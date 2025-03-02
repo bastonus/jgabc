@@ -362,3 +362,82 @@ syl.bold {
     page-break-before: always;
   }
 }
+
+/* Styles pour les traductions de psaumes, identiques à ceux des évangiles */
+.psalm-translation {
+  margin: 0;
+  padding: 0;
+  border-left: none;
+}
+
+.psalm-reference {
+  color: #d00!important;
+  font-family: 'Crimson Text';
+  font-size: 14pt;
+  font-style: italic;
+}
+
+.psalm-text {
+  display: flex;
+  margin: 0 -12pt;
+  padding: 0;
+  background-color: transparent;
+  font-family: 'Crimson Text';
+  font-size: 120%;
+}
+
+.psalm-text > * {
+  flex: 0 1 auto;
+  margin: 0 12pt;
+  text-align: justify;
+}
+
+.psalm-english, .psalm-french, .psalm-latin {
+  margin-bottom: 10px;
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Uniformiser les styles des références de psaumes avec ceux des évangiles */
+.psalm-reference {
+  font-style: italic;
+  color: #800000;
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+}
+
+/* Assurer que les sélecteurs de langue ont le même style */
+.selectShowPsalmum, .selectShowLectionem {
+  margin-left: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+@media(max-width: 524px) {
+  .psalm-text {
+    flex-wrap: wrap;
+    margin: -9pt 0;
+  }
+  .psalm-text > * {
+    margin: 9pt 0;
+  }
+}
+
+/* Styles pour l'impression */
+@media print {
+  .hidden-print {
+    display: none !important;
+  }
+  
+  .psalm-translation {
+    max-width: 624px;
+    font-size: 19.2px;
+    margin: auto;
+  }
+  
+  .psalm-translation select {
+    display: none!important;
+  }
+}

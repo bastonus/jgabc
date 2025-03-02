@@ -300,7 +300,7 @@ $(function(){
   var regexGabcClef = /\([^)]*([cf]b?[1-4])/;
   var removeDiacritics=function(string) {
     if(typeof(string) != 'string') return '';
-    return string.replace(/á/g,'a').replace(/é|ë/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ý/g,'y').replace(/æ|ǽ/g,'ae').replace(/œ/g,'oe').replace(/[,.;?“”‘’"':]/g,'');
+    return string.replace(/á/g,'a').replace(/é|ë/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ý/g,'y').replace(/æ|ǽ/g,'ae').replace(/œ/g,'oe').replace(/[,.;?“”‘'":]/g,'');
   };
   var getGabcForPropers=function(propers,part,text){
     var id = propers[part + 'ID'];
@@ -837,6 +837,10 @@ $(function(){
         $lectiones.hide();
       }
       updateAllParts();
+      
+      // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+      // après que tous les éléments de la page ont été mis à jour
+      setTimeout(updateAllPsalmTranslations, 1000);
     }
   }
   function updateReadings(readings, $lectiones) {
@@ -859,6 +863,10 @@ $(function(){
       selPropers.isNovus = true;
       novusOption = {};
       updateAllParts();
+      
+      // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+      // après que tous les éléments de la page ont été mis à jour
+      setTimeout(updateAllPsalmTranslations, 1000);
     }
   }
   var addTemporaryRubrics = function(rubrics) {
@@ -908,6 +916,8 @@ $(function(){
         })
       }
     }
+    // Mettre à jour toutes les traductions de psaumes après la mise à jour de toutes les parties
+    setTimeout(updateAllPsalmTranslations, 500);
   };
   var selectedDayNovus = function(e){
     selDay = $(this).val();
@@ -919,6 +929,10 @@ $(function(){
     }
     clearHash({ sundayNovus: selDay }, selDay);
     updateDayNovus();
+    
+    // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+    // après que tous les éléments de la page ont été mis à jour
+    setTimeout(updateAllPsalmTranslations, 1000);
   };
   var getSeasonForMoment = function(m) {
     var dates = Dates(m.year());
@@ -1176,12 +1190,20 @@ $(function(){
     }
     $('.lectio').hide();
     updateDay(this.id == 'selSunday'? 'propers.html' : 'saints.html');
+    
+    // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+    // après que tous les éléments de la page ont été mis à jour
+    setTimeout(updateAllPsalmTranslations, 1000);
   };
   var selectedTempus = function(e){
     selTempus = $(this).val();
     updateTempus();
     addToHash('tempus', selTempus);
     updateDay();
+    
+    // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+    // après que tous les éléments de la page ont été mis à jour
+    setTimeout(updateAllPsalmTranslations, 1000);
   };
   var ordinaryParts = ['asperges','kyrie','gloria','credo','preface','sanctus','agnus','ite'];
   var selectedOrdinary = function(e){
@@ -2599,6 +2621,31 @@ $(function(){
       ref = parseRef(prop.commentary).slice(-1)[0];
       if(/^Ps/.test(ref && ref.book)) {
         $('#div'+part[0].toUpperCase()+part.slice(1)+' select.sel-psalms:not(:visible)').val(('00'+ref.chapter).slice(-3));
+        
+        // Ajouter le menu déroulant pour les traductions de psaumes
+        var $psalmTranslation = chantContainer.next('.psalm-translation');
+        if($psalmTranslation.length == 0) {
+          $psalmTranslation = $('<div>').addClass('psalm-translation').insertAfter(chantContainer);
+          var psalmRef = prop.commentary;
+          var partName = '';
+          switch(part) {
+            case 'introitus': partName = 'Introitus'; break;
+            case 'graduale': partName = 'Graduale'; break;
+            case 'tractus': partName = 'Tractus'; break;
+            case 'offertorium': partName = 'Offertorium'; break;
+            case 'communio': partName = 'Communio'; break;
+            default: partName = part[0].toUpperCase() + part.slice(1);
+          }
+          
+          // Modifier le HTML pour qu'il corresponde exactement à celui des évangiles
+          $psalmTranslation.html(createPsalmTranslationHTML(partName, psalmRef));
+          
+          // Mettre à jour les traductions
+          updatePsalmTranslations(psalmRef, $psalmTranslation);
+          
+          // Mettre à jour toutes les traductions pour s'assurer que tout est synchronisé
+          setTimeout(updateAllPsalmTranslations, 100);
+        }
       }
     }
     var ctxt = prop.ctxt;
@@ -2759,6 +2806,10 @@ $(function(){
     selYearNovus = $(this).val();
     addToHash('yearNovus', selYearNovus);
     updateAllParts();
+    
+    // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+    // après que tous les éléments de la page ont été mis à jour
+    setTimeout(updateAllPsalmTranslations, 1000);
   });
   $selTempus.change(selectedTempus);
   $selOrdinary.change(selectedOrdinary).change();
@@ -3544,7 +3595,11 @@ console.info(JSON.stringify(selPropers));
             selector = '#div' + key[0].toUpperCase() + key.slice(1);
           }
           var element = $(selector)[0];
-          window.afterChantLayout = function() { element.scrollIntoView(); };
+          window.afterChantLayout = function() { 
+            element.scrollIntoView(); 
+            // Mettre à jour toutes les traductions de psaumes après le chargement de la page
+            setTimeout(updateAllPsalmTranslations, 500);
+          };
           isPageLoad = false;
         }
         if(key in hash || (i > 5 && (i <= 10 || !('ordinary' in hash)))) {
@@ -3897,6 +3952,15 @@ console.info(JSON.stringify(selPropers));
     $lectio.find('.lectio-text > *').hide();
     if(selector) $lectio.find(selector).show();
     $lectio.toggleClass('hidden-print',!val);
+    
+    // Synchroniser avec les psaumes
+    if (val.includes('english')) {
+      $('.selectShowPsalmum').val('english').change();
+    } else if (val.includes('french')) {
+      $('.selectShowPsalmum').val('french').change();
+    } else {
+      $('.selectShowPsalmum').val('').change();
+    }
   }).on('click', '[data-toggle="dropdown"]', function(e) {
     $(this).parent('.btn-group').toggleClass('open');
     e.stopPropagation();
@@ -3954,4 +4018,188 @@ console.info(JSON.stringify(selPropers));
   selTempus = getSeasonForMoment(new moment());
   updateTempus();
   hashChanged(true);
+  
+  // Ajouter un délai pour s'assurer que les traductions de psaumes sont mises à jour
+  // après le chargement initial de la page
+  setTimeout(function() {
+    updateAllPsalmTranslations();
+    
+    // Observer les changements dans le DOM pour les conteneurs de chant-preview
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' || mutation.type === 'subtree') {
+          // Mettre à jour les traductions de psaumes lorsque le DOM change
+          setTimeout(updateAllPsalmTranslations, 500);
+        }
+      });
+    });
+    
+    // Observer les modifications dans les conteneurs de chant-preview
+    $('.chant-preview').each(function() {
+      observer.observe(this, { childList: true, subtree: true });
+    });
+  }, 1500);
+});
+
+// Ajouter la fonction updatePsalmTranslations après la fonction updateReadings
+function updatePsalmTranslations(psalmRef, $container) {
+  if (!psalmRef || !$container) return;
+  
+  // Extraire la référence du psaume
+  var ref = parseRef(psalmRef).slice(-1)[0];
+  if (!ref || ref.book !== 'Ps') return;
+  
+  // Formater la référence pour getReading
+  var formattedRef = 'Ps ' + ref.chapter;
+  if (ref.verse) {
+    formattedRef += ': ' + ref.verse;
+    if (ref.endVerse) {
+      formattedRef += '-' + ref.endVerse;
+    }
+  }
+  
+  // Récupérer les traductions - utiliser le même format que updateReadings
+  [{e:'vulgate',l:'latin'},{e:'douay-rheims',l:'english'},{e:'aelf',l:'french'}].forEach(function(edition) {
+    var $psalmText = $container.find('.psalm-text .psalm-'+edition.l).empty();
+    getReading({ref:formattedRef,edition:edition.e,language:edition.l.slice(0,2)}).then(function(reading) {
+      // Wrapper le texte dans un span avec les styles appropriés si nécessaire
+      $psalmText.empty().append(reading);
+    });
+  });
+}
+
+// Ajouter un gestionnaire d'événements pour le sélecteur de langue des psaumes
+$(document).on('change', '.selectShowPsalmum', function(e){
+  e.preventDefault();
+  var val = $(this).val();
+  localStorage.showPsalmum = val;
+  
+  // Mettre à jour tous les sélecteurs de psaumes pour qu'ils utilisent la même valeur
+  $('.selectShowPsalmum').val(val);
+  
+  // Mettre à jour l'affichage de tous les psaumes
+  $('.psalm-translation').each(function() {
+    var $psalmTranslation = $(this);
+    var selector = val ? val.split(',').map(function(v) { return '.psalm-'+v; }).join(',') : '';
+    $psalmTranslation.find('.psalm-text').toggle(!!val);
+    $psalmTranslation.find('.psalm-text > *').hide();
+    if(selector) $psalmTranslation.find(selector).show();
+    $psalmTranslation.toggleClass('hidden-print',!val);
+  });
+  
+  // Synchroniser avec les lectures
+  if (val) {
+    // Déterminer quelle valeur utiliser pour les lectures en fonction de la langue des psaumes
+    var lectioVal = val; // Par défaut, utiliser la même valeur
+    
+    // Ne pas changer la sélection des lectures si elle contient déjà la langue actuelle
+    // Cela préserve les choix comme "Latin and English" ou "Latin and French"
+    var currentLectioVal = localStorage.showLectionem || '';
+    if (currentLectioVal !== lectioVal) {
+      $('.selectShowLectionem').val(lectioVal).change();
+    }
+  }
+});
+
+// Ajouter une fonction dédiée à la création du HTML pour les traductions de psaumes
+function createPsalmTranslationHTML(partName, psalmRef) {
+  var html = '<div><span class="psalm-reference">' + partName + ' ' + psalmRef + '</span>';
+  html += '<select class="selectShowPsalmum">';
+  html += ' <option value="">Hidden</option>';
+  html += ' <option value="latin">Latin</option>';
+  html += ' <option value="english">English</option>';
+  html += ' <option value="french">French</option>';
+  html += ' <option value="latin,english">Latin and English</option>';
+  html += ' <option value="latin,french">Latin and French</option>';
+  html += '</select></div>';
+  html += '<div class="psalm-text">';
+  html += '<div class="psalm-latin"></div>';
+  html += '<div class="psalm-english"></div>';
+  html += '<div class="psalm-french"></div>';
+  html += '</div>';
+  return html;
+}
+
+// Ajouter une fonction pour mettre à jour toutes les traductions de psaumes
+function updateAllPsalmTranslations() {
+  console.log("Mise à jour des traductions de psaumes...");
+  
+  // Restaurer la préférence de langue
+  var savedPsalmumVal = localStorage.showPsalmum || '';
+  var lectioVal = localStorage.showLectionem || '';
+  
+  // Si pas de préférence pour les psaumes mais une pour les lectures, l'utiliser
+  if (!savedPsalmumVal && lectioVal) {
+    savedPsalmumVal = lectioVal; // Utiliser directement la même valeur que les lectures
+  }
+  
+  // Si aucune préférence n'est définie, utiliser 'latin,english' par défaut
+  if (!savedPsalmumVal) {
+    savedPsalmumVal = 'latin,english';
+  }
+  
+  // Mettre à jour tous les sélecteurs avec la valeur sauvegardée
+  $('.selectShowPsalmum').val(savedPsalmumVal);
+  
+  // Parcourir tous les conteneurs de chant-preview
+  $('.chant-preview').each(function() {
+    var $chantContainer = $(this);
+    var part = $chantContainer.attr('id');
+    
+    if (!part) return;
+    
+    part = part.replace('-preview', '');
+    
+    if (part && sel[part] && sel[part].commentary) {
+      var psalmRef = sel[part].commentary;
+      
+      // Vérifier si le conteneur de traduction existe déjà
+      var $psalmTranslation = $chantContainer.next('.psalm-translation');
+      
+      // S'il n'existe pas, le créer
+      if ($psalmTranslation.length === 0) {
+        console.log("Création d'un nouveau conteneur de traduction pour", part);
+        $psalmTranslation = $('<div class="psalm-translation"></div>').insertAfter($chantContainer);
+        
+        var partName;
+        switch(part) {
+          case 'introitus': partName = 'Introitus'; break;
+          case 'graduale': partName = 'Graduale'; break;
+          case 'tractus': partName = 'Tractus'; break;
+          case 'offertorium': partName = 'Offertorium'; break;
+          case 'communio': partName = 'Communio'; break;
+          default: partName = part[0].toUpperCase() + part.slice(1);
+        }
+        
+        // Ajouter le HTML pour les traductions
+        $psalmTranslation.html(createPsalmTranslationHTML(partName, psalmRef));
+      }
+      
+      // Mettre à jour les traductions
+      updatePsalmTranslations(psalmRef, $psalmTranslation);
+    }
+  });
+  
+  // Après avoir ajouté/mis à jour tous les conteneurs, appliquer la préférence de langue
+  var selector = savedPsalmumVal ? savedPsalmumVal.split(',').map(function(v) { return '.psalm-'+v; }).join(',') : '';
+  $('.psalm-translation').each(function() {
+    var $psalmTranslation = $(this);
+    $psalmTranslation.find('.psalm-text').toggle(!!savedPsalmumVal);
+    $psalmTranslation.find('.psalm-text > *').hide();
+    if(selector) $psalmTranslation.find(selector).show();
+    $psalmTranslation.toggleClass('hidden-print', !savedPsalmumVal);
+    $psalmTranslation.find('.selectShowPsalmum').val(savedPsalmumVal);
+  });
+}
+
+// Synchroniser les parties lorsque les menus du haut sont modifiés
+$(document).ready(function() {
+  // Gestionnaire pour les changements des menus principaux
+  $('#selSunday, #selSaint, #selMass').on('change', function() {
+    // Attendre que le contenu soit mis à jour
+    setTimeout(function() {
+      // Mettre à jour toutes les traductions de psaumes
+      updateAllPsalmTranslations();
+    }, 1000); // Attendre que les parties soient chargées
+  });
 });
