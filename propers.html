@@ -90,20 +90,6 @@
           <li class="disabled"><a href='#' id='includeSequentia'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Sequentia</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
           <li class="disabled"><a href='#' id='includeOffertorium'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Offertorium</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
           <li class="disabled"><a href='#' id='includeCommunio'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Communio</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="centered-heading ordinary">Ordinary</li>
-          <li class="disabled ordinary"><a href='#' id='includeAsperges'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Asperges</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeKyrie'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Kyrie</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeGloria'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Gloria</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeCredo'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Credo</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includePreface'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Preface</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeSanctus'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Sanctus</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeAgnus'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Agnus</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeIte'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Ite</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="centered-heading ordinary">Ad libitum Chants</li>
-          <li class="disabled ordinary"><a href='#' id='includeCustom1'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Ad libitum</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeCustom2'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Ad libitum</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeCustom3'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Ad libitum</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
-          <li class="disabled ordinary"><a href='#' id='includeCustom4'><span class='glyphicon glyphicon-check'></span> <span class='lbl'>Ad libitum</span><span class='pull-right toggle-page-break glyphicon glyphicon-file'></span></a></li>
         </ul>
       </div>
     </div>
@@ -625,27 +611,224 @@
       <stop offset="-50%" stop-color="rgba(0,0,0,0.4)"/>
       <stop offset="100%"   stop-color="#0061b5"/>
     </linearGradient>
-    <!-- <filter id="porrectus-glow-left" x="-150%" y="-150%" width="400%" height="400%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="5 5" result="glow" width="10%" x="-8%"/>
-      <feFlood flood-color="#337ab7" result="COLOR" x="0" y="0" width="50%" height="100%"/>
-      <feComposite in="COLOR" in2="glow" operator="in" result="glow-color" />
-      <feMerge>
-        <feMergeNode in="glow-color"/>
-        <feMergeNode in="glow-color"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="porrectus-glow-right" x="-150%" y="-150%" width="400%" height="400%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="5 5" result="glow" width="10%" x="2%"/>
-      <feFlood flood-color="#337ab7" result="COLOR" x="0" y="0" width="50%" height="100%"/>
-      <feComposite in="COLOR" in2="glow" operator="in" result="glow-color" />
-      <feMerge>
-        <feMergeNode in="glow-color"/>
-        <feMergeNode in="glow-color"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter> -->
   </defs>
   </svg>
+  
+  <!-- Styles pour le sélecteur de langue globale -->
+  <style>
+    .global-language-container {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin: 15px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .global-language-container label {
+      margin-right: 10px;
+      color: #333;
+      font-weight: bold;
+    }
+    
+    #selGlobalLanguage {
+      padding: 5px;
+      border-radius: 3px;
+      border: 1px solid #aaa;
+      background-color: #fff;
+      min-width: 160px;
+    }
+    
+    .language-status {
+      margin-left: 15px;
+      font-style: italic;
+      color: #666;
+      display: inline-block;
+    }
+    
+    .language-help {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #777;
+    }
+    
+    /* Indication visuelle que la synchronisation est active */
+    .sync-active {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+  </style>
+  
+  <!-- Script de synchronisation des langues -->
+  <script>
+    $(function() {
+      // Ajouter un sélecteur de langue globale
+      var $globalLangSelector = $('<div class="hide-print global-language-container"><label for="selGlobalLanguage">Langue globale:</label> <select id="selGlobalLanguage" class="small-screen"><option value="">(Hidden)</option><option value="latin">Latin</option><option value="english">English</option><option value="latin,english">Latin et Anglais</option><option value="french">Français</option><option value="latin,french">Latin et Français</option></select><span class="language-status"></span><div class="language-help">Ce sélecteur applique une règle de langue à toutes les sections.</div></div>');
+      
+      // Insérer le sélecteur après le bouton "Traditional"
+      $('#btnCalendar').parent().after($globalLangSelector);
+      
+      // Variables pour éviter les récurrences
+      var isUpdatingFromGlobal = false;
+      var isUpdatingFromPsalm = false;
+      
+      // Fonction d'application unique des règles de langue
+      function applyLanguageRules(selectedValue) {
+        console.log('Application des règles de langue:', selectedValue);
+        
+        // Si déjà en cours de mise à jour, on sort pour éviter la récurrence
+        if (isUpdatingFromGlobal) return;
+        isUpdatingFromGlobal = true;
+        
+        try {
+          // Afficher l'indicateur visuel
+          $('.language-status').text('Application...').addClass('sync-active');
+          
+          // 1. Déterminer les valeurs correspondantes pour les différentes parties
+          var lectioValue = ''; // Valeur par défaut (caché)
+          var psalmValue = ''; // Valeur par défaut (caché)
+          
+          if (selectedValue === 'latin') {
+            lectioValue = 'latin';
+            psalmValue = ''; // Latin uniquement pour les propres (pas de traduction)
+          } else if (selectedValue === 'english') {
+            lectioValue = 'latin,english';
+            psalmValue = 'english';
+          } else if (selectedValue === 'latin,english') {
+            lectioValue = 'latin,english';
+            psalmValue = 'english';
+          } else if (selectedValue === 'french') {
+            lectioValue = 'latin,french';
+            psalmValue = 'french';
+          } else if (selectedValue === 'latin,french') {
+            lectioValue = 'latin,french';
+            psalmValue = 'french';
+          }
+          
+          // 2. Modifier directement les sélecteurs sans déclencher d'événements supplémentaires
+          $('.selectShowLectionem').each(function() {
+            $(this).val(lectioValue);
+            var $lectio = $(this).closest('.lectio');
+            $lectio.find('.lectio-text').toggle(!!lectioValue);
+            $lectio.find('.lectio-text > *').hide();
+            
+            if (lectioValue) {
+              var selector = lectioValue.split(',').map(function(val) { 
+                return '.lectio-' + val; 
+              }).join(',');
+              $lectio.find(selector).show();
+            }
+            
+            $lectio.toggleClass('hidden-print', !lectioValue);
+          });
+          
+          // 3. Modifier les sélecteurs pour les psaumes
+          $('.selectShowPsalmum').each(function() {
+            $(this).val(psalmValue);
+            var $psalmTranslation = $(this).closest('.psalm-translation');
+            $psalmTranslation.find('.psalm-text').toggle(!!psalmValue);
+            $psalmTranslation.find('.psalm-text > *').hide();
+            
+            if (psalmValue) {
+              var selector = psalmValue.split(',').map(function(val) { 
+                return '.psalm-' + val; 
+              }).join(',');
+              $psalmTranslation.find(selector).show();
+            }
+            
+            $psalmTranslation.toggleClass('hidden-print', !psalmValue);
+          });
+        } finally {
+          // Réinitialiser la variable pour permettre de futures mises à jour
+          isUpdatingFromGlobal = false;
+          
+          // 4. Mettre à jour le message de statut
+          setTimeout(function() {
+            $('.language-status').text('Appliqué').removeClass('sync-active');
+            
+            // Faire disparaître le message après 2 secondes
+            setTimeout(function() {
+              $('.language-status').text('');
+            }, 2000);
+          }, 300);
+          
+          console.log('Application terminée: lectures = ' + lectioValue + ', psaumes = ' + psalmValue);
+        }
+      }
+      
+      // Fonction pour appliquer les règles uniquement depuis un psaume vers les lectures
+      function applyRulesFromPsalm(psalmValue) {
+        console.log('Changement manuel détecté dans un psaume:', psalmValue);
+        
+        // Si déjà en cours de mise à jour, on sort pour éviter la récurrence
+        if (isUpdatingFromGlobal || isUpdatingFromPsalm) return;
+        isUpdatingFromPsalm = true;
+        
+        try {
+          var lectioValue = '';
+          
+          if (psalmValue === '') {
+            lectioValue = '';
+          } else if (psalmValue === 'english') {
+            lectioValue = 'latin,english';
+          } else if (psalmValue === 'french') {
+            lectioValue = 'latin,french';
+          }
+          
+          // Mettre à jour uniquement les lectures
+          $('.selectShowLectionem').each(function() {
+            $(this).val(lectioValue);
+            var $lectio = $(this).closest('.lectio');
+            $lectio.find('.lectio-text').toggle(!!lectioValue);
+            $lectio.find('.lectio-text > *').hide();
+            
+            if (lectioValue) {
+              var selector = lectioValue.split(',').map(function(val) { 
+                return '.lectio-' + val; 
+              }).join(',');
+              $lectio.find(selector).show();
+            }
+            
+            $lectio.toggleClass('hidden-print', !lectioValue);
+          });
+          
+          // Mettre à jour le sélecteur global (sans déclencher de mise à jour)
+          var globalValue = '';
+          if (psalmValue === 'english') {
+            globalValue = 'english';
+          } else if (psalmValue === 'french') {
+            globalValue = 'french';
+          } else if (psalmValue === '') {
+            globalValue = 'latin';
+          }
+          
+          $('#selGlobalLanguage').val(globalValue);
+        } finally {
+          isUpdatingFromPsalm = false;
+        }
+      }
+      
+      // Ajouter un gestionnaire pour le sélecteur global
+      $('#selGlobalLanguage').on('change', function() {
+        var selectedValue = $(this).val();
+        applyLanguageRules(selectedValue);
+      });
+      
+      // Ajouter un gestionnaire uniquement pour les psaumes
+      $(document).on('change', '.selectShowPsalmum', function() {
+        var selectedValue = $(this).val();
+        applyRulesFromPsalm(selectedValue);
+      });
+      
+      // IMPORTANT: Supprimer tout gestionnaire d'événement qui pourrait mettre à jour
+      // les psaumes lorsque les lectures sont modifiées
+      // Nous n'ajoutons pas d'événement pour '.selectShowLectionem'
+    });
+  </script>
 </body>
 </html>
