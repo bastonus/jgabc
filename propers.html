@@ -648,29 +648,23 @@
     
     .language-help {
       margin-top: 5px;
-      font-size: 12px;
       color: #777;
+      font-size: 0.9em;
     }
     
-    /* Indication visuelle que la synchronisation est active */
     .sync-active {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
+      color: #e97716;
+      font-weight: bold;
     }
   </style>
   
   <!-- Script de synchronisation des langues -->
   <script>
     $(function() {
-      // Ajouter un sélecteur de langue globale
-      var $globalLangSelector = $('<div class="hide-print global-language-container"><label for="selGlobalLanguage">Langue globale:</label> <select id="selGlobalLanguage" class="small-screen"><option value="">(Hidden)</option><option value="latin">Latin</option><option value="english">English</option><option value="latin,english">Latin et Anglais</option><option value="french">Français</option><option value="latin,french">Latin et Français</option></select><span class="language-status"></span><div class="language-help">Ce sélecteur applique une règle de langue à toutes les sections.</div></div>');
+      // Créer un sélecteur de langue global caché
+      var $globalLangSelector = $('<div class="hide-print global-language-container" style="display:none;"><input type="hidden" id="selGlobalLanguage" value="latin"/><span class="language-status"></span></div>');
       
-      // Insérer le sélecteur après le bouton "Traditional"
+      // Insérer le sélecteur après le bouton "Traditional" (mais il sera caché)
       $('#btnCalendar').parent().after($globalLangSelector);
       
       // Une seule variable pour contrôler toutes les mises à jour - plus simple et plus robuste
@@ -691,7 +685,7 @@
         isUpdating = true;
         
         try {
-          // Afficher l'indicateur visuel
+          // Afficher l'indicateur visuel (caché mais utile pour le débogage)
           $('.language-status').text('Application...').addClass('sync-active');
           
           // 1. Déterminer les valeurs correspondantes pour les différentes parties
@@ -729,13 +723,16 @@
           
           // 4. Appliquer au graduel, tract, alleluia, etc.
           updateProperLangs(psalmValue);
+          
+          // 5. Mettre à jour les références dans instructions.md si elles sont présentes
+          updateMassPartReferences();
         } finally {
           // Garantir la réinitialisation après un court délai pour éviter toute récurrence
           setTimeout(function() {
             isUpdating = false;
             lastUpdatedElement = null;
             
-            // Mettre à jour le message de statut
+            // Mettre à jour le message de statut (pour débogage uniquement, caché à l'utilisateur)
             $('.language-status').text('Appliqué').removeClass('sync-active');
             
             // Faire disparaître le message après 2 secondes
@@ -904,65 +901,343 @@
         $psalmTranslation.toggleClass('hidden-print', !psalmValue);
       }
       
-      // Ajouter un gestionnaire pour le sélecteur global avec délai pour éviter les rebonds
-      $('#selGlobalLanguage').on('change', function() {
-        clearTimeout(updateTimer);
-        var selectedValue = $(this).val();
+      // Fonction pour mettre à jour les références dans les titres des parties de la messe
+      function updateMassPartReferences() {
+        console.log('Mise à jour des références des parties de la messe...');
         
-        updateTimer = setTimeout(function() {
-          applyLanguageRules(selectedValue);
-        }, 50);
-      });
-      
-      // Ajouter un gestionnaire uniquement pour les psaumes avec délai
-      $(document).on('change', '.selectShowPsalmum', function() {
-        clearTimeout(updateTimer);
-        var $this = $(this);
-        var selectedValue = $this.val();
+        // Liste des parties de la messe et leurs sélecteurs
+        var parts = [
+          { name: 'Introitus', id: 'introitus', selector: '#introitus-preview' },
+          { name: 'Graduale', id: 'graduale', selector: '#graduale-preview' },
+          { name: 'Tractus', id: 'tractus', selector: '#tractus-preview' },
+          { name: 'Alleluia', id: 'alleluia', selector: '#alleluia-preview' },
+          { name: 'Offertorium', id: 'offertorium', selector: '#offertorium-preview' },
+          { name: 'Communio', id: 'communio', selector: '#communio-preview' }
+        ];
         
-        updateTimer = setTimeout(function() {
-          applyRulesFromPsalm(selectedValue, $this[0]);
-        }, 50);
-      });
-      
-      // Ajouter un gestionnaire pour les lectures qui synchronisera uniquement
-      // les autres lectures sans toucher aux psaumes, avec délai
-      $(document).on('change', '.selectShowLectionem', function() {
-        clearTimeout(updateTimer);
-        var $this = $(this);
-        var selectedValue = $this.val();
-        
-        updateTimer = setTimeout(function() {
-          synchronizeLections(selectedValue, $this[0]);
-        }, 50);
-      });
-      
-      // Ajouter un gestionnaire pour les sélecteurs de style des propres (graduel, etc.)
-      $(document).on('change', '#selStyleGraduale, #selStyleTractus, #selStyleAlleluia, #selStyleOffertorium, #selStyleCommunio', function() {
-        // Ne traiter que si c'est un changement manuel (pas déclenché programmatiquement)
-        if (isUpdating) return;
-        
-        clearTimeout(updateTimer);
-        var $this = $(this);
-        var selectedValue = $this.val();
-        
-        updateTimer = setTimeout(function() {
-          // Si l'utilisateur sélectionne psalm-tone, on doit mettre à jour les lectures
-          if (selectedValue === 'psalm-tone') {
-            // Déterminer quelle langue utiliser en fonction du sélecteur global
-            var globalValue = $('#selGlobalLanguage').val();
-            var psalmValue = '';
+        parts.forEach(function(part) {
+          var $label = $('#lbl' + part.name);
+          var $preview = $(part.selector);
+          
+          if ($label.length && $preview.length && $preview.is(':visible')) {
+            // Essayer de trouver la référence dans le contenu
+            var previewText = $preview.text();
+            // Recherche améliorée pour trouver des références dans différents formats
+            var refMatch = previewText.match(/\(([\w\s\.]+\d+(?:[\,\-]\d+)?(?:\s*\:\s*\d+(?:[\-\–]\d+)?)?)\)/);
             
-            if (globalValue === 'english' || globalValue === 'latin,english') {
-              psalmValue = 'english';
-            } else if (globalValue === 'french' || globalValue === 'latin,french') {
-              psalmValue = 'french';
+            if (refMatch && refMatch[1]) {
+              var partRef = refMatch[1].trim();
+              var newText = part.name + ' - ' + partRef;
+              
+              $label.find('a').text(newText);
+              $label.find('a').attr('title', newText);
+              console.log('Référence mise à jour pour ' + part.name + ': ' + partRef);
+              
+              // Stocker également la référence pour utilisation future
+              if (!window.massPartReferences) {
+                window.massPartReferences = {};
+              }
+              window.massPartReferences[part.id] = partRef;
+            } else {
+              console.log('Pas de référence trouvée pour ' + part.name);
+              // Restaurer le titre par défaut
+              $label.find('a').text(part.name);
+            }
+          }
+        });
+        
+        // Enregistrer l'état actuel
+        var currentState = {
+          mass: $('#selMass').val(),
+          sunday: $('#selSunday').val(),
+          saint: $('#selSaint').val(),
+          language: $('#selGlobalLanguage').val() || 'latin',
+          timestamp: new Date().getTime()
+        };
+        
+        localStorage.setItem('massState', JSON.stringify(currentState));
+        console.log('État de la messe enregistré:', currentState);
+      }
+      
+      // Surveillance directe des changements dans le DOM pour les titres des parties
+      // Cette méthode est plus robuste car elle détecte tout changement réel
+      var observerConfig = { 
+        childList: true, 
+        subtree: true, 
+        characterData: true,
+        attributes: true
+      };
+      
+      // Créer un observateur qui mettra à jour les informations de référence 
+      // quand le contenu des divs des parties de la messe change
+      var massPartObserver = new MutationObserver(function(mutations) {
+        // Vérifier si les mutations concernent les parties de la messe
+        var shouldUpdate = false;
+        
+        mutations.forEach(function(mutation) {
+          // Si un div de partie de messe devient visible
+          if (mutation.target.id && 
+              (mutation.target.id.match(/^div(Introitus|Graduale|Tractus|Alleluia|Offertorium|Communio)$/) ||
+               mutation.target.id.match(/^(introitus|graduale|tractus|alleluia|offertorium|communio)-preview$/))) {
+            shouldUpdate = true;
+          }
+          
+          // Si une classe change sur un élément contenant une partie de messe
+          if (mutation.type === 'attributes' && 
+              mutation.attributeName === 'class' && 
+              mutation.target.className && 
+              mutation.target.className.match(/chant-preview/)) {
+            shouldUpdate = true;
+          }
+        });
+        
+        if (shouldUpdate) {
+          console.log('Mutation détectée dans les parties de la messe - mise à jour des références');
+          
+          // Utiliser un délai minimal pour s'assurer que tous les changements sont appliqués
+          setTimeout(function() {
+            // Mettre à jour les références dans les titres
+            updateMassPartReferences();
+          }, 200);
+        }
+      });
+      
+      // Commencer à observer le document entier
+      massPartObserver.observe(document.body, observerConfig);
+      
+      // Plus robuste: fonction pour mettre à jour manuellement les références
+      window.forceUpdateReferences = function() {
+        console.log('Forçage de la mise à jour des références...');
+        
+        // Liste des parties de la messe avec leurs éléments d'affichage
+        var parts = [
+          { name: 'Introitus', selector: '#introitus-preview' },
+          { name: 'Graduale', selector: '#graduale-preview' },
+          { name: 'Tractus', selector: '#tractus-preview' },
+          { name: 'Alleluia', selector: '#alleluia-preview' },
+          { name: 'Offertorium', selector: '#offertorium-preview' },
+          { name: 'Communio', selector: '#communio-preview' }
+        ];
+        
+        parts.forEach(function(part) {
+          var $label = $('#lbl' + part.name);
+          var $preview = $(part.selector);
+          
+          if ($label.length && $preview.length) {
+            // Essayer de trouver la référence dans le contenu
+            var previewText = $preview.text();
+            var refMatch = previewText.match(/\(([\w\s\.]+\d+(?:[\,\-]\d+)?(?:\s*\:\s*\d+(?:[\-\–]\d+)?)?)\)/);
+            
+            if (refMatch && refMatch[1]) {
+              var partRef = refMatch[1].trim();
+              var newText = part.name + ' - ' + partRef;
+              
+              $label.find('a').text(newText);
+              $label.find('a').attr('title', newText);
+              console.log('Référence mise à jour pour ' + part.name + ': ' + partRef);
+            } else {
+              // Si pas de référence trouvée, restaurer le titre par défaut
+              $label.find('a').text(part.name);
+              console.log('Pas de référence trouvée pour ' + part.name);
+            }
+          }
+        });
+      };
+      
+      // Ajouter un bouton caché pour forcer la mise à jour (utile pour le débogage)
+      $('<button id="btnUpdateRefs" style="display:none">Update References</button>')
+        .appendTo('body')
+        .on('click', window.forceUpdateReferences);
+        
+      // APPROCHE RADICALE: intercepter directement les sélecteurs de masses avec des logs détaillés
+      function interceptAndUpdateTitles() {
+        console.log('=== INTERCEPTION FORCÉE DES RÉFÉRENCES ===');
+        
+        // Intercepter les sélecteurs
+        var originalSelMassChange = $('#selMass').data('original-change-handler');
+        var originalSelSundayChange = $('#selSunday').data('original-change-handler');
+        var originalSelSaintChange = $('#selSaint').data('original-change-handler');
+        
+        // Sauvegarder les handlers originaux s'ils n'ont pas encore été sauvegardés
+        if (!originalSelMassChange) {
+          console.log('Sauvegarde des handlers originaux...');
+          // Faire une copie des handlers actuels
+          $('#selMass, #selSunday, #selSaint').each(function() {
+            var $this = $(this);
+            var events = $._data($this[0], 'events');
+            if (events && events.change) {
+              var originalHandlers = [];
+              $.each(events.change, function(i, event) {
+                originalHandlers.push(event.handler);
+              });
+              $this.data('original-change-handler', originalHandlers);
+              console.log('Handler sauvegardé pour', $this.attr('id'));
+            }
+          });
+          
+          // Remplacer les handlers
+          $('#selMass, #selSunday, #selSaint').off('change').on('change', function() {
+            var $this = $(this);
+            var id = $this.attr('id');
+            var value = $this.val();
+            console.log('Changement détecté sur', id, 'avec la valeur', value);
+            
+            // Préserver la langue actuelle lors du changement de messe
+            var currentLanguage = $('#selGlobalLanguage').val() || 'latin';
+            
+            // Appeler les handlers originaux
+            var originalHandlers = $this.data('original-change-handler');
+            if (originalHandlers) {
+              console.log('Appel des handlers originaux...');
+              $.each(originalHandlers, function(i, handler) {
+                handler.apply($this[0]);
+              });
             }
             
-            // Mettre à jour les lectures avec la langue correspondante
-            applyRulesFromPsalm(psalmValue, $this[0]);
+            // Séquence de mise à jour avec des délais progressifs
+            // Cette approche garantit que les mises à jour se produisent au bon moment
+            
+            // Premier délai court pour laisser le temps aux handlers de base de s'exécuter
+            setTimeout(function() {
+              console.log('Première étape: Réapplication de la langue...');
+              // Réappliquer les règles de langue pour maintenir la cohérence
+              $('#selGlobalLanguage').val(currentLanguage);
+              applyLanguageRules(currentLanguage);
+              
+              // Deuxième délai pour attendre le chargement du contenu
+              setTimeout(function() {
+                console.log('Deuxième étape: Première tentative de mise à jour des références...');
+                window.forceUpdateReferences();
+                
+                // Troisième délai pour une seconde tentative (au cas où la première échoue)
+                setTimeout(function() {
+                  console.log('Troisième étape: Deuxième tentative de mise à jour des références...');
+                  window.forceUpdateReferences();
+                  
+                  // Dernière tentative avec la fonction la plus complète
+                  setTimeout(function() {
+                    console.log('Quatrième étape: Dernière tentative avec updateTitlesManually...');
+                    updateTitlesManually();
+                  }, 1500);
+                }, 1000);
+              }, 800);
+            }, 300);
+          });
+          
+          console.log('Les sélecteurs de masse ont été interceptés avec succès!');
+        } else {
+          console.log('Les sélecteurs ont déjà été interceptés.');
+        }
+      }
+      
+      // Fonction extrême de secours en cas d'échec des autres méthodes
+      function updateTitlesManually() {
+        console.log('=== MISE À JOUR MANUELLE DES TITRES ===');
+        
+        // Verifier directement dans l'objet global 'sel'
+        if (typeof window.sel !== 'object') {
+          console.error("L'objet sel n'est pas disponible!");
+          return;
+        }
+        
+        // Accès direct à la structure de données
+        var parts = [
+          { id: 'introitus', labelSelector: '#lblIntroitus' },
+          { id: 'graduale', labelSelector: '#lblGraduale' },
+          { id: 'tractus', labelSelector: '#lblTractus' },
+          { id: 'alleluia', labelSelector: '#lblAlleluia' },
+          { id: 'offertorium', labelSelector: '#lblOffertorium' },
+          { id: 'communio', labelSelector: '#lblCommunio' }
+        ];
+        
+        parts.forEach(function(part) {
+          var $label = $(part.labelSelector);
+          if (!$label.length) return;
+          
+          var partObj = window.sel[part.id];
+          if (!partObj) {
+            console.warn('Objet non trouvé pour', part.id);
+            return;
           }
-        }, 50);
+          
+          console.log('Traitement de', part.id, ':', partObj);
+          
+          // Extraire la référence par tous les moyens possibles
+          var reference = '';
+          
+          // Essayer d'abord le texte de prévisualisation
+          var $preview = $('#' + part.id + '-preview');
+          if ($preview.length) {
+            var text = $preview.text();
+            var match = text.match(/\(([^)]+)\)(\s*)$/);
+            if (match) {
+              reference = match[1].trim();
+              console.log('Référence trouvée dans le texte de prévisualisation:', reference);
+            }
+          }
+          
+          // Sinon, essayer d'extraire de l'objet partObj
+          if (!reference) {
+            if (partObj.reference) {
+              reference = partObj.reference;
+              console.log('Référence trouvée dans partObj.reference:', reference);
+            } else if (partObj.source) {
+              reference = partObj.source;
+              console.log('Référence trouvée dans partObj.source:', reference);
+            } else if (partObj.gabc && partObj.gabc.header && partObj.gabc.header.reference) {
+              reference = partObj.gabc.header.reference;
+              console.log('Référence trouvée dans partObj.gabc.header.reference:', reference);
+            } else if (partObj.gabc && partObj.gabc.header && partObj.gabc.header.book) {
+              reference = partObj.gabc.header.book;
+              console.log('Référence trouvée dans partObj.gabc.header.book:', reference);
+            } else if (partObj.gabc && partObj.gabc.header && partObj.gabc.header.commentary) {
+              reference = partObj.gabc.header.commentary;
+              console.log('Référence trouvée dans partObj.gabc.header.commentary:', reference);
+            }
+          }
+          
+          // Dernière tentative: essayer d'extraire la référence des données directement
+          if (!reference && window.proprium && window.proprium[part.id]) {
+            var propriumObj = window.proprium[part.id];
+            if (propriumObj.reference) {
+              reference = propriumObj.reference;
+              console.log('Référence trouvée dans proprium.' + part.id + '.reference:', reference);
+            }
+          }
+          
+          // Mettre à jour le label si une référence a été trouvée
+          if (reference) {
+            var partName = part.id.charAt(0).toUpperCase() + part.id.slice(1);
+            var newText = partName + ' - ' + reference;
+            $label.find('a').text(newText);
+            $label.find('a').attr('title', newText);
+            console.log('Titre mis à jour pour', part.id, ':', newText);
+          } else {
+            console.warn('Aucune référence trouvée pour', part.id);
+            // Restaurer au moins le nom de base
+            $label.find('a').text(part.id.charAt(0).toUpperCase() + part.id.slice(1));
+          }
+        });
+      }
+      
+      // Exécuter l'interception au chargement de la page
+      $(document).ready(function() {
+        // Attendre un peu pour s'assurer que tout est chargé
+        setTimeout(function() {
+          console.log('Initialisation de l\'interception des références...');
+          interceptAndUpdateTitles();
+          window.forceUpdateReferences(); // Premier appel immédiat
+          
+          // Ajouter raccourci clavier Alt+R pour forcer la mise à jour manuellement
+          $(document).on('keydown', function(e) {
+            if (e.altKey && e.key === 'r') {
+              console.log('Raccourci Alt+R détecté, mise à jour forcée des références');
+              window.forceUpdateReferences();
+              updateTitlesManually();
+              e.preventDefault();
+            }
+          });
+        }, 1500);
       });
     });
   </script>
