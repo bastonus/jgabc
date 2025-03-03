@@ -411,31 +411,47 @@ syl.bold {
   font-weight: bold;
 }
 
-/* Assurer que les sélecteurs de langue ont le même style */
-.selectShowPsalmum, .selectShowLectionem {
-  margin-left: 5px;
-  padding: 2px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  font-size: 12pt;
+/* Styles spécifiques pour les sélecteurs de langue avec haute priorité */
+body a[class*="langue"],
+body a[id*="langue"],
+body select[id*="langue"],
+body .language-selector {
+  padding: 5px !important;
+  border-radius: 3px !important;
+  border: 1px solid #aaa !important;
+  background-color: #fff !important;
+  min-width: 120px !important;
+  display: inline-block !important;
+  margin: 5px 0 !important;
+  text-decoration: none !important;
+  color: #333 !important;
+}
+    
+body a[class*="langue"]:hover,
+body a[id*="langue"]:hover,
+body select[id*="langue"]:hover,
+body .language-selector:hover {
+  border-color: #666 !important;
+  background-color: #f5f5f5 !important;
+  cursor: pointer !important;
+}
+    
+body a[class*="langue"]:focus,
+body a[class*="langue"].active,
+body a[id*="langue"]:focus,
+body a[id*="langue"].active,
+body select[id*="langue"]:focus,
+body .language-selector:focus,
+body .language-selector.active {
+  outline: none !important;
+  border-color: #0061b5 !important;
+  box-shadow: 0 0 3px rgba(0, 97, 181, 0.5) !important;
 }
 
-/* Assurer que le texte des traductions a le même style */
-.psalm-english, .psalm-french, .lectio-english, .lectio-french {
-  margin-bottom: 10px;
-  font-family: 'Crimson Text', serif;
-  font-size: 14pt !important;
-  line-height: 1.5;
-}
-
-@media(max-width: 524px) {
-  .psalm-text {
-    flex-wrap: wrap;
-    margin: -9pt 0;
-  }
-  .psalm-text > * {
-    margin: 9pt 0;
-  }
+/* Style des conteneurs de sélecteurs de langue */
+.langue-container, div[class*="langue-container"] {
+  margin: 10px 0;
+  display: inline-block;
 }
 
 /* Styles pour l'impression */
