@@ -673,17 +673,22 @@
       // Insérer le sélecteur après le bouton "Traditional"
       $('#btnCalendar').parent().after($globalLangSelector);
       
-      // Variables pour éviter les récurrences
-      var isUpdatingFromGlobal = false;
-      var isUpdatingFromPsalm = false;
+      // Une seule variable pour contrôler toutes les mises à jour - plus simple et plus robuste
+      var isUpdating = false;
+      var updateTimer = null;
+      var lastUpdatedElement = null;
       
       // Fonction d'application unique des règles de langue
       function applyLanguageRules(selectedValue) {
         console.log('Application des règles de langue:', selectedValue);
         
-        // Si déjà en cours de mise à jour, on sort pour éviter la récurrence
-        if (isUpdatingFromGlobal) return;
-        isUpdatingFromGlobal = true;
+        // Vérification simple mais efficace pour éviter toute récurrence
+        if (isUpdating) {
+          console.log('Mise à jour déjà en cours, annulation');
+          return;
+        }
+        
+        isUpdating = true;
         
         try {
           // Afficher l'indicateur visuel
@@ -713,61 +718,80 @@
           // 2. Modifier directement les sélecteurs sans déclencher d'événements supplémentaires
           $('.selectShowLectionem').each(function() {
             $(this).val(lectioValue);
-            var $lectio = $(this).closest('.lectio');
-            $lectio.find('.lectio-text').toggle(!!lectioValue);
-            $lectio.find('.lectio-text > *').hide();
-            
-            if (lectioValue) {
-              var selector = lectioValue.split(',').map(function(val) { 
-                return '.lectio-' + val; 
-              }).join(',');
-              $lectio.find(selector).show();
-            }
-            
-            $lectio.toggleClass('hidden-print', !lectioValue);
+            updateLectioDisplay($(this));
           });
           
           // 3. Modifier les sélecteurs pour les psaumes
           $('.selectShowPsalmum').each(function() {
             $(this).val(psalmValue);
-            var $psalmTranslation = $(this).closest('.psalm-translation');
-            $psalmTranslation.find('.psalm-text').toggle(!!psalmValue);
-            $psalmTranslation.find('.psalm-text > *').hide();
-            
-            if (psalmValue) {
-              var selector = psalmValue.split(',').map(function(val) { 
-                return '.psalm-' + val; 
-              }).join(',');
-              $psalmTranslation.find(selector).show();
-            }
-            
-            $psalmTranslation.toggleClass('hidden-print', !psalmValue);
+            updatePsalmDisplay($(this));
           });
-        } finally {
-          // Réinitialiser la variable pour permettre de futures mises à jour
-          isUpdatingFromGlobal = false;
           
-          // 4. Mettre à jour le message de statut
+          // 4. Appliquer au graduel, tract, alleluia, etc.
+          updateProperLangs(psalmValue);
+        } finally {
+          // Garantir la réinitialisation après un court délai pour éviter toute récurrence
           setTimeout(function() {
+            isUpdating = false;
+            lastUpdatedElement = null;
+            
+            // Mettre à jour le message de statut
             $('.language-status').text('Appliqué').removeClass('sync-active');
             
             // Faire disparaître le message après 2 secondes
             setTimeout(function() {
               $('.language-status').text('');
             }, 2000);
-          }, 300);
-          
-          console.log('Application terminée: lectures = ' + lectioValue + ', psaumes = ' + psalmValue);
+            
+            console.log('Application terminée: lectures = ' + lectioValue + ', psaumes = ' + psalmValue);
+          }, 100);
         }
       }
       
+      // Fonction qui met à jour la langue pour les propres (graduel, tractus, etc.)
+      function updateProperLangs(psalmValue) {
+        // S'assurer qu'on n'est pas dans une récurrence
+        if (isUpdating && !lastUpdatedElement) return;
+        
+        var newStyleValue = '';
+        
+        // Déterminer la valeur de style à appliquer
+        if (psalmValue === 'english') {
+          newStyleValue = 'psalm-tone'; // Utiliser psalm-tone pour l'anglais
+        } else if (psalmValue === 'french') {
+          newStyleValue = 'psalm-tone'; // Utiliser psalm-tone pour le français
+        } else {
+          newStyleValue = 'full'; // Par défaut, utiliser le chant complet pour le latin
+        }
+        
+        // Appliquer aux sélecteurs de style pour les propres
+        $('#selStyleGraduale, #selStyleTractus, #selStyleAlleluia, #selStyleOffertorium, #selStyleCommunio').each(function() {
+          // Sauvegarder la valeur actuelle si c'est full ou psalm-tone
+          var currentValue = $(this).val();
+          if (psalmValue && (currentValue === 'full' || currentValue === 'psalm-tone')) {
+            $(this).val(newStyleValue);
+            // Déclencher le changement pour mettre à jour l'affichage
+            $(this).trigger('change');
+          } else if (!psalmValue && currentValue === 'psalm-tone') {
+            $(this).val('full');
+            // Déclencher le changement pour mettre à jour l'affichage
+            $(this).trigger('change');
+          }
+        });
+      }
+      
       // Fonction pour appliquer les règles uniquement depuis un psaume vers les lectures
-      function applyRulesFromPsalm(psalmValue) {
+      function applyRulesFromPsalm(psalmValue, sourceElement) {
         console.log('Changement manuel détecté dans un psaume:', psalmValue);
         
-        // Si déjà en cours de mise à jour, on sort pour éviter la récurrence
-        if (isUpdatingFromGlobal || isUpdatingFromPsalm) return;
-        isUpdatingFromPsalm = true;
+        // Vérification avec lastUpdatedElement pour éviter la récurrence
+        if (isUpdating || sourceElement === lastUpdatedElement) {
+          console.log('Mise à jour déjà en cours ou source déjà traitée, annulation');
+          return;
+        }
+        
+        isUpdating = true;
+        lastUpdatedElement = sourceElement;
         
         try {
           var lectioValue = '';
@@ -780,21 +804,10 @@
             lectioValue = 'latin,french';
           }
           
-          // Mettre à jour uniquement les lectures
+          // Mettre à jour uniquement les lectures, mais sans déclencher d'événements
           $('.selectShowLectionem').each(function() {
             $(this).val(lectioValue);
-            var $lectio = $(this).closest('.lectio');
-            $lectio.find('.lectio-text').toggle(!!lectioValue);
-            $lectio.find('.lectio-text > *').hide();
-            
-            if (lectioValue) {
-              var selector = lectioValue.split(',').map(function(val) { 
-                return '.lectio-' + val; 
-              }).join(',');
-              $lectio.find(selector).show();
-            }
-            
-            $lectio.toggleClass('hidden-print', !lectioValue);
+            updateLectioDisplay($(this));
           });
           
           // Mettre à jour le sélecteur global (sans déclencher de mise à jour)
@@ -809,25 +822,148 @@
           
           $('#selGlobalLanguage').val(globalValue);
         } finally {
-          isUpdatingFromPsalm = false;
+          // Garantir la réinitialisation après un court délai
+          setTimeout(function() {
+            isUpdating = false;
+          }, 100);
         }
       }
       
-      // Ajouter un gestionnaire pour le sélecteur global
+      // Fonction pour synchroniser uniquement les lectures entre elles
+      function synchronizeLections(lectioValue, sourceElement) {
+        console.log('Synchronisation des lectures:', lectioValue);
+        
+        // Vérification avec lastUpdatedElement pour éviter la récurrence
+        if (isUpdating || sourceElement === lastUpdatedElement) {
+          console.log('Mise à jour déjà en cours ou source déjà traitée, annulation');
+          return;
+        }
+        
+        isUpdating = true;
+        lastUpdatedElement = sourceElement;
+        
+        try {
+          // Mettre à jour uniquement les autres lectures
+          $('.selectShowLectionem').not(sourceElement).each(function() {
+            $(this).val(lectioValue);
+            updateLectioDisplay($(this));
+          });
+          
+          // Mettre à jour le sélecteur global (sans déclencher de mise à jour)
+          var globalValue = '';
+          if (lectioValue === 'latin,english') {
+            globalValue = 'english';
+          } else if (lectioValue === 'latin,french') {
+            globalValue = 'french';
+          } else if (lectioValue === 'latin') {
+            globalValue = 'latin';
+          } else if (lectioValue === '') {
+            globalValue = '';
+          }
+          
+          $('#selGlobalLanguage').val(globalValue);
+        } finally {
+          // Garantir la réinitialisation après un court délai
+          setTimeout(function() {
+            isUpdating = false;
+          }, 100);
+        }
+      }
+      
+      // Fonction utilitaire pour mettre à jour l'affichage d'une lecture
+      function updateLectioDisplay($select) {
+        var lectioValue = $select.val();
+        var $lectio = $select.closest('.lectio');
+        $lectio.find('.lectio-text').toggle(!!lectioValue);
+        $lectio.find('.lectio-text > *').hide();
+        
+        if (lectioValue) {
+          var selector = lectioValue.split(',').map(function(val) { 
+            return '.lectio-' + val; 
+          }).join(',');
+          $lectio.find(selector).show();
+        }
+        
+        $lectio.toggleClass('hidden-print', !lectioValue);
+      }
+      
+      // Fonction utilitaire pour mettre à jour l'affichage d'un psaume
+      function updatePsalmDisplay($select) {
+        var psalmValue = $select.val();
+        var $psalmTranslation = $select.closest('.psalm-translation');
+        $psalmTranslation.find('.psalm-text').toggle(!!psalmValue);
+        $psalmTranslation.find('.psalm-text > *').hide();
+        
+        if (psalmValue) {
+          var selector = psalmValue.split(',').map(function(val) { 
+            return '.psalm-' + val; 
+          }).join(',');
+          $psalmTranslation.find(selector).show();
+        }
+        
+        $psalmTranslation.toggleClass('hidden-print', !psalmValue);
+      }
+      
+      // Ajouter un gestionnaire pour le sélecteur global avec délai pour éviter les rebonds
       $('#selGlobalLanguage').on('change', function() {
+        clearTimeout(updateTimer);
         var selectedValue = $(this).val();
-        applyLanguageRules(selectedValue);
+        
+        updateTimer = setTimeout(function() {
+          applyLanguageRules(selectedValue);
+        }, 50);
       });
       
-      // Ajouter un gestionnaire uniquement pour les psaumes
+      // Ajouter un gestionnaire uniquement pour les psaumes avec délai
       $(document).on('change', '.selectShowPsalmum', function() {
-        var selectedValue = $(this).val();
-        applyRulesFromPsalm(selectedValue);
+        clearTimeout(updateTimer);
+        var $this = $(this);
+        var selectedValue = $this.val();
+        
+        updateTimer = setTimeout(function() {
+          applyRulesFromPsalm(selectedValue, $this[0]);
+        }, 50);
       });
       
-      // IMPORTANT: Supprimer tout gestionnaire d'événement qui pourrait mettre à jour
-      // les psaumes lorsque les lectures sont modifiées
-      // Nous n'ajoutons pas d'événement pour '.selectShowLectionem'
+      // Ajouter un gestionnaire pour les lectures qui synchronisera uniquement
+      // les autres lectures sans toucher aux psaumes, avec délai
+      $(document).on('change', '.selectShowLectionem', function() {
+        clearTimeout(updateTimer);
+        var $this = $(this);
+        var selectedValue = $this.val();
+        
+        updateTimer = setTimeout(function() {
+          synchronizeLections(selectedValue, $this[0]);
+        }, 50);
+      });
+      
+      // Ajouter un gestionnaire pour les sélecteurs de style des propres (graduel, etc.)
+      $(document).on('change', '#selStyleGraduale, #selStyleTractus, #selStyleAlleluia, #selStyleOffertorium, #selStyleCommunio', function() {
+        // Ne traiter que si c'est un changement manuel (pas déclenché programmatiquement)
+        if (isUpdating) return;
+        
+        clearTimeout(updateTimer);
+        var $this = $(this);
+        var selectedValue = $this.val();
+        
+        updateTimer = setTimeout(function() {
+          // Si l'utilisateur sélectionne psalm-tone, on doit mettre à jour les lectures
+          if (selectedValue === 'psalm-tone') {
+            // Déterminer quelle langue utiliser en fonction du sélecteur global
+            var globalValue = $('#selGlobalLanguage').val();
+            var psalmValue = '';
+            
+            if (globalValue === 'english' || globalValue === 'latin,english') {
+              psalmValue = 'english';
+            } else if (globalValue === 'french' || globalValue === 'latin,french') {
+              psalmValue = 'french';
+            }
+            
+            // Mettre à jour les lectures avec la langue correspondante
+            applyRulesFromPsalm(psalmValue, $this[0]);
+          }
+        }, 50);
+      });
     });
   </script>
 </body>
