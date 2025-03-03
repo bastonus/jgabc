@@ -1,0 +1,7 @@
+[Rank]
+S. Lini Papæ et Martyris;;Semiduplex;;2;;vide C4b
+
+[Rule]
+OPapaM=Linum;
+vide C4b;
+Gloria

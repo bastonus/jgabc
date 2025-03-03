@@ -1,0 +1,13 @@
+@Sancti/11-21
+
+[Rule]
+Doxology=Nat
+
+[Responsory Vespera]
+@CommuneM/C10
+
+[Responsory3]
+@Commune/C11:Responsory1
+
+[Responsory Laudes]
+@CommuneM/C10

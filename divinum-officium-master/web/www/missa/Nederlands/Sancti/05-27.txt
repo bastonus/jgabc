@@ -1,0 +1,17 @@
+[Rank]
+S. Bedæ Venerabilis Confessoris et Ecclesiæ Doctoris;;Duplex majus;;4;;vide C5a
+
+[Rule]
+vide C5a;
+CPapaM=Johannes;
+Gloria
+
+[Oratio]
+God, Gij verheerlijkt uw Kerk door de wijsheid van uw heilige belijder en leraar Beda. Wil uw dienaren altijd genadig met zijn wijsheid verlichten en door zijn verdiensten helpen.
+$Per Dominum
+
+[Secreta]
+@Commune/C4a:Secreta1:s/N\./Beda/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio1:s/N\./Beda/

@@ -1,0 +1,50 @@
+[Rank]
+S. Joannis Chrysostomi Episcopi Confessoris Ecclesiæ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4a
+Gloria
+CredoDA
+
+[Name]
+Joannes Chrysostome
+
+[Introitus]
+@Commune/C4a
+
+[Oratio]
+Ecclésiam tuam, quǽsumus, Dómine, grátia cœléstis amplíficet: quam beáti Joánnis Chrysóstomi Confessóris tui atque Pontíficis illustráre voluísti gloriósis méritis et doctrínis.
+$Per Dominum
+
+[Lectio]
+@Commune/C4a
+
+[Graduale]
+!Eccli 44:16
+Ecce sacérdos magnus, qui in diébus suis plácuit Deo. 
+!Eccli 44:20
+Non est inventus símilis illi, qui conserváret legem Excélsi. 
+Allelúja, allelúja.
+!Jac 1:12
+Beátus vir, qui suffert tentatiónem: quóniam, cum probátus fúerit, accípiet corónam vitæ. Allelúja.
+
+[Tractus]
+!Ps 111:1-3
+Beátus vir, qui timet Dóminum: in mandátis ejus cupit nimis,
+V. Potens in terra erit semen ejus: generátio rectórum benedicétur.
+V. Glória et divítiæ in domo ejus: et justítia ejus manet in sǽculum sǽculi.
+
+[Evangelium]
+@Commune/C4a
+
+[Offertorium]
+@Commune/C4a
+
+[Secreta]
+@Commune/C4a:Secreta:s/N\./Joánnis Chrysóstomi/
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4a:Postcommunio:s/N\./Joánnes Chrysóstomus/

@@ -1,0 +1,5 @@
+@Commune/C2a
+
+[Oratio]
+Beati Martyris tui Melchioris, quǽsumus, Domine, precibus adiuvemur; ut, cuius gloriamur triumpho, fidei constantiam imitemur.
+$Per Dominum

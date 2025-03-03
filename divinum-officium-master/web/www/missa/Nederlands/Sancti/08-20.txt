@@ -1,0 +1,37 @@
+[Rank]
+S. Bernardi Abbatis et Ecclesiæ Doctoris;;Duplex;;3;;vide C5
+
+[Name]
+Bernarde
+
+[Introitus]
+@Commune/C4a
+
+[Oratio]
+@Commune/C4a:Oratio:s/N\./Bernardus/
+
+[Lectio]
+@Commune/C4a:Lectio1
+
+[Graduale]
+!Ps 36:30-31
+De mond van de rechtvaardige verkondigt de wijsheid, en wat recht is spreekt zijn tong.
+V. De wet van zijn God blijft in zijn hart en zijn schreden wankelen niet.
+Alleluia, alleluia.
+!Eccli 45:9
+De Heer had hem lief en tooide hem. Met een eregewaad heeft Hij hem bekleed. Alleluia.
+
+[Evangelium]
+@Commune/C4a
+
+[Offertorium]
+@Commune/C4a
+
+[Secreta]
+@Commune/C4a:Secreta1:s/N\./Bernardus/
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4a:Postcommunio1:s/N\./Bernardus/

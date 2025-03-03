@@ -1,0 +1,18 @@
+[Rank]
+S. Urbani Papæ et Martyris;;Simplex;;1.1;;vide C2
+
+[Rule]
+vide C2;
+Gloria
+OPapaM=Urbánum;
+
+[Oratio]
+@Commune/C4b:Oratio1:s/N\./Urbáno/
+(sed rubrica divino aut rubrica 1955 aut rubrica 1960)
+@Commune/C4b:Oratio Gregem
+
+[Secreta]
+@Commune/C4b:Secreta1:s/N\./Urbáno/
+
+[Postcommunio]
+@Commune/C4b:Postcommunio1:s/N\./Urbáni/

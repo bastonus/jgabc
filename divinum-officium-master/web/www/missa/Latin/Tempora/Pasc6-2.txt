@@ -1,0 +1,10 @@
+@Tempora/Pasc5-4
+
+[Rank]
+Feria III infra Octavam Ascensionis;;Semiduplex;;2.1;;ex Tempora/Pasc5-4
+
+[Rule]
+Evangelium non appropriatum
+ex Tempora/Pasc5-4;
+Gloria
+Suffr=Maria3;Ecclesiæ,Papa;;

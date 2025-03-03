@@ -1,0 +1,16 @@
+[Rank]
+S. Antonini Episcopi Confessoris;;Duplex;;3;;vide C4
+
+[Rule]
+vide C4;mtv
+9 lectiones
+
+[Oratio]
+Mogen de verdiensten van uw heilige belijder en bisschop Antoninus ons bijstaan, o Heer, opdat wij roemen kunnen op uw barmhartigheid jegens ons, zoals wij in hem uw wonderbare werken prijzen.
+$Per Dominum
+
+[Secreta]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4:Postcommunio:s/N\./Antoninus/

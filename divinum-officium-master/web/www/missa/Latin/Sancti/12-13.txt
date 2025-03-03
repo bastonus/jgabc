@@ -1,0 +1,34 @@
+[Rank]
+S. Luciæ Virginis et Martyris;;Duplex;;3;;ex C6b
+
+[Rule]
+vide C6b;
+Gloria
+
+[Introitus]
+@Commune/C6b
+
+[Oratio]
+@Commune/C6b::s/N\./Luciæ/
+
+[Lectio]
+@Commune/C6b
+
+[Graduale]
+@Sancti/07-21
+
+[Evangelium]
+@Commune/C6a
+
+[Offertorium]
+@Commune/C6
+
+[Secreta]
+@Commune/C6b::s/N\./Luciæ/
+
+[Communio]
+!Ps 118:161-162
+Príncipes persecúti sunt me gratis, et a verbis tuis formidávit cor meum: lætábor ego super elóquia tua, quasi qui invénit spólia multa.
+
+[Postcommunio]
+@Commune/C6b::s/N\./Luciæ/

@@ -1,0 +1,46 @@
+[Rank]
+S. Ephraem Syri Confessoris et Ecclesiae Doctorem;;Duplex;;3;;vide C5a
+
+[Rule]
+vide C5a;
+Gloria
+
+[Comment]
+# 18 VI – S. Efrém, Diácono, Confessor e Doutor
+! 3 classe
+! Paramentos brancos
+
+S.S. Marcos e Marceliano, Mártires
+! Comemoração
+! Paramentos vermelhos
+
+[Name]
+Ephraem
+
+[Introitus]
+@Commune/C4a:Introitus
+
+[Oratio]
+Ó Deus, que quisestes ilustrar a vossa Igreja com a brilhante erudição e com os méritos da preclara vida do B. Efrém, vosso Confessor e Doutor, humildemente Vos suplicamos que pela sua intercessão a defendais com vosso perpétuo poder das insídias do erro e da perversidade.
+$Per Dominum
+
+[Lectio]
+@Commune/C4a:Lectio
+
+[Graduale]
+@Commune/C4a:Graduale
+
+[Evangelium]
+@Commune/C4a:Evangelium
+
+[Offertorium]
+@Commune/C4a:Offertorium
+
+[Secreta]
+@Commune/C4a:Secreta
+
+[Communio]
+@Commune/C4a:Communio
+
+[Postcommunio]
+@Commune/C4a:Postcommunio

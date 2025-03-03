@@ -1,0 +1,24 @@
+[Rank]
+S. Paschalis Baylon Confessoris;;Duplex;;3;;vide C5
+
+[Rule]
+Gloria
+
+[Introitus]
+@Commune/C4c
+
+[Oratio]
+God, Gij hebt uw heilige belijder Paschalis gesierd met een wonderbare liefde voor de heilige geheimen van uw Lichaam en Bloed. Laat in uw goedheid ook ons uit dit goddelijk gastmaal een even geestelijke voldoening smaken als hij.
+$Qui vivis
+
+[Lectio]
+@Commune/C5
+
+[Evangelium]
+@Commune/C4c
+
+[Offertorium]
+@Commune/C2c
+
+[Communio]
+@Commune/C4d

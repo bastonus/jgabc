@@ -1,0 +1,37 @@
+[Rank]
+S. Bonaventuræ Episcopi Confessoris;;Duplex;;3;;vide C4a
+
+[Rank] (rubrica 1570)
+S. Bonaventuræ Episcopi Confessoris;;Semiduplex;;2.2;;vide C4a
+
+[Rule]
+vide C4a;
+Gloria
+CredoDA
+
+[Introitus]
+@Commune/C4a
+
+[Oratio]
+@Commune/C4a:Oratio:s/N\./Bonaventura/
+
+[Lectio]
+@Commune/C4a
+
+[Graduale]
+@Sancti/07-14
+
+[Evangelium]
+@Commune/C4a
+
+[Offertorium]
+@Commune/C2c
+
+[Secreta]
+@Commune/C4d:Secreta:s/N\./Bonaventura/
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4d:Postcommunio:s/N\./Bonaventura/

@@ -1,0 +1,14 @@
+[Rank]
+S. Sabbæ Abbatis;;Simplex;;1.1;;vide C4c
+
+[Rule]
+vide C4c;
+
+[Oratio]
+@Commune/C4c:Oratio:s/N\./Sabbas/
+
+[Secreta]
+@Commune/C4c:Secreta:s/N\./Sabbas/
+
+[Postcommunio]
+@Commune/C4c:Postcommunio:s/N\./Sabbas/

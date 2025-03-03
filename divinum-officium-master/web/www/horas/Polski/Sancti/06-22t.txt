@@ -1,0 +1,5 @@
+[Rank]
+Św. Paulina Biskupa i Wyznawcy;;Simplex;;1.1;;vide C4
+
+[Oratio]
+@Commune/C4::s/N\./Paulina/

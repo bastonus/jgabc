@@ -1,0 +1,12 @@
+@Commune/C4
+
+[Rank]
+S. Laurentii Justiniani Episcopi et Confessoris;;Semiduplex;;2;;vide C4
+
+[Rule]
+vide C4
+Gloria
+
+[Secreta]
+Te rogamos, Señor, que en todas partes nos alegren tus santos, para que celebrando sus méritos sintamos su patrocinio.
+$Per Dominum

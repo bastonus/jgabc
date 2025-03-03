@@ -1,0 +1,5 @@
+[Rank]
+S. Albertus Magnus Ep Conf et Eccl Doctoris;;Duplex;;3;;vide C4a
+
+[Name]
+Albert

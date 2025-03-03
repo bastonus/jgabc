@@ -1,0 +1,16 @@
+[Rank]
+S. Andreæ Corsini Episcopi et Confessoris;;Duplex;;3;;vide C4
+
+[Rule]
+vide C4;
+Gloria
+
+[Oratio]
+God, Gij laat in uw Kerk steeds nieuwe voorbeelden stellen van deugd. Doe uw volk zo het voetspoor drukken van uw heilige belijder en bisschop Andreas, dat het ook het loon verwerft.
+$Per Dominum
+
+[Secreta]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4:Postcommunio:s/N\./Andreas/

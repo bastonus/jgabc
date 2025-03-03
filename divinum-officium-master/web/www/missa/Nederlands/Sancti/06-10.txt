@@ -1,0 +1,16 @@
+[Rank]
+S. Margaritæ Reginæ viduæ;;Semiduplex;;2.2;;vide C7a
+
+[Rule]
+vide C7a;
+Gloria
+
+[Oratio]
+God, Gij hebt de heilige koningin Margarita een wonder doen zijn van buitengewone liefde voor de armen. Doe op haar voorspraak en naar haar voorbeeld uw liefde in onze harten steeds toenemen.
+$Per Dominum
+
+[Secreta]
+@Commune/C6b
+
+[Postcommunio]
+@Commune/C6b

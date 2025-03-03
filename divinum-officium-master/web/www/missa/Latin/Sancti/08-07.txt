@@ -1,0 +1,29 @@
+[Rank]
+S. Cajetani Confessoris;;Duplex;;3;;vide C5
+
+[Rule]
+vide C5;
+9 lectiones
+Gloria
+
+[Introitus]
+@Commune/C4c
+
+[Oratio]
+Deus, qui beáto Cajetáno Confessóri tuo apostólicam vivéndi formam imitári tribuísti: da nobis, ejus intercessióne et exémplo, in te semper confídere et sola cæléstia desideráre.
+$Per Dominum
+
+[Evangelium]
+@Tempora/Pent14-0
+
+[Offertorium]
+@Commune/C2c
+
+[Secreta]
+@Commune/C5b
+
+[Communio]
+@Commune/C4d
+
+[Postcommunio]
+@Commune/C5b::s/N\./Caietáno/

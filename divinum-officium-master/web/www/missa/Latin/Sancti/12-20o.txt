@@ -1,0 +1,13 @@
+[Rank]
+In Vigilia S. Thomæ Ap.;;Vigilia;;1.5;;vide C1v
+
+[Rule]
+vide C1v;
+no Gloria
+Suffr=Maria1;;
+
+[Name]
+Thomæ
+
+[Evangelium]
+@Commune/C1v

@@ -1,0 +1,6 @@
+[Rank]
+St. Hilarion, Abbot;;Simplex;;1.1;;vide C4c
+
+[Rule]
+vide C5;
+Suffragium=Maria3;Papa;Ecclesia;;

@@ -1,0 +1,10 @@
+[Rank]
+S. Gregorii PapĂŚ Confessoris et EcclesiĂŚ Doctoris;;Duplex;;3;;vide C4b
+(sed rubrica tridentina)
+S. Gregorii PapĂŚ Confessoris et EcclesiĂŚ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4b;
+(sed rubrica tridentina)
+vide C4a;
+Gloria

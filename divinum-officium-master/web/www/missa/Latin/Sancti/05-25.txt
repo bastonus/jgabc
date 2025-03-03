@@ -1,0 +1,20 @@
+[Rank]
+S. Gregorii VII Papæ Confessoris;;Duplex;;3;;vide C4b
+
+[Rule]
+vide C4b;
+9 lectiones
+Gloria
+
+[Introitus]
+@Commune/C4b
+
+[Oratio]
+Deus, in te sperántium fortitúdo, qui beátum Gregórium Confessórem tuum atque Pontíficem, pro tuénda Ecclésiæ libertáte, virtúte constántiæ roborásti: da nobis, ejus exémplo et intercessióne, ómnia adversántia fórtiter superáre.
+$Per Dominum
+
+[Secreta]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4::s/N\./Gregório/

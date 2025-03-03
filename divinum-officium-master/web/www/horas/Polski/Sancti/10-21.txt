@@ -1,0 +1,5 @@
+[Rank]
+Św. Hilarjona Opata;;Simplex;;1.1;;vide C5
+
+[Oratio]
+@Commune/C5:Oratio1:s/N\./Hilarjona/

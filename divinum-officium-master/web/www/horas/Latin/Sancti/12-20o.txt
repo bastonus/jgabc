@@ -1,0 +1,21 @@
+[Officium]
+In Vigilia S. Thomæ Ap.
+
+[Rank]
+;;Simplex;;1.5;;vide C1v
+
+[Rule]
+vide C1v;
+Responsory Feria
+Preces feriales
+Versum Feria
+no Te Deum
+Laudes 2
+no Gloria
+Suffr=Maria1;;
+
+[Name]
+Thomæ
+
+[Evangelium]
+@Commune/C1v

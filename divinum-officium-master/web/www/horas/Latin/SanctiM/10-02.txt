@@ -1,0 +1,21 @@
+@Sancti/10-02
+
+[Rank] (rubrica 1963)
+Ss. Angelorum Custodum;;Duplex;;3;;
+
+[MM Capitulum]
+@Sancti/10-02:Capitulum Sexta
+_
+@Sancti/05-08:Responsory Tertia:s/.*_//s
+
+[Responsory TertiaM]
+@Sancti/05-08:Versum 1
+
+[Responsory SextaM]
+@Sancti/05-08:Responsory Tertia:s/.*_.//s
+
+[Responsory NonaM]
+@:Versum 3
+
+[Ant Vespera 3]
+@Sancti/05-08:Ant Vespera:s/$/_/gm s/_/;;109/ s/_/;;110/ s/_/;;111/ s/_/;;137/ s/_//

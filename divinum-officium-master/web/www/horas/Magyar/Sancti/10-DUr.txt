@@ -1,0 +1,6 @@
+[Rule]
+9 lectiones
+Psalmi Dominica
+Antiphonas horas
+Psalm5 Vespera=116
+Festum Domini

@@ -1,0 +1,100 @@
+[parameters]
+Pope nn,nn~>$pope~>Entry~>12;;
+Bishop nn,nn~>$bishop~>Entry~>12;;
+Language for left column~>$lang1~>Optionmenu~>languages;;
+Fallback language~>$langfb~>Optionmenu~>languages~>16;;
+Contrast background~>$whitebground~>Checkbutton;;
+Text font~>$blackfont~>Entry~>12;;
+Small text~>$smallblack~>Entry~>12;;
+Red font~>$redfont~>Entry~>12;;
+Initiale~>$initiale~>Entry~>12;;
+Large font~>$largefont~>Entry~>12;;
+Small red~>$smallfont~>Entry~>12;;
+Title font~>$titlefont~>Entry~>12;;
+Screen height~>$screenheight~>Entry~>12;;
+Text width percent~>$textwidth~>Entry~>12;;
+Don't use fancy characters~>$nofancychars~>Checkbutton;;
+Building script~>$building~>Checkbutton~>~>15;;
+
+[general]
+Version~>$version~>Optionmenu~>versions;;
+Language 2~>$lang2~>Optionmenu~>languages;;
+Votive~>$votive~>Optionmenu~>votives;;
+
+[generalc]
+Version 1~>$version1~>Optionmenu~>versions;;
+Version 2~>$version2~>Optionmenu~>versions;;
+Language 1~>$lang1~>Optionmenu~>languages;;
+Language 2~>$lang2~>Optionmenu~>languages;;
+
+[languages]
+Latin,Čeština/Cesky,Deutsch,English,Español/Espanol,Français/French,Italiano,Magyar,Nederlands,Polski,Português/Portugues,Українська/Ukrainian
+
+[versions]
+Tridentine - 1570,Tridentine - 1910,Divino Afflatu - 1954,Reduced - 1955,Rubrics 1960 - 1960,1965-1967,Rubrics 1960 - 2020 USA/Rubrics 1960 Newcalendar
+
+[communes]
+C1,Commune Apostolorum, 
+C1a,Commune Evangelistarum,
+C1p,Commune Apostolorum tempore Paschali, 
+C2,Commune Unius Martyris,
+C2p,Commune Unius Martyris tempore Paschali,
+C3,Commune Plurimorum Martyrum,
+C3p,Commune Plurimorum Martyrum tempore Paschali,
+C4,Commune Confessoris Pontificis,
+C4a,Commune Doctorum Pontificium,
+C5,Commune Confessoris non Pontificis,
+C6,Commune unam Virginum,
+C6a,Commune plures Virgines
+C7,Commune non Virginum, Martyrum
+C7a,Commune non Virginum, non Martyrum
+C8,Commune Dedicationis Ecclaesiae
+C9,Officium defunctorum
+C10,Beata Maria in Sabbato
+C11,Commune Beatae Mariae Virginis,
+C12,Officium parvum Beatae Mariae Virginis
+
+[Rank Sancti]
+1=Simplex
+2=Semiduplex
+3=Duplex
+4=Duplex majus
+5=Duplex II Classis
+6=Duplex I Classis
+
+[Rank Tempora]
+1=Feria privilegiata
+4=Dominica ordinaria
+5=II class (Dominica Feast
+6=I class (Dominica, Feria, Feast)
+
+[votives]
+Hodie,
+Commune Unius Martyris: In virtute/C2,
+Commune Unius Martyris: Laetabitur/C2a,
+Commune Unius Martyris Pontificis: Sacerdotes Dei/C2b,
+Commune Unius Martyris Pontificis: Statuit/C2c,
+Commune unius Martyris Tempore Paschali: Protexisti/C2p,
+Commune Plurimorum Martyrum Intret in conspectu/C3,
+Commune Plurimorum Martyrum Tempore Paschali: Protexisti/C3p,
+Commune Plurimorum Martyrum Sapientiam Sanctorum/C3a,
+Commune Plurimorum martirum extra Tempus Paschale: Salus autem/C3b,
+Commune Plurimorum Martyrum Tempore Paschali: Sancti tui/C3pp,
+Commune Confessoris Pontificis:Statuit/C4,
+Commune Doctoris: In medio/C4a,
+Commune Summorum Pontificum: Si diligis/C4b,
+Commune Abbatis: Os iusti II/C4c,
+Commune Confessoris Pontificis:Sacerdotes/C4d,
+Commune Confessoris non pontificis: Os justi/C5,
+Commune Confessoris non pontificis: In medio/C5a,
+Commune Confessoris non pontificis: Justus/C5b,
+Commune Virgine et martyre: Loquebar/C6,
+Commune Virginum plurimorum: Me exspectaverunt/C6a,
+Commune Virginum tantum: Dilexisti/C6b,
+Commune non Virginum Martyrum: Exaudi nos/C7,
+Commune non Virginum non Martyrum: Cognovi/C7a,
+Dedicationis Ecclesiae: Terribilis/C8,
+Defunctorum quotidianis: Requiem aeternam/C9,
+In Festis Beatae Mariae Virginis: Salve Sancte Parens/C11,
+Votiva in Creatione et Coronatione Papae et in die anniversarii/Coronatio,
+Pro Propagatione Fidei/Propaganda

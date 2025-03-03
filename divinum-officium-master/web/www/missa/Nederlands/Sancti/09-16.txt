@@ -1,0 +1,10 @@
+[Rank]
+Ss. Cornelii Papæ et Cypriani Episcopi, Martyrum;;Semiduplex;;2.1;;vide C3
+
+[Rule]
+vide C3;
+9 lectiones
+
+[Oratio]
+Wij vragen U, Heer, dat het feest van uw heilige martelaren en bisschoppen Cornelius en Cyprianus ons bescherming mag bieden, en hun waardig gebed ons bij U aanbevelen.
+$Per Dominum

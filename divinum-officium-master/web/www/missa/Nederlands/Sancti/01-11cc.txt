@@ -1,0 +1,20 @@
+[Rank]
+S. Hygini Papæ et Martyris;;Simplex;;1.1;;vide C4b
+
+[Rule]
+vide C2c;
+(sed communi Summorum Pontificum)
+vide C4b; 
+CPapaM=Hyginus;
+Prefatio=Epi
+
+[Oratio]
+@Commune/C2c:Oratio:s/N\./Hyginus/
+(sed communi Summorum Pontificum)
+@Commune/C4b:Oratio:s/N\./Hyginus/
+
+[Secreta] (rubrica tridentina)
+@Commune/C2c:Secreta:s/N\./Hyginus/
+
+[Postcommunio] (rubrica tridentina)
+@Commune/C2c:Postcommunio:s/N\./Hyginus/

@@ -1,0 +1,15 @@
+[Rank]
+S. Hilarionis Abbatis;;Simplex;;1.1;;vide C4c
+
+[Rule]
+vide C4c;
+Suffragium=Maria3;Papa;Ecclesia;;
+
+[Oratio]
+@Commune/C4c:Oratio:s/N\./Hilariónis/
+
+[Secreta]
+@Commune/C4c:Secreta:s/N\./Hilariónis/
+
+[Postcommunio]
+@Commune/C4c:Postcommunio:s/N\./Hilariónis/

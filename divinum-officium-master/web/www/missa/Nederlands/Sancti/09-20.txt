@@ -1,0 +1,11 @@
+[Rank]
+S. Eustachii et Sociorum Martyrum;;Duplex;;3;;vide C3a
+
+[Rule]
+Gloria
+
+[Oratio]
+@Commune/C3a:Oratio:s/N\. en N\./Eustachius en Gezellen/
+
+[Postcommunio]
+@Commune/C3a:Postcommunio:s/N\. en N\./Eustachius en Gezellen/

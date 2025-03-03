@@ -1,0 +1,16 @@
+[Rank]
+S. Laurentii a Brundusio Confessoris;;Duplex;;3;;vide C5a
+
+[Rule]
+vide C5a;
+Gloria
+
+[Oratio]
+Deus, qui ad ardua quaeque pro nominis tui gloria et animarum salute beato Laurentio, Confessori tuo atque Doctori, spiritum sapientiae et fortitudinis contulisti: da nobis in eodem spiritu et agenda cognoscere; et cognita, ejus intercessione, perficere. 
+$Per Dominum
+
+[Secreta]
+@Commune/C4a:Secreta1:s/N\./Laurentio/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio1:s/N\./Laurentio/

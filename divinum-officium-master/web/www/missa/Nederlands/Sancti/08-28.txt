@@ -1,0 +1,43 @@
+[Rank]
+S. Augustini Episcopi et Confessoris et Ecclesiæ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4a;
+Gloria
+CredoDA
+
+[Name]
+Augustinus
+
+[Introitus]
+@Commune/C4a
+
+[Oratio]
+Luister, almachtige God, naar ons smeken, en doe hen, die Gij bezielt met vertrouwen op uw goedheid, op voorspraak van uw heilige belijder en bisschop Augustinus genadig de uitwerking van uw nooit versagende barmhartigheid ondervinden.
+$Per Dominum
+
+[Lectio]
+@Commune/C4a
+
+[Graduale]
+!Ps 36:30-31
+De mond van de rechtvaardige verkondigt wijsheid, en gerechtigheid spreekt zijn tong.
+V. De wet van zijn God blijft in zijn hart, en zijn schreden wankelen niet.
+Alleluia, alleluia.
+!Ps 88:21
+Ik heb David gevonden, mijn dienstknecht, met heilige olie hem gezalfd. Alleluia.
+
+[Evangelium]
+@Commune/C4a
+
+[Offertorium]
+@Commune/C4a
+
+[Secreta]
+@Commune/C4a:Secreta:s/N\./Augustinus/
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4a:Postcommunio:s/N\./Augustinus/

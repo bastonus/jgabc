@@ -1,0 +1,10 @@
+[Rank]
+S. Petronilla virgin;;Simplex;;1.1;;vide C6
+
+[Rule]
+vide C6;
+Gloria
+
+[Oratio]
+Escúchanos, Dios salvador nuestro, para que los que nos alegramos en la festividad de santa Petronila Virgen, haz que aprendamos a servirte con amor.
+$Per Dominum

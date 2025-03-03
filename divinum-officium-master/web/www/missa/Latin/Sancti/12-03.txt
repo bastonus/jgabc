@@ -1,0 +1,36 @@
+[Rank]
+S. Francisci Xaverii Confessoris;;Duplex majus;;4;;vide C5
+
+[Rule]
+vide C5;
+Gloria
+
+[Introitus]
+!Ps 118:46-47
+v. Loquébar de testimóniis tuis in conspéctu regum, et non confundébar: et meditábar in mandátis tuis, quæ diléxi nimis.
+!Ps 116:1-2
+Laudáte Dóminum, omnes gentes, laudáte eum, omnes pópuli: quóniam confirmáta est super nos misericórdia ejus, et véritas Dómini manet in ætérnum.
+&Gloria
+v. Loquébar de testimóniis tuis in conspéctu regum, et non confundébar: et meditábar in mandátis tuis, quæ diléxi nimis.
+
+[Oratio]
+Deus, qui Indiárum gentes beáti Francísci prædicatióne et miráculis Ecclésiæ tuæ aggregáre voluísti: concéde propítius; ut, cujus gloriósa mérita venerámur, virtútum quoque imitémur exémpla.
+$Per Dominum
+
+[Lectio]
+@Sancti/11-30:Lectio
+
+[Evangelium]
+@Sancti/08-08
+
+[Offertorium]
+@Commune/C2c
+
+[Secreta]
+@Commune/C5b
+
+[Communio]
+@Commune/C4d
+
+[Postcommunio]
+@Commune/C5b::s/N\./Francísco/

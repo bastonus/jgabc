@@ -1,0 +1,8 @@
+[Rank]
+Feria Secunda in Rogationibus;;Feria;;2;;ex Pasc5-1
+
+[Rule]
+ex Pasc5-1;
+no Gloria
+no Credo
+Suffr=Maria3;Ecclesiae,Papa;;

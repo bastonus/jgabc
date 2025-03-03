@@ -1,0 +1,39 @@
+[Rank]
+S. Caroli Episcopi et Confessoris;;Duplex;;3;;vide C4
+
+[Rule]
+vide C4;
+
+[Introitus]
+@Commune/C2c
+
+[Oratio]
+Ecclésiam tuam, Dómine, sancti Caróli Confessóris tui atque Pontíficis contínua protectióne custódi: ut, sicut illum pastorális sollicitúdo gloriósum réddidit; ita nos ejus intercéssio in tuo semper fáciat amóre fervéntes.
+$Per Dominum
+
+[Lectio]
+@Commune/C4
+
+[Graduale]
+!Eccli 44:16
+Ecce sacérdos magnus, qui in diébus suis plácuit Deo. 
+!Eccli 44:20
+Non est invéntus símilis illi, qui conserváret legem Excélsi. 
+Allelúja, allelúja.
+!Ps 109:4 
+Tu es sacérdos in ætérnum, secúndum órdinem Melchísedech. Allelúja.
+
+[Evangelium]
+@Commune/C4
+
+[Offertorium]
+@Commune/C2b
+
+[Secreta]
+@Commune/C4
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4::s/N\./Cárolo/

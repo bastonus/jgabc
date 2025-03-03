@@ -1,0 +1,33 @@
+@Sancti/10-07
+
+[Rank] (rubrica 1963)
+Beatæ Mariæ Virginis a Rosario;;Duplex;;3;;ex C11
+
+[Responsory Vespera]
+@Sancti/10-07:Responsory Sexta:s/._.*//s
+
+[Lectio94]
+@Sancti/10-07:Lectio7:s/.*_//s s/!.*//s
+@Sancti/10-07:Lectio8_1: s/$/~/
+@Sancti/10-07:Lectio8_2
+
+[MM Capitulum]
+@Sancti/10-07:Capitulum Sexta
+_
+@Sancti/10-07:Responsory Tertia:s/.*_//s
+
+[Responsory Laudes]
+@Sancti/10-07:Responsory Nona:s/._.*//s
+
+[Hymnus Laudes]
+@Sancti/10-07::s/Nat/NatT/
+
+[Responsory TertiaM]
+V. Sancta Dei Génetrix, semper Virgo Maria.
+R. Intercéde pro nobis ad Dóminum, Deum nostrum.
+
+[Responsory SextaM]
+@Sancti/10-07:Responsory Tertia:s/.*_.//s
+
+[Responsory NonaM]
+@Sancti/10-07:Responsory Sexta:s/.*_.//s

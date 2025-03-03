@@ -1,0 +1,30 @@
+[Rank]
+S. Nicolai de Tolentino Confessoris;;Duplex;;3;;vide C5b
+
+[Rule]
+vide C5b;
+9 lectiones
+
+[Comment]
+# 10 IX – S. Nicolau Tolentino, Confessor
+
+[Introitus]
+@Commune/C5b:Introitus
+
+[Oratio]
+@Commune/C5b:Oratio
+
+[Evangelium]
+@Commune/C5b:Evangelium
+
+[Offertorium]
+@Commune/C5b:Offertorium
+
+[Secreta]
+@Commune/C5b:Secreta
+
+[Communio]
+@Commune/C5b:Communio
+
+[Postcommunio]
+@Commune/C5b:Postcommunio

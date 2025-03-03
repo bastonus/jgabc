@@ -1,0 +1,41 @@
+[Rank]
+S. Annæ Matris B.M.V.;;Duplex II classis;;5.1;;ex C7a
+
+[Rule]
+vide C7a;
+Gloria
+CredoDA
+
+[Introitus]
+v. Gaudeámus omnes in Dómino, diem festum celebrántes sub honóre beátæ Annæ: de cujus sollemnitáte gaudent Angeli et colláudant Fílium Dei.
+!Ps 44:2.
+Eructávit cor meum verbum bonum: dico ego ópera mea Regi.
+&Gloria
+v. Gaudeámus omnes in Dómino, diem festum celebrántes sub honóre beátæ Annæ: de cujus sollemnitáte gaudent Angeli et colláudant Fílium Dei.
+
+[Oratio]
+Deus, qui beátæ Annæ grátiam conférre dignatus es, ut Genetrícis unigéniti Fílii tui mater effici mererétur: concéde propítius; ut, cujus sollémnia celebrámus, ejus apud te patrocíniis adjuvémur.
+$Per eundem
+
+[Lectio]
+@Commune/C7a
+
+[Graduale]
+@Sancti/07-22
+
+[Evangelium]
+@Commune/C6a
+
+[Offertorium]
+@Commune/C6b
+
+[Secreta]
+Sacrifíciis præséntibus, quǽsumus, Dómine, placatus inténde: ut per intercessiónem beátæ Annæ, quæ Genetrícis Fílii tui, Dómini nostri Jesu Christi, mater éxstitit, et devotióni nostræ profíciant et salúti.
+$Per eundem
+
+[Communio]
+@Commune/C6a:Offertorium
+
+[Postcommunio]
+Cœléstibus sacraméntis vegetáti, quǽsumus, Dómine, Deus noster: ut, intercessióne beátæ Annæ, quam Genetrícis Fílii tui matrem esse voluísti, ad ætérnam salútem perveníre mereámur.
+$Per eundem

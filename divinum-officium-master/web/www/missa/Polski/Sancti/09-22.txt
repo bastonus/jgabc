@@ -1,0 +1,24 @@
+[Rank]
+S. Thomae de Villanove Episcopi et Confessoris;;Duplex;;3;;vide C4
+
+[Rule]
+vide C4
+Gloria
+
+[Comment]
+# 22 IX – Św. Tomasza z Villanueva, Biskupa i Wyznawcy
+! 3 klasy
+! Szaty białe
+Św. Tomasz urodził się pod Villanueva w Kastylii w roku 1488. Ukończywszy z odznaczeniem studia uniwersyteckie w Alcala wstąpił do zakonu Augustianów. Jako prowincjał Andaluzji wysłał pierwszych misjonarzy augustiańskich do Meksyku. W roku 1544 mimo sprzeciwu został mianowany arcybiskupem Walencji. Broniąc Morysków występował otwarcie przeciw hiszpańskiej inkwizycji. Wszystko, co miał, rozdawał ubogim. W chwili swojej śmierci, nie posiadał nawet łóżka. Zmarł w roku 1555.
+
+[Oratio]
+Boże, Ty ozdobiłeś świętego Biskupa Tomasza cnotą niezwykłego miłosierdzia dla ubogich; prosimy Cię, abyś za jego wstawiennictwem zlał łaskawie skarby miłosierdzia Twojego na wszystkich, którzy Cię wzywają.
+$Per Dominum
+
+[Secreta]
+Prosimy Cię, Panie, niech doroczna uroczystość św. Tomasza, Twego Wyznawcy i Biskupa, uczyni nas godnymi Twojej miłości, a ta ofiara przebłagalna niech się przyczyni do jego niebieskiej chwały i wyjedna nam dary Twojej łaski.
+$Per Dominum
+
+[Postcommunio]
+Boże, Ty nagradzasz dusze wierne; spraw, abyśmy dostąpili przebaczenia przez prośby św. Tomasza, Twego Wyznawcy i Biskupa, którego chwalebną uroczystość obchodzimy.
+$Per Dominum

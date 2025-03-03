@@ -1,0 +1,4 @@
+@Tempora/Epi1-3
+
+[Lectio3]
+@Tempora/Epi1-3::s/\n15 / ¶\n15 /

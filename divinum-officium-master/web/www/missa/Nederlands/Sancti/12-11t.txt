@@ -1,0 +1,12 @@
+@Commune/C4b
+
+[Rank]
+S. Damasi Papæ et confessoris;;Semiduplex;;2.5;;vide C4b
+
+[Rule]
+OPapaC=Damasus;
+vide C4;
+Gloria
+
+[Oratio]
+@Commune/C4b:Oratio:s/N\./Damasus/

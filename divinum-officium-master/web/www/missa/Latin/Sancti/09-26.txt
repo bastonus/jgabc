@@ -1,0 +1,16 @@
+[Rank]
+Ss. Cypriani et Justinæ Martyrum;;Simplex;;1.1;;vide C3b
+
+[Rule]
+vide C3;
+Gloria
+
+[Oratio]
+Beatórum Mártyrum Cypriáni et Justínæ nos, Dómine, fóveant continuáta pæsídia: quia non désinis propítius intuéri, quos tálibus auxíliis concésseris adjuvári.
+$Per Dominum
+
+[Secreta]
+@Commune/C3a
+
+[Postcommunio]
+@Commune/C3a:Postcommunio:s/N\. et N\./Cypriáno et Justína/

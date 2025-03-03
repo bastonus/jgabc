@@ -1,0 +1,19 @@
+[Rank]
+S. Isidori Episc. Confessoris et Ecclesiæ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4a;
+Gloria
+CredoDA
+
+[Name]
+Isidore
+
+[Oratio]
+@Commune/C4a:Oratio:s/N\./Isidóri/
+
+[Secreta]
+@Commune/C4a:Secreta:s/N\./Isidóri/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio:s/N\./Isidórus/

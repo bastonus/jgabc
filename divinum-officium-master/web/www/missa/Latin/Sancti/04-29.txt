@@ -1,0 +1,20 @@
+[Rank]
+S. Petri Martyris;;Duplex;;3;;vide C2
+
+[Rule]
+vide C2;
+
+[Oratio]
+Præsta, quǽsumus, omnípotens Deus: ut beáti Petri Mártyris tui fidem cóngrua devotióne sectémur; qui, pro ejúsdem fídei dilatatióne, martýrii palmam méruit obtinére.
+$Per Dominum.
+
+[Lectio]
+@Commune/C2a
+
+[Secreta]
+Preces, quas tibi, Dómine, offérimus, intercedénte beáto Petro Mártyre tuo, cleménter inténde: et propugnatóres fídei sub tua protectióne custódi.
+$Per Dominum
+
+[Postcommunio]
+Fidéles tuos, Dómine, custódiant sacraménta, quæ súmpsimus: et, intercedénte beáto Petro Mártyre tuo, contra omnes advérsos tueántur incúrsus.
+$Per Dominum

@@ -1,0 +1,15 @@
+[Rank]
+S. Benedicti Abbatis;;Duplex majus;;4;;vide C4c
+
+[Rule]
+vide C4c;
+Gloria
+
+[Oratio]
+@Commune/C4c:Oratio:s/N\./Benedictus/
+
+[Secreta]
+@Commune/C4c:Secreta:s/N\./Benedictus/
+
+[Postcommunio]
+@Commune/C4c:Postcommunio:s/N\./Benedictus/

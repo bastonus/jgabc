@@ -1,0 +1,12 @@
+[Rank]
+S. Nicolai de Tolentino Confessoris;;Duplex;;3;;vide C5b
+
+[Rule]
+vide C5b;
+9 lectiones
+
+[Oratio]
+@Commune/C5b:Oratio:s/N\./Nicolaas/
+
+[Postcommunio]
+@Commune/C5b:Postcommunio:s/N\./Nicolaas/

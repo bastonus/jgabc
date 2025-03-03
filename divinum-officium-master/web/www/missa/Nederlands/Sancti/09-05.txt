@@ -1,0 +1,33 @@
+[Rank]
+S. Laurentii Justiniani Episcopi et Confessoris;;Semiduplex;;2.2;;vide C4
+
+[Rule]
+vide C4
+Gloria
+
+[Introitus]
+@Commune/C2c
+
+[Oratio]
+@Commune/C4:Oratio:s/N\./Laurentius/
+
+[Lectio]
+@Commune/C4
+
+[Graduale]
+@Commune/C4
+
+[Evangelium]
+@Commune/C4
+
+[Offertorium]
+@Commune/C2b
+
+[Secreta]
+@Commune/C4
+
+[Communio]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4:Postcommunio:s/N\./Laurentius/

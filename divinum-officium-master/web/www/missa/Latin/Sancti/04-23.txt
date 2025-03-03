@@ -1,0 +1,21 @@
+[Rank]
+S. Georgii Martyris;;Semiduplex;;2.2;;vide C2
+
+[Rule]
+vide C2;
+Gloria
+
+[Oratio]
+Deus, qui nos beáti Geórgii Mártyris tui méritis et intercessióne lætíficas: concéde propítius; ut, qui tua per eum benefícia póscimus, dono tuæ grátiæ consequámur.
+$Per Dominum
+
+[Lectio]
+@Commune/C2a
+
+[Secreta]
+Múnera, Dómine, obláta sanctífica: et, intercedénte beáto Geórgio Mártyre tuo, nos per hæc a peccatórum nostrórum máculis emúnda.
+$Per Dominum
+
+[Postcommunio]
+Súpplices te rogámus, omnípotens Deus: ut, quos tuis réficis sacraméntis, intercedénte beáto Geórgio Mártyre tuo, tibi étiam plácitis móribus dignánter tríbuas deservíre.
+$Per Dominum

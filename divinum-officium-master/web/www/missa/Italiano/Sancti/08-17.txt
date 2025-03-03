@@ -1,0 +1,9 @@
+[Rank]
+S. Hyacinthi Confessoris;;Duplex;;3;;vide C5
+
+[Rule]
+Gloria
+
+[Oratio]
+O Dio, che ci rallegri con l'annua festività del beato Giacinto confessore tuo, fa' che per la tua misericordia imitiamo le azioni di colui, del quale celebriamo l'anniversario.
+$Per Dominum

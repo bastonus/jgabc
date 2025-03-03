@@ -1,0 +1,19 @@
+[Rank]
+S. Petri Damiani Episcopi Confessoris et Ecclesiæ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4;
+Gloria
+
+[Name]
+Petrus
+
+[Oratio]
+Wij vragen U, almachtige God, doe ons de lessen en voorbeelden van uw heilige belijder en bisschop Petrus navolgen, opdat wij door de geringschatting van het aardse de eeuwige vreugde mogen verwerven.
+$Per Dominum
+
+[Secreta]
+@Commune/C4a:Secreta:s/N\./Petrus/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio:s/N\./Petrus/

@@ -1,0 +1,16 @@
+[Rank]
+S. Anselmi Episcopi Confessoris et Ecclesiæ Doctoris;;Duplex;;3;;vide C4a
+
+[Rule]
+vide C4a;
+Gloria
+CredoDA
+
+[Oratio]
+@Commune/C4a:Oratio:s/N\./Anselmus/
+
+[Secreta]
+@Commune/C4a:Secreta:s/N\./Anselmus/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio:s/N\./Anselmus/

@@ -1,0 +1,42 @@
+@Commune/C2p
+
+[Officium]
+Commune Plurimorum Martyrum Tempore Paschali
+
+[Hymnus Vespera]
+@Commune/C3:Hymnus Laudes
+
+[HymnusM Vespera]
+@Commune/C3:HymnusM Laudes
+
+[Oratio]
+@Commune/C3
+
+[Oratio1]
+@Commune/C3
+
+[Oratio2]
+@Commune/C3
+
+[Hymnus Matutinum]
+@Commune/C3
+
+[HymnusM Matutinum]
+@Commune/C3
+
+[Ant Matutinum]
+@Commune/C1p::1 s/;;18/;;1/
+;;2
+;;3
+@Commune/C1p::4 s/;;46/;;14/
+;;15
+;;23
+@Commune/C1p::7 s/;;74/;;32/
+;;33
+;;45
+
+[Hymnus Laudes]
+@Commune/C3
+
+[HymnusM Laudes]
+@Commune/C3

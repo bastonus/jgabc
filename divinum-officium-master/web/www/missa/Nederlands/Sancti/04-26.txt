@@ -1,0 +1,7 @@
+[Rank]
+SS. Cleti et Marcellini Paparum et Martyrum;;Semiduplex;;2.5;;vide C4b
+
+[Rule]
+OPapæM=Cletus en Marcellinus;
+vide C4b;
+Gloria

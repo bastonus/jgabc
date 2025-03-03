@@ -370,11 +370,14 @@ syl.bold {
   border-left: none;
 }
 
-.psalm-reference {
-  color: #d00!important;
-  font-family: 'Crimson Text';
-  font-size: 14pt;
+/* Style pour les références des psaumes et lectures */
+.psalm-reference, .lectio-reference {
   font-style: italic;
+  color: #d00!important;
+  font-family: 'Crimson Text', serif;
+  font-size: 14pt !important;
+  margin-right: 5px;
+  font-weight: normal;
 }
 
 .psalm-text {
@@ -399,12 +402,13 @@ syl.bold {
   line-height: 1.5;
 }
 
-/* Uniformiser les styles des références de psaumes avec ceux des évangiles */
-.psalm-reference {
+/* Style pour les labels des lectures */
+.lectio-label {
   font-style: italic;
-  color: #800000;
+  color: #d00!important;
   font-family: 'Crimson Text', serif;
-  font-size: 16px;
+  font-size: 14pt !important;
+  font-weight: bold;
 }
 
 /* Assurer que les sélecteurs de langue ont le même style */
@@ -413,6 +417,15 @@ syl.bold {
   padding: 2px;
   border: 1px solid #ccc;
   border-radius: 3px;
+  font-size: 12pt;
+}
+
+/* Assurer que le texte des traductions a le même style */
+.psalm-english, .psalm-french, .lectio-english, .lectio-french {
+  margin-bottom: 10px;
+  font-family: 'Crimson Text', serif;
+  font-size: 14pt !important;
+  line-height: 1.5;
 }
 
 @media(max-width: 524px) {

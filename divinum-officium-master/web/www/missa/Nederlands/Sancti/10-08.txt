@@ -1,0 +1,12 @@
+[Rank]
+S. Birgittæ Viduæ;;Duplex;;3;;vide C7a
+
+[Oratio]
+Heer, onze God, Gij hebt de heilige Birgitta door uw enige Zoon hemelse geheimen geopenbaard. Doe ons, uw dienaren, door haar liefdevolle voorspraak eens vreugdevol genieten van de openbaring van uw eeuwige heerlijkheid.
+$Per eundem
+
+[Secreta]
+@Commune/C6b
+
+[Postcommunio]
+@Commune/C6b

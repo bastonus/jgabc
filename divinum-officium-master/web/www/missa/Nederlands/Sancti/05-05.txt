@@ -1,0 +1,15 @@
+[Rank]
+S. Pii V Papæ Confessoris;;Duplex;;3;;vide C4b
+
+[Rule]
+Gloria
+
+[Oratio]
+God, Gij hebt U gewaardigd de heilige Pius tot paus te kiezen om de vijanden van uw Kerk te verpletteren en de goddelijke eredienst te herstellen. Verdedig ons door zijn bescherming en maak ons zo toegewijd aan uw dienst, dat wij de hinderlagen van alle vijanden ontwijken en een blijvende vrede genieten.
+$Per Dominum
+
+[Secreta]
+@Commune/C4
+
+[Postcommunio]
+@Commune/C4:Postcommunio:s/N\./Pius/

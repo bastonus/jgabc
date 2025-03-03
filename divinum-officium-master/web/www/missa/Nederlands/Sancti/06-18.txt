@@ -1,0 +1,19 @@
+[Rank]
+S. Ephræm Syri Confessoris et Ecclesiæ Doctorem;;Duplex;;3;;vide C5a
+
+[Rule]
+vide C5a;
+Gloria
+
+[Name]
+Ephrem
+
+[Oratio]
+God, Gij hebt uw Kerk willen verheerlijken door de wonderbare kennis en het buitengewoon verdienstelijk leven van uw heilige belijder en kerkleraar Ephrem. Wij vragen U nederig, dat Gij hem op zijn voorspraak met uw eeuwige macht voor de hinderlagen van dwaling en boosheid wilt behoeden.
+$Per Dominum
+
+[Secreta]
+@Commune/C4a:Secreta1:s/N\./Ephrem/
+
+[Postcommunio]
+@Commune/C4a:Postcommunio1:s/N\./Ephrem/

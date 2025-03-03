@@ -1,0 +1,16 @@
+[Rank]
+S. Bibianæ Virginis et Martyris;;Semiduplex;;2.5;;vide C6a
+
+[Rule]
+vide C6a;
+Gloria
+
+[Oratio]
+God, Gever van alle goed, in uw dienares Bibiana hebt Gij de bloem van de maagdelijkheid en de palm van het martelaarschap verbonden. Bind onze harten op haar voorspraak door de liefde aan U, opdat wij zonder gevaar het eeuwig loon mogen verwerven.
+$Per Dominum
+
+[Secreta]
+@Commune/C6a:Secreta1:s/N\./Bibiana/
+
+[Postcommunio]
+@Commune/C6a:Postcommunio1:s/N\./Bibiana/

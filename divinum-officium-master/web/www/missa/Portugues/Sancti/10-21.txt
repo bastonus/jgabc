@@ -1,0 +1,11 @@
+[Rank]
+S. Hilarionis Abbatis;;Simplex;;1.1;;vide C4c
+
+[Rule]
+vide C5;
+Suffragium=Maria3;Papa;Ecclesia;;
+
+[Comment]
+# 21 X – S. Hilarião, Abade
+! Comemoração
+! Paramentos brancos

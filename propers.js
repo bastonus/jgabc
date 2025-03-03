@@ -522,7 +522,7 @@ $(function(){
               var gradualeIsFirstAlleluia = ((sel.graduale && sel.graduale.id in chantID.alleluiaById) || isAlleluia('graduale',(sel.graduale.lines||[[]])[0][0])) && !/non\s+rep[eé]titur/i.exec((sel.graduale.lines||[[]])[0][1]);
               if(part=='graduale' || (part=='alleluia' && !gradualeIsFirstAlleluia)) {
                 // add ij. if not present:
-                gabc = gabc.replace(/(al\([^)]+\)le\([^)]+\)l[uú]\([^)]+\)[ij]a[.,;:]?\([^)]+\))\s+(?:\*|\{\*\})(?!~?(\([^)]+\)\s*)*\s*(?:\([;:,]+\))?\s*[{}]*(<i>)?{?ij\.?[{}]*(<\/i>)?}?)(?!(?:\([,;:]\)|\s+|~|<i>|[{}(_^]+)*non\s+rep[eé]titur)/i,'$1 {*} <i>ij.</i>');
+                gabc = gabc.replace(/(al\([^)]+\)le\([^)]+\)l[uú]\([^)]+\)[ij]a[.,;:]?\([^)]+\))\s+(?:\*|\{\*\})(?!~?(\([^)]+\)\s*)*\s*(?:\([;:,]\+\))?\s*[{}]*(<i>)?{?ij\.?[{}]*(<\/i>)?}?)(?!(?:\([,;:]\)|\s+|~|<i>|[{}(_^]+)*non\s+rep[eé]titur)/i,'$1 {*} <i>ij.</i>');
               } else if((part=='alleluia' && gradualeIsFirstAlleluia) || /^graduale[1-9]/.test(part)) {
                 // remove ij. if present
                 gabc = gabc.replace(/(al\([^)]+\)le\([^)]+\)l[uú]\([^)]+\)[ij]a[.,;:]?\([^)]+\)\s*[^a-z\s~]+)\s*(?:~?<i>)?ij\.?(?:<\/i>)?([^\)]*\()/i,'$1$2');
@@ -2235,6 +2235,7 @@ $(function(){
       var result = shiftGabcForClefChange([gMediant, gTermination],clef,tone.clef);
       gMediant = result[0];
       gTermination = result[1];
+      clef = originalClef;
     }
     var gTertium = introitTone && getTertiumQuid(gMediant,gTermination);
     
@@ -3953,7 +3954,8 @@ console.info(JSON.stringify(selPropers));
     if(selector) $lectio.find(selector).show();
     $lectio.toggleClass('hidden-print',!val);
     
-    // Synchroniser avec les psaumes
+    // Par défaut, afficher toujours le latin avec l'autre langue uniquement pour l'Évangile et l'Épître
+    // Pour les psaumes, on utilise uniquement la langue secondaire
     if (val.includes('english')) {
       $('.selectShowPsalmum').val('english').change();
     } else if (val.includes('french')) {
@@ -3961,6 +3963,9 @@ console.info(JSON.stringify(selPropers));
     } else {
       $('.selectShowPsalmum').val('').change();
     }
+    
+    // Synchroniser tous les autres sélecteurs de langue pour les lectures
+    $('.selectShowLectionem').not(this).val(val);
   }).on('click', '[data-toggle="dropdown"]', function(e) {
     $(this).parent('.btn-group').toggleClass('open');
     e.stopPropagation();
@@ -4075,7 +4080,7 @@ $(document).on('change', '.selectShowPsalmum', function(e){
   localStorage.showPsalmum = val;
   
   // Mettre à jour tous les sélecteurs de psaumes pour qu'ils utilisent la même valeur
-  $('.selectShowPsalmum').val(val);
+  $('.selectShowPsalmum').not(this).val(val);
   
   // Mettre à jour l'affichage de tous les psaumes
   $('.psalm-translation').each(function() {
@@ -4087,33 +4092,58 @@ $(document).on('change', '.selectShowPsalmum', function(e){
     $psalmTranslation.toggleClass('hidden-print',!val);
   });
   
-  // Synchroniser avec les lectures
-  if (val) {
-    // Déterminer quelle valeur utiliser pour les lectures en fonction de la langue des psaumes
-    var lectioVal = val; // Par défaut, utiliser la même valeur
-    
-    // Ne pas changer la sélection des lectures si elle contient déjà la langue actuelle
-    // Cela préserve les choix comme "Latin and English" ou "Latin and French"
-    var currentLectioVal = localStorage.showLectionem || '';
-    if (currentLectioVal !== lectioVal) {
-      $('.selectShowLectionem').val(lectioVal).change();
-    }
-  }
+  // Ne pas synchroniser avec les lectures pour conserver leurs options spécifiques
+  // Les lectures maintiennent leurs propres paramètres indépendamment
 });
 
 // Ajouter une fonction dédiée à la création du HTML pour les traductions de psaumes
 function createPsalmTranslationHTML(partName, psalmRef) {
-  var html = '<div><span class="psalm-reference">' + partName + ' ' + psalmRef + '</span>';
+  // Convertir le nom de la partie en titre latin avec première lettre en majuscule
+  var latinTitle = '';
+  
+  // Déterminer le titre latin selon la partie
+  switch(partName.toLowerCase()) {
+    case 'introitus':
+    case 'introit':
+      latinTitle = 'Introitus';
+      break;
+    case 'graduale':
+    case 'gradual':
+      latinTitle = 'Graduale';
+      break;
+    case 'tractus':
+    case 'tract':
+      latinTitle = 'Tractus';
+      break;
+    case 'offertorium':
+    case 'offertory':
+      latinTitle = 'Offertorium';
+      break;
+    case 'communio':
+    case 'communion':
+      latinTitle = 'Communio';
+      break;
+    case 'alleluia':
+      latinTitle = 'Alleluia';
+      break;
+    case 'sequentia':
+    case 'sequence':
+      latinTitle = 'Sequentia';
+      break;
+    default:
+      latinTitle = partName;
+  }
+  
+  // Construire le HTML avec titre latin et référence séparés
+  var html = '<div>';
+  html += '<span class="lectio-label">' + latinTitle + ' : </span>';
+  html += '<span class="psalm-reference">' + psalmRef + '</span>';
   html += '<select class="selectShowPsalmum">';
-  html += ' <option value="">Hidden</option>';
-  html += ' <option value="latin">Latin</option>';
+  html += ' <option value="">(Hidden)</option>';
   html += ' <option value="english">English</option>';
   html += ' <option value="french">French</option>';
-  html += ' <option value="latin,english">Latin and English</option>';
-  html += ' <option value="latin,french">Latin and French</option>';
   html += '</select></div>';
   html += '<div class="psalm-text">';
-  html += '<div class="psalm-latin"></div>';
   html += '<div class="psalm-english"></div>';
   html += '<div class="psalm-french"></div>';
   html += '</div>';
@@ -4124,22 +4154,20 @@ function createPsalmTranslationHTML(partName, psalmRef) {
 function updateAllPsalmTranslations() {
   console.log("Mise à jour des traductions de psaumes...");
   
-  // Restaurer la préférence de langue
-  var savedPsalmumVal = localStorage.showPsalmum || '';
-  var lectioVal = localStorage.showLectionem || '';
+  // Restaurer la préférence de langue pour les lectures
+  var lectioVal = localStorage.showLectionem || 'latin,english'; // Par défaut, utiliser latin + anglais
+  $('.selectShowLectionem').val(lectioVal).change();
   
-  // Si pas de préférence pour les psaumes mais une pour les lectures, l'utiliser
-  if (!savedPsalmumVal && lectioVal) {
-    savedPsalmumVal = lectioVal; // Utiliser directement la même valeur que les lectures
+  // Pour les psaumes, extraire la langue secondaire des lectures
+  var psalmLang = '';
+  if (lectioVal.includes('english')) {
+    psalmLang = 'english';
+  } else if (lectioVal.includes('french')) {
+    psalmLang = 'french';
   }
   
-  // Si aucune préférence n'est définie, utiliser 'latin,english' par défaut
-  if (!savedPsalmumVal) {
-    savedPsalmumVal = 'latin,english';
-  }
-  
-  // Mettre à jour tous les sélecteurs avec la valeur sauvegardée
-  $('.selectShowPsalmum').val(savedPsalmumVal);
+  // Appliquer la valeur à tous les sélecteurs de psaumes
+  $('.selectShowPsalmum').val(psalmLang).change();
   
   // Parcourir tous les conteneurs de chant-preview
   $('.chant-preview').each(function() {
@@ -4181,14 +4209,14 @@ function updateAllPsalmTranslations() {
   });
   
   // Après avoir ajouté/mis à jour tous les conteneurs, appliquer la préférence de langue
-  var selector = savedPsalmumVal ? savedPsalmumVal.split(',').map(function(v) { return '.psalm-'+v; }).join(',') : '';
+  var selector = psalmLang ? psalmLang.split(',').map(function(v) { return '.psalm-'+v; }).join(',') : '';
   $('.psalm-translation').each(function() {
     var $psalmTranslation = $(this);
-    $psalmTranslation.find('.psalm-text').toggle(!!savedPsalmumVal);
+    $psalmTranslation.find('.psalm-text').toggle(!!psalmLang);
     $psalmTranslation.find('.psalm-text > *').hide();
     if(selector) $psalmTranslation.find(selector).show();
-    $psalmTranslation.toggleClass('hidden-print', !savedPsalmumVal);
-    $psalmTranslation.find('.selectShowPsalmum').val(savedPsalmumVal);
+    $psalmTranslation.toggleClass('hidden-print', !psalmLang);
+    $psalmTranslation.find('.selectShowPsalmum').val(psalmLang);
   });
 }
 

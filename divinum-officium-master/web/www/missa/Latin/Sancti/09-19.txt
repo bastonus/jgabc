@@ -1,0 +1,25 @@
+[Rank]
+S. Januarii Episcopi et Sociorum Martyrum;;Duplex;;3;;vide C3b
+
+[Rule]
+vide C3b;
+9 lectiones
+
+[Oratio]
+Deus, qui nos ánnua sanctórum Mártyrum tuórum Januárii et Sociórum ejus sollemnitáte lætíficas: concéde propítius; ut, quorum gaudémus méritis, accendámur exémplis.
+$Per Dominum
+
+[Evangelium]
+@Sancti/01-19
+
+[Secreta]
+Oblátis, quǽsumus, Dómine, placáre munéribus: et, intercedéntibus sanctis Martýribus tuis Januário et Sóciis ejus, a cunctis nos defénde perículis.
+$Per Dominum
+
+[Communio]
+!Matt 10:27
+Quod dico vobis in ténebris, dícite in lúmine, dicit Dóminus: et quod in aure audítis, prædicáte super tecta.
+
+[Postcommunio]
+Hæc nos commúnio, Dómine, purget a crímine: et, intercedéntibus sanctis Martýribus tuis Januário et Sóciis ejus, coeléstis remédii fáciat esse consórtes.
+$Per Dominum

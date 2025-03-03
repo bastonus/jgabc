@@ -1,0 +1,5 @@
+[Rank]
+Św. Aleksy Wyznawcy;;Semiduplex;;2;;vide C5
+
+[Oratio]
+@Commune/C5::s/N\./Aleksego/

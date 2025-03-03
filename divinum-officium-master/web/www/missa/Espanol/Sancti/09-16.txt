@@ -1,0 +1,10 @@
+[Rank]
+Ss. Cornelii Papae et Cypriani Episcopi, Martyrum;;Semiduplex;;2.1;;vide C3
+
+[Rule]
+vide C3;
+9 lectiones
+
+[Oratio]
+Te suplicamos, Señor, nos protejan las fiestas de tus santos obispos y mártires Cornelio y Cipriano, y nos recomiende su santa intercesión.
+$Per Dominum

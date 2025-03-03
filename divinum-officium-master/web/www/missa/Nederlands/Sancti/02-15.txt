@@ -1,0 +1,15 @@
+[Rank]
+SS. Faustini et Jovitæ;;Simplex;;1.1;;vide C3b
+
+[Rule]
+vide C3b;
+Gloria
+
+[Oratio]
+@Commune/C3b:Oratio:s/N\. en N\./Faustinus en Jovita/
+
+[Secreta]
+@Commune/C3
+
+[Postcommunio]
+@Commune/C3

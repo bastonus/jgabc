@@ -1,0 +1,20 @@
+[Rank]
+S. Joannis a Cruce Confessoris et Ecclesiæ Doctoris;;Duplex;;3;;vide C5a
+
+[Oratio_]
+Dieu, vous avez inspiré à saint Jean, votre Confesseur et Docteur, un amour sublime de la parfaite abnégation de soi et de la Croix : faites que, nous attachant toujours à l’imiter, nous obtenions la gloire éternelle.
+$Per Dominum
+
+[Oratio]
+@:Oratio_
+(sed rubrica tridentina)
+@:Oratio_:s/ et Docteur//
+
+
+[Secreta]
+Que la pieuse intercession de saint Jean, votre Confesseur et Docteur, ne nous fasse point défaut, Seigneur : qu’elle vous rende nos dons agréables et nous obtienne toujours votre indulgence.
+$Per Dominum
+
+[Postcommunio]
+Afin, Seigneur, que votre saint sacrifice nous procure le salut, que le bienheureux Jean, votre Confesseur et votre admirable Docteur intercède pour nous.
+$Per Dominum

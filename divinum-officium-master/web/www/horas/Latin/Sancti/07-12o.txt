@@ -1,0 +1,13 @@
+[Rank]
+Ss. Naboris et Felicis Martyrum;;Simplex;;1.1;;vide C3
+
+[Rule]
+vide C3;
+
+[Oratio]
+Præsta, quæsumus, Domine: ut, sicut nos sanctorum Martyrum tuorum Naboris et Felicis natalitia celebranda non deserunt; ita iugiter suffragiis comitentur.
+$Per Dominum
+
+[Lectio93] (rubrica 1570)
+@Commune/C3:Lectio4:s/$/~/s
+@Commune/C3:Lectio5

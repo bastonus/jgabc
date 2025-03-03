@@ -1,0 +1,42 @@
+[Rank]
+S. Polycarpi Episcopi et Martyris;;Duplex;;3;;vide C2
+
+[Rank] (rubrica 1570)
+S. Polycarpi Episcopi et Martyris;;Simplex;;1.1;;vide C2
+
+[Rule]
+vide C2;
+Gloria
+
+[Introitus]
+@Commune/C2b
+
+[Oratio]
+@Commune/C2b:Oratio:s/N\./Polycárpi/
+
+[Lectio]
+Léctio Epístolæ beáti Joánnis Apóstoli
+!1 Joann 3:10-16
+Caríssimi: Omnis qui non est justus, non est ex Deo, et qui non díligit fratrem suum: quóniam hæc est annuntiátio, quam audístis ab inítio, ut diligátis altérutrum. Non sicut Cain, qui ex malígno erat, et occídit fratrem suum. Et propter quid occídit eum? Quóniam ópera ejus malígna erant: fratris autem ejus justa. Nolíte mirári fratres, si odit vos mundus. Nos scimus quóniam transláti sumus de morte ad vitam, quóniam dilígimus fratres. Qui non díligit, manet in morte: omnis qui odit fratrem suum, homicída est. Et scitis, quóniam omnis homicída non habet vitam ætérnam in semetípso manéntem. In hoc cognóvimus caritátem Dei, quóniam ille ánimam suam pro nobis pósuit: et nos debémus pro frátribus ánimas pónere.
+
+[Graduale]
+@Commune/C2b
+
+[Tractus]
+@Commune/C2b
+
+[Evangelium]
+@Commune/C2a
+
+[Offertorium]
+@Commune/C2b
+
+[Secreta]
+@Commune/C2b:Secreta:s/N\./Polycárpo/
+
+[Communio]
+@Commune/C2b
+
+[Postcommunio]
+Refécti participatióne múneris sacri, quǽsumus, Dómine, Deus noster: ut, cujus exséquimur cultum, intercedénte beáto Polycárpo Mártyre tuo atque Pontífice, sentiámus efféctum.
+$Per Dominum

@@ -1,0 +1,62 @@
+[Rank]
+In Cathedra S. Petri Ap. Antiochiæ;;Duplex majus;;4;;ex C4
+
+[Rank](rubrica 196)
+In Cathedra S. Petri Apostoli;;Duplex majus;;4;;ex C4
+
+[Rule]
+ex C4;
+Gloria
+Credo
+Prefatio=Apostolis
+Sub unica conclusione
+
+[Introitus]
+@Commune/C2c
+
+[Oratio]
+@Sancti/01-18
+_
+!Commemoratio S. Pauli
+Deus, qui multitúdinem géntium beáti Pauli Apóstoli prædicatióne docuísti: da nobis, quǽsumus; ut, cujus commemoratiónem cólimus, ejus apud te patrocínia sentiámus.
+$Per Dominum
+
+[Lectio]
+@Commune/Coronatio
+
+[Graduale]
+@Commune/C4b
+
+[GradualeP]
+@Commune/Coronatio
+
+[Tractus]
+!Ps 106:32; 106:31
+Exáltent eum in Ecclésia plebis: et in cáthedra seniórum laudent eum.
+V. Confiteántur Dómino misericórdiæ ejus; et mirabília ejus fíliis hóminum.
+_
+!Tractus
+@Commune/Coronatio
+
+[Evangelium]
+@Commune/C4b
+
+[Offertorium]
+@Commune/Coronatio
+
+[Secreta]
+@Sancti/01-18
+_
+!Pro S. Paulo
+Apóstoli tui Pauli précibus, Dómine, plebis tuæ dona sanctífica: ut, quæ tibi tuo grata sunt institúto, gratióra fiant patrocínio supplicántis. 
+$Per Dominum
+
+[Communio]
+@Commune/C4b
+
+[Postcommunio]
+@Sancti/01-18
+_
+!Pro S. Paulo
+Sanctificáti, Dómine, salutári mystério: quǽsumus; ut nobis ejus non desit orátio, cujus nos donásti patrocínio gubernari.
+$Per Dominum
