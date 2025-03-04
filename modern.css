@@ -327,7 +327,20 @@ svg.Exsurge-Chant-score tspan {
   svg rect.dividerLine, /* Divider Line */
   svg line.staffLine, /* Staff Line */
   .dividerLine, /* Pour toute autre classe dividerLine */
-  .staffLine { /* Pour toute autre classe staffLine */
+  .staffLine, /* Pour toute autre classe staffLine */
+  .neumeLines, /* Lignes des neumes */
+  .neumeLine,
+  path.brace, /* Lignes reliant les neumes */
+  .horizontalEpisema, /* Episema horizontal */
+  .episema,
+  g.accentedBrace path,
+  path[class*="brace"],
+  line[class*="episema"],
+  rect[class*="episema"],
+  path[class*="episema"],
+  g[class*="episema"] path,
+  g[class*="episema"] line,
+  g[class*="neume"] line { /* Pour toute autre classe d'episema */
     stroke: #ffffff !important;
     fill: #ffffff !important;
   }
