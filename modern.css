@@ -302,6 +302,62 @@ svg.Exsurge-Chant-score tspan {
   stroke: var(--chant-color);
 }
 
+@media (prefers-color-scheme: dark) {
+  svg.Exsurge-Chant-score g,
+  svg.Exsurge-Chant-score path,
+  svg.Exsurge-Chant-score rect,
+  svg.Exsurge-Chant-score text,
+  svg.Exsurge-Chant-score tspan,
+  svg.Exsurge-Chant-score line {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  svg.Exsurge-Chant-score text.lyric,
+  svg.Exsurge-Chant-score text.dropCap,
+  svg.Exsurge-Chant-score text.annotation {
+    fill: #ffffff !important;
+  }
+  
+  /* Assurer que les lignes de chant sont blanches */
+  svg.Exsurge-Chant-score line,
+  svg.Exsurge-Chant-score polyline,
+  svg.Exsurge-Chant-score .staff-line,
+  svg.Exsurge-Chant-score .ledger-line,
+  svg rect.dividerLine, /* Divider Line */
+  svg line.staffLine, /* Staff Line */
+  .dividerLine, /* Pour toute autre classe dividerLine */
+  .staffLine { /* Pour toute autre classe staffLine */
+    stroke: #ffffff !important;
+    fill: #ffffff !important;
+  }
+  
+  /* Assurer que les notes de chant (neumes) sont blanches */
+  svg.Exsurge-Chant-score .neume,
+  svg.Exsurge-Chant-score .note,
+  svg.Exsurge-Chant-score .notehead {
+    fill: #ffffff !important;
+  }
+
+  /* Assurer que les lignes et le texte du gabc tool sont blancs */
+  svg g,
+  text.lyric,
+  text.dropCap,
+  text.annotation {
+    fill: #ffffff !important;
+  }
+
+  /* Garder les éléments spécifiques en rouge */
+  .psalm-reference,
+  .versenum,
+  .sp,
+  .alt,
+  .asterisk {
+    fill: #d00 !important;
+    color: #d00 !important;
+  }
+}
+
 /* Améliorations supplémentaires */
 
 /* Style de la barre de navigation */
@@ -373,7 +429,7 @@ label {
   width: 16px;
   left: 4px;
   bottom: 4px;
-  background-color: white;
+  background-color: #ffffff;
   transition: .4s;
   border-radius: 50%;
 }
@@ -388,6 +444,12 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(16px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .slider:before {
+    background-color: #f0f0f0;
+  }
 }
 
 /* Tableaux élégants */
@@ -510,6 +572,29 @@ table tbody tr:hover {
   padding: 15px;
   margin-bottom: 15px;
   border-radius: var(--border-radius);
+}
+
+/* Style spécifique pour block hide-print contenant Ad libitum */
+.block.hide-print {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-radius: 0; /* Suppression des coins arrondis pour les blocs */
+}
+
+.hide-print .verses-ad-libitum,
+.hide-print .verses-ad-libitum-custom,
+.hide-print .verses-ad-libitum-default {
+  color: var(--text-color);
+}
+
+/* Styles additionnels pour les éléments contenant "Ad libitum" en mode sombre */
+@media (prefers-color-scheme: dark) {
+  .block.hide-print label[for="txtCustom"] a,
+  .block.hide-print label[id^="lbl"] a,
+  .block.hide-print .verses-ad-libitum *,
+  .hide-print .cbVersesAdLibitum + span {
+    color: var(--text-color) !important;
+  }
 }
 
 .hide-print select,

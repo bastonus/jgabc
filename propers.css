@@ -10,8 +10,8 @@ svg.bg-blur {
   position: sticky;
   top: -1px;
   padding-top: 4px;
-  background: white;
-  border-bottom: 1px solid #ddd;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
   z-index: 1;
 }
 .link {
@@ -110,11 +110,12 @@ textarea {
   line-height: 1;
 }
 div[part] > div.block:first-child {
-  background: white;
+  background: var(--background-color);
   position: -webkit-sticky;
   position: sticky;
   top: -1px;
   padding: 1px 0 0;
+  z-index: 1;
 }
 text.aboveLinesText {
   fill: #d00!important;
