@@ -1,0 +1,545 @@
+/* modern.css - Ajoute un style moderne à l'application avec support du mode sombre */
+
+/* Variables CSS pour faciliter les thèmes */
+:root {
+  /* Palette de couleurs - mode clair */
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --accent-color: #8b0000; /* Rouge foncé, plus adapté pour le contexte liturgique */
+  --secondary-color: #666666;
+  --border-color: #e0e0e0;
+  --button-bg: #f5f5f5;
+  --button-hover-bg: #e0e0e0;
+  --button-active-bg: #d0d0d0;
+  --card-bg: #ffffff;
+  --navbar-bg: #f8f8f8;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --highlight-color: #ff6b6b;
+  --link-color: #8b0000;
+  --link-hover-color: #5e0000;
+  --dropdown-bg: #ffffff;
+  --chant-color: #000000;
+  --select-bg: #ffffff;
+  
+  /* Variables d'interface utilisateur */
+  --border-radius: 6px;
+  --box-shadow: 0 2px 8px var(--shadow-color);
+  --transition-speed: 0.3s;
+}
+
+/* Mode sombre basé sur les préférences système */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --accent-color: #ff6b6b;
+    --secondary-color: #a0a0a0;
+    --border-color: #333333;
+    --button-bg: #2a2a2a;
+    --button-hover-bg: #3a3a3a;
+    --button-active-bg: #444444;
+    --card-bg: #1e1e1e;
+    --navbar-bg: #1a1a1a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --highlight-color: #ff8787;
+    --link-color: #ff6b6b;
+    --link-hover-color: #ff9e9e;
+    --dropdown-bg: #1e1e1e;
+    --chant-color: #ffffff;
+    --select-bg: #2a2a2a;
+  }
+}
+
+/* Styles de base */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+  padding: 12px !important;
+  line-height: 1.5;
+}
+
+/* Navigation */
+.nav-pills {
+  margin-bottom: 15px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.nav-pills > li > a {
+  color: var(--text-color);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+  border-radius: var(--border-radius) !important;
+  margin-right: 5px;
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:hover,
+.nav-pills > li.active > a:focus {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.nav-pills > li:not(.active) > a:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--accent-color);
+}
+
+/* Boutons stylisés */
+.btn {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.btn-default {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+}
+
+.btn-default:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--link-hover-color);
+  border-color: var(--link-hover-color);
+}
+
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
+/* Contrôles de formulaire */
+input, select, textarea {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 6px 10px;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+/* Style pour les select */
+select {
+  background-color: var(--select-bg);
+  color: var(--text-color);
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-color) 50%), 
+                    linear-gradient(135deg, var(--text-color) 50%, transparent 50%);
+  background-position: calc(100% - 15px) center, calc(100% - 10px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 25px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select.small-screen {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 8px;
+}
+
+/* Cartes et conteneurs */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 8px 0;
+}
+
+.dropdown-menu > li > a {
+  color: var(--text-color);
+  padding: 8px 20px;
+}
+
+.dropdown-menu > li > a:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--accent-color);
+}
+
+/* Ajustements spécifiques au contexte liturgique */
+.verses .versiculum,
+.verses > p > span.versenum {
+  color: var(--accent-color) !important;
+}
+
+tspan.selectable:hover {
+  fill: var(--accent-color);
+}
+
+.selected {
+  fill: var(--accent-color);
+}
+
+text.dropCap:hover {
+  fill: var(--accent-color) !important;
+}
+
+/* Media controls modernisés */
+#mediaControls {
+  background-color: var(--navbar-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 5px 0;
+}
+
+#mediaControls .progress {
+  background-color: var(--button-bg);
+}
+
+#mediaControls .btn {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+}
+
+#mediaControls .btn:hover {
+  color: var(--accent-color);
+  background-color: var(--button-hover-bg);
+}
+
+/* Styles responsive améliorés */
+@media screen and (max-width: 768px) {
+  .nav-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-pills > li {
+    margin-bottom: 5px;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+  }
+}
+
+/* Classes d'utilité */
+.rounded {
+  border-radius: var(--border-radius);
+}
+
+.shadow {
+  box-shadow: var(--box-shadow);
+}
+
+/* Pour assurer que GABC reste lisible en mode sombre */
+text.lyric,
+text.dropCap,
+text.annotation {
+  fill: var(--chant-color);
+}
+
+svg {
+  background-color: transparent !important;
+}
+
+/* Assurer que les glyphes du chant grégorien restent visibles en mode sombre */
+svg g {
+  fill: var(--chant-color);
+}
+
+/* Style pour tous les svg d'Exsurge */
+svg.Exsurge-Chant-score {
+  background-color: transparent !important;
+}
+
+svg.Exsurge-Chant-score g,
+svg.Exsurge-Chant-score path,
+svg.Exsurge-Chant-score rect,
+svg.Exsurge-Chant-score text,
+svg.Exsurge-Chant-score tspan {
+  fill: var(--chant-color) !important;
+  stroke: var(--chant-color);
+}
+
+/* Améliorations supplémentaires */
+
+/* Style de la barre de navigation */
+.navbar-card {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  background-color: var(--card-bg);
+}
+
+/* Formulaires améliorés */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 8px 12px;
+  width: 100%;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+/* Labels améliorés */
+label {
+  display: inline-block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+/* Interrupteurs et cases à cocher élégants */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--accent-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Tableaux élégants */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+table th {
+  font-weight: 600;
+  text-align: left;
+  background-color: var(--button-bg);
+}
+
+table tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Alerte et messages */
+.alert {
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #2e7d32;
+}
+
+.alert-info {
+  background-color: rgba(33, 150, 243, 0.1);
+  border-color: rgba(33, 150, 243, 0.5);
+  color: #1565c0;
+}
+
+.alert-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-color: rgba(255, 152, 0, 0.5);
+  color: #ef6c00;
+}
+
+.alert-danger {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.5);
+  color: #d32f2f;
+}
+
+/* Gestion du mode sombre pour ces éléments */
+@media (prefers-color-scheme: dark) {
+  .alert-success {
+    background-color: rgba(76, 175, 80, 0.15);
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #81c784;
+  }
+
+  .alert-info {
+    background-color: rgba(33, 150, 243, 0.15);
+    border-color: rgba(33, 150, 243, 0.3);
+    color: #64b5f6;
+  }
+
+  .alert-warning {
+    background-color: rgba(255, 152, 0, 0.15);
+    border-color: rgba(255, 152, 0, 0.3);
+    color: #ffb74d;
+  }
+
+  .alert-danger {
+    background-color: rgba(244, 67, 54, 0.15);
+    border-color: rgba(244, 67, 54, 0.3);
+    color: #e57373;
+  }
+  
+  table th {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+  }
+  
+  .glyphicon {
+    color: var(--text-color);
+  }
+}
+
+/* Amélioration des glyphicones */
+.glyphicon {
+  margin-right: 5px;
+}
+
+/* Classes d'espacement */
+.mt-10 { margin-top: 10px; }
+.mb-10 { margin-bottom: 10px; }
+.ml-10 { margin-left: 10px; }
+.mr-10 { margin-right: 10px; }
+.p-10 { padding: 10px; }
+
+/* Préservation des éléments liturgiques spécifiques */
+.goudy, .lectio-text, .choral-sign, .greinitial, .greannotation {
+  color: var(--text-color) !important;
+}
+
+/* Style pour la section hide-print */
+.hide-print {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: var(--border-radius);
+}
+
+.hide-print select,
+.hide-print button {
+  margin-bottom: 8px;
+}
+
+/* Style pour les références bibliques */
+[ref] {
+  color: var(--accent-color);
+  font-style: italic;
+}
+
+/* Style pour les éditeurs de texte */
+.text-editor {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+/* Styles pour les liens */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+} 

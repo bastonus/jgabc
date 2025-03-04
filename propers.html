@@ -12,6 +12,7 @@
 </script>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark">
   <title>Mass Propers</title>
   <link rel="gabc-index" href="gabc-files.html" type="text/html" />
   <link rel="icon" href="icon/clear-main.png" type="image/png" />
@@ -19,6 +20,7 @@
   <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="style.css" />
   <link rel="stylesheet" type="text/css" href="propers.css" />
+  <link rel="stylesheet" type="text/css" href="modern.css" />
   <!-- <link href="https://fonts.googleapis.com/css?family=Crimson+Text:400,400i,700,700i&text=:;,()[]?.%22'%E2%80%A0*QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnmáéíóúýäëæǽœœ%CC%81/1234567890-" rel="stylesheet"> -->
   <script src="jquery.min.js" type="text/javascript"></script>
   <script src="jquery.autosize-min.js"></script>
@@ -48,7 +50,7 @@
   <script src="patterns/en-us.js"></script>
   <script src="patterns/fr-FR.js"></script>
 </head>
-<body class='sans' style="padding:8px;">
+<body class='sans'>
   <form id="pdfForm" target="_blank" method="get" action="https://www.sourceandsummit.com/editor/legacy/">
     <!--<input type='hidden' name='pdf' value='1'/>-->
     <input type='hidden' name='crop' value='0'/>
@@ -63,7 +65,7 @@
     <input type="hidden" id="pdff_fontsize" value="20" name="fontsize"/>
     <input type="hidden" id="pdff_fmt" name="fmt" value="pdf"/>
   </form>
-  <div style="width:100%;margin-bottom:5px" class='hide-print ss-border-bottom'>
+  <div class="card navbar-card hide-print ss-border-bottom">
     <ul class="nav nav-pills" style="display: inline-block;">
       <li role="presentation"><a href="transcriber.html">GABC Transcription Tool</a></li>
       <li role="presentation"><a href="psalmtone.html">Psalm Tone Tool</a></li>
@@ -71,13 +73,13 @@
       <li role="presentation" class="active"><a href="propers.html">Propers Tool</a></li>
       <li role="presentation"><a href="faq.html">(About)</a></li>
     </ul>
-    <div style="float:right;margin-left:8px" class="btn-group" role="group">
-      <a class='btn btn-xs btn-primary' href='#' id='lnkPdfDirect'>PDF</a>
-      <a class='btn btn-xs btn-default' href='#' id='lnkPdf'>Further PDF options</a>
+    <div style="float:right;margin-left:8px" class="btn-group shadow" role="group">
+      <a class='btn btn-xs btn-primary rounded' href='#' id='lnkPdfDirect'>PDF</a>
+      <a class='btn btn-xs btn-default rounded' href='#' id='lnkPdf'>Further PDF options</a>
     </div>
     <div class="right hide-ss" style="clear: both; margin-top: 6px">
       <div class="btn-group open-on-hover">
-        <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+        <button type="button" class="btn btn-xs btn-default dropdown-toggle rounded" data-toggle="dropdown">
           Include in PDF <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right" id="dropdown-menu-include">
@@ -95,7 +97,7 @@
     </div>
     <div class="right hide-ss" style="margin-top: 6px;margin-right: 6px;">
       <div class="btn-group open-on-hover">
-        <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+        <button type="button" class="btn btn-xs btn-default dropdown-toggle rounded" data-toggle="dropdown">
           <span class="lbl lbl-paper-size">Letter</span> Paper <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-paper-size">
@@ -109,11 +111,11 @@
     <a style="float:right;margin-top: 6px" class="cordova-only btn btn-sm btn-primary" href="#" id="shareUrl"><span class='glyphicon glyphicon-share'></span> Share Current Settings</a>
   </div>
   <div class='hide-print'>
-    <label for="btnCalendar">Calendar:&nbsp;</label><button id='btnCalendar' class='btn btn-default active' value='traditional' style='button'>Traditional</button>
-    <div><button class="hidden btn btn-danger" style="margin: 6px 0" id="btnClearSelections"><span class='glyphicon glyphicon-remove'></span> Clear Selections</button></div>
-    <div><select id="selSunday" class="small-screen"></select></div>
-    <div><select id="selSundayNovus" class="small-screen" style='display:none'></select></div>
-    <div><select id="selSaint" class="small-screen"></select></div>
+    <label for="btnCalendar">Calendar:&nbsp;</label><button id='btnCalendar' class='btn btn-default active rounded' value='traditional'>Traditional</button>
+    <div><button class="hidden btn btn-danger rounded" style="margin: 6px 0" id="btnClearSelections"><span class='glyphicon glyphicon-remove'></span> Clear Selections</button></div>
+    <div><select id="selSunday" class="small-screen rounded"></select></div>
+    <div><select id="selSundayNovus" class="small-screen rounded" style='display:none'></select></div>
+    <div><select id="selSaint" class="small-screen rounded"></select></div>
     <div><select id="selMass" class="small-screen"></select></div>
     <div><select id="selTempus" class="small-screen" style='display:none;'></select></div>
     <div><select id="selYearNovus" class="small-screen" style='display:none;'></select></div>
