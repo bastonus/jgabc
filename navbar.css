@@ -1,0 +1,110 @@
+/* Styles pour la barre de navigation */
+.navbar-card {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  /* Les styles visuels (background, bordure, etc.) sont définis dans modern.css */
+}
+
+/* Style pour le bouton burger en mobile */
+.burger-menu {
+  display: none;
+  font-size: 18px;
+  cursor: pointer;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1510; /* S'assurer qu'il est au-dessus du header transparent */
+  transition: all 0.3s ease;
+}
+
+.burger-menu:hover {
+  opacity: 0.8;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Styles pour la version mobile - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Ajout de padding au body pour éviter le chevauchement */
+  body {
+    padding-top: 56px !important;
+    margin: 0 !important;
+  }
+  
+  /* En-tête fixe en haut, sans aucune marge */
+  .navbar-card,
+  .card.navbar-card,
+  div.card.navbar-card,
+  div.card.navbar-card.hide-print {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 56px !important; 
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Position du bouton burger */
+  .burger-menu {
+    display: block !important;
+    top: 50% !important;
+    left: 15px !important;
+    transform: translateY(-50%) !important;
+    z-index: 10000 !important;
+  }
+  
+  /* Menu déroulant sous l'en-tête fixe */
+  .nav-pills {
+    display: none !important;
+    width: 100% !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    z-index: 9998 !important;
+    left: 0 !important;
+    top: 56px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  .nav-pills.show {
+    display: block !important;
+  }
+  
+  .nav-pills li {
+    display: block !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  
+  .nav-pills li a {
+    display: block !important;
+    padding: 12px 15px !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Position des boutons à droite */
+  .btn-group.shadow {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10000 !important;
+  }
+}
+
+/* Style pour desktop */
+@media (min-width: 769px) {
+  .nav-pills {
+    display: inline-block !important;
+  }
+} 
