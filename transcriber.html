@@ -70,13 +70,14 @@ textarea:focus {
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 @media(min-width: 624px) {
   .main-container {
     max-width: 600px;
-    padding: 0 12px;
+    padding: 0 15px;
   }
 }
 
@@ -88,36 +89,32 @@ textarea:focus {
 }
 
 /* Barre de navigation avec la même largeur que dans propers */
-.container-wrapper {
+.navbar-card.hide-print.ss-border-bottom {
+  max-width: 100%;
   width: 100%;
-  display: flex;
-  justify-content: center;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-bottom: none !important;
   background-color: var(--navbar-bg);
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 1000;
-}
-
-.navbar-card.hide-print.ss-border-bottom {
-  max-width: 100%;
-  width: 100%;
-  margin: 0 auto;
-  padding: 10px;
-  border-bottom: none !important;
+  border-radius: var(--border-radius);
 }
 
 @media(min-width: 624px) {
   .navbar-card.hide-print.ss-border-bottom {
     max-width: 600px;
-    padding: 10px 12px;
+    padding: 15px 12px;
   }
 }
 
 @media(min-width: 1262px) {
   .navbar-card.hide-print.ss-border-bottom {
     max-width: 1240px;
-    padding: 10px 20px;
+    padding: 15px 20px;
   }
 }
 
@@ -285,6 +282,51 @@ label {
   margin: 1rem 0;
 }
 
+/* Système d'onglets */
+.tabs-container {
+  margin: 1rem 0 1.5rem;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.tab-button.active {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+/* Styles pour le mode intégré */
+.integrated-description {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.integrated-column .editor-column-header::before {
+  content: none !important; /* Ne pas afficher l'étiquette en mode responsive */
+}
+
 /* Mode sombre spécifique */
 :root[data-theme="dark"] #chant-parent {
   border-color: var(--border-color);
@@ -314,6 +356,26 @@ label {
   border-color: var(--border-color);
 }
 
+:root[data-theme="dark"] .integrated-description {
+  color: #aaa;
+}
+
+:root[data-theme="dark"] .tab-button {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .tab-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+:root[data-theme="dark"] .tab-button.active {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
 /* État du corps avec menu ouvert */
 body.menu-open {
   overflow: hidden;
@@ -326,46 +388,127 @@ body.menu-open {
 @media screen and (max-width: 768px) {
   .main-container {
     padding: 0 10px;
+    margin-top: 0;
   }
   
   body {
     padding-top: 0; /* Plus besoin car nous utilisons position: sticky */
   }
   
-  .container-wrapper {
-    position: sticky; /* Conserver sticky même sur mobile */
-  }
-  
   .navbar-card.hide-print.ss-border-bottom {
+    position: sticky; /* Conserver sticky même sur mobile */
+    max-width: 100%;
     padding: 10px;
+    margin-bottom: 15px;
   }
   
+  /* Styles responsive pour les onglets */
+  .tab-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    flex: 1;
+    font-size: 13px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  
+  /* Réinitialisation du style des étiquettes pour le mode responsive */
   .editor-labels {
-    flex-direction: column;
+    display: none; /* Cacher les étiquettes originales */
   }
   
-  .editor-labels-column {
-    margin-bottom: 8px;
+  .editor-row {
+    flex-direction: column;
+    gap: 20px;
   }
   
   #chant-parent2 {
-    height: 50vh;
+    height: 40vh;
+    margin-top: 20px;
   }
   
   .editor-column {
     min-width: 100%;
+    width: 100%;
+  }
+  
+  /* Ajouter des étiquettes directement dans les en-têtes de colonne */
+  .editor-column:first-child .editor-column-header::before {
+    content: "Text";
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    text-align: center;
+  }
+  
+  .editor-column:last-child .editor-column-header::before {
+    content: "GABC";
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    text-align: center;
   }
   
   textarea {
-    height: 180px !important;
+    height: 150px !important;
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 10px;
+    border-width: 2px;
+  }
+  
+  .inline-controls {
+    flex-direction: row;
+    margin: 0 0 8px 0;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .left-control, .right-control {
+    height: auto;
+    font-size: 14px;
+  }
+  
+  .left-control {
+    flex: 1 0 100%;
+  }
+  
+  .right-control {
+    width: 100%;
+    margin-top: 5px;
+  }
+  
+  .right-control select {
+    width: 100%;
+    min-width: unset;
+    padding: 10px;
+    height: 40px;
   }
   
   .action-buttons {
     flex-direction: column;
+    width: 100%;
   }
   
   .action-buttons a {
     width: 100%;
+    padding: 10px;
+    font-size: 16px;
   }
   
   /* Amélioration de la navigation mobile */
@@ -421,9 +564,6 @@ body.menu-open {
   <input type="hidden" id="pdff_fmt" name="fmt" value="pdf"/>
 </form>
 
-<!-- Wrapper pour centrer la navigation -->
-<div class="container-wrapper">
-  <!-- Navigation Bar -->
 <div class="card navbar-card hide-print ss-border-bottom">
   <ul class="nav nav-pills" style="display: inline-block;">
     <li role="presentation" class="active"><a href="transcriber.html">GABC Transcription Tool</a></li>
@@ -433,7 +573,7 @@ body.menu-open {
     <li role="presentation"><a href="faq.html">(About)</a></li>
   </ul>
   <div style="float:right;margin-left:8px" class="btn-group shadow" role="group">
-    <button class="theme-toggle btn btn-xs" style="margin-right: 8px;" onclick="toggleTheme()" title="Changer de thème"><i class="fa fa-moon-o" aria-hidden="true"></i></button>
+    <button class="theme-toggle btn btn-xs" style="margin-right: 8px;" onclick="toggleTheme()" title="Change theme"><i class="fa fa-moon-o" aria-hidden="true"></i></button>
     <a class='btn btn-xs btn-primary rounded' href='#' id='lnkPdfDirect'>PDF</a>
     <a class='btn btn-xs btn-default rounded' href='#' id='lnkPdf'>Further PDF options</a>
   </div>
@@ -441,13 +581,15 @@ body.menu-open {
     <i class="fa fa-bars" aria-hidden="true"></i>
   </div>
 </div>
-</div>
 
 <!-- Contenu principal avec marges -->
 <div class="main-container">
-  <!-- Toggle Mode Button -->
-  <div class="toggle-mode hide-print">
-    <a href="#" id="lnkToggleMode" class="btn btn-xs btn-default">Show integrated GABC</a>
+  <!-- Système d'onglets -->
+  <div class="tabs-container hide-print">
+    <div class="tab-buttons">
+      <button id="tabSplit" class="tab-button active">Split View</button>
+      <button id="tabIntegrated" class="tab-button">Integrated GABC</button>
+    </div>
   </div>
 
   <!-- Editor Containers -->
@@ -513,7 +655,14 @@ body.menu-open {
           <label for="editor" title="You can put GABC headers in this text box if you want them included in the GABC file download link below. Any headers you type in will persist in local storage between sessions.">Integrated GABC</label>
         </div>
       </div>
-      <div class="editor-column" style="width: 100%;">
+      <div class="editor-column integrated-column" style="width: 100%;">
+        <div class="editor-column-header">
+          <div class="inline-controls">
+            <div class="left-control">
+              <p class="integrated-description">Integrated editing mode: text and notation in a single field</p>
+            </div>
+          </div>
+        </div>
         <textarea id="editor" spellcheck="false" style="height: 400px;"></textarea>
       </div>
 </div>
@@ -564,17 +713,37 @@ body.menu-open {
 <script>
   // Script personnalisé pour améliorer la gestion des modes et la responsivité
   $(document).ready(function() {
-    // Gestion de la transition entre les modes (two boxes vs integrated GABC)
-    $("#lnkToggleMode").click(function(e) {
-      e.preventDefault();
-      $(this).text($("#oneBox").is(':hidden') ? "Show split view" : "Show integrated GABC");
-      $("#oneBox,#twoBoxes").fadeToggle();
+    // Gestion de la transition entre les modes avec le système d'onglets
+    $("#tabSplit").click(function() {
+      // Activer l'onglet séparé
+      $(this).addClass('active');
+      $("#tabIntegrated").removeClass('active');
       
-      // Ajuster les hauteurs après le changement de mode
-      if (typeof adjustEditorHeights === 'function') {
-        adjustEditorHeights();
-      }
+      // Afficher le mode deux encarts et cacher le mode intégré
+      $("#twoBoxes").show();
+      $("#oneBox").hide();
     });
+    
+    $("#tabIntegrated").click(function() {
+      // Activer l'onglet intégré
+      $(this).addClass('active');
+      $("#tabSplit").removeClass('active');
+      
+      // Afficher le mode intégré et cacher le mode deux encarts
+      $("#oneBox").show();
+      $("#twoBoxes").hide();
+      
+      // S'assurer que le contenu GABC intégré est à jour
+      updateIntegratedGabc();
+    });
+    
+    // Fonction pour mettre à jour le contenu GABC intégré
+    function updateIntegratedGabc() {
+      // Si la fonction existe dans le fichier transcriber.html.js
+      if (typeof updateEditor === 'function') {
+        updateEditor();
+      }
+    }
     
     // S'assurer que l'aperçu est adapté à la taille de l'écran
     function adjustPreviewSize() {
@@ -597,9 +766,35 @@ body.menu-open {
       }
     }
     
-    // Exécuter l'ajustement au chargement et lors du redimensionnement
-    $(window).resize(adjustPreviewSize);
+    // Fonction pour ajuster l'affichage des étiquettes selon la disposition
+    function adjustResponsiveLabels() {
+      // Vérifier la disposition des éléments
+      const firstColumn = $(".editor-column:first-child");
+      const lastColumn = $(".editor-column:last-child");
+      
+      // Si les colonnes sont empilées (l'une au-dessus de l'autre), afficher les étiquettes responsives
+      const isStacked = firstColumn.offset().top + firstColumn.outerHeight() <= lastColumn.offset().top;
+      
+      if (isStacked || window.innerWidth <= 768) {
+        // Activer l'affichage des étiquettes responsives
+        $('.editor-column-header').css('position', 'relative');
+        $('.editor-labels').hide();
+      } else {
+        // Revenir à l'affichage normal
+        $('.editor-column-header').css('position', '');
+        $('.editor-labels').show();
+      }
+    }
+    
+    // Exécuter tous les ajustements lors du redimensionnement
+    $(window).resize(function() {
+      adjustPreviewSize();
+      adjustResponsiveLabels();
+    });
+    
+    // Exécuter au chargement initial
     adjustPreviewSize();
+    adjustResponsiveLabels();
     
     // Améliorer l'expérience de défilement dans le conteneur de l'aperçu
     $("#chant-parent").on('wheel', function(e) {

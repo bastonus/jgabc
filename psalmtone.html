@@ -38,6 +38,15 @@
   <script src="exsurge.min.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/burgermenu.js"></script>
+  <script src='moment.min.js'></script>
+  <script>
+    // Script pour le menu burger mobile
+    $(document).ready(function() {
+      $('.burger-menu').click(function() {
+        $('.navbar-card').toggleClass('show-mobile-menu');
+      });
+    });
+  </script>
   <!-- <script src="jszip-deflate.js" async type="text/javascript"></script>-->
 <style>
 table.bordered {
@@ -108,6 +117,107 @@ textarea{
     height: 100%!important;
   }
 }
+
+/* Ajout des styles pour la navbar */
+.navbar-card.hide-print.ss-border-bottom {
+  width: 100%;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  padding: 15px;
+  position: relative;
+  background-color: var(--card-bg);
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 624px) {
+  .navbar-card.hide-print.ss-border-bottom {
+    max-width: 600px;
+    padding: 15px 12px;
+  }
+}
+
+@media (min-width: 1262px) {
+  .navbar-card.hide-print.ss-border-bottom {
+    max-width: 1240px;
+    padding: 15px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 0;
+  }
+  
+  .navbar-card.hide-print.ss-border-bottom {
+    position: sticky;
+    top: 0;
+    max-width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    z-index: 1000;
+  }
+  
+  .main-container {
+    padding: 0 10px;
+    margin-top: 0;
+  }
+}
+
+.main-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 624px) {
+  .main-container {
+    max-width: 600px;
+    padding: 0 15px;
+  }
+}
+
+@media (min-width: 1262px) {
+  .main-container {
+    max-width: 1240px;
+    padding: 0 20px;
+  }
+}
+
+/* Styles pour le menu burger sur mobile */
+.burger-menu {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .burger-menu {
+    display: block;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .nav-pills {
+    display: none !important;
+  }
+  
+  .navbar-card.show-mobile-menu .nav-pills {
+    display: block !important;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .navbar-card.show-mobile-menu .btn-group {
+    float: none !important;
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+  }
+}
 </style>
 </head>
 <body class='sans'>
@@ -135,7 +245,7 @@ textarea{
     <li role="presentation"><a href="faq.html">(About)</a></li>
   </ul>
   <div style="float:right;margin-left:8px" class="btn-group shadow" role="group">
-    <button class="theme-toggle btn btn-xs" style="margin-right: 8px;" onclick="toggleTheme()" title="Changer de thème"><i class="fa fa-moon-o" aria-hidden="true"></i></button>
+    <button class="theme-toggle btn btn-xs" style="margin-right: 8px;" onclick="toggleTheme()" title="Change theme"><i class="fa fa-moon-o" aria-hidden="true"></i></button>
     <a class='btn btn-xs btn-primary rounded' href='#' id='lnkPdfDirect'>PDF</a>
     <a class='btn btn-xs btn-default rounded' href='#' id='lnkPdf'>Further PDF options</a>
   </div>
@@ -251,5 +361,41 @@ Mediant of <span id="sMedAccent"></span> accent<span id="sMedAccentS">s</span><s
     </filter>
   </defs>
   </svg>
+</div>
+
+<div class="main-container">
+  <div id="chant-parent2">
+    <div class='when-no-editor'><a href="#editor">Show Editor</a></div>
+    <div id="chant-parent">
+      <div id="chant-pad">
+        <div id="chant-preview"></div>
+        <div id="verses"></div>
+      </div>
+    </div>
+  </div>
+  <svg class="bg-blur">
+  <defs>
+    <filter id="text-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5 5" result="glow"/>
+      <feFlood flood-color="#337ab7" result="COLOR" />
+      <feComposite in="COLOR" in2="glow" operator="in" result="glow-color" />
+      <feMerge>
+        <feMergeNode in="glow-color"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="note-glow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5 5" result="glow"/>
+      <feFlood flood-color="#337ab7" result="COLOR" />
+      <feComposite in="COLOR" in2="glow" operator="in" result="glow-color" />
+      <feMerge>
+        <feMergeNode in="glow-color"/>
+        <feMergeNode in="glow-color"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  </svg>
+</div>
 </body>
 </html>
