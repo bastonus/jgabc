@@ -105,26 +105,10 @@ h6 {
     flex-direction: column;
 }
 
-@media (min-width: 769px) {
-    .app-container {
-        flex-direction: row;
-    }
-}
+/* .app-container media query removed */
 
 /* Sidebar (Desktop Fixed) */
-.app-sidebar {
-    width: var(--sidebar-width);
-    background-color: var(--background-surface);
-    border-right: 1px solid var(--border-color);
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 1000;
-    padding: 24px;
-    flex-direction: column;
-    /* Hidden on mobile via utility, visible on desktop via utility */
-}
+/* Sidebar REMOVED */
 
 /* Header Actions & Toggles */
 .header-actions {
@@ -252,13 +236,7 @@ h6 {
     /* Space for bottom nav */
 }
 
-@media (min-width: 769px) {
-    .app-main {
-        margin-left: var(--sidebar-width);
-        /* Push content */
-        padding-bottom: 0;
-    }
-}
+/* .app-main media query removed (margin-left) */
 
 /* Header */
 .app-header {
@@ -470,6 +448,11 @@ h6 {
 
 [data-theme="light"] .chant-preview svg {
     filter: none;
+}
+
+text.annotation {
+    font-weight: 600;
+    font-variant: small-caps;
 }
 
 /* Bottom Nav */
@@ -770,4 +753,141 @@ input:focus+.slider {
 
 input:checked+.slider:before {
     transform: translateX(20px);
+}
+
+/* Chant Context Menu (Floating Toolbar) */
+.chant-context {
+    position: absolute;
+    z-index: 9999;
+    background-color: var(--background-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 150px;
+}
+
+.chant-context .btn-group {
+    display: flex;
+    gap: 2px;
+}
+
+.chant-context .btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.chant-context .btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.chant-context .btn:hover {
+    background-color: var(--background-highlight);
+}
+
+.chant-context .btn-primary {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.chant-context .btn-danger {
+    color: #ff453a;
+}
+
+.chant-context .btn-success {
+    color: #30d158;
+}
+
+.chant-context .glyphicon {
+    display: inline-block;
+    font-family: 'Glyphicons Halflings', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+}
+
+/* Fallback icons */
+.chant-context .glyphicon-play::before {
+    content: "▶";
+    margin-right: 4px;
+}
+
+.chant-context .glyphicon-step-backward::before {
+    content: "⏮";
+}
+
+.chant-context .glyphicon-step-forward::before {
+    content: "⏭";
+}
+
+.chant-context .glyphicon-pause::before {
+    content: "⏸";
+}
+
+.chant-context .glyphicon-stop::before {
+    content: "⏹";
+}
+
+.chant-context .glyphicon-plus::before {
+    content: "+";
+}
+
+.chant-context .glyphicon-minus::before {
+    content: "-";
+}
+
+.chant-context .glyphicon-remove::before {
+    content: "✕";
+}
+
+.chant-context .glyphicon-arrow-left::before {
+    content: "←";
+}
+
+.chant-context .glyphicon-arrow-right::before {
+    content: "→";
+}
+
+.chant-context .glyphicon-check::before {
+    content: "✓";
+}
+
+.chant-context .glyphicon-unchecked::before {
+    content: "☐";
+}
+
+/* Active note styles */
+svg.ChantScore .active {
+    fill: var(--primary-color) !important;
+    stroke: var(--primary-color) !important;
+}
+
+svg.ChantScore .porrectus-left {
+    fill: var(--primary-color) !important;
+}
+
+svg.ChantScore .porrectus-right {
+    fill: var(--primary-color) !important;
+}
+
+/* Ensure toolbar doesn't get clipped */
+body {
+    position: relative;
 }

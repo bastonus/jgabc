@@ -1048,3 +1048,42 @@ a:hover {
 :root[data-theme="dark"] .block.hide-print label a:hover {
   color: var(--link-hover-color);
 } 
+/* Commentary Styles from propers.css */
+.commentary {
+  text-align: right;
+  font-style: italic;
+  line-height: 1;
+  color: var(--accent-color);
+  margin-top: 0.5em;
+  font-family: 'Crimson Text', serif;
+  font-size: 120%;
+}
+
+@media(min-width: 624px) {
+  .commentary {
+    font-size: 3.16vw;
+  }
+  .show-gabc .commentary {
+    font-size: 1.58vw;
+  }
+}
+
+@media(min-width: 1262px) {
+  .commentary {
+    font-size: 39.9px;
+  }
+}
+
+@media print {
+  .commentary {
+    display: none;
+  }
+}
+
+/* Clickable Notes Cursor */
+.chant-preview g.neume,
+.chant-preview use[source-index],
+.chant-preview text[source-index] {
+  cursor: pointer;
+}
+

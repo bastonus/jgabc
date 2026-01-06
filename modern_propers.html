@@ -43,6 +43,7 @@
     <script src="patterns/fr-FR.js"></script>
 
     <!-- Modern Logic -->
+    <script src="js/chant_editing.js"></script>
     <script src="js/mobile_propers.js"></script>
 </head>
 
@@ -50,62 +51,7 @@
     <div class="app-container">
 
         <!-- Desktop Sidebar -->
-        <aside id="appSidebar" class="app-sidebar desktop-only">
-            <div class="logo">
-                <img src="icon/clear-main.png" alt="ChantTools Logo" style="height:32px;">
-                <!-- H1 Removed to avoid double title -->
-            </div>
-
-            <!-- Sidebar Controls Removed (Moved to Sticky Header) -->
-
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-tab="temporum">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                    </span> Temporum
-                </a>
-                <!-- ... other nav items ... -->
-                <a href="#" class="nav-item" data-tab="sanctorum">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </span> Sanctorum
-                </a>
-                <a href="#" class="nav-item" data-tab="communia">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path
-                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                            </path>
-                        </svg>
-                    </span> Communia
-                </a>
-                <a href="#" class="nav-item" data-tab="ordinarium">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                        </svg>
-                    </span> Ordinarium
-                </a>
-            </nav>
-            <div class="sidebar-footer">
-                <button id="desktopThemeToggle" class="btn-icon">
-                    Toggle Theme
-                </button>
-            </div>
-        </aside>
+        <!-- Desktop Sidebar Removed -->
 
         <!-- Main Content -->
         <main class="app-main">
@@ -711,8 +657,8 @@
             </div>
 
             <!-- Bottom Navigation (Mobile Only) -->
-            <nav class="bottom-nav mobile-only">
-                <a href="#" class="nav-item active" data-tab="temporal">
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item active" data-tab="temporum">
                     <span class="icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -722,9 +668,9 @@
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
                     </span>
-                    <span class="label">Sunday</span>
+                    <span class="label">Temporum</span>
                 </a>
-                <a href="#" class="nav-item" data-tab="sanctoral">
+                <a href="#" class="nav-item" data-tab="sanctorum">
                     <span class="icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -732,29 +678,28 @@
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </span>
-                    <span class="label">Saints</span>
+                    <span class="label">Sanctorum</span>
                 </a>
-                <a href="#" class="nav-item" data-tab="votive">
+                <a href="#" class="nav-item" data-tab="communia">
                     <span class="icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
                         </svg>
                     </span>
-                    <span class="label">Votive</span>
+                    <span class="label">Communia</span>
                 </a>
-                <a href="#" class="nav-item" data-tab="ordinaries">
+                <a href="#" class="nav-item" data-tab="ordinarium">
                     <span class="icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 9v6"></path>
-                            <path d="M15 9v6"></path>
-                            <path d="M9 12h6"></path>
-                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                         </svg>
                     </span>
-                    <span class="label">Mass</span>
+                    <span class="label">Ordinarium</span>
                 </a>
             </nav>
         </main>

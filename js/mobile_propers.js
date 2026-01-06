@@ -15,7 +15,7 @@ window.sel = {
 window.includePropers = [];
 window.paperSize = localStorage.paperSize || 'letter';
 window.pageBreaks = (localStorage.pageBreaks || "").split(',');
-window.isNovus = false;
+window.isNovus = localStorage.getItem('rubricMode') === 'novus';
 window.novusOption = {};
 window.novusYear = 'A'; // Default
 
@@ -364,6 +364,13 @@ $(function () {
         updateTextAndChantForPart(part);
     });
 
+    // Apply stored rubric mode on load (before auto-select)
+    if (window.isNovus) {
+        $('#btnCalendar').text('Novus Ordo');
+        $('#selSunday').addClass('hidden');
+        $('#selSundayNovus, #selYearNovus').removeClass('hidden');
+    }
+
     // Auto-select Date (Wait for data)
     // We call this after population.
     autoSelectDate();
@@ -650,6 +657,7 @@ var selectedOrdinary = function (e) {
 
 function toggleCalendarMode() {
     isNovus = !isNovus;
+    localStorage.setItem('rubricMode', isNovus ? 'novus' : 'traditional');
     var labels = $('.btn-text-toggle'); // Select both desktop and mobile buttons
     labels.text(isNovus ? 'Novus Ordo' : 'Traditional');
 
@@ -1049,82 +1057,197 @@ function layoutChant(part, id) {
 
 function layoutChantFromGabc(part, gabc) {
     var $preview = $('#' + part + '-preview');
+    // Clear previous SVG but keep container structure implies we empty it.
     $preview.empty();
 
-    // --- Inject Annotations if missing ---
-    // User requested "Intr. II" style annotations
-    if (gabc.indexOf('annotation:') === -1) {
-        var modeMatch = gabc.match(/mode:\s*([^;\n]+)/i);
-        var typeMatch = gabc.match(/office-part:\s*([^;\n]+)/i);
+    // --- 1. Header & Commentary Extraction ---
+    var header = getHeader(gabc);
 
-        var insertions = [];
+    // Logic from propers.js to extracting commentary
+    var commentary = header.commentary;
+    // Handle the visual commentary div
+    var $chantCommentary = $preview.parent().prev('.commentary');
+    if ($chantCommentary.length === 0) {
+        $chantCommentary = $('<div class="commentary"></div>').insertBefore($preview.parent());
+    }
+    $chantCommentary.text(commentary || '').toggle(!!commentary);
 
-        if (typeMatch) {
-            var type = typeMatch[1].trim();
-            var map = {
-                'Introitus': 'Intr.',
-                'Graduale': 'Grad.',
-                'Alleluia': 'All.',
-                'Tractus': 'Tract.',
-                'Sequentia': 'Seq.',
-                'Offertorium': 'Offert.',
-                'Communio': 'Comm.',
-                'Antiphona': 'Ant.',
-                'Responsorium': 'Resp.',
-                'Hymnus': 'Hymn.'
-            };
-            var abbr = map[type];
-            // Fallback: Use first 3-4 chars if long
-            if (!abbr && type.length > 4) abbr = type.substring(0, 4) + '.';
-            else if (!abbr) abbr = type;
+    // --- Inject Annotations (Force Legacy Style) ---
+    // User wants "Intr." and "II" exactly like old app.
+    // We must strip existing annotations type match and enforce our abbreviations.
+    var splitIdx = gabc.indexOf('%%');
+    var headerStr = (splitIdx !== -1) ? gabc.substring(0, splitIdx) : gabc;
+    var bodyStr = (splitIdx !== -1) ? gabc.substring(splitIdx) : "";
 
-            insertions.push("annotation: " + abbr + ";");
-        }
+    // Parse header fields for logic
+    // (We use a temp parsing since getHeader might be outside or simple)
+    var modeMatch = headerStr.match(/mode:\s*([^;\r\n]+)/i);
+    var typeMatch = headerStr.match(/office-part:\s*([^;\r\n]+)/i);
+    var mode = modeMatch ? modeMatch[1].trim() : '';
+    var type = typeMatch ? typeMatch[1].trim() : ''; // preserve case for now
 
-        if (modeMatch) {
-            var mode = modeMatch[1].trim();
-            // Convert simple numbers to Roman
-            var romans = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
-            var mInt = parseInt(mode);
-            // removing any potential non-digit chars for parsing
-            if (!isNaN(mInt) && romans[mInt]) {
-                insertions.push("annotation: " + romans[mInt] + ";");
-            } else {
-                insertions.push("annotation: " + mode + ";");
-            }
-        }
+    // Remove existing annotation lines to avoid duplicates/conflicts
+    headerStr = headerStr.replace(/annotation:\s*[^;\r\n]+;[\r\n]*/gi, "");
 
-        if (insertions.length > 0) {
-            var splitIdx = gabc.indexOf('%%');
-            if (splitIdx !== -1) {
-                gabc = gabc.slice(0, splitIdx) + insertions.join('\n') + '\n' + gabc.slice(splitIdx);
-            } else {
-                gabc = insertions.join('\n') + '\n' + gabc;
-            }
-        }
+    var partAbbrev = {
+        'introitus': 'Intr.', 'graduale': 'Grad.', 'alleluia': 'All.',
+        'tractus': 'Tract.', 'sequentia': 'Seq.', 'offertorium': 'Offert.',
+        'communio': 'Comm.', 'antiphona': 'Ant.', 'responsorium': 'Resp.',
+        'hymnus': 'Hymn.', 'kyrie': 'Kyrie', 'gloria': 'Gloria',
+        'credo': 'Credo', 'sanctus': 'Sanctus', 'agnus': 'Agnus'
+    };
+    // Legacy propers.js uses lowercase numerals which become small-caps via CSS
+    var romanNumeral = ['', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
+
+    // Determine Display Type
+    var dispType = partAbbrev[type.toLowerCase()];
+    if (!dispType && type.length > 0) {
+        dispType = type.charAt(0).toUpperCase() + type.slice(1);
     }
 
-    var ctxt = new exsurge.ChantContext();
-    ctxt.lyricTextFont = "'Crimson Text', serif";
-    ctxt.rubricColor = '#e33';
+    // Determine Display Mode
+    var dispMode = mode;
+    var modeNum = parseInt(mode);
+    if (!isNaN(modeNum) && romanNumeral[modeNum]) {
+        dispMode = romanNumeral[modeNum];
+    }
+
+    var annotations = [];
+    if (dispType) {
+        annotations.push(dispType);
+        // Show mode unless it's just a Verse (which isn't usually a main part type, but for safety)
+        if (dispType !== 'V/.' && dispMode) {
+            annotations.push(dispMode);
+        }
+    } else if (dispMode) {
+        annotations.push(dispMode);
+    }
+
+    if (annotations.length > 0) {
+        var insertion = annotations.map(function (a) { return "annotation: " + a + ";"; }).join('\n');
+        // Append to headerStr
+        headerStr = headerStr.trim() + '\n' + insertion + '\n';
+        gabc = headerStr + bodyStr;
+    }
+
+    // --- 3. Exsurge Context & Rendering ---
+    // Use the factory from util.js if available to ensure exact legacy styling (sizes, fonts)
+    var ctxt;
+    if (typeof makeExsurgeChantContext === 'function') {
+        ctxt = makeExsurgeChantContext();
+    } else {
+        // Fallback if util.js is missing
+        ctxt = new exsurge.ChantContext();
+        ctxt.lyricTextFont = "'Crimson Text', serif";
+        ctxt.rubricColor = '#d00';
+        ctxt.textStyles.annotation.size = 12.8;
+    }
 
     var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, gabc);
-    var score = new exsurge.ChantScore(ctxt, mappings, true);
+    var score = new exsurge.ChantScore(ctxt, mappings, true); // true = drop cap
 
-    var width = $preview.width() || 350;
-    ctxt.width = width;
+    // --- 4. Responsive Width Logic ---
+    var performLayout = function () {
+        var availableWidth = $preview.width() || $(document.body).width() - 32; // Fallback
+        // Limit max width for readability, similar to propers.js logic
+        var newWidth = Math.min(624, availableWidth);
 
-    score.performLayout(ctxt);
-    score.layoutChantLines(ctxt, width, function () {
-        var svg = score.createSvgNode(ctxt);
-        $preview.append(svg);
+        ctxt.width = newWidth;
+
+        $preview.empty(); // Clear before redraw
+
+        score.performLayout(ctxt);
+        score.layoutChantLines(ctxt, newWidth, function () {
+            var svg = score.createSvgNode(ctxt);
+            // Scaling logic for small screens or specific constraints can be added here
+            // propers.js does some scaling fixes for IE11, likely not needed for modern, 
+            // but we can ensure it fits:
+            if (svg.getAttribute('width') > availableWidth) {
+                svg.setAttribute('width', "100%");
+                svg.setAttribute('height', "auto");
+            }
+
+            $preview.append(svg);
+
+            // --- 5. Clickable Notes (Audio Placeholder) ---
+            // Allow interaction with chant notes.
+            if (window.registerChantClicks && window.showToolbarForNote) {
+                window.registerChantClicks($(svg), function (sourceIndex, $container, e) {
+                    var element = $(e.target).closest('[source-index]')[0];
+                    var selPart = (window.selPropers && window.selPropers[part]) || {};
+                    // Ensure selPart has necessary properties or use a proxy if needed
+                    // creating a context for editing if it doesn't exist
+                    if (!selPart.gabc) selPart.gabc = gabc; // Ensure GABC is there
+
+                    // Pass the editorialChange function (global from chant_editing.js)
+                    // and the context base object containing the part name.
+                    if (window.editorialChange) {
+                        window.showToolbarForNote(element, window.editorialChange, { part: part });
+                    } else {
+                        console.warn("editorialChange function not found");
+                    }
+                });
+            } else {
+                $(svg).find('.neume, [source-index]').click(async function (e) {
+                    e.stopPropagation();
+                    var sourceIndex = $(this).attr('source-index');
+                    console.log("Clicked chant element (v2):", this, "Source Index:", sourceIndex);
+
+                    // Prefer Tone.js directly if available for reliable playback
+                    if (window.Tone) {
+                        try {
+                            if (Tone.context.state !== 'running') {
+                                await Tone.start();
+                            }
+                            const synth = new Tone.Synth().toDestination();
+                            synth.triggerAttackRelease("A4", "8n");
+                        } catch (err) {
+                            console.warn("Tone.js playback failed:", err);
+                            // Fallback to legacy tones.js
+                            if (window.tones && window.tones.play) {
+                                window.tones.play("a", 4);
+                            }
+                        }
+                    } else if (window.tones && window.tones.play) {
+                        try {
+                            window.tones.play("a", 4);
+                        } catch (err) {
+                            console.warn("Audio playback failed:", err);
+                        }
+                    }
+                });
+            }
+        });
+    };
+
+    // Initial Layout
+    performLayout();
+
+    // Attach resize handler specifically for this chant item to re-layout
+    // We namespace it to the part to avoid duplicate listeners
+    $(window).off('resize.chant-' + part).on('resize.chant-' + part, function () {
+        // Debounce simple
+        clearTimeout($preview.data('resize-timeout'));
+        $preview.data('resize-timeout', setTimeout(performLayout, 200));
     });
 }
 
 function getHeader(gabc) {
     var header = {};
-    var match = gabc.match(/name:\s*(.*?);/);
-    if (match) header.name = match[1];
+    if (!gabc) return header;
+    var match = gabc.match(/([\w-]+):\s*([^;\r\n]+)/g);
+    if (match) {
+        match.forEach(function (m) {
+            var parts = m.split(':');
+            if (parts.length >= 2) {
+                var key = parts[0].trim().toLowerCase();
+                var val = parts[1].trim();
+                // cleanup semicolon
+                if (val.endsWith(';')) val = val.substring(0, val.length - 1);
+                header[key] = val;
+            }
+        });
+    }
     return header;
 }
 function updateDay(id) {
