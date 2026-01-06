@@ -59,7 +59,7 @@
             <!-- Sidebar Controls Removed (Moved to Sticky Header) -->
 
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-tab="temporal">
+                <a href="#" class="nav-item active" data-tab="temporum">
                     <span class="nav-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -68,19 +68,19 @@
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                    </span> Temporal
+                    </span> Temporum
                 </a>
                 <!-- ... other nav items ... -->
-                <a href="#" class="nav-item" data-tab="sanctoral">
+                <a href="#" class="nav-item" data-tab="sanctorum">
                     <span class="nav-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                    </span> Sanctoral
+                    </span> Sanctorum
                 </a>
-                <a href="#" class="nav-item" data-tab="mass">
+                <a href="#" class="nav-item" data-tab="communia">
                     <span class="nav-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -89,7 +89,15 @@
                                 d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                             </path>
                         </svg>
-                    </span> Mass
+                    </span> Communia
+                </a>
+                <a href="#" class="nav-item" data-tab="ordinarium">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
+                    </span> Ordinarium
                 </a>
             </nav>
             <div class="sidebar-footer">
@@ -106,8 +114,8 @@
                 <!-- Selectors (as Title) -->
                 <div class="header-title-area" style="flex: 1; min-width: 0; padding-right: 12px;">
                     <section class="controls-section header-controls">
-                        <!-- Tab 1: Temporal (Sunday/Feast) -->
-                        <div id="tabContent-temporal" class="tab-content active">
+                        <!-- Tab 1: Temporum (Sunday/Feast) -->
+                        <div id="tabContent-temporum" class="tab-content active">
                             <div class="grid-controls">
                                 <div class="control-group">
                                     <select id="selSunday" class="modern-select"></select>
@@ -118,8 +126,8 @@
                             </div>
                         </div>
 
-                        <!-- Tab 2: Sanctoral (Saint) -->
-                        <div id="tabContent-sanctoral" class="tab-content hidden">
+                        <!-- Tab 2: Sanctorum (Saint) -->
+                        <div id="tabContent-sanctorum" class="tab-content hidden">
                             <div class="grid-controls">
                                 <div class="control-group">
                                     <select id="selSaint" class="modern-select"></select>
@@ -127,8 +135,8 @@
                             </div>
                         </div>
 
-                        <!-- Tab 3: Votive (Votive Masses) -->
-                        <div id="tabContent-votive" class="tab-content hidden">
+                        <!-- Tab 3: Communia (Communia Masses) -->
+                        <div id="tabContent-communia" class="tab-content hidden">
                             <div class="grid-controls">
                                 <div class="control-group">
                                     <select id="selMass" class="modern-select"></select>
@@ -136,8 +144,8 @@
                             </div>
                         </div>
 
-                        <!-- Tab 4: Ordinaries -->
-                        <div id="tabContent-ordinaries" class="tab-content hidden">
+                        <!-- Tab 4: Ordinarium -->
+                        <div id="tabContent-ordinarium" class="tab-content hidden">
                             <div class="grid-controls">
                                 <div class="control-group">
                                     <select id="selOrdinary" class="modern-select"></select>
@@ -147,19 +155,14 @@
                     </section>
                 </div>
                 <div class="header-actions">
-                    <button id="btnPrint" class="icon-button" aria-label="Print / PDF">
+                    <button id="btnCalendar" class="btn-text-toggle">Traditional</button>
+                    <button id="btnSettings" class="icon-button" aria-label="Settings">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <rect x="6" y="14" width="12" height="8"></rect>
-                        </svg>
-                    </button>
-                    <button id="btnCalendar" class="btn-text-toggle">Traditional</button>
-                    <button id="themeToggle" class="icon-button" aria-label="Toggle Dark Mode">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
                         </svg>
                     </button>
                 </div>
@@ -168,22 +171,7 @@
             <div class="content-area">
 
                 <!-- "Now Playing" / Controls Card (Moved to Header) -->
-                <!-- Global Settings (Translations) - Moved out of controls -->
-                <div class="global-settings card" style="padding: 12px; margin-bottom: 24px;">
-                    <label
-                        style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">Translations</label>
-                    <div class="toggle-group" style="display:flex; gap:16px;">
-                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
-                            <input type="checkbox" id="cbLatin" checked> Latin
-                        </label>
-                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
-                            <input type="checkbox" id="cbEnglish" checked> English
-                        </label>
-                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
-                            <input type="checkbox" id="cbFrench"> French
-                        </label>
-                    </div>
-                </div>
+                <!-- Global Settings (Translations) - Moved to Modal -->
 
                 <!-- Chant List -->
                 <div id="chantContainer" class="chant-list">
@@ -773,17 +761,69 @@
     </div>
 
     <!-- Hidden form for PDF generation -->
-    <form id="pdfFormDirect" target="_blank" method="post"
-        action="https://www.sourceandsummit.com/editor/legacy/process.php" style="display:none;">
-        <input type="hidden" id="pdff_gabc" name="gabc[]" />
-        <input type="hidden" id="pdff_width" name="width" value="7.5" />
-        <input type="hidden" id="pdff_height" name="height" value="11" />
-        <input type="hidden" id="pdff_croppdf" name="croppdf" value="false" />
-        <input type="hidden" id="pdff_spacing" value="vichi" name="spacing" />
-        <input type="hidden" id="pdff_font" value="GaramondPremierPro" name="font" />
-        <input type="hidden" id="pdff_fontsize" value="20" name="fontsize" />
-        <input type="hidden" id="pdff_fmt" name="fmt" value="pdf" />
-    </form>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button id="closeSettings" class="btn-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label class="setting-label">Theme</label>
+                    <div class="segmented-control" id="themeSelector">
+                        <button class="segment" data-value="light">Light</button>
+                        <button class="segment" data-value="dark">Dark</button>
+                        <button class="segment" data-value="system">System</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Translations</label>
+                    <div class="toggle-list">
+                        <label class="toggle-item">
+                            <span>Latin</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="cbLatin" checked>
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-item">
+                            <span>English</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="cbEnglish" checked>
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-item">
+                            <span>French</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="cbFrench">
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Default Chant Style</label>
+                    <div class="segmented-control" id="defStyleSelector">
+                        <button class="segment" data-value="full">Full Chant</button>
+                        <button class="segment" data-value="psalm-tone">Psalm Tone</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

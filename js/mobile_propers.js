@@ -62,6 +62,7 @@ var getLiturgicalDates = function (Y) {
     result.holyFamily = moment(result.epiphany).add(7 - result.epiphany.day(), 'days');
     result.sundaysAfterPentecost = result.advent1.diff(result.pentecost, 'weeks') - 1;
     result.sundaysAfterEpiphany = result.septuagesima.diff(result.holyFamily, 'weeks');
+    result.ashWednesday = moment(result.pascha).subtract(46, 'days'); // Added for Novus Ordo
     return result;
 };
 
@@ -165,7 +166,66 @@ $(function () {
     if (typeof populateSelectors !== 'undefined') populateSelectors();
     else doPopulate();
 
-    // Event Listeners
+    // --- Tab Switching Logic (Fix for about:blank error) ---
+    $('.nav-item[data-tab]').click(function (e) {
+        e.preventDefault(); // Prevent default link behavior
+        var tabName = $(this).data('tab');
+
+        // Update Nav State
+        $('.nav-item').removeClass('active');
+        $('.nav-item[data-tab="' + tabName + '"]').addClass('active');
+
+        // Show Content
+        $('.tab-content').removeClass('active').addClass('hidden');
+        $('#tabContent-' + tabName).removeClass('hidden').addClass('active');
+
+        // Update Hash
+        updateUrlHash();
+    });
+
+    // --- Hash Routing Logic ---
+    function updateUrlHash() {
+        var activeTab = $('.nav-item.active').data('tab');
+        var hash = '';
+
+        if (activeTab === 'temporum') {
+            if (window.isNovus) {
+                var val = $('#selSundayNovus').val();
+                if (val) hash = 'temporum=' + encodeURIComponent(val); // Use key or logic
+            } else {
+                var val = $('#selSunday').val();
+                if (val) hash = 'temporum=' + val;
+            }
+        } else if (activeTab === 'sanctorum') {
+            var val = $('#selSaint').val();
+            if (val) hash = 'sanctorum=' + val;
+        } else if (activeTab === 'communia') {
+            var val = $('#selMass').val();
+            if (val) hash = 'communia=' + val;
+        } else if (activeTab === 'ordinarium') {
+            // Ordinarium usually doesn't have a specific page state other than the selection
+            var val = $('#selOrdinary').val();
+            if (val) hash = 'ordinarium=' + val;
+        }
+
+        // If ordinary is selected, maybe keep it in hash too? 
+        // Legacy propers.html mostly tracked the main selection.
+        // Let's stick to the main tab selection.
+
+        if (hash) {
+            window.location.hash = hash;
+        } else {
+            // If no selection, maybe just tab?
+            window.location.hash = activeTab;
+        }
+    }
+
+    // Listen for selection changes to update hash
+    $('#selSunday, #selSundayNovus, #selSaint, #selMass, #selOrdinary').change(function () {
+        updateUrlHash();
+    });
+
+    // Core Logic Listeners (RESTORED)
     $('#selSunday, #selSaint, #selMass').change(selectedDay);
     $('#selSundayNovus').change(selectedDayNovus);
     $('#selYearNovus').change(function () {
@@ -173,11 +233,60 @@ $(function () {
         if ($('#selSundayNovus').val()) $('#selSundayNovus').trigger('change');
     });
 
+    // On Load: Check Hash
+    function loadFromHash() {
+        var hash = window.location.hash.substring(1);
+        if (hash) {
+            var parts = hash.split('=');
+            var tab = parts[0];
+            var proper = decodeURIComponent(parts[1] || '');
+
+            // Validate tab
+            if (['temporum', 'sanctorum', 'communia', 'ordinarium'].indexOf(tab) !== -1) {
+                // Click tab
+                $('.nav-item[data-tab="' + tab + '"]').click();
+
+                // Select Proper if exists
+                if (proper) {
+                    if (tab === 'temporum') {
+                        // Check mode? 
+                        // If logic requires deducing mode from key, it's hard.
+                        // Assuming current mode for now, or check key format?
+                        // Novus keys are strings like "First Sunday...", Old keys are "Adv1"
+
+                        var isNovusKey = proper.indexOf('Sunday') !== -1 || proper.indexOf(' ') !== -1; // heuristic
+                        if (isNovusKey && !window.isNovus) {
+                            $('#btnCalendar').click(); // Switch to Novus
+                        } else if (!isNovusKey && window.isNovus) {
+                            $('#btnCalendar').click(); // Switch to Trad
+                        }
+
+                        if (window.isNovus) {
+                            $('#selSundayNovus').val(proper).change();
+                        } else {
+                            $('#selSunday').val(proper).change();
+                        }
+                    } else if (tab === 'sanctorum') {
+                        $('#selSaint').val(proper).change();
+                    } else if (tab === 'communia') {
+                        $('#selMass').val(proper).change();
+                    } else if (tab === 'ordinarium') {
+                        $('#selOrdinary').val(proper).change();
+                    }
+                }
+            }
+        }
+    }
+
+    // Delay loadFromHash slightly or call immediately? Call after population.
+    // We can call it at end of init.
+
+
     $('#selOrdinary').change(selectedOrdinary);
     $('#btnCalendar, #btnCalendarDesktop').click(toggleCalendarMode);
 
     // PDF / Print
-    $('#btnPrint, #btnPrintDesktop').click(printPDF);
+
 
     // Audio Playback
     $(document).on('click', '.btnPlay', function (e) {
@@ -186,14 +295,16 @@ $(function () {
         playAudio(part);
     });
 
-    // Theme Toggle
-    $('#themeToggle').click(function () {
-        var current = $('body').attr('data-theme');
-        var next = current === 'light' ? 'dark' : 'light';
-        $('body').attr('data-theme', next);
-        localStorage.setItem('theme', next);
-    });
-    if (localStorage.getItem('theme') === 'light') $('body').attr('data-theme', 'light');
+    // --- Settings & Modal Logic ---
+    $('#btnSettings').click(function () { $('#settingsModal').removeClass('hidden'); });
+    $('#closeSettings, .modal-backdrop').click(function () { $('#settingsModal').addClass('hidden'); });
+
+    // Init Settings
+    initSettings();
+
+    // Load State from Hash (at end of init)
+    loadFromHash();
+    $(window).on('hashchange', loadFromHash);
 
     // Editor & Settings Toggles
     $('.toggleShowGabc').click(function (e) {
@@ -259,12 +370,64 @@ $(function () {
 
     // Trigger update if already selected
     if ($('#selSunday').val()) updateDay('selSunday');
+});
 
-    // Global Translation Event (Refresh readings if changed)
+function initSettings() {
+    // 1. Theme
+    var storedTheme = localStorage.getItem('theme') || 'system';
+    applyTheme(storedTheme);
+    $('#themeSelector .segment[data-value="' + storedTheme + '"]').addClass('active');
+
+    $('#themeSelector .segment').click(function () {
+        var val = $(this).data('value');
+        localStorage.setItem('theme', val);
+        applyTheme(val);
+        $('#themeSelector .segment').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    // 2. Translations
+    var storedTrans = JSON.parse(localStorage.getItem('translations') || '{"latin":true,"english":true,"french":false}');
+    $('#cbLatin').prop('checked', storedTrans.latin);
+    $('#cbEnglish').prop('checked', storedTrans.english);
+    $('#cbFrench').prop('checked', storedTrans.french);
+
     $('#cbLatin, #cbEnglish, #cbFrench').change(function () {
+        var newTrans = {
+            latin: $('#cbLatin').is(':checked'),
+            english: $('#cbEnglish').is(':checked'),
+            french: $('#cbFrench').is(':checked')
+        };
+        localStorage.setItem('translations', JSON.stringify(newTrans));
         if (selDay && !isNovus) updateAllParts();
     });
-});
+
+    // 3. Chant Style
+    var storedStyle = localStorage.getItem('defaultStyle') || 'full';
+    $('#defStyleSelector .segment[data-value="' + storedStyle + '"]').addClass('active');
+    // Apply initial
+    $('.selStyle').val(storedStyle);
+
+    $('#defStyleSelector .segment').click(function () {
+        var val = $(this).data('value');
+        localStorage.setItem('defaultStyle', val);
+        $('#defStyleSelector .segment').removeClass('active');
+        $(this).addClass('active');
+
+        // Apply immediately to all
+        $('.selStyle').val(val).trigger('change');
+    });
+}
+
+function applyTheme(theme) {
+    if (theme === 'system') {
+        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        $('body').attr('data-theme', isDark ? 'dark' : 'light');
+    } else {
+        $('body').attr('data-theme', theme);
+    }
+}
+
 
 function autoSelectDate() {
     var today = moment().startOf('day');
@@ -272,40 +435,110 @@ function autoSelectDate() {
 
     console.log("Auto-selecting date for: " + today.format('YYYY-MM-DD'));
 
-    if (window.sundayKeys) {
-        var bestMatch = null;
+    if (isNovus) {
+        if (window.sundaysNovusOrdo) {
+            // Calculate expected key
+            var expectedKey = getNovusOrdoKey(today, dates);
+            console.log("Calculated Novus Key: " + expectedKey);
 
-        for (var i = 0; i < window.sundayKeys.length; i++) {
-            var item = window.sundayKeys[i];
-            if (!item.key) continue;
-            var d = getDateForSundayKey(item.key, dates);
+            if (expectedKey) {
+                // Normalize for soft-hyphens etc.
+                var normalize = function (s) { return s.replace(/\u00AD/g, '').replace(/-/g, '').toLowerCase().replace(/\s+/g, ''); };
+                var search = normalize(expectedKey);
 
-            // 1. Exact match
-            if (d && d.isSame(today, 'day')) {
-                console.log("Exact match found: " + item.key);
-                $('#selSunday').val(item.key).change();
-                return;
-            }
+                var bestMatch = null;
+                for (var i = 0; i < window.sundaysNovusOrdo.length; i++) {
+                    var item = window.sundaysNovusOrdo[i];
+                    var key = (typeof item === 'string') ? item : item.key;
+                    if (!key) continue;
 
-            // 2. Track closest Sunday before today (within last 7 days)
-            if (d && d.isBefore(today) && today.diff(d, 'days') < 7) {
-                bestMatch = item.key;
+                    if (normalize(key) === search) {
+                        bestMatch = key;
+                        break;
+                    }
+                }
+
+                if (bestMatch) {
+                    $('#selSundayNovus').val(bestMatch).change();
+                    return;
+                }
             }
         }
+    } else {
+        // Traditional Logic
+        if (window.sundayKeys) {
+            var bestMatch = null;
 
-        // 3. If no exact match, fallback to the Sunday of the week
-        if (bestMatch) {
-            console.log("Week match found: " + bestMatch);
-            $('#selSunday').val(bestMatch).change();
-        } else {
-            // Priority 4: Default/First if nothing matches (e.g. gap in logic)
-            // But verify if we should check Sanctoral too?
-            // Simple Sanctoral check:
-            var sanctoralKey = today.format('MMMD'); // e.g. Jan6
-            // Check if this key exists in selSaint selector?
-            // iterating options in selSaint is DOM heavy, let's just default to first element or do nothing
+            for (var i = 0; i < window.sundayKeys.length; i++) {
+                var item = window.sundayKeys[i];
+                if (!item.key) continue;
+                var d = getDateForSundayKey(item.key, dates);
+
+                if (d && d.isSame(today, 'day')) {
+                    $('#selSunday').val(item.key).change();
+                    return;
+                }
+                if (d && d.isBefore(today) && today.diff(d, 'days') < 7) {
+                    bestMatch = item.key;
+                }
+            }
+            if (bestMatch) {
+                $('#selSunday').val(bestMatch).change();
+            }
         }
     }
+}
+
+function getNovusOrdoKey(date, dates) {
+    if (date.isSameOrAfter(dates.advent1) && date.isBefore(dates.nativitas)) {
+        var week = Math.floor(date.diff(dates.advent1, 'weeks')) + 1;
+        if (date.day() !== 0) return null; // Only Sundays
+        return getOrdinal(week) + " Sunday of Advent";
+    }
+
+    if (date.isSame(dates.nativitas, 'day')) return "Nativity Mass at Day";
+
+    if (date.isSameOrAfter(dates.ashWednesday) && date.isBefore(dates.pascha)) {
+        if (date.isSame(dates.ashWednesday, 'day')) return "Ash Wednesday";
+
+        if (date.isSameOrAfter(dates.quad1)) {
+            var weekLent = Math.floor(date.diff(dates.quad1, 'weeks')) + 1;
+            if (weekLent === 6) return "Palm Sunday";
+            if (weekLent <= 5) return getOrdinal(weekLent) + " Sunday in Lent";
+        }
+    }
+
+    if (date.isSameOrAfter(dates.pascha) && date.isBefore(dates.pentecost)) {
+        if (date.isSame(dates.pascha, 'day')) return "Easter Sunday";
+        var weekEaster = Math.floor(date.diff(dates.pascha, 'weeks')) + 1;
+        if (weekEaster >= 2 && weekEaster <= 7) return getOrdinal(weekEaster) + " Sunday of Easter";
+    }
+
+    if (date.isSame(dates.pentecost, 'day')) return "Pentecost";
+
+    var trinity = moment(dates.pentecost).add(7, 'days');
+    if (date.isSame(trinity, 'day') || (date.isAfter(trinity) && date.diff(trinity, 'days') < 7)) return "Most Holy Trinity";
+
+    var corpus = moment(dates.pentecost).add(14, 'days');
+    if (date.isSame(corpus, 'day') || (date.isAfter(corpus) && date.diff(corpus, 'days') < 7)) return "Body and Blood of Christ";
+
+    if (date.isAfter(dates.pentecost) && date.isBefore(dates.advent1)) {
+        var weeksFromAdv = Math.ceil(dates.advent1.diff(date, 'days') / 7);
+        var n = 35 - weeksFromAdv;
+
+        if (n === 34) return "Christ the King";
+        if (n >= 1 && n <= 33) return getOrdinal(n) + " Sunday";
+    }
+
+    return null;
+}
+
+function getOrdinal(n) {
+    var ordinals = ["", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+        "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+        "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+        "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth"];
+    return ordinals[n];
 }
 
 // --- Core Logic ---
@@ -419,6 +652,8 @@ function toggleCalendarMode() {
     isNovus = !isNovus;
     var labels = $('.btn-text-toggle'); // Select both desktop and mobile buttons
     labels.text(isNovus ? 'Novus Ordo' : 'Traditional');
+
+    // Toggle Selectors Visibility
     if (isNovus) {
         $('#selSunday').addClass('hidden');
         $('#selSundayNovus, #selYearNovus').removeClass('hidden');
@@ -426,6 +661,21 @@ function toggleCalendarMode() {
         $('#selSunday').removeClass('hidden');
         $('#selSundayNovus, #selYearNovus').addClass('hidden');
     }
+
+    // Reset Selection
+    selDay = null;
+    selPropers = null;
+    // Clear dropdowns visually to avoid confusion (optional, but good UX)
+    $('#selSunday').val('');
+    $('#selSundayNovus').val('');
+
+    // Clear content instantly or wait for auto-select?
+    // Let's clear to be safe then auto-select.
+    $('.chant-item').hide();
+    $('.chant-name').text('');
+
+    // Trigger Auto Select for new mode
+    autoSelectDate();
 }
 
 // --- Audio Playback ---
@@ -728,24 +978,7 @@ function updateAllParts() {
 }
 
 // -- New UI Logic --
-$(function () {
-    // Tab Switching Logic
-    $('.nav-item[data-tab]').click(function (e) {
-        e.preventDefault();
-        var tabName = $(this).data('tab');
 
-        // Update Nav State (Sidebar & Bottom)
-        $('.nav-item').removeClass('active');
-        $('.nav-item[data-tab="' + tabName + '"]').addClass('active');
-
-        // Show Content
-        $('.tab-content').removeClass('active').addClass('hidden');
-        $('#tabContent-' + tabName).removeClass('hidden').addClass('active');
-    });
-
-    // Calendar Toggle Logic (Header & Desktop Sidebar)
-    $('#btnCalendar, #btnCalendarDesktop').click(toggleCalendarMode);
-});
 
 function getChantId(part) {
     // 1. Check Ordinaries first (specific parts)
@@ -818,6 +1051,59 @@ function layoutChantFromGabc(part, gabc) {
     var $preview = $('#' + part + '-preview');
     $preview.empty();
 
+    // --- Inject Annotations if missing ---
+    // User requested "Intr. II" style annotations
+    if (gabc.indexOf('annotation:') === -1) {
+        var modeMatch = gabc.match(/mode:\s*([^;\n]+)/i);
+        var typeMatch = gabc.match(/office-part:\s*([^;\n]+)/i);
+
+        var insertions = [];
+
+        if (typeMatch) {
+            var type = typeMatch[1].trim();
+            var map = {
+                'Introitus': 'Intr.',
+                'Graduale': 'Grad.',
+                'Alleluia': 'All.',
+                'Tractus': 'Tract.',
+                'Sequentia': 'Seq.',
+                'Offertorium': 'Offert.',
+                'Communio': 'Comm.',
+                'Antiphona': 'Ant.',
+                'Responsorium': 'Resp.',
+                'Hymnus': 'Hymn.'
+            };
+            var abbr = map[type];
+            // Fallback: Use first 3-4 chars if long
+            if (!abbr && type.length > 4) abbr = type.substring(0, 4) + '.';
+            else if (!abbr) abbr = type;
+
+            insertions.push("annotation: " + abbr + ";");
+        }
+
+        if (modeMatch) {
+            var mode = modeMatch[1].trim();
+            // Convert simple numbers to Roman
+            var romans = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+            var mInt = parseInt(mode);
+            // removing any potential non-digit chars for parsing
+            if (!isNaN(mInt) && romans[mInt]) {
+                insertions.push("annotation: " + romans[mInt] + ";");
+            } else {
+                insertions.push("annotation: " + mode + ";");
+            }
+        }
+
+        if (insertions.length > 0) {
+            var splitIdx = gabc.indexOf('%%');
+            if (splitIdx !== -1) {
+                gabc = gabc.slice(0, splitIdx) + insertions.join('\n') + '\n' + gabc.slice(splitIdx);
+            } else {
+                gabc = insertions.join('\n') + '\n' + gabc;
+            }
+        }
+    }
+
     var ctxt = new exsurge.ChantContext();
     ctxt.lyricTextFont = "'Crimson Text', serif";
     ctxt.rubricColor = '#e33';
@@ -848,4 +1134,96 @@ function updateDay(id) {
         // For now, just trigger change as the user might have selected via hash or browser autofill
         $sel.trigger('change');
     }
+}
+
+// --- FIX: Revised Novus Ordo Logic (Overriding previous definition) ---
+function getNovusOrdoKey(date, dates) {
+    date = moment(date).startOf('day');
+    var sunday = moment(date).day(0).startOf('day');
+    var year = date.year();
+
+    // Ensure dates exist or default
+    var nativitas = dates.nativitas || moment(year + "-12-25", "YYYY-MM-DD");
+    var epiphany = dates.epiphany || moment(year + "-01-06", "YYYY-MM-DD");
+    var ashWed = dates.ashWednesday;
+    var pascha = dates.pascha;
+    var pentecost = dates.pentecost;
+    var advent1 = dates.advent1;
+
+    // Fixed Feasts
+    if (date.month() === 0 && date.date() === 1) return "Blessed Virgin Mary";
+    if (date.month() === 11 && date.date() === 25) return "Nativity Mass at Day";
+    if (date.isSame(epiphany, 'day')) return "Epiphany";
+
+    // Baptism calculation (Sunday after Epiphany)
+    var baptism = moment(epiphany).day(0).add(7, 'days');
+    if (baptism.date() < 7) baptism.add(7, 'days');
+    if (date.isSame(baptism, 'day')) return "Baptism of the Lord";
+
+    // Ordinary Time I: From Day after Baptism to Day before Ash Wed
+    if (date.isAfter(baptism) && (!ashWed || date.isBefore(ashWed))) {
+        var week = Math.floor(sunday.diff(baptism, 'weeks')) + 2;
+        return getOrdinal(week) + " Sunday";
+    }
+
+    // Lent
+    if (ashWed && date.isSameOrAfter(ashWed) && (!pascha || date.isBefore(pascha))) {
+        if (date.isSame(ashWed, 'day')) return "Ash Wednesday";
+        if (dates.quad1 && date.isSameOrAfter(dates.quad1)) {
+            var weekLent = Math.floor(sunday.diff(dates.quad1, 'weeks')) + 1;
+            if (weekLent === 6) return "Palm Sunday";
+            if (weekLent <= 5) return getOrdinal(weekLent) + " Sunday in Lent";
+        }
+    }
+
+    // Easter Season
+    if (pascha && date.isSameOrAfter(pascha) && (!pentecost || date.isBefore(pentecost))) {
+        if (date.isSame(pascha, 'day')) return "Easter Sunday";
+        var weekEaster = Math.floor(sunday.diff(pascha, 'weeks')) + 1;
+        if (weekEaster >= 2 && weekEaster <= 7) return getOrdinal(weekEaster) + " Sunday of Easter";
+    }
+
+    // Pentecost
+    if (pentecost && date.isSame(pentecost, 'day')) return "Pentecost";
+
+    // Post-Pentecost
+    if (pentecost) {
+        var trinity = moment(pentecost).add(7, 'days');
+        if (sunday.isSame(trinity, 'day')) return "Most Holy Trinity";
+
+        var corpus = moment(pentecost).add(14, 'days');
+        if (sunday.isSame(corpus, 'day')) return "Body and Blood of Christ";
+
+        // Ordinary Time II
+        var corpusWeek = moment(corpus).add(6, 'days');
+        if (date.isAfter(corpusWeek) && (!advent1 || date.isBefore(advent1))) {
+            if (advent1) {
+                var weeksFromAdv = Math.ceil(advent1.diff(sunday, 'weeks'));
+                var n = 35 - weeksFromAdv;
+                if (n === 34) return "Christ the King";
+                if (n >= 1 && n <= 33) return getOrdinal(n) + " Sunday";
+            }
+        }
+    }
+
+    // Advent
+    if (advent1 && date.isSameOrAfter(advent1) && date.isBefore(nativitas)) {
+        var week = Math.floor(sunday.diff(advent1, 'weeks')) + 1;
+        return getOrdinal(week) + " Sunday of Advent";
+    }
+
+    // Holy Family (Sunday in Octave of Christmas, or Dec 30)
+    if (date.month() === 11 && date.date() >= 26) {
+        var d = moment(nativitas);
+        var hf;
+        if (d.day() === 0) {
+            hf = moment(d).add(5, 'days'); // Dec 30
+        } else {
+            hf = moment(d).day(0).add(7, 'days');
+        }
+        if (sunday.isSame(hf, 'day')) return "Holy Family";
+        if (date.isSame(hf, 'day')) return "Holy Family";
+    }
+
+    return null;
 }

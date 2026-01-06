@@ -1,0 +1,1050 @@
+/* modern.css - Ajoute un style moderne à l'application avec support du mode sombre */
+
+/* Variables CSS pour faciliter les thèmes */
+:root {
+  /* Palette de couleurs - mode clair */
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --accent-color: #8b0000; /* Rouge foncé, plus adapté pour le contexte liturgique */
+  --secondary-color: #666666;
+  --border-color: #e0e0e0;
+  --button-bg: #f5f5f5;
+  --button-hover-bg: #e0e0e0;
+  --button-active-bg: #d0d0d0;
+  --card-bg: #ffffff;
+  --card-bg-rgb: 255, 255, 255;
+  --navbar-bg: #f8f8f8;
+  --navbar-bg-rgb: 248, 248, 248;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --highlight-color: #ff6b6b;
+  --link-color: #8b0000;
+  --link-hover-color: #5e0000;
+  --dropdown-bg: #ffffff;
+  --chant-color: #000000;
+  --select-bg: #ffffff;
+  --border-color-rgb: 224, 224, 224;
+  
+  /* Variables d'interface utilisateur */
+  --border-radius: 6px;
+  --box-shadow: 0 2px 8px var(--shadow-color);
+  --transition-speed: 0.3s;
+}
+
+/* Support du thème sombre via l'attribut data-theme */
+:root[data-theme="dark"] {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --accent-color: #ff6b6b;
+  --secondary-color: #a0a0a0;
+  --border-color: #333333;
+  --button-bg: #2a2a2a;
+  --button-hover-bg: #3a3a3a;
+  --button-active-bg: #444444;
+  --card-bg: #1e1e1e;
+  --card-bg-rgb: 30, 30, 30;
+  --navbar-bg: #1a1a1a;
+  --navbar-bg-rgb: 26, 26, 26;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --highlight-color: #ff8787;
+  --link-color: #ff6b6b;
+  --link-hover-color: #ff9e9e;
+  --dropdown-bg: #1e1e1e;
+  --chant-color: #ffffff;
+  --select-bg: #2a2a2a;
+  --border-color-rgb: 51, 51, 51;
+}
+
+/* Mode sombre basé sur les préférences système si aucun thème n'est explicitement défini */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --accent-color: #ff6b6b;
+    --secondary-color: #a0a0a0;
+    --border-color: #333333;
+    --button-bg: #2a2a2a;
+    --button-hover-bg: #3a3a3a;
+    --button-active-bg: #444444;
+    --card-bg: #1e1e1e;
+    --navbar-bg: #1a1a1a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --highlight-color: #ff8787;
+    --link-color: #ff6b6b;
+    --link-hover-color: #ff9e9e;
+    --dropdown-bg: #1e1e1e;
+    --chant-color: #ffffff;
+    --select-bg: #2a2a2a;
+  }
+}
+
+/* Style du bouton de thème dans le groupe */
+.btn-group .theme-toggle {
+  background-color: var(--button-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 5px 10px;
+  margin: 0;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.btn-group .theme-toggle:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Mode sombre pour le bouton */
+:root[data-theme="dark"] .btn-group .theme-toggle {
+  background-color: var(--button-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .btn-group .theme-toggle:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Styles de base */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+  padding: 12px !important;
+  line-height: 1.5;
+}
+
+/* Navigation */
+.nav-pills {
+  margin-bottom: 15px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.nav-pills > li > a {
+  color: var(--text-color);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+  border-radius: var(--border-radius) !important;
+  margin-right: 5px;
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:hover,
+.nav-pills > li.active > a:focus {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.nav-pills > li:not(.active) > a:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--accent-color);
+}
+
+/* Boutons stylisés */
+.btn {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.btn-default {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+}
+
+.btn-default:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--link-hover-color);
+  border-color: var(--link-hover-color);
+}
+
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
+/* Contrôles de formulaire */
+input, select, textarea {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 6px 10px;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+/* Style pour les select */
+select {
+  background-color: var(--select-bg);
+  color: var(--text-color);
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-color) 50%), 
+                    linear-gradient(135deg, var(--text-color) 50%, transparent 50%);
+  background-position: calc(100% - 15px) center, calc(100% - 10px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 25px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select.small-screen {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 8px;
+}
+
+/* Style des cartes */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background-color: var(--dropdown-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 8px 0;
+}
+
+.dropdown-menu > li > a {
+  color: var(--text-color);
+  padding: 8px 20px;
+}
+
+.dropdown-menu > li > a:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--accent-color);
+}
+
+/* Ajustements spécifiques au contexte liturgique */
+.verses .versiculum,
+.verses > p > span.versenum {
+  color: var(--accent-color) !important;
+}
+
+tspan.selectable:hover {
+  fill: var(--accent-color);
+}
+
+.selected {
+  fill: var(--accent-color);
+}
+
+text.dropCap:hover {
+  fill: var(--accent-color) !important;
+}
+
+/* Media controls modernisés */
+#mediaControls {
+  background-color: var(--navbar-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 5px 0;
+}
+
+#mediaControls .progress {
+  background-color: var(--button-bg);
+}
+
+#mediaControls .btn {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+}
+
+#mediaControls .btn:hover {
+  color: var(--accent-color);
+  background-color: var(--button-hover-bg);
+}
+
+/* Styles responsive améliorés */
+@media screen and (max-width: 768px) {
+  .nav-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-pills > li {
+    margin-bottom: 5px;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+  }
+}
+
+/* Classes d'utilité */
+.rounded {
+  border-radius: var(--border-radius);
+}
+
+.shadow {
+  box-shadow: var(--box-shadow);
+}
+
+/* Pour assurer que GABC reste lisible en mode sombre */
+text.lyric,
+text.dropCap,
+text.annotation {
+  fill: var(--chant-color);
+}
+
+svg {
+  background-color: transparent !important;
+}
+
+/* Assurer que les glyphes du chant grégorien restent visibles en mode sombre */
+svg g {
+  fill: var(--chant-color);
+}
+
+/* Style pour tous les svg d'Exsurge */
+svg.Exsurge-Chant-score {
+  background-color: transparent !important;
+}
+
+svg.Exsurge-Chant-score g,
+svg.Exsurge-Chant-score path,
+svg.Exsurge-Chant-score rect,
+svg.Exsurge-Chant-score text,
+svg.Exsurge-Chant-score tspan {
+  fill: var(--chant-color) !important;
+  stroke: var(--chant-color);
+}
+
+/* Règles uniformisées pour le thème sombre - utilisées pour la préférence système ET pour le thème explicite */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score g,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score path,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score rect,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score text,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score tspan,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score line {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score text.lyric,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score text.dropCap,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score text.annotation {
+    fill: #ffffff !important;
+  }
+  
+  /* Assurer que les lignes de chant sont blanches */
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score line,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score polyline,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score .staff-line,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score .ledger-line,
+  :root:not([data-theme="light"]) svg rect.dividerLine, /* Divider Line */
+  :root:not([data-theme="light"]) svg line.staffLine, /* Staff Line */
+  :root:not([data-theme="light"]) .dividerLine, /* Pour toute autre classe dividerLine */
+  :root:not([data-theme="light"]) .staffLine, /* Pour toute autre classe staffLine */
+  :root:not([data-theme="light"]) .neumeLines, /* Lignes des neumes */
+  :root:not([data-theme="light"]) .neumeLine,
+  :root:not([data-theme="light"]) path.brace, /* Lignes reliant les neumes */
+  :root:not([data-theme="light"]) .horizontalEpisema, /* Episema horizontal */
+  :root:not([data-theme="light"]) .episema,
+  :root:not([data-theme="light"]) g.accentedBrace path,
+  :root:not([data-theme="light"]) path[class*="brace"],
+  :root:not([data-theme="light"]) line[class*="episema"],
+  :root:not([data-theme="light"]) rect[class*="episema"],
+  :root:not([data-theme="light"]) path[class*="episema"],
+  :root:not([data-theme="light"]) g[class*="episema"] path,
+  :root:not([data-theme="light"]) g[class*="episema"] line,
+  :root:not([data-theme="light"]) g[class*="neume"] line { /* Pour toute autre classe d'episema */
+    stroke: #ffffff !important;
+    fill: #ffffff !important;
+  }
+  
+  /* Assurer que les notes de chant (neumes) sont blanches */
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score .neume,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score .note,
+  :root:not([data-theme="light"]) svg.Exsurge-Chant-score .notehead {
+    fill: #ffffff !important;
+  }
+
+  /* Assurer que les lignes et le texte du gabc tool sont blancs */
+  :root:not([data-theme="light"]) svg g,
+  :root:not([data-theme="light"]) text.lyric,
+  :root:not([data-theme="light"]) text.dropCap,
+  :root:not([data-theme="light"]) text.annotation {
+    fill: #ffffff !important;
+  }
+
+  /* Garder les éléments spécifiques en rouge - règle avec priorité très élevée */
+  :root:not([data-theme="light"]) .psalm-reference,
+  :root:not([data-theme="light"]) .versenum,
+  :root:not([data-theme="light"]) svg text.versenum,
+  :root:not([data-theme="light"]) text[class*="versenum"],
+  :root:not([data-theme="light"]) .sp,
+  :root:not([data-theme="light"]) .alt,
+  :root:not([data-theme="light"]) svg text.asterisk,
+  :root:not([data-theme="light"]) text[class*="asterisk"],
+  :root:not([data-theme="light"]) .asterisk {
+    fill: #d00 !important;
+    color: #d00 !important;
+    stroke: none !important;
+  }
+}
+
+/* Sélecteurs SVG complets pour le thème sombre explicite */
+:root[data-theme="dark"] svg.Exsurge-Chant-score g,
+:root[data-theme="dark"] svg.Exsurge-Chant-score path,
+:root[data-theme="dark"] svg.Exsurge-Chant-score rect,
+:root[data-theme="dark"] svg.Exsurge-Chant-score text,
+:root[data-theme="dark"] svg.Exsurge-Chant-score tspan,
+:root[data-theme="dark"] svg.Exsurge-Chant-score line {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+:root[data-theme="dark"] svg.Exsurge-Chant-score text.lyric,
+:root[data-theme="dark"] svg.Exsurge-Chant-score text.dropCap,
+:root[data-theme="dark"] svg.Exsurge-Chant-score text.annotation {
+  fill: #ffffff !important;
+}
+
+/* Assurer que les lignes de chant sont blanches en mode sombre */
+:root[data-theme="dark"] svg.Exsurge-Chant-score line,
+:root[data-theme="dark"] svg.Exsurge-Chant-score polyline,
+:root[data-theme="dark"] svg.Exsurge-Chant-score .staff-line,
+:root[data-theme="dark"] svg.Exsurge-Chant-score .ledger-line,
+:root[data-theme="dark"] svg rect.dividerLine, /* Divider Line */
+:root[data-theme="dark"] svg line.staffLine, /* Staff Line */
+:root[data-theme="dark"] .dividerLine, /* Pour toute autre classe dividerLine */
+:root[data-theme="dark"] .staffLine, /* Pour toute autre classe staffLine */
+:root[data-theme="dark"] .neumeLines, /* Lignes des neumes */
+:root[data-theme="dark"] .neumeLine,
+:root[data-theme="dark"] path.brace, /* Lignes reliant les neumes */
+:root[data-theme="dark"] .horizontalEpisema, /* Episema horizontal */
+:root[data-theme="dark"] .episema,
+:root[data-theme="dark"] g.accentedBrace path,
+:root[data-theme="dark"] path[class*="brace"],
+:root[data-theme="dark"] line[class*="episema"],
+:root[data-theme="dark"] rect[class*="episema"],
+:root[data-theme="dark"] path[class*="episema"],
+:root[data-theme="dark"] g[class*="episema"] path,
+:root[data-theme="dark"] g[class*="episema"] line,
+:root[data-theme="dark"] g[class*="neume"] line { /* Pour toute autre classe d'episema */
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Assurer que les notes de chant (neumes) sont blanches */
+:root[data-theme="dark"] svg.Exsurge-Chant-score .neume,
+:root[data-theme="dark"] svg.Exsurge-Chant-score .note,
+:root[data-theme="dark"] svg.Exsurge-Chant-score .notehead {
+  fill: #ffffff !important;
+}
+
+/* Assurer que les lignes et le texte du gabc tool sont blancs */
+:root[data-theme="dark"] svg g,
+:root[data-theme="dark"] svg text {
+  fill: #ffffff !important;
+}
+
+:root[data-theme="dark"] .verses {
+  color: var(--text-color);
+}
+
+/* Garder les éléments spécifiques en rouge */
+:root[data-theme="dark"] .psalm-reference,
+:root[data-theme="dark"] .versenum,
+:root[data-theme="dark"] svg text.versenum,
+:root[data-theme="dark"] text[class*="versenum"],
+:root[data-theme="dark"] .sp,
+:root[data-theme="dark"] .alt,
+:root[data-theme="dark"] svg text.asterisk,
+:root[data-theme="dark"] text[class*="asterisk"],
+:root[data-theme="dark"] .asterisk {
+  fill: #d00 !important;
+  color: #d00 !important;
+  stroke: none !important;
+}
+
+/* Transitions douces pour le changement de thème */
+body, textarea, input, select, a, button, 
+.btn, svg, svg path, svg text, svg line, svg g,
+.verses, #chant-parent, .nav-pills > li > a,
+table.bordered, tr.bordered > td {
+  transition: all 0.3s ease;
+}
+
+/* Styles supplémentaires pour faq.html en mode sombre */
+:root[data-theme="dark"] .card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .question {
+  color: var(--accent-color);
+}
+
+:root[data-theme="dark"] blockquote,
+:root[data-theme="dark"] code {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] h5,
+:root[data-theme="dark"] h6 {
+  color: var(--text-color);
+}
+
+/* Styles pour les boutons PDF et options */
+.btn-group.hide-ss,
+.btn-group.shadow {
+  position: relative;
+  z-index: 90;
+}
+
+/* Styles spécifiques pour propers.html et sa structure de navigation */
+.card.navbar-card .btn-group.shadow {
+  position: relative;
+  margin-right: 0;
+  margin-top: 0;
+}
+
+/* Amélioration des boutons PDF et Further PDF options */
+.btn-xs.btn-primary,
+.btn-xs.btn-default {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+
+/* Version sombre des boutons */
+:root[data-theme="dark"] .btn-xs.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--border-color);
+  color: var(--background-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-default {
+  background-color: var(--button-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-primary:hover {
+  background-color: var(--link-hover-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-default:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Styles pour assurer que les textes dans div.block.hide-print changent de couleur en mode sombre */
+:root[data-theme="dark"] .block.hide-print,
+:root[data-theme="dark"] .block.hide-print label,
+:root[data-theme="dark"] .block.hide-print a,
+:root[data-theme="dark"] .block.hide-print .text,
+:root[data-theme="dark"] .block.hide-print span {
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .block.hide-print label[for="txtCustom"] a,
+:root[data-theme="dark"] .block.hide-print label a {
+  color: var(--link-color);
+}
+
+:root[data-theme="dark"] .block.hide-print label[for="txtCustom"] a:hover,
+:root[data-theme="dark"] .block.hide-print label a:hover {
+  color: var(--link-hover-color);
+}
+
+/* Améliorations supplémentaires */
+
+/* Style de la barre de navigation */
+.navbar-card {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: var(--border-radius);
+}
+
+/* S'assurer que la bordure inférieure n'interfère pas avec l'effet de transparence */
+.ss-border-bottom {
+  border-bottom: 2px solid rgba(var(--border-color-rgb, 224, 224, 224), 0.5);
+}
+
+:root[data-theme="dark"] .ss-border-bottom {
+  border-bottom: 2px solid rgba(var(--border-color-rgb, 51, 51, 51), 0.5);
+}
+
+/* Appliquer l'effet de transparence au bon sélecteur */
+.card.navbar-card {
+  background-color: rgba(var(--card-bg-rgb, 255, 255, 255), 0.95) !important;
+  border-bottom: none;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(var(--border-color-rgb, 224, 224, 224), 0.5);
+  border-bottom: none;
+}
+
+/* Ajustements du thème sombre pour la barre de navigation avec effet de transparence */
+:root[data-theme="dark"] .card.navbar-card {
+  background-color: rgba(var(--card-bg-rgb, 30, 30, 30), 0.95) !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(var(--border-color-rgb, 51, 51, 51), 0.5);
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  /* Styles visuels de l'en-tête - MODE RESPONSIVE UNIQUEMENT */
+  .card.navbar-card {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  :root[data-theme="dark"] .card.navbar-card {
+    background-color: #1e1e1e !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Style du menu dropdown */
+  .nav-pills {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  :root[data-theme="dark"] .nav-pills {
+    background-color: #1e1e1e !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+/* Formulaires améliorés */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 8px 12px;
+  width: 100%;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+/* Labels améliorés */
+label {
+  display: inline-block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+/* Interrupteurs et cases à cocher élégants */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #ffffff;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--accent-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .slider:before {
+    background-color: #f0f0f0;
+  }
+}
+
+/* Tableaux élégants */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+table th {
+  font-weight: 600;
+  text-align: left;
+  background-color: var(--button-bg);
+}
+
+table tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Alerte et messages */
+.alert {
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #2e7d32;
+}
+
+.alert-info {
+  background-color: rgba(33, 150, 243, 0.1);
+  border-color: rgba(33, 150, 243, 0.5);
+  color: #1565c0;
+}
+
+.alert-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-color: rgba(255, 152, 0, 0.5);
+  color: #ef6c00;
+}
+
+.alert-danger {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.5);
+  color: #d32f2f;
+}
+
+/* Gestion du mode sombre pour ces éléments */
+@media (prefers-color-scheme: dark) {
+  .alert-success {
+    background-color: rgba(76, 175, 80, 0.15);
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #81c784;
+  }
+
+  .alert-info {
+    background-color: rgba(33, 150, 243, 0.15);
+    border-color: rgba(33, 150, 243, 0.3);
+    color: #64b5f6;
+  }
+
+  .alert-warning {
+    background-color: rgba(255, 152, 0, 0.15);
+    border-color: rgba(255, 152, 0, 0.3);
+    color: #ffb74d;
+  }
+
+  .alert-danger {
+    background-color: rgba(244, 67, 54, 0.15);
+    border-color: rgba(244, 67, 54, 0.3);
+    color: #e57373;
+  }
+  
+  table th {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+  }
+  
+  .glyphicon {
+    color: var(--text-color);
+  }
+}
+
+/* Amélioration des glyphicones */
+.glyphicon {
+  margin-right: 5px;
+}
+
+/* Classes d'espacement */
+.mt-10 { margin-top: 10px; }
+.mb-10 { margin-bottom: 10px; }
+.ml-10 { margin-left: 10px; }
+.mr-10 { margin-right: 10px; }
+.p-10 { padding: 10px; }
+
+/* Préservation des éléments liturgiques spécifiques */
+.goudy, .lectio-text, .choral-sign, .greinitial, .greannotation {
+  color: var(--text-color) !important;
+}
+
+/* Style pour la section hide-print */
+.hide-print {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: var(--border-radius);
+}
+
+/* Style spécifique pour block hide-print contenant Ad libitum */
+.block.hide-print {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-radius: 0; /* Suppression des coins arrondis pour les blocs */
+}
+
+.hide-print .verses-ad-libitum,
+.hide-print .verses-ad-libitum-custom,
+.hide-print .verses-ad-libitum-default {
+  color: var(--text-color);
+}
+
+/* Styles additionnels pour les éléments contenant "Ad libitum" en mode sombre */
+@media (prefers-color-scheme: dark) {
+  .block.hide-print label[for="txtCustom"] a,
+  .block.hide-print label[id^="lbl"] a,
+  .block.hide-print .verses-ad-libitum *,
+  .hide-print .cbVersesAdLibitum + span {
+    color: var(--text-color) !important;
+  }
+}
+
+.hide-print select,
+.hide-print button {
+  margin-bottom: 8px;
+}
+
+/* Style pour les références bibliques */
+[ref] {
+  color: var(--accent-color);
+  font-style: italic;
+}
+
+/* Style pour les éditeurs de texte */
+.text-editor {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+/* Styles pour les liens */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+/* Styles spécifiques pour le thème sombre */
+:root[data-theme="dark"] body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] input[type="text"],
+:root[data-theme="dark"] select {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] #chant-parent {
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .nav-pills > li > a {
+  color: var(--link-color);
+}
+
+:root[data-theme="dark"] .nav-pills > li.active > a {
+  background-color: var(--accent-color);
+  color: var(--background-color);
+}
+
+:root[data-theme="dark"] .nav-pills > li:not(.active) > a:hover {
+  background-color: var(--button-hover-bg);
+}
+
+:root[data-theme="dark"] table.bordered,
+:root[data-theme="dark"] tr.bordered > td {
+  border-color: var(--border-color);
+}
+
+/* Styles supplémentaires pour faq.html en mode sombre */
+:root[data-theme="dark"] .card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] .question {
+  color: var(--accent-color);
+}
+
+:root[data-theme="dark"] blockquote,
+:root[data-theme="dark"] code {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] h5,
+:root[data-theme="dark"] h6 {
+  color: var(--text-color);
+}
+
+/* Styles pour les boutons PDF et options */
+.btn-group.hide-ss,
+.btn-group.shadow {
+  position: relative;
+  z-index: 90;
+}
+
+/* Styles spécifiques pour propers.html et sa structure de navigation */
+.card.navbar-card .btn-group.shadow {
+  position: relative;
+  margin-right: 0;
+  margin-top: 0;
+}
+
+/* Amélioration des boutons PDF et Further PDF options */
+.btn-xs.btn-primary,
+.btn-xs.btn-default {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+
+/* Version sombre des boutons */
+:root[data-theme="dark"] .btn-xs.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--border-color);
+  color: var(--background-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-default {
+  background-color: var(--button-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-primary:hover {
+  background-color: var(--link-hover-color);
+}
+
+:root[data-theme="dark"] .btn-xs.btn-default:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Styles pour assurer que les textes dans div.block.hide-print changent de couleur en mode sombre */
+:root[data-theme="dark"] .block.hide-print,
+:root[data-theme="dark"] .block.hide-print label,
+:root[data-theme="dark"] .block.hide-print a,
+:root[data-theme="dark"] .block.hide-print .text,
+:root[data-theme="dark"] .block.hide-print span {
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .block.hide-print label[for="txtCustom"] a,
+:root[data-theme="dark"] .block.hide-print label a {
+  color: var(--link-color);
+}
+
+:root[data-theme="dark"] .block.hide-print label[for="txtCustom"] a:hover,
+:root[data-theme="dark"] .block.hide-print label a:hover {
+  color: var(--link-hover-color);
+} 
