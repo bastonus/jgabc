@@ -1,0 +1,589 @@
+/* Spotify-Inspired Mobile-First CSS */
+
+:root {
+    /* Color Palette - Red/Black/White iOS/Spotify Style */
+    --primary-color: #FF453A;
+    /* iOS Dark Mode Red */
+    --primary-color-rgb: 255, 69, 58;
+
+    --background-base: #000000;
+    /* OLED Black */
+    --background-surface: #1C1C1E;
+    /* iOS System Gray 6 Dark */
+    --background-highlight: #2C2C2E;
+    /* iOS System Gray 5 Dark */
+
+    --text-primary: #FFFFFF;
+    --text-secondary: #8E8E93;
+    /* iOS System Gray */
+    --text-tertiary: #48484A;
+    /* iOS System Gray 3 */
+
+    --border-color: #38383A;
+    /* iOS Separator Color */
+
+    /* Layout */
+    --header-height: 60px;
+    --nav-height: 83px;
+    /* Standard iOS Tab Bar height */
+    --sidebar-width: 250px;
+    --border-radius: 12px;
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] {
+    --primary-color: #FF3B30;
+    /* iOS Light Mode Red */
+    --background-base: #F2F2F7;
+    /* iOS System Grouped Background */
+    --background-surface: #FFFFFF;
+    --background-highlight: #E5E5EA;
+    /* iOS System Gray 5 */
+    --text-primary: #000000;
+    --text-secondary: #8E8E93;
+    --text-tertiary: #C7C7CC;
+    --border-color: #C6C6C8;
+}
+
+/* Reset & Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--background-base);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+/* Helpers */
+.hidden {
+    display: none !important;
+}
+
+.mobile-only {
+    display: flex;
+}
+
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    .mobile-only {
+        display: none !important;
+    }
+
+    .desktop-only {
+        display: flex;
+    }
+}
+
+/* --- Layout --- */
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    /* Mobile: Column direction usually, but flex row works if main wraps or sidebar is hidden */
+    flex-direction: column;
+}
+
+@media (min-width: 769px) {
+    .app-container {
+        flex-direction: row;
+    }
+}
+
+/* Sidebar (Desktop Fixed) */
+.app-sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--background-surface);
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    padding: 24px;
+    flex-direction: column;
+    /* Hidden on mobile via utility, visible on desktop via utility */
+}
+
+/* Header Actions & Toggles */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-text-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-text-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-text-toggle.full-width {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Sidebar Header Controls */
+.sidebar-header-controls {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Tab Content Logic */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hide original Control Header since we have tabs now */
+.control-header {
+    display: none;
+}
+
+/* Sidebar Contents */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.logo h1 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background-color: var(--background-highlight);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background-color: var(--background-highlight);
+    color: var(--primary-color);
+}
+
+.sidebar-footer {
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Main Content */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Important for flex shrinking */
+    margin-left: 0;
+    padding-bottom: var(--nav-height);
+    /* Space for bottom nav */
+}
+
+@media (min-width: 769px) {
+    .app-main {
+        margin-left: var(--sidebar-width);
+        /* Push content */
+        padding-bottom: 0;
+    }
+}
+
+/* Header */
+.app-header {
+    height: var(--header-height);
+    background-color: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+}
+
+[data-theme="light"] .app-header {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-greeting {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Content Area */
+.content-area {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+@media (min-width: 769px) {
+    .content-area {
+        padding: 24px;
+    }
+}
+
+/* --- Components --- */
+
+/* Controls */
+/* Controls */
+.controls-section {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0;
+    border: none;
+}
+
+/* Header Specific Controls */
+.header-controls {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.header-controls .modern-select {
+    font-size: 1.1rem;
+    padding: 0;
+    height: 100%;
+}
+
+/* Sticky Controls - REMOVED */
+.sticky-controls {
+    display: none;
+}
+
+.control-header {
+    display: none;
+}
+
+.grid-controls {
+    display: block;
+    margin-bottom: 0;
+}
+
+.control-group {
+    margin-bottom: 0;
+}
+
+.control-group label {
+    display: none;
+}
+
+.modern-select {
+    width: 100%;
+    background-color: transparent;
+    color: var(--text-primary);
+    border: none;
+    padding: 4px 0;
+    border-radius: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    line-height: 1.2;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 1em;
+    padding-right: 1.2em;
+    text-overflow: ellipsis;
+}
+
+/* Adjust light mode arrow color */
+[data-theme="light"] .modern-select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.modern-select:focus {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+/* Chants */
+.chant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chant-item {
+    background-color: var(--background-surface);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .chant-item {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chant-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.chant-type {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.chant-name {
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.text-content {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+}
+
+.chant-item.ordinary {
+    border-left: 4px solid var(--primary-color);
+}
+
+.chant-item.ordinary .chant-type {
+    color: var(--text-secondary);
+}
+
+/* GABC */
+.gabc-editor {
+    width: 100%;
+    min-height: 150px;
+    background-color: #0d0d0d;
+    color: #4CAF50;
+    font-family: monospace;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+
+.chant-preview {
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.chant-preview svg {
+    filter: invert(1) hue-rotate(180deg);
+    max-width: 100%;
+    height: auto;
+}
+
+[data-theme="light"] .chant-preview svg {
+    filter: none;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    background-color: rgba(28, 28, 30, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: 20px;
+    z-index: 1000;
+}
+
+[data-theme="light"] .bottom-nav {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.bottom-nav .nav-item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0;
+    gap: 4px;
+    font-size: 0.7rem;
+    background: transparent !important;
+}
+
+.bottom-nav .nav-item .icon {
+    display: flex;
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+}
+
+.bottom-nav .nav-item.active {
+    color: var(--primary-color);
+}
+
+/* Buttons */
+.btn-icon,
+.icon-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+#themeToggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] #themeToggle {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+.btn-icon:hover,
+.icon-button:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-pill {
+    background-color: var(--background-highlight);
+    color: var(--text-primary);
+    border: none;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-pill:hover {
+    background-color: var(--border-color);
+}
+
+/* Readings */
+.reading-version {
+    margin-bottom: 2rem;
+    text-align: justify;
+    line-height: 1.6;
+}
+
+.reading-version h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.reading-version span {
+    display: inline;
+    margin-right: 4px;
+    white-space: normal;
+}

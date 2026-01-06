@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mass Propers - ChantTools</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="icon/clear-main.png" type="image/png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="css/modern.css">
+
+    <!-- Original Dependencies (required for logic) -->
+    <script src="jquery.min.js"></script>
+    <script src="jquery.autosize-min.js"></script>
+    <script src="jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="js/Tone.min.js"></script>
+    <script src="js/tones.js"></script>
+    <script src="util.js"></script>
+    <script src="psalmtone.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="moment.easter.js"></script>
+    <script src="propersdata.js"></script>
+    <script src="lectiones.js"></script>
+    <script src="ordinarydata.js"></script>
+    <script src="miscChants.js"></script>
+    <script src="propersdatanovus.js"></script>
+    <script src="verseRef.js"></script>
+    <script src="exsurge.min.js"></script>
+    <script src="incipits.js"></script>
+    <script src="jquery.hypher.js"></script>
+    <script src="patterns/la-hypher.js"></script>
+    <script src="patterns/en-us.js"></script>
+    <script src="patterns/fr-FR.js"></script>
+
+    <!-- Modern Logic -->
+    <script src="js/mobile_propers.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Desktop Sidebar -->
+        <aside id="appSidebar" class="app-sidebar desktop-only">
+            <div class="logo">
+                <img src="icon/clear-main.png" alt="ChantTools Logo" style="height:32px;">
+                <!-- H1 Removed to avoid double title -->
+            </div>
+
+            <!-- Sidebar Controls Removed (Moved to Sticky Header) -->
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="temporal">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </span> Temporal
+                </a>
+                <!-- ... other nav items ... -->
+                <a href="#" class="nav-item" data-tab="sanctoral">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span> Sanctoral
+                </a>
+                <a href="#" class="nav-item" data-tab="mass">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </span> Mass
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="desktopThemeToggle" class="btn-icon">
+                    Toggle Theme
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Unified Header (Sticky) -->
+            <header class="app-header">
+                <!-- Selectors (as Title) -->
+                <div class="header-title-area" style="flex: 1; min-width: 0; padding-right: 12px;">
+                    <section class="controls-section header-controls">
+                        <!-- Tab 1: Temporal (Sunday/Feast) -->
+                        <div id="tabContent-temporal" class="tab-content active">
+                            <div class="grid-controls">
+                                <div class="control-group">
+                                    <select id="selSunday" class="modern-select"></select>
+                                    <select id="selSundayNovus" class="modern-select hidden"></select>
+                                    <select id="selYearNovus" class="modern-select hidden"
+                                        style="margin-top:8px"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Sanctoral (Saint) -->
+                        <div id="tabContent-sanctoral" class="tab-content hidden">
+                            <div class="grid-controls">
+                                <div class="control-group">
+                                    <select id="selSaint" class="modern-select"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Votive (Votive Masses) -->
+                        <div id="tabContent-votive" class="tab-content hidden">
+                            <div class="grid-controls">
+                                <div class="control-group">
+                                    <select id="selMass" class="modern-select"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Ordinaries -->
+                        <div id="tabContent-ordinaries" class="tab-content hidden">
+                            <div class="grid-controls">
+                                <div class="control-group">
+                                    <select id="selOrdinary" class="modern-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="header-actions">
+                    <button id="btnPrint" class="icon-button" aria-label="Print / PDF">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                    </button>
+                    <button id="btnCalendar" class="btn-text-toggle">Traditional</button>
+                    <button id="themeToggle" class="icon-button" aria-label="Toggle Dark Mode">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <!-- "Now Playing" / Controls Card (Moved to Header) -->
+                <!-- Global Settings (Translations) - Moved out of controls -->
+                <div class="global-settings card" style="padding: 12px; margin-bottom: 24px;">
+                    <label
+                        style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">Translations</label>
+                    <div class="toggle-group" style="display:flex; gap:16px;">
+                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                            <input type="checkbox" id="cbLatin" checked> Latin
+                        </label>
+                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                            <input type="checkbox" id="cbEnglish" checked> English
+                        </label>
+                        <label style="cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                            <input type="checkbox" id="cbFrench"> French
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Chant List -->
+                <div id="chantContainer" class="chant-list">
+                    <!-- Template for Chants -->
+                    <!-- ... chants ... -->
+
+
+                    <!-- Introitus -->
+                    <div id="divIntroitus" class="chant-item" part="introitus" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info">
+                                <span class="chant-type">Introitus</span>
+                                <h3 class="chant-name">Introit Title</h3>
+                            </div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc" title="Edit">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtIntroitus" class="gabc-editor hidden"></textarea>
+                            <div id="introitus-preview-container" class="preview-container">
+                                <div id="introitus-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Readings -->
+                    <div id="divEpistle" class="chant-item" part="epistle" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Epistola</span></div>
+                        </div>
+                        <div class="chant-content">
+                            <div id="epistle-preview" class="chant-preview text-content"
+                                style="font-family: 'Crimson Text', serif; font-size: 1.1em; padding: 10px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Graduale -->
+                    <div id="divGraduale" class="chant-item" part="graduale" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info">
+                                <span class="chant-type">Graduale</span>
+                                <h3 class="chant-name">Gradual Title</h3>
+                            </div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc" title="Edit">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtGraduale" class="gabc-editor hidden"></textarea>
+                            <div id="graduale-preview-container" class="preview-container">
+                                <div id="graduale-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other chants (Alleluia, Tractus, Sequentia, Offertorium, Communio) follow same pattern -->
+                    <div id="divAlleluia" class="chant-item" part="alleluia" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Alleluia</span></div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc">✏️</button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtAlleluia" class="gabc-editor hidden"></textarea>
+                            <div id="alleluia-preview-container" class="preview-container">
+                                <div id="alleluia-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divTractus" class="chant-item" part="tractus" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Tractus</span></div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc">✏️</button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtTractus" class="gabc-editor hidden"></textarea>
+                            <div id="tractus-preview-container" class="preview-container">
+                                <div id="tractus-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divSequentia" class="chant-item" part="sequentia" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Sequentia</span></div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc">✏️</button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtSequentia" class="gabc-editor hidden"></textarea>
+                            <div id="sequentia-preview-container" class="preview-container">
+                                <div id="sequentia-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gospel -->
+                    <div id="divGospel" class="chant-item" part="gospel" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Evangelium</span></div>
+                        </div>
+                        <div class="chant-content">
+                            <div id="gospel-preview" class="chant-preview text-content"
+                                style="font-family: 'Crimson Text', serif; font-size: 1.1em; padding: 10px;"></div>
+                        </div>
+                    </div>
+
+                    <div id="divOffertorium" class="chant-item" part="offertorium" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Offertorium</span></div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc">✏️</button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtOffertorium" class="gabc-editor hidden"></textarea>
+                            <div id="offertorium-preview-container" class="preview-container">
+                                <div id="offertorium-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divCommunio" class="chant-item" part="communio" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Communio</span></div>
+                            <div class="chant-actions">
+                                <button class="btn-icon btnPlay" title="Play">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleSettings" title="Settings">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button class="btn-icon toggleShowGabc">✏️</button>
+                            </div>
+                        </div>
+                        <div class="chant-content">
+                            <div class="chant-settings hidden"
+                                style="background:var(--bg-secondary); padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid var(--border-color);">
+                                <div class="grid-controls"
+                                    style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                                    <div class="control-group">
+                                        <label style="font-size:0.8rem;">Style</label>
+                                        <select class="selStyle modern-select" style="font-size:0.9rem; padding:6px;">
+                                            <option value="full">Full Chant</option>
+                                            <option value="psalm-tone">Psalm Tone</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group tone-group hidden">
+                                        <label style="font-size:0.8rem;">Tone</label>
+                                        <select class="selTone modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group ending-group hidden">
+                                        <label style="font-size:0.8rem;">Ending</label>
+                                        <select class="selEnding modern-select"
+                                            style="font-size:0.9rem; padding:6px;"></select>
+                                    </div>
+                                    <div class="control-group solemn-group hidden"
+                                        style="display:flex; align-items:flex-end;">
+                                        <label style="cursor:pointer;"><input type="checkbox" class="cbSolemn">
+                                            Solemn</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea id="txtCommunio" class="gabc-editor hidden"></textarea>
+                            <div id="communio-preview-container" class="preview-container">
+                                <div id="communio-preview" class="chant-preview"></div>
+                            </div>
+                            <!-- Extra Verses Logic Placeholder -->
+                            <div class="extra-verses-section">
+                                <label><input type="checkbox" class="cbVersesAdLibitum"> Verses ad libitum</label>
+                                <div id="communioVerses-preview" class="verses verses-ad-libitum chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ordinary Placeholders -->
+                    <div id="divKyrie" class="chant-item ordinary" part="kyrie" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Kyrie</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtKyrie" class="gabc-editor hidden"></textarea>
+                            <div id="kyrie-preview-container" class="preview-container">
+                                <div id="kyrie-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divGloria" class="chant-item ordinary" part="gloria" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Gloria</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtGloria" class="gabc-editor hidden"></textarea>
+                            <div id="gloria-preview-container" class="preview-container">
+                                <div id="gloria-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divCredo" class="chant-item ordinary" part="credo" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Credo</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtCredo" class="gabc-editor hidden"></textarea>
+                            <div id="credo-preview-container" class="preview-container">
+                                <div id="credo-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divSanctus" class="chant-item ordinary" part="sanctus" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Sanctus</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtSanctus" class="gabc-editor hidden"></textarea>
+                            <div id="sanctus-preview-container" class="preview-container">
+                                <div id="sanctus-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divAgnus" class="chant-item ordinary" part="agnus" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Agnus Dei</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtAgnus" class="gabc-editor hidden"></textarea>
+                            <div id="agnus-preview-container" class="preview-container">
+                                <div id="agnus-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divIte" class="chant-item ordinary" part="ite" style="display:none;">
+                        <div class="chant-item-header">
+                            <div class="chant-info"><span class="chant-type">Ite Missa Est</span></div>
+                            <button class="btn-icon toggleShowGabc">✏️</button>
+                        </div>
+                        <div class="chant-content">
+                            <textarea id="txtIte" class="gabc-editor hidden"></textarea>
+                            <div id="ite-preview-container" class="preview-container">
+                                <div id="ite-preview" class="chant-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Navigation (Mobile Only) -->
+            <nav class="bottom-nav mobile-only">
+                <a href="#" class="nav-item active" data-tab="temporal">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </span>
+                    <span class="label">Sunday</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="sanctoral">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                    <span class="label">Saints</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="votive">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </span>
+                    <span class="label">Votive</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="ordinaries">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 9v6"></path>
+                            <path d="M15 9v6"></path>
+                            <path d="M9 12h6"></path>
+                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                        </svg>
+                    </span>
+                    <span class="label">Mass</span>
+                </a>
+            </nav>
+        </main>
+    </div>
+
+    <!-- Hidden form for PDF generation -->
+    <form id="pdfFormDirect" target="_blank" method="post"
+        action="https://www.sourceandsummit.com/editor/legacy/process.php" style="display:none;">
+        <input type="hidden" id="pdff_gabc" name="gabc[]" />
+        <input type="hidden" id="pdff_width" name="width" value="7.5" />
+        <input type="hidden" id="pdff_height" name="height" value="11" />
+        <input type="hidden" id="pdff_croppdf" name="croppdf" value="false" />
+        <input type="hidden" id="pdff_spacing" value="vichi" name="spacing" />
+        <input type="hidden" id="pdff_font" value="GaramondPremierPro" name="font" />
+        <input type="hidden" id="pdff_fontsize" value="20" name="fontsize" />
+        <input type="hidden" id="pdff_fmt" name="fmt" value="pdf" />
+    </form>
+</body>
+
+</html>
