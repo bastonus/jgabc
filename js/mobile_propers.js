@@ -49,34 +49,59 @@ function renderApp() {
     renderContent();
 }
 
+var TAB_LABELS = {
+    temporum:  'Proprium Temporum',
+    sanctorum: 'Proprium Sanctorum',
+    communia:  'Votiv\u00e6 et Ali\u00e6 Miss\u00e6',
+    adlibitum: 'Cantus Ad Libitum'
+};
+
 function updateHeader() {
     let title = 'Propria Miss\u00e6';
+    var isListMenu = false;
+
+    // Small tab-name label above the title
+    $('#greetingTime').text(TAB_LABELS[appState.tab] || 'Propria Miss\u00e6');
+
     if (appState.tab === 'temporum') {
         title = appState.rite === 'novus'
             ? ($('#selSundayNovus option:selected').text() || 'Eligas diem...')
             : ($('#selSunday option:selected').text() || 'Eligas diem...');
+        isListMenu = true;
     } else if (appState.tab === 'sanctorum') {
         title = $('#selSaint option:selected').text() || 'Eligas festum...';
+        isListMenu = true;
     } else if (appState.tab === 'communia') {
         title = $('#selMass option:selected').text() || 'Eligas missam...';
+        isListMenu = true;
     } else if (appState.tab === 'adlibitum') {
         title = 'Ad libitum';
     }
-    $('#headerTitle').text(title);
+    
+    var $titleText = $('#headerTitle .title-text');
+    if ($titleText.length) {
+        $titleText.text(title);
+    } else {
+        $('#headerTitle').text(title);
+    }
+    
+    if (isListMenu) {
+        $('#headerTitle .dropdown-icon').css('display', 'inline-flex');
+    } else {
+        $('#headerTitle .dropdown-icon').css('display', 'none');
+    }
 
     $('#btnRubric').text(appState.rite === 'novus' ? 'Novus Ordo' : 'Vetus Ordo');
     $('#btnRubric').toggleClass('active', appState.rite === 'novus');
 
-    $('.selector-group').addClass('hidden');
-    if (appState.tab === 'temporum') {
-        $('#' + (appState.rite === 'novus' ? 'selectorTempNovus' : 'selectorTempTrad')).removeClass('hidden');
-    } else if (appState.tab === 'sanctorum') {
-        $('#selectorSanctorum').removeClass('hidden');
-    } else if (appState.tab === 'communia') {
-        $('#selectorCommunia').removeClass('hidden');
-    } else if (appState.tab === 'adlibitum') {
-        $('#selectorAdlibitum').removeClass('hidden');
+    // Show Ad Libitum search bar inside header on that tab
+    if (appState.tab === 'adlibitum') {
+        $('#adlibitumSearch').removeClass('hidden');
+        $('#headerTitle').addClass('hidden');
         setTimeout(function() { $('#searchAdlibitum').focus(); }, 100);
+    } else {
+        $('#adlibitumSearch').addClass('hidden');
+        $('#headerTitle').removeClass('hidden');
     }
 }
 
@@ -85,9 +110,53 @@ function updateNavigation() {
     $(`.nav-item[data-tab="${appState.tab}"]`).addClass('active');
 }
 
+function syncSelPropersToTab() {
+    var val = null;
+    var isNovus = false;
+    
+    if (appState.tab === 'temporum') {
+        if (appState.rite === 'novus') {
+            val = $('#selSundayNovus').val();
+            isNovus = true;
+        } else {
+            val = $('#selSunday').val();
+        }
+    } else if (appState.tab === 'sanctorum') {
+        val = $('#selSaint').val();
+    } else if (appState.tab === 'communia') {
+        val = $('#selMass').val();
+    }
+    
+    if (!val) {
+        selPropers = null;
+        return;
+    }
+    
+    if (isNovus) {
+        let baseData = window.propriumNoviOrdinis[val];
+        if (baseData) {
+            selPropers = {};
+            Object.keys(baseData).forEach(function(k) {
+                let d = baseData[k];
+                selPropers[k] = (d[appState.selection.novusYear] || d.A || d);
+            });
+        } else {
+            selPropers = null;
+        }
+    } else {
+        var prop = window.proprium[val];
+        if (prop && prop.ref && window.proprium[prop.ref]) {
+            prop = window.proprium[prop.ref];
+        }
+        selPropers = prop;
+    }
+}
+
 function renderContent() {
     const $stream = $('#content-stream');
     $stream.empty();
+
+    syncSelPropersToTab();
 
     if (!selPropers && appState.tab !== 'ordinarium' && appState.tab !== 'adlibitum') {
         $stream.append(`
@@ -185,7 +254,12 @@ function renderContent() {
     }
 
     // ===== PROPER TABS: Temporum / Sanctorum / Votivæ =====
-    var selDay = appState.selection.temporum || '';
+    var selDay = '';
+    if (appState.tab === 'temporum') selDay = appState.rite === 'novus' ? $('#selSundayNovus').val() : $('#selSunday').val();
+    else if (appState.tab === 'sanctorum') selDay = $('#selSaint').val();
+    else if (appState.tab === 'communia') selDay = $('#selMass').val();
+    selDay = selDay || '';
+    
     var isPaschal = /^Pasc/.test(selDay);
 
     // Asperges / Vidi Aquam (Temporum only)
@@ -578,37 +652,93 @@ function initCardListeners() {
         var gabc = $(this).val();
         if (gabc.length > 20) renderChantSVG($card, gabc);
     });
+
+    // Inline Header Dropdown
+    $('#headerTitle').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (appState.tab === 'adlibitum' || appState.tab === 'ordinarium') return;
+        if ($('#headerDropdown').hasClass('open')) {
+            closeHeaderDropdown();
+        } else {
+            openHeaderDropdown();
+        }
+    });
+
+    // Close on outside click
+    $(document).off('click.headerdropdown').on('click.headerdropdown', function(e) {
+        if (!$(e.target).closest('#headerTitle, #headerDropdown').length) {
+            closeHeaderDropdown();
+        }
+    });
 }
 
 // --- Helpers ---
 
+function openHeaderDropdown() {
+    var $sourceSelect;
+    if (appState.tab === 'temporum') {
+        $sourceSelect = appState.rite === 'novus' ? $('#selSundayNovus') : $('#selSunday');
+    } else if (appState.tab === 'sanctorum') {
+        $sourceSelect = $('#selSaint');
+    } else if (appState.tab === 'communia') {
+        $sourceSelect = $('#selMass');
+    }
+    if (!$sourceSelect || !$sourceSelect.length) return;
+
+    var selectedVal = $sourceSelect.val();
+
+    // Build or reuse dropdown
+    var $dd = $('#headerDropdown');
+    if (!$dd.length) {
+        $dd = $('<div id="headerDropdown"></div>');
+        $('body').append($dd);
+    }
+    $dd.empty();
+
+    $sourceSelect.children().each(function() {
+        var $node = $(this);
+        if ($node.is('optgroup')) {
+            $dd.append($('<div class="hdd-group"></div>').text($node.attr('label')));
+            $node.children('option').each(function() {
+                if (!$(this).val()) return;
+                buildHddItem($(this), $dd, selectedVal, $sourceSelect);
+            });
+        } else if ($node.is('option') && $node.val()) {
+            buildHddItem($node, $dd, selectedVal, $sourceSelect);
+        }
+    });
+
+    // Position it below the header
+    var headerH = $('.app-header').outerHeight() || 60;
+    $dd.css('top', headerH + 'px').addClass('open');
+
+    // Scroll to selected
+    var $sel = $dd.find('.hdd-item.selected');
+    if ($sel.length) {
+        setTimeout(function() {
+            $dd[0].scrollTop = $sel[0].offsetTop - 60;
+        }, 50);
+    }
+}
+
+function buildHddItem($opt, $dd, selectedVal, $sourceSelect) {
+    var $item = $('<div class="hdd-item"></div>').text($opt.text()).attr('data-val', $opt.val());
+    if ($opt.val() === selectedVal) $item.addClass('selected');
+    $item.on('click', function() {
+        $sourceSelect.val($opt.val()).change();
+        closeHeaderDropdown();
+    });
+    $dd.append($item);
+}
+
+function closeHeaderDropdown() {
+    $('#headerDropdown').removeClass('open');
+}
+
 function handleSelectionChange(id, val) {
     if (!val) return;
 
-    if (id === 'selSunday' || id === 'selSundayNovus') {
-        if (appState.rite === 'novus') {
-            let baseData = window.propriumNoviOrdinis[val];
-            if (baseData) {
-                selPropers = {};
-                Object.keys(baseData).forEach(k => {
-                    let d = baseData[k];
-                    selPropers[k] = (d[appState.selection.novusYear] || d.A || d);
-                });
-            }
-        } else {
-            selPropers = window.proprium[val];
-        }
-        renderContent();
-
-    } else if (id === 'selSaint') {
-        selPropers = window.proprium[val];
-        renderContent();
-
-    } else if (id === 'selMass') {
-        selPropers = window.proprium[val];
-        renderContent();
-        $('#selectionModal').removeClass('active');
-    } else if (id === 'selOrdinary') {
+    if (id === 'selOrdinary') {
         if (window.massOrdinary) {
             let ord = window.massOrdinary[val - 1];
             if (ord) {
@@ -617,8 +747,11 @@ function handleSelectionChange(id, val) {
                 });
             }
         }
-        renderContent();
+    } else if (id === 'selMass') {
+        $('#selectionModal').removeClass('active');
     }
+    
+    renderContent();
 }
 
 // getChantId is no longer needed — ID resolution is inline in renderContent().
@@ -819,7 +952,7 @@ function autoSelectDate() {
     // Default Votivae to first available if none selected
     if (window.otherKeys && !appState.selection.communia) {
         for (var i = 0; i < window.otherKeys.length; i++) {
-            if (window.otherKeys[i].key) {
+            if (window.otherKeys[i].key && window.otherKeys[i].key !== 'custom') {
                 $('#selMass').val(window.otherKeys[i].key).change();
                 break;
             }

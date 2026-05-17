@@ -57,7 +57,12 @@
         <header class="app-header">
             <div class="header-title-area">
                 <div id="greetingTime" class="card-type">Mass Propers</div>
-                <h1 id="headerTitle" class="header-title">Loading...</h1>
+                <h1 id="headerTitle" class="header-title dropdown-trigger" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <span class="title-text">Loading...</span>
+                    <span class="dropdown-icon" style="display:none; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--background-highlight); border:1px solid var(--border-color); color:var(--text-secondary); transition: all 0.2s ease;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                </h1>
             </div>
             <div class="header-actions">
                 <button id="btnRubric" class="rite-toggle">Traditional</button>
@@ -71,38 +76,27 @@
                     </svg>
                 </button>
             </div>
-        </header>
-
-        <!-- Selector Bar -->
-        <div class="selector-bar">
-            <!-- Temporum: Traditional -->
-            <div id="selectorTempTrad" class="selector-group">
-                <select id="selSunday" class="modern-select"></select>
-            </div>
-            <!-- Temporum: Novus Ordo -->
-            <div id="selectorTempNovus" class="selector-group hidden">
-                <select id="selSundayNovus" class="modern-select"></select>
-                <div class="year-segments" id="yearSelector">
-                    <button class="segment active" data-val="A">A</button>
-                    <button class="segment" data-val="B">B</button>
-                    <button class="segment" data-val="C">C</button>
-                </div>
-            </div>
-            <!-- Sanctorum -->
-            <div id="selectorSanctorum" class="selector-group hidden">
-                <select id="selSaint" class="modern-select"></select>
-            </div>
-            <!-- Votivæ -->
-            <div id="selectorCommunia" class="selector-group hidden">
-                <select id="selMass" class="modern-select"></select>
-            </div>
-            <!-- Ad Libitum -->
-            <div id="selectorAdlibitum" class="selector-group hidden">
+            <!-- Ad Libitum search (shown only on that tab) -->
+            <div id="adlibitumSearch" class="adlibitum-header-search hidden">
                 <div class="search-input-wrapper">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input id="searchAdlibitum" type="text" class="search-input" placeholder="Quaere cantum per incipit..." autocomplete="off" autocorrect="off" spellcheck="false">
                     <div id="searchDropdown" class="search-dropdown hidden"></div>
                 </div>
+            </div>
+        </header>
+
+        <!-- Hidden selects: populated by JS, used by openHeaderDropdown() -->
+        <div style="display:none" aria-hidden="true">
+            <select id="selSunday"></select>
+            <select id="selSundayNovus"></select>
+            <select id="selSaint"></select>
+            <select id="selMass"></select>
+            <select id="selOrdinary"></select>
+            <div id="yearSelector">
+                <button class="segment active" data-val="A">A</button>
+                <button class="segment" data-val="B">B</button>
+                <button class="segment" data-val="C">C</button>
             </div>
         </div>
 
