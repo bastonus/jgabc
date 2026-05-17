@@ -65,7 +65,6 @@
                 </h1>
             </div>
             <div class="header-actions">
-                <button id="btnRubric" class="rite-toggle">Traditional</button>
                 <button id="btnSettings" class="icon-btn" aria-label="Settings" title="Settings">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -76,14 +75,6 @@
                     </svg>
                 </button>
             </div>
-            <!-- Ad Libitum search (shown only on that tab) -->
-            <div id="adlibitumSearch" class="adlibitum-header-search hidden">
-                <div class="search-input-wrapper">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input id="searchAdlibitum" type="text" class="search-input" placeholder="Quaere cantum per incipit..." autocomplete="off" autocorrect="off" spellcheck="false">
-                    <div id="searchDropdown" class="search-dropdown hidden"></div>
-                </div>
-            </div>
         </header>
 
         <!-- Hidden selects: populated by JS, used by openHeaderDropdown() -->
@@ -92,16 +83,19 @@
             <select id="selSundayNovus"></select>
             <select id="selSaint"></select>
             <select id="selMass"></select>
-            <select id="selOrdinary"></select>
-            <div id="yearSelector">
-                <button class="segment active" data-val="A">A</button>
-                <button class="segment" data-val="B">B</button>
-                <button class="segment" data-val="C">C</button>
-            </div>
         </div>
 
         <!-- Main Content Stream -->
         <main class="app-main">
+            <!-- Ad Libitum search (shown only on that tab) -->
+            <div id="adlibitumSearch" class="adlibitum-body-search hidden" style="margin-bottom: 20px;">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input id="searchAdlibitum" type="text" class="search-input" placeholder="Quaere cantum per incipit..." autocomplete="off" autocorrect="off" spellcheck="false">
+                    <div id="searchDropdown" class="search-dropdown hidden"></div>
+                </div>
+            </div>
+
             <div id="content-stream" class="content-area">
                 <!-- Dynamic Cards Injected Here -->
             </div>
@@ -158,6 +152,23 @@
             <button id="btnCloseSettings" class="icon-btn" aria-label="Close">&times;</button>
         </div>
         <div class="settings-body">
+            <!-- Ritus -->
+            <div class="settings-group">
+                <label class="settings-label">Ritus</label>
+                <div class="year-segments" id="riteOptions">
+                    <button class="segment active" data-value="traditional">Vetus Ordo</button>
+                    <button class="segment" data-value="novus">Novus Ordo</button>
+                </div>
+            </div>
+            <!-- Annus Liturgicus -->
+            <div class="settings-group" id="settingsNovusYear" style="display:none;">
+                <label class="settings-label">Annus Liturgicus</label>
+                <div class="year-segments" id="yearSelector">
+                    <button class="segment active" data-val="A">Annus A</button>
+                    <button class="segment" data-val="B">Annus B</button>
+                    <button class="segment" data-val="C">Annus C</button>
+                </div>
+            </div>
             <!-- Thema -->
             <div class="settings-group">
                 <label class="settings-label">Thema</label>

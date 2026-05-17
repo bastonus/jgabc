@@ -91,13 +91,21 @@ function updateHeader() {
         $('#headerTitle .dropdown-icon').css('display', 'none');
     }
 
-    $('#btnRubric').text(appState.rite === 'novus' ? 'Novus Ordo' : 'Vetus Ordo');
-    $('#btnRubric').toggleClass('active', appState.rite === 'novus');
+    // Update settings panel Rite toggle state
+    $('#riteOptions .segment').removeClass('active');
+    $(`#riteOptions .segment[data-value="${appState.rite}"]`).addClass('active');
 
-    // Show Ad Libitum search bar inside header on that tab
+    // Show/hide Novus Ordo Year selector in settings based on rite
+    if (appState.rite === 'novus') {
+        $('#settingsNovusYear').show();
+    } else {
+        $('#settingsNovusYear').hide();
+    }
+
+    // Show Ad Libitum search bar in the body on that tab
     if (appState.tab === 'adlibitum') {
         $('#adlibitumSearch').removeClass('hidden');
-        $('#headerTitle').addClass('hidden');
+        $('#headerTitle').removeClass('hidden'); // Ensure title is visible
         setTimeout(function() { $('#searchAdlibitum').focus(); }, 100);
     } else {
         $('#adlibitumSearch').addClass('hidden');
@@ -510,15 +518,18 @@ function setupEventListeners() {
         renderContent();
     });
 
-    $('#btnRubric').on('click', function () {
-        appState.rite = appState.rite === 'novus' ? 'traditional' : 'novus';
-        localStorage.setItem('rubricMode', appState.rite === 'novus' ? 'novus' : 'traditional');
+    $('#riteOptions').on('click', '.segment', function () {
+        var val = $(this).data('value');
+        if (appState.rite === val) return;
+        
+        appState.rite = val;
+        localStorage.setItem('rubricMode', val);
         doPopulate();
         autoSelectDate();
         renderApp();
     });
 
-    $('.modern-select').on('change', function () {
+    $('#selSunday, #selSundayNovus, #selSaint, #selMass').on('change', function () {
         const id = $(this).attr('id');
         const val = $(this).val();
 
@@ -526,7 +537,6 @@ function setupEventListeners() {
         if (id === 'selSundayNovus') appState.selection.temporum = val;
         if (id === 'selSaint') appState.selection.sanctorum = val;
         if (id === 'selMass') appState.selection.communia = val;
-        if (id === 'selOrdinary') appState.selection.ordinarium = val;
 
         handleSelectionChange(id, val);
     });
@@ -752,6 +762,7 @@ function handleSelectionChange(id, val) {
     }
     
     renderContent();
+    updateHeader();
 }
 
 // getChantId is no longer needed — ID resolution is inline in renderContent().
