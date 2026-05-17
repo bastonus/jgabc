@@ -3,6 +3,7 @@ var regexVowel = /(?:[cgq]u|[iy])?([aeiouyáéëíóúýǽæœ]+)/i;
 var regexLatin = /((?:<\w+>)*)(((?:(?:(\s+)|)(?:(?:i(?!i)|(?:n[cg]|q)u)(?=[aeiouyáéëíóúýǽœ́æœ])|[bcdfghjklmnprstvwxz]*)([aá]u|[ao][eé]?|[eiuyáéëíóúýǽæœ]\u0301?)(?:(?:[\wáéíóúýǽæœ]\u0301?)*(?=-)|(?=(?:n[cg]u|sc|[sc][tp]r?|gn|ps)[aeiouyáéëíóúýǽæœ]\u0301?|[bcdgptf][lrh][\wáéíóúýǽæœ]\u0301?)|(?:[bcdfghjklmnpqrstvwxz]+(?=$|[^\wáëéíóúýǽæœ])|[bcdfghjklmnpqrstvwxz](?=[bcdfghjklmnpqrstvwxz]+))?)))(?:([\*-])|((?:[^\w\sáëéíóúýǽæœ\u0301])*(?:\s[:;†\^\*"«»‘’“”„‟‹›‛])*\.?(?=\s|$))?)(?=(\s*|$)))((?:<\/\w+>)*)/gi
 var regexWords = /((?:<\w+>)*)([^a-z\xDF-\xFF\u00c0-\u024f\u1e00-\u1eff\u02C6-\u0323\u4e00-\u9fff\)\<!]*\s*"*(?=[a-z\xDF-\xFF\u00c0-\u024f\u1e00-\u1eff\u02C6-\u0323\u4e00-\u9fff(<!]))(!(?:<\w+>.*?<\/\w+>|\S+)|([a-z\xDF-\xFF\u00c0-\u024f\u1e00-\u1eff\u02C6-\u0323’\u4e00-\u9fff'*]*)(?:\(([a-z\xDF-\xFF\u00c0-\u024f\u1e00-\u1eff\u02C6-\u0323’\u4e00-\u9fff'*]+)\)([a-z\xDF-\xFF\u00c0-\u024f\u1e00-\u1eff\u02C6-\u0323’\u4e00-\u9fff'*]*))?)(=?)((?:\s*[-"'“”‘’«»„:;,.\)¿\?¡!])*)(\s+[†*])?((?:<\/\w+>\s*)*)/gi;
 var regexQuoteTernary = /([?:])([^?:]*)(?=$|:)/g;
+var regexTernaryOperands = /\?([^?:]*):([^?:]*)$/;
 var regexAccent = /[áéíóúýǽ\u0301]/i;
 var regexToneGabc = /(')?(([^\sr]+)(r)?)(?=$|\s)/gi;
 var regexVerseNumber = /^(\d+)\.?\s*/;
@@ -225,23 +226,19 @@ var o_g_tones =
                     },
          'in dir. romanus': {clef:"c3",
                   mediant:"hr g f 'h hr h.",
-                  termination:"hr f."
+                  termination:"hr 'h fr f."
                 },
           'in dir. monasticus': {clef:"c3",
                       mediant:"hr g f 'h hr h.",
                       termination:"hr h."
                     },
-			'tonus T.P.': {clef:"c3",
-						mediant:"e f hr i 'i fr f.",
+			'in dir. T.P.': {clef:"c3",
+					mediant:"e f hr i 'i fr f.",
 					termination:"hr e f 'g fr f."},
-			'tonus ad Horas 2 nov ad lib.': {clef:"c4",
-						mediant:"f gh hr 'g gr f.",
-					termination:"hr 'g g."},
-					 	
-             // 'in directum (alt.)': {clef:"c4",
-             //          mediant:"t[0].word.length==1?f gh hr g h.:f gh hr 'g fr f.",
-             //          termination:"hr f 'g gr g."
-             //        },
+			'in dir. ad Horas 2 nov ad lib.': {clef:"c4",
+            mediant:"t[0]?.word?.length==1?f gh hr g h.:f gh hr 'g fr f.",
+            termination:"hr f 'g gr g."
+          },
              "Introit 1":{"clef":"c4",
                           "mediant":"f gh hr 'hj hr hr 'hg gh..",
                           "termination":"gf gh hr hjh g f fff d."},
@@ -364,7 +361,8 @@ var Syl = (function(){
       // in Polish, sometimes a word does not contain a vowel, and therefore has to be part of first syllable of the following word.
       preword = '';
       while((m=regexWords.exec(text)) && m[0]){
-        var w=(m[5]?(m[4]+m[5]+m[6]):m[3]).toLowerCase(),
+        var raw=(m[5]?(m[4]+m[5]+m[6]):m[3]),
+            w=raw.toLowerCase()
             opi=m[4]?m[4].length:0,         // opening parenthesis index
             cpi=m[5]?1+opi+m[5].length:0,   // closing parenthesis index
             ai=w.split('*'),                // accent indices
@@ -397,7 +395,7 @@ var Syl = (function(){
               var stillMoreWords = text.slice(lastIndex).match(regexWords);
               regexWords.lastIndex = lastIndex;
               if(stillMoreWords) {
-                preword = w;
+                preword = raw;
                 continue;
               }
             } else if(d.length) {
@@ -652,7 +650,26 @@ function processGabcPrespace(prespace) {
 function processGabcPrespaceForWhitespace(prespace) {
   return prespace.replace(/\S*/g, '');
 }
+function combineToneGabc(tones) {
+  return tones.reduce(
+    (gabc, tone) =>
+      gabc +
+      tone.gabcClosed
+        .replace(/[\(\)]/g, "")
+        .replace(new RegExp("^" + gabc.slice(-1), "i"), ""),
+    "",
+  ).replace(/(.*?)([a-m]{2,})(\.*)/, (_, preNotes, notes, dots) => {
+    const noteCount = notes.length;
+    if (!preNotes && noteCount >= 3 && Array.from(notes).slice(1).every((note, i) => note.charCodeAt(0) < notes.charCodeAt(i))) {
+      notes = notes[0] + 'v' + notes.slice(1).toUpperCase();
+    }
+    dots = dots && (noteCount === 2 ? '..' : '.');
+    return `${preNotes}${notes}${dots}`;
+  });
+}
+            
 function applyPsalmTone(options) {
+  var experimentalOxytones = typeof new URLSearchParams(location.search).get('experimental') === 'string';
   var text = options.text,
       gabc = options.gabc,
       clef = options.clef,
@@ -766,9 +783,20 @@ function applyPsalmTone(options) {
       var s = syl[si];
       if(ti == tones.length - 1 && si == syl.length - 1 && toneList.accents > 0 && s.accent){
         ti = toneList.lastAccentI();
-        if(!toneList.lastAccent().open){
+        if(!tones[ti].open){
           var addDots = /\./g.test(tone.all);
-          tone = tones[ti];
+          var finalTones = tones.slice(ti);
+          tone = finalTones[0];
+
+          if (experimentalOxytones) {
+            // combine tones following
+            tone = $.extend({},tone);
+            var gabc = combineToneGabc(finalTones);
+            tone.gabc = tone.gabcClosed = '(' + gabc + ')';
+            addDots = false;
+            lastOpen = true;
+          }
+
           if(addDots && !/\./.test(tone.all)){
             var dots = '.'.repeat( tone.gabc.match(/[a-m]/gi).length );
             tone = $.extend({},tone);
@@ -840,6 +868,11 @@ function applyPsalmTone(options) {
             si = lastAccentI - 2;
             s = syl[si];
             if(s)s.accent = true;
+          } else if(countToNext === 1 && typeof lastOpen === 'object' && experimentalOxytones) {
+            // combine tones following
+            tone = $.extend({},tone);
+            var gabc = combineToneGabc([tone, lastOpen]);
+            tone.gabc = tone.gabcClosed = '(' + gabc + ')';
           }
           si = originalSi;
           s = syl[si];
@@ -994,8 +1027,12 @@ function applyPsalmTone(options) {
 }
 
 function removeIntonation(t) {
-  t.tones.splice(0,t.intonation);
-  t.intonation = 0;
+  if (t.tones) {
+    t.tones.splice(0,t.intonation);
+    t.intonation = 0;
+  } else {
+    t.removeIntonation = true;
+  }
   return t;
 }
 
@@ -1527,7 +1564,11 @@ Evaluatable.prototype.isString = function(){return false;};
 Evaluatable.prototype.getString = function(){return this.string;};
 Evaluatable.prototype.eval = function(){
   callback=this.callback;
-  return eval(this.string);
+  let result = eval(this.string);
+  if (this.removeIntonation) {
+    result = removeIntonation(result);
+  }
+  return result;
 };
 
 function maxDiff(array) {

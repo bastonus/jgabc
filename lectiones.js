@@ -364,6 +364,10 @@ var lectiones = {
   "Ad Romanos 11: 33-36",
   "Matthæus 28: 18-20"
  ],
+ "Pent1w": [
+  "1 Joannis 4: 8-21",
+  "Lucas 6: 36-42"
+ ],
  "Pent2": [
   "1 Joannis 3: 13-18",
   "Lucas 14: 16-24"
@@ -814,6 +818,14 @@ var lectiones = {
   "Ad Hebræos 5: 1-6",
   "Joannes 10: 11-16"
  ],
+ "Dec31": [
+  "1 Petri 5: 1-4, 10-11",
+  "Matthæus 16: 13-19"
+ ],
+ "Dec31_v": [
+  "2 Ad Timotheum 4: 1-8",
+  "Lucas 12: 35-40"
+ ],
  "Dec3": [
   "Ad Romanos 10: 10-18",
   "Marcus 16: 15-18"
@@ -1245,6 +1257,10 @@ var lectiones = {
  "Nov26": [
   "Ecclesiasticus 45: 1-6",
   "Matthæus 19: 27-29"
+ ],
+ "Nov27": [
+  "Apocalypsis 12: 1,5,14-16",
+  "Joannes 2: 1-11"
  ],
  "Nov30": [
   "Ad Romanos 10: 10-18",
@@ -1690,7 +1706,7 @@ var lectiones = {
   "1 Petri 5: 1-4, 10-11",
   "Matthæus 16: 13-19"
  ],
- "Pasch3w": [
+ "Pasc2w": [
   "Genesis 49: 22-26",
   "Lucas 3: 21-23"
  ],
