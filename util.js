@@ -1079,6 +1079,7 @@ if(typeof window=='object') (function(window) {
         timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds()*duration));
       };
       timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote);
+      window.getChantProgress = function() { return notes && notes.length ? (noteId / notes.length) : 0; };
       window.playNextNote = playNextNote;
       window.playPauseScore = function() {
         if(timeoutNextNote) {

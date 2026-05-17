@@ -207,6 +207,72 @@
         </div>
     </aside>
 
-</body>
+    <!-- Modern Sticky Player Bar -->
+    <div id="modernPlayerBar" class="modern-player-bar">
+        <!-- Progress Bar -->
+        <div id="playerProgressBarContainer" class="player-progress-container">
+            <div class="player-progress-bar">
+                <div id="playerProgressFill" class="player-progress-fill"></div>
+            </div>
+        </div>
+        <div class="player-bar-inner">
+            <!-- Chant info (Title only) -->
+            <div class="player-info">
+                <div class="player-note-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                </div>
+                <div class="player-meta">
+                    <div id="playerChantName" class="player-chant-name">—</div>
+                </div>
+            </div>
 
+            <!-- Controls (Stop, Play, Next) -->
+            <div class="player-controls">
+                <button id="playerBtnStop" class="player-btn player-btn-secondary" title="Stop">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                </button>
+                <button id="playerBtnPlay" class="player-btn player-btn-primary" title="Play">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <button id="playerBtnNext" class="player-btn player-btn-secondary" title="Next Note">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="5 4 15 12 5 20 5 4"></polygon><rect x="17" y="4" width="3" height="16"></rect></svg>
+                </button>
+            </div>
+
+            <!-- Options (Pitch, Range, Solesmes, Tempo) -->
+            <div class="player-options">
+                <!-- Pitch Transpose -->
+                <div class="player-pitch-group" style="display:flex; align-items:center; gap:4px;">
+                    <button id="playerPitchDown" class="player-btn-option" title="Transpose Down">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <span id="playerStartingPitch" style="font-weight:bold; color:var(--primary-color); font-size:0.9rem; min-width:24px; text-align:center;">?</span>
+                    <button id="playerPitchUp" class="player-btn-option" title="Transpose Up">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div style="width:1px; height:20px; background:var(--border-color, rgba(0,0,0,0.1)); margin: 0 4px;"></div>
+
+                <!-- Solesmes Toggle -->
+                <button id="playerBtnSolesmes" class="player-btn-option" title="Toggle Solesmes Lengths" style="margin-right: 4px;">
+                    <img src="salicus.svg" alt="Solesmes" style="height:14px; filter: invert(0) opacity(0.8);">
+                </button>
+                
+                <!-- Tempo Controls -->
+                <div class="player-tempo-group" style="display:flex; align-items:center; gap:4px;">
+                    <button class="player-btn-option tempo-minus" title="Slower">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <span id="playerTempoValue" class="tempo-value" style="font-size:0.85rem; font-weight:600; min-width:60px; text-align:center;">150 BPM</span>
+                    <button class="player-btn-option tempo-plus" title="Faster">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
 </html>

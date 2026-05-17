@@ -282,7 +282,11 @@ function editorialChange(e) {
     $txt.val(gabc);
 
     // Re-render
-    layoutChantFromGabc(e.data.part, gabc);
+    if (window.renderChantSVG && $card.length) {
+        window.renderChantSVG($card, gabc);
+    } else if (typeof layoutChantFromGabc === 'function') {
+        layoutChantFromGabc(e.data.part, gabc);
+    }
 
     // Hide toolbars
     removeChantContextMenus();

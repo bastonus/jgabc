@@ -30,6 +30,7 @@ $(function () {
 
     initTheme();
     setupEventListeners();
+    setupPlayerBar();
 
     // Populate selectors
     doPopulate();
@@ -464,12 +465,350 @@ function renderChantSVG($card, gabc) {
         var svg = score.createSvgNode(ctxt);
         $preview.append(svg);
 
-        // Responsive Note Clicks
-        $(svg).find('.neume').on('click', function (e) {
+        // Store score on card for the player
+        $card.data('chant-score', score);
+
+        // Wire neume clicks to select that note for playback later
+        $(svg).find('use[source-index]').on('click', function (e) {
             e.stopPropagation();
-            playAudioNote();
+            var note = this.source && this.source.neume ? this.source : null;
+            if (note) {
+                // Highlight note visually
+                $(svg).find('use[source-index].active').removeClass('active');
+                this.classList.add('active');
+                
+                // Store the selected note
+                $card.data('selected-note', note);
+
+                // Open player bar in paused state
+                updatePlayerUI($card, score, false);
+
+                // Restore editing context menu (Popup)
+                if (window.removeChantContextMenus) window.removeChantContextMenus();
+                if (window.showToolbarForNote && window.editorialChange) {
+                    var part = $card.data('part') || '';
+                    window.showToolbarForNote(this, window.editorialChange, {part: part});
+                }
+            }
+        });
+
+        // Wire dropcap clicks to select the first note and prevent the legacy popup
+        $(svg).find('text.dropCap').on('click', function (e) {
+            e.stopPropagation(); // Prevents util.js from showing the popup!
+            
+            var firstActualNote = null;
+            if (score && score.notations) {
+                for (var i = 0; i < score.notations.length; i++) {
+                    if (score.notations[i].notes && score.notations[i].notes.length > 0) {
+                        firstActualNote = score.notations[i].notes[0];
+                        break;
+                    }
+                }
+            }
+
+            if (firstActualNote) {
+                // Highlight first note visually
+                $(svg).find('use[source-index].active').removeClass('active');
+                if (firstActualNote.svgNode) {
+                    firstActualNote.svgNode.classList.add('active');
+                }
+                
+                // Store the selected note
+                $card.data('selected-note', firstActualNote);
+
+                // Open player bar in paused state
+                updatePlayerUI($card, score, false);
+            }
+        });
+
+        // Wire the card's play button
+        $card.find('.btn-play').off('click').on('click', function (e) {
+            e.stopPropagation();
+            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+            if (window.isPlayingChant && window.isPlayingChant() && _currentPlayerCard && _currentPlayerCard[0] === $card[0]) {
+                window.playPauseScore && window.playPauseScore();
+                updatePlayerUI($card, score, false);
+            } else {
+                var startNote = $card.data('selected-note');
+                window.playScore && window.playScore(score, null, startNote);
+                // We don't clear the selected note so they can replay from there if they want, 
+                // but the player will advance.
+                updatePlayerUI($card, score, true);
+            }
         });
     });
+}
+
+// --- Modern Sticky Player Bar ---
+
+var _currentPlayerCard = null;
+
+function updatePlayerUI($card, score, isPlaying) {
+    _currentPlayerCard = $card;
+
+    // Show the global player bar
+    var part = $card.data('part') || '';
+    var title = $card.find('.card-title').text() || part;
+    $('#playerChantName').text(title);
+
+    // Update Pitch and Range info
+    updatePitchUI(score);
+
+    var $bar = $('#modernPlayerBar');
+    $bar.addClass('visible');
+
+    // Update play/pause icon on bar
+    setPlayerBarState(isPlaying);
+
+    // Update play button on the card itself
+    updateCardPlayIcon($card, isPlaying);
+
+    // Stop button in card area
+    $('.chant-card .btn-play').not($card.find('.btn-play')).each(function() {
+        updateCardPlayIcon($(this).closest('.chant-card'), false);
+    });
+}
+
+// Global to hold progress interval
+var _progressInterval = null;
+
+function setPlayerBarState(isPlaying) {
+    if (isPlaying) {
+        $('#playerBtnPlay').addClass('playing');
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>');
+        startProgressTracking();
+    } else {
+        $('#playerBtnPlay').removeClass('playing');
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>');
+        if (_progressInterval) clearInterval(_progressInterval);
+    }
+}
+
+function startProgressTracking() {
+    if (_progressInterval) clearInterval(_progressInterval);
+    _progressInterval = setInterval(function() {
+        if (!window.isPlayingChant || !window.isPlayingChant()) return;
+        
+        if (window.getChantProgress) {
+            var percent = window.getChantProgress() * 100;
+            if (percent > 100) percent = 100;
+            $('#playerProgressFill').css('width', percent + '%');
+            
+            // Stop if reached the very end
+            if (percent >= 100) {
+                $('#playerBtnStop').click();
+            }
+        }
+    }, 150);
+}
+
+function getPitchRangeStr(semitones) {
+    var intervals = [['P', 1], ['m', 2], ['M', 2], ['m', 3], ['M', 3], ['P', 4], ['d', 5], ['P', 5], ['m', 6], ['M', 6], ['m', 7], ['M', 7]];
+    semitones = Math.abs(semitones);
+    var octaves = Math.floor(semitones / 12);
+    semitones %= 12;
+    var r = intervals[semitones];
+    if (!octaves) return r.join('');
+    var number = parseInt(r[1]) + 8 * octaves - 1;
+    return r[0] + number;
+}
+
+function updatePitchUI(score) {
+    if (!score || !window.exsurge) return;
+    var lowPitch = 100000, highPitch = 0, startPitch = null;
+    score.notations.forEach(function(notation) {
+        if(notation.notes) notation.notes.forEach(function(note) {
+            var pitch = note.pitch.toInt();
+            if(startPitch == null) startPitch = pitch;
+            lowPitch = Math.min(lowPitch, pitch);
+            highPitch = Math.max(highPitch, pitch);
+        });
+    });
+
+    if (startPitch == null) return;
+    
+    // Ensure defaultStartPitch exists
+    if (!score.defaultStartPitch && window.calculateDefaultStartPitch) {
+        score.defaultStartPitch = window.calculateDefaultStartPitch(startPitch, lowPitch, highPitch);
+    }
+    
+    var rangeStr = getPitchRangeStr(highPitch - lowPitch);
+    $('#playerRangeInfo').text(rangeStr);
+
+    var pitchObj = new exsurge.Pitch(score.defaultStartPitch.toInt());
+    var thisPitchName = (window.tones && window.tones.noteName) ? window.tones.noteName[pitchObj.step] : '';
+    if(thisPitchName.indexOf(' / ') > -1) thisPitchName = thisPitchName.split(' / ')[0]; 
+    $('#playerStartingPitch').text(thisPitchName + pitchObj.octave);
+}
+
+function updateCardPlayIcon($card, isPlaying) {
+    var $btn = $card.find('.btn-play');
+    if (isPlaying) {
+        $btn.html('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>');
+        $btn.addClass('active');
+    } else {
+        $btn.html('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>');
+        $btn.removeClass('active');
+    }
+}
+
+function setupPlayerBar() {
+    // Play/Pause
+    $('#playerBtnPlay').on('click', function() {
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') Tone.context.resume();
+        
+        // If not playing and we haven't started this score yet, or it's completely stopped
+        if (!window.isPlayingChant || !window.isPlayingChant()) {
+            if (_currentPlayerCard) {
+                var score = _currentPlayerCard.data('chant-score');
+                var startNote = _currentPlayerCard.data('selected-note');
+                if (score) {
+                    window.playScore && window.playScore(score, null, startNote);
+                    setPlayerBarState(true);
+                    updateCardPlayIcon(_currentPlayerCard, true);
+                    return;
+                }
+            }
+        }
+
+        var isNowPlaying = window.playPauseScore && window.playPauseScore();
+        if (isNowPlaying === undefined) {
+            // was playing, now paused
+            setPlayerBarState(false);
+            if (_currentPlayerCard) updateCardPlayIcon(_currentPlayerCard, false);
+        } else {
+            // was paused, now playing
+            setPlayerBarState(true);
+            if (_currentPlayerCard) updateCardPlayIcon(_currentPlayerCard, true);
+        }
+    });
+
+    // Step forward: skip to next neume
+    $('#playerBtnNext').on('click', function() {
+        if (window.playNextNote) window.playNextNote();
+    });
+
+    // Pitch Transpose Down
+    $('#playerPitchDown').on('click', function() {
+        if (_currentPlayerCard) {
+            var score = _currentPlayerCard.data('chant-score');
+            if (score && score.defaultStartPitch && window.exsurge) {
+                score.defaultStartPitch = new exsurge.Pitch(score.defaultStartPitch.toInt() - 1);
+                updatePitchUI(score);
+                // The Tone synthesizer uses score.defaultStartPitch dynamically on the next note
+            }
+        }
+    });
+
+    // Pitch Transpose Up
+    $('#playerPitchUp').on('click', function() {
+        if (_currentPlayerCard) {
+            var score = _currentPlayerCard.data('chant-score');
+            if (score && score.defaultStartPitch && window.exsurge) {
+                score.defaultStartPitch = new exsurge.Pitch(score.defaultStartPitch.toInt() + 1);
+                updatePitchUI(score);
+            }
+        }
+    });
+
+    // Stop
+    $('#playerBtnStop').on('click', function() {
+        if (window.stopScore) window.stopScore();
+        $('#modernPlayerBar').removeClass('visible');
+        if (_currentPlayerCard) updateCardPlayIcon(_currentPlayerCard, false);
+        _currentPlayerCard = null;
+        $('#playerProgressFill').css('width', '0%');
+    });
+
+    // Seek via Progress Bar Click
+    $('#playerProgressBarContainer').on('click', function(e) {
+        if (!_currentPlayerCard) return;
+        
+        var rect = this.getBoundingClientRect();
+        var clickX = e.clientX - rect.left;
+        var percent = clickX / rect.width;
+        
+        var svg = _currentPlayerCard.find('svg')[0];
+        if (!svg) return;
+        
+        var $notes = $(svg).find('use[source-index]');
+        var total = $notes.length;
+        if (total === 0) return;
+        
+        var targetIndex = Math.floor(total * percent);
+        if (targetIndex >= total) targetIndex = total - 1;
+        if (targetIndex < 0) targetIndex = 0;
+        
+        var note = null;
+        var targetNode = null;
+        for (var i = targetIndex; i < total; i++) {
+            var n = $notes[i];
+            if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
+        }
+        if (!note && targetIndex > 0) {
+            for (var i = targetIndex - 1; i >= 0; i--) {
+                var n = $notes[i];
+                if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
+            }
+        }
+        
+        if (note && targetNode) {
+            // Highlight manually
+            $(svg).find('use[source-index].active').removeClass('active');
+            targetNode.classList.add('active');
+            
+            var score = _currentPlayerCard.data('chant-score');
+            
+            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+            
+            if (window.playScore && score) {
+                window.playScore(score, null, note);
+                setPlayerBarState(true);
+                updateCardPlayIcon(_currentPlayerCard, true);
+                $('#playerProgressFill').css('width', (targetIndex / total * 100) + '%');
+            }
+        }
+    });
+
+    // Tempo minus
+    $('.tempo-minus').on('click', function() {
+        var bpm = window.setRelativeTempo ? window.setRelativeTempo(-10) : 155;
+        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+    });
+
+    // Tempo plus
+    $('.tempo-plus').on('click', function() {
+        var bpm = window.setRelativeTempo ? window.setRelativeTempo(10) : 175;
+        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+    });
+
+    // Solesmes lengths toggle
+    $('#playerBtnSolesmes').on('click', function() {
+        if (window.toggleIsUsingSolesmesLengths) {
+            var isUsing = window.toggleIsUsingSolesmesLengths();
+            if (isUsing) {
+                $(this).css('color', 'var(--primary-color)');
+            } else {
+                $(this).css('color', 'var(--text-secondary)');
+            }
+        }
+    });
+
+    // Scroll currently playing card into view
+    setInterval(function() {
+        if (_currentPlayerCard && window.isPlayingChant && window.isPlayingChant()) {
+            // Highlight active card softly
+            $('.chant-card').removeClass('is-playing');
+            _currentPlayerCard.addClass('is-playing');
+        } else if (!window.isPlayingChant || !window.isPlayingChant()) {
+            $('.chant-card').removeClass('is-playing');
+            setPlayerBarState(false);
+        }
+    }, 500);
 }
 
 // --- Event Handlers ---
