@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Sacred - Settings</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1132d4",
+                        "primary-dark": "#0a22a0",
+                        "primary-light": "#3d57f0",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                        "surface-dark": "#18182E", /* Deep purple tinted surface */
+                        "surface-dark-highlight": "#20203d",
+                        "subtle-purple": "#232338",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top App Bar (iOS Style) -->
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-[#101322]/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 transition-colors duration-300">
+<div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+<button class="flex items-center text-primary dark:text-primary-light hover:opacity-80 transition-opacity p-2 -ml-2 rounded-lg">
+<span class="material-symbols-outlined text-[24px]">chevron_left</span>
+<span class="text-[17px] font-medium leading-none ml-0.5">Rehearsal</span>
+</button>
+<h1 class="absolute left-1/2 -translate-x-1/2 text-[17px] font-semibold text-slate-900 dark:text-white">Settings</h1>
+<button class="text-primary dark:text-primary-light text-[17px] font-semibold p-2 -mr-2 hover:opacity-80 transition-opacity">
+                Done
+            </button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full max-w-md mx-auto px-4 py-6 space-y-8 pb-24">
+<!-- Section: Content & Liturgy -->
+<section>
+<div class="px-4 pb-2">
+<h2 class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Liturgy &amp; Content</h2>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5">
+<!-- Rite Preference (Segmented Control style inside list) -->
+<div class="p-4 border-b border-slate-100 dark:border-white/5">
+<div class="flex flex-col gap-3">
+<label class="text-base font-medium text-slate-900 dark:text-slate-100">Rite Preference</label>
+<div class="bg-slate-100 dark:bg-black/30 p-1 rounded-lg flex relative">
+<!-- Selected Tab Indicator (Visual only, would move with JS) -->
+<div class="w-1/2 absolute left-1 top-1 bottom-1 bg-white dark:bg-slate-700 rounded-md shadow-sm transition-all duration-300 pointer-events-none"></div>
+<button class="flex-1 relative z-10 py-1.5 text-sm font-medium text-center text-slate-900 dark:text-white rounded-md transition-colors">
+                                1962 Missal
+                            </button>
+<button class="flex-1 relative z-10 py-1.5 text-sm font-medium text-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                                Novus Ordo
+                            </button>
+</div>
+</div>
+</div>
+<!-- Show Translations -->
+<div class="flex items-center justify-between px-4 py-3.5 border-b border-slate-100 dark:border-white/5 last:border-0 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-primary-light">
+<span class="material-symbols-outlined text-[18px]">translate</span>
+</div>
+<span class="text-base font-normal text-slate-900 dark:text-slate-100">Show Translations</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Translation Language -->
+<div class="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-300">
+<span class="material-symbols-outlined text-[18px]">language</span>
+</div>
+<span class="text-base font-normal text-slate-900 dark:text-slate-100">Translation Language</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-500 dark:text-slate-400 text-[15px]">English</span>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+<p class="px-4 pt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Choose the liturgical rite to determine available chants and prayers. Translations appear beneath Latin text.
+            </p>
+</section>
+<!-- Section: Audio & Rehearsal -->
+<section>
+<div class="px-4 pb-2">
+<h2 class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Audio &amp; Rehearsal</h2>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5">
+<!-- Reference Pitch -->
+<div class="flex items-center justify-between px-4 py-3.5 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-300">
+<span class="material-symbols-outlined text-[18px]">graphic_eq</span>
+</div>
+<span class="text-base font-normal text-slate-900 dark:text-slate-100">Reference Pitch</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-primary dark:text-primary-light font-medium text-[15px]">A=440Hz</span>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-[20px]">chevron_right</span>
+</div>
+</div>
+<!-- Voice Part -->
+<div class="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-300">
+<span class="material-symbols-outlined text-[18px]">record_voice_over</span>
+</div>
+<span class="text-base font-normal text-slate-900 dark:text-slate-100">Preferred Voice Part</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-500 dark:text-slate-400 text-[15px]">Tenor</span>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Appearance -->
+<section>
+<div class="px-4 pb-2">
+<h2 class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Appearance</h2>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5 p-4 flex items-center justify-between gap-4">
+<span class="text-base font-normal text-slate-900 dark:text-slate-100 whitespace-nowrap">App Theme</span>
+<div class="flex items-center bg-slate-100 dark:bg-black/30 p-1 rounded-lg">
+<button class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">light_mode</span>
+</button>
+<button class="px-3 py-1.5 rounded-md bg-white dark:bg-slate-700 shadow-sm text-sm font-medium text-slate-900 dark:text-white transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">dark_mode</span>
+                        Dark
+                   </button>
+<button class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">settings_brightness</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section: Data & Storage -->
+<section>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/5">
+<div class="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="text-base font-normal text-slate-900 dark:text-slate-100">Downloaded Chants</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-500 dark:text-slate-400 text-[15px]">142 MB</span>
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer / Version -->
+<div class="pt-8 text-center pb-8">
+<div class="flex justify-center mb-4">
+<div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-purple-900 flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white text-[32px]">music_note</span>
+</div>
+</div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white">Modern Sacred</h3>
+<p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Version 1.0.2 (Build 420)</p>
+<div class="mt-6 flex justify-center gap-6">
+<a class="text-xs font-medium text-primary dark:text-primary-light hover:underline" href="#">Privacy Policy</a>
+<a class="text-xs font-medium text-primary dark:text-primary-light hover:underline" href="#">Support</a>
+<a class="text-xs font-medium text-primary dark:text-primary-light hover:underline" href="#">Terms of Service</a>
+</div>
+</div>
+</main>
+<!-- Bottom Sheet Indicator (Simulated for visual completeness) -->
+<div class="fixed bottom-0 left-0 right-0 h-1 bg-transparent pointer-events-none flex justify-center pb-2">
+<div class="w-1/3 max-w-[130px] h-1.5 bg-slate-300 dark:bg-white/20 rounded-full"></div>
+</div>
+</body></html>

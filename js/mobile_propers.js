@@ -1,26 +1,631 @@
-// Modern Propers JS - Spotify Mobile UI Logic
-// (Renamed from modern_propers.js to bypass file lock issues)
+// Modern Propers JS - Refactored for Dynamic Rendering & Premium UI
 
-// Global State
-window.selDay = null;
-window.selTempus = '';
+// --- Global State ---
+window.appState = {
+    rite: localStorage.getItem('rubricMode') === 'novus' ? 'novus' : 'traditional',
+    tab: 'temporum', // temporum, sanctorum, communia, ordinarium, adlibitum
+    date: moment(),
+    selection: {
+        temporum: null,
+        sanctorum: null,
+        communia: null,
+        ordinarium: null,
+        novusYear: 'A',
+        adlibitum: null
+    },
+    settings: {
+        theme: localStorage.getItem('theme') || 'dark',
+        translations: JSON.parse(localStorage.getItem('translations') || '{"latin":true,"english":true}'),
+        chantStyle: localStorage.getItem('defaultStyle') || 'full'
+    }
+};
+
+// Data Holders
 window.selPropers = null;
 window.selOrdinaries = {};
-window.selCustom = {};
-window.sel = {
-    tractus: {}, offertorium: {}, introitus: {}, graduale: {}, communio: {},
-    alleluia: {}, sequentia: {}, asperges: {}, kyrie: {}, gloria: {},
-    credo: {}, preface: {}, sanctus: {}, agnus: {}, ite: {}
-};
-window.includePropers = [];
-window.paperSize = localStorage.paperSize || 'letter';
-window.pageBreaks = (localStorage.pageBreaks || "").split(',');
-window.isNovus = localStorage.getItem('rubricMode') === 'novus';
-window.novusOption = {};
-window.novusYear = 'A'; // Default
 
-// Initialization
-// --- Date & Initialization Logic ---
+// --- Initialization ---
+$(function () {
+    console.log("Modern Propers V2 Initializing...");
+
+    initTheme();
+    setupEventListeners();
+
+    // Populate selectors
+    doPopulate();
+
+    // Auto-select date
+    autoSelectDate();
+
+    // Initial Render
+    renderApp();
+});
+
+// --- Core Logic: Navigation & Rendering ---
+
+function renderApp() {
+    updateHeader();
+    updateNavigation();
+    renderContent();
+}
+
+function updateHeader() {
+    let title = 'Propria Miss\u00e6';
+    if (appState.tab === 'temporum') {
+        title = appState.rite === 'novus'
+            ? ($('#selSundayNovus option:selected').text() || 'Eligas diem...')
+            : ($('#selSunday option:selected').text() || 'Eligas diem...');
+    } else if (appState.tab === 'sanctorum') {
+        title = $('#selSaint option:selected').text() || 'Eligas festum...';
+    } else if (appState.tab === 'communia') {
+        title = $('#selMass option:selected').text() || 'Eligas missam...';
+    } else if (appState.tab === 'adlibitum') {
+        title = 'Ad libitum';
+    }
+    $('#headerTitle').text(title);
+
+    $('#btnRubric').text(appState.rite === 'novus' ? 'Novus Ordo' : 'Vetus Ordo');
+    $('#btnRubric').toggleClass('active', appState.rite === 'novus');
+
+    $('.selector-group').addClass('hidden');
+    if (appState.tab === 'temporum') {
+        $('#' + (appState.rite === 'novus' ? 'selectorTempNovus' : 'selectorTempTrad')).removeClass('hidden');
+    } else if (appState.tab === 'sanctorum') {
+        $('#selectorSanctorum').removeClass('hidden');
+    } else if (appState.tab === 'communia') {
+        $('#selectorCommunia').removeClass('hidden');
+    } else if (appState.tab === 'adlibitum') {
+        $('#selectorAdlibitum').removeClass('hidden');
+        setTimeout(function() { $('#searchAdlibitum').focus(); }, 100);
+    }
+}
+
+function updateNavigation() {
+    $('.nav-item').removeClass('active');
+    $(`.nav-item[data-tab="${appState.tab}"]`).addClass('active');
+}
+
+function renderContent() {
+    const $stream = $('#content-stream');
+    $stream.empty();
+
+    if (!selPropers && appState.tab !== 'ordinarium' && appState.tab !== 'adlibitum') {
+        $stream.append(`
+            <div class="card" style="text-align:center; opacity:0.6; padding:40px; border-style:dashed;">
+                <h3 style="margin-bottom:10px;">Select a Mass</h3>
+                <p>Use the selectors above or the nav tabs below.</p>
+            </div>
+        `);
+        return;
+    }
+
+    // Helper: resolve a proper chant ID from selPropers
+    function resolveId(tradKey, novusKey) {
+        if (!selPropers) return null;
+        var id = selPropers[tradKey] || selPropers[novusKey];
+        if (Array.isArray(id)) id = id[0];
+        if (id && typeof id === 'object' && id.id) id = id.id;
+        if (!id || id === 'no') return null;
+        return id;
+    }
+
+    // Helper: render an ordinary part if not disabled
+    function renderOrdinary(label, key) {
+        if (selPropers && selPropers[key] === false) return;
+        if (selOrdinaries && selOrdinaries[key]) {
+            renderChantCard($stream, label, selOrdinaries[key], 'Ordinary');
+        }
+    }
+
+    // Helper: render a proper chant
+    function renderProper(label, tradKey, novusKey) {
+        var id = resolveId(tradKey, novusKey);
+        if (id) renderChantCard($stream, label, id, 'Proper');
+    }
+
+    // Helper: render readings (Epistle or Gospel)
+    function renderReading(title, readings, index) {
+        if (readings && readings[index]) {
+            renderReadingCard($stream, title, readings[index]);
+        }
+    }
+
+    // Get readings data
+    var readings = null;
+    if (appState.rite === 'traditional') {
+        var selDay = appState.selection.temporum || appState.selection.sanctorum;
+        if (selDay) {
+            var prop = window.proprium && window.proprium[selDay];
+            if (prop && prop.ref && window.lectiones[prop.ref]) {
+                readings = window.lectiones[prop.ref];
+            } else if (window.lectiones && window.lectiones[selDay]) {
+                readings = window.lectiones[selDay];
+            }
+            if (!readings) {
+                var match = /^Pent(Epi\d)$/.exec(selDay);
+                var lecDay = match ? match[1] : selDay;
+                if (window.lectiones && window.lectiones[lecDay]) readings = window.lectiones[lecDay];
+            }
+        }
+    }
+
+    // ===== ORDINARIUM TAB =====
+    if (appState.tab === 'ordinarium') {
+        var ordIdx = parseInt($('#selOrdinary').val()) - 1;
+        var ord = (window.massOrdinary && !isNaN(ordIdx)) ? window.massOrdinary[ordIdx] : null;
+        if (!ord) {
+            $stream.append('<div class="card" style="text-align:center;opacity:0.6;padding:40px;border-style:dashed"><h3>Select an Ordinary</h3></div>');
+            return;
+        }
+        var renderOrdPart = function(label, part) {
+            if (!part) return;
+            var arr = Array.isArray(part) ? part : [part];
+            arr.forEach(function(p) { renderChantCard($stream, p.name || label, p.id, 'Ordinary'); });
+        };
+        renderOrdPart('Kyrie', ord.kyrie);
+        renderOrdPart('Gloria', ord.gloria);
+        renderOrdPart('Credo', ord.credo);
+        renderOrdPart('Sanctus', ord.sanctus);
+        renderOrdPart('Agnus Dei', ord.agnus);
+        renderOrdPart('Ite Missa Est', ord.ite);
+        renderOrdPart('Benedicamus', ord.benedicamus);
+        initCardListeners();
+        return;
+    }
+
+    // ===== AD LIBITUM TAB =====
+    if (appState.tab === 'adlibitum') {
+        if (appState.selection.adlibitum) {
+            renderChantCard($stream, appState.selection.adlibitum.label, appState.selection.adlibitum.id, 'Ad libitum');
+            initCardListeners();
+        } else {
+            $stream.append('<div class="card" style="text-align:center;opacity:0.6;padding:40px;border-style:dashed"><h3>Quaere cantum</h3><p>Scribe incipit supra ut cantum invenias.</p></div>');
+        }
+        return;
+    }
+
+    // ===== PROPER TABS: Temporum / Sanctorum / Votivæ =====
+    var selDay = appState.selection.temporum || '';
+    var isPaschal = /^Pasc/.test(selDay);
+
+    // Asperges / Vidi Aquam (Temporum only)
+    if (appState.tab === 'temporum' && !(selPropers && selPropers.asperges === false)) {
+        if (window.ordinaryAdLib && window.ordinaryAdLib.asperges) {
+            var aspId = isPaschal ? 958 : 497;
+            renderChantCard($stream, isPaschal ? 'Vidi Aquam' : 'Asperges me', aspId, 'Ordinarium');
+        }
+    }
+
+    renderProper('Introitus', 'inID', 'introitus');
+    renderOrdinary('Kyrie', 'kyrie');
+    renderOrdinary('Gloria', 'gloria');
+    renderReading('Epistola', readings, 0);
+    renderProper('Graduale', 'grID', 'graduale');
+    renderProper('Tractus', 'trID', 'tractus');
+    renderProper('Alleluia', 'alID', 'alleluia');
+    renderProper('Sequentia', 'seqID', 'sequentia');
+    renderReading('Evangelium', readings, readings ? readings.length - 1 : 1);
+    renderOrdinary('Credo', 'credo');
+    renderProper('Offertorium', 'ofID', 'offertorium');
+    if (!(selPropers && selPropers.preface === false)) {
+        if (window.ordinaryAdLib && window.ordinaryAdLib.preface) {
+            renderChantCard($stream, 'Præfatio', window.ordinaryAdLib.preface[0].id, 'Ordinarium');
+        }
+    }
+    renderOrdinary('Sanctus', 'sanctus');
+    renderOrdinary('Agnus Dei', 'agnus');
+    renderProper('Communio', 'coID', 'communio');
+    renderOrdinary('Ite Missa Est', 'ite');
+    initCardListeners();
+}
+
+
+// --- Component Rendering ---
+
+function renderReadings($container) {
+    if (!window.lectiones) return;
+
+    // Logic to find reading key (Simplified from original)
+    // In original: var match = /^Pent(Epi\d)$/.exec(selDay); var lecDay = match ? match[1] : selDay;
+    // We need 'selDay' from state.
+    let selDay = appState.selection.temporum || appState.selection.sanctorum;
+    // Sanctorum readings tricky without map? 
+    // Usually readings are linked in proprium via 'ref'.
+
+    let readings = null;
+    let prop = window.proprium && window.proprium[selDay];
+
+    if (prop) {
+        if (prop.ref && window.lectiones[prop.ref]) {
+            readings = window.lectiones[prop.ref];
+        } else if (window.lectiones[selDay]) {
+            readings = window.lectiones[selDay];
+        }
+    }
+
+    // Try parsing numbered
+    if (!readings && selDay) {
+        let match = /^Pent(Epi\d)$/.exec(selDay);
+        let lecDay = match ? match[1] : selDay;
+        if (window.lectiones[lecDay]) readings = window.lectiones[lecDay];
+    }
+
+    if (readings) {
+        // Epistle (Index 0)
+        if (readings[0]) renderReadingCard($container, 'Epistle', readings[0]);
+        // Gospel (Index 1)
+        if (readings[1]) renderReadingCard($container, 'Gospel', readings[1]);
+    }
+}
+
+function renderReadingCard($container, title, ref) {
+    var lang = appState.settings.readingLang || 'la';
+    var editionMap = { la: 'vulgate', en: 'douay-rheims', fr: 'vulgate' };
+    var edition = editionMap[lang] || 'vulgate';
+
+    const $card = $(`
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <span class="card-type">Lectio</span>
+                    <h3 class="card-title">${title}</h3>
+                </div>
+            </div>
+            <div class="reading-ref" style="font-size:0.85rem; opacity:0.7; padding:4px 16px;">${ref}</div>
+            <div class="reading-content loading-pulse" style="padding:12px 16px;">Oneratur...</div>
+        </div>
+    `);
+    $container.append($card);
+
+    getReading({ ref: ref, edition: edition, language: lang }).then(function (spans) {
+        var $content = $card.find('.reading-content').empty().removeClass('loading-pulse');
+        if (spans && spans.length) {
+            $content.append($('<div class="reading-text" style="line-height:1.9; font-family:\'Crimson Text\', serif; font-size:1.05rem;">').append(spans));
+        } else {
+            $content.html('<em style="opacity:0.5">Lectio non invenitur: ' + ref + '</em>');
+        }
+    });
+}
+
+
+function renderChantCard($container, part, id, typeLabel) {
+    var typeClass = (typeLabel === 'Ordinarium') ? 'rubric-red' : '';
+    var initialStyle = appState.settings.chantStyle;
+
+    const cardHtml = `
+        <div class="card chant-card" data-part="${part}" data-id="${id}">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <span class="card-type ${typeClass}">${typeLabel}</span>
+                    <h3 class="card-title capitalize">${part}</h3>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-icon btn-play" title="Play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></button>
+                    <button class="btn-icon btn-settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+                    <button class="btn-icon btn-edit" title="Edit GABC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                </div>
+            </div>
+
+            <div class="settings-panel hidden">
+                <div>
+                    <label class="control-label">Style</label>
+                    <select class="modern-select sel-style">
+                        <option value="full" ${initialStyle === 'full' ? 'selected' : ''}>Full Chant</option>
+                        <option value="psalm-tone" ${initialStyle === 'psalm-tone' ? 'selected' : ''}>Psalm Tone</option>
+                    </select>
+                </div>
+                <div class="tone-controls hidden">
+                    <label class="control-label">Tone</label>
+                    <select class="modern-select sel-tone"></select>
+                </div>
+                <div class="tone-controls hidden">
+                    <label class="control-label">Ending</label>
+                    <select class="modern-select sel-ending"></select>
+                </div>
+            </div>
+
+            <textarea class="gabc-editor hidden"></textarea>
+            
+            <div class="chant-preview-container">
+                <div class="chant-preview loading-pulse"></div>
+            </div>
+
+            <div class="commentary" style="display:none; text-align:center; color:#888; font-size:0.8rem; margin-top:8px;"></div>
+        </div>
+    `;
+    const $card = $(cardHtml);
+    $container.append($card);
+
+    loadChantData($card, part, id);
+}
+
+function loadChantData($card, part, id) {
+    const gabcUrl = `gabc/${id}.gabc`;
+    $.get(gabcUrl, function (data) {
+        $card.find('.gabc-editor').val(data).data('full-gabc', data);
+
+        const header = getHeader(data);
+        if (header.name) $card.find('.card-title').text(header.name);
+        if (header.commentary) $card.find('.commentary').text(header.commentary).show();
+
+        renderChantSVG($card, data);
+    }).fail(function () {
+        $card.find('.chant-preview').text("Error loading chant.");
+    });
+}
+
+function renderChantSVG($card, gabc) {
+    const $preview = $card.find('.chant-preview').empty().removeClass('loading-pulse');
+
+    var ctxt;
+    if (typeof makeExsurgeChantContext === 'function') {
+        ctxt = makeExsurgeChantContext();
+    } else {
+        ctxt = new exsurge.ChantContext();
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        ctxt.rubricColor = isDark ? '#ef5350' : '#c62828';
+        ctxt.specialCharColor = isDark ? '#ef5350' : '#c62828';
+        ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
+        ctxt.annotationTextFont = ctxt.lyricTextFont;
+        ctxt.staffLineColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)';
+        ctxt.noteColor = isDark ? '#e8e8e8' : '#1a1a1a';
+    }
+
+    var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, gabc);
+    var score = new exsurge.ChantScore(ctxt, mappings, true);
+
+    var width = $card.width() - 20;
+    ctxt.width = width;
+
+    score.performLayout(ctxt);
+    score.layoutChantLines(ctxt, width, function () {
+        var svg = score.createSvgNode(ctxt);
+        $preview.append(svg);
+
+        // Responsive Note Clicks
+        $(svg).find('.neume').on('click', function (e) {
+            e.stopPropagation();
+            playAudioNote();
+        });
+    });
+}
+
+// --- Event Handlers ---
+
+// --- Ad Libitum incipit search ---
+function buildIncipitIndex() {
+    var list = [];
+    if (typeof incipits !== 'undefined') {
+        Object.keys(incipits).forEach(function(partName) {
+            var part = incipits[partName];
+            (function walk(obj, prefix) {
+                Object.keys(obj).forEach(function(key) {
+                    var val = obj[key];
+                    var text = prefix ? prefix + ' ' + key : key;
+                    if (typeof val === 'number') {
+                        list.push({ label: partName + ': ' + text, id: val, part: partName });
+                    } else if (typeof val === 'object' && val !== null) {
+                        walk(val, text);
+                    }
+                });
+            })(part, '');
+        });
+    }
+    if (typeof miscChants !== 'undefined') {
+        miscChants.forEach(function(chant) {
+            if (chant.id && chant.name) {
+                list.push({ label: 'Ad libitum: ' + chant.name, id: chant.id, part: 'Ad libitum' });
+            }
+        });
+    }
+    return list;
+}
+
+var _incipitIndex = null;
+function getIncipitIndex() {
+    if (!_incipitIndex) _incipitIndex = buildIncipitIndex();
+    return _incipitIndex;
+}
+
+function setupEventListeners() {
+    $('.nav-item').on('click', function (e) {
+        e.preventDefault();
+        appState.tab = $(this).data('tab');
+        updateNavigation();
+        updateHeader();
+        renderContent();
+    });
+
+    $('#btnRubric').on('click', function () {
+        appState.rite = appState.rite === 'novus' ? 'traditional' : 'novus';
+        localStorage.setItem('rubricMode', appState.rite === 'novus' ? 'novus' : 'traditional');
+        doPopulate();
+        autoSelectDate();
+        renderApp();
+    });
+
+    $('.modern-select').on('change', function () {
+        const id = $(this).attr('id');
+        const val = $(this).val();
+
+        if (id === 'selSunday') appState.selection.temporum = val;
+        if (id === 'selSundayNovus') appState.selection.temporum = val;
+        if (id === 'selSaint') appState.selection.sanctorum = val;
+        if (id === 'selMass') appState.selection.communia = val;
+        if (id === 'selOrdinary') appState.selection.ordinarium = val;
+
+        handleSelectionChange(id, val);
+    });
+
+    // Ad Libitum search
+    $('#searchAdlibitum').on('input', function() {
+        var q = $(this).val().toLowerCase().trim();
+        var $dd = $('#searchDropdown');
+        if (q.length < 2) { $dd.addClass('hidden').empty(); return; }
+        var results = getIncipitIndex().filter(function(item) {
+            return item.label.toLowerCase().indexOf(q) >= 0;
+        }).slice(0, 20);
+        $dd.empty();
+        if (!results.length) { $dd.addClass('hidden'); return; }
+        results.forEach(function(item) {
+            $('<div class="search-result-item">').text(item.label).on('click', function() {
+                appState.selection.adlibitum = item;
+                $('#searchAdlibitum').val(item.label);
+                $dd.addClass('hidden').empty();
+                renderContent();
+                updateHeader();
+            }).appendTo($dd);
+        });
+        $dd.removeClass('hidden');
+    });
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-input-wrapper').length) {
+            $('#searchDropdown').addClass('hidden');
+        }
+    });
+
+    // selOrdinary is now in settings panel — wire it here
+    $('#selOrdinary').off('change').on('change', function () {
+        var val = $(this).val();
+        appState.selection.ordinarium = val;
+        if (window.massOrdinary && val) {
+            var ord = window.massOrdinary[parseInt(val) - 1];
+            if (ord) {
+                ['kyrie', 'gloria', 'credo', 'sanctus', 'agnus', 'ite', 'benedicamus'].forEach(function(p) {
+                    if (ord[p]) selOrdinaries[p] = Array.isArray(ord[p]) ? ord[p][0].id : ord[p].id;
+                });
+            }
+        } else {
+            selOrdinaries = {};
+        }
+        if (selPropers || appState.tab === 'adlibitum') renderContent();
+    });
+
+    $('.segment[data-val]').on('click', function () {
+        appState.selection.novusYear = $(this).data('val');
+        $(this).siblings().removeClass('active');
+        $(this).addClass('active');
+        // Refresh
+        if ($('#selSundayNovus').val()) $('#selSundayNovus').trigger('change');
+    });
+
+
+    // --- Settings Panel ---
+    $('#btnSettings').on('click', function () {
+        $('#settingsPanel, #settingsBackdrop').addClass('active');
+    });
+    $('#btnCloseSettings, #settingsBackdrop').on('click', function () {
+        $('#settingsPanel, #settingsBackdrop').removeClass('active');
+    });
+
+    // Theme selection
+    $('#themeOptions').on('click', '.settings-option', function () {
+        var val = $(this).data('value');
+        $(this).addClass('active').siblings().removeClass('active');
+        appState.settings.theme = val;
+        localStorage.setItem('theme', val);
+        applyTheme(val);
+    });
+
+    // Accent color
+    $('#colorOptions').on('click', '.color-swatch', function () {
+        var color = $(this).data('color');
+        $(this).addClass('active').siblings().removeClass('active');
+        localStorage.setItem('accentColor', color);
+        document.documentElement.style.setProperty('--accent-color', color);
+    });
+
+    // Reading language
+    $('#langOptions').on('click', '.settings-option', function () {
+        var val = $(this).data('value');
+        $(this).addClass('active').siblings().removeClass('active');
+        appState.settings.readingLang = val;
+        localStorage.setItem('readingLang', val);
+        renderContent();
+    });
+}
+
+function initCardListeners() {
+    $('.btn-play').off('click').on('click', function () {
+        playAudioNote();
+    });
+
+    $('.btn-edit').off('click').on('click', function () {
+        var $card = $(this).closest('.card');
+        var $editor = $card.find('.gabc-editor');
+        $editor.toggleClass('hidden');
+        if (!$editor.hasClass('hidden')) $editor.focus();
+    });
+
+    $('.btn-settings').off('click').on('click', function () {
+        $(this).toggleClass('active');
+        $(this).closest('.card').find('.settings-panel').toggleClass('hidden');
+    });
+
+    // Wire per-card style selector
+    $('.sel-style').off('change').on('change', function () {
+        var $card = $(this).closest('.card');
+        var style = $(this).val();
+        var gabc = $card.find('.gabc-editor').val();
+        var isPsalmTone = style === 'psalm-tone';
+        $card.find('.tone-controls').toggleClass('hidden', !isPsalmTone);
+        if (gabc) renderChantSVG($card, gabc);
+    });
+
+    // Wire GABC editor live update
+    $('.gabc-editor').off('input').on('input', function () {
+        var $card = $(this).closest('.card');
+        var gabc = $(this).val();
+        if (gabc.length > 20) renderChantSVG($card, gabc);
+    });
+}
+
+// --- Helpers ---
+
+function handleSelectionChange(id, val) {
+    if (!val) return;
+
+    if (id === 'selSunday' || id === 'selSundayNovus') {
+        if (appState.rite === 'novus') {
+            let baseData = window.propriumNoviOrdinis[val];
+            if (baseData) {
+                selPropers = {};
+                Object.keys(baseData).forEach(k => {
+                    let d = baseData[k];
+                    selPropers[k] = (d[appState.selection.novusYear] || d.A || d);
+                });
+            }
+        } else {
+            selPropers = window.proprium[val];
+        }
+        renderContent();
+
+    } else if (id === 'selSaint') {
+        selPropers = window.proprium[val];
+        renderContent();
+
+    } else if (id === 'selMass') {
+        selPropers = window.proprium[val];
+        renderContent();
+        $('#selectionModal').removeClass('active');
+    } else if (id === 'selOrdinary') {
+        if (window.massOrdinary) {
+            let ord = window.massOrdinary[val - 1];
+            if (ord) {
+                ['kyrie', 'gloria', 'credo', 'sanctus', 'agnus', 'ite', 'benedicamus'].forEach(p => {
+                    if (ord[p]) selOrdinaries[p] = Array.isArray(ord[p]) ? ord[p][0].id : ord[p].id;
+                });
+            }
+        }
+        renderContent();
+    }
+}
+
+// getChantId is no longer needed — ID resolution is inline in renderContent().
+// Kept as a no-op for any callers.
+function getChantId(part) { return null; }
+
+// --- Date Logic Re-Implementation ---
 var Dates = {
     Computus: {
         getEaster: function (Y) {
@@ -40,7 +645,6 @@ var Dates = {
     }
 };
 
-// Ported from propers.js
 var getLiturgicalDates = function (Y) {
     var result = {};
     result.year = Y;
@@ -62,9 +666,11 @@ var getLiturgicalDates = function (Y) {
     result.holyFamily = moment(result.epiphany).add(7 - result.epiphany.day(), 'days');
     result.sundaysAfterPentecost = result.advent1.diff(result.pentecost, 'weeks') - 1;
     result.sundaysAfterEpiphany = result.septuagesima.diff(result.holyFamily, 'weeks');
-    result.ashWednesday = moment(result.pascha).subtract(46, 'days'); // Added for Novus Ordo
+    result.ashWednesday = moment(result.pascha).subtract(46, 'days');
     return result;
 };
+
+// --- Restored Liturgical Logic ---
 
 var getDateForSundayKey = function (key, dates) {
     var weekdayKeys = ['m', 't', 'w', 'h', 'f', 's'];
@@ -86,16 +692,6 @@ var getDateForSundayKey = function (key, dates) {
         case "CorpusChristi": return dates.corpusChristi;
         case "SCJ": return dates.sacredHeart;
         case "ChristusRex": return dates.ChristusRex;
-        case "EmbWedSept":
-        case "EmbFriSept":
-        case "EmbSatSept":
-        case "EmbSatSeptS":
-            var dayOffset = { 'W': 3, 'F': 5, 'S': 6 };
-            var targetDay = dayOffset[key[3]]; // Check logic
-            // Simplified implementation for Ember Sept: 
-            // Propers.js used complex logic. Let's approximate or skip for now if too complex blindly.
-            // Or just return null effectively skipping auto-select for these specific rarities unless I debug more.
-            return null;
     }
 
     var match;
@@ -148,301 +744,11 @@ var getDateForSundayKey = function (key, dates) {
     return null;
 };
 
-$(function () {
-    console.log("Mobile Propers Initializing...");
-
-    // Greeting
-    var hour = new Date().getHours();
-    var greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-    $('#greetingTime').text(greeting);
-
-    // Advanced Toggle
-    $('#toggleAdvanced').click(function () {
-        $('#advancedOptions').toggleClass('hidden');
-        $(this).find('svg').css('transform', $('#advancedOptions').hasClass('hidden') ? 'rotate(0deg)' : 'rotate(180deg)');
-    });
-
-    // Populate Selectors
-    if (typeof populateSelectors !== 'undefined') populateSelectors();
-    else doPopulate();
-
-    // --- Tab Switching Logic (Fix for about:blank error) ---
-    $('.nav-item[data-tab]').click(function (e) {
-        e.preventDefault(); // Prevent default link behavior
-        var tabName = $(this).data('tab');
-
-        // Update Nav State
-        $('.nav-item').removeClass('active');
-        $('.nav-item[data-tab="' + tabName + '"]').addClass('active');
-
-        // Show Content
-        $('.tab-content').removeClass('active').addClass('hidden');
-        $('#tabContent-' + tabName).removeClass('hidden').addClass('active');
-
-        // Update Hash
-        updateUrlHash();
-    });
-
-    // --- Hash Routing Logic ---
-    function updateUrlHash() {
-        var activeTab = $('.nav-item.active').data('tab');
-        var hash = '';
-
-        if (activeTab === 'temporum') {
-            if (window.isNovus) {
-                var val = $('#selSundayNovus').val();
-                if (val) hash = 'temporum=' + encodeURIComponent(val); // Use key or logic
-            } else {
-                var val = $('#selSunday').val();
-                if (val) hash = 'temporum=' + val;
-            }
-        } else if (activeTab === 'sanctorum') {
-            var val = $('#selSaint').val();
-            if (val) hash = 'sanctorum=' + val;
-        } else if (activeTab === 'communia') {
-            var val = $('#selMass').val();
-            if (val) hash = 'communia=' + val;
-        } else if (activeTab === 'ordinarium') {
-            // Ordinarium usually doesn't have a specific page state other than the selection
-            var val = $('#selOrdinary').val();
-            if (val) hash = 'ordinarium=' + val;
-        }
-
-        // If ordinary is selected, maybe keep it in hash too? 
-        // Legacy propers.html mostly tracked the main selection.
-        // Let's stick to the main tab selection.
-
-        if (hash) {
-            window.location.hash = hash;
-        } else {
-            // If no selection, maybe just tab?
-            window.location.hash = activeTab;
-        }
-    }
-
-    // Listen for selection changes to update hash
-    $('#selSunday, #selSundayNovus, #selSaint, #selMass, #selOrdinary').change(function () {
-        updateUrlHash();
-    });
-
-    // Core Logic Listeners (RESTORED)
-    $('#selSunday, #selSaint, #selMass').change(selectedDay);
-    $('#selSundayNovus').change(selectedDayNovus);
-    $('#selYearNovus').change(function () {
-        window.novusYear = $(this).val();
-        if ($('#selSundayNovus').val()) $('#selSundayNovus').trigger('change');
-    });
-
-    // On Load: Check Hash
-    function loadFromHash() {
-        var hash = window.location.hash.substring(1);
-        if (hash) {
-            var parts = hash.split('=');
-            var tab = parts[0];
-            var proper = decodeURIComponent(parts[1] || '');
-
-            // Validate tab
-            if (['temporum', 'sanctorum', 'communia', 'ordinarium'].indexOf(tab) !== -1) {
-                // Click tab
-                $('.nav-item[data-tab="' + tab + '"]').click();
-
-                // Select Proper if exists
-                if (proper) {
-                    if (tab === 'temporum') {
-                        // Check mode? 
-                        // If logic requires deducing mode from key, it's hard.
-                        // Assuming current mode for now, or check key format?
-                        // Novus keys are strings like "First Sunday...", Old keys are "Adv1"
-
-                        var isNovusKey = proper.indexOf('Sunday') !== -1 || proper.indexOf(' ') !== -1; // heuristic
-                        if (isNovusKey && !window.isNovus) {
-                            $('#btnCalendar').click(); // Switch to Novus
-                        } else if (!isNovusKey && window.isNovus) {
-                            $('#btnCalendar').click(); // Switch to Trad
-                        }
-
-                        if (window.isNovus) {
-                            $('#selSundayNovus').val(proper).change();
-                        } else {
-                            $('#selSunday').val(proper).change();
-                        }
-                    } else if (tab === 'sanctorum') {
-                        $('#selSaint').val(proper).change();
-                    } else if (tab === 'communia') {
-                        $('#selMass').val(proper).change();
-                    } else if (tab === 'ordinarium') {
-                        $('#selOrdinary').val(proper).change();
-                    }
-                }
-            }
-        }
-    }
-
-    // Delay loadFromHash slightly or call immediately? Call after population.
-    // We can call it at end of init.
-
-
-    $('#selOrdinary').change(selectedOrdinary);
-    $('#btnCalendar, #btnCalendarDesktop').click(toggleCalendarMode);
-
-    // PDF / Print
-
-
-    // Audio Playback
-    $(document).on('click', '.btnPlay', function (e) {
-        e.preventDefault();
-        var part = $(this).closest('.chant-item').attr('part');
-        playAudio(part);
-    });
-
-    // --- Settings & Modal Logic ---
-    $('#btnSettings').click(function () { $('#settingsModal').removeClass('hidden'); });
-    $('#closeSettings, .modal-backdrop').click(function () { $('#settingsModal').addClass('hidden'); });
-
-    // Init Settings
-    initSettings();
-
-    // Load State from Hash (at end of init)
-    loadFromHash();
-    $(window).on('hashchange', loadFromHash);
-
-    // Editor & Settings Toggles
-    $('.toggleShowGabc').click(function (e) {
-        e.stopPropagation();
-        var $card = $(this).closest('.chant-item');
-        $card.find('.gabc-editor').toggleClass('hidden');
-    });
-    $('.toggleSettings').click(function (e) {
-        e.stopPropagation();
-        var $card = $(this).closest('.chant-item');
-        $card.find('.chant-settings').toggleClass('hidden');
-    });
-
-    // Chant Style / Psalm Tone Controls
-    $('.selStyle').change(function () {
-        var $card = $(this).closest('.chant-item');
-        var style = $(this).val();
-        var part = $card.attr('part');
-
-        if (style === 'psalm-tone') {
-            $card.find('.tone-group, .ending-group, .solemn-group').removeClass('hidden');
-            // Populate Tones if empty
-            var $selTone = $card.find('.selTone');
-            if ($selTone.children().length === 0) {
-                $.each(g_tones, function (k, v) {
-                    $selTone.append($('<option>', { value: k, text: k }));
-                });
-                $selTone.val('8.'); // Default
-                $selTone.trigger('change');
-            }
-        } else {
-            $card.find('.tone-group, .ending-group, .solemn-group').addClass('hidden');
-        }
-        updateTextAndChantForPart(part);
-    });
-
-    $('.selTone').change(function () {
-        var $card = $(this).closest('.chant-item');
-        var tone = $(this).val();
-        var part = $card.attr('part');
-        var endings = getEndings(tone);
-        var $selEnding = $card.find('.selEnding').empty();
-
-        if (endings.length > 0) {
-            $.each(endings, function (i, e) {
-                $selEnding.append($('<option>', { value: e, text: e }));
-            });
-            $card.find('.ending-group').removeClass('hidden');
-        } else {
-            $card.find('.ending-group').addClass('hidden');
-        }
-        updateTextAndChantForPart(part);
-    });
-
-    $('.selEnding, .cbSolemn').change(function () {
-        var part = $(this).closest('.chant-item').attr('part');
-        updateTextAndChantForPart(part);
-    });
-
-    // Apply stored rubric mode on load (before auto-select)
-    if (window.isNovus) {
-        $('#btnCalendar').text('Novus Ordo');
-        $('#selSunday').addClass('hidden');
-        $('#selSundayNovus, #selYearNovus').removeClass('hidden');
-    }
-
-    // Auto-select Date (Wait for data)
-    // We call this after population.
-    autoSelectDate();
-
-    // Trigger update if already selected
-    if ($('#selSunday').val()) updateDay('selSunday');
-});
-
-function initSettings() {
-    // 1. Theme
-    var storedTheme = localStorage.getItem('theme') || 'system';
-    applyTheme(storedTheme);
-    $('#themeSelector .segment[data-value="' + storedTheme + '"]').addClass('active');
-
-    $('#themeSelector .segment').click(function () {
-        var val = $(this).data('value');
-        localStorage.setItem('theme', val);
-        applyTheme(val);
-        $('#themeSelector .segment').removeClass('active');
-        $(this).addClass('active');
-    });
-
-    // 2. Translations
-    var storedTrans = JSON.parse(localStorage.getItem('translations') || '{"latin":true,"english":true,"french":false}');
-    $('#cbLatin').prop('checked', storedTrans.latin);
-    $('#cbEnglish').prop('checked', storedTrans.english);
-    $('#cbFrench').prop('checked', storedTrans.french);
-
-    $('#cbLatin, #cbEnglish, #cbFrench').change(function () {
-        var newTrans = {
-            latin: $('#cbLatin').is(':checked'),
-            english: $('#cbEnglish').is(':checked'),
-            french: $('#cbFrench').is(':checked')
-        };
-        localStorage.setItem('translations', JSON.stringify(newTrans));
-        if (selDay && !isNovus) updateAllParts();
-    });
-
-    // 3. Chant Style
-    var storedStyle = localStorage.getItem('defaultStyle') || 'full';
-    $('#defStyleSelector .segment[data-value="' + storedStyle + '"]').addClass('active');
-    // Apply initial
-    $('.selStyle').val(storedStyle);
-
-    $('#defStyleSelector .segment').click(function () {
-        var val = $(this).data('value');
-        localStorage.setItem('defaultStyle', val);
-        $('#defStyleSelector .segment').removeClass('active');
-        $(this).addClass('active');
-
-        // Apply immediately to all
-        $('.selStyle').val(val).trigger('change');
-    });
-}
-
-function applyTheme(theme) {
-    if (theme === 'system') {
-        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        $('body').attr('data-theme', isDark ? 'dark' : 'light');
-    } else {
-        $('body').attr('data-theme', theme);
-    }
-}
-
-
 function autoSelectDate() {
     var today = moment().startOf('day');
     var dates = getLiturgicalDates(today.year());
 
-    console.log("Auto-selecting date for: " + today.format('YYYY-MM-DD'));
-
-    if (isNovus) {
+    if (appState.rite === 'novus') {
         if (window.sundaysNovusOrdo) {
             // Calculate expected key
             var expectedKey = getNovusOrdoKey(today, dates);
@@ -467,15 +773,12 @@ function autoSelectDate() {
 
                 if (bestMatch) {
                     $('#selSundayNovus').val(bestMatch).change();
-                    return;
                 }
             }
         }
     } else {
-        // Traditional Logic
         if (window.sundayKeys) {
             var bestMatch = null;
-
             for (var i = 0; i < window.sundayKeys.length; i++) {
                 var item = window.sundayKeys[i];
                 if (!item.key) continue;
@@ -483,7 +786,8 @@ function autoSelectDate() {
 
                 if (d && d.isSame(today, 'day')) {
                     $('#selSunday').val(item.key).change();
-                    return;
+                    bestMatch = null;
+                    break;
                 }
                 if (d && d.isBefore(today) && today.diff(d, 'days') < 7) {
                     bestMatch = item.key;
@@ -494,742 +798,118 @@ function autoSelectDate() {
             }
         }
     }
-}
 
-function getNovusOrdoKey(date, dates) {
-    if (date.isSameOrAfter(dates.advent1) && date.isBefore(dates.nativitas)) {
-        var week = Math.floor(date.diff(dates.advent1, 'weeks')) + 1;
-        if (date.day() !== 0) return null; // Only Sundays
-        return getOrdinal(week) + " Sunday of Advent";
-    }
-
-    if (date.isSame(dates.nativitas, 'day')) return "Nativity Mass at Day";
-
-    if (date.isSameOrAfter(dates.ashWednesday) && date.isBefore(dates.pascha)) {
-        if (date.isSame(dates.ashWednesday, 'day')) return "Ash Wednesday";
-
-        if (date.isSameOrAfter(dates.quad1)) {
-            var weekLent = Math.floor(date.diff(dates.quad1, 'weeks')) + 1;
-            if (weekLent === 6) return "Palm Sunday";
-            if (weekLent <= 5) return getOrdinal(weekLent) + " Sunday in Lent";
+    // Auto-select Saint if there's a match today
+    if (window.saintKeys) {
+        var bestSaintMatch = null;
+        for (var i = 0; i < window.saintKeys.length; i++) {
+            var item = window.saintKeys[i];
+            if (!item.key) continue;
+            var m = moment(item.key, 'MMMD').year(today.year());
+            if (m.isValid() && m.isSame(today, 'day')) {
+                bestSaintMatch = item.key;
+                break;
+            }
+        }
+        if (bestSaintMatch) {
+            $('#selSaint').val(bestSaintMatch).change();
         }
     }
 
-    if (date.isSameOrAfter(dates.pascha) && date.isBefore(dates.pentecost)) {
-        if (date.isSame(dates.pascha, 'day')) return "Easter Sunday";
-        var weekEaster = Math.floor(date.diff(dates.pascha, 'weeks')) + 1;
-        if (weekEaster >= 2 && weekEaster <= 7) return getOrdinal(weekEaster) + " Sunday of Easter";
+    // Default Votivae to first available if none selected
+    if (window.otherKeys && !appState.selection.communia) {
+        for (var i = 0; i < window.otherKeys.length; i++) {
+            if (window.otherKeys[i].key) {
+                $('#selMass').val(window.otherKeys[i].key).change();
+                break;
+            }
+        }
     }
-
-    if (date.isSame(dates.pentecost, 'day')) return "Pentecost";
-
-    var trinity = moment(dates.pentecost).add(7, 'days');
-    if (date.isSame(trinity, 'day') || (date.isAfter(trinity) && date.diff(trinity, 'days') < 7)) return "Most Holy Trinity";
-
-    var corpus = moment(dates.pentecost).add(14, 'days');
-    if (date.isSame(corpus, 'day') || (date.isAfter(corpus) && date.diff(corpus, 'days') < 7)) return "Body and Blood of Christ";
-
-    if (date.isAfter(dates.pentecost) && date.isBefore(dates.advent1)) {
-        var weeksFromAdv = Math.ceil(dates.advent1.diff(date, 'days') / 7);
-        var n = 35 - weeksFromAdv;
-
-        if (n === 34) return "Christ the King";
-        if (n >= 1 && n <= 33) return getOrdinal(n) + " Sunday";
-    }
-
-    return null;
 }
 
-function getOrdinal(n) {
-    var ordinals = ["", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
-        "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
-        "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
-        "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth"];
-    return ordinals[n];
-}
-
-// --- Core Logic ---
+// ... Additional helper functions from original file can be added here if critical ...
 
 function doPopulate() {
-    console.log("Populating selectors...");
-    var populate = function (keys, $sel) {
-        if (!keys || !$sel.length) return;
-        var key = 'title';
-        $.each(keys, function (i, o) {
-            if (typeof (o) == 'string') o = { key: o, title: o.length == 1 ? 'Year ' + o : o };
-            var $opt = $('<option></option>').text(o[key] || o.title);
-            if (o.key) $opt.val(o.key);
-            $sel.append($opt);
-        });
-    };
-
     if (typeof window.sundayKeys !== 'undefined') populate(window.sundayKeys, $('#selSunday'));
     if (typeof window.saintKeys !== 'undefined') populate(window.saintKeys, $('#selSaint'));
     if (typeof window.otherKeys !== 'undefined') populate(window.otherKeys, $('#selMass'));
-
-    // Populate Novus Ordo
-    if (typeof window.sundaysNovusOrdo !== 'undefined') {
-        populate(window.sundaysNovusOrdo, $('#selSundayNovus'));
-        // Populate Years
-        var years = ['A', 'B', 'C'];
-        populate(years, $('#selYearNovus'));
-    }
-
-    if (typeof window.massOrdinary !== 'undefined') {
-        var ordinaryKeys = window.massOrdinary.map(function (e, i) {
-            return { key: (i + 1).toString(), title: (i + 1) + ' - ' + (e.name || e.season) };
+    if (typeof window.sundaysNovusOrdo !== 'undefined') populate(window.sundaysNovusOrdo, $('#selSundayNovus'));
+    if (window.massOrdinary) {
+        var opts = window.massOrdinary.map(function(e, i) {
+            var label = e.name ? (e.name + ' — ' + e.season) : e.season;
+            return { key: (i + 1).toString(), title: label, en: label };
         });
-        ordinaryKeys.unshift({ key: '', title: 'Chant Mass Ordinaries...' });
-        populate(ordinaryKeys, $('#selOrdinary'));
+        populate(opts, $('#selOrdinary'));
     }
 }
 
-var selectedDay = function (e) {
-    selDay = $(this).val();
-    // Reset others
-    var id = this.id;
-    $('#selSunday, #selSaint, #selMass').not(this).val('');
+function populate(keys, $sel) {
+    if (!keys) return;
+    $sel.empty();
 
-    // Real Lookup
-    var proprium = window.proprium || window.propriumNoviOrdinis;
-    if (typeof proprium !== 'undefined') {
-        selPropers = proprium[selDay];
-        updateAllParts();
+    var defaultText = 'Eligas...';
+    var id = $sel.attr('id');
+    if (id === 'selSunday' || id === 'selSundayNovus') defaultText = 'Eligas diem...';
+    else if (id === 'selSaint') defaultText = 'Eligas festum...';
+    else if (id === 'selMass') defaultText = 'Eligas missam...';
+    else if (id === 'selOrdinary') defaultText = 'Ordinaria Missæ in cantu gregoriano...';
 
-        // Update Header
-        var title = $(this).find('option:selected').text();
-        if (title) $('#greetingTime').text(title);
-    }
-};
-
-var selectedDayNovus = function (e) {
-    selDay = $(this).val();
-
-    // Novus Ordo Lookup
-    // propriumNoviOrdinis is key -> day object
-    if (window.propriumNoviOrdinis && window.propriumNoviOrdinis[selDay]) {
-        var baseProps = window.propriumNoviOrdinis[selDay];
-
-        // Handle Cycles (A, B, C) if present
-        selPropers = {}; // Reset
-
-        // Deep copy/merge logic for Cycles
-        Object.keys(baseProps).forEach(function (part) {
-            var val = baseProps[part];
-            if (val && (val.A || val.B || val.C)) {
-                // Cycle logic
-                selPropers[part] = val[window.novusYear] || val.A; // Default to A if missing
-            } else {
-                selPropers[part] = val;
-            }
-        });
-
-        // Also normalize property names if needed (introitus -> introitus)
-        // Novus data uses same keys: introitus, graduale, etc.
-        updateAllParts();
-
-        var title = $(this).find('option:selected').text();
-        if (title) $('#greetingTime').text(title + " (Year " + window.novusYear + ")");
-    }
-};
-
-var selectedOrdinary = function (e) {
-    var val = $(this).val();
-
-    // Reset
-    window.selOrdinaries = {};
-
-    if (val && window.massOrdinary) {
-        var ord = window.massOrdinary[val - 1]; // 1-based index
-        if (ord) {
-            var parts = ['kyrie', 'gloria', 'credo', 'sanctus', 'agnus', 'ite', 'benedicamus'];
-            parts.forEach(function (p) {
-                if (ord[p]) {
-                    // Take first if array, or object
-                    var item = Array.isArray(ord[p]) ? ord[p][0] : ord[p];
-                    window.selOrdinaries[p] = item.id;
-                }
-            });
+    $sel.append(new Option(defaultText, ''));
+    var $currentGroup = null;
+    $.each(keys, function (i, o) {
+        if (typeof o === 'string') o = { key: o, title: o };
+        // Group header (no key, or group:true)
+        if (!o.key || o.group) {
+            $currentGroup = $('<optgroup>').attr('label', o.title || o.en);
+            $sel.append($currentGroup);
+            return;
         }
-    }
-    updateAllParts();
-};
-
-function toggleCalendarMode() {
-    isNovus = !isNovus;
-    localStorage.setItem('rubricMode', isNovus ? 'novus' : 'traditional');
-    var labels = $('.btn-text-toggle'); // Select both desktop and mobile buttons
-    labels.text(isNovus ? 'Novus Ordo' : 'Traditional');
-
-    // Toggle Selectors Visibility
-    if (isNovus) {
-        $('#selSunday').addClass('hidden');
-        $('#selSundayNovus, #selYearNovus').removeClass('hidden');
-    } else {
-        $('#selSunday').removeClass('hidden');
-        $('#selSundayNovus, #selYearNovus').addClass('hidden');
-    }
-
-    // Reset Selection
-    selDay = null;
-    selPropers = null;
-    // Clear dropdowns visually to avoid confusion (optional, but good UX)
-    $('#selSunday').val('');
-    $('#selSundayNovus').val('');
-
-    // Clear content instantly or wait for auto-select?
-    // Let's clear to be safe then auto-select.
-    $('.chant-item').hide();
-    $('.chant-name').text('');
-
-    // Trigger Auto Select for new mode
-    autoSelectDate();
-}
-
-// --- Audio Playback ---
-// Basic GABC parser to sequence of frequencies
-var noteMap = {
-    'c': 130.81, 'd': 146.83, 'e': 164.81, 'f': 174.61, 'g': 196.00, 'a': 220.00, 'b': 246.94,
-    'h': 246.94, // German B natural
-    'i': 261.63, 'j': 293.66, 'k': 329.63, 'l': 349.23, 'm': 392.00
-};
-// Helper to shift octaves if needed, but standard GABC fits in range c3-c5 usually.
-// Notes in GABC: c4 is C4 (Middle C) = 261.63 Hz.
-// In GABC data (exsurge): key line c4 -> c is on 4th line.
-// Let's use tones.play(noteName) from tones.js if available.
-// tones.js: notes.play("c4")
-
-function playAudio(part) {
-    if (!window.tones || !window.tones.play) {
-        alert("Audio library not loaded.");
-        return;
-    }
-
-    // Get GABC from editor (which is updated)
-    var gabc = $('#txt' + part[0].toUpperCase() + part.slice(1)).val();
-    if (!gabc) return;
-
-    // Parse GABC for notes
-    // Look for ( note ) format. e.g. (f g h)
-    // Regex from psalmtone.js: /([cf]b?[1-4])|[a-m]/
-    // We need to just extract the note sequence.
-    var notes = [];
-    var inParen = false;
-    for (var i = 0; i < gabc.length; i++) {
-        var c = gabc[i];
-        if (c === '(') { inParen = true; continue; }
-        if (c === ')') { inParen = false; continue; }
-
-        if (inParen && /[a-l]/.test(c)) { // m is rarely used, but valid
-            // Translate GABC height char to Note Name
-            // This is tricky without knowing the Clef. 
-            // We need to parse Clef first (e.g. c4, f3).
-            // For now, let's assume specific mapping or just play the relative intervals?
-            // tones.play() takes note strings like "c4".
-            // We need a full parser. For this task, we might just play a sample tone?
-            // "Read Notes" implies reading the actual chant.
-            // Let's try to map 'a'-'l' to a fixed scale mostly matching c4 clef.
-            // c4 clef: f=C4, g=D4, h=E4, i=F4, j=G4, k=A4, l=B4, m=C5
-            // This is roughly correct.
-            var map = {
-                'a': 'A3', 'b': 'B3', 'c': 'C4', 'd': 'D4', 'e': 'E4', 'f': 'F4', 'g': 'G4',
-                'h': 'A4', 'i': 'B4', 'j': 'C5', 'k': 'D5', 'l': 'E5', 'm': 'F5'
-            };
-            // This mapping is for c4 clef where 'g' is on bottom line (D?). NO.
-            // c4 clef: C is on 4th line.
-            // Line 1: D, 2: F, 3: A, 4: C
-            // Valid GABC heights: 
-            // a=lowest.
-            // Let's use a scale starting at A3.
-            // a=A3, b=B3, c=C4, d=D4, e=E4, f=F4, g=G4, h=A4, i=B4, j=C5, k=D5, l=E5, m=F5
-            // This is a diatonic scale of C major (white keys).
-            if (map[c]) notes.push(map[c]);
+        // Title-only header row (has title but no key)
+        if (o.title && !o.key) {
+            $currentGroup = null;
+            return;
         }
-    }
-
-    // Play notes sequence
-    playSequence(notes);
-}
-
-function playSequence(notes) {
-    if (notes.length === 0) return;
-    var now = tones.context.currentTime;
-    var step = 0.4; // seconds per note
-    notes.forEach(function (n, i) {
-        // tones.play(note, duration, time) checking tones.js signature?
-        // tones.js source: notes.play(freq|name, options) ???
-        // tones.js had playFrequency.
-        // Let's assume tones.play(note) plays immediately.
-        // We need scheduling.
-        setTimeout(function () {
-            tones.play(n);
-        }, i * 400); // 400ms delay
-    });
-}
-
-// --- Print PDF ---
-function printPDF() {
-    // Collect all visible chants
-    var gabcData = [];
-    $('.chant-item:visible').each(function () {
-        var part = $(this).attr('part');
-        var gabc = $(this).find('.gabc-editor').val();
-        if (gabc) {
-            gabcData.push(gabc);
-        }
-    });
-
-    if (gabcData.length === 0) {
-        alert("No chants to print.");
-        return;
-    }
-
-    // Create form handling logic similar to legacy
-    // Post to http://sourceandsummit.com/editor/legacy/Process.php (or similar)
-    // Actually, propers.js uses http://gregorio.gabrielmass.com/cgi/process.pl or similar?
-    // Let's check the old util.js linkSelector: http://gregorio.gabrielmass.com/cgi/process.pl
-    // But recently likely using sourceandsummit.
-
-    // Simpler: Just print the page? 
-    // Use window.print() but styled for print?
-    // The user request was "PDF Generation", often implying the PDF service.
-    // Let's try `window.print()` first as it works well with @media print if defined.
-    // modern.css might not have print styles.
-    // If not, let's use the legacy method via form submission to sourceandsummit if we can finding the URL.
-    // Found in propers.html: form action="https://sourceandsummit.com/editor/legacy/Process.php"
-
-    var $form = $('<form action="https://www.sourceandsummit.com/editor/legacy/process.php" method="POST" target="_blank"></form>');
-    // We need to concat all GABC into one 'gabc' field or multiple?
-    // Legacy form: input name="gabc[]"
-    gabcData.forEach(function (g, i) {
-        $('<input>').attr({ type: 'hidden', name: 'gabc[]', value: g }).appendTo($form);
-    });
-    // Add options
-    $('<input>').attr({ type: 'hidden', name: 'croppdf', value: 'N' }).appendTo($form);
-    $('<input>').attr({ type: 'hidden', name: 'paper', value: window.paperSize || 'letter' }).appendTo($form);
-
-    $form.appendTo('body').submit().remove();
-}
-
-// --- Update Text & Chant (Logic) ---
-function updateTextAndChantForPart(part) {
-    if (!selPropers) return;
-
-    var $card = $('.chant-item[part="' + part + '"]');
-    var $txt = $card.find('.gabc-editor');
-    var style = $card.find('.selStyle').val();
-
-    if (style === 'psalm-tone') {
-        // Generate Psalm Tone
-        var tone = $card.find('.selTone').val();
-        var ending = $card.find('.selEnding').val();
-        var solemn = $card.find('.cbSolemn').is(':checked');
-
-        // Use text from selPropers (e.g., introitusText)
-        // Check `selPropers[part + 'Text']` or `selPropers['text' + part]`?
-        // Looking at propers.js, typically `selPropers.introitus`. Wait, that's the ID?
-        // selPropers might have the full object or just properties.
-        // propers.js: `selPropers = propriumNoviOrdinis[...]`. 
-        // If it's old `propers.js` data, `introitus` might be the GABC, not text.
-        // We need the TEXT. If we only have GABC, we can strip it.
-        // But `selPropers` usually has `introitus` as ID.
-        // If we don't have raw text, we can't generate tone easily without stripping GABC first.
-
-        // Let's try to fetch the GABC first (if not loaded), strip it, then apply tone.
-        var fullGabc = $txt.data('full-gabc'); // Store full GABC when loaded
-        if (!fullGabc) {
-            // If not stored, maybe it's in the textarea already?
-            fullGabc = $txt.val();
-        }
-
-        if (fullGabc) {
-            // Strip GABC to get text
-            var text = fullGabc.replace(/\([^\)]*\)/g, '').replace(/\s+/g, ' ').trim();
-            // Remove header
-            text = text.replace(/^[\s\S]*?%%\s?\n/, ''); // Header
-
-            // Apply Tone
-            var toneGabc = applyPsalmTone({
-                text: text,
-                gabc: g_tones[tone],
-                clef: g_tones[tone].clef,
-                format: bi_formats.gabc,
-                favor: {
-                    termination: ending,
-                    solemn: solemn
-                }
-            });
-
-            $txt.val(toneGabc);
-            // Render
-            layoutChantFromGabc(part, toneGabc);
-        }
-    } else {
-        // Full Chant
-        // Revert to original ID or GABC
-        var id = getChantId(part);
-        if (id) layoutChant(part, id);
-    }
-}
-
-
-function updateAllParts() {
-    $('.chant-item').hide(); // Hide all first
-
-    // Always try to show ordinary parts if selected, even if selPropers is null (rare case?)
-    // But usually we need both. 
-
-    if (!selPropers) return;
-
-    // Handle Readings (Epistle/Gospel)
-    if (!isNovus) {
-        var readings = null;
-        var prop = window.proprium && window.proprium[selDay];
-        var ref = prop && prop.ref;
-
-        // Logic from propers.js to find reading key
-        var match = /^Pent(Epi\d)$/.exec(selDay);
-        var lecDay = match ? match[1] : selDay;
-
-        if (window.lectiones) {
-            readings = window.lectiones[lecDay] || (ref && window.lectiones[ref]);
-        }
-
-        if (readings && readings.length > 0) {
-            var editions = [];
-            if ($('#cbLatin').is(':checked')) editions.push({ e: 'vulgate', l: 'latin', name: 'Latin' });
-            if ($('#cbEnglish').is(':checked')) editions.push({ e: 'douay-rheims', l: 'english', name: 'English' });
-            if ($('#cbFrench').is(':checked')) editions.push({ e: 'aelf', l: 'french', name: 'French' });
-
-            // Epistle (Index 0)
-            if (readings[0]) {
-                $('#divEpistle').show();
-                var $ep = $('#epistle-preview').empty();
-
-                editions.forEach(function (ed) {
-                    var $container = $('<div class="reading-version"></div>').appendTo($ep);
-                    $container.append('<h4>' + ed.name + '</h4><div class="loading">Loading...</div>');
-
-                    getReading({ ref: readings[0], edition: ed.e, language: ed.l.slice(0, 2) }).then(function (text) {
-                        $container.find('.loading').remove();
-                        $container.append(text);
-                    }).fail(function (e) {
-                        $container.find('.loading').text('Error loading ' + ed.name);
-                    });
-                });
-            } else {
-                $('#divEpistle').hide();
-            }
-
-            // Gospel (Index 1)
-            if (readings[1]) {
-                $('#divGospel').show();
-                var $gp = $('#gospel-preview').empty();
-
-                editions.forEach(function (ed) {
-                    var $container = $('<div class="reading-version"></div>').appendTo($gp);
-                    $container.append('<h4>' + ed.name + '</h4><div class="loading">Loading...</div>');
-
-                    getReading({ ref: readings[1], edition: ed.e, language: ed.l.slice(0, 2) }).then(function (text) {
-                        $container.find('.loading').remove();
-                        $container.append(text);
-                    }).fail(function (e) {
-                        $container.find('.loading').text('Error loading ' + ed.name);
-                    });
-                });
-            } else {
-                $('#divGospel').hide();
-            }
+        var $opt = $(new Option(o.title || o.en, o.key));
+        if ($currentGroup) {
+            $currentGroup.append($opt);
         } else {
-            $('#divEpistle, #divGospel').hide();
-        }
-    } else {
-        // Novus Ordo readings logic (if any) or hide
-        $('#divEpistle, #divGospel').hide();
-    }
-
-    // Iterate all chant items
-    $('div.chant-item').each(function () {
-        var $el = $(this);
-        var part = $el.attr('part'); // Use $el for consistency
-
-        // Skip hidden checks? Or minimal checks.
-        if (part === 'epistle' || part === 'gospel') return; // Handled above
-
-        // Verses Logic (Introit, Offertory, Communion)
-        // Map part to verse key: introitus -> inVerses
-        var shortMap = {
-            'introitus': 'in',
-            'offertorium': 'of',
-            'communio': 'co'
-        };
-        if (shortMap[part] && selPropers[shortMap[part] + 'Verses']) {
-            var verseText = selPropers[shortMap[part] + 'Verses'];
-            var $v = $el.find('.chant-verse');
-            if (!$v.length) {
-                $v = $('<div class="chant-verse" style="margin-top:10px; font-style:italic; opacity:0.8;"></div>').appendTo($el.find('.chant-content'));
-            }
-            $v.text("℣. " + verseText);
-        }
-
-        // Skip if explicity disabled in propers
-        if (selPropers[part] === false) return;
-
-        var id = getChantId(part);
-        if (id) {
-            $el.show();
-            // Assuming layoutChant handles re-entrancy or we clear it.
-            // layoutChant clears preview.
-            layoutChant(part, id);
+            $sel.append($opt);
         }
     });
 }
 
-// -- New UI Logic --
+function initTheme() {
+    var theme = appState.settings.theme;
+    applyTheme(theme);
 
-
-function getChantId(part) {
-    // 1. Check Ordinaries first (specific parts)
-    if (window.selOrdinaries && window.selOrdinaries[part]) return window.selOrdinaries[part];
-
-    if (!selPropers) return null;
-
-    // Direct mapping
-    var map = {
-        'introitus': 'inID',
-        'graduale': 'grID',
-        'alleluia': 'alID',
-        'tractus': 'trID',
-        'offertorium': 'ofID',
-        'communio': 'coID',
-        'sequentia': 'seID',
-        'asperges': 'asID',
-        'vidi': 'viID'
-    };
-
-    // Novus Ordo Data structure is often: introitus: [{id: "123", incipit: "..."}]
-    if (isNovus) {
-        if (selPropers[part]) {
-            var val = selPropers[part];
-            // If array, take first (or user could select loops? Keep simple for now)
-            if (Array.isArray(val) && val.length > 0) return val[0].id;
-            if (val.id) return val.id;
-        }
-        return null;
-    }
-
-    // 2. Try mapped ID (e.g., inID) [LEGACY / TRAD]
-    if (map[part] && selPropers[map[part]]) return selPropers[map[part]];
-
-    // 3. Try direct proper lookup (some might be objects/strings)
-    if (selPropers[part]) return selPropers[part];
-
-    // 4. Try legacy ID format (e.g., introitusID)
-    if (selPropers[part + 'ID']) return selPropers[part + 'ID'];
-
-    return null;
-}
-
-function layoutChant(part, id) {
-    var $preview = $('#' + part + '-preview');
-    $preview.empty().text('Loading...');
-
-    var gabcUrl = 'gabc/' + id + '.gabc';
-
-    $.get(gabcUrl, function (data) {
-        // Store full GABC for toggling back
-        var $card = $('.chant-item[part="' + part + '"]');
-        var $txt = $card.find('.gabc-editor');
-        $txt.val(data);
-        $txt.data('full-gabc', data); // Cache for psalm tone generation
-
-        layoutChantFromGabc(part, data);
-
-        var header = getHeader(data);
-        if (header && header.name) {
-            $('#div' + part[0].toUpperCase() + part.slice(1) + ' .chant-name').text(header.name);
-        }
-
-    }).fail(function () {
-        $preview.text('Error loading.');
+    // Sync settings panel active states
+    $('#themeOptions .settings-option').each(function () {
+        $(this).toggleClass('active', $(this).data('value') === theme);
     });
-}
 
-function layoutChantFromGabc(part, gabc) {
-    var $preview = $('#' + part + '-preview');
-    // Clear previous SVG but keep container structure implies we empty it.
-    $preview.empty();
-
-    // --- 1. Header & Commentary Extraction ---
-    var header = getHeader(gabc);
-
-    // Logic from propers.js to extracting commentary
-    var commentary = header.commentary;
-    // Handle the visual commentary div
-    var $chantCommentary = $preview.parent().prev('.commentary');
-    if ($chantCommentary.length === 0) {
-        $chantCommentary = $('<div class="commentary"></div>').insertBefore($preview.parent());
-    }
-    $chantCommentary.text(commentary || '').toggle(!!commentary);
-
-    // --- Inject Annotations (Force Legacy Style) ---
-    // User wants "Intr." and "II" exactly like old app.
-    // We must strip existing annotations type match and enforce our abbreviations.
-    var splitIdx = gabc.indexOf('%%');
-    var headerStr = (splitIdx !== -1) ? gabc.substring(0, splitIdx) : gabc;
-    var bodyStr = (splitIdx !== -1) ? gabc.substring(splitIdx) : "";
-
-    // Parse header fields for logic
-    // (We use a temp parsing since getHeader might be outside or simple)
-    var modeMatch = headerStr.match(/mode:\s*([^;\r\n]+)/i);
-    var typeMatch = headerStr.match(/office-part:\s*([^;\r\n]+)/i);
-    var mode = modeMatch ? modeMatch[1].trim() : '';
-    var type = typeMatch ? typeMatch[1].trim() : ''; // preserve case for now
-
-    // Remove existing annotation lines to avoid duplicates/conflicts
-    headerStr = headerStr.replace(/annotation:\s*[^;\r\n]+;[\r\n]*/gi, "");
-
-    var partAbbrev = {
-        'introitus': 'Intr.', 'graduale': 'Grad.', 'alleluia': 'All.',
-        'tractus': 'Tract.', 'sequentia': 'Seq.', 'offertorium': 'Offert.',
-        'communio': 'Comm.', 'antiphona': 'Ant.', 'responsorium': 'Resp.',
-        'hymnus': 'Hymn.', 'kyrie': 'Kyrie', 'gloria': 'Gloria',
-        'credo': 'Credo', 'sanctus': 'Sanctus', 'agnus': 'Agnus'
-    };
-    // Legacy propers.js uses lowercase numerals which become small-caps via CSS
-    var romanNumeral = ['', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
-
-    // Determine Display Type
-    var dispType = partAbbrev[type.toLowerCase()];
-    if (!dispType && type.length > 0) {
-        dispType = type.charAt(0).toUpperCase() + type.slice(1);
-    }
-
-    // Determine Display Mode
-    var dispMode = mode;
-    var modeNum = parseInt(mode);
-    if (!isNaN(modeNum) && romanNumeral[modeNum]) {
-        dispMode = romanNumeral[modeNum];
-    }
-
-    var annotations = [];
-    if (dispType) {
-        annotations.push(dispType);
-        // Show mode unless it's just a Verse (which isn't usually a main part type, but for safety)
-        if (dispType !== 'V/.' && dispMode) {
-            annotations.push(dispMode);
-        }
-    } else if (dispMode) {
-        annotations.push(dispMode);
-    }
-
-    if (annotations.length > 0) {
-        var insertion = annotations.map(function (a) { return "annotation: " + a + ";"; }).join('\n');
-        // Append to headerStr
-        headerStr = headerStr.trim() + '\n' + insertion + '\n';
-        gabc = headerStr + bodyStr;
-    }
-
-    // --- 3. Exsurge Context & Rendering ---
-    // Use the factory from util.js if available to ensure exact legacy styling (sizes, fonts)
-    var ctxt;
-    if (typeof makeExsurgeChantContext === 'function') {
-        ctxt = makeExsurgeChantContext();
-    } else {
-        // Fallback if util.js is missing
-        ctxt = new exsurge.ChantContext();
-        ctxt.lyricTextFont = "'Crimson Text', serif";
-        ctxt.rubricColor = '#d00';
-        ctxt.textStyles.annotation.size = 12.8;
-    }
-
-    var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, gabc);
-    var score = new exsurge.ChantScore(ctxt, mappings, true); // true = drop cap
-
-    // --- 4. Responsive Width Logic ---
-    var performLayout = function () {
-        var availableWidth = $preview.width() || $(document.body).width() - 32; // Fallback
-        // Limit max width for readability, similar to propers.js logic
-        var newWidth = Math.min(624, availableWidth);
-
-        ctxt.width = newWidth;
-
-        $preview.empty(); // Clear before redraw
-
-        score.performLayout(ctxt);
-        score.layoutChantLines(ctxt, newWidth, function () {
-            var svg = score.createSvgNode(ctxt);
-            // Scaling logic for small screens or specific constraints can be added here
-            // propers.js does some scaling fixes for IE11, likely not needed for modern, 
-            // but we can ensure it fits:
-            if (svg.getAttribute('width') > availableWidth) {
-                svg.setAttribute('width', "100%");
-                svg.setAttribute('height', "auto");
-            }
-
-            $preview.append(svg);
-
-            // --- 5. Clickable Notes (Audio Placeholder) ---
-            // Allow interaction with chant notes.
-            if (window.registerChantClicks && window.showToolbarForNote) {
-                window.registerChantClicks($(svg), function (sourceIndex, $container, e) {
-                    var element = $(e.target).closest('[source-index]')[0];
-                    var selPart = (window.selPropers && window.selPropers[part]) || {};
-                    // Ensure selPart has necessary properties or use a proxy if needed
-                    // creating a context for editing if it doesn't exist
-                    if (!selPart.gabc) selPart.gabc = gabc; // Ensure GABC is there
-
-                    // Pass the editorialChange function (global from chant_editing.js)
-                    // and the context base object containing the part name.
-                    if (window.editorialChange) {
-                        window.showToolbarForNote(element, window.editorialChange, { part: part });
-                    } else {
-                        console.warn("editorialChange function not found");
-                    }
-                });
-            } else {
-                $(svg).find('.neume, [source-index]').click(async function (e) {
-                    e.stopPropagation();
-                    var sourceIndex = $(this).attr('source-index');
-                    console.log("Clicked chant element (v2):", this, "Source Index:", sourceIndex);
-
-                    // Prefer Tone.js directly if available for reliable playback
-                    if (window.Tone) {
-                        try {
-                            if (Tone.context.state !== 'running') {
-                                await Tone.start();
-                            }
-                            const synth = new Tone.Synth().toDestination();
-                            synth.triggerAttackRelease("A4", "8n");
-                        } catch (err) {
-                            console.warn("Tone.js playback failed:", err);
-                            // Fallback to legacy tones.js
-                            if (window.tones && window.tones.play) {
-                                window.tones.play("a", 4);
-                            }
-                        }
-                    } else if (window.tones && window.tones.play) {
-                        try {
-                            window.tones.play("a", 4);
-                        } catch (err) {
-                            console.warn("Audio playback failed:", err);
-                        }
-                    }
-                });
-            }
+    var savedColor = localStorage.getItem('accentColor');
+    if (savedColor) {
+        document.documentElement.style.setProperty('--accent-color', savedColor);
+        $('#colorOptions .color-swatch').each(function () {
+            $(this).toggleClass('active', $(this).data('color') === savedColor);
         });
-    };
+    }
 
-    // Initial Layout
-    performLayout();
-
-    // Attach resize handler specifically for this chant item to re-layout
-    // We namespace it to the part to avoid duplicate listeners
-    $(window).off('resize.chant-' + part).on('resize.chant-' + part, function () {
-        // Debounce simple
-        clearTimeout($preview.data('resize-timeout'));
-        $preview.data('resize-timeout', setTimeout(performLayout, 200));
+    var savedLang = localStorage.getItem('readingLang') || 'la';
+    // Ensure fillion (French, server-only) doesn't get used locally
+    if (savedLang === 'fr') savedLang = 'la';
+    appState.settings.readingLang = savedLang;
+    $('#langOptions .settings-option').each(function () {
+        $(this).toggleClass('active', $(this).data('value') === savedLang);
     });
+}
+
+function applyTheme(theme) {
+    if (theme === 'auto') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
 }
 
 function getHeader(gabc) {
@@ -1240,26 +920,13 @@ function getHeader(gabc) {
         match.forEach(function (m) {
             var parts = m.split(':');
             if (parts.length >= 2) {
-                var key = parts[0].trim().toLowerCase();
-                var val = parts[1].trim();
-                // cleanup semicolon
-                if (val.endsWith(';')) val = val.substring(0, val.length - 1);
-                header[key] = val;
+                header[parts[0].trim().toLowerCase()] = parts[1].trim();
             }
         });
     }
     return header;
 }
-function updateDay(id) {
-    var $sel = $('#' + id);
-    if ($sel.length) {
-        // If no value, select first? Or just trigger.
-        // For now, just trigger change as the user might have selected via hash or browser autofill
-        $sel.trigger('change');
-    }
-}
-
-// --- FIX: Revised Novus Ordo Logic (Overriding previous definition) ---
+// --- Restored Novus Ordo Logic ---
 function getNovusOrdoKey(date, dates) {
     date = moment(date).startOf('day');
     var sunday = moment(date).day(0).startOf('day');
@@ -1335,7 +1002,7 @@ function getNovusOrdoKey(date, dates) {
         return getOrdinal(week) + " Sunday of Advent";
     }
 
-    // Holy Family (Sunday in Octave of Christmas, or Dec 30)
+    // Holy Family
     if (date.month() === 11 && date.date() >= 26) {
         var d = moment(nativitas);
         var hf;
@@ -1349,4 +1016,20 @@ function getNovusOrdoKey(date, dates) {
     }
 
     return null;
+}
+
+function getOrdinal(n) {
+    var ordinals = ["", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+        "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+        "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+        "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth"];
+    return ordinals[n] || n;
+}
+
+function playAudioNote() {
+    if (window.Tone) {
+        if (Tone.context.state !== 'running') Tone.start();
+        const synth = new Tone.Synth().toDestination();
+        synth.triggerAttackRelease("C4", "8n");
+    }
 }

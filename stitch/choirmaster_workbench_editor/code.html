@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Choirmaster Workbench Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1132d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                        "surface-dark": "#1a1e30",
+                        "surface-lighter": "#242942",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for code editor */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1a1e30; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #323b67; 
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4b5585; 
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display overflow-hidden h-screen flex flex-col">
+<!-- Top App Bar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 z-20">
+<button class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Workbench</h2>
+<button class="flex items-center justify-end text-primary dark:text-[#929bc9] hover:text-primary dark:hover:text-white font-semibold transition-colors">
+<span class="text-sm mr-1">Save</span>
+<span class="material-symbols-outlined text-lg">save_alt</span>
+</button>
+</div>
+<!-- Main Content Area: Score & Controls -->
+<div class="flex-1 overflow-y-auto relative flex flex-col w-full max-w-md mx-auto h-full">
+<!-- Score Visualization (Top Half) -->
+<div class="w-full bg-[#e8e6e3] text-black relative shrink-0 min-h-[35%] flex flex-col border-b border-slate-300 dark:border-slate-700 shadow-inner">
+<div class="absolute top-2 right-2 flex space-x-2">
+<button class="p-1.5 bg-white/50 hover:bg-white rounded-lg transition text-slate-600">
+<span class="material-symbols-outlined text-lg">zoom_in</span>
+</button>
+</div>
+<!-- Chant Score Placeholder -->
+<div class="flex-1 flex items-center justify-center p-6 overflow-x-auto">
+<!-- Using an SVG pattern to simulate chant notation for clean scaling -->
+<div class="w-full h-full flex items-center justify-center opacity-90" data-alt="Traditional Gregorian Chant music score on a four-line staff" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsA9GogBMBIvj_Amwfm5kHO0oxNW_YwPq1bm3ukL3IMBafK52l04X94Y7NbxegYs43YgsNWTOCEdLvyTq481mEVYjyZd8B4s17VVaNJ5AAmf3BPzBhCLKnEaYegkZSwNFGiaZ0YQqEiA84MZ8msS3bX9_orNotEKKHJhJuSQNHjPBjwl8A-QHBxuCPeNg7sP8WfGICLsH2B-lKhVZYKxsD9IAxJR4y6BXMR7LzY-ISFXJkiOxe6DEz2JymPG_XDH1hFgf9EV_crg'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+</div>
+</div>
+<div class="px-4 py-2 bg-[#dcdad7] text-[#555] text-xs font-mono border-t border-[#d1cfcc] flex justify-between items-center">
+<span>Mode VIII</span>
+<span class="flex items-center gap-1"><span class="block w-2 h-2 rounded-full bg-green-500"></span> Live Preview</span>
+</div>
+</div>
+<!-- Quick Convert Panel (Floating/Elevated) -->
+<div class="px-4 py-4 z-10 -mt-4">
+<div class="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-[#323b67] bg-white dark:bg-surface-dark p-4 shadow-xl">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined">music_note</span>
+</div>
+<div class="flex flex-col">
+<p class="text-slate-900 dark:text-white text-sm font-bold leading-tight">Psalm Tone Quick-Convert</p>
+<p class="text-slate-500 dark:text-[#929bc9] text-xs font-normal">Auto-format current selection</p>
+</div>
+</div>
+<button class="flex h-8 px-3 cursor-pointer items-center justify-center rounded-lg bg-primary hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-lg shadow-primary/20">
+                        Apply
+                    </button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="relative">
+<label class="absolute -top-2 left-2 px-1 bg-white dark:bg-surface-dark text-[10px] font-medium text-slate-500 dark:text-[#929bc9]">Tone</label>
+<button class="flex w-full items-center justify-between rounded-lg border border-slate-300 dark:border-[#323b67] bg-slate-50 dark:bg-[#191e33] h-10 px-3 text-sm text-slate-900 dark:text-white">
+<span>Tone VIII</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">arrow_drop_down</span>
+</button>
+</div>
+<div class="relative">
+<label class="absolute -top-2 left-2 px-1 bg-white dark:bg-surface-dark text-[10px] font-medium text-slate-500 dark:text-[#929bc9]">Ending</label>
+<button class="flex w-full items-center justify-between rounded-lg border border-slate-300 dark:border-[#323b67] bg-slate-50 dark:bg-[#191e33] h-10 px-3 text-sm text-slate-900 dark:text-white">
+<span>G (Solemn)</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">arrow_drop_down</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- GABC Code Editor (Bottom Half - Fill Remaining) -->
+<div class="flex-1 bg-surface-dark border-t border-slate-700 flex flex-col min-h-0">
+<!-- Terminal Header -->
+<div class="flex items-center justify-between px-4 py-2 bg-[#151929] border-b border-[#2a304a]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#929bc9] text-sm">terminal</span>
+<h3 class="text-[#929bc9] text-xs font-bold uppercase tracking-wider">GABC Source</h3>
+</div>
+<div class="flex gap-2">
+<button class="p-1 hover:bg-[#2a304a] rounded text-[#929bc9]">
+<span class="material-symbols-outlined text-sm">undo</span>
+</button>
+<button class="p-1 hover:bg-[#2a304a] rounded text-[#929bc9]">
+<span class="material-symbols-outlined text-sm">redo</span>
+</button>
+<button class="p-1 hover:bg-[#2a304a] rounded text-[#929bc9]">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Editor Area -->
+<div class="flex-1 relative font-mono text-sm leading-relaxed p-4 overflow-auto custom-scrollbar bg-[#0f111a]">
+<!-- Line Numbers -->
+<div class="absolute left-0 top-4 bottom-0 w-8 text-right pr-2 text-slate-600 select-none text-xs">
+                    1<br/>2<br/>3<br/>4
+                </div>
+<!-- Code Content -->
+<div class="pl-8 text-slate-300 outline-none h-full whitespace-pre-wrap break-all" contenteditable="true" spellcheck="false">
+Pá(<span class="text-cyan-400">g</span>)ter(<span class="text-cyan-400">f</span>) nós(<span class="text-cyan-400">g</span>)ter,(<span class="text-cyan-400">g</span>) qui(<span class="text-cyan-400">h</span>) es(<span class="text-cyan-400">f</span>) in(<span class="text-cyan-400">g</span>) caé(<span class="text-cyan-400">h</span>)lis:
+sanc(<span class="text-cyan-400">h</span>)ti(<span class="text-cyan-400">h</span>)fi(<span class="text-cyan-400">h</span>)cé(<span class="text-cyan-400">h</span>)tur(<span class="text-cyan-400">h</span>) no(<span class="text-cyan-400">h</span>)men(<span class="text-cyan-400">g</span>) tu(<span class="text-cyan-400">f</span>)um:
+ad(<span class="text-cyan-400">h</span>)vé(<span class="text-cyan-400">h</span>)ni(<span class="text-cyan-400">g</span>)at(<span class="text-cyan-400">g</span>) reg(<span class="text-cyan-400">f</span>)num(<span class="text-cyan-400">g</span>) tu(<span class="text-cyan-400">h</span>)um:<span class="animate-pulse inline-block w-2 h-4 bg-primary align-middle ml-0.5"></span>
+</div>
+</div>
+<!-- Toolbar / Quick Insert -->
+<div class="h-12 bg-[#1a1e30] border-t border-[#2a304a] flex items-center px-2 overflow-x-auto gap-2 shrink-0 no-scrollbar">
+<button class="bg-[#242942] hover:bg-[#323b67] text-[#929bc9] hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors min-w-[32px]">(</button>
+<button class="bg-[#242942] hover:bg-[#323b67] text-[#929bc9] hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors min-w-[32px]">)</button>
+<div class="w-px h-6 bg-[#323b67] mx-1"></div>
+<button class="bg-[#242942] hover:bg-[#323b67] text-cyan-300 hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors">flex</button>
+<button class="bg-[#242942] hover:bg-[#323b67] text-cyan-300 hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors">med</button>
+<button class="bg-[#242942] hover:bg-[#323b67] text-cyan-300 hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors">div</button>
+<button class="bg-[#242942] hover:bg-[#323b67] text-purple-300 hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors">::</button>
+<button class="bg-[#242942] hover:bg-[#323b67] text-purple-300 hover:text-white px-3 py-1.5 rounded text-xs font-mono border border-[#323b67] transition-colors">*</button>
+</div>
+</div>
+</div>
+</body></html>
