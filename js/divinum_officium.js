@@ -111,6 +111,30 @@ function formatLiturgicalDate(mom, lang) {
     return d + ' ' + ENGLISH_MONTHS[m] + ' ' + y;
 }
 
+function formatBadgeDate(mom, lang) {
+    if (!mom || !mom.isValid()) return '';
+    var d = mom.date();
+    var dStr = (d < 10 ? '0' + d : '' + d);
+    var m = mom.month(); // 0-11
+
+    var monthsFr = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    var monthsLa = ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var monthsEs = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sept.', 'oct.', 'nov.', 'dic.'];
+    var monthsIt = ['genn.', 'febbr.', 'mar.', 'apr.', 'magg.', 'giugno', 'luglio', 'ag.', 'sett.', 'ott.', 'nov.', 'dic.'];
+    var monthsDe = ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sept.', 'Okt.', 'Nov.', 'Dez.'];
+    var monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    var monthLabel;
+    if (lang === 'fr') monthLabel = monthsFr[m];
+    else if (lang === 'la') monthLabel = monthsLa[m];
+    else if (lang === 'es') monthLabel = monthsEs[m];
+    else if (lang === 'it') monthLabel = monthsIt[m];
+    else if (lang === 'de') monthLabel = monthsDe[m];
+    else monthLabel = monthsEn[m];
+
+    return dStr + ' ' + monthLabel;
+}
+
 // ---- All 73 Canonical Bible Books in jgabc ----
 var DO_BIBLE_BOOKS = [
     // Pentateuque
@@ -1004,12 +1028,19 @@ function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolde
         }
     }
 
-    // External file reference e.g. @Commune/C4a or @Sancti/02-24 or @Commune/C1:Introitus
+    // External file reference e.g. @Commune/C4 or @Commune/C4::s/N\./.../ or @Sancti/02-24:Ant 1
     if (firstLine.indexOf('@') === 0) {
         var ref = firstLine.substring(1).trim();
+        var subPart = null;
+        var subIdx = ref.indexOf('::');
+        if (subIdx !== -1) {
+            subPart = ref.substring(subIdx + 2);
+            ref = ref.substring(0, subIdx);
+        }
+
         var parts = ref.split(':');
         var filePath = parts[0].trim();
-        var targetSec = parts[1] ? parts[1].trim() : sectionName;
+        var targetSec = (parts[1] && parts[1].trim()) ? parts[1].trim() : sectionName;
 
         if (!/\.txt$/i.test(filePath)) filePath += '.txt';
 
@@ -1036,7 +1067,17 @@ function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolde
                     var extSections = parseSections(data);
                     var match = getSectionWithAliases(extSections, targetSec);
                     if (match) {
-                        resolveSectionText(match.key, match.lines, extSections, langFolder, isMissa, callback, depth + 1);
+                        resolveSectionText(match.key, match.lines, extSections, langFolder, isMissa, function(resLines) {
+                            if (subPart) {
+                                var subMatch = subPart.match(/^s\/([^\/]+)\/([^\/]*)\//);
+                                if (subMatch) {
+                                    var pat = new RegExp(subMatch[1], 'g');
+                                    var rep = subMatch[2];
+                                    resLines = resLines.map(function(l) { return l.replace(pat, rep); });
+                                }
+                            }
+                            callback(resLines);
+                        }, depth + 1);
                         return;
                     }
                 }
@@ -1146,246 +1187,194 @@ function isSanctiGreaterFeastOnSunday(sanctiFileText) {
 
 function extractCommuneRef(text) {
     if (!text) return null;
+    var mTop = text.match(/(?:^|\n)\s*@([A-Za-z0-9_\-\/]+)(?:\s|\n|$)/);
+    if (mTop && !mTop[1].startsWith(':')) return mTop[1].trim();
+
     var mRule = text.match(/\[Rule\][^\n]*\n([^\[\n]+)/i);
     if (mRule) {
         var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
-        if (mC) return mC[1];
+        if (mC) return mC[1].trim();
     }
     var mRank = text.match(/\[Rank\][^\n]*\n([^\[\n]+)/i);
     if (mRank) {
         var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
-        if (mC2) return mC2[1];
+        if (mC2) return mC2[1].trim();
     }
     var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
-    if (mGen) return mGen[1];
+    if (mGen) return mGen[1].trim();
     return null;
 }
 
-function loadCommunePropersForMissa(daySections, laFileText, langFolder, callback) {
-    var rawDayText = Object.keys(daySections).map(function(k) { return '[' + k + ']\n' + daySections[k].join('\n'); }).join('\n\n');
-    var comRef = extractCommuneRef(rawDayText) || extractCommuneRef(laFileText);
-
-    if (!comRef) {
-        callback(daySections);
+function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visited) {
+    if (!depth) depth = 0;
+    if (!visited) visited = {};
+    if (depth > 6 || visited[relPath]) {
+        callback({});
         return;
     }
+    visited[relPath] = true;
 
-    var cleanRef = comRef.replace(/^Commune\//i, '');
-    if (!/\.txt$/i.test(cleanRef)) cleanRef += '.txt';
+    var cleanPath = relPath;
+    if (!/\.txt$/i.test(cleanPath)) cleanPath += '.txt';
+
+    var primaryCorpus = isMissa ? 'missa' : 'horas';
+    var altCorpus = isMissa ? 'horas' : 'missa';
 
     var candidatePaths = [];
-    if (/^Sancti\//i.test(cleanRef)) {
-        candidatePaths.push('do_data/missa/' + langFolder + '/' + cleanRef);
-        candidatePaths.push('do_data/horas/' + langFolder + '/' + cleanRef);
-        candidatePaths.push('do_data/missa/Latin/' + cleanRef);
-        candidatePaths.push('do_data/horas/Latin/' + cleanRef);
+    if (/^(Sancti|Tempora|Commune)\//i.test(cleanPath)) {
+        candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + cleanPath);
+        candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + cleanPath);
+        candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + cleanPath);
+        candidatePaths.push('do_data/' + altCorpus + '/Latin/' + cleanPath);
     } else {
-        candidatePaths.push('do_data/horas/' + langFolder + '/Commune/' + cleanRef);
-        candidatePaths.push('do_data/missa/' + langFolder + '/Commune/' + cleanRef);
-        candidatePaths.push('do_data/horas/Latin/Commune/' + cleanRef);
-        candidatePaths.push('do_data/missa/Latin/Commune/' + cleanRef);
+        candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/Commune/' + cleanPath);
+        candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/Commune/' + cleanPath);
+        candidatePaths.push('do_data/' + primaryCorpus + '/Latin/Commune/' + cleanPath);
+        candidatePaths.push('do_data/' + altCorpus + '/Latin/Commune/' + cleanPath);
     }
 
     var tryIdx = 0;
-    function tryNextCom() {
+    function tryLoad() {
         if (tryIdx >= candidatePaths.length) {
-            callback(daySections);
+            callback({});
             return;
         }
         var p = candidatePaths[tryIdx++];
         fetchLocalFile(p, function(err, data) {
             if (!err && data) {
-                var comSec = parseSections(data);
-                var merged = {};
-                Object.keys(comSec).forEach(function(k) { merged[k] = comSec[k]; });
-                Object.keys(daySections).forEach(function(k) {
-                    if (daySections[k] && daySections[k].length) {
-                        merged[k] = daySections[k];
+                var laP = p.replace('/' + langFolder + '/', '/Latin/');
+                fetchLocalFile(laP, function(errLa, laData) {
+                    var fullTextForRules = (laData || '') + '\n' + data;
+                    var baseRef = extractCommuneRef(fullTextForRules);
+                    var curSections = parseSections(data);
+
+                    if (baseRef) {
+                        var baseClean = baseRef;
+                        if (!/^(Sancti|Tempora|Commune)\//i.test(baseClean)) {
+                            baseClean = 'Commune/' + baseClean;
+                        }
+                        loadRecursiveDOFile(baseClean, langFolder, isMissa, function(baseSections) {
+                            var merged = Object.assign({}, baseSections, curSections);
+                            callback(merged);
+                        }, depth + 1, visited);
+                    } else {
+                        callback(curSections);
                     }
                 });
-                callback(merged);
                 return;
             }
-            tryNextCom();
+            tryLoad();
         });
     }
 
-    tryNextCom();
+    tryLoad();
 }
 
 function loadMissaData(date, lang, callback) {
     var codes = computeLiturgicalCodes(date);
     var langFolder = getLangFolder(lang);
-    var feastKey = doState.officiumKey || null;
+    var feastKey = convertFeastKeyToCode(doState.officiumKey) || null;
 
     var sanctiCode = feastKey || codes.sancti;
     var temporaCode = feastKey || codes.tempora;
 
-    var sanctiPath = 'do_data/missa/' + langFolder + '/Sancti/' + sanctiCode + '.txt';
-    var temporaPath = 'do_data/missa/' + langFolder + '/Tempora/' + temporaCode + '.txt';
-    var laSanctiPath = 'do_data/missa/Latin/Sancti/' + sanctiCode + '.txt';
-    var laTemporaPath = 'do_data/missa/Latin/Tempora/' + temporaCode + '.txt';
+    var primaryPath = 'Sancti/' + sanctiCode;
+    var fallbackPath = 'Tempora/' + temporaCode;
 
-    // Helper to load vern + latin counterpart
-    function loadFilePair(vPath, lPath, onLoaded) {
-        fetchLocalFile(vPath, function(errV, vData) {
-            if (!errV && vData) {
-                fetchLocalFile(lPath, function(errL, lData) {
-                    onLoaded(vData, (!errL && lData) ? lData : vData);
-                });
-            } else {
-                fetchLocalFile(lPath, function(errL, lData) {
-                    if (!errL && lData) {
-                        onLoaded(lData, lData);
-                    } else {
-                        onLoaded(null, null);
-                    }
-                });
-            }
-        });
-    }
-
-    // If user explicitly selected an office/feast key, honor it directly
-    if (feastKey) {
-        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
-            if (sData) {
-                processMissaFile(sData, laSData, langFolder, lang, callback);
-            } else {
-                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
-                    if (tData) {
-                        processMissaFile(tData, laTData, langFolder, lang, callback);
-                    } else if (langFolder !== 'Latin') {
-                        loadMissaData(date, 'la', callback);
-                    } else {
-                        callback(null, null);
-                    }
-                });
-            }
-        });
-        return;
-    }
-
-    // Automatic Sunday resolution:
-    // On Sunday, default to Temporale unless Sancti is a greater feast (I. classis or Festum Domini).
-    if (codes.isSunday) {
-        fetchLocalFile(laSanctiPath, function(errS, laSanctiData) {
-            var isGreater = (!errS && laSanctiData) ? isSanctiGreaterFeastOnSunday(laSanctiData) : false;
-            if (isGreater) {
-                loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
-                    if (sData) {
-                        processMissaFile(sData, laSData, langFolder, lang, callback);
-                    } else {
-                        loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
-                            if (tData) processMissaFile(tData, laTData, langFolder, lang, callback);
-                            else callback(null, null);
-                        });
-                    }
-                });
-            } else {
-                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
-                    if (tData) {
-                        processMissaFile(tData, laTData, langFolder, lang, callback);
-                    } else {
-                        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
-                            if (sData) processMissaFile(sData, laSData, langFolder, lang, callback);
-                            else callback(null, null);
-                        });
-                    }
-                });
-            }
+    if (codes.isSunday && !feastKey) {
+        fetchLocalFile('do_data/missa/Latin/Sancti/' + sanctiCode + '.txt', function(errS, laSData) {
+            var isGreater = (!errS && laSData) ? isSanctiGreaterFeastOnSunday(laSData) : false;
+            var target = isGreater ? primaryPath : fallbackPath;
+            var alt = isGreater ? fallbackPath : primaryPath;
+            loadRecursiveDOFile(target, langFolder, true, function(sec) {
+                if (Object.keys(sec).length > 2) {
+                    processMissaSections(sec, langFolder, lang, callback);
+                } else {
+                    loadRecursiveDOFile(alt, langFolder, true, function(sec2) {
+                        processMissaSections(sec2, langFolder, lang, callback);
+                    });
+                }
+            });
         });
     } else {
-        // Weekday (Feria): Sancti first, fallback to Temporale
-        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
-            if (sData) {
-                processMissaFile(sData, laSData, langFolder, lang, callback);
+        loadRecursiveDOFile(primaryPath, langFolder, true, function(sec) {
+            if (Object.keys(sec).length > 2) {
+                processMissaSections(sec, langFolder, lang, callback);
             } else {
-                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
-                    if (tData) {
-                        processMissaFile(tData, laTData, langFolder, lang, callback);
-                    } else if (langFolder !== 'Latin') {
-                        loadMissaData(date, 'la', callback);
-                    } else {
-                        callback(null, null);
-                    }
+                loadRecursiveDOFile(fallbackPath, langFolder, true, function(sec2) {
+                    processMissaSections(sec2, langFolder, lang, callback);
                 });
             }
         });
     }
 }
 
-function processMissaFile(fileText, laFileText, langFolder, langKey, callback) {
-    if (typeof laFileText === 'function') {
-        callback = laFileText;
-        laFileText = fileText;
+function processMissaSections(fullSections, langFolder, langKey, callback) {
+    if (!fullSections || Object.keys(fullSections).length === 0) {
+        callback(null, null);
+        return;
     }
-    var rawSections = parseSections(fileText);
-    var feastTitle = (rawSections['Officium'] && rawSections['Officium'][0]) ? rawSections['Officium'][0].trim() : 'Missa Diei';
+    var feastTitle = (fullSections['Officium'] && fullSections['Officium'][0]) ? fullSections['Officium'][0].trim() : 'Missa Diei';
 
-    loadCommunePropersForMissa(rawSections, laFileText, langFolder, function(fullSections) {
-        if (rawSections['Officium']) fullSections['Officium'] = rawSections['Officium'];
-        var finalTitle = (fullSections['Officium'] && fullSections['Officium'][0]) ? fullSections['Officium'][0].trim() : feastTitle;
+    var standardPropers = [
+        { key: 'Introitus', label: 'Introitus', badge: 'Proprium' },
+        { key: 'Oratio', label: 'Collecta / Oratio', badge: 'Oratio' },
+        { key: 'Lectio', label: 'Epistola', badge: 'Lectio' },
+        { key: 'Graduale', label: 'Graduale', badge: 'Proprium' },
+        { key: 'Tractus', label: 'Tractus', badge: 'Proprium' },
+        { key: 'Alleluia', label: 'Alleluia', badge: 'Proprium' },
+        { key: 'Sequentia', label: 'Sequentia', badge: 'Proprium' },
+        { key: 'Evangelium', label: 'Evangelium', badge: 'Evangelium' },
+        { key: 'Offertorium', label: 'Offertorium', badge: 'Proprium' },
+        { key: 'Secreta', label: 'Secreta', badge: 'Oratio' },
+        { key: 'Communio', label: 'Communio', badge: 'Proprium' },
+        { key: 'Postcommunio', label: 'Postcommunio', badge: 'Oratio' }
+    ];
 
-        var standardPropers = [
-            { key: 'Introitus', label: 'Introitus', badge: 'Proprium' },
-            { key: 'Oratio', label: 'Collecta / Oratio', badge: 'Oratio' },
-            { key: 'Lectio', label: 'Epistola', badge: 'Lectio' },
-            { key: 'Graduale', label: 'Graduale', badge: 'Proprium' },
-            { key: 'Tractus', label: 'Tractus', badge: 'Proprium' },
-            { key: 'Alleluia', label: 'Alleluia', badge: 'Proprium' },
-            { key: 'Sequentia', label: 'Sequentia', badge: 'Proprium' },
-            { key: 'Evangelium', label: 'Evangelium', badge: 'Evangelium' },
-            { key: 'Offertorium', label: 'Offertorium', badge: 'Proprium' },
-            { key: 'Secreta', label: 'Secreta', badge: 'Oratio' },
-            { key: 'Communio', label: 'Communio', badge: 'Proprium' },
-            { key: 'Postcommunio', label: 'Postcommunio', badge: 'Oratio' }
-        ];
+    if (!doState.includeOrdinarium) {
+        var propDict = {};
+        var pPending = standardPropers.length;
 
-        if (!doState.includeOrdinarium) {
-            var propDict = {};
-            var pPending = standardPropers.length;
+        standardPropers.forEach(function(p) {
+            var lines = fullSections[p.key];
+            if (!lines || !lines.length) {
+                var match = getSectionWithAliases(fullSections, p.key);
+                if (match) lines = match.lines;
+            }
 
-            standardPropers.forEach(function(p) {
-                var lines = fullSections[p.key];
-                if (!lines || !lines.length) {
-                    var match = getSectionWithAliases(fullSections, p.key);
-                    if (match) lines = match.lines;
-                }
-
-                if (lines && lines.length) {
-                    resolveSectionText(p.key, lines, fullSections, langFolder, true, function(resolvedLines) {
-                        propDict[p.key] = {
-                            id: p.key.toLowerCase(),
-                            type: p.label,
-                            badge: p.badge,
-                            lines: resolvedLines
-                        };
-                        pPending--;
-                        if (pPending === 0) finish();
-                    });
-                } else {
+            if (lines && lines.length) {
+                resolveSectionText(p.key, lines, fullSections, langFolder, true, function(resolvedLines) {
+                    propDict[p.key] = {
+                        id: p.key.toLowerCase(),
+                        type: p.label,
+                        badge: p.badge,
+                        lines: resolvedLines
+                    };
                     pPending--;
                     if (pPending === 0) finish();
+                });
+            } else {
+                pPending--;
+                if (pPending === 0) finish();
+            }
+        });
+
+        function finish() {
+            var orderedCards = [];
+            standardPropers.forEach(function(p) {
+                if (propDict[p.key]) {
+                    orderedCards.push(propDict[p.key]);
                 }
             });
-
-            function finish() {
-                var orderedCards = [];
-                standardPropers.forEach(function(p) {
-                    if (propDict[p.key]) {
-                        orderedCards.push(propDict[p.key]);
-                    }
-                });
-                callback(null, { title: finalTitle, cards: orderedCards });
-            }
-            return;
+            callback(null, { title: feastTitle, cards: orderedCards });
         }
+        return;
+    }
 
-        var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
-        fetchLocalFile(ordoPath, function(oErr, oData) {
-            var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
-            assembleFullMissa(fullSections, ordoParts, langFolder, finalTitle, callback);
-        });
+    var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
+    fetchLocalFile(ordoPath, function(oErr, oData) {
+        var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
+        assembleFullMissa(fullSections, ordoParts, langFolder, feastTitle, callback);
     });
 }
 
@@ -1452,14 +1441,58 @@ function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback)
         if (conclusio.length) cards.push({ id: 'conclusio', type: 'Ite Missa est & Ultimum Evangelium', badge: 'Ordinarium', lines: conclusio });
         if (leonis.length) cards.push({ id: 'leonis', type: 'Orationes Leonis XIII', badge: 'Preces', lines: leonis });
 
-        callback(null, { title: feastTitle, cards: cards });
+        resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
     }
 }
+
+function convertFeastKeyToCode(key) {
+    if (!key) return null;
+    var m = key.match(/^([A-Za-z]{3})(\d+)(.*)$/);
+    if (m) {
+        var mon = m[1], day = m[2], sfx = m[3];
+        var monMap = {
+            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+            'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+        };
+        if (monMap[mon]) {
+            var dInt = parseInt(day, 10);
+            var dd = (dInt < 10 ? '0' + dInt : '' + dInt);
+            return dd ? (monMap[mon] + '-' + dd + sfx) : key;
+        }
+    }
+    return key;
+}
+
+function resolveAllHoursCards(cards, fullSections, langFolder, callback) {
+    if (!cards || !cards.length) {
+        callback([]);
+        return;
+    }
+    var pending = cards.length;
+    var resolvedCards = new Array(cards.length);
+
+    cards.forEach(function(card, idx) {
+        if (!card.lines || !card.lines.length) {
+            resolvedCards[idx] = card;
+            pending--;
+            if (pending === 0) callback(resolvedCards);
+            return;
+        }
+
+        resolveSectionText(card.id, card.lines, fullSections, langFolder, false, function(resLines) {
+            card.lines = resLines;
+            resolvedCards[idx] = card;
+            pending--;
+            if (pending === 0) callback(resolvedCards);
+        });
+    });
+}
+
 
 function loadHoursData(date, hora, langKey, callback) {
     var codes = computeLiturgicalCodes(date);
     var langFolder = getLangFolder(langKey);
-    var feastKey = doState.officiumKey || null;
+    var feastKey = convertFeastKeyToCode(doState.officiumKey) || null;
 
     var laDayPath = 'do_data/horas/Latin/Sancti/' + (feastKey || codes.sancti) + '.txt';
     var laTempPath = 'do_data/horas/Latin/Tempora/' + (feastKey || codes.tempora) + '.txt';
@@ -1520,7 +1553,7 @@ function processHoursWithLatinRule(laFileText, hora, langFolder, langKey, date, 
     var communeMatch = ruleLine.match(/ex\s+([A-Za-z0-9]+)/);
     var communeFile = communeMatch ? communeMatch[1] : null;
 
-    var feastKey = doState.officiumKey || null;
+    var feastKey = convertFeastKeyToCode(doState.officiumKey) || null;
     var codes = computeLiturgicalCodes(date);
     var vernDayPath = 'do_data/horas/' + langFolder + '/Sancti/' + (feastKey || codes.sancti) + '.txt';
     var vernTempPath = 'do_data/horas/' + langFolder + '/Tempora/' + (feastKey || codes.tempora) + '.txt';
@@ -1624,7 +1657,7 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
         var oraMat = getSec('Oratio') || ['$Per Dominum'];
         cards.push({ id: 'oratio', type: 'Oratio', badge: 'Oratio', lines: oraMat });
 
-        callback(null, { title: feastTitle, cards: cards });
+        resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
         return;
     }
 
@@ -1650,7 +1683,7 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
         var oraLaudes = getSec('Oratio') || ['$Per Dominum'];
         cards.push({ id: 'oratio', type: 'Oratio', badge: 'Oratio', lines: oraLaudes });
 
-        callback(null, { title: feastTitle, cards: cards });
+        resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
         return;
     }
 
@@ -1688,7 +1721,7 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
                         { id: 'magnificat', type: 'Canticum Magnificat', badge: 'Canticum', lines: ['Ant. ' + antMag.join(' ')].concat(getLitText('canticum_magnificat', langKey)) },
                         { id: 'oratio', type: 'Oratio', badge: 'Oratio', lines: oratio }
                     ]);
-                    callback(null, { title: feastTitle, cards: cards });
+                    resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
                 }
             });
         });
@@ -1716,7 +1749,7 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
                         { id: 'oratio', type: 'Oratio', badge: 'Oratio', lines: getLitText('oratio_visita', langKey) },
                         { id: 'salve_regina', type: 'Antiphona Finalis B.M.V.', badge: 'Antiphona', lines: getLitText('salve_regina', langKey) }
                     ];
-                    callback(null, { title: feastTitle, cards: cards });
+                    resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
                 });
             });
         });
@@ -1751,7 +1784,7 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
         { id: 'oratio', type: 'Oratio', badge: 'Oratio', lines: oraMinor }
     ];
 
-    callback(null, { title: feastTitle, cards: cards });
+    resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
 }
 
 // ---- UI Card Renderer with 2 Distinct Language Parameters ----
@@ -1860,8 +1893,160 @@ function formatSingleParagraph(l) {
     return '<p>' + formatLiturgicalSymbols(escHtml(l)) + '</p>';
 }
 
-// Psalm verse without numbers (Continuous chanting flow)
-function formatSinglePsalmVerse(line, isDox) {
+// ---- Latin Psalmody & Cadence Formatting Engine with Partie Avant Detector ----
+var VOWELS = /[aáàeéèiíìoóòuúùyýỳæœ]/i;
+var ACCENTED_VOWELS = /[áéíóúý]/i;
+
+function getSyllables(word) {
+    if (!word) return [];
+    return word.match(/[^aeiouyáéíóúæœ]*[aeiouyáéíóúæœ]+(?:[^aeiouyáéíóúæœ]+(?![aeiouyáéíóúæœ]))?/gi) || [word];
+}
+
+function findTonicSyllableIndex(syllables) {
+    var n = syllables.length;
+    if (n <= 1) return 0;
+    if (n === 2) return 0; // Pénultième automatique en latin classique/ecclésiastique
+
+    // Cherche un accent explicite
+    for (var i = 0; i < n; i++) {
+        if (ACCENTED_VOWELS.test(syllables[i])) return i;
+    }
+
+    // Par défaut sur la pénultième si non spécifié
+    return n - 2;
+}
+
+function processHemistich(hemistich, accentsCount, prepCount) {
+    if (typeof accentsCount !== 'number') accentsCount = 1;
+    if (typeof prepCount !== 'number') prepCount = 0;
+
+    var tokens = hemistich.trim().split(/\s+/);
+    if (!tokens.length || !tokens[0]) return hemistich;
+
+    // Build flattened syllable list with word references
+    var allSyllables = [];
+    tokens.forEach(function(rawWord, wIdx) {
+        var leadMatch = rawWord.match(/^[^\p{L}]+/u);
+        var trailMatch = rawWord.match(/[^\p{L}]+$/u);
+        var leading = leadMatch ? leadMatch[0] : '';
+        var trailing = trailMatch ? trailMatch[0] : '';
+        var cleanWord = rawWord.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
+
+        if (!cleanWord) {
+            allSyllables.push({ text: rawWord, isPunct: true, wIdx: wIdx, isTonic: false, leading: '', trailing: '' });
+            return;
+        }
+
+        var syls = getSyllables(cleanWord);
+        var tonicIdx = findTonicSyllableIndex(syls);
+
+        syls.forEach(function(sText, sIdx) {
+            allSyllables.push({
+                text: sText,
+                isPunct: false,
+                wIdx: wIdx,
+                sIdx: sIdx,
+                isFirstInWord: (sIdx === 0),
+                isLastInWord: (sIdx === syls.length - 1),
+                isTonic: (sIdx === tonicIdx && syls.length > 1 || ACCENTED_VOWELS.test(sText)),
+                leading: (sIdx === 0 ? leading : ''),
+                trailing: (sIdx === syls.length - 1 ? trailing : ''),
+                type: 'recit'
+            });
+        });
+    });
+
+    // 1. Find cadence accents scanning backwards
+    var accentsFound = 0;
+    var firstAccentSylIdx = -1;
+
+    for (var i = allSyllables.length - 1; i >= 0; i--) {
+        var s = allSyllables[i];
+        if (s.isPunct) continue;
+        if (s.isTonic && accentsFound < accentsCount) {
+            s.type = 'accent';
+            accentsFound++;
+            firstAccentSylIdx = i;
+        }
+    }
+
+    if (firstAccentSylIdx === -1 && allSyllables.length > 0) {
+        firstAccentSylIdx = Math.max(0, allSyllables.length - 2);
+        allSyllables[firstAccentSylIdx].type = 'accent';
+    }
+
+    // 2. Détecteur de partie avant (syllabes de préparation avant le premier accent de cadence)
+    if (prepCount > 0 && firstAccentSylIdx > 0) {
+        var prepsFound = 0;
+        for (var j = firstAccentSylIdx - 1; j >= 0 && prepsFound < prepCount; j--) {
+            var sp = allSyllables[j];
+            if (!sp.isPunct) {
+                sp.type = 'prep';
+                prepsFound++;
+            }
+        }
+    }
+
+    // 3. Rebuild formatted hemistich
+    var result = '';
+    var curWordIdx = -1;
+
+    allSyllables.forEach(function(s) {
+        if (s.wIdx !== curWordIdx) {
+            if (curWordIdx !== -1) result += ' ';
+            curWordIdx = s.wIdx;
+        }
+        var formattedText = s.text;
+        if (s.type === 'accent') {
+            formattedText = '<b>' + formattedText + '</b>';
+        } else if (s.type === 'prep') {
+            formattedText = '<u>' + formattedText + '</u>';
+        }
+        result += s.leading + formattedText + s.trailing;
+    });
+
+    return result;
+}
+
+function formatPsalmodie(verset, options) {
+    if (!verset) return '';
+    if (!options) options = {};
+
+    var accentsMed = options.accentsMediante !== undefined ? options.accentsMediante : 1;
+    var prepMed = options.prepMediante !== undefined ? options.prepMediante : 0;
+    var accentsTerm = options.accentsTerminaison !== undefined ? options.accentsTerminaison : 1;
+    var prepTerm = options.prepTerminaison !== undefined ? options.prepTerminaison : 0;
+
+    // Split on flexe † if present
+    var flexPart = '';
+    var mainVerse = verset;
+    if (verset.indexOf('†') !== -1) {
+        var fParts = verset.split('†');
+        flexPart = processHemistich(fParts[0], 1, 0) + ' <span class="do-flexe">†</span> ';
+        mainVerse = fParts.slice(1).join('†');
+    }
+
+    var parts = mainVerse.split('*');
+    if (parts.length !== 2) {
+        return flexPart + processHemistich(mainVerse, accentsMed, prepMed);
+    }
+
+    var left = processHemistich(parts[0], accentsMed, prepMed);
+    var right = processHemistich(parts[1], accentsTerm, prepTerm);
+
+    return flexPart + left + ' <span class="do-verse-mediant">*</span> ' + right;
+}
+
+// Export for global access
+if (typeof window !== 'undefined') {
+    window.getSyllables = getSyllables;
+    window.findTonicSyllableIndex = findTonicSyllableIndex;
+    window.processHemistich = processHemistich;
+    window.formatPsalmodie = formatPsalmodie;
+}
+
+// Psalm verse without numbers (Continuous chanting flow with Cadence and Preparation support)
+function formatSinglePsalmVerse(line, isDox, toneOptions) {
     if (!line) return '<div class="do-psalm-verse"></div>';
     line = line.trim();
 
@@ -1876,7 +2061,12 @@ function formatSinglePsalmVerse(line, isDox) {
         return '<div class="do-antiphon-line"><span class="do-ant-tag">Ant.</span> ' + formatLiturgicalSymbols(escHtml(antContent)) + '</div>';
     }
 
-    var inner = formatLiturgicalSymbols(escHtml(line));
+    var inner;
+    if (line.indexOf('*') !== -1 || line.indexOf('†') !== -1) {
+        inner = formatPsalmodie(line, toneOptions);
+    } else {
+        inner = formatLiturgicalSymbols(escHtml(line));
+    }
 
     return '<div class="do-psalm-verse' + (isDox ? ' do-doxology' : '') + '">' +
         '<span class="do-verse-text">' + inner + '</span>' +
@@ -3036,6 +3226,1488 @@ function getSanctoralMonthGroup(key, uiLang) {
     return obj[uiLang] || obj['fr'] || obj['la'];
 }
 
+var DO_UNIFIED_TITLES = {
+    "fr": {
+        "Adv1": "1er Dimanche de l'Avent",
+        "Adv2": "2e Dimanche de l'Avent",
+        "Adv3": "3e Dimanche de l'Avent (Gaudete)",
+        "Adv3w": "Mercredi des Quatre-Temps de l'Avent",
+        "Adv3f": "Vendredi des Quatre-Temps de l'Avent",
+        "Adv3s": "Samedi des Quatre-Temps de l'Avent",
+        "Adv3ss": "Sabbato IV Temporum (forma brevior)",
+        "Adv4": "4e Dimanche de l'Avent",
+        "Dec24": "pridie Nativitas",
+        "Dec25_1": "Nativitas Domini, Missa ad media noctem",
+        "Dec25_2": "Nativitas Domini, Missa ad matutinam",
+        "Dec25_3": "Nativitas Domini, Missa interdiu",
+        "Nat1": "Dimanche dans l'Octave de la Nativité",
+        "Jan1": "Octava Nativitatis (Circumcisione Domini)",
+        "Nat2": "Le Saint Nom de Jésus",
+        "Jan5a": "In Vigilia Epiphaniæ",
+        "Epi": "Epiphania",
+        "Epi1": "Fête de la Sainte Famille (1er Dimanche après l'Épiphanie)",
+        "Epi1s": "  Feria post I post Epiphaniam",
+        "Epi2": "2e Dimanche après l'Épiphanie",
+        "Epi3": "3e Dimanche après l'Épiphanie",
+        "Epi4": "4e Dimanche après l'Épiphanie",
+        "Epi5": "5e Dimanche après l'Épiphanie",
+        "Epi6": "6e Dimanche après l'Épiphanie",
+        "7a": "Septuagesima",
+        "6a": "Sexagesima",
+        "5a": "Quinquagesima",
+        "5aw": "Feria IV Cinerum",
+        "5ah": "  Feria V post Cinerum",
+        "5af": "  Feria VI post Cinerum",
+        "5as": "  Sabbato post Cinerum",
+        "Quad1": "1er Dimanche de Carême",
+        "Quad1m": "  Feria II post Dominicam I Quadragesimæ",
+        "Quad1t": "  Feria III post Dominicam I Quadragesimæ",
+        "Quad1w": "Mercredi des Quatre-Temps de Carême",
+        "Quad1h": "  Feria V post Dominicam I Quadragesimæ",
+        "Quad1f": "Vendredi des Quatre-Temps de Carême",
+        "Quad1s": "Samedi des Quatre-Temps de Carême",
+        "Quad1ss": "  Sabbato IV Temporum (forma brevior)",
+        "Quad2": "2e Dimanche de Carême",
+        "Quad2m": "  Feria II post Dominicam II Quadragesimæ",
+        "Quad2t": "  Feria III post Dominicam II Quadragesimæ",
+        "Quad2w": "  Feria IV post Dominicam II Quadragesimæ",
+        "Quad2h": "  Feria V post Dominicam II Quadragesimæ",
+        "Quad2f": "  Feria VI post Dominicam II Quadragesimæ",
+        "Quad2s": "  Sabbato post Dominicam II Quadragesimæ",
+        "Quad3": "3e Dimanche de Carême",
+        "Quad3m": "  Feria II post Dominicam III Quadragesime",
+        "Quad3t": "  Feria III post Dominicam III Quadragesimæ",
+        "Quad3w": "  Feria IV post Dominicam III Quadragesimæ",
+        "Quad3h": "  Feria V post Dominicam III Quadragesimæ",
+        "Quad3f": "  Feria VI post Dominicam III Quadragesimæ",
+        "Quad3s": "  Sabbato post Dominicam III Quadragesimæ",
+        "Quad4": "4e Dimanche de Carême (Lætare)",
+        "Quad4m": "  Feria II post Dominicam IV Quadragesime",
+        "Quad4t": "  Feria III post Dominicam IV Quadragesimæ",
+        "Quad4w": "  Feria IV post Dominicam IV Quadragesimæ",
+        "Quad4h": "  Feria V post Dominicam IV Quadragesimæ",
+        "Quad4f": "  Feria VI post Dominicam IV Quadragesimæ",
+        "Quad4s": "  Sabbato post Dominicam IV Quadragesimæ",
+        "Quad5": "Dimanche de la Passion",
+        "Quad5m": "  Feria II post Dominicam I Passionis",
+        "Quad5t": "  Feria III post Dominicam I Passionis",
+        "Quad5w": "  Feria IV post Dominicam I Passionis",
+        "Quad5h": "  Feria V post Dominicam I Passionis",
+        "Quad5f": "  Feria VI post Dominicam I Passionis",
+        "Quad5f_sd": "  Feria VI: Septem Dolorum beatæ Mariæ Virginis",
+        "Quad5s": "  Sabbato post Dominicam I Passionis",
+        "Quad6": "Dimanche des Rameaux",
+        "Quad6_v": "Dominica in Palmis (ante 1955)",
+        "Quad6m": "  Feria II Hebdomadæ Sanctæ",
+        "Quad6t": "  Feria III Hebdomadæ Sanctæ",
+        "Quad6t_v": "  Feria III Hebdomadæ Sanctæ (ante 1955)",
+        "Quad6w": "  Feria IV Hebdomadæ Sanctæ",
+        "Quad6w_v": "  Feria IV Hebdomadæ Sanctæ (ante 1955)",
+        "Quad6h": "Feria V in Cena Domini",
+        "Quad6h_v": "Feria V in Cena Domini (ante 1955)",
+        "Quad6h-lotio": "  Antiphonæ ad Lotionem Pedum",
+        "Quad6f": "Feria VI in Passione et Morte Domini",
+        "Quad6f_v": "Feria VI in Parasceve (ante 1955)",
+        "Quad6s": "Vigilia Paschalis",
+        "Quad6s_v": "Vigilia Paschalis (ante 1955)",
+        "Pasc0": "Dimanche de Pâques (Résurrection du Seigneur)",
+        "Pasc0m": "Lundi de Pâques",
+        "Pasc0t": "Mardi de Pâques",
+        "Pasc0w": "Feria IV in Oct Paschæ",
+        "Pasc0h": "Feria V in Oct Paschæ",
+        "Pasc0f": "Feria VI in Oct Paschæ",
+        "Pasc0s": "Sabbato in Oct Paschæ",
+        "Pasc1": "Dimanche in Albis (Quasimodo)",
+        "Pasc2": "2e Dimanche après Pâques (du Bon Pasteur)",
+        "Pasc2w": "S. Joseph Sponsi B. Mariæ V.",
+        "Pasc3": "3e Dimanche après Pâques",
+        "Pasc4": "4e Dimanche après Pâques",
+        "Pasc5": "5e Dimanche après Pâques",
+        "Asc": "Ascension de Notre Seigneur",
+        "Pasc6": "Dimanche après l'Ascension",
+        "Pasc6s": "Sabbato in Vigilia Pentecostes",
+        "Pasc6s_v": "Sabbato in Vigilia Pentecostes (ante 1955)",
+        "Pent0": "Dimanche de la Pentecôte",
+        "Pent0m": "Lundi de la Pentecôte",
+        "Pent0t": "Mardi de la Pentecôte",
+        "Pent0w": "Mercredi des Quatre-Temps de la Pentecôte",
+        "Pent0h": "Feria V in Oct Pentecostes",
+        "Pent0f": "Vendredi des Quatre-Temps de la Pentecôte",
+        "Pent0s": "Samedi des Quatre-Temps de la Pentecôte",
+        "Pent0ss": "Sabbato IV Temporum (forma brevior)",
+        "Pent1": "Fête de la Très Sainte Trinité",
+        "Pent1w": "  Feria post 1 post Pentecosten",
+        "CorpusChristi": "Fête-Dieu (Très Saint Sacrement)",
+        "Pent2": "2e Dimanche après la Pentecôte (dans l'Octave de la Fête-Dieu)",
+        "SCJ": "Fête du Sacré-Cœur de Jésus",
+        "Pent3": "3e Dimanche après la Pentecôte (dans l'Octave du Sacré-Cœur)",
+        "Pent4": "4e Dimanche après la Pentecôte",
+        "Pent5": "5e Dimanche après la Pentecôte",
+        "Pent6": "6e Dimanche après la Pentecôte",
+        "Pent7": "7e Dimanche après la Pentecôte",
+        "Pent8": "8e Dimanche après la Pentecôte",
+        "Pent9": "9e Dimanche après la Pentecôte",
+        "Pent10": "10e Dimanche après la Pentecôte",
+        "Pent11": "11e Dimanche après la Pentecôte",
+        "Pent12": "12e Dimanche après la Pentecôte",
+        "Pent13": "13e Dimanche après la Pentecôte",
+        "Pent14": "14e Dimanche après la Pentecôte",
+        "Pent15": "15e Dimanche après la Pentecôte",
+        "Pent16": "16e Dimanche après la Pentecôte",
+        "Pent17": "17e Dimanche après la Pentecôte",
+        "EmbWedSept": "Mercredi des Quatre-Temps de Septembre",
+        "EmbFriSept": "Vendredi des Quatre-Temps de Septembre",
+        "EmbSatSept": "Samedi des Quatre-Temps de Septembre",
+        "EmbSatSeptS": "Sabbato IV Temporum (forma brevior)",
+        "Pent18": "18e Dimanche après la Pentecôte",
+        "Pent19": "19e Dimanche après la Pentecôte",
+        "Pent20": "20e Dimanche après la Pentecôte",
+        "Pent21": "21e Dimanche après la Pentecôte",
+        "Pent22": "22e Dimanche après la Pentecôte",
+        "ChristusRex": "Fête de Notre Seigneur Jésus-Christ Roi",
+        "Pent23": "23e Dimanche après la Pentecôte",
+        "PentEpi3": "3e Dimanche anticipé après l'Épiphanie",
+        "PentEpi4": "4e Dimanche anticipé après l'Épiphanie",
+        "PentEpi5": "5e Dimanche anticipé après l'Épiphanie",
+        "PentEpi6": "6e Dimanche anticipé après l'Épiphanie",
+        "Pent24": "24e et Dernier Dimanche après la Pentecôte",
+        "nuptialis": "Messe de Mariage (Missa pro Sponso et Sponsa)",
+        "defunctorum": "Messe des Morts (Requiem)",
+        "dedicatio": "Dédicace de l'Église",
+        "litaniis": "Ad Litaniis Maj. et Min.",
+        "votiveST": "Messe votive de la Sainte Trinité",
+        "votiveA": "Messe votive des Saints Anges",
+        "votiveJ": "Messe votive de Saint Joseph",
+        "votivePP": "Messe votive des Saints Pierre et Paul",
+        "votiveOA": "Messe votive de tous les Saints Apôtres",
+        "votiveSS": "Messe votive du Saint-Esprit",
+        "votiveSES": "Messe votive du Très Saint Sacrement",
+        "votiveJCSES": "Messe votive du Christ Prêtre Éternel",
+        "votiveSC": "Messe votive de la Sainte Croix",
+        "votivePJC": "Messe votive de la Passion de Notre Seigneur",
+        "votiveSCJ": "Messe votive du Sacré-Cœur de Jésus",
+        "SMadvent": "Ab Adventu usque ad Nativitatem",
+        "SMchristmas": "A Nativitate usque ad Purificationem",
+        "SMlent": "A Purificatione usque ad Pascha",
+        "SMeaster": "A Pascha usque ad Pentecosten",
+        "SMpentecost": "A Pentecoste usque ad Adventum",
+        "Aug22": "Feast of the Immaculate Heart of BVM",
+        "votiveECJ": "De Eucharistico Corde Jesu",
+        "mass_vigil_apostle": "In Vigiliis Apostolorum (Ego autem sicut)",
+        "mass_holy_pope": "Commune Summorum Pontificum (Si diligis me)",
+        "mass_i_martyr_bishop": "Missa I (Statuit)",
+        "mass_ii_martyr_bishop": "Missa II (Sacerdotes Dei)",
+        "mass_i_martyr_not_bishop": "Missa I (In virtute tua)",
+        "mass_ii_martyr_not_bishop": "Missa II (Laetabitur justus)",
+        "mass_one_martyr": "Pro uno Martyre (Protexisti me)",
+        "mass_two_or_more_martyr": "Pro pluribus Martyribus (Sancti tui)",
+        "mass_i_two_or_more_martyr": "Missa I (Intret in conspectu)",
+        "mass_ii_two_or_more_martyr": "Missa II (Sapientiam sanctorum)",
+        "mass_iii_two_or_more_martyr": "Missa III (Salus autem)",
+        "mass_i_confessor_bishop": "Missa I (Statuit)",
+        "mass_ii_confessor_bishop": "Missa II (Sacerdotes tui)",
+        "mass_doctors": "Pro Doctoribus (In medio)",
+        "mass_i_confessor_not_bishop": "Missa I (Os justi)",
+        "mass_ii_confessor_not_bishop": "Missa II (Justus ut palma)",
+        "mass_abbots": "Pro Abbatibus (Os justi)",
+        "mass_i_virgin_martyr": "Pro Virgine et Martyre I (Loquebar)",
+        "mass_ii_virgin_martyr": "Pro Virgine et Martyre II (Me exspectaverunt)",
+        "mass_i_virgin_not_martyr": "Pro Virgine tantum I (Dilexisti)",
+        "mass_ii_virgin_not_martyr": "Pro Virgine tantum II (Vultum tuum)",
+        "mass_holy_woman_martyr": "Pro Martyre (Me exspectaverunt)",
+        "mass_holy_woman_not_martyr": "Pro nec Virgine nec Martyre (Cognovi)",
+        "Jan5": "S. Télesphore, Pape et Martyr",
+        "Jan11": "S. Hygin, Pape et Martyr",
+        "Jan13": "Baptism of Our Lord Jesus Christ",
+        "Jan14": "S. Hilaire Evêque et Confesseur Docteur de l'Eglise",
+        "Jan15": "S. Paul, Premier Ermite et Confesseur",
+        "Jan16": "S. Marcel Ier, Pape et Martyr",
+        "Jan17": "S. Antoine, Abbé",
+        "Jan18": "Chaire de Saint Pierre à Rome",
+        "Jan19": "SS. Marius, Marthe, Audifax et Abacum Martyrs",
+        "Jan20": "Saints Fabien et Sébastien, Martyrs",
+        "Jan21": "Sainte Agnès, Vierge et Martyre",
+        "Jan22": "Saints Vincent et Anastase, Martyrs",
+        "Jan23": "S. Raymond de Peñafort, Confesseur",
+        "Jan24": "S. Timothée, Évêque et Martyr",
+        "Jan25": "In Conversione S. Pauli Apostoli",
+        "Jan26": "S. Polycarpe, Évêque et Martyr",
+        "Jan27": "S. Jean Chrysostome, Évêque et Docteur",
+        "Jan28": "S. Petri Nolasci Confessoris",
+        "Jan29": "S. François de Sales, Évêque et Docteur",
+        "Jan30": "Sainte Martine, Vierge et Martyre",
+        "Jan31": "S. Joannis Bosco Confessoris",
+        "Feb1": "S. Ignatii Episcopi et Martyris",
+        "Feb2": "Purification of BVM",
+        "Feb3": "S. Blasii Episcopi et Martyris",
+        "Feb4": "S. Andreæ Corsini Episcopi et Confessoris",
+        "Feb5": "S. Agathæ Virginis et Martyris",
+        "Feb6": "S. Titi Episcopi et Confessoris",
+        "Feb7": "S. Romualdi Abbatis",
+        "Feb8": "S. Joannis de Matha Confessoris",
+        "Feb9": "S. Cyrilli Episc. Alexandrini Confessoris et Ecclesiæ Doctoris",
+        "Feb10": "S. Scholasticæ Virginis",
+        "Feb11": "Apparition of BVM at Lourdes",
+        "Feb12": "Ss. Septem Fundatorum Ordinis Servorum B. M. V.",
+        "Feb14": "S. Valentini Presbyteri et Martyris",
+        "Feb15": "SS. Faustini et Jovitæ Martyrum",
+        "Feb18": "S. Simeonis Episcopi et Martyris",
+        "Feb18a": "S. Simeonis Episcopi et Martyris",
+        "Feb22": "In Cathedra S. Petri Apostoli Antiochiæ",
+        "Feb23": "St Peter Damian",
+        "Feb23or24": "Feb 23 vel 24: In vigilia S Matthiæ",
+        "Feb24or25": "S. Matthiæ Apostoli",
+        "Feb27or28": "S. Gabrielis a Virgine Perdolente Confessoris",
+        "Mar4": "S. Casimiri Confessoris",
+        "Mar6": "Ss. Perpetuæ et Felicitatis Martyrum",
+        "Mar7": "S. Thomæ de Aquino Confessoris et Ecclesiæ Doctoris",
+        "Mar8": "S. Joannis de Deo Confessoris",
+        "Mar9": "S. Franciscæ Romanæ Viduæ",
+        "Mar10": "Ss. Quadraginta Martyrum",
+        "Mar12": "S. Gregorii Papæ Confessoris et Ecclesiæ Doctoris",
+        "Mar17": "S. Patrick Évêque et Confesseur",
+        "Mar18": "S. Cyrille Évêque de Jérusalem Confesseur et Docteur de l'Église",
+        "Mar21": "S. Benedicti Abbatis",
+        "Mar24": "S. Gabrielis Archangeli",
+        "Mar27": "S. Joannis Damasceni Confessoris",
+        "Mar28": "S. Joannis a Capistrano Confessoris",
+        "Apr2": "S. Francisci de Paula Confessoris",
+        "Apr4": "S. Isidori Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Apr5": "S. Vincentii Ferrerii Confessoris",
+        "Apr11": "S. Leonis I Papæ Confessoris et Ecclesiæ Doctoris",
+        "Apr13": "S. Hermenegildi Martyris",
+        "Apr14": "S. Justini Martyris",
+        "Apr17": "S. Aniceti Papæ et Martyris",
+        "Apr21": "S. Anselmi Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Apr22": "Saints Soter et Caius, Souverains Pontifs et Martyrs",
+        "Apr23": "S. Georgii Martyris",
+        "Apr24": "S. Fidelis de Sigmaringa Martyris",
+        "Apr25": "S. Marc Evangeliste",
+        "Apr26": "Sts Clet et Marcellin Souverin Pontifes et Martyrs",
+        "Apr27": "S. Pierre Canisius Confesseur et Docteur de l'Eglise",
+        "Apr28": "S. Pauli a Cruce Confessoris",
+        "Apr29": "S. Pierre Martyr",
+        "Apr30": "S. Catharinæ Senensis Virginis",
+        "May2": "SAINT ATHANASE, ÉVÊQUE, CONFES. ET DOCT. DE L’ÉGLISE",
+        "May3": "In Inventione S Crucis",
+        "May4": "S. Monique Veuve",
+        "May5": "S. Pii V Papæ et Confessoris",
+        "May6": "S. Joannis Apostoli ante Portam Latinam",
+        "May7": "S. Stanislai Episcopi et Martyris",
+        "May8": "In Apparitione S. Michaelis Archangeli",
+        "May9": "Saint Grégoire de Nazianze, Évêque, Confesseur et Docteur de l'Église",
+        "May10": "Saint Antonin Évêque et Confesseur",
+        "May11": "Ss Philip and James",
+        "May12": "Saints Nérée, Achille, la Vierge Domitille et Pancrace, Martyrs",
+        "May13": "Saint Robert Bellarmin, Évêque, Confesseur et Docteur de l’Église",
+        "May14": "Saint Boniface Martyr",
+        "May15": "S. Joannis Baptistæ de la Salle Confessoris",
+        "May16": "Saint Ubald, Évêque et Confesseur",
+        "May17": "Saint Pascal Baylon Confesseur",
+        "May18": "S. Venantii Martyris",
+        "May19": "S. Pierre Celestin Pape et Confesseur",
+        "May20": "S. Bernardini Senensis Confessoris",
+        "May24": "Our Lady Help of Christians",
+        "May25": "S. Gregoire VII Pape et Confesseur",
+        "May26": "S. Philippe Neri Confesseur",
+        "May27": "S. Bède le Vénérable, Confesseur et Docteur de l’Église",
+        "May28": "St Augustin de Cantorbéry, évêque et confesseur",
+        "May29": "S. Marie-Madeleine de Pazzi, Vierge",
+        "May30": "S. Felix Ier Pape et Martyr",
+        "May31": "Queenship of BVM",
+        "Jun1": "S. Angèle Mérici, Vierge",
+        "Jun2": "Ss. Marcellini, Petri, atque Erasmi Martyrum",
+        "Jun4": "S. Francisci Caracciolo Confessoris",
+        "Jun5": "S. Boniface Évêque et Martyr",
+        "Jun6": "S. Norbert Evêque et Confesseur",
+        "Jun9": "Ss. Prime et Félicien Martyrs",
+        "Jun10": "S. Marguerite Reine et Veuve",
+        "Jun11": "S. Barnabé Apôtre",
+        "Jun12": "S. Jean de S. Facond Confesseur",
+        "Jun13": "S. Antoine de Padoue Confesseur",
+        "Jun14": "S. Basile le Grand, Confesseur et Docteur de l’Église",
+        "Jun15": "Ss. Vite, Modeste et Crescence, Martyrs",
+        "Jun17": "St Gregory Barbadici",
+        "Jun18": "S. Éphrem le Syrien, Confesseur et Docteur de l’Église",
+        "Jun19": "S. Julienne de Falconieri, Vierge",
+        "Jun19a": "S. Julienne de Falconieri, Vierge",
+        "Jun20": "S. Silvère, Pape et Martyr",
+        "Jun21": "S. Louis de Gonzague, Confesseur",
+        "Jun22": "S. Paulin de Nole, Évêque et Confesseur",
+        "Jun23": "Vigile de la Nativité de S. Jean-Baptiste",
+        "Jun24": "Nativité de Saint Jean-Baptiste",
+        "Jun25": "S. Guillaume, Abbé",
+        "Jun26": "Ss. Jean et Paul, Martyrs",
+        "Jun28": "S. Irénée, Évêque et Martyr",
+        "Jun29": "Les Ss. Apôtres Pierre et Paul",
+        "Jun30": "En la Commémoraison de l’Apôtre S. Paul",
+        "Jul1": "Le Très Précieux Sang de Notre Seigneur Jésus-Christ",
+        "Jul2": "The Visitation of BVM",
+        "Jul3": "S. Léon, Pape et Confesseur",
+        "Jul3a": "S. Léon, Pape et Confesseur",
+        "Jul4": "Within the octave of the Apostles Peter and Paul",
+        "Jul5": "S. Antoine Marie Zaccaria, Confesseur",
+        "Jul6": "Octave des Ss. Apôtres Pierre et Paul",
+        "Jul7": "Ss Cyrille et Méthode, Évêques et Confesseurs",
+        "Jul8": "Ste Élisabeth, Reine du Portugal, Veuve",
+        "Jul10": "Les saints Sept Frères Martys, et les saintes Rufine et Seconde, Vierges et Martyres",
+        "Jul11": "S. Pie Ier, Pape et Martyr",
+        "Jul11a": "S. Pie Ier, Pape et Martyr",
+        "Jul12": "S. Jean Gualbert, Abbé",
+        "Jul13": "S. Anaclet, Pape et Martyr",
+        "Jul14": "S. Bonaventure, Évêque, Confesseur et Docteur de l’Église",
+        "Jul15": "S. Henri, Empereur et Confesseur",
+        "Jul16": "Our Lady of Mount Carmel",
+        "Jul17": "S. Alexis, Confesseur",
+        "Jul18": "S. Camille de Lellis, Confesseur",
+        "Jul19": "S. Vincent de Paul, Confesseur",
+        "Jul20": "S. Jérôme Émilien, Confesseur",
+        "Jul21": "Ste Praxède, Vierge",
+        "Jul21a": "Ste Praxède, Vierge",
+        "Jul22": "Ste Marie-Madeleine, pénitente",
+        "Jul23": "S. Apollinaire, Évêque et Martyr",
+        "Jul24": "Vigile de S. Jacques, Apôtre",
+        "Jul25": "S. Jacques, Apôtre",
+        "Jul26": "Ste Anne, mère de la T.S. Vierge Marie",
+        "Jul27": "S. Pantaléon, Martyr",
+        "Jul28": "Ss Nazaire et Celse, Martyrs, Victor, Pape et Martyr et Innocent Ier, Pape et Confesseur",
+        "Jul29": "Ste Marthe, Vierge",
+        "Jul30": "Ss Abdon et Sennen, Martyrs",
+        "Jul31": "S. Ignace, Confesseur",
+        "Aug1": "S. Pierre aux Liens",
+        "Aug1a": "S. Pierre aux Liens",
+        "Aug2": "S. Alphonse Marie de Liguori, Évêque, Confesseur et Docteur de l’Église",
+        "Aug3": "Invention de S. Étienne, Premier Martyr",
+        "Aug4": "S. Dominique, Confesseur",
+        "Aug5": "Dedication of the Basilica of St Mary Major",
+        "Aug6": "Transfiguration of Our Lord",
+        "Aug7": "S. Gaétan de Thiène, Confesseur",
+        "Aug8": "Ss Cyriaque, Large et Smaragde, Martyrs",
+        "Aug8a": "Ss Cyriaque, Large et Smaragde, Martyrs",
+        "Aug9": "S. Jean-Marie Vianney, Confesseur",
+        "Aug10": "S. Laurent, Martyr",
+        "Aug11": "Ss Tiburce et Suzanne, Vierge, Martyrs",
+        "Aug12": "Ste Claire, Vierge",
+        "Aug13": "Ss, Hippolyte et Cassien, Martyrs",
+        "Aug14": "Vigil of Assumption of BVM",
+        "Aug15": "Assumption of BVM",
+        "Aug16": "St Joachim, père de la B. V. M.",
+        "Aug17": "S. Hyacinthe, Confesseur",
+        "Aug18": "St Agapitus",
+        "Aug19": "S. Jean Eudes, Confesseur",
+        "Aug20": "S. Bernard, Abbé et Docteur de l’Église",
+        "Aug21": "Ste Jeanne-Françoise Frémiot de Chantal, Veuve",
+        "Aug23": "S. Philippe Beniti, Confesseur",
+        "Aug24": "S. Barthélemy, Apôtre",
+        "Aug25": "S. Louis, Roi et Confesseur",
+        "Aug26": "S. Zéphyrin, Pape et Martyr",
+        "Aug27": "S. Joseph Calasanz, Confesseur",
+        "Aug28": "S. Augustin, Évêque, Confesseur et Docteur de l’Église",
+        "Aug29": "Décollation de S. Jean-Baptiste",
+        "Aug30": "Sainte Rose de Lima, Vierge",
+        "Aug31": "S. Raymond Nonnat, Confesseur",
+        "Sep1": "S. Gilles, Abbé",
+        "Sep2": "S. Étienne, Roi et Confesseur",
+        "Sep3": "S. Pie X, Pape et Confesseur",
+        "Sep5": "S. Laurent Justinien, Évêque et Confesseur",
+        "Sep8": "Nativity of BVM",
+        "Sep9": "S. Gorgon, Martyr",
+        "Sep9a": "S. Pierre Claver, Confesseur",
+        "Sep10": "S. Nicolas de Tolentino, Confesseur",
+        "Sep11": "Saints Prote et Hyacinthe, Martyrs",
+        "Sep12": "Le Très Saint Nom de Marie",
+        "Sep14": "The Exaltation of the Holy Cross",
+        "Sep15": "Seven Sorrows of BVM",
+        "Sep16": "Ss Corneille, Pape, et Cyprien, Évêque, Martyrs",
+        "Sep17": "Impression des Stigmates de Saint François",
+        "Sep18": "S. Joseph de Cupertino, Confesseur",
+        "Sep19": "St Janvier, Evêque, et ses Compagnons, Martyrs",
+        "Sep19laSalette": "Notre-Dame de La Salette",
+        "Sep20": "St Eustache et ses compagnons, Martyrs",
+        "Sep21": "St Matthieu, Apôtre et Evangéliste",
+        "Sep22": "St Thomas de Villeneuve, Evêque et Confesseur",
+        "Sep23": "St Lin, Pape et Martyr",
+        "Sep24": "Our Lady of Ransom",
+        "Sep26": "St Cyprien et Ste Justine, Martyrs",
+        "Sep26a": "Saints Isaac Jogues, Jean de Brébeuf et leurs Compagnons",
+        "Sep27": "Sts Côme et Damien, Martyrs",
+        "Sep28": "St Wenceslas, Duc et Martyr",
+        "Sep29": "Dédicace de St Michel, Archange",
+        "Sep30": "St Jérôme, Confesseur et Docteur de l'Eglise",
+        "Oct1": "Saint Rémi, Evêque et Confesseur",
+        "Oct2": "Sts Anges Gardiens",
+        "Oct3": "Ste Thérèse de l’Enfant Jésus, vierge et docteur de l’Eglise",
+        "Oct4": "St François d’Assise, Confesseur",
+        "Oct5": "St Placide et ses Compagnons, Martyrs",
+        "Oct6": "St Bruno, Confesseur",
+        "Oct7": "The Most Holy Rosary of BVM",
+        "Oct8": "Ste Brigitte, Veuve",
+        "Oct9": "St Jean Léonardi, Confesseur",
+        "Oct10": "St François de Borgia, Confesseur",
+        "Oct11": "Maternitatis Beatæ Mariæ Virginis",
+        "Oct13": "St Edouard, Roi et Confesseur",
+        "Oct14": "St Calixte Ier, Pape et Martyr",
+        "Oct15": "Ste Thérèse, Vierge",
+        "Oct16": "Ste Hedwige, Veuve",
+        "Oct17": "Ste Marguerite-Marie Alacoque, Vierge",
+        "Oct18": "St Luc, Evangéliste",
+        "Oct19": "St Pierre d’Alcantara, Confesseur",
+        "Oct20": "St Jean de Kenty, Confesseur",
+        "Oct21": "St Hilarion, Abbé",
+        "Oct23": "St Anthony Mary Claret",
+        "Oct24": "St Raphaël, Archange",
+        "Oct25": "Sts Chrysanthe et Darie, Martyrs",
+        "Oct25a": "Sts Chrysanthe et Darie, Martyrs",
+        "Oct26": "St Evariste, Pape et Martyr",
+        "Oct27": "Vigile des Sts Simon et Jude, Apôtres",
+        "Oct28": "Sts Simon et Jude, Apôtres",
+        "Oct31": "Vigile de la fête de tous les Saints",
+        "Nov1": "Tous les Saints",
+        "Nov4": "St Charles Evêque et Confesseur",
+        "Nov5": "The Feast of the Holy Relics",
+        "Nov8": "Dans l'octave de la Toussaint",
+        "Nov9": "The Dedication of the Lateran Basilica",
+        "Nov10": "St. André Avellin Confesseur",
+        "Nov11": "St Martin, Evêque et Confesseur",
+        "Nov12": "S. Martini Papæ et Martyris",
+        "Nov13": "S. Didace Confesseur",
+        "Nov13a": "S. Didace Confesseur",
+        "Nov14": "St. Josaphat Evêque et Martyrs",
+        "Nov15": "St. Albert le Grand, Evêque Confesseur et Docteur de l'Eglise",
+        "Nov16": "Ste Gertrude Vierge",
+        "Nov17": "St. Grégoire Thaumaturge Evêque et Confesseur",
+        "Nov18": "The Dedication of the Basilicas of Ss Peter and Paul",
+        "Nov19": "Ste. Elisabeth Veuve",
+        "Nov20": "St. Félix de Valois Confesseur",
+        "Nov21": "The Presentation of BVM",
+        "Nov22": "Ste Cécile Vierge et Martyre",
+        "Nov23": "St Clément Ier Pape et Martyr",
+        "Nov24": "St. Jean de la Croix Confesseur et Docteur de l'Eglise",
+        "Nov25": "Ste Catherine Vierge et Martyre",
+        "Nov26": "St Silvestre Abbé",
+        "Nov27": "Our Lady of the Miraculous Medal",
+        "Nov29": "Vigile de St André Apôtre",
+        "Nov29a": "Vigile de St André Apôtre",
+        "Nov30": "St André Apôtre",
+        "Dec2": "Ste Bibiane Vierge et Martyre",
+        "Dec3": "S. François Xavier Confesseur",
+        "Dec4": "St Pierre Chrysologue Evêque Confesseur et Docteur de l'Eglise",
+        "Dec5": "St Sabba Abbé",
+        "Dec6": "St Nicolas Evêque et Confesseur",
+        "Dec7": "St Ambroise Evêque Confesseur et Docteur de l'Eglise",
+        "Dec8": "The Immaculate Conception of BVM",
+        "Dec10": "St Melchiades",
+        "Dec11": "St Damase Ier, pape et confesseur",
+        "Dec12": "Our Lady of Guadalupe",
+        "Dec13": "Ste Lucie Vierge et Martyre",
+        "Dec16": "Ste Eusebe Evêque et Martyre",
+        "Dec20": "In Vigilia S Thomæ Apostoli",
+        "Dec21": "St Thomas, Apôtre",
+        "Dec26": "St Etienne Protomartyr",
+        "Dec27": "St Jean Apôtre et Evangéliste",
+        "Dec28": "Les Saints Innocents",
+        "Dec29": "St Thomas Evêque et Martyr",
+        "Dec31": "St Sylvestre Pape et Confesseur",
+        "Dec31_v": "St Sylvestre Pape et Confesseur",
+        "Quad": "Septuagesima usque ad Finem Quadragesimæ",
+        "Pasch": "Tempus Paschale",
+        "Nat0": "Vigile de la Nativité",
+        "Quadp1": "Dimanche de la Septuagésime",
+        "Quadp2": "Dimanche de la Sexagésime",
+        "Quadp3": "Dimanche de la Quinquagésime",
+        "Quadw": "Mercredi des Cendres",
+        "HolyThurs": "Jeudi Saint (In Cœna Domini)",
+        "GoodFri": "Vendredi Saint (In Parasceve)",
+        "HolySat": "Samedi Saint (Vigile Pascale)"
+    },
+    "la": {
+        "Adv1": "Dominica I Adventus",
+        "Adv2": "Dominica II Adventus",
+        "Adv3": "Dominica III Adventus (Gaudete)",
+        "Adv3w": "Feria Quarta IV Temporum Adventus",
+        "Adv3f": "Feria Sexta IV Temporum Adventus",
+        "Adv3s": "Sabbato IV Temporum Adventus",
+        "Adv3ss": "Sabbato IV Temporum (forma brevior)",
+        "Adv4": "Dominica IV Adventus",
+        "Dec24": "pridie Nativitas",
+        "Dec25_1": "Nativitas Domini, Missa ad media noctem",
+        "Dec25_2": "Nativitas Domini, Missa ad matutinam",
+        "Dec25_3": "Nativitas Domini, Missa interdiu",
+        "Nat1": "Dominica infra Octavam Nativitatis",
+        "Jan1": "Octava Nativitatis (Circumcisione Domini)",
+        "Nat2": "Sanctissimi Nominis Jesu",
+        "Jan5a": "In Vigilia Epiphaniæ",
+        "Epi": "Epiphania",
+        "Epi1": "Sanctæ Familiæ Jesu, Mariæ, Joseph",
+        "Epi1s": "  Feria post I post Epiphaniam",
+        "Epi2": "Dominica II post Epiphaniam",
+        "Epi3": "Dominica III post Epiphaniam",
+        "Epi4": "Dominica IV post Epiphaniam",
+        "Epi5": "Dominica V post Epiphaniam",
+        "Epi6": "Dominica VI post Epiphaniam",
+        "7a": "Septuagesima",
+        "6a": "Sexagesima",
+        "5a": "Quinquagesima",
+        "5aw": "Feria IV Cinerum",
+        "5ah": "  Feria V post Cinerum",
+        "5af": "  Feria VI post Cinerum",
+        "5as": "  Sabbato post Cinerum",
+        "Quad1": "Dominica I in Quadragesima",
+        "Quad1m": "  Feria II post Dominicam I Quadragesimæ",
+        "Quad1t": "  Feria III post Dominicam I Quadragesimæ",
+        "Quad1w": "Feria Quarta IV Temporum Quadragesimæ",
+        "Quad1h": "  Feria V post Dominicam I Quadragesimæ",
+        "Quad1f": "Feria Sexta IV Temporum Quadragesimæ",
+        "Quad1s": "Sabbato IV Temporum Quadragesimæ",
+        "Quad1ss": "  Sabbato IV Temporum (forma brevior)",
+        "Quad2": "Dominica II in Quadragesima",
+        "Quad2m": "  Feria II post Dominicam II Quadragesimæ",
+        "Quad2t": "  Feria III post Dominicam II Quadragesimæ",
+        "Quad2w": "  Feria IV post Dominicam II Quadragesimæ",
+        "Quad2h": "  Feria V post Dominicam II Quadragesimæ",
+        "Quad2f": "  Feria VI post Dominicam II Quadragesimæ",
+        "Quad2s": "  Sabbato post Dominicam II Quadragesimæ",
+        "Quad3": "Dominica III in Quadragesima",
+        "Quad3m": "  Feria II post Dominicam III Quadragesime",
+        "Quad3t": "  Feria III post Dominicam III Quadragesimæ",
+        "Quad3w": "  Feria IV post Dominicam III Quadragesimæ",
+        "Quad3h": "  Feria V post Dominicam III Quadragesimæ",
+        "Quad3f": "  Feria VI post Dominicam III Quadragesimæ",
+        "Quad3s": "  Sabbato post Dominicam III Quadragesimæ",
+        "Quad4": "Dominica IV in Quadragesima (Lætare)",
+        "Quad4m": "  Feria II post Dominicam IV Quadragesime",
+        "Quad4t": "  Feria III post Dominicam IV Quadragesimæ",
+        "Quad4w": "  Feria IV post Dominicam IV Quadragesimæ",
+        "Quad4h": "  Feria V post Dominicam IV Quadragesimæ",
+        "Quad4f": "  Feria VI post Dominicam IV Quadragesimæ",
+        "Quad4s": "  Sabbato post Dominicam IV Quadragesimæ",
+        "Quad5": "Dominica I Passionis",
+        "Quad5m": "  Feria II post Dominicam I Passionis",
+        "Quad5t": "  Feria III post Dominicam I Passionis",
+        "Quad5w": "  Feria IV post Dominicam I Passionis",
+        "Quad5h": "  Feria V post Dominicam I Passionis",
+        "Quad5f": "  Feria VI post Dominicam I Passionis",
+        "Quad5f_sd": "  Feria VI: Septem Dolorum beatæ Mariæ Virginis",
+        "Quad5s": "  Sabbato post Dominicam I Passionis",
+        "Quad6": "Dominica II Passionis seu in Palmis",
+        "Quad6_v": "Dominica in Palmis (ante 1955)",
+        "Quad6m": "  Feria II Hebdomadæ Sanctæ",
+        "Quad6t": "  Feria III Hebdomadæ Sanctæ",
+        "Quad6t_v": "  Feria III Hebdomadæ Sanctæ (ante 1955)",
+        "Quad6w": "  Feria IV Hebdomadæ Sanctæ",
+        "Quad6w_v": "  Feria IV Hebdomadæ Sanctæ (ante 1955)",
+        "Quad6h": "Feria V in Cena Domini",
+        "Quad6h_v": "Feria V in Cena Domini (ante 1955)",
+        "Quad6h-lotio": "  Antiphonæ ad Lotionem Pedum",
+        "Quad6f": "Feria VI in Passione et Morte Domini",
+        "Quad6f_v": "Feria VI in Parasceve (ante 1955)",
+        "Quad6s": "Vigilia Paschalis",
+        "Quad6s_v": "Vigilia Paschalis (ante 1955)",
+        "Pasc0": "Dominica Resurrectionis",
+        "Pasc0m": "Feria Secunda infra Octavam Paschæ",
+        "Pasc0t": "Feria Tertia infra Octavam Paschæ",
+        "Pasc0w": "Feria IV in Oct Paschæ",
+        "Pasc0h": "Feria V in Oct Paschæ",
+        "Pasc0f": "Feria VI in Oct Paschæ",
+        "Pasc0s": "Sabbato in Oct Paschæ",
+        "Pasc1": "Dominica in Albis in Octava Paschæ",
+        "Pasc2": "Dominica II post Pascha (Boni Pastoris)",
+        "Pasc2w": "S. Joseph Sponsi B. Mariæ V.",
+        "Pasc3": "Dominica III post Pascha",
+        "Pasc4": "Dominica IV post Pascha",
+        "Pasc5": "Dominica V post Pascha",
+        "Asc": "In Ascensione Domini",
+        "Pasc6": "Dominica post Ascensionem",
+        "Pasc6s": "Sabbato in Vigilia Pentecostes",
+        "Pasc6s_v": "Sabbato in Vigilia Pentecostes (ante 1955)",
+        "Pent0": "Dominica Pentecostes",
+        "Pent0m": "Feria Secunda infra Octavam Pentecostes",
+        "Pent0t": "Feria Tertia infra Octavam Pentecostes",
+        "Pent0w": "Feria Quarta IV Temporum Pentecostes",
+        "Pent0h": "Feria V in Oct Pentecostes",
+        "Pent0f": "Feria Sexta IV Temporum Pentecostes",
+        "Pent0s": "Sabbato IV Temporum Pentecostes",
+        "Pent0ss": "Sabbato IV Temporum (forma brevior)",
+        "Pent1": "In Festo Sanctissimæ Trinitatis",
+        "Pent1w": "  Feria post 1 post Pentecosten",
+        "CorpusChristi": "Sanctissimi Corporis Christi",
+        "Pent2": "Dominica II post Pentecosten",
+        "SCJ": "Sacratissimi Cordis Jesu",
+        "Pent3": "Dominica III post Pentecosten",
+        "Pent4": "Dominica IV post Pentecosten",
+        "Pent5": "Dominica V post Pentecosten",
+        "Pent6": "Dominica VI post Pentecosten",
+        "Pent7": "Dominica VII post Pentecosten",
+        "Pent8": "Dominica VIII post Pentecosten",
+        "Pent9": "Dominica IX post Pentecosten",
+        "Pent10": "Dominica X post Pentecosten",
+        "Pent11": "Dominica XI post Pentecosten",
+        "Pent12": "Dominica XII post Pentecosten",
+        "Pent13": "Dominica XIII post Pentecosten",
+        "Pent14": "Dominica XIV post Pentecosten",
+        "Pent15": "Dominica XV post Pentecosten",
+        "Pent16": "Dominica XVI post Pentecosten",
+        "Pent17": "Dominica XVII post Pentecosten",
+        "EmbWedSept": "Feria Quarta IV Temporum Septembris",
+        "EmbFriSept": "Feria Sexta IV Temporum Septembris",
+        "EmbSatSept": "Sabbato IV Temporum Septembris",
+        "EmbSatSeptS": "Sabbato IV Temporum (forma brevior)",
+        "Pent18": "Dominica XVIII post Pentecosten",
+        "Pent19": "Dominica XIX post Pentecosten",
+        "Pent20": "Dominica XX post Pentecosten",
+        "Pent21": "Dominica XXI post Pentecosten",
+        "Pent22": "Dominica XXII post Pentecosten",
+        "ChristusRex": "Domini Nostri Jesu Christi Regis",
+        "Pent23": "Dominica XXIII post Pentecosten",
+        "PentEpi3": "Dominica III quæ superfuit post Epiphaniam",
+        "PentEpi4": "Dominica IV quæ superfuit post Epiphaniam",
+        "PentEpi5": "Dominica V quæ superfuit post Epiphaniam",
+        "PentEpi6": "Dominica VI quæ superfuit post Epiphaniam",
+        "Pent24": "Dominica XXIV et Ultima post Pentecosten",
+        "nuptialis": "Missa pro Sponso et Sponsa",
+        "defunctorum": "Missa Defunctorum",
+        "dedicatio": "In Anniversario Dedicationis Ecclesiæ",
+        "litaniis": "Ad Litaniis Maj. et Min.",
+        "votiveST": "Missa votiva de Sanctissima Trinitate",
+        "votiveA": "Missa votiva de Angelis",
+        "votiveJ": "Missa votiva de Sancto Joseph",
+        "votivePP": "Missa votiva de SS. Apostolis Petro et Paulo",
+        "votiveOA": "Missa votiva de omnibus SS. Apostolis",
+        "votiveSS": "Missa votiva de Spiritu Sancto",
+        "votiveSES": "Missa votiva de Sanctissimo Sacramento",
+        "votiveJCSES": "Missa votiva de Jesu Christo Summo et Æterno Sacerdote",
+        "votiveSC": "Missa votiva de Sancta Cruce",
+        "votivePJC": "Missa votiva de Passione D.N. Jesu Christi",
+        "votiveSCJ": "Missa votiva de Sacratissimo Corde Jesu",
+        "SMadvent": "Ab Adventu usque ad Nativitatem",
+        "SMchristmas": "A Nativitate usque ad Purificationem",
+        "SMlent": "A Purificatione usque ad Pascha",
+        "SMeaster": "A Pascha usque ad Pentecosten",
+        "SMpentecost": "A Pentecoste usque ad Adventum",
+        "Aug22": "Feast of the Immaculate Heart of BVM",
+        "votiveECJ": "De Eucharistico Corde Jesu",
+        "mass_vigil_apostle": "In Vigiliis Apostolorum (Ego autem sicut)",
+        "mass_holy_pope": "Commune Summorum Pontificum (Si diligis me)",
+        "mass_i_martyr_bishop": "Missa I (Statuit)",
+        "mass_ii_martyr_bishop": "Missa II (Sacerdotes Dei)",
+        "mass_i_martyr_not_bishop": "Missa I (In virtute tua)",
+        "mass_ii_martyr_not_bishop": "Missa II (Laetabitur justus)",
+        "mass_one_martyr": "Pro uno Martyre (Protexisti me)",
+        "mass_two_or_more_martyr": "Pro pluribus Martyribus (Sancti tui)",
+        "mass_i_two_or_more_martyr": "Missa I (Intret in conspectu)",
+        "mass_ii_two_or_more_martyr": "Missa II (Sapientiam sanctorum)",
+        "mass_iii_two_or_more_martyr": "Missa III (Salus autem)",
+        "mass_i_confessor_bishop": "Missa I (Statuit)",
+        "mass_ii_confessor_bishop": "Missa II (Sacerdotes tui)",
+        "mass_doctors": "Pro Doctoribus (In medio)",
+        "mass_i_confessor_not_bishop": "Missa I (Os justi)",
+        "mass_ii_confessor_not_bishop": "Missa II (Justus ut palma)",
+        "mass_abbots": "Pro Abbatibus (Os justi)",
+        "mass_i_virgin_martyr": "Pro Virgine et Martyre I (Loquebar)",
+        "mass_ii_virgin_martyr": "Pro Virgine et Martyre II (Me exspectaverunt)",
+        "mass_i_virgin_not_martyr": "Pro Virgine tantum I (Dilexisti)",
+        "mass_ii_virgin_not_martyr": "Pro Virgine tantum II (Vultum tuum)",
+        "mass_holy_woman_martyr": "Pro Martyre (Me exspectaverunt)",
+        "mass_holy_woman_not_martyr": "Pro nec Virgine nec Martyre (Cognovi)",
+        "Jan5": "S. Telesphori Papæ et Martyris",
+        "Jan11": "S. Hygini Papæ et Martyris",
+        "Jan13": "Baptism of Our Lord Jesus Christ",
+        "Jan14": "S. Hilarii Episcopi Confessoris Ecclesiæ Doctoris",
+        "Jan15": "S. Pauli Primi Eremitæ et Confessoris",
+        "Jan16": "S. Marcelli Papæ et Martyris",
+        "Jan17": "S. Antonii Abbatis",
+        "Jan18": "Cathedræ S. Petri Romæ",
+        "Jan19": "Ss. Marii, Marthæ, Audifacis, et Abachum Martyrum",
+        "Jan20": "Ss. Fabiani et Sebastiani Martyrum",
+        "Jan21": "S. Agnetis Virginis et Martyris",
+        "Jan22": "Ss. Vincentii et Anastasii Martyrum",
+        "Jan23": "S. Raymundi de Peñafort Confessoris",
+        "Jan24": "S. Timothei Episcopi et Martyris",
+        "Jan25": "In Conversione S. Pauli Apostoli",
+        "Jan26": "S. Polycarpi Episcopi et Martyris",
+        "Jan27": "S. Joannis Chrysostomi Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Jan28": "S. Petri Nolasci Confessoris",
+        "Jan29": "S. Francisci Salesii Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Jan30": "S. Martinæ Virginis et Martyris",
+        "Jan31": "S. Joannis Bosco Confessoris",
+        "Feb1": "S. Ignatii Episcopi et Martyris",
+        "Feb2": "Purification of BVM",
+        "Feb3": "S. Blasii Episcopi et Martyris",
+        "Feb4": "S. Andreæ Corsini Episcopi et Confessoris",
+        "Feb5": "S. Agathæ Virginis et Martyris",
+        "Feb6": "S. Titi Episcopi et Confessoris",
+        "Feb7": "S. Romualdi Abbatis",
+        "Feb8": "S. Joannis de Matha Confessoris",
+        "Feb9": "S. Cyrilli Episc. Alexandrini Confessoris et Ecclesiæ Doctoris",
+        "Feb10": "S. Scholasticæ Virginis",
+        "Feb11": "Apparition of BVM at Lourdes",
+        "Feb12": "Ss. Septem Fundatorum Ordinis Servorum B. M. V.",
+        "Feb14": "S. Valentini Presbyteri et Martyris",
+        "Feb15": "SS. Faustini et Jovitæ",
+        "Feb18": "S. Simeonis Episcopi et Martyris",
+        "Feb18a": "S. Simeonis Episcopi et Martyris",
+        "Feb22": "In Cathedra S. Petri Apostoli Antiochiæ",
+        "Feb23": "St Peter Damian",
+        "Feb23or24": "Feb 23 vel 24: In vigilia S Matthiæ",
+        "Feb24or25": "S. Matthiæ Apostoli",
+        "Feb27or28": "S. Gabrielis a Virgine Perdolente Confessoris",
+        "Mar4": "S. Casimiri Confessoris",
+        "Mar6": "Ss. Perpetuæ et Felicitatis Martyrum",
+        "Mar7": "S. Thomæ de Aquino Confessoris et Ecclesiæ Doctoris",
+        "Mar8": "S. Joannis de Deo Confessoris",
+        "Mar9": "S. Franciscæ Romanæ Viduæ",
+        "Mar10": "Ss. Quadraginta Martyrum",
+        "Mar12": "S. Gregorii Papæ Confessoris et Ecclesiæ Doctoris",
+        "Mar17": "S. Patricii Episcopi et Confessoris",
+        "Mar18": "S. Cyrilli Episcopi Hierosolymitani Confessoris et Ecclesiæ Doctoris",
+        "Mar21": "S. Benedicti Abbatis",
+        "Mar24": "S. Gabrielis Archangeli",
+        "Mar27": "S. Joannis Damasceni Confessoris et Ecclesiæ Doctoris",
+        "Mar28": "S. Joannis a Capistrano Confessoris",
+        "Apr2": "S. Francisci de Paula Confessoris",
+        "Apr4": "S. Isidori Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Apr5": "S. Vincentii Ferrerii Confessoris",
+        "Apr11": "S. Leonis I Papæ Confessoris et Ecclesiæ Doctoris",
+        "Apr13": "S. Hermenegildi Martyris",
+        "Apr14": "S. Justini Martyris",
+        "Apr17": "S. Aniceti Papæ et Martyris",
+        "Apr21": "S. Anselmi Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Apr22": "SS. Soteris et Caji Summorum Pontificum et Martyrum",
+        "Apr23": "S. Georgii Martyris",
+        "Apr24": "S. Fidelis de Sigmaringa Martyris",
+        "Apr25": "S. Marci Evangelistæ",
+        "Apr26": "SS. Cleti et Marcellini Summorum Pontificum et Martyrum",
+        "Apr27": "S. Petri Canisii Confessoris et Ecclesiæ Doctoris",
+        "Apr28": "S. Pauli a Cruce Confessoris",
+        "Apr29": "S. Petri Martyris",
+        "Apr30": "S. Catharinæ Senensis Virginis",
+        "May2": "S. Athanasii Episcopi Confessoris et Ecclesiæ Doctoris",
+        "May3": "In Inventione S Crucis",
+        "May4": "S. Monicæ Viduæ",
+        "May5": "S. Pii V Papæ et Confessoris",
+        "May6": "S. Joannis Apostoli ante Portam Latinam",
+        "May7": "S. Stanislai Episcopi et Martyris",
+        "May8": "In Apparitione S. Michaëlis Archangeli",
+        "May9": "S. Gregorii Nazianzeni Episcopi Confessoris et Ecclesiæ Doctoris",
+        "May10": "S. Antonini Episcopi et Confessoris",
+        "May11": "Ss Philip and James",
+        "May12": "Ss. Nerei, Achillei et Domitillæ Virg. atque Pancratii Martyrum",
+        "May13": "S. Roberti Bellarmino Episcopi Confessoris et Ecclesiæ Doctoris",
+        "May14": "S. Bonifatii Martyris",
+        "May15": "S. Joannis Baptistæ de la Salle Confessoris",
+        "May16": "S. Ubaldi Episcopi et Confessoris",
+        "May17": "S. Paschalis Baylon Confessoris",
+        "May18": "S. Venantii Martyris",
+        "May19": "S. Petri Celestini Papæ et Confessoris",
+        "May20": "S. Bernardini Senensis Confessoris",
+        "May24": "Our Lady Help of Christians",
+        "May25": "S. Gregorii VII Papæ et Confessoris",
+        "May26": "S. Philippi Neri Confessoris",
+        "May27": "S. Bedæ Venerabilis Confessoris et Ecclesiæ Doctoris",
+        "May28": "S. Augustini Episcopi et Confessoris",
+        "May29": "S. Mariæ Magdalenæ de Pazzis Virginis",
+        "May30": "S. Felicis I Papæ et Martyris",
+        "May31": "Queenship of BVM",
+        "Jun1": "S. Angelæ Mericiæ Virginis",
+        "Jun2": "Ss. Marcellini, Petri, atque Erasmi, Episcopi, Martyrum",
+        "Jun4": "S. Francisci Caracciolo Confessoris",
+        "Jun5": "S. Bonifatii Episcopi et Martyris",
+        "Jun6": "S. Norberti Episcopi et Confessoris",
+        "Jun9": "Ss. Primi et Feliciani Martyrum",
+        "Jun10": "S. Margaritæ Reginæ Viduæ",
+        "Jun11": "S. Barnabæ Apostoli",
+        "Jun12": "S. Joannis a S. Facundo Confessoris",
+        "Jun13": "S. Antonii de Padua Confessoris",
+        "Jun14": "S. Basilii Magni, Episcopis Confessoris et Ecclesiæ Doctoris",
+        "Jun15": "Ss. Viti, Modesti atque Crescentiæ Martyrum",
+        "Jun17": "St Gregory Barbadici",
+        "Jun18": "S. Ephræm Syri Confessoris et Ecclesiæ Doctoris",
+        "Jun19": "S. Julianæ de Falconeriis Virginis",
+        "Jun19a": "S. Julianæ de Falconeriis Virginis",
+        "Jun20": "S. Silverii Papæ et Martyris",
+        "Jun21": "S. Aloisii Gonzagæ Confessoris",
+        "Jun22": "S. Paulini Episcopi et Confessoris",
+        "Jun23": "In Vigilia S. Joannis Baptistæ",
+        "Jun24": "In Nativitate S. Joannis Baptistæ",
+        "Jun25": "S. Gulielmi Abbatis",
+        "Jun26": "Ss. Joannis et Pauli Martyrum",
+        "Jun28": "S. Irenæi Episcopi et Martyris",
+        "Jun29": "SS. Apostolorum Petri et Pauli",
+        "Jun30": "In Commemoratione S. Pauli Apostoli",
+        "Jul1": "Pretiosissimi Sanguinis Domini Nostri Jesu Christi",
+        "Jul2": "The Visitation of BVM",
+        "Jul3": "S. Leonis Papæ et Confessoris",
+        "Jul3a": "S. Leonis Papæ et Confessoris",
+        "Jul4": "Within the octave of the Apostles Peter and Paul",
+        "Jul5": "S. Antonii Mariæ Zaccaria Confessoris",
+        "Jul6": "In Octava Ss. Apostolorum Petri et Pauli",
+        "Jul7": "Ss. Cyrilli et Methodii Pont. et Conf.",
+        "Jul8": "S. Elisabeth Reg. Portugaliæ Viduæ",
+        "Jul10": "Ss. Septem Fratrum Martyrum, ac Rufinæ et Secundæ Virginum et Martyrum",
+        "Jul11": "S. Pii I Papæ et Martyris",
+        "Jul11a": "S. Pii I Papæ et Martyris",
+        "Jul12": "S. Joannis Gualberti Abbatis",
+        "Jul13": "S. Anacleti Papæ et Martyris",
+        "Jul14": "S. Bonaventuræ Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Jul15": "S. Henrici Imperatoris Confessoris",
+        "Jul16": "Our Lady of Mount Carmel",
+        "Jul17": "S. Alexii Confessoris",
+        "Jul18": "S. Camilli de Lellis Confessoris",
+        "Jul19": "S. Vincentii a Paulo Confessoris",
+        "Jul20": "S. Hieronymi Æmiliani Confessoris",
+        "Jul21": "S. Praxedis Virginis",
+        "Jul21a": "S. Praxedis Virginis",
+        "Jul22": "S. Mariæ Magdalenæ Pœnitentis",
+        "Jul23": "S. Apollinaris Episcopi et Martyris",
+        "Jul24": "In Vigilia S. Jacobi Ap.",
+        "Jul25": "S. Jacobi Apostoli",
+        "Jul26": "S. Annæ Matris B.M.V.",
+        "Jul27": "S. Pantaleonis Martyris",
+        "Jul28": "Ss. Nazarii et Celsi Martyrum, Victoris I Papæ et Martyris ac Innocentii I Papæ et Confessoris",
+        "Jul29": "S. Marthæ Virginis",
+        "Jul30": "S. Abdon et Sennen Martyrum",
+        "Jul31": "S. Ignatii Confessoris",
+        "Aug1": "S. Petri ad Vincula",
+        "Aug1a": "S. Petri ad Vincula",
+        "Aug2": "S. Alfonsi Mariæ de Ligorio Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Aug3": "De Inventione S. Stephani Protomartyris",
+        "Aug4": "S. Dominici Confessoris",
+        "Aug5": "Dedication of the Basilica of St Mary Major",
+        "Aug6": "Transfiguration of Our Lord",
+        "Aug7": "S. Cajetani Confessoris",
+        "Aug8": "Ss. Cyriaci, Largi et Smaragdi Martyrum",
+        "Aug8a": "Ss. Cyriaci, Largi et Smaragdi Martyrum",
+        "Aug9": "S. Joannis Mariæ Vianney Confessoris",
+        "Aug10": "S. Laurentii Martyris",
+        "Aug11": "Ss. Tiburtii et Susannæ Virginis, Martyrum",
+        "Aug12": "S. Claræ Virginis",
+        "Aug13": "Ss. Hippolyti et Cassiani Martyrum",
+        "Aug14": "Vigil of Assumption of BVM",
+        "Aug15": "Assumption of BVM",
+        "Aug16": "S. Joachim Confessoris, Patris B. M. V.",
+        "Aug17": "S. Hyacinthi Confessoris",
+        "Aug18": "St Agapitus",
+        "Aug19": "S. Joannis Eudes Confessoris",
+        "Aug20": "S. Bernardi Abbatis et Ecclesiæ Doctoris",
+        "Aug21": "S. Joannæ Franciscæ Frémiot de Chantal Viduæ",
+        "Aug23": "S. Philippi Benitii Confessoris",
+        "Aug24": "S. Bartholomæi Apostoli",
+        "Aug25": "S. Ludovici Regis Franciæ Confessoris",
+        "Aug26": "S. Zephyrini Papæ et Martyris",
+        "Aug27": "S. Josephi Calasanctii Confessoris",
+        "Aug28": "S. Augustini Episcopi et Confessoris et Ecclesiæ Doctoris",
+        "Aug29": "In Decollatione S. Joannis Baptistæ",
+        "Aug30": "S. Rosæ a Sancta Maria Limanæ Virginis",
+        "Aug31": "S. Raymundi Nonnati Confessoris",
+        "Sep1": "S. Ægidii Abbatis",
+        "Sep2": "S. Stephani Regis Hungariæ Confessoris",
+        "Sep3": "S. Pii X Papæ Confessoris",
+        "Sep5": "S. Laurentii Justiniani Episcopi et Confessoris",
+        "Sep8": "Nativity of BVM",
+        "Sep9": "S. Gorgonii Martyris",
+        "Sep9a": "S. Petri Claver Confessoris",
+        "Sep10": "S. Nicolai de Tolentino Confessoris",
+        "Sep11": "Ss. Proti et Hyacinthi Martyrum",
+        "Sep12": "Sanctissimi Nominis Mariæ",
+        "Sep14": "The Exaltation of the Holy Cross",
+        "Sep15": "Seven Sorrows of BVM",
+        "Sep16": "Ss. Cornelii Papæ et Cypriani Episcopi, Martyrum",
+        "Sep17": "Impressionis Stigmatum S. Francisci",
+        "Sep18": "S. Josephi de Cupertino Confessoris",
+        "Sep19": "S. Januarii Episcopi et Sociorum Martyrum",
+        "Sep19laSalette": "Beatæ Mariæ Virginis de La Salette",
+        "Sep20": "Ss. Eustachii et Sociorum Martyrum",
+        "Sep21": "S. Matthæi Apostoli et Evangelistæ",
+        "Sep22": "S. Thomæ de Villanova Episcopi et Confessoris",
+        "Sep23": "S. Lini Papæ et Martyris",
+        "Sep24": "Our Lady of Ransom",
+        "Sep26": "Ss. Cypriani et Justinæ Virginis, Martyrum",
+        "Sep26a": "Ss. Isaaci Jogues, Joannis de Brébeuf et Sociorum Martyrum",
+        "Sep27": "Ss. Cosmæ et Damiani Martyrum",
+        "Sep28": "S. Wenceslai Ducis et Martyris",
+        "Sep29": "In Dedicatione S. Michaëlis Archangelis",
+        "Sep30": "S. Hieronymi Presbyteris Confessoris et Ecclesiæ Doctoris",
+        "Oct1": "S. Remigii Episcopi et Confessoris",
+        "Oct2": "Ss. Angelorum Custodum",
+        "Oct3": "S. Theresiæ a Jesu Infante Virginis",
+        "Oct4": "S. Francisci Confessoris",
+        "Oct5": "Ss. Placidi et Sociorum Martyrum",
+        "Oct6": "S. Brunonis Confessoris",
+        "Oct7": "The Most Holy Rosary of BVM",
+        "Oct8": "S. Birgittæ Viduæ",
+        "Oct9": "S. Joannis Leonardi Confessoris",
+        "Oct10": "S. Francisci Borgiæ Confessoris",
+        "Oct11": "Maternitatis Beatæ Mariæ Virginis",
+        "Oct13": "S. Eduardi Regis Confessoris",
+        "Oct14": "S. Callisti Papæ et Martyris",
+        "Oct15": "S. Teresiæ Virginis",
+        "Oct16": "S. Hedwigis Viduæ",
+        "Oct17": "S. Margaritæ Mariæ Alacoque Virginis",
+        "Oct18": "S. Lucæ Evangelistæ",
+        "Oct19": "S. Petri de Alcantara Confessoris",
+        "Oct20": "S. Joannis Cantii Confessoris",
+        "Oct21": "S. Hilarionis Abbatis",
+        "Oct23": "St Anthony Mary Claret",
+        "Oct24": "S. Raphaëlis Archangeli",
+        "Oct25": "Ss. Chrysanthi et Dariæ Martyrum",
+        "Oct25a": "Ss. Chrysanthi et Dariæ Martyrum",
+        "Oct26": "S. Evaristi Papæ et Martyris",
+        "Oct27": "In Vigilia Ss. Simonis et Judæ Ap.",
+        "Oct28": "Ss. Simonis et Judæ Apostolorum",
+        "Oct31": "In Vigilia Omnium Sanctorum",
+        "Nov1": "Omnium Sanctorum",
+        "Nov4": "S. Caroli Episcopi et Confessoris",
+        "Nov5": "The Feast of the Holy Relics",
+        "Nov8": "In Octava Omnium Sanctorum",
+        "Nov9": "The Dedication of the Lateran Basilica",
+        "Nov10": "S. Andreæ Avellini Confessoris",
+        "Nov11": "S. Martini Episcopi et Confessoris",
+        "Nov12": "S. Martini Papæ et Martyris",
+        "Nov13": "S. Didaci Confessoris",
+        "Nov13a": "S. Didaci Confessoris",
+        "Nov14": "S. Josaphat Episcopi et Martyris",
+        "Nov15": "S. Alberti Magni Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Nov16": "S. Gertrudis Virginis",
+        "Nov17": "S. Gregorii Thaumaturgi Episcopi et Confessoris",
+        "Nov18": "The Dedication of the Basilicas of Ss Peter and Paul",
+        "Nov19": "S. Elisabeth Viduæ",
+        "Nov20": "S. Felicis de Valois Confessoris",
+        "Nov21": "The Presentation of BVM",
+        "Nov22": "S. Cæciliæ Virginis et Martyris",
+        "Nov23": "S. Clementis Papæ et Martyris",
+        "Nov24": "S. Joannis a Cruce Confessoris et Ecclesiæ Doctoris",
+        "Nov25": "S. Catharinæ Virginis et Martyris",
+        "Nov26": "S. Silvestri Abbatis",
+        "Nov27": "Our Lady of the Miraculous Medal",
+        "Nov29": "In Vigilia S. Andreæ Apostoli",
+        "Nov29a": "In Vigilia S. Andreæ Apostoli",
+        "Nov30": "S. Andreæ Apostoli",
+        "Dec2": "S. Bibianæ Virginis et Martyris",
+        "Dec3": "S. Francisci Xaverii Confessoris",
+        "Dec4": "S. Petri Chrysologi Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Dec5": "S. Sabbæ Abbatis",
+        "Dec6": "S. Nicolai Episcopi et Confessoris",
+        "Dec7": "S. Ambrosii Episcopi Confessoris et Ecclesiæ Doctoris",
+        "Dec8": "The Immaculate Conception of BVM",
+        "Dec10": "St Melchiades",
+        "Dec11": "S. Damasi Papæ et Confessoris",
+        "Dec12": "Our Lady of Guadalupe",
+        "Dec13": "S. Luciæ Virginis et Martyris",
+        "Dec16": "S. Eusebii Episcopi et Martyris",
+        "Dec20": "In Vigilia S Thomæ Apostoli",
+        "Dec21": "S. Thomæ Apostoli",
+        "Dec26": "S. Stephani Protomartyris",
+        "Dec27": "S. Joannis Apostoli et Evangelistæ",
+        "Dec28": "Ss. Innocentium",
+        "Dec29": "S. Thomæ Cantuariensis Episcopi et Martyris",
+        "Dec31": "S. Silvestri Papæ et Confessoris",
+        "Dec31_v": "S. Silvestri Papæ et Confessoris",
+        "Quad": "Septuagesima usque ad Finem Quadragesimæ",
+        "Pasch": "Tempus Paschale",
+        "Nat0": "In Vigilia Nativitatis Domini",
+        "Quadp1": "Dominica in Septuagesima",
+        "Quadp2": "Dominica in Sexagesima",
+        "Quadp3": "Dominica in Quinquagesima",
+        "Quadw": "Feria Quarta Cinerum",
+        "HolyThurs": "Feria Quinta in Cœna Domini",
+        "GoodFri": "Feria Sexta in Parasceve",
+        "HolySat": "Sabbato Sancto (Vigilia Paschalis)"
+    },
+    "en": {
+        "Adv1": "1st Sunday in Advent",
+        "Adv2": "2nd Sunday in Advent",
+        "Adv3": "3rd Sunday in Advent (Gaudete)",
+        "Adv3w": "Ember Wednesday in Advent",
+        "Adv3f": "Ember Friday in Advent",
+        "Adv3s": "Ember Saturday in Advent",
+        "Adv3ss": "Ember Saturday (shorter form)",
+        "Adv4": "4th Sunday in Advent",
+        "Dec24": "Christmas Eve",
+        "Dec25_1": "The Nativity of our Lord (Christmas), Mass at Midnight",
+        "Dec25_2": "Christmas, Mass at dawn",
+        "Dec25_3": "Christmas, Mass during the day",
+        "Nat1": "Sunday within the Octave of Christmas",
+        "Jan1": "Octave day of Christmas (Jan 1.)",
+        "Nat2": "Holy Name of Jesus",
+        "Jan5a": "Vigil of Epiphany",
+        "Epi": "Epiphany",
+        "Epi1": "Feast of the Holy Family (1st Sunday after Epiphany)",
+        "Epi1s": "  Feria after 1st Sunday after Epiphany",
+        "Epi2": "2nd Sunday after Epiphany",
+        "Epi3": "3rd Sunday after Epiphany",
+        "Epi4": "4th Sunday after Epiphany",
+        "Epi5": "5th Sunday after Epiphany",
+        "Epi6": "6th Sunday after Epiphany",
+        "7a": "Septuagesima",
+        "6a": "Sexagesima",
+        "5a": "Quinquagesima",
+        "5aw": "Ash Wednesday",
+        "5ah": "  Thursday after Ash Wednesday",
+        "5af": "  Friday after Ash Wednesday",
+        "5as": "  Saturday after Ash Wednesday",
+        "Quad1": "1st Sunday of Lent",
+        "Quad1m": "  Monday in the 1st week of Lent",
+        "Quad1t": "  Tuesday in the 1st week of Lent",
+        "Quad1w": "Ember Wednesday of Lent",
+        "Quad1h": "  Thursday in the 1st week of Lent",
+        "Quad1f": "Ember Friday of Lent",
+        "Quad1s": "Ember Saturday of Lent",
+        "Quad1ss": "  Ember Saturday (shorter form)",
+        "Quad2": "2nd Sunday of Lent",
+        "Quad2m": "  Monday in the 2nd week of Lent",
+        "Quad2t": "  Tuesday in the 2nd week of Lent",
+        "Quad2w": "  Wednesday in the 2nd week of Lent",
+        "Quad2h": "  Thursday in the 2nd week of Lent",
+        "Quad2f": "  Friday in the 2nd week of Lent",
+        "Quad2s": "  Saturday in the 2nd week of Lent",
+        "Quad3": "3rd Sunday of Lent",
+        "Quad3m": "  Monday in the 3rd week of Lent",
+        "Quad3t": "  Tuesday in the 3rd week of Lent",
+        "Quad3w": "  Wednesday in the 3rd week of Lent",
+        "Quad3h": "  Thursday in the 3rd week of Lent",
+        "Quad3f": "  Friday in the 3rd week of Lent",
+        "Quad3s": "  Saturday in the 3rd week of Lent",
+        "Quad4": "4th Sunday of Lent (Laetare)",
+        "Quad4m": "  Monday in the 4th week of Lent",
+        "Quad4t": "  Tuesday in the 4th week of Lent",
+        "Quad4w": "  Wednesday in the 4th week of Lent",
+        "Quad4h": "  Thursday in the 4th week of Lent",
+        "Quad4f": "  Friday in the 4th week of Lent",
+        "Quad4s": "  Saturday in the 4th week of Lent",
+        "Quad5": "Passion Sunday",
+        "Quad5m": "  Monday in Passion Week",
+        "Quad5t": "  Tuesday in Passion Week",
+        "Quad5w": "  Wednesday in Passion Week",
+        "Quad5h": "  Thursday in Passion Week",
+        "Quad5f": "  Friday in Passion Week",
+        "Quad5f_sd": "  Friday: The Seven Sorrows of the Blessed Virgin Mary",
+        "Quad5s": "  Saturday in Passion Week",
+        "Quad6": "Palm Sunday",
+        "Quad6_v": "Palm Sunday (pre 1955)",
+        "Quad6m": "  Monday in Holy Week",
+        "Quad6t": "  Tuesday in Holy Week",
+        "Quad6t_v": "  Tuesday in Holy Week (pre 1955)",
+        "Quad6w": "  Wednesday in Holy Week",
+        "Quad6w_v": "  Wednesday in Holy Week (pre 1955)",
+        "Quad6h": "Maundy Thursday",
+        "Quad6h_v": "Maundy Thursday (pre 1955)",
+        "Quad6h-lotio": "  Antiphons at the Washing of the Feet",
+        "Quad6f": "Good Friday",
+        "Quad6f_v": "Good Friday (pre 1955)",
+        "Quad6s": "Easter Vigil",
+        "Quad6s_v": "Easter Vigil (pre 1955)",
+        "Pasc0": "Easter Sunday",
+        "Pasc0m": "Easter Monday",
+        "Pasc0t": "Easter Tuesday",
+        "Pasc0w": "Easter Wednesday",
+        "Pasc0h": "Easter Thursday",
+        "Pasc0f": "Easter Friday",
+        "Pasc0s": "Easter Saturday",
+        "Pasc1": "Low Sunday (Octave of Easter)",
+        "Pasc2": "2nd Sunday after Easter (Good Shepherd)",
+        "Pasc2w": "Solemnity of St Joseph",
+        "Pasc3": "3rd Sunday after Easter",
+        "Pasc4": "4th Sunday after Easter",
+        "Pasc5": "5th Sunday after Easter",
+        "Asc": "Ascension of Our Lord",
+        "Pasc6": "Sunday after the Ascension",
+        "Pasc6s": "Pentecost Vigil (Whitsun Eve)",
+        "Pasc6s_v": "Pentecost Vigil (Whitsun Eve) (pre 1955)",
+        "Pent0": "Pentecost Sunday",
+        "Pent0m": "Pentecost Monday",
+        "Pent0t": "Pentecost Tuesday",
+        "Pent0w": "Ember Wednesday of Pentecost",
+        "Pent0h": "Pentecost Thursday",
+        "Pent0f": "Ember Friday of Pentecost",
+        "Pent0s": "Ember Saturday of Pentecost",
+        "Pent0ss": "Ember Saturday (shorter form)",
+        "Pent1": "Trinity Sunday",
+        "Pent1w": "  Feria after 1st Sunday after Pentecost",
+        "CorpusChristi": "Corpus Christi",
+        "Pent2": "2nd Sunday after Pentecost (Sunday within the Octave of Corpus Christi)",
+        "SCJ": "Feast of the Most Sacred Heart of Jesus",
+        "Pent3": "3rd Sunday after Pentecost (Sunday within the Octave of Sacred Heart)",
+        "Pent4": "4th Sunday after Pentecost",
+        "Pent5": "5th Sunday after Pentecost",
+        "Pent6": "6th Sunday after Pentecost",
+        "Pent7": "7th Sunday after Pentecost",
+        "Pent8": "8th Sunday after Pentecost",
+        "Pent9": "9th Sunday after Pentecost",
+        "Pent10": "10th Sunday after Pentecost",
+        "Pent11": "11th Sunday after Pentecost",
+        "Pent12": "12th Sunday after Pentecost",
+        "Pent13": "13th Sunday after Pentecost",
+        "Pent14": "14th Sunday after Pentecost",
+        "Pent15": "15th Sunday after Pentecost",
+        "Pent16": "16th Sunday after Pentecost",
+        "Pent17": "17th Sunday after Pentecost",
+        "EmbWedSept": "Ember Wednesday in September",
+        "EmbFriSept": "Ember Friday in September",
+        "EmbSatSept": "Ember Saturday in September",
+        "EmbSatSeptS": "Ember Saturday (shorter form)",
+        "Pent18": "18th Sunday after Pentecost",
+        "Pent19": "19th Sunday after Pentecost",
+        "Pent20": "20th Sunday after Pentecost",
+        "Pent21": "21st Sunday after Pentecost",
+        "Pent22": "22nd Sunday after Pentecost",
+        "ChristusRex": "Feast of Christ the King",
+        "Pent23": "23rd Sunday after Pentecost",
+        "PentEpi3": "3rd Sunday remaining after Epiphany",
+        "PentEpi4": "4th Sunday remaining after Epiphany",
+        "PentEpi5": "5th Sunday remaining after Epiphany",
+        "PentEpi6": "6th Sunday remaining after Epiphany",
+        "Pent24": "24th and Last Sunday after Pentecost",
+        "nuptialis": "Wedding Mass",
+        "defunctorum": "Mass for the Dead",
+        "dedicatio": "Mass of the dedication of a church",
+        "litaniis": "At Major and Minor Litanies",
+        "votiveST": "Votive Mass of the Most Holy Trinity",
+        "votiveA": "Votive Mass of the Holy Angels",
+        "votiveJ": "Votive Mass of Saint Joseph",
+        "votivePP": "Votive Mass of Saints Peter and Paul",
+        "votiveOA": "Votive Mass of the Apostles",
+        "votiveSS": "Votive Mass of the Holy Ghost",
+        "votiveSES": "Votive Mass of the Most Holy Sacrament",
+        "votiveJCSES": "Votive Mass of Christ the Eternal High Priest",
+        "votiveSC": "Votive Mass of the Holy Cross",
+        "votivePJC": "Votive Mass of the Passion of Our Lord Jesus Christ",
+        "votiveSCJ": "Votive Mass of the Most Sacred Heart of Jesus",
+        "SMadvent": "in Advent",
+        "SMchristmas": "From Christmas to Candlemas",
+        "SMlent": "From Candlemas to Easter",
+        "SMeaster": "From Easter to Pentecost",
+        "SMpentecost": "From Pentecost to Advent",
+        "Aug22": "Feast of the Immaculate Heart of BVM",
+        "votiveECJ": "Of the Eucharistic Heart of Jesus",
+        "mass_vigil_apostle": "Mass Vigil of an Apostle (Ego autem sicut)",
+        "mass_holy_pope": "Mass of a Holy Pope (Si diligis me)",
+        "mass_i_martyr_bishop": "Mass I (Statuit)",
+        "mass_ii_martyr_bishop": "Mass II (Sacerdotes Dei)",
+        "mass_i_martyr_not_bishop": "Mass I (In virtute tua)",
+        "mass_ii_martyr_not_bishop": "Mass II (Laetabitur justus)",
+        "mass_one_martyr": "One Martyr (Protexisti me)",
+        "mass_two_or_more_martyr": "Two or more Martyrs (Sancti tui)",
+        "mass_i_two_or_more_martyr": "Mass I (Intret in conspectu)",
+        "mass_ii_two_or_more_martyr": "Mass II (Sapientiam sanctorum)",
+        "mass_iii_two_or_more_martyr": "Mass III (Salus autem)",
+        "mass_i_confessor_bishop": "Mass I (Statuit)",
+        "mass_ii_confessor_bishop": "Mass II (Sacerdotes tui)",
+        "mass_doctors": "Doctors (In medio)",
+        "mass_i_confessor_not_bishop": "Mass I (Os justi)",
+        "mass_ii_confessor_not_bishop": "Mass II (Justus ut palma)",
+        "mass_abbots": "Abbots (Os justi)",
+        "mass_i_virgin_martyr": "Virgin Martyr, Mass I (Loquebar)",
+        "mass_ii_virgin_martyr": "Virgin Martyr, Mass II (Me exspectaverunt)",
+        "mass_i_virgin_not_martyr": "Virgin not a Martyr, Mass I (Dilexisti)",
+        "mass_ii_virgin_not_martyr": "Virgin not a Martyr, Mass II (Vultum tuum)",
+        "mass_holy_woman_martyr": "Martyr (Me exspectaverunt)",
+        "mass_holy_woman_not_martyr": "Neither Virgin nor Martyr (Cognovi)",
+        "Jan5": "St Telesphorus",
+        "Jan11": "St Hyginus",
+        "Jan13": "Baptism of Our Lord Jesus Christ",
+        "Jan14": "St. Hilary, Bishop of Poitiers, Confessor and Doctor of the Church",
+        "Jan15": "St. Paul the First Hermit, Confessor",
+        "Jan16": "St. Marcellus, Pope and Martyr",
+        "Jan17": "S. Anthony, Abbot",
+        "Jan18": "Chair of St. Peter at Rome",
+        "Jan19": "Ss. Marius, Martha, Audifax, and Abachum, Martyrs",
+        "Jan20": "Ss. Fabian and Sebastian, Martyrs",
+        "Jan21": "S. Agnes, Virgin and Martyr",
+        "Jan22": "Ss. Vincent and Anastasius, Martyrs",
+        "Jan23": "S. Raymond of Penafort, Confessor",
+        "Jan24": "St. Timothy, Bishop and Martyr",
+        "Jan25": "Conversion of St. Paul the Apostle",
+        "Jan26": "St. Polycarp, Bishop and Martyr",
+        "Jan27": "St. John Chrysostom, Bishop, Confessor, and Doctor of the Church",
+        "Jan28": "St. Peter Nolasco, Confessor",
+        "Jan29": "St. Francis de Sales, Bishop, Confessor, and Doctor of the Church",
+        "Jan30": "St. Martina, Virgin and Martyr",
+        "Jan31": "St. John Bosco, Confessor",
+        "Feb1": "St. Ignatius, Bishop and Martyr",
+        "Feb2": "Purification of BVM",
+        "Feb3": "St. Blase, Bishop and Martyr",
+        "Feb4": "St. Andrew Corsini, Bishop and Confessor",
+        "Feb5": "St. Agatha, Virgin and Martyr",
+        "Feb6": "St. Titus, Bishop and Confessor",
+        "Feb7": "St. Romuald, Abbot",
+        "Feb8": "St. John of Matha, Confessor",
+        "Feb9": "St. Cyril of Alexandria, Bishop, Confessor, and Doctor of the Church",
+        "Feb10": "St. Scholastica, Virgin",
+        "Feb11": "Apparition of BVM at Lourdes",
+        "Feb12": "Seven Holy Founders of the Order of the Servants of the Blessed Virgin Mary",
+        "Feb14": "St. Valentine, Priest and Martyr",
+        "Feb15": "Sts. Faustinus and Jovita, Martyrs",
+        "Feb18": "St. Simeon, Bishop and Martyr",
+        "Feb18a": "St. Simeon, Bishop and Martyr",
+        "Feb22": "Chair of St. Peter at Antioch",
+        "Feb23": "St Peter Damian",
+        "Feb23or24": "Feb 23 or 24: Vigil of St Matthias",
+        "Feb24or25": "St. Matthias the Apostle",
+        "Feb27or28": "St. Gabriel of the Sorrowful Virgin, Confessor",
+        "Mar4": "St. Casimir, Confessor",
+        "Mar6": "Sts. Perpetua and Felicity, Martyrs",
+        "Mar7": "St. Thomas Aquinas, Confessor and Doctor of the Church",
+        "Mar8": "St. John of God, Confessor",
+        "Mar9": "St. Frances of Rome, Widow",
+        "Mar10": "Forty Holy Martyrs",
+        "Mar12": "S. Gregory the Great, Pope, Confessor and Doctor of the Church",
+        "Mar17": "St. Patrick, Bishop and Confessor",
+        "Mar18": "St. Cyril of Jerusalem, Confessor and Doctor of the Church",
+        "Mar21": "St. Benedict, Abbot",
+        "Mar24": "St. Gabriel the Archangel",
+        "Mar27": "St. John Damascene, Confessor",
+        "Mar28": "St. John of Capistrano, Confessor",
+        "Apr2": "St. Francis of Paula, Confessor",
+        "Apr4": "S. Isidore of Seville, Bishop, Confessor and Doctor of the Church",
+        "Apr5": "St. Vincent Ferrer, Confessor",
+        "Apr11": "St. Leo the Great, Pope, Confessor and Doctor of the Church",
+        "Apr13": "St. Hermenegild, Martyr",
+        "Apr14": "St. Justini Martyr",
+        "Apr17": "St. Anicetus, Pope and Martyr",
+        "Apr21": "St. Anselm, Bishop, Confessor and Doctor of the Church",
+        "Apr22": "Sts. Soter and Caius, Popes and Martyrs",
+        "Apr23": "St. George, Martyr",
+        "Apr24": "St. Fidelis of Sigmaringen, Martyr",
+        "Apr25": "St. Mark the Evangelist",
+        "Apr26": "Sts. Cletus and Marcellinus, Popes and Martyrs",
+        "Apr27": "St. Peter Canisius, Confessor and Doctor of the Church",
+        "Apr28": "St. Paul of the Cross, Confessor",
+        "Apr29": "St. Peter the Martyr",
+        "Apr30": "St. Catherine of Siena, Virgin",
+        "May2": "S. Athanasius, Confessor and Doctor of the Church",
+        "May3": "Finding of the Holy Cross",
+        "May4": "St. Monica, Widow",
+        "May5": "St. Pius V, Pope and Confessor",
+        "May6": "St. John the Apostle Before the Latin Gate",
+        "May7": "St. Stanislaus, Bishop and Martyr",
+        "May8": "Apparition of St. Michael the Archangel",
+        "May9": "St. Gregory Nazianzen, Bishop, Confessor and Doctor of the Church",
+        "May10": "St. Antoninus, Bishop and Confessor",
+        "May11": "Ss Philip and James",
+        "May12": "Ss. Nereus, Achilleus and Domitilla the Virgin and Pancras, Martyrs",
+        "May13": "St. Robert Bellarmine, Bishop, Confessor and Doctor of the Church",
+        "May14": "St. Boniface, Martyr",
+        "May15": "St. John Baptist de la Salle, Confessor",
+        "May16": "St. Ubald, Bishop and Confessor",
+        "May17": "St. Pascal Baylon Confessor",
+        "May18": "St. Venantius, Martyr",
+        "May19": "St. Peter Celestine, Pope and Confessor",
+        "May20": "St. Bernardine of Siena, Confessor",
+        "May24": "Our Lady Help of Christians",
+        "May25": "St. Gregory VII, Pope and Confessor",
+        "May26": "St. Philip Neri, Confessor",
+        "May27": "St. Bede the Venerable, Confessor and Doctor of the Church",
+        "May28": "St. Augustine of Canterbury, Bishop and Confessor",
+        "May29": "St. Mary Magdalene de Pazzi, Virgin",
+        "May30": "St. Felix, Pope and Martyr",
+        "May31": "Queenship of BVM",
+        "Jun1": "St. Angela Merici, Virgin",
+        "Jun2": "Sts. Marcellinus, Peter, and Erasmus, Martyrs",
+        "Jun4": "St. Francis Caracciolo, Confessor",
+        "Jun5": "St. Boniface, Bishop and Martyr",
+        "Jun6": "St. Norbert, Bishop and Confessor",
+        "Jun9": "Sts. Primus and Felician, Martyrs",
+        "Jun10": "St. Margaret, Queen and Widow",
+        "Jun11": "St. Barnabas the Apostle",
+        "Jun12": "St. John of St. Facundus, Confessor",
+        "Jun13": "St. Anthony of Padua, Confessor",
+        "Jun14": "St. Basil the Great, Confessor and Doctor of the Church",
+        "Jun15": "Sts. Vitus, Modestus and Crescentia, Martyrs",
+        "Jun17": "St Gregory Barbadici",
+        "Jun18": "St. Ephraem of Syria, Confessor and Doctor of the Church",
+        "Jun19": "St. Juliana Falconeri, Virgin",
+        "Jun19a": "St. Juliana Falconeri, Virgin",
+        "Jun20": "St. Silverius, Pope and Martyr",
+        "Jun21": "St. Aloysius Gonzaga, Confessor",
+        "Jun22": "St. Paulinus of Nola, Bishop and Confessor",
+        "Jun23": "Vigil of the Nativity of St. John the Baptist",
+        "Jun24": "Nativity of St. John the Baptist",
+        "Jun25": "St. William, Abbot",
+        "Jun26": "Sts. John and Paul, Martyrs",
+        "Jun28": "St. Irenaeus, Bishop and Martyr",
+        "Jun29": "Sts. Peter and Paul, Apostles",
+        "Jun30": "Commemoration of St. Paul the Apostle",
+        "Jul1": "Most Precious Blood of Our Lord Jesus Christ",
+        "Jul2": "The Visitation of BVM",
+        "Jul3": "St. Leo II, Pope and Confessor",
+        "Jul3a": "St. Leo II, Pope and Confessor",
+        "Jul4": "Within the octave of the Apostles Peter and Paul",
+        "Jul5": "St. Anthony Mary Zaccaria, Confessor",
+        "Jul6": "Octave of Sts. Peter and Paul",
+        "Jul7": "Sts. Cyril and Methodius, Bishops and Confessors",
+        "Jul8": "St. Elizabeth of Portugal, Queen and Widow",
+        "Jul10": "Seven Brothers, Martyrs, and Sts. Rufina and Secunda, Virgins and Martyrs",
+        "Jul11": "St. Pius I, Pope and Martyr",
+        "Jul11a": "St. Pius I, Pope and Martyr",
+        "Jul12": "St. John Gualbert, Abbot",
+        "Jul13": "St. Anacletus, Pope and Martyr",
+        "Jul14": "St. Bonaventure, Bishop, Confessor and Doctor of the Church",
+        "Jul15": "St. Henry the Emperor, Confessor",
+        "Jul16": "Our Lady of Mount Carmel",
+        "Jul17": "St. Alexis, Confessor",
+        "Jul18": "St. Camillus de Lellis, Confessor",
+        "Jul19": "St. Vincent de Paul, Confessor",
+        "Jul20": "St. Jerome Emiliani, Confessor",
+        "Jul21": "St. Praxedes, Virgin",
+        "Jul21a": "St. Praxedes, Virgin",
+        "Jul22": "St. Mary Magdalene, Penitent",
+        "Jul23": "St. Apollinaris, Bishop and Martyr",
+        "Jul24": "Vigil of St. James the Apostle",
+        "Jul25": "St. James the Apostle",
+        "Jul26": "St. Anne, Mother of the Blessed Virgin Mary",
+        "Jul27": "S. Pantaleon Martyr",
+        "Jul28": "Sts. Nazarius and Celsus, Martyr, Pope Victor I, Martyr, and Pope Innocent I, Confessor",
+        "Jul29": "St. Martha, Virgin",
+        "Jul30": "St. Abdon and Sennen, Martyr",
+        "Jul31": "St. Ignatius of Loyola, Confessor",
+        "Aug1": "St. Peter in Chains",
+        "Aug1a": "St. Peter in Chains",
+        "Aug2": "St. Alphonsus Liguori, Bishop, Confessor and Doctor of the Church",
+        "Aug3": "Finding of St. Stephen the First Martyr",
+        "Aug4": "St. Dominic the Confessor",
+        "Aug5": "Dedication of the Basilica of St Mary Major",
+        "Aug6": "Transfiguration of Our Lord",
+        "Aug7": "St. Cajetan, Confessor",
+        "Aug8": "Sts. Cyriacus, Largus and Smaragdus, Martyrs",
+        "Aug8a": "Sts. Cyriacus, Largus and Smaragdus, Martyrs",
+        "Aug9": "St. Jean-Marie Vianney, Confessor",
+        "Aug10": "St. Lawrence, Martyr",
+        "Aug11": "Sts. Tiburtius and Susanna, Martyrs",
+        "Aug12": "St. Clare, Virgin",
+        "Aug13": "Sts. Hippolytus and Cassian, Martyrs",
+        "Aug14": "Vigil of Assumption of BVM",
+        "Aug15": "Assumption of BVM",
+        "Aug16": "St. Joachim, Confessor, Father of the Blessed Virgin Mary",
+        "Aug17": "St. Hyacinth, Confessor",
+        "Aug18": "St Agapitus",
+        "Aug19": "St. John Eudes, Confessor",
+        "Aug20": "St. Bernard of Clairvaux, Abbot and Doctor of the Church",
+        "Aug21": "St. Jeanne-Françoise Frémiot de Chantal, Widow;Duplex",
+        "Aug23": "St. Philip Benizi, Confessor",
+        "Aug24": "St. Bartholomew the Apostle",
+        "Aug25": "St. Louis, Confessor",
+        "Aug26": "St. Zephyrinus, Pope and Martyr",
+        "Aug27": "St. Joseph Calasanz, Confessor",
+        "Aug28": "St. Augustine of Hippo, Bishop, Confessor, and Doctor of the Church",
+        "Aug29": "Beheading of St. John the Baptist",
+        "Aug30": "St. Rose of Lima, Virgin",
+        "Aug31": "St. Raymond Nonnatus, Confessor",
+        "Sep1": "St. Giles, Abbot",
+        "Sep2": "St. Stephen, King of Hungary, Confessor",
+        "Sep3": "St. Pius X, Pope and Confessor",
+        "Sep5": "St. Lawrence Justinian, Bishop and Confessor",
+        "Sep8": "Nativity of BVM",
+        "Sep9": "S. Gorgonius, Martyr",
+        "Sep9a": "S. Gorgonius, Martyr",
+        "Sep10": "St. Nicholas of Tolentino Confessor",
+        "Sep11": "Sts. Protus and Hyacinth Martyrs",
+        "Sep12": "Most Holy Name of Mary",
+        "Sep14": "The Exaltation of the Holy Cross",
+        "Sep15": "Seven Sorrows of BVM",
+        "Sep16": "Sts. Cornelius, Pope and Cyprian, Bishop, Martyrs",
+        "Sep17": "Impression of the Stigmata of St. Francis",
+        "Sep18": "St. Joseph of Cupertino Confessor",
+        "Sep19": "St. Januarius, Bishop and Companions, Martyrs",
+        "Sep19laSalette": "St. Januarius, Bishop and Companions, Martyrs",
+        "Sep20": "S. Eustachius and Companions, Martyrs",
+        "Sep21": "St. Matthew, Apostle and Evangelist",
+        "Sep22": "St. Thomas of Villanova, Bishop and Confessor",
+        "Sep23": "St. Linus, Pope and Martyr",
+        "Sep24": "Our Lady of Ransom",
+        "Sep26": "Sts. Cyprian and Justina, Martyrs",
+        "Sep26a": "Sts. Cyprian and Justina, Martyrs",
+        "Sep27": "Sts. Cosmas and Damian, Martyrs",
+        "Sep28": "St. Wenceslaus, Duke and Martyr",
+        "Sep29": "Dedication of the Archbasilica of St. Michael the Archangel",
+        "Sep30": "St. Jerome, Priest, Confessor and Doctor of the Church",
+        "Oct1": "St. Remigius, Bishop and Confessor",
+        "Oct2": "Guardian Angels",
+        "Oct3": "St. Thérèse of the Child Jesus, Virgin",
+        "Oct4": "St. Francis of Assisi, Confessor",
+        "Oct5": "Sts. Placidus and Companions Martyrs",
+        "Oct6": "St. Bruno, Confessor",
+        "Oct7": "The Most Holy Rosary of BVM",
+        "Oct8": "St. Birgitta, Widow",
+        "Oct9": "St. John Leonard, Confessor",
+        "Oct10": "St. Francis Borgia, Confessor",
+        "Oct11": "The Motherhood of BVM",
+        "Oct13": "St. Edward the Confessor, King",
+        "Oct14": "St. Callistus, Pope and Martyr",
+        "Oct15": "St. Teresa of Avila, Virgin",
+        "Oct16": "St. Hedwig, Widow",
+        "Oct17": "St. Marguerite-Marie Alacoque, Virgin",
+        "Oct18": "St. Luke the Evangelist",
+        "Oct19": "St. Peter of Alcantara, Confessor",
+        "Oct20": "St. John Cantius, Confessor",
+        "Oct21": "St. Hilarion, Abbot",
+        "Oct23": "St Anthony Mary Claret",
+        "Oct24": "St. Raphael the Archangel;Duplex majus",
+        "Oct25": "Sts. Chrysanthus and Daria, Martyrs",
+        "Oct25a": "Sts. Chrysanthus and Daria, Martyrs",
+        "Oct26": "St. Evaristus, Pope and Martyr",
+        "Oct27": "Vigil of Sts. Simon and Jude, Apostles",
+        "Oct28": "Sts. Simon and Jude, Apostles",
+        "Oct31": "Vigil of All Saints",
+        "Nov1": "All Saints",
+        "Nov4": "St. Charles Borromeo, Bishop and Confessor",
+        "Nov5": "The Feast of the Holy Relics",
+        "Nov8": "Octave of All Saints",
+        "Nov9": "The Dedication of the Lateran Basilica",
+        "Nov10": "St. Andrew Avellino Confessor",
+        "Nov11": "St. Martin, Bishop of Tours, Confessor",
+        "Nov12": "St. Martin I, Pope and Martyr",
+        "Nov13": "St. Didacus, Confessor",
+        "Nov13a": "St. Didacus, Confessor",
+        "Nov14": "St. Josaphat, Bishop and Martyr",
+        "Nov15": "St. Albert the Great, Bishop, Confessor and Doctor of the Church",
+        "Nov16": "St. Gertrude, Virgin",
+        "Nov17": "St. Gregory the Wonderworker, Bishop and Confessor",
+        "Nov18": "The Dedication of the Basilicas of Ss Peter and Paul",
+        "Nov19": "St. Elizabeth, Widow",
+        "Nov20": "St. Felix de Valois, Confessor",
+        "Nov21": "The Presentation of BVM",
+        "Nov22": "St. Cecilia, Virgin and Martyr",
+        "Nov23": "St. Clement, Pope and Martyr",
+        "Nov24": "St. John of the Cross, Confessor and Doctor of the Church",
+        "Nov25": "St. Catharine of Alexandria, Virgin and Martyr",
+        "Nov26": "St. Sylvester, Abbot",
+        "Nov27": "Our Lady of the Miraculous Medal",
+        "Nov29": "Vigil of St. Andrew the Apostle",
+        "Nov29a": "Vigil of St. Andrew the Apostle",
+        "Nov30": "St. Andrew the Apostle",
+        "Dec2": "St. Bibiana, Virgin and Martyr",
+        "Dec3": "St. Francis Xavier, Confessor",
+        "Dec4": "St. Peter Chrysologus, Bishop, Confessor and Doctor of the Church",
+        "Dec5": "St. Sabbas, Abbot",
+        "Dec6": "St. Nicholas, Bishop and Confessor",
+        "Dec7": "St. Ambrose, Bishop, Confessor and Doctor of the Church",
+        "Dec8": "The Immaculate Conception of BVM",
+        "Dec10": "St Melchiades",
+        "Dec11": "St. Damasus, Pope and Confessor",
+        "Dec12": "Our Lady of Guadalupe",
+        "Dec13": "St. Lucy, Virgin and Martyr",
+        "Dec16": "St. Eusebius, Bishop and Martyr",
+        "Dec20": "Vigil of St Thomas",
+        "Dec21": "St. Thomas the Apostle",
+        "Dec26": "St. Stephen the First Martyr",
+        "Dec27": "St. John the Apostle, Evangelist",
+        "Dec28": "Holy Innocents",
+        "Dec29": "St. Thomas of Canterbury, Bishop and Martyr",
+        "Dec31": "St. Sylvester, Pope and Confessor",
+        "Dec31_v": "St. Sylvester, Pope and Confessor",
+        "Quad": "Septuagesima through Lent",
+        "Pasch": "Paschal Time",
+        "Nat0": "Vigil of Christmas",
+        "Quadp1": "Septuagesima Sunday",
+        "Quadp2": "Sexagesima Sunday",
+        "Quadp3": "Quinquagesima Sunday",
+        "Quadw": "Ash Wednesday",
+        "HolyThurs": "Maundy Thursday",
+        "GoodFri": "Good Friday",
+        "HolySat": "Holy Saturday (Easter Vigil)"
+    }
+};
+
 var DO_FR_TEMPORA_TITLES = {
     'Adv1': "Ier Dimanche de l'Avent",
     'Adv2': "IIe Dimanche de l'Avent",
@@ -3080,6 +4752,19 @@ function getVernacularItemTitle(item, uiLang) {
     if (!uiLang) uiLang = getUiLang();
     var k = item.key || '';
 
+    // Check authentic [Officium] dictionary matching header and file
+    if (typeof DO_UNIFIED_TITLES !== 'undefined' && DO_UNIFIED_TITLES[uiLang] && DO_UNIFIED_TITLES[uiLang][k]) {
+        return DO_UNIFIED_TITLES[uiLang][k];
+    }
+    if ((uiLang === 'fr' || uiLang === 'bilingual') && typeof DO_UNIFIED_TITLES !== 'undefined' && DO_UNIFIED_TITLES.fr && DO_UNIFIED_TITLES.fr[k]) {
+        return DO_UNIFIED_TITLES.fr[k];
+    }
+
+    // Temporal fallback
+    if (typeof DO_FR_TEMPORA_TITLES !== 'undefined' && DO_FR_TEMPORA_TITLES[k] && (uiLang === 'fr' || uiLang === 'bilingual')) {
+        return DO_FR_TEMPORA_TITLES[k];
+    }
+
     // Latin UI
     if (uiLang === 'la') {
         var laT = item.title || item.key;
@@ -3092,136 +4777,8 @@ function getVernacularItemTitle(item, uiLang) {
         return enT.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
     }
 
-    // French UI (Default / 'fr')
-    if (DO_FR_TEMPORA_TITLES[k]) {
-        return DO_FR_TEMPORA_TITLES[k];
-    }
-    var mPent = k.match(/^Pent(\d+)$/i);
-    if (mPent) return mPent[1] + "e Dimanche après la Pentecôte";
-    var mEpi = k.match(/^Epi(\d+)$/i);
-    if (mEpi) return mEpi[1] + "e Dimanche après l'Épiphanie";
-    var mQuad = k.match(/^Quad(\d+)$/i);
-    if (mQuad) return mQuad[1] + "e Dimanche de Carême";
-    var mAdv = k.match(/^Adv(\d+)$/i);
-    if (mAdv) return mAdv[1] + "e Dimanche de l'Avent";
-
-    var t = item.en || item.title || item.key;
-    t = t.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
-
-    var frReplacements = [
-        [/\bOur Lady of Mount Carmel\b/gi, 'Notre-Dame du Mont-Carmel'],
-        [/\bOur Lady of the Rosary\b/gi, 'Notre-Dame du Rosaire'],
-        [/\bOur Lady of Sorrows\b/gi, 'Notre-Dame des Sept Douleurs'],
-        [/\bOur Lady of Lourdes\b/gi, 'Notre-Dame de Lourdes'],
-        [/\bOur Lady of Ransom\b/gi, 'Notre-Dame de la Merci'],
-        [/\bOur Lady of Good Counsel\b/gi, 'Notre-Dame du Bon Conseil'],
-        [/\bOur Lady of Perpetual Help\b/gi, 'Notre-Dame du Perpétuel Secours'],
-        [/\bOur Lady of the Snows\b/gi, 'Notre-Dame des Neiges'],
-        [/\bOur Lady of\s+/gi, 'Notre-Dame de '],
-        [/\bAssumption of the BVM\b/gi, 'Assomption de la Très Sainte Vierge Marie'],
-        [/\bNativity of the BVM\b/gi, 'Nativité de la Très Sainte Vierge Marie'],
-        [/\bImmaculate Conception\b/gi, 'Immaculée Conception de la Vierge Marie'],
-        [/\bAnnunciation\b/gi, 'Annonciation de la Vierge Marie'],
-        [/\bPurification\b/gi, 'Purification de la Vierge Marie (Chandeleur)'],
-        [/\bVisitation\b/gi, 'Visitation de la Vierge Marie'],
-        [/\bAll Saints\b/gi, 'La Toussaint'],
-        [/\bAll Souls\b/gi, 'Commémoration de tous les fidèles défunts'],
-        [/\bChristmas\b/gi, 'Nativité de Notre Seigneur (Noël)'],
-        [/\bEpiphany\b/gi, 'Épiphanie de Notre Seigneur'],
-        [/\bCircumcision of Our Lord\b/gi, 'Circoncision de Notre Seigneur'],
-        [/\bBaptism of Our Lord Jesus Christ\b/gi, 'Baptême de Notre Seigneur Jésus-Christ'],
-        [/\bTransfiguration of Our Lord\b/gi, 'Transfiguration de Notre Seigneur'],
-        [/\bExaltation of the Holy Cross\b/gi, 'Exaltation de la Sainte Croix'],
-        [/\bFinding of the Holy Cross\b/gi, 'Invention de la Sainte Croix'],
-        [/\bSeven Holy Brothers\b/gi, 'Les Sept Saints Frères Martyrs'],
-        [/\bSeven Holy Founders\b/gi, 'Les Sept Saints Fondateurs des Servites'],
-        [/\bHoly Guardian Angels\b/gi, 'Les Saints Anges Gardiens'],
-        [/\bHoly Innocents\b/gi, 'Les Saints Innocents Martyrs'],
-        [/\bDedication of the Lateran Basilica\b/gi, 'Dédicace de la Basilique du Latran'],
-        [/\bDedication of the Basilica of St Mary Major\b/gi, 'Dédicace de Sainte-Marie-Majeure'],
-        [/\bDedication of the Basilicas of Ss Peter and Paul\b/gi, 'Dédicace des Basiliques des Saints Pierre et Paul'],
-        [/\bChair of St Peter at Rome\b/gi, 'Chaire de Saint Pierre à Rome'],
-        [/\bChair of St Peter at Antioch\b/gi, 'Chaire de Saint Pierre à Antioche'],
-        [/\bConversion of St Paul\b/gi, 'Conversion de Saint Paul'],
-        [/\bCommemoration of St Paul\b/gi, 'Commémoration de Saint Paul'],
-        [/\bThe Beheading of St John the Baptist\b/gi, 'Décollation de Saint Jean-Baptiste'],
-        [/\bNativity of St John the Baptist\b/gi, 'Nativité de Saint Jean-Baptiste'],
-        [/\bSts\s+/gi, 'Saints '],
-        [/\bSt\s+/gi, 'Saint '],
-        [/\bSs\s+/gi, 'Saints '],
-        [/\bS\s+/gi, 'Saint '],
-        [/\bBartholomew\b/gi, 'Barthélemy'],
-        [/\bLawrence\b/gi, 'Laurent'],
-        [/\bStephen\b/gi, 'Étienne'],
-        [/\bGregory\b/gi, 'Grégoire'],
-        [/\bPeter\b/gi, 'Pierre'],
-        [/\bPaul\b/gi, 'Paul'],
-        [/\bJohn\b/gi, 'Jean'],
-        [/\bJames\b/gi, 'Jacques'],
-        [/\bThomas\b/gi, 'Thomas'],
-        [/\bAndrew\b/gi, 'André'],
-        [/\bPhilip\b/gi, 'Philippe'],
-        [/\bMatthew\b/gi, 'Matthieu'],
-        [/\bMark\b/gi, 'Marc'],
-        [/\bLuke\b/gi, 'Luc'],
-        [/\bSimon and Jude\b/gi, 'Simon et Jude'],
-        [/\bMary Magdalen\b/gi, 'Marie-Madeleine'],
-        [/\bAnne\b/gi, 'Anne'],
-        [/\bJoachim\b/gi, 'Joachim'],
-        [/\bJoseph\b/gi, 'Joseph'],
-        [/\bMichael Archangel\b/gi, 'Michel Archange'],
-        [/\bRaphael Archangel\b/gi, 'Raphaël Archange'],
-        [/\bGabriel Archangel\b/gi, 'Gabriel Archange'],
-        [/\bAugustine\b/gi, 'Augustin'],
-        [/\bJerome\b/gi, 'Jérôme'],
-        [/\bAmbrose\b/gi, 'Ambroise'],
-        [/\bHilary\b/gi, 'Hilaire'],
-        [/\bAthanasius\b/gi, 'Athanase'],
-        [/\bChrysostom\b/gi, 'Chrysostome'],
-        [/\bBasil\b/gi, 'Basile'],
-        [/\bBernard\b/gi, 'Bernard'],
-        [/\bFrancis of Assisi\b/gi, 'François d\'Assise'],
-        [/\bFrancis de Sales\b/gi, 'François de Sales'],
-        [/\bDominic\b/gi, 'Dominique'],
-        [/\bTherese of the Child Jesus\b/gi, 'Thérèse de l\'Enfant-Jésus'],
-        [/\bTeresa of Avila\b/gi, 'Thérèse d\'Avila'],
-        [/\bAnthony of Padua\b/gi, 'Antoine de Padoue'],
-        [/\bIgnatius of Loyola\b/gi, 'Ignace de Loyola'],
-        [/\bLouis\b/gi, 'Louis'],
-        [/\bDenis\b/gi, 'Denis'],
-        [/\bMartin\b/gi, 'Martin'],
-        [/\bNicholas\b/gi, 'Nicolas'],
-        [/\bCecilia\b/gi, 'Cécile'],
-        [/\bAgnes\b/gi, 'Agnès'],
-        [/\bLucy\b/gi, 'Lucie'],
-        [/\bAgatha\b/gi, 'Agathe'],
-        [/\bCatherine of Siena\b/gi, 'Catherine de Sienne'],
-        [/\bCatherine of Alexandria\b/gi, 'Catherine d\'Alexandrie'],
-        [/\bJoan of Arc\b/gi, 'Jeanne d\'Arc'],
-        [/\bDoctor of the Church\b/gi, 'Docteur de l\'Église'],
-        [/\bDoctor\b/gi, 'Docteur'],
-        [/\bPope and Martyr\b/gi, 'Pape et Martyr'],
-        [/\bPope\b/gi, 'Pape'],
-        [/\bBishop and Martyr\b/gi, 'Évêque et Martyr'],
-        [/\bBishop and Confessor\b/gi, 'Évêque et Confesseur'],
-        [/\bBishop\b/gi, 'Évêque'],
-        [/\bMartyr\b/gi, 'Martyr'],
-        [/\bMartyrs\b/gi, 'Martyrs'],
-        [/\bConfessor\b/gi, 'Confesseur'],
-        [/\bAbbot\b/gi, 'Abbé'],
-        [/\bVirgin and Martyr\b/gi, 'Vierge et Martyre'],
-        [/\bVirgin\b/gi, 'Vierge'],
-        [/\bWidow\b/gi, 'Veuve'],
-        [/\bApostle\b/gi, 'Apôtre'],
-        [/\bEvangelist\b/gi, 'Évangéliste'],
-        [/\bCompanions\b/gi, 'Compagnons'],
-        [/\band\b/gi, 'et']
-    ];
-
-    frReplacements.forEach(function(pair) {
-        t = t.replace(pair[0], pair[1]);
-    });
-    return t;
+    var t = item.title || item.en || item.key;
+    return t.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
 }
 
 var DO_MONTH_NAMES = {
@@ -3608,7 +5165,7 @@ function renderHeaderDropdownItems() {
             items.forEach(function(item) {
                 var itemDate = getDateForLiturgicalKey(item.key, year);
                 var isSel = itemDate && itemDate.format('YYYY-MM-DD') === curDateStr;
-                var dateBadge = itemDate ? itemDate.format('DD MMM') : '';
+                var dateBadge = itemDate ? formatBadgeDate(itemDate, uiLang) : '';
                 var dispTitle = getVernacularItemTitle(item, uiLang);
 
                 var $card = $('<button class="hdd-item-card' + (isSel ? ' selected' : '') + '">')
