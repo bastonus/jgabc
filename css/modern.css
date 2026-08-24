@@ -1,24 +1,26 @@
-/* Modern Sacred — Stitch Design Language */
+/* Modern Sacred — Dynamic Accent-Tinted Minimalist System */
 
-:root {
-    /* Color Palette — Navy-Purple Liturgical */
-    --primary-color: #6366f1;
-    --primary-color-rgb: 99, 102, 241;
-    --primary-dark: #4f46e5;
-    --primary-light: #818cf8;
+:root,
+[data-theme="dark"] {
+    /* Primary Accent */
+    --primary-color: #c96b63;
+    --primary-color-rgb: 201, 107, 99;
+    --primary-dark: #b55a52;
+    --primary-light: #d88179;
 
-    --accent-purple: #a855f7;
-    --accent-rose: #be185d;
+    /* Base background for main content */
+    --background-base: color-mix(in srgb, var(--primary-color) 1.5%, #0e0f12);
+    /* Lighter sidebar background for natural frameless separation */
+    --background-sidebar: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
+    --background-surface: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
+    --background-highlight: color-mix(in srgb, var(--primary-color) 5.5%, #232732);
 
-    --background-base: #0f0f12;
-    --background-surface: #18182e;
-    --background-highlight: #20203d;
+    --text-primary: #f8fafc;
+    --text-secondary: color-mix(in srgb, var(--primary-color) 5%, #94a3b8);
+    --text-tertiary: color-mix(in srgb, var(--primary-color) 6%, #64748b);
 
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-tertiary: #475569;
-
-    --border-color: rgba(255, 255, 255, 0.06);
+    /* Zero strokes / frameless */
+    --border-color: transparent;
 
     /* Layout */
     --header-height: auto;
@@ -26,17 +28,30 @@
     --border-radius: 16px;
 }
 
-/* Light Mode Overrides */
+/* Light Theme with Natural Borderless Surface Separation */
 [data-theme="light"] {
-    --primary-color: #4f46e5;
-    --primary-light: #6366f1;
-    --background-base: #f6f6f8;
-    --background-surface: #ffffff;
-    --background-highlight: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --text-tertiary: #cbd5e1;
-    --border-color: rgba(0, 0, 0, 0.08);
+    --background-base: color-mix(in srgb, var(--primary-color) 1%, #ffffff);
+    --background-sidebar: color-mix(in srgb, var(--primary-color) 2%, #f0f2f6);
+    --background-surface: color-mix(in srgb, var(--primary-color) 2%, #f0f2f6);
+    --background-highlight: color-mix(in srgb, var(--primary-color) 3.5%, #e2e6ee);
+
+    --text-primary: #111317;
+    --text-secondary: color-mix(in srgb, var(--primary-color) 6%, #475569);
+    --text-tertiary: color-mix(in srgb, var(--primary-color) 8%, #64748b);
+
+    --border-color: transparent;
+}
+
+/* OLED Pure Black Mode */
+[data-theme="oled"] {
+    --background-base: #000000;
+    --background-sidebar: #0f0f0f;
+    --background-surface: #0f0f0f;
+    --background-highlight: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #8c8c8c;
+    --text-tertiary: #404040;
+    --border-color: transparent;
 }
 
 /* Reset & Base */
@@ -271,10 +286,10 @@ h6 {
 
 .card-type {
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--accent-purple);
+    color: var(--primary-color);
     font-family: 'Inter', sans-serif;
 }
 

@@ -1,0 +1,16 @@
+[Officium]
+S. Agustín, Obispo, Confesor y Doctor de la Iglesia
+
+[Name]
+Agustín
+
+[Oratio]
+Atiende, a nuestras súplicas, oh Dios todopoderoso, y ya que nos concedes esperar confiados en tu bondad, por la intercesión de S. Agustín, tu confesor y Pontífice, danos benigno el efecto de la acostumbrada misericordia.
+$Per Dominum
+
+[Graduale]
+!Ps 36:30-31
+La boca del justo derramará sabiduría, y su lengua hablará juiciosamente.
+V. La ley de su Dios la tiene en medio de su corazón, y andará con firmes pasos. Aleluya, aleluya.
+!Ps 88:21
+V. Hallé a David, siervo mío; ungíle con mi óleo santo. Aleluya.
