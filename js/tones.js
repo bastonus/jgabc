@@ -477,9 +477,11 @@ function unmute(
    */
   function destroyChannelTag() {
     if (channelTag) {
-      // Change src to nothing and trigger a load, this is required to actually hide / clear the iOS playback controls
-      channelTag.src = 'about:blank';
-      channelTag.load();
+      try {
+        channelTag.pause();
+        channelTag.removeAttribute('src');
+        channelTag.load();
+      } catch (e) {}
       channelTag = null;
     }
   }

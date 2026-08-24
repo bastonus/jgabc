@@ -46,10 +46,12 @@
 [data-theme="dark"] .do-sidebar,
 [data-theme="dark"] .do-header-dropdown,
 [data-theme="dark"] .settings-panel,
+[data-theme="dark"] .modern-player-bar,
 [data-theme="oled"] .do-top-header,
 [data-theme="oled"] .do-sidebar,
 [data-theme="oled"] .do-header-dropdown,
-[data-theme="oled"] .settings-panel {
+[data-theme="oled"] .settings-panel,
+[data-theme="oled"] .modern-player-bar {
     background-color: rgba(0, 0, 0, 0.78) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
@@ -2887,16 +2889,20 @@ body, html {
 .do-test-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
-}
-
 /* Intercalated Chant Cards */
 .do-chant-card-wrapper {
-    margin: 14px 0 18px 0;
+    width: 100% !important;
+    margin: 14px 0 18px 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    clear: both !important;
     transition: all 0.25s ease;
 }
 
 .do-chant-card {
-    background: var(--background-surface);
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: var(--background-secondary);
     border: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
     border-radius: 12px;
     padding: 16px 18px;
@@ -3005,6 +3011,8 @@ body, html {
 }
 
 .do-chant-preview {
+    width: 100% !important;
+    box-sizing: border-box !important;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 6px 0;
@@ -3012,12 +3020,13 @@ body, html {
     min-height: 80px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .do-chant-preview svg {
-    max-width: 100%;
-    height: auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
     display: block;
 }
 
@@ -3025,15 +3034,129 @@ body, html {
     user-select: none;
 }
 
-.do-chant-preview svg use[source-index] {
-    cursor: pointer;
-    transition: fill 0.15s ease;
+/* Dark Mode & OLED Theme: Chant Notes, Staff Lines, Glyphs and Lyric Text in White */
+[data-theme="dark"] .do-chant-preview svg,
+[data-theme="oled"] .do-chant-preview svg,
+:root:not([data-theme="light"]) .do-chant-preview svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
 }
 
-.do-chant-preview svg use[source-index]:hover,
-.do-chant-preview svg use[source-index].active {
+[data-theme="dark"] .do-chant-preview svg line,
+[data-theme="oled"] .do-chant-preview svg line,
+:root:not([data-theme="light"]) .do-chant-preview svg line {
+    stroke: rgba(255, 255, 255, 0.55) !important;
+    fill: none !important;
+}
+
+[data-theme="dark"] .do-chant-preview svg path.brace,
+[data-theme="oled"] .do-chant-preview svg path.brace,
+:root:not([data-theme="light"]) .do-chant-preview svg path.brace {
+    stroke: #ffffff !important;
+    fill: none !important;
+}
+
+[data-theme="dark"] .do-chant-preview svg .neumeLine,
+[data-theme="dark"] .do-chant-preview svg .neumeBeam,
+[data-theme="dark"] .do-chant-preview svg .dividerLine,
+[data-theme="oled"] .do-chant-preview svg .neumeLine,
+[data-theme="oled"] .do-chant-preview svg .neumeBeam,
+[data-theme="oled"] .do-chant-preview svg .dividerLine,
+:root:not([data-theme="light"]) .do-chant-preview svg .neumeLine,
+:root:not([data-theme="light"]) .do-chant-preview svg .neumeBeam,
+:root:not([data-theme="light"]) .do-chant-preview svg .dividerLine {
+    fill: #ffffff !important;
+}
+
+[data-theme="dark"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected) {
+    fill: #ffffff !important;
+}
+
+[data-theme="dark"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] .do-chant-preview svg text tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] .do-chant-preview svg text tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) .do-chant-preview svg text tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+    fill: #ffffff !important;
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+}
+
+/* Light Mode */
+[data-theme="light"] .do-chant-preview svg {
+    color: #111317 !important;
+    fill: #111317 !important;
+}
+
+[data-theme="light"] .do-chant-preview svg line {
+    stroke: rgba(0, 0, 0, 0.45) !important;
+    fill: none !important;
+}
+
+[data-theme="light"] .do-chant-preview svg path.brace {
+    stroke: #111317 !important;
+    fill: none !important;
+}
+
+[data-theme="light"] .do-chant-preview svg .neumeLine,
+[data-theme="light"] .do-chant-preview svg .neumeBeam,
+[data-theme="light"] .do-chant-preview svg .dividerLine {
+    fill: #111317 !important;
+}
+
+[data-theme="light"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="light"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] .do-chant-preview svg text tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+    fill: #111317 !important;
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+}
+
+/* Rubrics & Special Characters in Chants (Ps., V., R., asterisks, etc.): Always in Accent Color */
+.do-chant-preview svg text.rubric,
+.do-chant-preview svg text.specialChar,
+.do-chant-preview svg tspan.rubric,
+.do-chant-preview svg tspan.specialChar,
+.do-chant-preview svg .rubric,
+.do-chant-preview svg [class*="rubric"],
+.do-chant-preview svg [class*="specialChar"],
+.do-chant-preview svg text[class*="rubric"],
+.do-chant-preview svg tspan[class*="rubric"] {
     fill: var(--primary-color) !important;
-    filter: drop-shadow(0 0 3px var(--primary-color));
+}
+
+/* Active / Highlighted / Played Note in any theme (Overrides everything) */
+.do-chant-preview svg use.active,
+.do-chant-preview svg use[class*="active"],
+.do-chant-preview svg use.selected,
+.do-chant-preview svg use[class*="selected"],
+.do-chant-preview svg use[source-index]:hover,
+.do-chant-preview svg use[source-index].active,
+.do-chant-preview svg text.active,
+.do-chant-preview svg text.active tspan,
+.do-chant-preview svg tspan.active,
+.do-chant-preview svg text.dropCap.active,
+.do-chant-preview svg .note.active,
+.do-chant-preview svg .active {
+    fill: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    filter: none !important;
+}
+
+.do-chant-preview svg use.active.porrectus-left,
+.do-chant-preview svg use.active.porrectus-right {
+    fill: var(--primary-color) !important;
+    filter: none !important;
+}
+
+.do-chant-preview svg use[source-index] {
+    cursor: pointer;
+    transition: fill 0.1s ease;
 }
 
 .do-chant-gabc-raw {
@@ -3063,31 +3186,408 @@ body, html {
     font-style: italic;
 }
 
-.do-chant-error {
-    padding: 12px;
-    color: #ef5350;
-    font-size: 0.82rem;
-    background: rgba(239, 83, 80, 0.1);
+/* =============================================================
+   APP-NATIVE COMPACT BOTTOM PLAYER (DOCK STYLE)
+   ============================================================= */
+#mediaControls {
+    display: none !important;
+}
+
+.modern-player-bar,
+.do-player-floating {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background-color: rgba(10, 11, 14, 0.92) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 18%, rgba(255,255,255,0.08)) !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.45), 0 -1px 0 rgba(255,255,255,0.04) !important;
+    z-index: 1200 !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(100%) !important;
+    transition: transform 0.30s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.22s ease,
+                visibility 0.30s !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+[data-theme="dark"] .modern-player-bar,
+[data-theme="dark"] .do-player-floating,
+[data-theme="oled"] .modern-player-bar,
+[data-theme="oled"] .do-player-floating {
+    background-color: rgba(0, 0, 0, 0.90) !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, rgba(255, 255, 255, 0.10)) !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.80), 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="light"] .modern-player-bar,
+[data-theme="light"] .do-player-floating {
+    background-color: color-mix(in srgb, var(--background-base) 92%, transparent) !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 14%, rgba(0, 0, 0, 0.10)) !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08), 0 -1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.modern-player-bar.visible,
+.do-player-floating.visible {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Integrated Progress Track */
+.do-player-progress-track,
+.player-progress-container {
+    position: relative !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 3px !important;
+    background: rgba(128, 128, 128, 0.15) !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    transition: height 0.15s ease !important;
+    z-index: auto !important;
+}
+
+.do-player-progress-track:hover,
+.player-progress-container:hover {
+    height: 5px !important;
+}
+
+.do-player-progress-bar,
+.player-progress-bar {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+}
+
+.do-player-progress-fill,
+.player-progress-fill {
+    height: 100% !important;
+    width: 0%;
+    background: var(--primary-color) !important;
+    border-radius: 0 !important;
+    transition: width 0.1s linear !important;
+}
+
+/* Main Body Row */
+.do-player-body,
+.player-bar-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 7px 16px 8px 16px !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+/* Left: Identity */
+.do-player-info,
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.do-player-badge,
+.player-chant-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    padding: 2px 6px;
     border-radius: 6px;
+    flex-shrink: 0;
+    line-height: 1.3;
+}
+
+.do-player-name,
+.player-chant-name {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* Center: Core Playback Controls */
+.do-player-center-controls,
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+
+.do-player-action-btn,
+.player-btn-secondary {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--background-highlight);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    padding: 0;
+}
+
+.do-player-action-btn:hover,
+.player-btn-secondary:hover {
+    background: color-mix(in srgb, var(--primary-color) 18%, var(--background-highlight));
+    color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.do-player-play-btn,
+.player-btn-primary {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary-color);
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 14px color-mix(in srgb, var(--primary-color) 50%, transparent);
+    transition: transform 0.15s ease, filter 0.15s ease;
+    padding: 0;
+}
+
+.do-player-play-btn svg,
+.player-btn-primary svg {
+    fill: #ffffff !important;
+}
+
+.do-player-play-btn:hover,
+.player-btn-primary:hover {
+    transform: scale(1.08);
+    filter: brightness(1.10);
+}
+
+/* Right: App Pill Segment Controls */
+.do-player-settings-group,
+.player-options {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+}
+
+.do-player-pill-control,
+.player-pitch-group,
+.player-tempo-group {
+    display: inline-flex;
+    align-items: center;
+    background: var(--background-highlight);
+    border-radius: 8px;
+    padding: 2px;
+    height: 28px;
+    box-sizing: border-box;
+}
+
+.do-player-pill-arrow,
+.player-btn-option {
+    width: 22px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.do-player-pill-arrow:hover,
+.player-btn-option:hover {
+    background: var(--background-surface);
+    color: var(--text-primary);
+}
+
+.do-player-pill-val,
+#playerStartingPitch,
+#playerTempoValue {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 32px;
+    text-align: center;
+    padding: 0 3px;
+    user-select: none;
+}
+
+.do-player-toggle-btn,
+#playerBtnSolesmes {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--background-highlight);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.do-player-toggle-btn img,
+#playerBtnSolesmes img {
+    opacity: 0.75;
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.do-player-toggle-btn:hover,
+#playerBtnSolesmes:hover {
+    background: color-mix(in srgb, var(--primary-color) 12%, var(--background-highlight));
+}
+
+.do-player-toggle-btn.active,
+#playerBtnSolesmes.active {
+    background: color-mix(in srgb, var(--primary-color) 22%, transparent) !important;
+    color: var(--primary-color);
+}
+
+.do-player-toggle-btn.active img,
+#playerBtnSolesmes.active img {
+    opacity: 1;
+    filter: drop-shadow(0 0 2px var(--primary-color));
+}
+
+.do-chant-card {
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.do-chant-card.is-playing {
+    border-left: 3px solid var(--primary-color);
+    padding-left: 12px;
+}
+
+/* ── Padding for content so dock doesn't cover last item ────── */
+.app-main {
+    transition: padding-bottom 0.3s ease;
+}
+
+body.player-dock-open .app-main {
+    padding-bottom: 72px;
 }
 
 @media (max-width: 768px) {
-    .do-test-banner {
-        padding: 16px 14px;
+    body.player-dock-open .app-main {
+        padding-bottom: 66px;
     }
-    .do-test-title {
-        font-size: 1.15rem;
+}
+
+@media (max-width: 768px) {
+    .modern-player-bar,
+    .do-player-floating {
+        /* keep full-width dock on mobile */
+        border-radius: 0;
     }
-    .do-test-toolbar {
-        flex-direction: column;
-        align-items: stretch;
+    .do-player-body,
+    .player-bar-inner {
+        padding: 7px 12px 8px 12px;
+        gap: 8px;
     }
-    .do-test-select {
-        max-width: 100%;
-        width: 100%;
+    .do-player-badge,
+    .player-chant-sub {
+        display: none;
     }
-    .do-chant-card {
-        padding: 12px 12px;
+    .do-player-name,
+    .player-chant-name {
+        font-size: 0.86rem;
+        max-width: 120px;
+    }
+    .do-player-play-btn,
+    .player-btn-primary {
+        width: 36px;
+        height: 36px;
+    }
+    .do-player-action-btn,
+    .player-btn-secondary {
+        width: 28px;
+        height: 28px;
+    }
+    .do-player-settings-group,
+    .player-options {
+        gap: 4px;
+    }
+    .do-player-pill-control,
+    .player-pitch-group,
+    .player-tempo-group {
+        height: 26px;
+    }
+    .do-player-pill-arrow,
+    .player-btn-option {
+        width: 18px;
+        height: 22px;
+    }
+    .do-player-pill-val,
+    #playerStartingPitch {
+        font-size: 0.70rem;
+        min-width: 22px;
+    }
+    #playerTempoValue {
+        font-size: 0.68rem;
+        min-width: 28px;
+    }
+    .do-player-toggle-btn,
+    #playerBtnSolesmes {
+        width: 26px;
+        height: 26px;
     }
 }
 

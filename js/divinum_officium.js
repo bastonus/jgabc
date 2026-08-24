@@ -14,7 +14,8 @@ var doState = window.doState = {
     vernacularLang: localStorage.getItem('do_vernacular_lang') || (localStorage.getItem('do_lang') === 'la' ? 'none' : (localStorage.getItem('do_lang') || 'fr')),
     edition: localStorage.getItem('do_edition') || '1960',
     rite: localStorage.getItem('do_rite') || 'traditional',
-    officiumKey: localStorage.getItem('do_officiumKey') || null,
+    officiumKey: null,
+    testFeastKey: null,
     includeOrdinarium: localStorage.getItem('do_ordinarium') === 'true',
     includeGregorian: (localStorage.getItem('do_include_gregorian') !== 'false'),
     selectedKyriale: localStorage.getItem('do_selected_kyriale') || 'auto',
@@ -602,8 +603,6 @@ function updateUiTranslations() {
     $('.do-nav-item[data-hora="home"] .do-nav-tag').text(t.home_tag);
     $('.do-nav-item[data-hora="missa"] .do-nav-label').text(t.missa);
     $('.do-nav-item[data-hora="missa"] .do-nav-tag').text(t.missa_tag);
-    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-label').text(t.missa_gregorian || 'Messe & Grégorien');
-    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-tag').text(t.missa_gregorian_tag || 'Page de Test');
     $('.do-nav-item[data-hora="matutinum"] .do-nav-label').text(t.matutinum);
     $('.do-nav-item[data-hora="matutinum"] .do-nav-tag').text(t.matutinum_tag);
     $('.do-nav-item[data-hora="laudes"] .do-nav-label').text(t.laudes);
@@ -1419,7 +1418,9 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
 function loadMissaData(date, lang, callback) {
     var codes = computeLiturgicalCodes(date);
     var langFolder = getLangFolder(lang);
-    var feastKey = convertFeastKeyToCode(doState.officiumKey) || null;
+    var isTestMissa = (doState.hora === 'missa_gregorian');
+    var rawKey = isTestMissa ? (doState.testFeastKey || doState.officiumKey) : doState.officiumKey;
+    var feastKey = convertFeastKeyToCode(rawKey) || null;
 
     var sanctiCode = feastKey || codes.sancti;
     var temporaCode = feastKey || codes.tempora;
@@ -3456,12 +3457,322 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale) {
     return result;
 }
 
-function renderSingleChantScore($wrapper) {
-    if ($wrapper.data('do-rendered')) return;
+function preprocessGabcForExsurge(gabc) {
+    if (!gabc || typeof gabc !== 'string') return gabc;
+
+    // 1. Process <eu>...</eu> (Euouae - saeculorum Amen termination)
+    // Convert each syllable inside <eu> into italic rubric colored letters: <c><i>E</i></c>(h) <c><i>u</i></c>(h)...
+    gabc = gabc.replace(/<eu>([\s\S]*?)<\/eu>/gi, function(match, inner) {
+        return inner.replace(/(^|\))([^()]+)(?=\(|$)/g, function(m, closeParen, text) {
+            var trimmed = text.trim();
+            if (!trimmed) return m;
+            var leadingSpace = text.match(/^\s*/)[0];
+            var trailingSpace = text.match(/\s*$/)[0];
+            return closeParen + leadingSpace + '<c><i>' + trimmed + '</i></c>' + trailingSpace;
+        });
+    });
+    // Remove any remaining unclosed <eu> or </eu> tags
+    gabc = gabc.replace(/<\/?eu>/gi, '');
+
+    // 2. Remove ledger line indications like [oll:1{}] or [ull:0;12mm]
+    gabc = gabc.replace(/\[[ou]ll:[01]?[{}][01]?\]/ig, '');
+
+    // 3. Normalize \Vbar, \Rbar, \Abar to standard bar symbols
+    gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) {
+        return b.toUpperCase() + '/.';
+    }).replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) {
+        return b.toUpperCase() + '/.';
+    });
+
+    // 4. Wrap standard rubric indicators (Ps., V., R., T.P., ij., etc.) in rubric coloring
+    // Match <i>Ps.</i>, <i>Ps</i>, <i>Psalmus</i>, Ps.
+    gabc = gabc.replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1<c><i>Ps.</i></c>');
+    gabc = gabc.replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
+
+    // Match <i>V.</i>, <i>℣.</i>, <i>℣</i>, <i>Versus</i>, V/.
+    gabc = gabc.replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
+    gabc = gabc.replace(/(^|\s|\))(V\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
+
+    // Match <i>R.</i>, <i>℟.</i>, <i>℟</i>, <i>Responsorium</i>, R/.
+    gabc = gabc.replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
+    gabc = gabc.replace(/(^|\s|\))(R\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
+
+    // Match <i>T.P.</i>, <i>T. P.</i>, <i>Tp.</i>, <i>Extra T.P.</i>
+    gabc = gabc.replace(/(^|\s|\))<i>\s*(?:Extra\s+)?T\.?\s*P\.?\s*<\/i>/gi, '$1<c><i>T. P.</i></c>');
+
+    // Match <i>ij.</i>, <i>iij.</i>, <i>bis</i>, <i>ter</i>
+    gabc = gabc.replace(/(^|\s|\))<i>\s*(i+j\.?|bis|ter)\s*<\/i>/gi, function(m, p1, p2) {
+        return p1 + '<c><i>' + p2 + '</i></c>';
+    });
+
+    // Match section annotations like <i>Tractus</i>, <i>Graduale</i>, <i>Canticum</i>, <i>Post Septuagesimam</i>, <i>Sequentia</i>
+    gabc = gabc.replace(/(^|\s|\))<i>\s*(Tractus|Graduale|Canticum|Post Septuagesimam|Sequentia|Offertorium|Communio|Introitus)\s*<\/i>/gi, function(m, p1, p2) {
+        return p1 + '<c><i>' + p2 + '</i></c>';
+    });
+
+    // 5. Episemata fixes and alt text formatting
+    gabc = gabc.replace(/\\emph{([^(}]+)\}/g, '<c><i>$1</i></c>');
+    gabc = gabc.replace(/(v[A-Z]__[A-Z])([^_])/g, '$1_3$2');
+    gabc = gabc.replace(/\\hspace{[^}]*}/g, '');
+
+    // 6. Make standalone asterisks and daggers rubric colored
+    gabc = gabc.replace(/([^)]\s+)([*†])(?=\s*\()/g, '$1<c>$2</c>');
+
+    return gabc;
+}
+
+var _doCurrentPlayerCard = null;
+var _doCurrentScore = null;
+var _doProgressInterval = null;
+
+function initDoPlayer() {
+    // Play/Pause button
+    $('#playerBtnPlay').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+            Tone.context.resume();
+        }
+        if (window.isPlayingChant && window.isPlayingChant()) {
+            // Currently playing → pause/resume
+            if (window.playPauseScore) {
+                var resumed = window.playPauseScore();
+                setDoPlayerBarState(resumed);
+            } else if (window.stopScore) {
+                window.stopScore();
+                setDoPlayerBarState(false);
+            }
+        } else if (_doCurrentScore && window.playScore) {
+            // Start from selected note (if user clicked a note) or from beginning
+            var startNote = _doCurrentPlayerCard ? _doCurrentPlayerCard.data('selected-start-note') : null;
+            window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, startNote || undefined);
+            setDoPlayerBarState(true);
+        }
+    });
+
+    // Stop button
+    $('#playerBtnStop').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (window.stopScore) window.stopScore();
+        setDoPlayerBarState(false);
+        $('#playerProgressFill').css('width', '0%');
+        $('#modernPlayerBar').removeClass('visible');
+        $('body').removeClass('player-dock-open');
+        if (_doCurrentPlayerCard) {
+            _doCurrentPlayerCard.removeClass('is-playing');
+            _doCurrentPlayerCard.removeData('selected-start-note');
+            var svg = _doCurrentPlayerCard.find('svg')[0];
+            if (svg) $(svg).find('use.active, text.active').removeClass('active');
+        }
+        _doCurrentPlayerCard = null;
+        _doCurrentScore = null;
+    });
+
+    // Next note button
+    $('#playerBtnNext').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (window.playNextNote) window.playNextNote();
+    });
+
+    // Pitch Transpose Down (-1 semitone)
+    $('#playerPitchDown').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (_doCurrentScore && window.exsurge) {
+            var curPitch = _doCurrentScore.defaultStartPitch ? (typeof _doCurrentScore.defaultStartPitch.toInt === 'function' ? _doCurrentScore.defaultStartPitch.toInt() : _doCurrentScore.defaultStartPitch) : null;
+            if (curPitch != null) {
+                _doCurrentScore.defaultStartPitch = new exsurge.Pitch(curPitch - 1);
+                updateDoPitchUI(_doCurrentScore);
+            }
+        }
+    });
+
+    // Pitch Transpose Up (+1 semitone)
+    $('#playerPitchUp').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (_doCurrentScore && window.exsurge) {
+            var curPitch = _doCurrentScore.defaultStartPitch ? (typeof _doCurrentScore.defaultStartPitch.toInt === 'function' ? _doCurrentScore.defaultStartPitch.toInt() : _doCurrentScore.defaultStartPitch) : null;
+            if (curPitch != null) {
+                _doCurrentScore.defaultStartPitch = new exsurge.Pitch(curPitch + 1);
+                updateDoPitchUI(_doCurrentScore);
+            }
+        }
+    });
+
+    // Solesmes Lengths Toggle (Salicus)
+    $('#playerBtnSolesmes').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (window.toggleIsUsingSolesmesLengths) {
+            var isUsing = window.toggleIsUsingSolesmesLengths();
+            $(this).toggleClass('active', !!isUsing);
+        }
+    });
+    if (window.getIsUsingSolesmesLengths) {
+        $('#playerBtnSolesmes').toggleClass('active', !!window.getIsUsingSolesmesLengths());
+    }
+
+    // Tempo -
+    $('#playerTempoMinus, .tempo-minus').off('click').on('click', function(e) {
+        e.stopPropagation();
+        var bpm = window.setRelativeTempo ? window.setRelativeTempo(-10) : 140;
+        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+    });
+
+    // Tempo +
+    $('#playerTempoPlus, .tempo-plus').off('click').on('click', function(e) {
+        e.stopPropagation();
+        var bpm = window.setRelativeTempo ? window.setRelativeTempo(10) : 160;
+        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+    });
+
+    // Seek via Progress Bar Click
+    $('#playerProgressBarContainer').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (!_doCurrentPlayerCard || !_doCurrentScore) return;
+
+        var rect = this.getBoundingClientRect();
+        var clickX = e.clientX - rect.left;
+        var percent = Math.max(0, Math.min(1, clickX / rect.width));
+
+        var svg = _doCurrentPlayerCard.find('svg')[0];
+        if (!svg) return;
+
+        var $notes = $(svg).find('use[source-index]');
+        var total = $notes.length;
+        if (total === 0) return;
+
+        var targetIndex = Math.floor(total * percent);
+        if (targetIndex >= total) targetIndex = total - 1;
+
+        var note = null;
+        var targetNode = null;
+        for (var i = targetIndex; i < total; i++) {
+            var n = $notes[i];
+            if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
+        }
+        if (!note && targetIndex > 0) {
+            for (var i = targetIndex - 1; i >= 0; i--) {
+                var n = $notes[i];
+                if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
+            }
+        }
+
+        if (note && targetNode) {
+            $(svg).find('use.active').removeClass('active');
+            targetNode.classList.add('active');
+
+            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+
+            if (window.playScore) {
+                window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, note);
+                setDoPlayerBarState(true);
+                $('#playerProgressFill').css('width', (percent * 100) + '%');
+            }
+        }
+    });
+}
+
+function updateDoPlayerUI($card, score, isPlaying, startNote) {
+    _doCurrentPlayerCard = $card;
+    _doCurrentScore = score;
+
+    var part = $card.data('chant-part') || '';
+    var title = $card.data('chant-title') || '';
+
+    $('#playerChantPart').text(part);
+    $('#playerChantName').text(title);
+
+    updateDoPitchUI(score);
+
+    $('#modernPlayerBar').addClass('visible');
+    $('body').addClass('player-dock-open');
+    setDoPlayerBarState(isPlaying);
+
+    $('.do-chant-card').removeClass('is-playing');
+    $card.addClass('is-playing');
+}
+
+function setDoPlayerBarState(isPlaying) {
+    if (isPlaying) {
+        $('#playerBtnPlay').addClass('playing');
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>');
+        startDoProgressTracking();
+    } else {
+        $('#playerBtnPlay').removeClass('playing');
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>');
+        if (_doProgressInterval) clearInterval(_doProgressInterval);
+    }
+}
+
+function startDoProgressTracking() {
+    if (_doProgressInterval) clearInterval(_doProgressInterval);
+    _doProgressInterval = setInterval(function() {
+        if (!window.isPlayingChant || !window.isPlayingChant()) {
+            if (_doProgressInterval) clearInterval(_doProgressInterval);
+            setDoPlayerBarState(false);
+            return;
+        }
+        if (window.getChantProgress) {
+            var percent = window.getChantProgress() * 100;
+            if (percent > 100) percent = 100;
+            $('#playerProgressFill').css('width', percent + '%');
+            if (percent >= 100) {
+                setDoPlayerBarState(false);
+            }
+        }
+    }, 150);
+}
+
+function updateDoPitchUI(score) {
+    if (!score || !window.exsurge) return;
+    var lowPitch = 100000, highPitch = 0, startPitch = null;
+    if (score.notations) {
+        score.notations.forEach(function(notation) {
+            if (notation.notes) {
+                notation.notes.forEach(function(note) {
+                    if (note.pitch) {
+                        var pitch = note.pitch.toInt();
+                        if (startPitch == null) startPitch = pitch;
+                        lowPitch = Math.min(lowPitch, pitch);
+                        highPitch = Math.max(highPitch, pitch);
+                    }
+                });
+            }
+        });
+    }
+
+    if (startPitch == null) return;
+
+    if (!score.defaultStartPitch && window.calculateDefaultStartPitch) {
+        score.defaultStartPitch = window.calculateDefaultStartPitch(startPitch, lowPitch, highPitch);
+    }
+
+    var pitchObj = (score.defaultStartPitch && typeof score.defaultStartPitch.toInt === 'function') 
+        ? score.defaultStartPitch 
+        : new exsurge.Pitch(startPitch);
+
+    var noteNames = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+    var stepName = noteNames[pitchObj.step] || '';
+    $('#playerStartingPitch').text(stepName + (pitchObj.octave !== undefined ? pitchObj.octave : ''));
+}
+
+function renderSingleChantScore($wrapper, force) {
+    if (!force && $wrapper.data('do-rendered')) return;
     var chantId = $wrapper.data('chant-id');
-    var defaultPart = $wrapper.data('chant-part') || 'Chant';
-    var defaultName = $wrapper.data('chant-name') || defaultPart;
-    if (!chantId) return;
+    var defaultName = $wrapper.data('chant-name') || ('Chant ' + chantId);
+    var defaultPart = $wrapper.data('chant-part') || 'Chant grégorien';
+
+    if (!chantId) {
+        $wrapper.html('<div class="do-chant-error">Identifiant de chant non spécifié.</div>');
+        return;
+    }
+
+    var cachedGabc = $wrapper.data('cached-gabc');
+    if (cachedGabc) {
+        $wrapper.data('do-rendered', true);
+        processGabcData(cachedGabc);
+        return;
+    }
 
     $wrapper.data('do-rendered', true);
     var gabcUrl = 'gabc/' + chantId + '.gabc';
@@ -3471,6 +3782,7 @@ function renderSingleChantScore($wrapper) {
             $wrapper.html('<div class="do-chant-error">Partition ' + chantId + ' non disponible.</div>');
             return;
         }
+        $wrapper.data('cached-gabc', data);
         var header = parseGabcHeader(data);
         var title = header.name || defaultName;
         var officePart = header['office-part'] || defaultPart;
@@ -3486,90 +3798,94 @@ function renderSingleChantScore($wrapper) {
                         '<h4 class="do-chant-title">' + escHtml(title) + '</h4>' +
                         modeHtml +
                     '</div>' +
-                    '<div class="do-chant-actions">' +
-                        '<span class="do-chant-pitch-badge" style="display:none;" title="Ton de départ"></span>' +
-                        '<button class="do-chant-btn do-chant-play-btn" title="Écouter le chant">' +
-                            '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
-                            '<span>Écouter</span>' +
-                        '</button>' +
-                        '<button class="do-chant-btn do-chant-gabc-btn" title="Afficher/Masquer le code GABC">' +
-                            '<span>&lt;/&gt; GABC</span>' +
-                        '</button>' +
-                    '</div>' +
                 '</div>' +
                 '<div class="do-chant-preview"><div class="do-chant-loading">Génération de la partition vectorielle…</div></div>' +
-                '<pre class="do-chant-gabc-raw hidden">' + escHtml(data) + '</pre>' +
             '</div>';
 
         var $card = $(cardHtml);
         $wrapper.empty().append($card);
 
-        var $preview = $card.find('.do-chant-preview');
-        var $gabcRaw = $card.find('.do-chant-gabc-raw');
-        var $playBtn = $card.find('.do-chant-play-btn');
-        var $pitchBadge = $card.find('.do-chant-pitch-badge');
-        var $gabcBtn = $card.find('.do-chant-gabc-btn');
+        $card.data('chant-part', officePart);
+        $card.data('chant-title', title);
 
-        // Toggle GABC raw
-        $gabcBtn.on('click', function(e) {
-            e.stopPropagation();
-            $gabcRaw.toggleClass('hidden');
-            $gabcBtn.toggleClass('active');
-        });
+        var $preview = $card.find('.do-chant-preview');
 
         // Exsurge Rendering
         if (typeof exsurge !== 'undefined') {
             try {
                 var ctxt = new exsurge.ChantContext();
-                var isDark = $('html').attr('data-theme') !== 'light';
+                var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                var isDark = (curTheme !== 'light');
                 var accentColor = doState.settings.color || '#c96b63';
 
-                ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.45)';
-                ctxt.noteColor = isDark ? '#f8fafc' : '#111317';
-                ctxt.rubricColor = accentColor;
+                ctxt.textColor = isDark ? '#ffffff' : '#111317';
+                ctxt.noteColor = isDark ? '#ffffff' : '#111317';
+                ctxt.neumeLineColor = isDark ? '#ffffff' : '#111317';
+                ctxt.dividerLineColor = isDark ? '#ffffff' : '#111317';
+                ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)';
+
+                ctxt.setFont("'Crimson Text', 'Libre Baskerville', serif", 16);
+                ctxt.setRubricColor(accentColor);
                 ctxt.specialCharColor = accentColor;
-                ctxt.lyricTextColor = isDark ? '#f8fafc' : '#111317';
+                ctxt.rubricColor = accentColor;
+                ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
                 ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
                 ctxt.annotationTextFont = ctxt.lyricTextFont;
 
-                var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, data);
+                if (ctxt.textStyles) {
+                    Object.keys(ctxt.textStyles).forEach(function(k) {
+                        if (ctxt.textStyles[k]) {
+                            ctxt.textStyles[k].color = isDark ? '#ffffff' : '#111317';
+                            ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
+                        }
+                    });
+                }
+
+                var processedGabc = preprocessGabcForExsurge(data);
+                var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
                 var score = new exsurge.ChantScore(ctxt, mappings, true);
 
-                var width = Math.max(280, $card.width() - 20);
+                var width = getOptimalChantWidth($card);
                 ctxt.width = width;
 
                 score.performLayout(ctxt);
                 score.layoutChantLines(ctxt, width, function() {
                     var svg = score.createSvgNode(ctxt);
-                    $preview.empty().append(svg);
-                    $card.data('chant-score', score);
+                    if (svg) {
+                        svg.setAttribute('width', '100%');
+                        svg.style.width = '100%';
+                        svg.style.maxWidth = '100%';
+                        svg.style.height = 'auto';
 
-                    // Compute start pitch
-                    if (score.defaultStartPitch) {
-                        var pitchInt = (typeof score.defaultStartPitch.toInt === 'function') ? score.defaultStartPitch.toInt() : (typeof score.defaultStartPitch === 'number' ? score.defaultStartPitch : 0);
-                        if (pitchInt) {
-                            var pObj = new exsurge.Pitch(pitchInt);
-                            var noteNames = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
-                            var stepName = noteNames[pObj.step] || '';
-                            $pitchBadge.text('Ton: ' + stepName + ' ' + pObj.octave).show();
-                        }
+                        var noteFill = isDark ? '#ffffff' : '#111317';
+                        svg.setAttribute('fill', noteFill);
+                        svg.style.fill = noteFill;
+
+                        $preview.empty().append(svg);
+                        $card.data('chant-score', score);
+                        $card.data('chant-ctxt', ctxt);
+                        $card.data('chant-gabc', processedGabc);
+
+                        // Neume note click → select note + show player, but don't auto-play
+                        $(svg).find('use[source-index]').on('click', function(e) {
+                            e.stopPropagation();
+                            var note = this.source && this.source.neume ? this.source : null;
+                            if (note) {
+                                $(svg).find('use.active').removeClass('active');
+                                this.classList.add('active');
+                                // Store the selected start note so Play button uses it
+                                $card.data('selected-start-note', note);
+                                // Show the player in paused state, don't start playback
+                                updateDoPlayerUI($card, score, false);
+                            }
+                        });
+
+                        // Clicking anywhere on the card/preview activates the player
+                        $card.on('click', function(e) {
+                            if ($(e.target).closest('use[source-index]').length) return;
+                            updateDoPlayerUI($card, score, false);
+                        });
                     }
-
-                    // Neume note click
-                    $(svg).find('use[source-index]').on('click', function(e) {
-                        e.stopPropagation();
-                        var note = this.source && this.source.neume ? this.source : null;
-                        if (note) {
-                            $(svg).find('use[source-index].active').removeClass('active');
-                            this.classList.add('active');
-                            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                                Tone.context.resume();
-                            }
-                            if (window.playScore) {
-                                window.playScore(score, null, note);
-                            }
-                        }
-                    });
                 });
             } catch(e) {
                 console.warn('Exsurge error:', e);
@@ -3578,30 +3894,6 @@ function renderSingleChantScore($wrapper) {
         } else {
             $preview.html('<div class="do-chant-error">Moteur Exsurge non chargé.</div>');
         }
-
-        // Play / Stop Button
-        $playBtn.on('click', function(e) {
-            e.stopPropagation();
-            var score = $card.data('chant-score');
-            if (!score) return;
-
-            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                Tone.context.resume();
-            }
-
-            if (window.isPlayingChant && window.isPlayingChant()) {
-                window.stopScore && window.stopScore();
-                $('.do-chant-play-btn').removeClass('is-playing').find('span').text('Écouter');
-                $('.do-chant-play-btn').find('svg').html('<polygon points="5 3 19 12 5 21 5 3"></polygon>');
-            } else {
-                $('.do-chant-play-btn').removeClass('is-playing').find('span').text('Écouter');
-                $('.do-chant-play-btn').find('svg').html('<polygon points="5 3 19 12 5 21 5 3"></polygon>');
-
-                $playBtn.addClass('is-playing').find('span').text('Arrêter');
-                $playBtn.find('svg').html('<rect x="6" y="6" width="12" height="12" rx="2"></rect>');
-                window.playScore && window.playScore(score);
-            }
-        });
     }
 
     if (GABC_LOCAL_CACHE[chantId]) {
@@ -3620,16 +3912,119 @@ function renderSingleChantScore($wrapper) {
     }
 }
 
-function renderAllChantScoresInDOM($root) {
-    var $wrappers = ($root || $('#do-content-stream')).find('.do-chant-card-wrapper');
-    $wrappers.each(function() {
-        if (doState.includeGregorian) {
-            $(this).show();
-            renderSingleChantScore($(this));
+function getOptimalChantWidth($card) {
+    var $preview = $card.find('.do-chant-preview');
+    var w = 0;
+    if ($preview.length && $preview.width() > 100) {
+        w = $preview.width();
+    } else if ($card.innerWidth() > 100) {
+        w = $card.innerWidth() - 32;
+    } else {
+        var $stream = $('#do-content-stream');
+        if ($stream.length && $stream.width() > 100) {
+            w = $stream.width() - (window.innerWidth <= 768 ? 48 : 80);
         } else {
-            $(this).hide();
+            w = $(window).width() - (window.innerWidth <= 768 ? 32 : 80);
+        }
+    }
+    return Math.max(280, Math.floor(w));
+}
+
+function relayoutAllChantScores() {
+    if (doState.hora !== 'missa_gregorian') return;
+    $('.do-chant-card').each(function() {
+        var $card = $(this);
+        var score = $card.data('chant-score');
+        var ctxt = $card.data('chant-ctxt');
+        var data = $card.data('chant-gabc');
+        if (score && ctxt && data) {
+            var newWidth = getOptimalChantWidth($card);
+            if (Math.abs((ctxt.width || 0) - newWidth) > 6) {
+                ctxt.width = newWidth;
+                score.performLayout(ctxt);
+                score.layoutChantLines(ctxt, newWidth, function() {
+                    var svg = score.createSvgNode(ctxt);
+                    if (svg) {
+                        svg.setAttribute('width', '100%');
+                        svg.style.width = '100%';
+                        svg.style.maxWidth = '100%';
+                        svg.style.height = 'auto';
+
+                        var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                        var isDark = (curTheme !== 'light');
+                        var noteFill = isDark ? '#ffffff' : '#111317';
+                        svg.setAttribute('fill', noteFill);
+                        svg.style.fill = noteFill;
+
+                        $card.find('.do-chant-preview').empty().append(svg);
+
+                        // Rebind note click for playback
+                        $(svg).find('use[source-index]').on('click', function(e) {
+                            e.stopPropagation();
+                            var note = this.source && this.source.neume ? this.source : null;
+                            if (note) {
+                                $(svg).find('use[source-index].active').removeClass('active');
+                                this.classList.add('active');
+                                if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                                    Tone.context.resume();
+                                }
+                                if (window.playScore) {
+                                    window.playScore(score, null, note);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
         }
     });
+}
+
+var chantResizeTimer = null;
+var chantResizeObserver = null;
+
+function setupChantResizeObserver() {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (chantResizeObserver) {
+        chantResizeObserver.disconnect();
+    }
+    chantResizeObserver = new ResizeObserver(function() {
+        if (chantResizeTimer) clearTimeout(chantResizeTimer);
+        chantResizeTimer = setTimeout(function() {
+            if (doState.hora === 'missa_gregorian') {
+                relayoutAllChantScores();
+            }
+        }, 50);
+    });
+
+    var streamEl = document.getElementById('do-content-stream');
+    if (streamEl) chantResizeObserver.observe(streamEl);
+
+    var appLayoutEl = document.querySelector('.app-layout');
+    if (appLayoutEl) chantResizeObserver.observe(appLayoutEl);
+}
+
+$(window).on('resize orientationchange', function() {
+    if (doState.hora !== 'missa_gregorian') return;
+    if (chantResizeTimer) clearTimeout(chantResizeTimer);
+    chantResizeTimer = setTimeout(function() {
+        relayoutAllChantScores();
+    }, 60);
+});
+
+function renderAllChantScoresInDOM($root, force) {
+    var $wrappers = ($root || $('#do-content-stream')).find('.do-chant-card-wrapper');
+    setTimeout(function() {
+        $wrappers.each(function() {
+            if (doState.includeGregorian) {
+                $(this).show();
+                renderSingleChantScore($(this), force);
+            } else {
+                $(this).hide();
+            }
+        });
+        setupChantResizeObserver();
+    }, 20);
 }
 
 function renderTestMissaBannerAndToolbar() {
@@ -3650,12 +4045,13 @@ function renderTestMissaBannerAndToolbar() {
         '<option value="18"' + (curKyriale === '18' ? ' selected' : '') + '>Missa XVIII : Deus Genitor alme (Féries)</option>' +
         '<option value="19"' + (curKyriale === '19' ? ' selected' : '') + '>Missa pro defunctis (Requiem)</option>';
 
+    var curProper = doState.testFeastKey || doState.officiumKey || '';
     var properOptionsHtml = '<option value="">— Propre du jour (Automatique) —</option>';
     if (typeof sundayKeys !== 'undefined') {
         properOptionsHtml += '<optgroup label="Proprium de Tempore">';
         sundayKeys.forEach(function(item) {
             if (item.key) {
-                var isSel = (doState.officiumKey === item.key);
+                var isSel = (curProper === item.key);
                 properOptionsHtml += '<option value="' + escHtml(item.key) + '"' + (isSel ? ' selected' : '') + '>' + escHtml(item.title || item.en) + '</option>';
             }
         });
@@ -3665,7 +4061,7 @@ function renderTestMissaBannerAndToolbar() {
         properOptionsHtml += '<optgroup label="Messes Votives &amp; Communs">';
         otherKeys.forEach(function(item) {
             if (item.key) {
-                var isSel = (doState.officiumKey === item.key);
+                var isSel = (curProper === item.key);
                 properOptionsHtml += '<option value="' + escHtml(item.key) + '"' + (isSel ? ' selected' : '') + '>' + escHtml(item.title || item.en) + '</option>';
             }
         });
@@ -3741,15 +4137,15 @@ function displayResult(result, vernResult) {
         });
     }
 
-    var chantsMap = isMissa ? getGregorianChantsMapForMissa(doState.date, doState.officiumKey, doState.selectedKyriale) : {};
+    var chantsMap = isTestMissa ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale) : {};
 
     result.cards.forEach(function(card) {
         var vernCard = (card.id && vernMap[card.id]) ? vernMap[card.id] : null;
         var cardHtml = renderOfficeCardHTML(card, vernCard);
         var $cardNode = $(cardHtml);
 
-        // If card has associated Gregorian chant(s)
-        var chantList = (isMissa && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
+        // If card has associated Gregorian chant(s) (strictly on Test Page)
+        var chantList = (isTestMissa && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
         if (chantList && chantList.length) {
             chantList.forEach(function(ch) {
                 var wrapperHtml = 
@@ -3773,8 +4169,10 @@ function displayResult(result, vernResult) {
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 
-    // Render all chant scores in DOM
-    renderAllChantScoresInDOM($stream);
+    // Render all chant scores in DOM strictly when in Test Missa mode
+    if (isTestMissa) {
+        renderAllChantScoresInDOM($stream);
+    }
 
     startBilingualSwipeHint();
 }
@@ -6103,6 +6501,9 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', theme);
     }
     applyColor(doState.settings.color);
+    if (doState.hora === 'missa_gregorian') {
+        renderAllChantScoresInDOM($('#do-content-stream'), true);
+    }
 }
 
 function applyColor(hex) {
@@ -6113,6 +6514,9 @@ function applyColor(hex) {
     document.documentElement.style.setProperty('--primary-color', hex);
     document.documentElement.style.setProperty('--primary-color-rgb', r + ',' + g + ',' + b);
     localStorage.setItem('do_color', hex);
+    if (doState.hora === 'missa_gregorian') {
+        renderAllChantScoresInDOM($('#do-content-stream'), true);
+    }
 }
 
 // ---- Event Listeners ----
@@ -6120,6 +6524,9 @@ function setupEventListeners() {
     $(document).on('click', '.do-brand, #btnBrandHome', function(e) {
         e.preventDefault();
         doState.hora = 'home';
+        doState.officiumKey = null;
+        doState.testFeastKey = null;
+        localStorage.removeItem('do_officiumKey');
         localStorage.setItem('do_hora', 'home');
         closeModals();
         renderDO();
@@ -6135,6 +6542,11 @@ function setupEventListeners() {
         }
         doState.hora = hora;
         localStorage.setItem('do_hora', hora);
+        if (hora !== 'missa_gregorian') {
+            doState.officiumKey = null;
+            doState.testFeastKey = null;
+            localStorage.removeItem('do_officiumKey');
+        }
         closeModals();
         renderDO();
     });
@@ -6149,6 +6561,11 @@ function setupEventListeners() {
         $('#doHoraePicker').addClass('hidden');
         doState.hora = hora;
         localStorage.setItem('do_hora', hora);
+        if (hora !== 'missa_gregorian') {
+            doState.officiumKey = null;
+            doState.testFeastKey = null;
+            localStorage.removeItem('do_officiumKey');
+        }
         renderDO();
     });
 
@@ -6158,6 +6575,11 @@ function setupEventListeners() {
         $('#doHoraePicker').addClass('hidden');
         doState.hora = hora;
         localStorage.setItem('do_hora', hora);
+        if (hora !== 'missa_gregorian') {
+            doState.officiumKey = null;
+            doState.testFeastKey = null;
+            localStorage.removeItem('do_officiumKey');
+        }
         renderDO();
     });
 
@@ -6475,12 +6897,7 @@ function setupEventListeners() {
 
     $(document).on('change', '#doTestProperSelect', function() {
         var val = $(this).val();
-        doState.officiumKey = val || null;
-        if (val) {
-            localStorage.setItem('do_officiumKey', val);
-        } else {
-            localStorage.removeItem('do_officiumKey');
-        }
+        doState.testFeastKey = val || null;
         renderDO();
     });
 
@@ -6664,6 +7081,9 @@ function setupEventListeners() {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
             if (doState.settings.theme === 'auto') {
                 document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                if (doState.hora === 'missa_gregorian') {
+                    renderAllChantScoresInDOM($('#do-content-stream'), true);
+                }
             }
         });
     }
@@ -6673,6 +7093,8 @@ function setupEventListeners() {
         if ($(e.target).closest('#headerDropdown, .header-title-area, .do-top-header, .dropdown-trigger').length) return;
         closeHeaderDropdown();
     });
+
+    initDoPlayer();
 }
 
 // ---- Initialization ----
