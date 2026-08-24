@@ -670,7 +670,7 @@ em {
 /* Text paragraph block */
 .do-text-block p {
     margin-bottom: 0.8em;
-    text-align: justify;
+    text-align: left;
     hyphens: auto;
     font-size: 1.12rem;
     line-height: 1.8;
@@ -744,40 +744,34 @@ div.do-rubric-inline {
     font-size: inherit !important;
 }
 
-/* Bilingual Row-by-Row Aligned Architecture */
-.do-bilingual-grid {
+/* Bilingual Dual-Pane Architecture (Desktop: 2 columns, Mobile: 2-pane swipe carousel) */
+.do-bilingual-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.do-bilingual-swipe-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    width: 100%;
+}
+
+.do-bilingual-pane {
     display: flex;
     flex-direction: column;
     gap: 0.55em;
-    width: 100%;
-}
-
-.do-bilingual-row {
-    display: flex;
-    gap: 2.5rem;
-    align-items: baseline;
-    width: 100%;
-}
-
-.do-bilingual-row > .do-col-la {
-    flex: 1;
     min-width: 0;
-    padding-right: 0;
 }
 
-.do-bilingual-row > .do-col-vernacular {
-    flex: 1;
-    min-width: 0;
-    padding-left: 0;
-}
-
-.do-bilingual-row p {
+.do-bilingual-pane p {
     margin-bottom: 0;
+    text-align: left;
 }
 
-/* Global Mobile Language Switcher */
-.do-global-lang-switcher {
-    display: none; /* Hidden on desktop */
+.do-pane-row {
+    text-align: left;
 }
 
 .do-verse-num-spacer {
@@ -797,57 +791,30 @@ div.do-rubric-inline {
 }
 
 @media (max-width: 768px) {
-    .do-global-lang-switcher {
-        display: inline-flex;
-        background: var(--background-highlight);
-        padding: 3px;
-        border-radius: 9px;
-        gap: 3px;
-        border: none !important;
-        margin-left: auto;
+    .do-bilingual-swipe-container {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 1.5rem !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        scroll-behavior: smooth !important;
+        padding-bottom: 4px;
+        width: 100% !important;
     }
 
-    .do-global-lang-btn {
-        padding: 5px 12px;
-        border-radius: 7px;
-        border: none !important;
-        background: transparent;
-        color: var(--text-secondary);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.74rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
+    .do-bilingual-swipe-container::-webkit-scrollbar {
+        display: none;
     }
 
-    .do-global-lang-btn.active {
-        background: var(--background-surface) !important;
-        color: var(--primary-color) !important;
-        font-weight: 700;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Synchronized Mobile View: switch all prayers simultaneously */
-    .do-mobile-show-la .do-bilingual-row > .do-col-vernacular {
-        display: none !important;
-    }
-    .do-mobile-show-la .do-bilingual-row > .do-col-la {
+    .do-bilingual-pane {
         flex: 0 0 100% !important;
         width: 100% !important;
-        display: block !important;
-    }
-
-    .do-mobile-show-vern .do-bilingual-row > .do-col-la {
-        display: none !important;
-    }
-    .do-mobile-show-vern .do-bilingual-row > .do-col-vernacular {
-        flex: 0 0 100% !important;
-        width: 100% !important;
-        display: block !important;
-    }
-
-    .do-col-la, .do-col-vernacular {
-        animation: fadeIn 0.15s ease;
+        min-width: 100% !important;
+        scroll-snap-align: start !important;
+        scroll-snap-stop: always !important;
+        box-sizing: border-box !important;
     }
 }
 
@@ -1183,7 +1150,7 @@ div.do-rubric-inline {
     font-family: 'Crimson Text', Georgia, serif;
     font-size: 1.12rem;
     line-height: 1.8;
-    text-align: justify;
+    text-align: left;
 }
 
 .do-bible-single-verse {
@@ -1191,7 +1158,7 @@ div.do-rubric-inline {
     font-size: 1.12rem;
     line-height: 1.8;
     margin-bottom: 8px;
-    text-align: justify;
+    text-align: left;
 }
 
 .do-bible-vnum {

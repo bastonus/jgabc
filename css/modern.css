@@ -698,7 +698,7 @@ text.annotation {
 /* Readings */
 .reading-version {
     margin-bottom: 2rem;
-    text-align: justify;
+    text-align: left;
     line-height: 1.6;
 }
 

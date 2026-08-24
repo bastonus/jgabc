@@ -2224,9 +2224,11 @@ function displayResult(result, vernResult) {
         return;
     }
 
-    var title = result.title;
-    if (vernResult && vernResult.title && vernResult.title !== result.title) {
-        title = result.title + ' • ' + vernResult.title;
+    var title = '';
+    if (vernResult && vernResult.title && doState.vernacularLang && doState.vernacularLang !== 'none') {
+        title = vernResult.title;
+    } else if (result && result.title) {
+        title = result.title;
     }
 
     if (title) {
@@ -2301,10 +2303,10 @@ function updateSidebarAndHeader() {
         $('#doGlobalLangSwitcher .do-global-lang-btn[data-lang="vern"]').text(vernName);
         $('#doGlobalLangSwitcher .do-global-lang-btn').removeClass('active');
         $('#doGlobalLangSwitcher .do-global-lang-btn[data-lang="' + (doState.mobileLang || 'la') + '"]').addClass('active');
-        $('#do-content-stream').removeClass('do-mobile-show-la do-mobile-show-vern').addClass('do-mobile-show-' + (doState.mobileLang || 'la'));
+        $('.app-main').addClass('is-bilingual-mobile');
     } else {
         $('#doGlobalLangSwitcher').hide();
-        $('#do-content-stream').removeClass('do-mobile-show-la do-mobile-show-vern');
+        $('.app-main').removeClass('is-bilingual-mobile');
     }
 }
 
@@ -3026,4 +3028,252 @@ function setupEventListeners() {
         if (bibleMode) {
             doState.hddBibleMode = bibleMode;
         } else {
-            doState.hddMo
+            doState.hddMode = $(this).data('mode');
+        }
+        renderHeaderDropdown();
+    });
+
+    // Today in Dropdown
+    $(document).on('click', '#btnHddToday, #btnDateToday', function(e) {
+        e.stopPropagation();
+        doState.date = moment();
+        doState.officiumKey = null;
+        localStorage.removeItem('do_officiumKey');
+        if (doState.calView) {
+            doState.calView = { year: doState.date.year(), month: doState.date.month() };
+        }
+        closeHeaderDropdown();
+        renderDO();
+    });
+
+    // Toggle In-App Calendar in Dropdown
+    $(document).on('click', '#btnHddCalendarToggle', function(e) {
+        e.stopPropagation();
+        doState.calOpen = !doState.calOpen;
+        $('.hdd-cal-chevron').toggleClass('open', doState.calOpen);
+        $('#hddCustomCalendar').toggleClass('hidden', !doState.calOpen);
+        if (doState.calOpen) {
+            doState.calView = { year: doState.date.year(), month: doState.date.month() };
+            renderCustomCalendarGrid();
+        }
+    });
+
+    // Prev / Next Month in Custom Calendar
+    $(document).on('click', '#btnHddCalPrevMonth', function(e) {
+        e.stopPropagation();
+        if (!doState.calView) doState.calView = { year: doState.date.year(), month: doState.date.month() };
+        doState.calView.month--;
+        if (doState.calView.month < 0) {
+            doState.calView.month = 11;
+            doState.calView.year--;
+        }
+        renderCustomCalendarGrid();
+    });
+
+    $(document).on('click', '#btnHddCalNextMonth', function(e) {
+        e.stopPropagation();
+        if (!doState.calView) doState.calView = { year: doState.date.year(), month: doState.date.month() };
+        doState.calView.month++;
+        if (doState.calView.month > 11) {
+            doState.calView.month = 0;
+            doState.calView.year++;
+        }
+        renderCustomCalendarGrid();
+    });
+
+    // Prev / Next Day in Dropdown
+    $(document).on('click', '#btnHddPrevDay', function(e) {
+        e.stopPropagation();
+        doState.date.subtract(1, 'day');
+        doState.officiumKey = null;
+        localStorage.removeItem('do_officiumKey');
+        if (doState.calView) {
+            doState.calView = { year: doState.date.year(), month: doState.date.month() };
+        }
+        renderHeaderDropdown();
+        renderDO();
+    });
+
+    $(document).on('click', '#btnHddNextDay', function(e) {
+        e.stopPropagation();
+        doState.date.add(1, 'day');
+        doState.officiumKey = null;
+        localStorage.removeItem('do_officiumKey');
+        if (doState.calView) {
+            doState.calView = { year: doState.date.year(), month: doState.date.month() };
+        }
+        renderHeaderDropdown();
+        renderDO();
+    });
+
+    // Filter search
+    $(document).on('input', '#hddSearchInput', function() {
+        renderHeaderDropdownItems();
+    });
+
+    $('#btnOpenSidebarMobile').on('click', function() {
+        $('#doSidebar').addClass('open');
+        $('#sidebarBackdrop').addClass('open');
+    });
+
+    $('#btnCloseSidebar, #sidebarBackdrop').on('click', function() {
+        closeModals();
+    });
+
+    $('#btnSettings, #btnSettingsSidebar').on('click', function() {
+        $('#settingsPanel').addClass('open active');
+        $('#settingsBackdrop').addClass('open active');
+    });
+
+    $('#btnCloseSettings, #settingsBackdrop').on('click', function() {
+        closeModals();
+    });
+
+    // Ordinarium Missæ Toggle
+    $('#doOrdinariumOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
+        var val = $(this).data('value') === true || $(this).data('value') === 'true';
+        doState.includeOrdinarium = val;
+        localStorage.setItem('do_ordinarium', val);
+        $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
+        $(this).addClass('active');
+        renderDO();
+    });
+
+    // 2 Distinct Settings: Latin Text Toggle
+    $('#doLatinOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
+        var val = $(this).data('value') === true || $(this).data('value') === 'true';
+        if (!val && (!doState.vernacularLang || doState.vernacularLang === 'none')) {
+            doState.vernacularLang = 'fr';
+            localStorage.setItem('do_vernacular_lang', 'fr');
+        }
+        doState.showLatin = val;
+        localStorage.setItem('do_show_latin', val);
+        $('#doLatinOptions .settings-option-card, #doLatinOptions .settings-pill-btn, #doLatinOptions .segment').removeClass('active');
+        $(this).addClass('active');
+        renderDO();
+    });
+
+    // 2 Distinct Settings: Vernacular Translation Select
+    $('#doVernacularOptions').on('click', '.settings-option-card, .settings-option', function() {
+        var val = $(this).data('value');
+        if (val === 'none' && !doState.showLatin) {
+            doState.showLatin = true;
+            localStorage.setItem('do_show_latin', true);
+        }
+        doState.vernacularLang = val;
+        localStorage.setItem('do_vernacular_lang', val);
+        $('#doVernacularOptions .settings-option-card, #doVernacularOptions .settings-option').removeClass('active');
+        $(this).addClass('active');
+        renderDO();
+    });
+
+    $('#doThemeOptions').on('click', '.settings-option-card, .settings-option', function() {
+        $('#doThemeOptions .settings-option-card, #doThemeOptions .settings-option').removeClass('active');
+        $(this).addClass('active');
+        doState.settings.theme = $(this).data('value');
+        localStorage.setItem('do_theme', doState.settings.theme);
+        initTheme();
+    });
+
+    $('#doColorOptions').on('click', '.color-swatch-circle, .color-swatch', function() {
+        $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
+        $(this).addClass('active');
+        applyColor($(this).data('color'));
+    });
+
+    // Global Mobile Language Switcher Button
+    $(document).on('click', '.do-global-lang-btn', function(e) {
+        e.stopPropagation();
+        var lang = $(this).data('lang');
+        doState.mobileLang = lang;
+        $('.do-global-lang-btn').removeClass('active');
+        $(this).addClass('active');
+        var $main = $('.app-main');
+        if ($main.length && $main[0]) {
+            var targetX = (lang === 'vern') ? ($main[0].scrollWidth - $main[0].clientWidth) : 0;
+            $main[0].scrollTo({ left: targetX, behavior: 'smooth' });
+        }
+    });
+
+    // Auto-update global language button on horizontal scroll
+    $('.app-main').on('scroll', function() {
+        if (!$(this).hasClass('is-bilingual-mobile')) return;
+        var sl = this.scrollLeft;
+        var w = this.clientWidth;
+        var isVern = (sl > w * 0.4);
+        var currentLang = isVern ? 'vern' : 'la';
+        if (doState.mobileLang !== currentLang) {
+            doState.mobileLang = currentLang;
+            $('.do-global-lang-btn').removeClass('active');
+            $('.do-global-lang-btn[data-lang="' + currentLang + '"]').addClass('active');
+        }
+    });
+
+    // Global Touch Gestures (Sidebar Drawer)
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchIsEdge = false;
+
+    $(document).on('touchstart', function(e) {
+        if (e.originalEvent.touches && e.originalEvent.touches.length === 1) {
+            touchStartX = e.originalEvent.touches[0].clientX;
+            touchStartY = e.originalEvent.touches[0].clientY;
+            touchIsEdge = (touchStartX <= 40);
+        }
+    });
+
+    $(document).on('touchend', function(e) {
+        if (!touchStartX || !e.originalEvent.changedTouches || !e.originalEvent.changedTouches.length) return;
+        var touchEndX = e.originalEvent.changedTouches[0].clientX;
+        var touchEndY = e.originalEvent.changedTouches[0].clientY;
+        var deltaX = touchEndX - touchStartX;
+        var deltaY = touchEndY - touchStartY;
+        var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
+
+        // Check if swiping left to close open sidebar
+        if (isSidebarOpen && deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            closeModals();
+            touchStartX = 0;
+            touchStartY = 0;
+            touchIsEdge = false;
+            return;
+        }
+
+        // Check if edge swiping right to open sidebar
+        if (!isSidebarOpen && touchIsEdge && deltaX > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+            $('#doSidebar').addClass('open active');
+            $('#sidebarBackdrop').addClass('open active');
+            touchStartX = 0;
+            touchStartY = 0;
+            touchIsEdge = false;
+            return;
+        }
+
+        touchStartX = 0;
+        touchStartY = 0;
+        touchIsEdge = false;
+    });
+
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (doState.settings.theme === 'auto') {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            }
+        });
+    }
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#headerDropdown, #doHeaderTitle, .dropdown-trigger, #btnDatePicker, #btnOpenCalendar, .hdd-cal-month-nav, .hdd-date-nav, .hdd-cal-day-cell, #btnHddCalendarToggle').length) {
+            closeHeaderDropdown();
+        }
+    });
+}
+
+// ---- Initialization ----
+$(function() {
+    console.log('Divinum Officium & Missale Initialized with Recursive Section & Variable Resolver.');
+    $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+    initTheme();
+    setupEventListeners();
+    renderDO();
+});
