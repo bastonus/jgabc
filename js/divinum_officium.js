@@ -2010,7 +2010,78 @@ function splitHymnStanzas(lines) {
     return stanzas;
 }
 
-function formatSingleParagraph(l) {
+// ---- Language-Aware Hyphenation Engine (Hypher Integration) ----
+function hyphenateHtmlText(html, lang) {
+    if (!html || typeof html !== 'string') return html;
+    if (typeof Hypher === 'undefined' || !Hypher.languages) return html;
+
+    var targetLang = (lang || 'la').toLowerCase();
+    var h = Hypher.languages[targetLang];
+    if (!h) {
+        if (targetLang === 'fr' || targetLang === 'fr-fr') h = Hypher.languages['fr-FR'] || Hypher.languages['fr'];
+        else if (targetLang === 'en' || targetLang === 'en-us') h = Hypher.languages['en-us'] || Hypher.languages['en'];
+        else if (targetLang === 'la' || targetLang === 'la_va') h = Hypher.languages['la'] || Hypher.languages['la_VA'];
+        else if (targetLang === 'it') h = Hypher.languages['it'];
+        else if (targetLang === 'pl') h = Hypher.languages['pl'];
+    }
+    if (!h) return html;
+
+    var parts = html.split(/(<[^>]+>)/g);
+    for (var i = 0; i < parts.length; i++) {
+        if (parts[i] && !parts[i].startsWith('<')) {
+            parts[i] = h.hyphenateText(parts[i]);
+        }
+    }
+    return parts.join('');
+}
+
+function hyphenateDomTree(el, lang) {
+    if (!el || typeof Hypher === 'undefined' || !Hypher.languages) return;
+    var targetLang = (lang || 'la').toLowerCase();
+    var h = Hypher.languages[targetLang];
+    if (!h) {
+        if (targetLang === 'fr' || targetLang === 'fr-fr') h = Hypher.languages['fr-FR'] || Hypher.languages['fr'];
+        else if (targetLang === 'en' || targetLang === 'en-us') h = Hypher.languages['en-us'] || Hypher.languages['en'];
+        else if (targetLang === 'la' || targetLang === 'la_va') h = Hypher.languages['la'] || Hypher.languages['la_VA'];
+        else if (targetLang === 'it') h = Hypher.languages['it'];
+        else if (targetLang === 'pl') h = Hypher.languages['pl'];
+    }
+    if (!h) return;
+
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+    var node;
+    while ((node = walker.nextNode())) {
+        var pName = node.parentNode ? node.parentNode.nodeName : '';
+        if (pName === 'SCRIPT' || pName === 'STYLE') continue;
+        if (node.nodeValue && node.nodeValue.indexOf('\u00AD') === -1) {
+            node.nodeValue = h.hyphenateText(node.nodeValue);
+        }
+    }
+}
+
+function applyHyphenationToContainer($container) {
+    if (typeof Hypher === 'undefined' || !Hypher.languages || !$container || !$container.length) return;
+
+    var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : 'fr';
+
+    // 1. Process explicit Latin elements
+    $container.find('.do-col-la, [lang="la"], .do-bible-la-col').each(function() {
+        hyphenateDomTree(this, 'la');
+    });
+
+    // 2. Process explicit Vernacular elements
+    $container.find('.do-col-vernacular, [lang="' + vernLang + '"], .do-bible-vern-col').each(function() {
+        hyphenateDomTree(this, vernLang);
+    });
+
+    // 3. Process single cards & any remaining card bodies
+    $container.find('.do-card-body').each(function() {
+        var cLang = $(this).attr('lang') || $(this).closest('[lang]').attr('lang') || (doState.showLatin ? 'la' : vernLang);
+        hyphenateDomTree(this, cLang);
+    });
+}
+
+function formatSingleParagraph(l, langKey) {
     if (!l) return '';
     l = l.trim();
 
@@ -2022,7 +2093,9 @@ function formatSingleParagraph(l) {
         if (/^(Ps\.|[0-9]?\s?[A-Z][a-z]+ [0-9]+:)/i.test(rText) && rText.length < 35) {
             return '<span class="do-source-ref">' + escHtml(rText) + '</span>';
         }
-        return '<div class="do-rubric-inline">' + formatLiturgicalSymbols(escHtml(rText)) + '</div>';
+        var formattedRubric = formatLiturgicalSymbols(escHtml(rText));
+        if (langKey) formattedRubric = hyphenateHtmlText(formattedRubric, langKey);
+        return '<div class="do-rubric-inline">' + formattedRubric + '</div>';
     }
 
     // Speakers: S (Sacerdos), P (Populus), M (Minister), C (Cantor/Celebrans), O (Omnes/Orans), V (Versiculus), R (Responsorium), D (Diaconus)
@@ -2031,10 +2104,13 @@ function formatSingleParagraph(l) {
         var symDisp = (sym === 'V') ? '℣.' : (sym === 'R') ? '℟.' : (sym + '.');
         var rest = l.replace(/^[SMPCOvrVRD]\.[\s\u00a0]*/i, '').trim();
         var text = formatLiturgicalSymbols(escHtml(rest));
+        if (langKey) text = hyphenateHtmlText(text, langKey);
         return '<p class="do-dialog-line"><span class="do-resp-sym ' + sym + '">' + symDisp + '</span> ' + text + '</p>';
     }
 
-    return '<p>' + formatLiturgicalSymbols(escHtml(l)) + '</p>';
+    var text = formatLiturgicalSymbols(escHtml(l));
+    if (langKey) text = hyphenateHtmlText(text, langKey);
+    return '<p>' + text + '</p>';
 }
 
 // ---- Latin Psalmody & Cadence Formatting Engine with Partie Avant Detector ----
@@ -2190,19 +2266,23 @@ if (typeof window !== 'undefined') {
 }
 
 // Psalm verse without numbers (Continuous chanting flow with Cadence and Preparation support)
-function formatSinglePsalmVerse(line, isDox, toneOptions) {
+function formatSinglePsalmVerse(line, isDox, toneOptions, langKey) {
     if (!line) return '<div class="do-psalm-verse"></div>';
     line = line.trim();
 
     if (/^[-–—_~*]+$/.test(line)) return '';
 
     if (/^\{[^\}]+\}$/.test(line)) {
-        return '<div class="do-rubric-inline">' + escHtml(line.substring(1, line.length - 1)) + '</div>';
+        var r = escHtml(line.substring(1, line.length - 1));
+        if (langKey) r = hyphenateHtmlText(r, langKey);
+        return '<div class="do-rubric-inline">' + r + '</div>';
     }
 
     if (/^Ant\./i.test(line)) {
         var antContent = line.replace(/^Ant\.\s*/i, '');
-        return '<div class="do-antiphon-line"><span class="do-ant-tag">Ant.</span> ' + formatLiturgicalSymbols(escHtml(antContent)) + '</div>';
+        var antHtml = formatLiturgicalSymbols(escHtml(antContent));
+        if (langKey) antHtml = hyphenateHtmlText(antHtml, langKey);
+        return '<div class="do-antiphon-line"><span class="do-ant-tag">Ant.</span> ' + antHtml + '</div>';
     }
 
     var inner;
@@ -2211,13 +2291,14 @@ function formatSinglePsalmVerse(line, isDox, toneOptions) {
     } else {
         inner = formatLiturgicalSymbols(escHtml(line));
     }
+    if (langKey) inner = hyphenateHtmlText(inner, langKey);
 
     return '<div class="do-psalm-verse' + (isDox ? ' do-doxology' : '') + '">' +
         '<span class="do-verse-text">' + inner + '</span>' +
     '</div>';
 }
 
-function formatSingleRespLine(line) {
+function formatSingleRespLine(line, langKey) {
     if (!line) return '';
     line = line.trim();
     if (/^[-–—_~*]+$/.test(line)) return '';
@@ -2232,17 +2313,20 @@ function formatSingleRespLine(line) {
     }
 
     var inner = formatLiturgicalSymbols(escHtml(line));
+    if (langKey) inner = hyphenateHtmlText(inner, langKey);
     return '<span class="do-resp-line">' +
         (sym ? '<span class="do-resp-sym ' + symCls + '">' + sym + '</span> ' : '') +
         inner +
     '</span>';
 }
 
-function formatSingleStanza(st) {
+function formatSingleStanza(st, langKey) {
     return '<div class="do-hymn-stanza">' +
         st.filter(function(line) { return line && !/^[-–—_~*]+$/.test(line.trim()); }).map(function(line) {
             var cleanLine = line.replace(/^[vvr]\.\s*/i, '');
-            return '<span class="do-hymn-line">' + formatLiturgicalSymbols(escHtml(cleanLine)) + '</span>';
+            var formattedLine = formatLiturgicalSymbols(escHtml(cleanLine));
+            if (langKey) formattedLine = hyphenateHtmlText(formattedLine, langKey);
+            return '<span class="do-hymn-line">' + formattedLine + '</span>';
         }).join('') +
     '</div>';
 }
@@ -2322,6 +2406,7 @@ function alignBilingualBlocks(laLines, vernLines) {
 function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
     var laProcessed = getProcessedLines(linesLa, 'la').filter(function(l) { return l && !/^[-–—_~*]+$/.test(l.trim()); });
     var vernProcessed = getProcessedLines(linesVern, langKey).filter(function(l) { return l && !/^[-–—_~*]+$/.test(l.trim()); });
+    var vernLangAttr = langKey || 'fr';
 
     var rows = [];
 
@@ -2334,8 +2419,8 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
             var vernSt = vernStanzas[i] || [];
             rows.push(
                 '<div class="do-bilingual-row">' +
-                    '<div class="do-col-la">' + (laSt.length ? formatSingleStanza(laSt) : '') + '</div>' +
-                    '<div class="do-col-vernacular">' + (vernSt.length ? formatSingleStanza(vernSt) : '') + '</div>' +
+                    '<div class="do-col-la" lang="la">' + (laSt.length ? formatSingleStanza(laSt, 'la') : '') + '</div>' +
+                    '<div class="do-col-vernacular" lang="' + vernLangAttr + '">' + (vernSt.length ? formatSingleStanza(vernSt, langKey) : '') + '</div>' +
                 '</div>'
             );
         }
@@ -2347,8 +2432,8 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
             var isDox = /gl[oó]ria patri|sicut erat|gloire au p|comme il [eé]tait|glory be|as it was in|gloria al padre|como era en/i.test(laL || vernL);
             rows.push(
                 '<div class="do-bilingual-row">' +
-                    '<div class="do-col-la">' + (laL ? formatSinglePsalmVerse(laL, isDox) : '') + '</div>' +
-                    '<div class="do-col-vernacular">' + (vernL ? formatSinglePsalmVerse(vernL, isDox) : '') + '</div>' +
+                    '<div class="do-col-la" lang="la">' + (laL ? formatSinglePsalmVerse(laL, isDox, null, 'la') : '') + '</div>' +
+                    '<div class="do-col-vernacular" lang="' + vernLangAttr + '">' + (vernL ? formatSinglePsalmVerse(vernL, isDox, null, langKey) : '') + '</div>' +
                 '</div>'
             );
         }
@@ -2359,30 +2444,30 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
             var vernL = vernProcessed[i] || '';
             rows.push(
                 '<div class="do-bilingual-row">' +
-                    '<div class="do-col-la">' + (laL ? formatSingleRespLine(laL) : '') + '</div>' +
-                    '<div class="do-col-vernacular">' + (vernL ? formatSingleRespLine(vernL) : '') + '</div>' +
+                    '<div class="do-col-la" lang="la">' + (laL ? formatSingleRespLine(laL, 'la') : '') + '</div>' +
+                    '<div class="do-col-vernacular" lang="' + vernLangAttr + '">' + (vernL ? formatSingleRespLine(vernL, langKey) : '') + '</div>' +
                 '</div>'
             );
         }
     } else if (/antiphona/i.test(badge)) {
-        var laText = formatLiturgicalSymbols(escHtml(laProcessed.join(' ')));
-        var vernText = formatLiturgicalSymbols(escHtml(vernProcessed.join(' ')));
+        var laText = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(laProcessed.join(' '))), 'la');
+        var vernText = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(vernProcessed.join(' '))), langKey);
         rows.push(
             '<div class="do-bilingual-row">' +
-                '<div class="do-col-la"><div class="do-antiphon-text">' + laText + '</div></div>' +
-                '<div class="do-col-vernacular"><div class="do-antiphon-text">' + vernText + '</div></div>' +
+                '<div class="do-col-la" lang="la"><div class="do-antiphon-text">' + laText + '</div></div>' +
+                '<div class="do-col-vernacular" lang="' + vernLangAttr + '"><div class="do-antiphon-text">' + vernText + '</div></div>' +
             '</div>'
         );
     } else {
         var aligned = alignBilingualBlocks(laProcessed, vernProcessed);
         aligned.forEach(function(pair) {
-            var laP = pair.la ? formatSingleParagraph(pair.la) : '';
-            var vernP = pair.vern ? formatSingleParagraph(pair.vern) : '';
+            var laP = pair.la ? formatSingleParagraph(pair.la, 'la') : '';
+            var vernP = pair.vern ? formatSingleParagraph(pair.vern, langKey) : '';
             if (laP || vernP) {
                 rows.push(
                     '<div class="do-bilingual-row">' +
-                        '<div class="do-col-la">' + laP + '</div>' +
-                        '<div class="do-col-vernacular">' + vernP + '</div>' +
+                        '<div class="do-col-la" lang="la">' + laP + '</div>' +
+                        '<div class="do-col-vernacular" lang="' + vernLangAttr + '">' + vernP + '</div>' +
                     '</div>'
                 );
             }
@@ -2500,49 +2585,50 @@ function formatCardBody(lines, badge, langKey) {
     var processedLines = getProcessedLines(lines, targetLang);
 
     if (/hymnus/i.test(badge)) {
-        return formatHymn(processedLines);
+        return formatHymn(processedLines, targetLang);
     } else if (/psalmus|canticum|invitatorium/i.test(badge)) {
-        return formatPsalm(processedLines);
+        return formatPsalm(processedLines, targetLang);
     } else if (/responsorium/i.test(badge)) {
-        return formatResponsory(processedLines);
+        return formatResponsory(processedLines, targetLang);
     } else if (/antiphona/i.test(badge)) {
-        return '<div class="do-antiphon-text">' + formatLiturgicalSymbols(escHtml(processedLines.join(' '))) + '</div>';
+        var antTxt = formatLiturgicalSymbols(escHtml(processedLines.join(' ')));
+        return '<div class="do-antiphon-text">' + hyphenateHtmlText(antTxt, targetLang) + '</div>';
     } else {
-        return formatTextBlock(processedLines);
+        return formatTextBlock(processedLines, targetLang);
     }
 }
 
-function formatHymn(lines) {
+function formatHymn(lines, langKey) {
     var stanzas = splitHymnStanzas(lines);
     return stanzas.map(function(st) {
-        return formatSingleStanza(st);
+        return formatSingleStanza(st, langKey);
     }).join('');
 }
 
-function formatPsalm(lines) {
+function formatPsalm(lines, langKey) {
     var html = '';
     lines.forEach(function(line) {
         line = line.trim();
         if (!line) return;
 
         var isDox = /gl[oó]ria patri|sicut erat|gloire au p|comme il [eé]tait|glory be|as it was in|gloria al padre|como era en/i.test(line);
-        html += formatSinglePsalmVerse(line, isDox);
+        html += formatSinglePsalmVerse(line, isDox, null, langKey);
     });
     return html;
 }
 
-function formatResponsory(lines) {
+function formatResponsory(lines, langKey) {
     var html = '';
     lines.forEach(function(line) {
-        html += formatSingleRespLine(line);
+        html += formatSingleRespLine(line, langKey);
     });
     return '<div class="do-responsory">' + html + '</div>';
 }
 
-function formatTextBlock(lines) {
+function formatTextBlock(lines, langKey) {
     return '<div class="do-text-block">' +
         lines.map(function(l) {
-            return formatSingleParagraph(l);
+            return formatSingleParagraph(l, langKey);
         }).join('') +
     '</div>';
 }
@@ -2740,10 +2826,12 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
             visibleKeys.forEach(function(vNum) {
                 var laText = laVerses[vNum] || '';
                 var vernText = vernVerses ? (vernVerses[vNum] || '') : '';
+                var laFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(laText)), 'la');
+                var vernFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(vernText)), vernLang || 'fr');
                 rows.push(
                     '<div class="do-bilingual-row do-bible-row">' +
-                        '<div class="do-col-la"><span class="do-bible-vnum">' + vNum + '</span> ' + formatLiturgicalSymbols(escHtml(laText)) + '</div>' +
-                        '<div class="do-col-vernacular"><span class="do-bible-vnum">' + vNum + '</span> ' + formatLiturgicalSymbols(escHtml(vernText)) + '</div>' +
+                        '<div class="do-col-la" lang="la"><span class="do-bible-vnum">' + vNum + '</span> ' + laFormatted + '</div>' +
+                        '<div class="do-col-vernacular" lang="' + (vernLang || 'fr') + '"><span class="do-bible-vnum">' + vNum + '</span> ' + vernFormatted + '</div>' +
                     '</div>'
                 );
             });
@@ -2756,9 +2844,10 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
             var rows = [];
             visibleKeys.forEach(function(vNum) {
                 var vernText = vernVerses ? (vernVerses[vNum] || '') : '';
+                var vernFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(vernText)), vernLang || 'fr');
                 rows.push(
-                    '<div class="do-bible-single-verse">' +
-                        '<span class="do-bible-vnum">' + vNum + '</span> ' + formatLiturgicalSymbols(escHtml(vernText)) +
+                    '<div class="do-bible-single-verse" lang="' + (vernLang || 'fr') + '">' +
+                        '<span class="do-bible-vnum">' + vNum + '</span> ' + vernFormatted +
                     '</div>'
                 );
             });
@@ -2767,9 +2856,10 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
             var rows = [];
             visibleKeys.forEach(function(vNum) {
                 var laText = laVerses[vNum] || '';
+                var laFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(laText)), 'la');
                 rows.push(
-                    '<div class="do-bible-single-verse">' +
-                        '<span class="do-bible-vnum">' + vNum + '</span> ' + formatLiturgicalSymbols(escHtml(laText)) +
+                    '<div class="do-bible-single-verse" lang="la">' +
+                        '<span class="do-bible-vnum">' + vNum + '</span> ' + laFormatted +
                     '</div>'
                 );
             });
@@ -2804,6 +2894,7 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     );
 
     $stream.append(cardHtml).append($bottomBar);
+    applyHyphenationToContainer($stream);
     if ($stream[0]) {
         var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 12px)' : '0%';
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
@@ -3192,6 +3283,8 @@ function displayResult(result, vernResult) {
         var cardHtml = renderOfficeCardHTML(card, vernCard);
         $stream.append(cardHtml);
     });
+
+    applyHyphenationToContainer($stream);
 
     if ($stream[0]) {
         var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 12px)' : '0%';

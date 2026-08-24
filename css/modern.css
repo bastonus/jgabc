@@ -1,23 +1,24 @@
 /* Modern Sacred — Dynamic Accent-Tinted Minimalist System */
 
 :root,
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-theme="oled"] {
     /* Primary Accent */
     --primary-color: #c96b63;
     --primary-color-rgb: 201, 107, 99;
     --primary-dark: #b55a52;
     --primary-light: #d88179;
 
-    /* Base background for main content */
-    --background-base: color-mix(in srgb, var(--primary-color) 1.5%, #0e0f12);
-    /* Lighter sidebar background for natural frameless separation */
-    --background-sidebar: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
-    --background-surface: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
-    --background-highlight: color-mix(in srgb, var(--primary-color) 5.5%, #232732);
+    /* Base background for main content - Pure OLED Black */
+    --background-base: #000000;
+    /* Sidebar / Surface backgrounds */
+    --background-sidebar: #000000;
+    --background-surface: #0a0a0a;
+    --background-highlight: #141414;
 
     --text-primary: #f8fafc;
-    --text-secondary: color-mix(in srgb, var(--primary-color) 5%, #94a3b8);
-    --text-tertiary: color-mix(in srgb, var(--primary-color) 6%, #64748b);
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
 
     /* Zero strokes / frameless */
     --border-color: transparent;
@@ -39,18 +40,6 @@
     --text-secondary: color-mix(in srgb, var(--primary-color) 6%, #475569);
     --text-tertiary: color-mix(in srgb, var(--primary-color) 8%, #64748b);
 
-    --border-color: transparent;
-}
-
-/* OLED Pure Black Mode */
-[data-theme="oled"] {
-    --background-base: #000000;
-    --background-sidebar: #0f0f0f;
-    --background-surface: #0f0f0f;
-    --background-highlight: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: #8c8c8c;
-    --text-tertiary: #404040;
     --border-color: transparent;
 }
 

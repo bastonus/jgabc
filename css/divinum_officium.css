@@ -8,20 +8,21 @@
 }
 
 :root,
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-theme="oled"] {
     --primary-color: #c96b63;
     --primary-color-rgb: 201, 107, 99;
 
-    /* Base background for main content */
-    --background-base: color-mix(in srgb, var(--primary-color) 1.5%, #0e0f12);
-    /* Lighter sidebar background for natural frameless separation */
-    --background-sidebar: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
-    --background-surface: color-mix(in srgb, var(--primary-color) 3.5%, #181a22);
-    --background-highlight: color-mix(in srgb, var(--primary-color) 5.5%, #232732);
+    /* Base background for main content - Pure OLED Black */
+    --background-base: #000000;
+    /* Sidebar and Surface background */
+    --background-sidebar: #000000;
+    --background-surface: #0a0a0a;
+    --background-highlight: #141414;
 
     --text-primary: #f8fafc;
-    --text-secondary: color-mix(in srgb, var(--primary-color) 5%, #94a3b8);
-    --text-tertiary: color-mix(in srgb, var(--primary-color) 6%, #64748b);
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
 
     /* Zero strokes / frameless */
     --border-color: transparent;
@@ -41,18 +42,10 @@
     --border-color: transparent;
 }
 
-/* OLED Pure Black Mode */
-[data-theme="oled"] {
-    --background-base: #000000;
-    --background-sidebar: #0f0f0f;
-    --background-surface: #0f0f0f;
-    --background-highlight: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: #8c8c8c;
-    --text-tertiary: #404040;
-    --border-color: transparent;
-}
-
+[data-theme="dark"] .do-top-header,
+[data-theme="dark"] .do-sidebar,
+[data-theme="dark"] .do-header-dropdown,
+[data-theme="dark"] .settings-panel,
 [data-theme="oled"] .do-top-header,
 [data-theme="oled"] .do-sidebar,
 [data-theme="oled"] .do-header-dropdown,
@@ -600,12 +593,18 @@
 .do-card.is-bible,
 .do-card.is-antiphon { border-left: none !important; }
 
-/* Card Body Typography (Universal Text Size) */
+/* Card Body Typography (Universal Text Size & Justified Layout) */
 .do-card-body {
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
     font-size: 1.12rem;
     line-height: 1.8;
     color: var(--text-primary);
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 /* In texts: b / strong tags become colored & normal weight */
@@ -642,6 +641,12 @@ em {
     color: var(--primary-color) !important;
     font-size: 1.12rem !important;
     line-height: 1.8;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 /* Initial drop cap / leading letter of verses/prayers: Normal weight, colored */
@@ -659,6 +664,12 @@ em {
     margin-bottom: 6px;
     font-size: 1.12rem;
     line-height: 1.8;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-verse-num {
@@ -675,6 +686,12 @@ em {
 .do-verse-text {
     display: block;
     font-size: inherit;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-mediant,
@@ -767,7 +784,11 @@ em {
 /* Text paragraph block */
 .do-text-block p {
     margin-bottom: 0.8em;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
     hyphens: auto;
     font-size: 1.12rem;
     line-height: 1.8;
@@ -867,18 +888,33 @@ div.do-rubric-inline {
 .do-bilingual-row > .do-col-la {
     flex: 1;
     min-width: 0;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-bilingual-row > .do-col-vernacular {
     flex: 1;
     min-width: 0;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-bilingual-row p {
     margin-bottom: 0;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-verse-num-spacer {
@@ -931,7 +967,12 @@ div.do-rubric-inline {
         min-width: calc(50% - 0.75rem) !important;
         max-width: calc(50% - 0.75rem) !important;
         box-sizing: border-box !important;
-        text-align: left !important;
+        text-align: justify !important;
+        text-justify: inter-word;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
     }
 
     .do-bilingual-row > .do-col-vernacular {
@@ -940,7 +981,12 @@ div.do-rubric-inline {
         min-width: calc(50% - 0.75rem) !important;
         max-width: calc(50% - 0.75rem) !important;
         box-sizing: border-box !important;
-        text-align: left !important;
+        text-align: justify !important;
+        text-justify: inter-word;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
     }
 
     @keyframes doBilingualSwipeHint {
@@ -1301,7 +1347,12 @@ div.do-rubric-inline {
     font-family: 'Crimson Text', Georgia, serif;
     font-size: 1.12rem;
     line-height: 1.8;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-bible-single-verse {
@@ -1309,7 +1360,12 @@ div.do-rubric-inline {
     font-size: 1.12rem;
     line-height: 1.8;
     margin-bottom: 8px;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .do-bible-vnum {
@@ -2658,4 +2714,52 @@ body, html {
 .do-timeline-row.active .do-row-time {
     color: var(--primary-color);
     font-weight: 600;
+}
+
+/* =============================================================
+   UNIVERSAL TEXT JUSTIFICATION & HYPHENATION RULES
+   ============================================================= */
+.do-card-body,
+.do-card-body p,
+.do-card-body div,
+.do-card-body span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial),
+.do-card p,
+.do-bilingual-wrapper,
+.do-bilingual-grid,
+.do-bilingual-row,
+.do-bilingual-row p,
+.do-bilingual-grid p,
+.do-bilingual-row > .do-col-la,
+.do-bilingual-row > .do-col-vernacular,
+.do-col-la,
+.do-col-vernacular,
+.do-single-text,
+.do-text-block,
+.do-text-block p,
+.do-dialog-line,
+.do-resp-line,
+.do-psalm-verse,
+.do-verse-text,
+.do-antiphon-text,
+.do-antiphon-line,
+.do-rubric-inline,
+.do-reading-body,
+.do-prayer-body,
+.do-bible-body,
+.do-bible-grid,
+.do-bible-single-col,
+.do-bible-single-verse,
+.do-bible-row,
+.do-bible-row > .do-col-la,
+.do-bible-row > .do-col-vernacular,
+.reading-version,
+.reading-version p {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    -webkit-hyphens: auto !important;
+    -moz-hyphens: auto !important;
+    -ms-hyphens: auto !important;
+    hyphens: auto !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
 }
