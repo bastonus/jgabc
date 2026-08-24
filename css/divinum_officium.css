@@ -1647,29 +1647,33 @@ div.do-rubric-inline {
    SACRED HEADER DROPDOWN (DATE & LITURGY SELECTOR)
    ============================================================= */
 .do-header-dropdown {
-    position: fixed;
-    top: 60px;
-    left: 290px;
-    right: 0;
-    max-height: calc(85vh - 60px);
-    background-color: color-mix(in srgb, var(--background-base) 84%, transparent) !important;
+    position: fixed !important;
+    top: 64px !important;
+    left: 290px !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 64px) !important;
+    background-color: color-mix(in srgb, var(--background-base) 82%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-    z-index: 1500;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: dropdownReveal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45) !important;
+    z-index: 1550 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    animation: dropdownReveal 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     border: none !important;
 }
 
 @media (max-width: 900px) {
     .do-header-dropdown {
         left: 0 !important;
-        top: 56px !important;
-        max-height: calc(88vh - 56px) !important;
+        right: 0 !important;
+        top: 68px !important;
+        bottom: 0 !important;
+        max-height: calc(100vh - 68px) !important;
     }
 }
 
@@ -1677,19 +1681,70 @@ div.do-rubric-inline {
     display: none !important;
 }
 
+[data-theme="oled"] .do-header-dropdown {
+    background-color: rgba(0, 0, 0, 0.78) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+}
+
 @keyframes dropdownReveal {
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Items list on top taking all remaining vertical height */
+.hdd-items-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 24px 16px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* Floating Bottom Control Dock */
+.hdd-bottom-controls,
 .hdd-header-controls {
-    padding: 14px 20px 10px;
-    background: transparent !important;
+    flex-shrink: 0;
+    background-color: color-mix(in srgb, var(--background-base) 88%, transparent) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-top: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent) !important;
+    padding: 12px 24px 16px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border: none !important;
-    flex-shrink: 0;
+    z-index: 20;
+}
+
+[data-theme="oled"] .hdd-bottom-controls,
+[data-theme="oled"] .hdd-header-controls {
+    background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+@media (max-width: 900px) {
+    .hdd-items-list {
+        padding: 6px 14px 12px !important;
+    }
+    .hdd-bottom-controls,
+    .hdd-header-controls {
+        padding: 10px 14px 14px !important;
+    }
+}
+
+.hdd-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .hdd-mode-bar {
@@ -1697,74 +1752,83 @@ div.do-rubric-inline {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    width: 100%;
 }
 
 .hdd-mode-segments {
     display: flex;
-    background: var(--background-highlight);
-    border-radius: 10px;
+    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
+    border-radius: 12px;
     padding: 3px;
     gap: 3px;
     flex: 1;
+    min-width: 180px;
 }
 
 .hdd-mode-btn {
     flex: 1;
     padding: 7px 12px;
     border: none !important;
-    border-radius: 7px;
+    border-radius: 9px;
     background: transparent;
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     text-align: center;
+}
+
+.hdd-mode-btn:hover {
+    color: var(--text-primary);
 }
 
 .hdd-mode-btn.active {
     background: var(--background-surface) !important;
     color: var(--primary-color) !important;
     font-weight: 700;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .hdd-today-btn {
     padding: 7px 14px;
     border-radius: 10px;
     border: none !important;
-    background: rgba(var(--primary-color-rgb), 0.12);
+    background: rgba(var(--primary-color-rgb), 0.14);
     color: var(--primary-color);
     font-family: 'Inter', sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .hdd-today-btn:hover {
-    background: rgba(var(--primary-color-rgb), 0.22);
+    background: rgba(var(--primary-color-rgb), 0.24);
 }
 
 .hdd-date-bar {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex: 1;
+    min-width: 160px;
 }
 
 .hdd-date-nav {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
-    background: var(--background-highlight);
+    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
     border: none !important;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
@@ -1778,21 +1842,21 @@ div.do-rubric-inline {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background: var(--background-highlight);
+    gap: 6px;
+    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
     color: var(--text-primary);
     border: none !important;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 7px 10px;
     font-family: 'Inter', sans-serif;
-    font-size: 0.86rem;
+    font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .hdd-date-btn:hover {
-    background: color-mix(in srgb, var(--primary-color) 12%, var(--background-highlight));
+    background: color-mix(in srgb, var(--primary-color) 10%, var(--background-highlight));
     color: var(--primary-color);
 }
 
@@ -1813,8 +1877,11 @@ div.do-rubric-inline {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border: none !important;
+    border: 1px solid var(--border-color) !important;
     animation: fadeIn 0.15s ease;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25);
+    max-height: 280px;
+    overflow-y: auto;
 }
 
 .hdd-custom-calendar.hidden {
@@ -1829,7 +1896,7 @@ div.do-rubric-inline {
 
 .hdd-cal-month-title {
     font-family: 'Libre Baskerville', serif;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -1858,10 +1925,11 @@ div.do-rubric-inline {
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-family: 'Inter', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     padding: 2px 0;
 }
 
@@ -1872,8 +1940,8 @@ div.do-rubric-inline {
 }
 
 .hdd-cal-day-cell {
-    height: 32px;
-    border-radius: 7px;
+    height: 30px;
+    border-radius: 6px;
     background: transparent;
     border: none !important;
     color: var(--text-primary);
@@ -1899,6 +1967,7 @@ div.do-rubric-inline {
 .hdd-cal-day-cell.today {
     font-weight: 700;
     color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.1);
 }
 
 .hdd-cal-day-cell.selected {
@@ -1916,45 +1985,49 @@ div.do-rubric-inline {
 
 .hdd-search-icon {
     position: absolute;
-    left: 10px;
+    left: 12px;
     color: var(--text-secondary);
     pointer-events: none;
 }
 
 .hdd-search-input {
     width: 100%;
-    background: var(--background-highlight);
+    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
     color: var(--text-primary);
     border: none !important;
-    border-radius: 8px;
-    padding: 8px 12px 8px 34px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 8px 12px 8px 36px;
+    font-size: 0.84rem;
     font-family: 'Inter', sans-serif;
     outline: none;
+    transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .hdd-search-input:focus {
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.18);
-}
-
-.hdd-items-list {
-    overflow-y: auto;
-    flex: 1;
-    padding: 6px 14px 20px;
+    background: var(--background-highlight);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.22);
 }
 
 .hdd-group-title {
-    padding: 12px 10px 4px;
+    padding: 12px 10px 8px !important;
     font-family: 'Inter', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--primary-color);
-    position: sticky;
-    top: 0;
-    background: var(--background-sidebar);
-    z-index: 2;
+    letter-spacing: 0.12em;
+    color: var(--primary-color) !important;
+    position: sticky !important;
+    top: 0 !important;
+    background-color: color-mix(in srgb, var(--background-base) 90%, transparent) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    z-index: 10 !important;
+    margin: 0 !important;
+}
+
+[data-theme="oled"] .hdd-group-title {
+    background-color: rgba(0, 0, 0, 0.88) !important;
 }
 
 .hdd-item-card {
@@ -1962,18 +2035,20 @@ div.do-rubric-inline {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 12px;
-    border-radius: 9px;
+    padding: 9px 12px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s ease;
     border: none !important;
-    background: transparent;
+    background: transparent !important;
+    box-shadow: none !important;
     width: 100%;
     text-align: left;
+    margin-bottom: 2px;
 }
 
 .hdd-item-card:hover {
-    background: var(--background-highlight);
+    background: rgba(var(--primary-color-rgb), 0.08) !important;
 }
 
 .hdd-item-card.selected {
@@ -1996,25 +2071,31 @@ div.do-rubric-inline {
 
 .hdd-item-date {
     font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.76rem;
     font-weight: 600;
     color: var(--text-secondary);
-    background: var(--background-highlight);
-    padding: 3px 8px;
-    border-radius: 6px;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
     white-space: nowrap;
     flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.hdd-item-card.selected .hdd-item-date {
+    color: var(--primary-color);
+    opacity: 1;
 }
 
 /* Bible Dropdown Book Card & Chapter Pills */
 .hdd-bible-book-card {
     background: var(--background-surface);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     border: none !important;
 }
 
@@ -2034,12 +2115,12 @@ div.do-rubric-inline {
 
 .hdd-bible-book-cat {
     font-family: 'Inter', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--primary-color);
     background: rgba(var(--primary-color-rgb), 0.12);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     white-space: nowrap;
 }
 

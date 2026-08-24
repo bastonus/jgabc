@@ -1079,6 +1079,25 @@ function buildInvitatoriumLines(invitAnt, langKey) {
     }
 }
 
+// ---- Liturgical Precedence Helper ----
+function isSanctiGreaterFeastOnSunday(sanctiFileText) {
+    if (!sanctiFileText) return false;
+    var rankMatch = sanctiFileText.match(/\[Rank\]([\s\S]*?)(?=\n\[|$)/i);
+    var rankText = rankMatch ? rankMatch[1] : sanctiFileText.substring(0, 400);
+
+    // 1st Class Feast (Rank >= 6 or "I classis", "1. classis", "Duplex I" with strict word boundaries)
+    if (/\bI\s*classis|\b1\s*classis|\bDuplex\s+I\b|;;[6789](\.\d+)?;;/i.test(rankText) && !/\bII\s*classis|\bIII\s*classis/i.test(rankText)) {
+        return true;
+    }
+
+    // Feast of the Lord of II. class (Festum Domini)
+    if (/Festum\s+Domini/i.test(sanctiFileText) && (/\bII\s*classis|\b2\s*classis|\bDuplex\s+II\b/i.test(rankText) || /;;5\.\d+;;/.test(rankText))) {
+        return true;
+    }
+
+    return false;
+}
+
 // ---- Data Loaders for Mass & Office ----
 
 function loadMissaData(date, lang, callback) {
@@ -1089,23 +1108,75 @@ function loadMissaData(date, lang, callback) {
     var sanctiPath = 'do_data/missa/' + langFolder + '/Sancti/' + (feastKey || codes.sancti) + '.txt';
     var temporaPath = 'do_data/missa/' + langFolder + '/Tempora/' + (feastKey || codes.tempora) + '.txt';
 
-    fetchLocalFile(sanctiPath, function(err, sData) {
-        if (!err && sData) {
-            processMissaFile(sData, langFolder, lang, callback);
-        } else {
-            fetchLocalFile(temporaPath, function(err2, tData) {
-                if (!err2 && tData) {
-                    processMissaFile(tData, langFolder, lang, callback);
-                } else {
-                    if (langFolder !== 'Latin') {
+    // If user explicitly selected an office/feast key, honor it directly
+    if (feastKey) {
+        fetchLocalFile(sanctiPath, function(err, sData) {
+            if (!err && sData) {
+                processMissaFile(sData, langFolder, lang, callback);
+            } else {
+                fetchLocalFile(temporaPath, function(err2, tData) {
+                    if (!err2 && tData) {
+                        processMissaFile(tData, langFolder, lang, callback);
+                    } else if (langFolder !== 'Latin') {
                         loadMissaData(date, 'la', callback);
                     } else {
                         callback(null, null);
                     }
-                }
-            });
-        }
-    });
+                });
+            }
+        });
+        return;
+    }
+
+    // Automatic Sunday resolution:
+    // On Sunday, default to Temporale unless Sancti is a greater feast (I. classis or Festum Domini).
+    if (codes.isSunday) {
+        fetchLocalFile('do_data/missa/Latin/Sancti/' + codes.sancti + '.txt', function(errS, laSanctiData) {
+            var isGreater = (!errS && laSanctiData) ? isSanctiGreaterFeastOnSunday(laSanctiData) : false;
+            if (isGreater) {
+                // Greater feast supersedes Sunday (e.g. Assumption, Transfiguration)
+                fetchLocalFile(sanctiPath, function(err, sData) {
+                    if (!err && sData) {
+                        processMissaFile(sData, langFolder, lang, callback);
+                    } else {
+                        fetchLocalFile(temporaPath, function(err2, tData) {
+                            if (!err2 && tData) processMissaFile(tData, langFolder, lang, callback);
+                            else callback(null, null);
+                        });
+                    }
+                });
+            } else {
+                // Standard Sunday: Temporale takes precedence
+                fetchLocalFile(temporaPath, function(err, tData) {
+                    if (!err && tData) {
+                        processMissaFile(tData, langFolder, lang, callback);
+                    } else {
+                        fetchLocalFile(sanctiPath, function(err2, sData) {
+                            if (!err2 && sData) processMissaFile(sData, langFolder, lang, callback);
+                            else callback(null, null);
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        // Weekday (Feria): Sancti first, fallback to Temporale
+        fetchLocalFile(sanctiPath, function(err, sData) {
+            if (!err && sData) {
+                processMissaFile(sData, langFolder, lang, callback);
+            } else {
+                fetchLocalFile(temporaPath, function(err2, tData) {
+                    if (!err2 && tData) {
+                        processMissaFile(tData, langFolder, lang, callback);
+                    } else if (langFolder !== 'Latin') {
+                        loadMissaData(date, 'la', callback);
+                    } else {
+                        callback(null, null);
+                    }
+                });
+            }
+        });
+    }
 }
 
 function processMissaFile(fileText, langFolder, langKey, callback) {
@@ -1244,19 +1315,57 @@ function loadHoursData(date, hora, langKey, callback) {
     var laDayPath = 'do_data/horas/Latin/Sancti/' + (feastKey || codes.sancti) + '.txt';
     var laTempPath = 'do_data/horas/Latin/Tempora/' + (feastKey || codes.tempora) + '.txt';
 
-    fetchLocalFile(laDayPath, function(err, laData) {
-        var dayFileText = (!err && laData) ? laData : null;
-        if (!dayFileText) {
-            fetchLocalFile(laTempPath, function(err2, laTData) {
-                processHoursWithLatinRule((!err2 && laTData) ? laTData : '', hora, langFolder, langKey, date, callback);
-            });
-        } else {
-            processHoursWithLatinRule(dayFileText, hora, langFolder, langKey, date, callback);
-        }
-    });
+    // If user explicitly selected a feast/office, honor it directly
+    if (feastKey) {
+        fetchLocalFile(laDayPath, function(err, laData) {
+            var dayFileText = (!err && laData) ? laData : null;
+            if (!dayFileText) {
+                fetchLocalFile(laTempPath, function(err2, laTData) {
+                    processHoursWithLatinRule((!err2 && laTData) ? laTData : '', hora, langFolder, langKey, date, true, callback);
+                });
+            } else {
+                processHoursWithLatinRule(dayFileText, hora, langFolder, langKey, date, false, callback);
+            }
+        });
+        return;
+    }
+
+    // Automatic Sunday resolution:
+    if (codes.isSunday) {
+        fetchLocalFile(laDayPath, function(errS, laSanctiData) {
+            var isGreater = (!errS && laSanctiData) ? isSanctiGreaterFeastOnSunday(laSanctiData) : false;
+            if (isGreater) {
+                // Greater feast (I. classis or Festum Domini)
+                processHoursWithLatinRule(laSanctiData, hora, langFolder, langKey, date, false, callback);
+            } else {
+                // Standard Sunday: Temporale takes precedence
+                fetchLocalFile(laTempPath, function(errT, laTData) {
+                    if (!errT && laTData) {
+                        processHoursWithLatinRule(laTData, hora, langFolder, langKey, date, true, callback);
+                    } else if (laSanctiData) {
+                        processHoursWithLatinRule(laSanctiData, hora, langFolder, langKey, date, false, callback);
+                    } else {
+                        processHoursWithLatinRule('', hora, langFolder, langKey, date, false, callback);
+                    }
+                });
+            }
+        });
+    } else {
+        // Weekday (Feria): Sancti first, fallback to Temporale
+        fetchLocalFile(laDayPath, function(err, laData) {
+            var dayFileText = (!err && laData) ? laData : null;
+            if (!dayFileText) {
+                fetchLocalFile(laTempPath, function(err2, laTData) {
+                    processHoursWithLatinRule((!err2 && laTData) ? laTData : '', hora, langFolder, langKey, date, true, callback);
+                });
+            } else {
+                processHoursWithLatinRule(dayFileText, hora, langFolder, langKey, date, false, callback);
+            }
+        });
+    }
 }
 
-function processHoursWithLatinRule(laFileText, hora, langFolder, langKey, date, callback) {
+function processHoursWithLatinRule(laFileText, hora, langFolder, langKey, date, isTemporaleSource, callback) {
     var laSec = parseSections(laFileText);
     var ruleLine = (laSec['Rule'] && laSec['Rule'][0]) ? laSec['Rule'][0] : '';
     var communeMatch = ruleLine.match(/ex\s+([A-Za-z0-9]+)/);
@@ -2725,7 +2834,24 @@ function getDateForLiturgicalKey(key, year) {
 }
 
 // ---- Header Dropdown Builder ----
-function getLiturgicalSeasonGroup(key) {
+function getLiturgicalSeasonGroup(key, uiLang) {
+    if (!uiLang) uiLang = getUiLang();
+    if (uiLang === 'fr') {
+        if (/^Adv/.test(key)) return "Temps de l'Avent";
+        if (/^Nat|^Dec2|^Jan1|^Jan5|^Epi/.test(key)) return 'Temps de Noël & Épiphanie';
+        if (/^[765]a|^Quad/.test(key)) return 'Septuagésime & Carême';
+        if (/^Pasc|^Asc|^Pent0$/.test(key)) return 'Temps Pascal';
+        if (/^Pent|^Corpus|^SCJ|^ChristusRex/.test(key)) return 'Temps après la Pentecôte';
+        return 'Propre du Temps';
+    }
+    if (uiLang === 'en') {
+        if (/^Adv/.test(key)) return 'Advent Season';
+        if (/^Nat|^Dec2|^Jan1|^Jan5|^Epi/.test(key)) return 'Christmas & Epiphany Season';
+        if (/^[765]a|^Quad/.test(key)) return 'Septuagesima & Lent';
+        if (/^Pasc|^Asc|^Pent0$/.test(key)) return 'Easter Season';
+        if (/^Pent|^Corpus|^SCJ|^ChristusRex/.test(key)) return 'Season after Pentecost';
+        return 'Proper of Time';
+    }
     if (/^Adv/.test(key)) return 'Tempus Adventus';
     if (/^Nat|^Dec2|^Jan1|^Jan5|^Epi/.test(key)) return 'Tempus Nativitatis & Epiphaniæ';
     if (/^[765]a|^Quad/.test(key)) return 'Tempus Septuagesimæ & Quadragesimæ';
@@ -2734,23 +2860,214 @@ function getLiturgicalSeasonGroup(key) {
     return 'Proprium Temporum';
 }
 
-function getSanctoralMonthGroup(key) {
-    var monthNames = {
-        Jan: 'Januarius (Janvier)',
-        Feb: 'Februarius (Février)',
-        Mar: 'Martius (Mars)',
-        Apr: 'Aprilis (Avril)',
-        May: 'Maius (Mai)',
-        Jun: 'Junius (Juin)',
-        Jul: 'Julius (Juillet)',
-        Aug: 'Augustus (Août)',
-        Sep: 'September (Septembre)',
-        Oct: 'October (Octobre)',
-        Nov: 'November (Novembre)',
-        Dec: 'December (Décembre)'
+function getSanctoralMonthGroup(key, uiLang) {
+    if (!uiLang) uiLang = getUiLang();
+    var m = (key || '').substring(0, 3);
+    var monthMap = {
+        Jan: { fr: 'Janvier', en: 'January', la: 'Januarius', es: 'Enero' },
+        Feb: { fr: 'Février', en: 'February', la: 'Februarius', es: 'Febrero' },
+        Mar: { fr: 'Mars', en: 'March', la: 'Martius', es: 'Marzo' },
+        Apr: { fr: 'Avril', en: 'April', la: 'Aprilis', es: 'Abril' },
+        May: { fr: 'Mai', en: 'May', la: 'Maius', es: 'Mayo' },
+        Jun: { fr: 'Juin', en: 'June', la: 'Junius', es: 'Junio' },
+        Jul: { fr: 'Juillet', en: 'July', la: 'Julius', es: 'Julio' },
+        Aug: { fr: 'Août', en: 'August', la: 'Augustus', es: 'Agosto' },
+        Sep: { fr: 'Septembre', en: 'September', la: 'September', es: 'Septiembre' },
+        Oct: { fr: 'Octobre', en: 'October', la: 'October', es: 'Octubre' },
+        Nov: { fr: 'Novembre', en: 'November', la: 'November', es: 'Noviembre' },
+        Dec: { fr: 'Décembre', en: 'December', la: 'December', es: 'Diciembre' }
     };
-    var m = key.substring(0, 3);
-    return monthNames[m] || 'Sanctorale';
+    var obj = monthMap[m];
+    if (!obj) return (uiLang === 'fr' ? 'Sanctoral' : (uiLang === 'en' ? 'Proper of Saints' : 'Proprium Sanctorum'));
+    return obj[uiLang] || obj['fr'] || obj['la'];
+}
+
+var DO_FR_TEMPORA_TITLES = {
+    'Adv1': "Ier Dimanche de l'Avent",
+    'Adv2': "IIe Dimanche de l'Avent",
+    'Adv3': "IIIe Dimanche de l'Avent (Gaudete)",
+    'Adv3w': "Mercredi des Quatre-Temps de l'Avent",
+    'Adv3f': "Vendredi des Quatre-Temps de l'Avent",
+    'Adv3s': "Samedi des Quatre-Temps de l'Avent",
+    'Adv4': "IVe Dimanche de l'Avent",
+    'Nat1': "Dimanche dans l'Octave de Noël",
+    'Epi1': "La Sainte Famille",
+    'Epi2': "IIe Dimanche après l'Épiphanie",
+    'Epi3': "IIIe Dimanche après l'Épiphanie",
+    'Epi4': "IVe Dimanche après l'Épiphanie",
+    'Epi5': "Ve Dimanche après l'Épiphanie",
+    'Epi6': "VIe Dimanche après l'Épiphanie",
+    '7a': "Dimanche de la Septuagésime",
+    '6a': "Dimanche de la Sexagésime",
+    '5a': "Dimanche de la Quinquagésime",
+    '5aw': "Mercredi des Cendres",
+    'Quad1': "Ier Dimanche de Carême",
+    'Quad2': "IIe Dimanche de Carême",
+    'Quad3': "IIIe Dimanche de Carême",
+    'Quad4': "IVe Dimanche de Carême (Lætare)",
+    'Quad5': "Dimanche de la Passion",
+    'Quad6': "Dimanche des Rameaux",
+    'Pasc0': "Dimanche de Pâques (Résurrection)",
+    'Pasc1': "Dimanche de Quasimodo (In Albis)",
+    'Pasc2': "IIe Dimanche après Pâques (Bon Pasteur)",
+    'Pasc3': "IIIe Dimanche après Pâques",
+    'Pasc4': "IVe Dimanche après Pâques",
+    'Pasc5': "Ve Dimanche après Pâques",
+    'Asc': "Ascension de Notre Seigneur",
+    'Asc1': "Dimanche après l'Ascension",
+    'Pent0': "Dimanche de la Pentecôte",
+    'Pent1': "La Très Sainte Trinité",
+    'CorpusChristi': "Fête-Dieu (Très Saint Sacrement)",
+    'SCJ': "Fête du Sacré-Cœur de Jésus",
+    'ChristusRex': "Fête du Christ-Roi"
+};
+
+function getVernacularItemTitle(item, uiLang) {
+    if (!uiLang) uiLang = getUiLang();
+    var k = item.key || '';
+
+    // Latin UI
+    if (uiLang === 'la') {
+        var laT = item.title || item.key;
+        return laT.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
+    }
+
+    // English UI
+    if (uiLang === 'en') {
+        var enT = item.en || item.title || item.key;
+        return enT.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
+    }
+
+    // French UI (Default / 'fr')
+    if (DO_FR_TEMPORA_TITLES[k]) {
+        return DO_FR_TEMPORA_TITLES[k];
+    }
+    var mPent = k.match(/^Pent(\d+)$/i);
+    if (mPent) return mPent[1] + "e Dimanche après la Pentecôte";
+    var mEpi = k.match(/^Epi(\d+)$/i);
+    if (mEpi) return mEpi[1] + "e Dimanche après l'Épiphanie";
+    var mQuad = k.match(/^Quad(\d+)$/i);
+    if (mQuad) return mQuad[1] + "e Dimanche de Carême";
+    var mAdv = k.match(/^Adv(\d+)$/i);
+    if (mAdv) return mAdv[1] + "e Dimanche de l'Avent";
+
+    var t = item.en || item.title || item.key;
+    t = t.replace(/^[A-Za-z]{3}\s*\d{1,2}:\s*/, '').replace(/^\d{1,2}\s*[A-Za-z]{3}:\s*/, '');
+
+    var frReplacements = [
+        [/\bOur Lady of Mount Carmel\b/gi, 'Notre-Dame du Mont-Carmel'],
+        [/\bOur Lady of the Rosary\b/gi, 'Notre-Dame du Rosaire'],
+        [/\bOur Lady of Sorrows\b/gi, 'Notre-Dame des Sept Douleurs'],
+        [/\bOur Lady of Lourdes\b/gi, 'Notre-Dame de Lourdes'],
+        [/\bOur Lady of Ransom\b/gi, 'Notre-Dame de la Merci'],
+        [/\bOur Lady of Good Counsel\b/gi, 'Notre-Dame du Bon Conseil'],
+        [/\bOur Lady of Perpetual Help\b/gi, 'Notre-Dame du Perpétuel Secours'],
+        [/\bOur Lady of the Snows\b/gi, 'Notre-Dame des Neiges'],
+        [/\bOur Lady of\s+/gi, 'Notre-Dame de '],
+        [/\bAssumption of the BVM\b/gi, 'Assomption de la Très Sainte Vierge Marie'],
+        [/\bNativity of the BVM\b/gi, 'Nativité de la Très Sainte Vierge Marie'],
+        [/\bImmaculate Conception\b/gi, 'Immaculée Conception de la Vierge Marie'],
+        [/\bAnnunciation\b/gi, 'Annonciation de la Vierge Marie'],
+        [/\bPurification\b/gi, 'Purification de la Vierge Marie (Chandeleur)'],
+        [/\bVisitation\b/gi, 'Visitation de la Vierge Marie'],
+        [/\bAll Saints\b/gi, 'La Toussaint'],
+        [/\bAll Souls\b/gi, 'Commémoration de tous les fidèles défunts'],
+        [/\bChristmas\b/gi, 'Nativité de Notre Seigneur (Noël)'],
+        [/\bEpiphany\b/gi, 'Épiphanie de Notre Seigneur'],
+        [/\bCircumcision of Our Lord\b/gi, 'Circoncision de Notre Seigneur'],
+        [/\bBaptism of Our Lord Jesus Christ\b/gi, 'Baptême de Notre Seigneur Jésus-Christ'],
+        [/\bTransfiguration of Our Lord\b/gi, 'Transfiguration de Notre Seigneur'],
+        [/\bExaltation of the Holy Cross\b/gi, 'Exaltation de la Sainte Croix'],
+        [/\bFinding of the Holy Cross\b/gi, 'Invention de la Sainte Croix'],
+        [/\bSeven Holy Brothers\b/gi, 'Les Sept Saints Frères Martyrs'],
+        [/\bSeven Holy Founders\b/gi, 'Les Sept Saints Fondateurs des Servites'],
+        [/\bHoly Guardian Angels\b/gi, 'Les Saints Anges Gardiens'],
+        [/\bHoly Innocents\b/gi, 'Les Saints Innocents Martyrs'],
+        [/\bDedication of the Lateran Basilica\b/gi, 'Dédicace de la Basilique du Latran'],
+        [/\bDedication of the Basilica of St Mary Major\b/gi, 'Dédicace de Sainte-Marie-Majeure'],
+        [/\bDedication of the Basilicas of Ss Peter and Paul\b/gi, 'Dédicace des Basiliques des Saints Pierre et Paul'],
+        [/\bChair of St Peter at Rome\b/gi, 'Chaire de Saint Pierre à Rome'],
+        [/\bChair of St Peter at Antioch\b/gi, 'Chaire de Saint Pierre à Antioche'],
+        [/\bConversion of St Paul\b/gi, 'Conversion de Saint Paul'],
+        [/\bCommemoration of St Paul\b/gi, 'Commémoration de Saint Paul'],
+        [/\bThe Beheading of St John the Baptist\b/gi, 'Décollation de Saint Jean-Baptiste'],
+        [/\bNativity of St John the Baptist\b/gi, 'Nativité de Saint Jean-Baptiste'],
+        [/\bSts\s+/gi, 'Saints '],
+        [/\bSt\s+/gi, 'Saint '],
+        [/\bSs\s+/gi, 'Saints '],
+        [/\bS\s+/gi, 'Saint '],
+        [/\bBartholomew\b/gi, 'Barthélemy'],
+        [/\bLawrence\b/gi, 'Laurent'],
+        [/\bStephen\b/gi, 'Étienne'],
+        [/\bGregory\b/gi, 'Grégoire'],
+        [/\bPeter\b/gi, 'Pierre'],
+        [/\bPaul\b/gi, 'Paul'],
+        [/\bJohn\b/gi, 'Jean'],
+        [/\bJames\b/gi, 'Jacques'],
+        [/\bThomas\b/gi, 'Thomas'],
+        [/\bAndrew\b/gi, 'André'],
+        [/\bPhilip\b/gi, 'Philippe'],
+        [/\bMatthew\b/gi, 'Matthieu'],
+        [/\bMark\b/gi, 'Marc'],
+        [/\bLuke\b/gi, 'Luc'],
+        [/\bSimon and Jude\b/gi, 'Simon et Jude'],
+        [/\bMary Magdalen\b/gi, 'Marie-Madeleine'],
+        [/\bAnne\b/gi, 'Anne'],
+        [/\bJoachim\b/gi, 'Joachim'],
+        [/\bJoseph\b/gi, 'Joseph'],
+        [/\bMichael Archangel\b/gi, 'Michel Archange'],
+        [/\bRaphael Archangel\b/gi, 'Raphaël Archange'],
+        [/\bGabriel Archangel\b/gi, 'Gabriel Archange'],
+        [/\bAugustine\b/gi, 'Augustin'],
+        [/\bJerome\b/gi, 'Jérôme'],
+        [/\bAmbrose\b/gi, 'Ambroise'],
+        [/\bHilary\b/gi, 'Hilaire'],
+        [/\bAthanasius\b/gi, 'Athanase'],
+        [/\bChrysostom\b/gi, 'Chrysostome'],
+        [/\bBasil\b/gi, 'Basile'],
+        [/\bBernard\b/gi, 'Bernard'],
+        [/\bFrancis of Assisi\b/gi, 'François d\'Assise'],
+        [/\bFrancis de Sales\b/gi, 'François de Sales'],
+        [/\bDominic\b/gi, 'Dominique'],
+        [/\bTherese of the Child Jesus\b/gi, 'Thérèse de l\'Enfant-Jésus'],
+        [/\bTeresa of Avila\b/gi, 'Thérèse d\'Avila'],
+        [/\bAnthony of Padua\b/gi, 'Antoine de Padoue'],
+        [/\bIgnatius of Loyola\b/gi, 'Ignace de Loyola'],
+        [/\bLouis\b/gi, 'Louis'],
+        [/\bDenis\b/gi, 'Denis'],
+        [/\bMartin\b/gi, 'Martin'],
+        [/\bNicholas\b/gi, 'Nicolas'],
+        [/\bCecilia\b/gi, 'Cécile'],
+        [/\bAgnes\b/gi, 'Agnès'],
+        [/\bLucy\b/gi, 'Lucie'],
+        [/\bAgatha\b/gi, 'Agathe'],
+        [/\bCatherine of Siena\b/gi, 'Catherine de Sienne'],
+        [/\bCatherine of Alexandria\b/gi, 'Catherine d\'Alexandrie'],
+        [/\bJoan of Arc\b/gi, 'Jeanne d\'Arc'],
+        [/\bDoctor of the Church\b/gi, 'Docteur de l\'Église'],
+        [/\bDoctor\b/gi, 'Docteur'],
+        [/\bPope and Martyr\b/gi, 'Pape et Martyr'],
+        [/\bPope\b/gi, 'Pape'],
+        [/\bBishop and Martyr\b/gi, 'Évêque et Martyr'],
+        [/\bBishop and Confessor\b/gi, 'Évêque et Confesseur'],
+        [/\bBishop\b/gi, 'Évêque'],
+        [/\bMartyr\b/gi, 'Martyr'],
+        [/\bMartyrs\b/gi, 'Martyrs'],
+        [/\bConfessor\b/gi, 'Confesseur'],
+        [/\bAbbot\b/gi, 'Abbé'],
+        [/\bVirgin and Martyr\b/gi, 'Vierge et Martyre'],
+        [/\bVirgin\b/gi, 'Vierge'],
+        [/\bWidow\b/gi, 'Veuve'],
+        [/\bApostle\b/gi, 'Apôtre'],
+        [/\bEvangelist\b/gi, 'Évangéliste'],
+        [/\bCompanions\b/gi, 'Compagnons'],
+        [/\band\b/gi, 'et']
+    ];
+
+    frReplacements.forEach(function(pair) {
+        t = t.replace(pair[0], pair[1]);
+    });
+    return t;
 }
 
 var DO_MONTH_NAMES = {
@@ -2844,6 +3161,7 @@ function createCalDayButton(dayNum, isOther, mDate, isToday, isSelected) {
         e.stopPropagation();
         doState.date = mDate;
         doState.officiumKey = null;
+        doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         doState.calView = { year: mDate.year(), month: mDate.month() };
         closeHeaderDropdown();
@@ -2925,11 +3243,74 @@ function renderHeaderDropdown() {
     renderHeaderDropdownItems();
 }
 
+var DO_LITURGICAL_FR_ALIASES = {
+    // Seasons
+    'Adv': 'Avent premier deuxieme troisieme quatrieme',
+    'Nat': 'Noel Nativite Circoncision Sainte Famille Saint Nom de Jesus',
+    'Epi': 'Epiphanie Rois Mages Bapteme du Seigneur',
+    '7a': 'Septuagesime',
+    '6a': 'Sexagesime',
+    '5a': 'Quinquagesime',
+    '5aw': 'Mercredi des Cendres Cendres',
+    'Quad': 'Careme Quadragesime',
+    'Quad5': 'Passion Temps de la Passion',
+    'Quad6': 'Rameaux Semaine Sainte Lundi Saint Mardi Saint Mercredi Saint Jeudi Saint Vendredi Saint Samedi Saint',
+    'Pasc': 'Paques Temps Pascal Octave de Paques Quasimodo Bon Pasteur',
+    'Asc': 'Ascension du Seigneur',
+    'Pent': 'Pentecote Octave de Pentecote Sainte Trinite Saint Sacrement Fete Dieu Sacre Coeur Christ Roi',
+    'CorpusChristi': 'Saint Sacrement Fete Dieu Corpus Domini',
+    'SCJ': 'Sacre Coeur de Jesus',
+    'ChristusRex': 'Christ Roi du Monde',
+    // Universal Major Feasts & Saints
+    '08-15': 'Assomption Sainte Vierge Marie',
+    '11-01': 'Toussaint Fete de tous les saints',
+    '11-02': 'Fideles Defunts Morts',
+    '12-08': 'Immaculee Conception',
+    '12-25': 'Noel Nativite du Seigneur',
+    '01-01': 'Circoncision Sainte Marie Mere de Dieu Jour de l An',
+    '01-06': 'Epiphanie Rois Mages',
+    '02-02': 'Purification Chandeleur Presentation',
+    '03-19': 'Saint Joseph Epoux de la Vierge Marie',
+    '03-25': 'Annonciation de la Sainte Vierge',
+    '06-24': 'Saint Jean Baptiste',
+    '06-29': 'Saints Pierre et Paul Apotres',
+    '08-06': 'Transfiguration',
+    '08-24': 'Saint Barthelemy Barthelemy Apotre',
+    '09-14': 'Exaltation de la Sainte Croix',
+    '09-29': 'Saint Michel Archange Anges',
+    '10-07': 'Notre Dame du Rosaire'
+};
+
+function getFrAliasesForKey(key) {
+    if (!key) return '';
+    var res = [];
+    Object.keys(DO_LITURGICAL_FR_ALIASES).forEach(function(k) {
+        if (key.indexOf(k) === 0 || key === k) {
+            res.push(DO_LITURGICAL_FR_ALIASES[k]);
+        }
+    });
+    return res.join(' ');
+}
+
+function normalizeSearchStr(str) {
+    if (!str) return '';
+    return str.toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove all accents and diacritics
+        .replace(/æ/g, 'ae')
+        .replace(/œ/g, 'oe')
+        .replace(/’/g, "'")
+        .trim();
+}
+
 function renderHeaderDropdownItems() {
     var isBible = (doState.hora === 'bible');
     var $list = $('#hddItemsList').empty();
     var uiLang = getUiLang();
-    var filter = ($('#hddSearchInput').val() || '').trim().toLowerCase();
+    var rawInput = $('#hddSearchInput').val() || '';
+    var normalizedFilter = normalizeSearchStr(rawInput);
+    var tokens = normalizedFilter.split(/\s+/).filter(Boolean);
 
     if (isBible) {
         var bibleMode = doState.hddBibleMode || 'vetus';
@@ -2937,13 +3318,16 @@ function renderHeaderDropdownItems() {
 
         DO_BIBLE_BOOKS.forEach(function(bk) {
             var isNT = (bk.cat === 'Évangiles' || bk.cat === 'Actes des Apôtres' || bk.cat === 'Épîtres de saint Paul' || bk.cat === 'Épîtres Catholiques' || bk.cat === 'Apocalypse');
-            if (!filter && ((bibleMode === 'vetus' && isNT) || (bibleMode === 'novum' && !isNT))) return;
+            if (!tokens.length && ((bibleMode === 'vetus' && isNT) || (bibleMode === 'novum' && !isNT))) return;
 
             var titleLa = bk.la || bk.id;
             var titleVern = bk[uiLang] || bk.fr || bk.en || '';
-            var fullSearchStr = (titleLa + ' ' + titleVern + ' ' + bk.id + ' ' + (bk.cat || '')).toLowerCase();
+            var fullSearchStr = normalizeSearchStr(titleLa + ' ' + titleVern + ' ' + (bk.fr || '') + ' ' + (bk.en || '') + ' ' + bk.id + ' ' + (bk.cat || ''));
 
-            if (filter && fullSearchStr.indexOf(filter) < 0) return;
+            if (tokens.length > 0) {
+                var matchesAll = tokens.every(function(tok) { return fullSearchStr.indexOf(tok) >= 0; });
+                if (!matchesAll) return;
+            }
 
             var catName = bk.cat || (isNT ? 'Novum Testamentum' : 'Vetus Testamentum');
             if (!bookGroups[catName]) bookGroups[catName] = [];
@@ -2995,7 +3379,7 @@ function renderHeaderDropdownItems() {
         });
 
         if (!hasBooks) {
-            $list.html('<div style="text-align:center; padding:24px; opacity:0.5; font-size:0.88rem;">Nullus liber inventus</div>');
+            $list.html('<div style="text-align:center; padding:32px 16px; opacity:0.6; font-size:0.9rem; font-family:\'Inter\',sans-serif;">' + (uiLang === 'fr' ? 'Aucun livre trouvé pour votre recherche' : 'Nullus liber inventus') + '</div>');
         }
 
     } else {
@@ -3011,18 +3395,36 @@ function renderHeaderDropdownItems() {
         if (mode === 'temporum') {
             allSundays.forEach(function(item) {
                 if (!item.key) return;
-                var title = item.title || item.en || item.key;
-                if (filter && title.toLowerCase().indexOf(filter) < 0 && item.key.toLowerCase().indexOf(filter) < 0) return;
-                var grp = getLiturgicalSeasonGroup(item.key);
+                var titleLa = item.title || item.key;
+                var titleEn = item.en || '';
+                var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+                var frAlias = getFrAliasesForKey(item.key);
+                var searchTarget = normalizeSearchStr(titleLa + ' ' + titleEn + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+
+                if (tokens.length > 0) {
+                    var matchesAll = tokens.every(function(tok) { return searchTarget.indexOf(tok) >= 0; });
+                    if (!matchesAll) return;
+                }
+
+                var grp = getLiturgicalSeasonGroup(item.key, uiLang);
                 if (!groups[grp]) groups[grp] = [];
                 groups[grp].push(item);
             });
         } else {
             allSaints.forEach(function(item) {
                 if (!item.key) return;
-                var title = item.title || item.en || item.key;
-                if (filter && title.toLowerCase().indexOf(filter) < 0 && item.key.toLowerCase().indexOf(filter) < 0) return;
-                var grp = getSanctoralMonthGroup(item.key);
+                var titleLa = item.title || item.key;
+                var titleEn = item.en || '';
+                var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+                var frAlias = getFrAliasesForKey(item.key);
+                var searchTarget = normalizeSearchStr(titleLa + ' ' + titleEn + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+
+                if (tokens.length > 0) {
+                    var matchesAll = tokens.every(function(tok) { return searchTarget.indexOf(tok) >= 0; });
+                    if (!matchesAll) return;
+                }
+
+                var grp = getSanctoralMonthGroup(item.key, uiLang);
                 if (!groups[grp]) groups[grp] = [];
                 groups[grp].push(item);
             });
@@ -3040,15 +3442,17 @@ function renderHeaderDropdownItems() {
                 var itemDate = getDateForLiturgicalKey(item.key, year);
                 var isSel = itemDate && itemDate.format('YYYY-MM-DD') === curDateStr;
                 var dateBadge = itemDate ? itemDate.format('DD MMM') : '';
+                var dispTitle = getVernacularItemTitle(item, uiLang);
 
                 var $card = $('<button class="hdd-item-card' + (isSel ? ' selected' : '') + '">')
-                    .append('<span class="hdd-item-title">' + escHtml(item.title || item.key) + '</span>')
+                    .append('<span class="hdd-item-title">' + escHtml(dispTitle) + '</span>')
                     .append('<span class="hdd-item-date">' + dateBadge + '</span>')
                     .on('click', function(e) {
                         e.stopPropagation();
                         if (itemDate && itemDate.isValid()) {
                             doState.date = itemDate;
                             doState.officiumKey = null;
+                            doState.userChangedHddMode = false;
                             localStorage.removeItem('do_officiumKey');
                         }
                         closeHeaderDropdown();
@@ -3060,12 +3464,20 @@ function renderHeaderDropdownItems() {
         });
 
         if (!hasItems) {
-            $list.html('<div style="text-align:center; padding:24px; opacity:0.5; font-size:0.88rem;">Nullum festum inventum</div>');
+            $list.html('<div style="text-align:center; padding:32px 16px; opacity:0.6; font-size:0.9rem; font-family:\'Inter\',sans-serif;">' + (uiLang === 'fr' ? 'Aucune fête trouvée pour votre recherche' : 'Nullum festum inventum') + '</div>');
         }
     }
 }
 
+function getDefaultHddModeForDate(date) {
+    var isSun = (date.day() === 0);
+    return isSun ? 'temporum' : 'sanctorum';
+}
+
 function openHeaderDropdown() {
+    if (!doState.userChangedHddMode) {
+        doState.hddMode = getDefaultHddModeForDate(doState.date);
+    }
     renderHeaderDropdown();
     $('#headerDropdown').removeClass('hidden');
     $('.dropdown-icon').css('transform', 'rotate(180deg)');
@@ -3260,26 +3672,37 @@ function setupEventListeners() {
         });
     });
 
-    $('#btnPrevDay').on('click', function() {
+    $('#btnPrevDay, #btnHddPrevDay').on('click', function(e) {
+        if (e) e.stopPropagation();
         doState.date.subtract(1, 'day');
         doState.officiumKey = null;
+        doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
         renderDO();
+        if (!$('#headerDropdown').hasClass('hidden')) {
+            renderHeaderDropdown();
+        }
     });
 
-    $('#btnNextDay').on('click', function() {
+    $('#btnNextDay, #btnHddNextDay').on('click', function(e) {
+        if (e) e.stopPropagation();
         doState.date.add(1, 'day');
         doState.officiumKey = null;
+        doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
         renderDO();
+        if (!$('#headerDropdown').hasClass('hidden')) {
+            renderHeaderDropdown();
+        }
     });
 
     // Dropdown Toggle from Header Title Area
-    $(document).on('click', '.header-title-area', function(e) {
+    $(document).on('click', '.header-title-area, #doHeaderTitle', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         if ($('#headerDropdown').hasClass('hidden')) {
             openHeaderDropdown();
         } else {
@@ -3300,6 +3723,7 @@ function setupEventListeners() {
             doState.hddBibleMode = bibleMode;
         } else {
             doState.hddMode = $(this).data('mode');
+            doState.userChangedHddMode = true;
         }
         renderHeaderDropdown();
     });
@@ -3309,6 +3733,7 @@ function setupEventListeners() {
         e.stopPropagation();
         doState.date = moment();
         doState.officiumKey = null;
+        doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         if (doState.calView) {
             doState.calView = { year: doState.date.year(), month: doState.date.month() };
@@ -3597,9 +4022,9 @@ function setupEventListeners() {
     }
 
     $(document).on('click', function(e) {
-        if (!$(e.target).closest('#headerDropdown, .header-title-area, #doHeaderTitle, .dropdown-trigger').length) {
-            closeHeaderDropdown();
-        }
+        if ($('#headerDropdown').hasClass('hidden')) return;
+        if ($(e.target).closest('#headerDropdown, .header-title-area, .do-top-header, .dropdown-trigger').length) return;
+        closeHeaderDropdown();
     });
 }
 
