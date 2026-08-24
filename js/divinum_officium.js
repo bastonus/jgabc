@@ -1730,8 +1730,8 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
             var vernSt = vernStanzas[i] || [];
             rows.push(
                 '<div class="do-bilingual-row">' +
-                    '<div class="do-col-la">' + formatSingleStanza(laSt) + '</div>' +
-                    '<div class="do-col-vernacular">' + formatSingleStanza(vernSt) + '</div>' +
+                    '<div class="do-col-la">' + (laSt.length ? formatSingleStanza(laSt) : '') + '</div>' +
+                    '<div class="do-col-vernacular">' + (vernSt.length ? formatSingleStanza(vernSt) : '') + '</div>' +
                 '</div>'
             );
         }
@@ -1741,7 +1741,6 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
             var laL = laProcessed[i] || '';
             var vernL = vernProcessed[i] || '';
             var isDox = /gl[oó]ria patri|sicut erat|gloire au p|comme il [eé]tait|glory be|as it was in|gloria al padre|como era en/i.test(laL || vernL);
-
             rows.push(
                 '<div class="do-bilingual-row">' +
                     '<div class="do-col-la">' + (laL ? formatSinglePsalmVerse(laL, isDox) : '') + '</div>' +
@@ -1786,7 +1785,11 @@ function renderBilingualCardBody(linesLa, linesVern, badge, langKey) {
         });
     }
 
-    return '<div class="do-bilingual-grid">' + rows.join('') + '</div>';
+    return '<div class="do-bilingual-wrapper">' +
+        '<div class="do-bilingual-grid">' +
+            rows.join('') +
+        '</div>' +
+    '</div>';
 }
 
 function cleanLiturgicalLine(line, langKey) {
@@ -1849,6 +1852,9 @@ function cleanLiturgicalLine(line, langKey) {
 function formatLiturgicalSymbols(text) {
     if (!text) return '';
 
+    // Verse numbers in scripture & liturgical readings (e.g. "10 Nos stulti...", "11 Usque in hanc horam...")
+    text = text.replace(/(^|[\s\.;?!:\(\[\{])(\d{1,3})\s+([A-Za-z\u00C0-\u024F])/g, '$1<span class="do-verse-num">$2</span> $3');
+
     // Asterisks
     text = text
         .replace(/\s\*\s/g, ' <span class="do-asterisk">*</span> ')
@@ -1861,6 +1867,12 @@ function formatLiturgicalSymbols(text) {
         .replace(/\s\+\s/g, ' <span class="do-cross">✠</span> ')
         .replace(/\s\+/g, ' <span class="do-cross">✠</span>')
         .replace(/\+\s/g, '<span class="do-cross">✠</span> ');
+
+    // Responsory and Versicle symbols: ℟., R., ℣., V.
+    text = text.replace(/℟\.?/g, '<span class="do-resp-sym R">℟.</span>');
+    text = text.replace(/℣\.?/g, '<span class="do-resp-sym V">℣.</span>');
+    text = text.replace(/(^|[\s\.;?!:\(\[\{])R\.(\s*|$|<|\.)/g, '$1<span class="do-resp-sym R">℟.</span>$2');
+    text = text.replace(/(^|[\s\.;?!:\(\[\{])V\.(\s+[A-Za-z\u00C0-\u024F]|$|<|\.)/g, '$1<span class="do-resp-sym V">℣.</span>$2');
 
     // All parenthetical indications & rubrics: (5a), (6), (genuflectitur), (on s'agenouille), (secreto), etc.
     text = text.replace(/\(([^)]+)\)/g, function(match, inner) {
@@ -2120,7 +2132,11 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
                     '</div>'
                 );
             });
-            bodyHtml = '<div class="do-bilingual-grid do-bible-grid">' + rows.join('') + '</div>';
+            bodyHtml = '<div class="do-bilingual-wrapper">' +
+                '<div class="do-bilingual-grid do-bible-grid">' +
+                    rows.join('') +
+                '</div>' +
+            '</div>';
         } else if (isVernOnly) {
             var rows = [];
             visibleKeys.forEach(function(vNum) {
@@ -2173,13 +2189,19 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     );
 
     $stream.append(cardHtml).append($bottomBar);
+    if ($stream[0]) {
+        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 0.75rem)' : '0%';
+        $stream[0].style.setProperty('--bilingual-offset', offsetVal);
+    }
 }
 
 // ---- Main Render Function ----
 function renderDO() {
     updateSidebarAndHeader();
+    closeHeaderDropdown();
 
-    if (doState.hora === 'bible') {
+    var isBible = (doState.hora === 'bible');
+    if (isBible) {
         renderBibleMainView();
         return;
     }
@@ -2250,6 +2272,65 @@ function displayResult(result, vernResult) {
         var cardHtml = renderOfficeCardHTML(card, vernCard);
         $stream.append(cardHtml);
     });
+
+    if ($stream[0]) {
+        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 0.75rem)' : '0%';
+        $stream[0].style.setProperty('--bilingual-offset', offsetVal);
+    }
+
+    startBilingualSwipeHint();
+}
+
+var swipeHintTimer = null;
+
+function startBilingualSwipeHint() {
+    if ($(window).width() > 768) return;
+    if (localStorage.getItem('do_swipe_hint_done')) return;
+
+    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+    if (!isBilingual) return;
+
+    if (swipeHintTimer) {
+        clearInterval(swipeHintTimer);
+        swipeHintTimer = null;
+    }
+
+    // Initial hint after 1.2s
+    setTimeout(function() {
+        playBilingualSwipeHint();
+    }, 1200);
+
+    // Repeat every 5.5s until user swipes
+    swipeHintTimer = setInterval(function() {
+        if (localStorage.getItem('do_swipe_hint_done') || doState.mobileLang === 'vern') {
+            stopBilingualSwipeHint();
+            return;
+        }
+        playBilingualSwipeHint();
+    }, 5500);
+}
+
+function playBilingualSwipeHint() {
+    if (localStorage.getItem('do_swipe_hint_done') || doState.mobileLang === 'vern') {
+        stopBilingualSwipeHint();
+        return;
+    }
+    var $rows = $('.do-bilingual-row');
+    if ($rows.length) {
+        $rows.addClass('do-bilingual-hint-anim');
+        setTimeout(function() {
+            $rows.removeClass('do-bilingual-hint-anim');
+        }, 1300);
+    }
+}
+
+function stopBilingualSwipeHint() {
+    if (swipeHintTimer) {
+        clearInterval(swipeHintTimer);
+        swipeHintTimer = null;
+    }
+    localStorage.setItem('do_swipe_hint_done', 'true');
+    $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
 }
 
 function updateSidebarAndHeader() {
@@ -2294,20 +2375,6 @@ function updateSidebarAndHeader() {
 
     $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
     $('#doColorOptions [data-color="' + doState.settings.color + '"]').addClass('active');
-
-    // Global Mobile Language Switcher state
-    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-    if (isBilingual) {
-        var vernName = (doState.vernacularLang === 'fr') ? 'Français' : (doState.vernacularLang === 'en') ? 'English' : (doState.vernacularLang === 'es') ? 'Español' : (doState.vernacularLang === 'it') ? 'Italiano' : (doState.vernacularLang === 'de') ? 'Deutsch' : (doState.vernacularLang === 'pt') ? 'Português' : 'Traduction';
-        $('#doGlobalLangSwitcher').css('display', '');
-        $('#doGlobalLangSwitcher .do-global-lang-btn[data-lang="vern"]').text(vernName);
-        $('#doGlobalLangSwitcher .do-global-lang-btn').removeClass('active');
-        $('#doGlobalLangSwitcher .do-global-lang-btn[data-lang="' + (doState.mobileLang || 'la') + '"]').addClass('active');
-        $('.app-main').addClass('is-bilingual-mobile');
-    } else {
-        $('#doGlobalLangSwitcher').hide();
-        $('.app-main').removeClass('is-bilingual-mobile');
-    }
 }
 
 function openBible(bookId, chapterNum, pageNum) {
@@ -3011,14 +3078,20 @@ function setupEventListeners() {
         renderDO();
     });
 
-    // Dropdown Toggle from Header Title, Calendar Icon or Sidebar Calendar
-    $(document).on('click', '#doHeaderTitle, .dropdown-trigger, #btnDatePicker, #btnOpenCalendar', function(e) {
+    // Dropdown Toggle from Header Title Area
+    $(document).on('click', '.header-title-area, #doHeaderTitle, .dropdown-trigger', function(e) {
+        e.preventDefault();
         e.stopPropagation();
         if ($('#headerDropdown').hasClass('hidden')) {
             openHeaderDropdown();
         } else {
             closeHeaderDropdown();
         }
+    });
+
+    // Prevent clicks inside the dropdown from closing it
+    $(document).on('click', '#headerDropdown', function(e) {
+        e.stopPropagation();
     });
 
     // Mode Toggle (Temporale vs Sanctorale OR Vetus vs Novum Testamentum)
@@ -3112,8 +3185,8 @@ function setupEventListeners() {
     });
 
     $('#btnOpenSidebarMobile').on('click', function() {
-        $('#doSidebar').addClass('open');
-        $('#sidebarBackdrop').addClass('open');
+        $('#doSidebar').addClass('open active');
+        $('#sidebarBackdrop').addClass('open active');
     });
 
     $('#btnCloseSidebar, #sidebarBackdrop').on('click', function() {
@@ -3181,44 +3254,68 @@ function setupEventListeners() {
         applyColor($(this).data('color'));
     });
 
-    // Global Mobile Language Switcher Button
-    $(document).on('click', '.do-global-lang-btn', function(e) {
-        e.stopPropagation();
-        var lang = $(this).data('lang');
-        doState.mobileLang = lang;
-        $('.do-global-lang-btn').removeClass('active');
-        $(this).addClass('active');
-        var $main = $('.app-main');
-        if ($main.length && $main[0]) {
-            var targetX = (lang === 'vern') ? ($main[0].scrollWidth - $main[0].clientWidth) : 0;
-            $main[0].scrollTo({ left: targetX, behavior: 'smooth' });
-        }
-    });
-
-    // Auto-update global language button on horizontal scroll
-    $('.app-main').on('scroll', function() {
-        if (!$(this).hasClass('is-bilingual-mobile')) return;
-        var sl = this.scrollLeft;
-        var w = this.clientWidth;
-        var isVern = (sl > w * 0.4);
-        var currentLang = isVern ? 'vern' : 'la';
-        if (doState.mobileLang !== currentLang) {
-            doState.mobileLang = currentLang;
-            $('.do-global-lang-btn').removeClass('active');
-            $('.do-global-lang-btn[data-lang="' + currentLang + '"]').addClass('active');
-        }
-    });
-
-    // Global Touch Gestures (Sidebar Drawer)
+    // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)
     var touchStartX = 0;
     var touchStartY = 0;
     var touchIsEdge = false;
+    var isDraggingBilingual = false;
+    var shiftDistance = 0;
+    var initialOffsetPx = 0;
 
     $(document).on('touchstart', function(e) {
         if (e.originalEvent.touches && e.originalEvent.touches.length === 1) {
             touchStartX = e.originalEvent.touches[0].clientX;
             touchStartY = e.originalEvent.touches[0].clientY;
-            touchIsEdge = (touchStartX <= 40);
+            touchIsEdge = (touchStartX <= 35);
+            isDraggingBilingual = false;
+
+            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+            var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
+
+            if (isBilingual && !isSidebarOpen) {
+                var $wrapper = $('.do-bilingual-wrapper').first();
+                var cardW = $wrapper.length ? $wrapper.width() : $(window).width();
+                shiftDistance = cardW + 24; // width + gap
+                initialOffsetPx = (doState.mobileLang === 'vern') ? -shiftDistance : 0;
+            }
+        }
+    });
+
+    $(document).on('touchmove', function(e) {
+        if (!touchStartX || !e.originalEvent.touches || !e.originalEvent.touches.length) return;
+        var currentX = e.originalEvent.touches[0].clientX;
+        var currentY = e.originalEvent.touches[0].clientY;
+        var deltaX = currentX - touchStartX;
+        var deltaY = currentY - touchStartY;
+        var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
+
+        if (isSidebarOpen) return;
+
+        // If swiping right from left edge while in Latin -> intend to open drawer, don't drag cards
+        if (touchIsEdge && deltaX > 0 && doState.mobileLang === 'la') return;
+
+        // Detect horizontal intent
+        if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+            if (isBilingual && shiftDistance > 0) {
+                isDraggingBilingual = true;
+                stopBilingualSwipeHint();
+                $('.do-bilingual-row').addClass('is-dragging');
+
+                var targetOffset = initialOffsetPx + deltaX;
+                // Clamp with gentle rubber banding
+                if (targetOffset > 0) {
+                    targetOffset = targetOffset * 0.25;
+                } else if (targetOffset < -shiftDistance) {
+                    var over = targetOffset + shiftDistance;
+                    targetOffset = -shiftDistance + (over * 0.25);
+                }
+
+                var $stream = $('#do-content-stream');
+                if ($stream.length && $stream[0]) {
+                    $stream[0].style.setProperty('--bilingual-offset', targetOffset + 'px');
+                }
+            }
         }
     });
 
@@ -3230,28 +3327,66 @@ function setupEventListeners() {
         var deltaY = touchEndY - touchStartY;
         var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
 
-        // Check if swiping left to close open sidebar
+        $('.do-bilingual-row').removeClass('is-dragging');
+
+        // Swiping left when sidebar is open -> close sidebar
         if (isSidebarOpen && deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
             closeModals();
             touchStartX = 0;
             touchStartY = 0;
             touchIsEdge = false;
+            isDraggingBilingual = false;
             return;
         }
 
-        // Check if edge swiping right to open sidebar
-        if (!isSidebarOpen && touchIsEdge && deltaX > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-            $('#doSidebar').addClass('open active');
-            $('#sidebarBackdrop').addClass('open active');
-            touchStartX = 0;
-            touchStartY = 0;
-            touchIsEdge = false;
-            return;
+        var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+
+        if (isBilingual && isDraggingBilingual) {
+            var $stream = $('#do-content-stream');
+            if (initialOffsetPx === 0) {
+                // Was at Latin
+                if (deltaX < -50) {
+                    // Snap all cards simultaneously to Vernacular
+                    doState.mobileLang = 'vern';
+                    if ($stream.length && $stream[0]) {
+                        $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
+                    }
+                } else {
+                    // Snap back to Latin
+                    doState.mobileLang = 'la';
+                    if ($stream.length && $stream[0]) {
+                        $stream[0].style.setProperty('--bilingual-offset', '0%');
+                    }
+                }
+            } else {
+                // Was at Vernacular
+                if (deltaX > 50) {
+                    // Snap all cards simultaneously to Latin
+                    doState.mobileLang = 'la';
+                    if ($stream.length && $stream[0]) {
+                        $stream[0].style.setProperty('--bilingual-offset', '0%');
+                    }
+                } else {
+                    // Snap back to Vernacular
+                    doState.mobileLang = 'vern';
+                    if ($stream.length && $stream[0]) {
+                        $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
+                    }
+                }
+            }
+        } else if (!isSidebarOpen) {
+            // Not dragging bilingual (e.g. edge swipe or already at Latin)
+            var isAtLatin = (doState.mobileLang === 'la');
+            if ((touchIsEdge || isAtLatin) && deltaX > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                $('#doSidebar').addClass('open active');
+                $('#sidebarBackdrop').addClass('open active');
+            }
         }
 
         touchStartX = 0;
         touchStartY = 0;
         touchIsEdge = false;
+        isDraggingBilingual = false;
     });
 
     if (window.matchMedia) {
@@ -3263,7 +3398,7 @@ function setupEventListeners() {
     }
 
     $(document).on('click', function(e) {
-        if (!$(e.target).closest('#headerDropdown, #doHeaderTitle, .dropdown-trigger, #btnDatePicker, #btnOpenCalendar, .hdd-cal-month-nav, .hdd-date-nav, .hdd-cal-day-cell, #btnHddCalendarToggle').length) {
+        if (!$(e.target).closest('#headerDropdown, .header-title-area, #doHeaderTitle, .dropdown-trigger').length) {
             closeHeaderDropdown();
         }
     });
