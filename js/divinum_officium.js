@@ -3708,6 +3708,9 @@ function initDoPlayer() {
     $('#do-content-stream').off('click', NOTE_SEL).on('click', NOTE_SEL, function(e) {
         e.stopPropagation();
 
+        // Ignore clicks during playback — can't reinitialize while playing
+        if (window.isPlayingChant && window.isPlayingChant()) return;
+
         // Clear the previous active note (single source of truth)
         clearActiveNote();
 
@@ -3804,11 +3807,13 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
 function setDoPlayerBarState(isPlaying) {
     if (isPlaying) {
         $('#playerBtnPlay').addClass('playing');
-        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>');
+        // Pause icon — two vertical bars, stroke style
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>');
         startDoProgressTracking();
     } else {
         $('#playerBtnPlay').removeClass('playing');
-        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>');
+        // Play icon — filled triangle
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>');
         if (_doProgressInterval) clearInterval(_doProgressInterval);
     }
 }
@@ -4022,6 +4027,8 @@ function renderSingleChantScore($wrapper, force) {
                         // Neume note + syllable click → select + show player dock in paused state
                         $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
                             e.stopPropagation();
+                            // Ignore clicks during playback
+                            if (window.isPlayingChant && window.isPlayingChant()) return;
                             clearActiveNote();
 
                             var targetEl = this;
@@ -4136,6 +4143,8 @@ function relayoutAllChantScores() {
                         // Rebind note + syllable click
                         $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
                             e.stopPropagation();
+                            // Ignore clicks during playback
+                            if (window.isPlayingChant && window.isPlayingChant()) return;
                             clearActiveNote();
 
                             var targetEl = this;
