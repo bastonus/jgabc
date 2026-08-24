@@ -227,6 +227,127 @@ var DO_BIBLE_BOOKS = [
     { id: 'Apocalypsis', la: 'Apocalypsis Joannis', fr: 'Apocalypse de saint Jean', en: 'Revelation', es: 'Apocalipsis', chapters: 22, cat: 'Apocalypse' }
 ];
 
+var BIBLE_BOOK_ALIASES = {
+    'matt': 'Matthæus',
+    'matth': 'Matthæus',
+    'matthieu': 'Matthæus',
+    'matthew': 'Matthæus',
+    'mattheus': 'Matthæus',
+    'matthæus': 'Matthæus',
+    'mt': 'Matthæus',
+    'marc': 'Marcus',
+    'mark': 'Marcus',
+    'marcus': 'Marcus',
+    'mc': 'Marcus',
+    'luc': 'Lucas',
+    'luke': 'Lucas',
+    'lucas': 'Lucas',
+    'lc': 'Lucas',
+    'jean': 'Joannes',
+    'john': 'Joannes',
+    'joannes': 'Joannes',
+    'johannes': 'Joannes',
+    'jn': 'Joannes',
+    'actes': 'Actus Apostolorum',
+    'acts': 'Actus Apostolorum',
+    'actus': 'Actus Apostolorum',
+    'romains': 'Ad Romanos',
+    'romans': 'Ad Romanos',
+    'romanos': 'Ad Romanos',
+    'rm': 'Ad Romanos',
+    '1 corinthiens': 'Ad Corinthios 1',
+    '1 corinthians': 'Ad Corinthios 1',
+    '1 cor': 'Ad Corinthios 1',
+    '2 corinthiens': 'Ad Corinthios 2',
+    '2 corinthians': 'Ad Corinthios 2',
+    '2 cor': 'Ad Corinthios 2',
+    'galates': 'Ad Galatas',
+    'galatians': 'Ad Galatas',
+    'ephesiens': 'Ad Ephesios',
+    'ephesians': 'Ad Ephesios',
+    'philippiens': 'Ad Philippenses',
+    'philippians': 'Ad Philippenses',
+    'colossiens': 'Ad Colossenses',
+    'colossians': 'Ad Colossenses',
+    '1 thessaloniciens': 'Ad Thessalonicenses 1',
+    '2 thessaloniciens': 'Ad Thessalonicenses 2',
+    '1 timothee': 'Ad Timotheum 1',
+    '2 timothee': 'Ad Timotheum 2',
+    'tite': 'Ad Titum',
+    'titus': 'Ad Titum',
+    'philemon': 'Ad Philemonem',
+    'hebreux': 'Ad Hebræos',
+    'hebrews': 'Ad Hebræos',
+    'hebraeos': 'Ad Hebræos',
+    'jacques': 'Jacobi',
+    'james': 'Jacobi',
+    '1 pierre': 'Petri 1',
+    '1 peter': 'Petri 1',
+    '2 pierre': 'Petri 2',
+    '2 peter': 'Petri 2',
+    '1 jean': 'Joannis 1',
+    '2 jean': 'Joannis 2',
+    '3 jean': 'Joannis 3',
+    'jude': 'Judæ',
+    'judas': 'Judæ',
+    'apocalypse': 'Apocalypsis',
+    'revelation': 'Apocalypsis',
+    'genese': 'Genesis',
+    'genesis': 'Genesis',
+    'exode': 'Exodus',
+    'exodus': 'Exodus',
+    'levitique': 'Leviticus',
+    'nombres': 'Numeri',
+    'deuteronome': 'Deuteronomium',
+    'psaumes': 'Psalmi',
+    'psalms': 'Psalmi',
+    'proverbes': 'Proverbia',
+    'proverbs': 'Proverbia',
+    'isaie': 'Isaias',
+    'isaias': 'Isaias',
+    'isaiah': 'Isaias',
+    'jeremie': 'Jeremias',
+    'jeremias': 'Jeremias',
+    'jeremiah': 'Jeremias'
+};
+
+function normalizeBibleBookId(input) {
+    if (!input || typeof input !== 'string') return 'Genesis';
+    var clean = input.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (BIBLE_BOOK_ALIASES[clean]) return BIBLE_BOOK_ALIASES[clean];
+
+    var direct = DO_BIBLE_BOOKS.find(function(b) {
+        return b.id.toLowerCase() === input.trim().toLowerCase() ||
+               (b.la && b.la.toLowerCase() === input.trim().toLowerCase()) ||
+               (b.fr && b.fr.toLowerCase() === input.trim().toLowerCase()) ||
+               (b.en && b.en.toLowerCase() === input.trim().toLowerCase()) ||
+               (b.es && b.es.toLowerCase() === input.trim().toLowerCase());
+    });
+    if (direct) return direct.id;
+
+    var normMatch = DO_BIBLE_BOOKS.find(function(b) {
+        var bIdClean = b.id.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        var bFrClean = (b.fr || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        var bLaClean = (b.la || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return bIdClean === clean || bFrClean === clean || bLaClean === clean;
+    });
+    if (normMatch) return normMatch.id;
+
+    var partial = DO_BIBLE_BOOKS.find(function(b) {
+        var bIdClean = b.id.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        var bFrClean = (b.fr || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return bIdClean.indexOf(clean) === 0 || bFrClean.indexOf(clean) === 0;
+    });
+    if (partial) return partial.id;
+
+    var valid = DO_BIBLE_BOOKS.find(function(b) { return b.id === input; });
+    return valid ? valid.id : 'Genesis';
+}
+
+if (doState.bible && doState.bible.book) {
+    doState.bible.book = normalizeBibleBookId(doState.bible.book);
+}
+
 var DO_UI_TRANSLATIONS = {
     fr: {
         app_sub: 'BRÉVIAIRE & MISSEL',
@@ -2468,12 +2589,16 @@ function renderBibleMainView() {
     var $stream = $('#do-content-stream');
     $stream.html(renderLoading());
 
-    var bookId = doState.bible.book || 'Genesis';
+    var rawBookId = doState.bible.book || 'Genesis';
+    var normId = normalizeBibleBookId(rawBookId);
+    var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === normId; }) || DO_BIBLE_BOOKS[0];
+    var bookId = bkObj.id;
+    doState.bible.book = bookId;
+    localStorage.setItem('do_bible_book', bookId);
+
     var chapterNum = parseInt(doState.bible.chapter, 10) || 1;
     var pageNum = parseInt(doState.bible.page, 10) || 1;
     var pageSize = doState.bible.pageSize || '15';
-
-    var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === bookId; }) || DO_BIBLE_BOOKS[0];
     var maxCh = bkObj.chapters || 1;
 
     if (chapterNum > maxCh) chapterNum = maxCh;
@@ -2797,16 +2922,16 @@ function setupHomeSearch() {
         // 3. Search Bible Books
         if (typeof DO_BIBLE_BOOKS !== 'undefined' && Array.isArray(DO_BIBLE_BOOKS)) {
             DO_BIBLE_BOOKS.forEach(function(b) {
-                var nameFr = b.fr || b.name;
-                var nameLa = b.la || b.name;
-                var searchTarget = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.code);
+                var nameFr = b.fr || b.la || b.id;
+                var nameLa = b.la || b.id;
+                var searchTarget = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.id);
                 var matchesAll = tokens.every(function(t) { return searchTarget.indexOf(t) >= 0; });
                 if (matchesAll) {
                     matches.push({
                         type: 'bible',
-                        code: b.code,
+                        id: b.id,
                         title: (uiLang === 'fr' ? nameFr : nameLa) + ' (Bible)',
-                        dateBadge: b.testament === 'NT' ? 'Nouveau Test.' : 'Ancien Test.'
+                        dateBadge: b.cat || 'Sacra Biblia'
                     });
                 }
             });
@@ -2827,7 +2952,7 @@ function setupHomeSearch() {
                 .on('click', function(e) {
                     e.stopPropagation();
                     if (m.type === 'bible') {
-                        openBible(m.code, 1, 1);
+                        openBible(m.id, 1, 1);
                     } else {
                         if (m.date && m.date.isValid()) {
                             doState.date = m.date;
@@ -2916,7 +3041,7 @@ function renderHomeView() {
                     .append('<div class="do-extra-link-subtitle">' + (uiLang === 'fr' ? 'Les 73 livres de l’Ancien et du Nouveau Testament bilingue' : '73 libri Canonici Veteris et Novi Testamenti bilinguis') + '</div>')
             )
             .on('click', function() {
-                openBible('Matt', 1, 1);
+                openBible('Matthæus', 1, 1);
             });
 
         $topCardsGrid.append($missaCard).append($bibleCard);
@@ -3175,10 +3300,9 @@ function updateSidebarAndHeader() {
 function openBible(bookId, chapterNum, pageNum) {
     doState.hora = 'bible';
     localStorage.setItem('do_hora', 'bible');
-    if (bookId) {
-        doState.bible.book = bookId;
-        localStorage.setItem('do_bible_book', bookId);
-    }
+    var normalizedId = normalizeBibleBookId(bookId || doState.bible.book || 'Genesis');
+    doState.bible.book = normalizedId;
+    localStorage.setItem('do_bible_book', normalizedId);
     if (chapterNum) {
         doState.bible.chapter = parseInt(chapterNum, 10);
         localStorage.setItem('do_bible_chapter', doState.bible.chapter);
