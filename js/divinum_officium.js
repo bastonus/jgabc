@@ -227,137 +227,6 @@ var DO_BIBLE_BOOKS = [
     { id: 'Apocalypsis', la: 'Apocalypsis Joannis', fr: 'Apocalypse de saint Jean', en: 'Revelation', es: 'Apocalipsis', chapters: 22, cat: 'Apocalypse' }
 ];
 
-var BIBLE_BOOK_ALIASES = {
-    'matt': 'Matthæus',
-    'matth': 'Matthæus',
-    'matthew': 'Matthæus',
-    'matthieu': 'Matthæus',
-    'mt': 'Matthæus',
-    'matthaeus': 'Matthæus',
-    'matthæus': 'Matthæus',
-    'marc': 'Marcus',
-    'mark': 'Marcus',
-    'mc': 'Marcus',
-    'marcus': 'Marcus',
-    'luc': 'Lucas',
-    'luke': 'Lucas',
-    'lc': 'Lucas',
-    'lucas': 'Lucas',
-    'jean': 'Joannes',
-    'john': 'Joannes',
-    'jn': 'Joannes',
-    'joann': 'Joannes',
-    'joannes': 'Joannes',
-    'act': 'Actus Apostolorum',
-    'acts': 'Actus Apostolorum',
-    'actes': 'Actus Apostolorum',
-    'actus': 'Actus Apostolorum',
-    'gen': 'Genesis',
-    'genesis': 'Genesis',
-    'genèse': 'Genesis',
-    'genese': 'Genesis',
-    'ex': 'Exodus',
-    'exod': 'Exodus',
-    'exode': 'Exodus',
-    'exodus': 'Exodus',
-    'lev': 'Leviticus',
-    'lévitique': 'Leviticus',
-    'levitique': 'Leviticus',
-    'num': 'Numeri',
-    'nombres': 'Numeri',
-    'deut': 'Deuteronomium',
-    'deutéronome': 'Deuteronomium',
-    'deuteronome': 'Deuteronomium',
-    'ps': 'Psalmi',
-    'psaumes': 'Psalmi',
-    'psaume': 'Psalmi',
-    'psalm': 'Psalmi',
-    'psalmi': 'Psalmi',
-    'apoc': 'Apocalypsis',
-    'apocalypse': 'Apocalypsis',
-    'apocalypsis': 'Apocalypsis',
-    'rom': 'Ad Romanos',
-    'romains': 'Ad Romanos',
-    'romanos': 'Ad Romanos',
-    'cor 1': 'Ad Corinthios 1',
-    '1 cor': 'Ad Corinthios 1',
-    '1 corinthiens': 'Ad Corinthios 1',
-    'cor 2': 'Ad Corinthios 2',
-    '2 cor': 'Ad Corinthios 2',
-    '2 corinthiens': 'Ad Corinthios 2',
-    'gal': 'Ad Galatas',
-    'galates': 'Ad Galatas',
-    'eph': 'Ad Ephesios',
-    'éphésiens': 'Ad Ephesios',
-    'ephesiens': 'Ad Ephesios',
-    'phil': 'Ad Philippenses',
-    'philippiens': 'Ad Philippenses',
-    'col': 'Ad Colossenses',
-    'colossiens': 'Ad Colossenses',
-    'thess 1': 'Ad Thessalonicenses 1',
-    '1 thess': 'Ad Thessalonicenses 1',
-    'thess 2': 'Ad Thessalonicenses 2',
-    '2 thess': 'Ad Thessalonicenses 2',
-    'tim 1': 'Ad Timotheum 1',
-    '1 tim': 'Ad Timotheum 1',
-    'tim 2': 'Ad Timotheum 2',
-    '2 tim': 'Ad Timotheum 2',
-    'tit': 'Ad Titum',
-    'tite': 'Ad Titum',
-    'philem': 'Ad Philemonem',
-    'philémon': 'Ad Philemonem',
-    'heb': 'Ad Hebræos',
-    'hebr': 'Ad Hebræos',
-    'hébreux': 'Ad Hebræos',
-    'hebreux': 'Ad Hebræos',
-    'hebraeos': 'Ad Hebræos',
-    'ad hebraeos': 'Ad Hebræos',
-    'jac': 'Jacobi',
-    'jacques': 'Jacobi',
-    'james': 'Jacobi',
-    'pet 1': 'Petri 1',
-    '1 pet': 'Petri 1',
-    '1 pierre': 'Petri 1',
-    'pet 2': 'Petri 2',
-    '2 pet': 'Petri 2',
-    '2 pierre': 'Petri 2',
-    'joann 1': 'Joannis 1',
-    '1 jean': 'Joannis 1',
-    'joann 2': 'Joannis 2',
-    '2 jean': 'Joannis 2',
-    'joann 3': 'Joannis 3',
-    '3 jean': 'Joannis 3',
-    'jud': 'Judæ',
-    'jude': 'Judæ',
-    'judae': 'Judæ'
-};
-
-function normalizeBibleBookId(input) {
-    if (!input || typeof input !== 'string') return 'Genesis';
-    var clean = input.trim().toLowerCase();
-    if (BIBLE_BOOK_ALIASES[clean]) return BIBLE_BOOK_ALIASES[clean];
-
-    // Direct match against DO_BIBLE_BOOKS id, la, fr, en, es
-    var direct = DO_BIBLE_BOOKS.find(function(b) {
-        return b.id.toLowerCase() === clean ||
-               (b.la && b.la.toLowerCase() === clean) ||
-               (b.fr && b.fr.toLowerCase() === clean) ||
-               (b.en && b.en.toLowerCase() === clean) ||
-               (b.es && b.es.toLowerCase() === clean);
-    });
-    if (direct) return direct.id;
-
-    // Partial startsWith match
-    var partial = DO_BIBLE_BOOKS.find(function(b) {
-        return b.id.toLowerCase().indexOf(clean) === 0 ||
-               (b.fr && b.fr.toLowerCase().indexOf(clean) === 0) ||
-               (b.la && b.la.toLowerCase().indexOf(clean) === 0);
-    });
-    if (partial) return partial.id;
-
-    return input;
-}
-
 var DO_UI_TRANSLATIONS = {
     fr: {
         app_sub: 'BRÉVIAIRE & MISSEL',
@@ -1988,7 +1857,21 @@ function getProcessedLines(lines, targetLang) {
             });
         }
     });
-    return out;
+
+    // Merge broken lines starting with mid-prayer parenthetical rubrics
+    var merged = [];
+    out.forEach(function(line) {
+        if (merged.length && /^\([^)]+\)\s+[A-Za-z\u00C0-\u024F]/i.test(line) && !/^[SMPCOvrVRD]\.[\s\u00a0]*/i.test(line) && !/^!/.test(line)) {
+            var prev = merged[merged.length - 1];
+            if (/^[SMPCOvrVRD]\.[\s\u00a0]*/i.test(prev) && !/^!/.test(prev)) {
+                merged[merged.length - 1] = prev + ' ' + line;
+                return;
+            }
+        }
+        merged.push(line);
+    });
+
+    return merged;
 }
 
 function splitHymnStanzas(lines) {
@@ -2250,7 +2133,8 @@ function getSpeakerType(line) {
     if (/^[SMPCOvrVRD]\.[\s\u00a0]*/i.test(line)) {
         return line.charAt(0).toUpperCase();
     }
-    if (/^!/.test(line) || /^\{/.test(line)) {
+    // Lines starting with !, {, or entirely enclosed in parentheses or rubric text
+    if (/^!/.test(line) || /^\{/.test(line) || /^\([^)]+\):?$/i.test(line) || (/^\(/.test(line) && /\)$/.test(line))) {
         return 'RUBRIC';
     }
     return 'TEXT';
@@ -2440,16 +2324,23 @@ function cleanLiturgicalLine(line, langKey) {
         return (DO_PRAYER_ENDINGS['$Amen'][langKey]) ? DO_PRAYER_ENDINGS['$Amen'][langKey] : DO_PRAYER_ENDINGS['$Amen']['la'];
     });
 
-    // Strip DO metadata tags
+    // Strip DO metadata tags & timing directives
     line = line.replace(/\{:H-[^:]+:\}/g, '');
     line = line.replace(/;;[0-9]+.*$/, '');
     line = line.replace(/!x!/g, '');
+    line = line.replace(/\bwait\d+\b/gi, '');
+    line = line.replace(/\bpause\d*\b/gi, '');
 
-    return line;
+    return line.trim();
 }
 
 function formatLiturgicalSymbols(text) {
     if (!text) return '';
+
+    // Restore safe formatting tags (em, i, b, strong, u, small, span, br, sub, sup) after escHtml
+    text = text
+        .replace(/&lt;(\/?(em|i|b|strong|u|small|span|br|sub|sup)(|\s+class="[^"]*"|\s+style="[^"]*"))&gt;/gi, '<$1>')
+        .replace(/&lt;br\s*\/?&gt;/gi, '<br>');
 
     // Verse numbers in scripture & liturgical readings (e.g. "10 Nos stulti...", "11 Usque in hanc horam...")
     text = text.replace(/(^|[\s\.;?!:\(\[\{])(\d{1,3})\s+([A-Za-z\u00C0-\u024F])/g, '$1<span class="do-verse-num">$2</span> $3');
@@ -2577,16 +2468,12 @@ function renderBibleMainView() {
     var $stream = $('#do-content-stream');
     $stream.html(renderLoading());
 
-    var rawBookId = doState.bible.book || 'Genesis';
-    var normId = normalizeBibleBookId(rawBookId);
-    var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === normId; }) || DO_BIBLE_BOOKS[0];
-    var bookId = bkObj.id;
-    doState.bible.book = bookId;
-    localStorage.setItem('do_bible_book', bookId);
-
+    var bookId = doState.bible.book || 'Genesis';
     var chapterNum = parseInt(doState.bible.chapter, 10) || 1;
     var pageNum = parseInt(doState.bible.page, 10) || 1;
     var pageSize = doState.bible.pageSize || '15';
+
+    var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === bookId; }) || DO_BIBLE_BOOKS[0];
     var maxCh = bkObj.chapters || 1;
 
     if (chapterNum > maxCh) chapterNum = maxCh;
@@ -2793,7 +2680,7 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
 
     $stream.append(cardHtml).append($bottomBar);
     if ($stream[0]) {
-        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 0.75rem)' : '0%';
+        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 12px)' : '0%';
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 }
@@ -2910,16 +2797,16 @@ function setupHomeSearch() {
         // 3. Search Bible Books
         if (typeof DO_BIBLE_BOOKS !== 'undefined' && Array.isArray(DO_BIBLE_BOOKS)) {
             DO_BIBLE_BOOKS.forEach(function(b) {
-                var nameFr = b.fr || b.la || b.id;
-                var nameLa = b.la || b.id;
-                var searchTarget = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.id);
+                var nameFr = b.fr || b.name;
+                var nameLa = b.la || b.name;
+                var searchTarget = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.code);
                 var matchesAll = tokens.every(function(t) { return searchTarget.indexOf(t) >= 0; });
                 if (matchesAll) {
                     matches.push({
                         type: 'bible',
-                        id: b.id,
+                        code: b.code,
                         title: (uiLang === 'fr' ? nameFr : nameLa) + ' (Bible)',
-                        dateBadge: b.cat || 'Sacra Biblia'
+                        dateBadge: b.testament === 'NT' ? 'Nouveau Test.' : 'Ancien Test.'
                     });
                 }
             });
@@ -2940,7 +2827,7 @@ function setupHomeSearch() {
                 .on('click', function(e) {
                     e.stopPropagation();
                     if (m.type === 'bible') {
-                        openBible(m.id, 1, 1);
+                        openBible(m.code, 1, 1);
                     } else {
                         if (m.date && m.date.isValid()) {
                             doState.date = m.date;
@@ -3029,7 +2916,7 @@ function renderHomeView() {
                     .append('<div class="do-extra-link-subtitle">' + (uiLang === 'fr' ? 'Les 73 livres de l’Ancien et du Nouveau Testament bilingue' : '73 libri Canonici Veteris et Novi Testamenti bilinguis') + '</div>')
             )
             .on('click', function() {
-                openBible('Matthæus', 1, 1);
+                openBible('Matt', 1, 1);
             });
 
         $topCardsGrid.append($missaCard).append($bibleCard);
@@ -3182,7 +3069,7 @@ function displayResult(result, vernResult) {
     });
 
     if ($stream[0]) {
-        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 0.75rem)' : '0%';
+        var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 12px)' : '0%';
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 
@@ -3288,9 +3175,10 @@ function updateSidebarAndHeader() {
 function openBible(bookId, chapterNum, pageNum) {
     doState.hora = 'bible';
     localStorage.setItem('do_hora', 'bible');
-    var normalizedId = normalizeBibleBookId(bookId || doState.bible.book || 'Genesis');
-    doState.bible.book = normalizedId;
-    localStorage.setItem('do_bible_book', normalizedId);
+    if (bookId) {
+        doState.bible.book = bookId;
+        localStorage.setItem('do_bible_book', bookId);
+    }
     if (chapterNum) {
         doState.bible.chapter = parseInt(chapterNum, 10);
         localStorage.setItem('do_bible_chapter', doState.bible.chapter);
