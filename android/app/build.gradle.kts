@@ -13,8 +13,8 @@ android {
         applicationId = "com.chanttools.divinumofficium"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "beta-0.0.1"
+        versionCode = 2
+        versionName = "beta-0.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,21 +24,14 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = file("release.keystore")
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = project.findProperty("RELEASE_KEYSTORE_PASSWORD") as? String ?: "android"
-                keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String ?: "androidreleasekey"
-                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String ?: "android"
-            } else {
-                val debugKeystore = file("${System.getProperty("user.home")}/.android/debug.keystore")
-                if (debugKeystore.exists()) {
-                    storeFile = debugKeystore
-                    storePassword = "android"
-                    keyAlias = "androiddebugkey"
-                    keyPassword = "android"
-                }
-            }
+            storeFile = file("release.keystore")
+            storePassword = project.findProperty("RELEASE_KEYSTORE_PASSWORD") as? String ?: "android"
+            keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String ?: "androidreleasekey"
+            keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String ?: "android"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = false
         }
     }
 
@@ -49,14 +42,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            val releaseSigning = signingConfigs.getByName("release")
-            if (releaseSigning.storeFile != null && releaseSigning.storeFile!!.exists()) {
-                signingConfig = releaseSigning
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 

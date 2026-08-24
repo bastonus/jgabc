@@ -49,7 +49,15 @@ jobs:
           mkdir -p android/app
           if [ ! -f "android/app/release.keystore" ]; then
             echo "Generating release keystore..."
-            keytool -genkey -v -keystore android/app/release.keystore -storepass android -alias androidreleasekey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=DivinumOfficium, OU=App, O=ChantTools, L=Paris, C=FR"
+            keytool -genkeypair -v \
+              -keystore android/app/release.keystore \
+              -storepass android \
+              -alias androidreleasekey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=DivinumOfficium, OU=App, O=ChantTools, L=Paris, C=FR"
           fi
 
       - name: Build Release APK with Gradle
@@ -57,11 +65,31 @@ jobs:
         run: |
           gradle :app:assembleRelease --stacktrace
 
-      - name: Prepare APK Artifact
+      - name: Sign and Verify APK
         run: |
+          BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
+          echo "Using Android Build Tools: $BUILD_TOOLS_DIR"
+          
+          RAW_APK=$(find android/app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
+          echo "Found compiled APK: $RAW_APK"
+          
           mkdir -p build-output
-          cp android/app/build/outputs/apk/release/app-release.apk build-output/Divinum-Officium.apk
-          echo "APK ready at build-output/Divinum-Officium.apk"
+          # Sign using apksigner with v1, v2, v3 schemes
+          $BUILD_TOOLS_DIR/apksigner sign \
+            --ks android/app/release.keystore \
+            --ks-pass pass:android \
+            --ks-key-alias androidreleasekey \
+            --key-pass pass:android \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out build-output/Divinum-Officium.apk \
+            "$RAW_APK"
+          
+          # Verify the signature
+          echo "Verifying APK signature..."
+          $BUILD_TOOLS_DIR/apksigner verify --verbose build-output/Divinum-Officium.apk
+          echo "APK successfully verified and ready at build-output/Divinum-Officium.apk"
 
       - name: Upload APK Artifact (GitHub Actions)
         uses: actions/upload-artifact@v4
