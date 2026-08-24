@@ -13,8 +13,8 @@ android {
         applicationId = "com.chanttools.divinumofficium"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "beta-0.0.3"
+        versionCode = 4
+        versionName = "beta-0.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
