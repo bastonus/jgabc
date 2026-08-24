@@ -206,6 +206,8 @@ var DO_BIBLE_BOOKS = [
 var DO_UI_TRANSLATIONS = {
     fr: {
         app_sub: 'BRÉVIAIRE & MISSEL',
+        home: 'Accueil',
+        home_tag: 'Hodie & Cursus',
         liturgia_diei: 'Liturgie du Jour',
         cursus_horarum: 'Heures Canoniales',
         sacra_biblia: 'Sainte Bible',
@@ -259,6 +261,8 @@ var DO_UI_TRANSLATIONS = {
     },
     la: {
         app_sub: 'BREVIARIUM & MISSALE',
+        home: 'Hodie',
+        home_tag: 'Tabularium',
         liturgia_diei: 'Liturgia Diei',
         cursus_horarum: 'Cursus Horarum',
         sacra_biblia: 'Sacra Biblia',
@@ -435,6 +439,8 @@ function updateUiTranslations() {
     }
 
     // Nav items in Sidebar
+    $('.do-nav-item[data-hora="home"] .do-nav-label').text(t.home);
+    $('.do-nav-item[data-hora="home"] .do-nav-tag').text(t.home_tag);
     $('.do-nav-item[data-hora="missa"] .do-nav-label').text(t.missa);
     $('.do-nav-item[data-hora="missa"] .do-nav-tag').text(t.missa_tag);
     $('.do-nav-item[data-hora="matutinum"] .do-nav-label').text(t.matutinum);
@@ -2195,10 +2201,193 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     }
 }
 
+function getCurrentLiturgicalHora() {
+    var h = new Date().getHours();
+    if (h >= 0 && h < 6) return 'matutinum';
+    if (h >= 6 && h < 9) return 'laudes';
+    if (h >= 9 && h < 11) return 'tertia';
+    if (h >= 11 && h < 14) return 'sexta';
+    if (h >= 14 && h < 17) return 'nona';
+    if (h >= 17 && h < 21) return 'vesperae';
+    return 'completorium';
+}
+
+var DO_HORA_DESCRIPTIONS = {
+    fr: {
+        matutinum: { name: 'Matines', time: '00h00 – 06h00', desc: 'Vigile et prière de la nuit' },
+        laudes: { name: 'Laudes', time: '06h00 – 09h00', desc: 'Louanges au lever du soleil' },
+        prima: { name: 'Prime', time: '06h00 – 08h00', desc: 'Consécration de la journée' },
+        tertia: { name: 'Tierce', time: '09h00 – 11h00', desc: 'Descente du Saint-Esprit' },
+        sexta: { name: 'Sexte', time: '11h00 – 14h00', desc: 'Crucifixion de Notre Seigneur' },
+        nona: { name: 'None', time: '14h00 – 17h00', desc: 'Mort de Jésus sur la Croix' },
+        vesperae: { name: 'Vêpres', time: '17h00 – 21h00', desc: 'Prière du soir et encens spirituel' },
+        completorium: { name: 'Complies', time: '21h00 – 00h00', desc: 'Dernière prière avant la nuit' },
+        missa: { name: 'Sainte Messe', time: 'Missa Diei', desc: 'Saint Sacrifice & Liturgie eucharistique' },
+        bible: { name: 'Sainte Écriture', time: 'Biblia Sacra', desc: 'Vulgate latine & Traduction' }
+    },
+    la: {
+        matutinum: { name: 'Matutinum', time: '00:00 – 06:00', desc: 'Vigiliae et oratio nocturna' },
+        laudes: { name: 'Laudes', time: '06:00 – 09:00', desc: 'Laudes matutinae' },
+        prima: { name: 'Prima', time: '06:00 – 08:00', desc: 'Hora prima diurna' },
+        tertia: { name: 'Tertia', time: '09:00 – 11:00', desc: 'Hora tertia' },
+        sexta: { name: 'Sexta', time: '11:00 – 14:00', desc: 'Hora meridiana' },
+        nona: { name: 'Nona', time: '14:00 – 17:00', desc: 'Hora nona' },
+        vesperae: { name: 'Vesperae', time: '17:00 – 21:00', desc: 'Oratio vespertina' },
+        completorium: { name: 'Completorium', time: '21:00 – 00:00', desc: 'Oratio ante quietem' },
+        missa: { name: 'Sancta Missa', time: 'Missa Diei', desc: 'Sacrificium Eucharisticum' },
+        bible: { name: 'Sacra Biblia', time: 'Biblia Sacra', desc: 'Vulgata Clementina' }
+    }
+};
+
+function renderHomeView() {
+    var $stream = $('#do-content-stream').empty();
+    var uiLang = getUiLang();
+    var curDateFormatted = formatLiturgicalDate(doState.date, uiLang);
+    var curHora = getCurrentLiturgicalHora();
+    var descs = DO_HORA_DESCRIPTIONS[uiLang] || DO_HORA_DESCRIPTIONS['fr'];
+    var curHoraInfo = descs[curHora] || { name: curHora, time: '', desc: '' };
+
+    $('#doHourLabel').text(uiLang === 'fr' ? 'ACCUEIL • ' + curDateFormatted.toUpperCase() : 'HODIE • ' + curDateFormatted.toUpperCase());
+    $('#doHeaderTitle .title-text').text(uiLang === 'fr' ? 'Tableau de bord liturgique' : 'Tabularium Liturgicum');
+
+    loadMissaData(doState.date, 'la', function(err, laResult) {
+        var feastTitle = (laResult && laResult.title) ? laResult.title : curDateFormatted;
+
+        var $home = $('<div class="do-home-view">');
+
+        // Hero Card
+        var $hero = $('<div class="do-home-hero">')
+            .append(
+                $('<div class="do-home-hero-top">')
+                    .append('<span class="do-home-date-badge">' + escHtml(curDateFormatted) + '</span>')
+                    .append('<span class="do-home-rank-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="12" cy="12" r="6"></circle></svg> ' + (uiLang === 'fr' ? 'Heure actuelle : ' + curHoraInfo.name : 'Hora apta : ' + curHoraInfo.name) + '</span>')
+            )
+            .append('<h2 class="do-home-feast-title">' + escHtml(feastTitle) + '</h2>')
+            .append(
+                $('<div class="do-home-hero-actions">')
+                    .append(
+                        $('<button class="do-home-current-btn">')
+                            .html('<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>' + (uiLang === 'fr' ? 'Prier ' + curHoraInfo.name : 'Ora ' + curHoraInfo.name) + '</span>')
+                            .on('click', function() {
+                                doState.hora = curHora;
+                                localStorage.setItem('do_hora', curHora);
+                                renderDO();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            })
+                    )
+                    .append(
+                        $('<button class="do-home-secondary-btn">')
+                            .html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> <span>' + (uiLang === 'fr' ? 'Sainte Messe' : 'Sancta Missa') + '</span>')
+                            .on('click', function() {
+                                doState.hora = 'missa';
+                                localStorage.setItem('do_hora', 'missa');
+                                renderDO();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            })
+                    )
+            );
+
+        $home.append($hero);
+
+        // Section: Cursus Horarum
+        var $horaeSection = $('<div class="do-home-section">')
+            .append(
+                $('<div class="do-home-section-header">')
+                    .append('<h3 class="do-home-section-title">' + (uiLang === 'fr' ? 'Les Heures de l’Office Divin' : 'Cursus Horarum Divini Officii') + '</h3>')
+            );
+
+        var $horaeGrid = $('<div class="do-home-grid">');
+        var hoursList = ['matutinum', 'laudes', 'prima', 'tertia', 'sexta', 'nona', 'vesperae', 'completorium'];
+
+        var horaIcons = {
+            matutinum: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+            laudes: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>',
+            prima: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>',
+            tertia: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 15 11"></polyline></svg>',
+            sexta: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 12 17"></polyline></svg>',
+            nona: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 9 15"></polyline></svg>',
+            vesperae: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="2" x2="12" y2="9"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line></svg>',
+            completorium: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
+        };
+
+        hoursList.forEach(function(hKey) {
+            var hInfo = descs[hKey] || { name: hKey, time: '', desc: '' };
+            var isCurrent = (hKey === curHora);
+
+            var $card = $('<button class="do-home-card' + (isCurrent ? ' is-current' : '') + '">')
+                .append('<div class="do-home-card-icon">' + (horaIcons[hKey] || '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>') + '</div>')
+                .append(
+                    $('<div class="do-home-card-info">')
+                        .append('<span class="do-home-card-name">' + escHtml(hInfo.name) + (isCurrent ? ' <small style="color:var(--primary-color); font-weight:700;">● ' + (uiLang === 'fr' ? 'En ce moment' : 'Nunc') + '</small>' : '') + '</span>')
+                        .append('<span class="do-home-card-time">' + escHtml(hInfo.time + ' • ' + hInfo.desc) + '</span>')
+                )
+                .on('click', function() {
+                    doState.hora = hKey;
+                    localStorage.setItem('do_hora', hKey);
+                    renderDO();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+            $horaeGrid.append($card);
+        });
+
+        $horaeSection.append($horaeGrid);
+        $home.append($horaeSection);
+
+        // Section: Missa & Biblia
+        var $extraSection = $('<div class="do-home-section">')
+            .append(
+                $('<div class="do-home-section-header">')
+                    .append('<h3 class="do-home-section-title">' + (uiLang === 'fr' ? 'Messe & Sainte Écriture' : 'Missa & Sacra Biblia') + '</h3>')
+            );
+
+        var $extraGrid = $('<div class="do-home-grid">');
+
+        // Missa Card
+        var $missaCard = $('<button class="do-home-card">')
+            .append('<div class="do-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"></path></svg></div>')
+            .append(
+                $('<div class="do-home-card-info">')
+                    .append('<span class="do-home-card-name">' + (uiLang === 'fr' ? 'Sainte Messe du Jour' : 'Sancta Missa') + '</span>')
+                    .append('<span class="do-home-card-time">' + (uiLang === 'fr' ? 'Propre des lectures et prières de la Messe' : 'Proprium et Ordinarium Missae') + '</span>')
+            )
+            .on('click', function() {
+                doState.hora = 'missa';
+                localStorage.setItem('do_hora', 'missa');
+                renderDO();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+        // Bible Card
+        var $bibleCard = $('<button class="do-home-card">')
+            .append('<div class="do-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>')
+            .append(
+                $('<div class="do-home-card-info">')
+                    .append('<span class="do-home-card-name">' + (uiLang === 'fr' ? 'Sainte Bible (Vulgate)' : 'Sacra Biblia Vulgata') + '</span>')
+                    .append('<span class="do-home-card-time">' + (uiLang === 'fr' ? '73 livres avec traduction verset par verset' : 'Vetus et Novum Testamentum') + '</span>')
+            )
+            .on('click', function() {
+                openBible('Matt', 1, 1);
+            });
+
+        $extraGrid.append($missaCard).append($bibleCard);
+        $extraSection.append($extraGrid);
+        $home.append($extraSection);
+
+        $stream.append($home);
+    });
+}
+
 // ---- Main Render Function ----
 function renderDO() {
     updateSidebarAndHeader();
     closeHeaderDropdown();
+
+    var isHome = (doState.hora === 'home');
+    if (isHome) {
+        renderHomeView();
+        return;
+    }
 
     var isBible = (doState.hora === 'bible');
     if (isBible) {
@@ -2918,6 +3107,15 @@ function applyColor(hex) {
 
 // ---- Event Listeners ----
 function setupEventListeners() {
+    $(document).on('click', '.do-brand, #btnBrandHome', function(e) {
+        e.preventDefault();
+        doState.hora = 'home';
+        localStorage.setItem('do_hora', 'home');
+        closeModals();
+        renderDO();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
     $(document).on('click', '.do-nav-item', function(e) {
         e.preventDefault();
         var hora = $(this).data('hora');
@@ -3079,7 +3277,7 @@ function setupEventListeners() {
     });
 
     // Dropdown Toggle from Header Title Area
-    $(document).on('click', '.header-title-area, #doHeaderTitle, .dropdown-trigger', function(e) {
+    $(document).on('click', '.header-title-area', function(e) {
         e.preventDefault();
         e.stopPropagation();
         if ($('#headerDropdown').hasClass('hidden')) {
@@ -3184,7 +3382,8 @@ function setupEventListeners() {
         renderHeaderDropdownItems();
     });
 
-    $('#btnOpenSidebarMobile').on('click', function() {
+    $(document).on('click', '#btnOpenSidebarMobile', function(e) {
+        e.stopPropagation();
         $('#doSidebar').addClass('open active');
         $('#sidebarBackdrop').addClass('open active');
     });
