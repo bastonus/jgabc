@@ -948,10 +948,47 @@ function fetchPsalmText(psalmNum, langKey, callback) {
     });
 }
 
-// Resolve Section Reference e.g. @Sancti/02-24 or @Commune/C1:Ant Vespera
-function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolder, isMissa, callback) {
-    if (!sectionLines || !sectionLines.length) {
-        callback([]);
+function getSectionWithAliases(sectionsObj, targetSec) {
+    if (!sectionsObj || !targetSec) return null;
+    if (sectionsObj[targetSec] && sectionsObj[targetSec].length) return { key: targetSec, lines: sectionsObj[targetSec] };
+
+    var aliases = {
+        'Lectio': ['Lectio', 'Epistola', 'Lectio1', 'Lectio 1', 'Lesson', 'Epistola Pauli'],
+        'Epistola': ['Epistola', 'Lectio', 'Lectio1', 'Lectio 1', 'Lesson', 'Epistola Pauli'],
+        'Oratio': ['Oratio', 'Collecta', 'Oratio 1', 'Oratio Pauli'],
+        'Secreta': ['Secreta', 'Secret', 'Super oblata', 'Secreta Pauli'],
+        'Postcommunio': ['Postcommunio', 'Postcommunion', 'Post communionem', 'Postcommunio Pauli'],
+        'Evangelium': ['Evangelium', 'Gospel'],
+        'Graduale': ['Graduale', 'GradualeP', 'Tractus'],
+        'Tractus': ['Tractus', 'Graduale', 'GradualeP'],
+        'Introitus': ['Introitus', 'Introit'],
+        'Offertorium': ['Offertorium', 'Offertory'],
+        'Communio': ['Communio', 'Communion'],
+        'Ant Vespera': ['Ant Vespera', 'Ant 1', 'Ant', 'Ant Vesperas'],
+        'Ant Laudes': ['Ant Laudes', 'Ant 2', 'Ant', 'Ant Laude']
+    };
+
+    var list = aliases[targetSec] || [];
+    for (var i = 0; i < list.length; i++) {
+        var a = list[i];
+        if (sectionsObj[a] && sectionsObj[a].length) return { key: a, lines: sectionsObj[a] };
+    }
+
+    var tLow = targetSec.toLowerCase().trim();
+    var keys = Object.keys(sectionsObj);
+    for (var k = 0; k < keys.length; k++) {
+        if (keys[k].toLowerCase().trim() === tLow && sectionsObj[keys[k]].length) {
+            return { key: keys[k], lines: sectionsObj[keys[k]] };
+        }
+    }
+    return null;
+}
+
+// Resolve Section Reference e.g. @Sancti/02-24 or @Commune/C4a or @Commune/C1:Introitus
+function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolder, isMissa, callback, depth) {
+    if (typeof depth !== 'number') depth = 0;
+    if (depth > 6 || !sectionLines || !sectionLines.length) {
+        callback(sectionLines || []);
         return;
     }
 
@@ -960,47 +997,54 @@ function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolde
     // Local section reference @:Lectio6_ or @:Ant Vespera
     if (firstLine.indexOf('@:') === 0) {
         var targetSec = firstLine.substring(2).trim();
-        if (baseSectionObj[targetSec]) {
-            resolveSectionText(targetSec, baseSectionObj[targetSec], baseSectionObj, langFolder, isMissa, callback);
+        var match = getSectionWithAliases(baseSectionObj, targetSec);
+        if (match) {
+            resolveSectionText(match.key, match.lines, baseSectionObj, langFolder, isMissa, callback, depth + 1);
             return;
         }
     }
 
-    // External file reference @Sancti/02-24 or @Commune/C1:Introitus
+    // External file reference e.g. @Commune/C4a or @Sancti/02-24 or @Commune/C1:Introitus
     if (firstLine.indexOf('@') === 0) {
         var ref = firstLine.substring(1).trim();
         var parts = ref.split(':');
-        var filePath = parts[0];
-        var targetSec = parts[1] || sectionName;
+        var filePath = parts[0].trim();
+        var targetSec = parts[1] ? parts[1].trim() : sectionName;
 
-        var fullPath = 'do_data/' + (isMissa ? 'missa' : 'horas') + '/' + langFolder + '/' + filePath;
-        if (!/\.txt$/i.test(fullPath)) fullPath += '.txt';
+        if (!/\.txt$/i.test(filePath)) filePath += '.txt';
 
-        fetchLocalFile(fullPath, function(err, data) {
-            if (!err && data) {
-                var extSections = parseSections(data);
-                if (extSections[targetSec]) {
-                    resolveSectionText(targetSec, extSections[targetSec], extSections, langFolder, isMissa, callback);
-                    return;
-                }
-            }
-            if (langFolder !== 'Latin') {
-                var fallbackPath = 'do_data/' + (isMissa ? 'missa' : 'horas') + '/Latin/' + filePath;
-                if (!/\.txt$/i.test(fallbackPath)) fullPath += '.txt';
-                fetchLocalFile(fallbackPath, function(err2, data2) {
-                    if (!err2 && data2) {
-                        var extSec2 = parseSections(data2);
-                        if (extSec2[targetSec]) {
-                            resolveSectionText(targetSec, extSec2[targetSec], extSec2, 'Latin', isMissa, callback);
-                            return;
-                        }
-                    }
-                    callback(sectionLines);
-                });
-            } else {
+        var primaryCorpus = isMissa ? 'missa' : 'horas';
+        var altCorpus = isMissa ? 'horas' : 'missa';
+
+        var candidatePaths = [];
+        candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + filePath);
+        candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + filePath);
+        if (langFolder !== 'Latin') {
+            candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + filePath);
+            candidatePaths.push('do_data/' + altCorpus + '/Latin/' + filePath);
+        }
+
+        var tryIdx = 0;
+        function tryNextCandidate() {
+            if (tryIdx >= candidatePaths.length) {
                 callback(sectionLines);
+                return;
             }
-        });
+            var path = candidatePaths[tryIdx++];
+            fetchLocalFile(path, function(err, data) {
+                if (!err && data) {
+                    var extSections = parseSections(data);
+                    var match = getSectionWithAliases(extSections, targetSec);
+                    if (match) {
+                        resolveSectionText(match.key, match.lines, extSections, langFolder, isMissa, callback, depth + 1);
+                        return;
+                    }
+                }
+                tryNextCandidate();
+            });
+        }
+
+        tryNextCandidate();
         return;
     }
 
@@ -1100,23 +1144,116 @@ function isSanctiGreaterFeastOnSunday(sanctiFileText) {
 
 // ---- Data Loaders for Mass & Office ----
 
+function extractCommuneRef(text) {
+    if (!text) return null;
+    var mRule = text.match(/\[Rule\][^\n]*\n([^\[\n]+)/i);
+    if (mRule) {
+        var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+        if (mC) return mC[1];
+    }
+    var mRank = text.match(/\[Rank\][^\n]*\n([^\[\n]+)/i);
+    if (mRank) {
+        var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+        if (mC2) return mC2[1];
+    }
+    var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+    if (mGen) return mGen[1];
+    return null;
+}
+
+function loadCommunePropersForMissa(daySections, laFileText, langFolder, callback) {
+    var rawDayText = Object.keys(daySections).map(function(k) { return '[' + k + ']\n' + daySections[k].join('\n'); }).join('\n\n');
+    var comRef = extractCommuneRef(rawDayText) || extractCommuneRef(laFileText);
+
+    if (!comRef) {
+        callback(daySections);
+        return;
+    }
+
+    var cleanRef = comRef.replace(/^Commune\//i, '');
+    if (!/\.txt$/i.test(cleanRef)) cleanRef += '.txt';
+
+    var candidatePaths = [];
+    if (/^Sancti\//i.test(cleanRef)) {
+        candidatePaths.push('do_data/missa/' + langFolder + '/' + cleanRef);
+        candidatePaths.push('do_data/horas/' + langFolder + '/' + cleanRef);
+        candidatePaths.push('do_data/missa/Latin/' + cleanRef);
+        candidatePaths.push('do_data/horas/Latin/' + cleanRef);
+    } else {
+        candidatePaths.push('do_data/horas/' + langFolder + '/Commune/' + cleanRef);
+        candidatePaths.push('do_data/missa/' + langFolder + '/Commune/' + cleanRef);
+        candidatePaths.push('do_data/horas/Latin/Commune/' + cleanRef);
+        candidatePaths.push('do_data/missa/Latin/Commune/' + cleanRef);
+    }
+
+    var tryIdx = 0;
+    function tryNextCom() {
+        if (tryIdx >= candidatePaths.length) {
+            callback(daySections);
+            return;
+        }
+        var p = candidatePaths[tryIdx++];
+        fetchLocalFile(p, function(err, data) {
+            if (!err && data) {
+                var comSec = parseSections(data);
+                var merged = {};
+                Object.keys(comSec).forEach(function(k) { merged[k] = comSec[k]; });
+                Object.keys(daySections).forEach(function(k) {
+                    if (daySections[k] && daySections[k].length) {
+                        merged[k] = daySections[k];
+                    }
+                });
+                callback(merged);
+                return;
+            }
+            tryNextCom();
+        });
+    }
+
+    tryNextCom();
+}
+
 function loadMissaData(date, lang, callback) {
     var codes = computeLiturgicalCodes(date);
     var langFolder = getLangFolder(lang);
     var feastKey = doState.officiumKey || null;
 
-    var sanctiPath = 'do_data/missa/' + langFolder + '/Sancti/' + (feastKey || codes.sancti) + '.txt';
-    var temporaPath = 'do_data/missa/' + langFolder + '/Tempora/' + (feastKey || codes.tempora) + '.txt';
+    var sanctiCode = feastKey || codes.sancti;
+    var temporaCode = feastKey || codes.tempora;
+
+    var sanctiPath = 'do_data/missa/' + langFolder + '/Sancti/' + sanctiCode + '.txt';
+    var temporaPath = 'do_data/missa/' + langFolder + '/Tempora/' + temporaCode + '.txt';
+    var laSanctiPath = 'do_data/missa/Latin/Sancti/' + sanctiCode + '.txt';
+    var laTemporaPath = 'do_data/missa/Latin/Tempora/' + temporaCode + '.txt';
+
+    // Helper to load vern + latin counterpart
+    function loadFilePair(vPath, lPath, onLoaded) {
+        fetchLocalFile(vPath, function(errV, vData) {
+            if (!errV && vData) {
+                fetchLocalFile(lPath, function(errL, lData) {
+                    onLoaded(vData, (!errL && lData) ? lData : vData);
+                });
+            } else {
+                fetchLocalFile(lPath, function(errL, lData) {
+                    if (!errL && lData) {
+                        onLoaded(lData, lData);
+                    } else {
+                        onLoaded(null, null);
+                    }
+                });
+            }
+        });
+    }
 
     // If user explicitly selected an office/feast key, honor it directly
     if (feastKey) {
-        fetchLocalFile(sanctiPath, function(err, sData) {
-            if (!err && sData) {
-                processMissaFile(sData, langFolder, lang, callback);
+        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
+            if (sData) {
+                processMissaFile(sData, laSData, langFolder, lang, callback);
             } else {
-                fetchLocalFile(temporaPath, function(err2, tData) {
-                    if (!err2 && tData) {
-                        processMissaFile(tData, langFolder, lang, callback);
+                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
+                    if (tData) {
+                        processMissaFile(tData, laTData, langFolder, lang, callback);
                     } else if (langFolder !== 'Latin') {
                         loadMissaData(date, 'la', callback);
                     } else {
@@ -1131,28 +1268,26 @@ function loadMissaData(date, lang, callback) {
     // Automatic Sunday resolution:
     // On Sunday, default to Temporale unless Sancti is a greater feast (I. classis or Festum Domini).
     if (codes.isSunday) {
-        fetchLocalFile('do_data/missa/Latin/Sancti/' + codes.sancti + '.txt', function(errS, laSanctiData) {
+        fetchLocalFile(laSanctiPath, function(errS, laSanctiData) {
             var isGreater = (!errS && laSanctiData) ? isSanctiGreaterFeastOnSunday(laSanctiData) : false;
             if (isGreater) {
-                // Greater feast supersedes Sunday (e.g. Assumption, Transfiguration)
-                fetchLocalFile(sanctiPath, function(err, sData) {
-                    if (!err && sData) {
-                        processMissaFile(sData, langFolder, lang, callback);
+                loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
+                    if (sData) {
+                        processMissaFile(sData, laSData, langFolder, lang, callback);
                     } else {
-                        fetchLocalFile(temporaPath, function(err2, tData) {
-                            if (!err2 && tData) processMissaFile(tData, langFolder, lang, callback);
+                        loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
+                            if (tData) processMissaFile(tData, laTData, langFolder, lang, callback);
                             else callback(null, null);
                         });
                     }
                 });
             } else {
-                // Standard Sunday: Temporale takes precedence
-                fetchLocalFile(temporaPath, function(err, tData) {
-                    if (!err && tData) {
-                        processMissaFile(tData, langFolder, lang, callback);
+                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
+                    if (tData) {
+                        processMissaFile(tData, laTData, langFolder, lang, callback);
                     } else {
-                        fetchLocalFile(sanctiPath, function(err2, sData) {
-                            if (!err2 && sData) processMissaFile(sData, langFolder, lang, callback);
+                        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
+                            if (sData) processMissaFile(sData, laSData, langFolder, lang, callback);
                             else callback(null, null);
                         });
                     }
@@ -1161,13 +1296,13 @@ function loadMissaData(date, lang, callback) {
         });
     } else {
         // Weekday (Feria): Sancti first, fallback to Temporale
-        fetchLocalFile(sanctiPath, function(err, sData) {
-            if (!err && sData) {
-                processMissaFile(sData, langFolder, lang, callback);
+        loadFilePair(sanctiPath, laSanctiPath, function(sData, laSData) {
+            if (sData) {
+                processMissaFile(sData, laSData, langFolder, lang, callback);
             } else {
-                fetchLocalFile(temporaPath, function(err2, tData) {
-                    if (!err2 && tData) {
-                        processMissaFile(tData, langFolder, lang, callback);
+                loadFilePair(temporaPath, laTemporaPath, function(tData, laTData) {
+                    if (tData) {
+                        processMissaFile(tData, laTData, langFolder, lang, callback);
                     } else if (langFolder !== 'Latin') {
                         loadMissaData(date, 'la', callback);
                     } else {
@@ -1179,64 +1314,78 @@ function loadMissaData(date, lang, callback) {
     }
 }
 
-function processMissaFile(fileText, langFolder, langKey, callback) {
+function processMissaFile(fileText, laFileText, langFolder, langKey, callback) {
+    if (typeof laFileText === 'function') {
+        callback = laFileText;
+        laFileText = fileText;
+    }
     var rawSections = parseSections(fileText);
     var feastTitle = (rawSections['Officium'] && rawSections['Officium'][0]) ? rawSections['Officium'][0].trim() : 'Missa Diei';
 
-    var standardPropers = [
-        { key: 'Introitus', label: 'Introitus', badge: 'Proprium' },
-        { key: 'Oratio', label: 'Collecta / Oratio', badge: 'Oratio' },
-        { key: 'Lectio', label: 'Epistola', badge: 'Lectio' },
-        { key: 'Graduale', label: 'Graduale', badge: 'Proprium' },
-        { key: 'Tractus', label: 'Tractus', badge: 'Proprium' },
-        { key: 'Alleluia', label: 'Alleluia', badge: 'Proprium' },
-        { key: 'Sequentia', label: 'Sequentia', badge: 'Proprium' },
-        { key: 'Evangelium', label: 'Evangelium', badge: 'Evangelium' },
-        { key: 'Offertorium', label: 'Offertorium', badge: 'Proprium' },
-        { key: 'Secreta', label: 'Secreta', badge: 'Oratio' },
-        { key: 'Communio', label: 'Communio', badge: 'Proprium' },
-        { key: 'Postcommunio', label: 'Postcommunio', badge: 'Oratio' }
-    ];
+    loadCommunePropersForMissa(rawSections, laFileText, langFolder, function(fullSections) {
+        if (rawSections['Officium']) fullSections['Officium'] = rawSections['Officium'];
+        var finalTitle = (fullSections['Officium'] && fullSections['Officium'][0]) ? fullSections['Officium'][0].trim() : feastTitle;
 
-    if (!doState.includeOrdinarium) {
-        var propDict = {};
-        var pPending = standardPropers.length;
+        var standardPropers = [
+            { key: 'Introitus', label: 'Introitus', badge: 'Proprium' },
+            { key: 'Oratio', label: 'Collecta / Oratio', badge: 'Oratio' },
+            { key: 'Lectio', label: 'Epistola', badge: 'Lectio' },
+            { key: 'Graduale', label: 'Graduale', badge: 'Proprium' },
+            { key: 'Tractus', label: 'Tractus', badge: 'Proprium' },
+            { key: 'Alleluia', label: 'Alleluia', badge: 'Proprium' },
+            { key: 'Sequentia', label: 'Sequentia', badge: 'Proprium' },
+            { key: 'Evangelium', label: 'Evangelium', badge: 'Evangelium' },
+            { key: 'Offertorium', label: 'Offertorium', badge: 'Proprium' },
+            { key: 'Secreta', label: 'Secreta', badge: 'Oratio' },
+            { key: 'Communio', label: 'Communio', badge: 'Proprium' },
+            { key: 'Postcommunio', label: 'Postcommunio', badge: 'Oratio' }
+        ];
 
-        standardPropers.forEach(function(p) {
-            var lines = rawSections[p.key];
-            if (lines && lines.length) {
-                resolveSectionText(p.key, lines, rawSections, langFolder, true, function(resolvedLines) {
-                    propDict[p.key] = {
-                        id: p.key.toLowerCase(),
-                        type: p.label,
-                        badge: p.badge,
-                        lines: resolvedLines
-                    };
+        if (!doState.includeOrdinarium) {
+            var propDict = {};
+            var pPending = standardPropers.length;
+
+            standardPropers.forEach(function(p) {
+                var lines = fullSections[p.key];
+                if (!lines || !lines.length) {
+                    var match = getSectionWithAliases(fullSections, p.key);
+                    if (match) lines = match.lines;
+                }
+
+                if (lines && lines.length) {
+                    resolveSectionText(p.key, lines, fullSections, langFolder, true, function(resolvedLines) {
+                        propDict[p.key] = {
+                            id: p.key.toLowerCase(),
+                            type: p.label,
+                            badge: p.badge,
+                            lines: resolvedLines
+                        };
+                        pPending--;
+                        if (pPending === 0) finish();
+                    });
+                } else {
                     pPending--;
                     if (pPending === 0) finish();
-                });
-            } else {
-                pPending--;
-                if (pPending === 0) finish();
-            }
-        });
-
-        function finish() {
-            var orderedCards = [];
-            standardPropers.forEach(function(p) {
-                if (propDict[p.key]) {
-                    orderedCards.push(propDict[p.key]);
                 }
             });
-            callback(null, { title: feastTitle, cards: orderedCards });
-        }
-        return;
-    }
 
-    var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
-    fetchLocalFile(ordoPath, function(oErr, oData) {
-        var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
-        assembleFullMissa(rawSections, ordoParts, langFolder, feastTitle, callback);
+            function finish() {
+                var orderedCards = [];
+                standardPropers.forEach(function(p) {
+                    if (propDict[p.key]) {
+                        orderedCards.push(propDict[p.key]);
+                    }
+                });
+                callback(null, { title: finalTitle, cards: orderedCards });
+            }
+            return;
+        }
+
+        var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
+        fetchLocalFile(ordoPath, function(oErr, oData) {
+            var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
+            assembleFullMissa(fullSections, ordoParts, langFolder, finalTitle, callback);
+        });
     });
 }
 
@@ -1419,7 +1568,12 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
         visited[tag] = true;
 
         var raw = activeDay[tag] || activeCom[tag] || laDay[tag] || laCom[tag] || null;
-        if (!raw || !raw.length) return null;
+        if (!raw || !raw.length) {
+            // Also try aliases
+            var match = getSectionWithAliases(activeDay, tag) || getSectionWithAliases(activeCom, tag) || getSectionWithAliases(laDay, tag) || getSectionWithAliases(laCom, tag);
+            if (match) raw = match.lines;
+            else return null;
+        }
 
         var first = raw[0].trim();
         // Local section reference @:Ant Vespera or @:Hymnus Vespera
@@ -1428,10 +1582,10 @@ function assembleOfficeStrict(laDay, vDay, laCom, vCom, hora, langFolder, langKe
             var resolved = getSec(targetTag, visited);
             if (resolved) return resolved;
         }
-        // External file reference @Commune/C1:Hymnus or @Sancti/02-24:Ant 1
-        if (first.indexOf('@') === 0 && first.indexOf(':') > 0) {
+        // External file reference @Commune/C1:Hymnus or @Commune/C4a or @Sancti/02-24:Ant 1
+        if (first.indexOf('@') === 0) {
             var parts = first.substring(1).split(':');
-            var secName = parts[1];
+            var secName = parts[1] ? parts[1].trim() : tag;
             if (secName) {
                 var resolved2 = getSec(secName, visited);
                 if (resolved2) return resolved2;
@@ -3174,6 +3328,12 @@ function renderHeaderDropdown() {
     var isBible = (doState.hora === 'bible');
     var uiLang = getUiLang();
 
+    var temporaleLabel = (uiLang === 'fr' ? 'Temporal' : (uiLang === 'es' ? 'Temporal' : (uiLang === 'en' ? 'Temporal' : 'Temporale')));
+    var sanctoraleLabel = (uiLang === 'fr' ? 'Sanctoral' : (uiLang === 'es' ? 'Santoral' : (uiLang === 'en' ? 'Sanctoral' : 'Sanctorale')));
+    var todayLabel = (uiLang === 'fr' ? "Aujourd'hui" : (uiLang === 'es' ? 'Hoy' : (uiLang === 'en' ? 'Today' : 'Hodie')));
+    var searchPlaceholder = (uiLang === 'fr' ? 'Rechercher un jour ou une fête…' : (uiLang === 'es' ? 'Buscar un día o fiesta…' : (uiLang === 'en' ? 'Search a day or feast…' : 'Quaere diem vel festum…')));
+    var bibleSearchPlaceholder = (uiLang === 'fr' ? 'Rechercher un livre ou un chapitre…' : (uiLang === 'es' ? 'Buscar un libro o capítulo…' : (uiLang === 'en' ? 'Search a book or chapter…' : 'Quaere librum vel caput…')));
+
     var curMode = isBible ? 'bible' : 'liturgy';
     var controlsMode = $('#hddControlsContainer').attr('data-mode');
 
@@ -3181,45 +3341,47 @@ function renderHeaderDropdown() {
         $('#hddControlsContainer').attr('data-mode', curMode).empty();
         if (isBible) {
             var bibleMode = doState.hddBibleMode || 'vetus';
-            var $modeBar = $('<div class="hdd-mode-bar">');
-            var $segments = $('<div class="hdd-mode-segments">')
+            var $searchBar = $('<div class="hdd-search-bar">')
+                .append('<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="hdd-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
+                .append('<input type="text" id="hddSearchInput" class="hdd-search-input" placeholder="' + escHtml(bibleSearchPlaceholder) + '" autocomplete="off" spellcheck="false">');
+
+            var $controlsRow = $('<div class="hdd-controls-row">');
+            var $modeGroup = $('<div class="hdd-mode-group" style="width:100%;">')
                 .append('<button class="hdd-mode-btn' + (bibleMode === 'vetus' ? ' active' : '') + '" data-bible-mode="vetus">Vetus Testamentum (46)</button>')
                 .append('<button class="hdd-mode-btn' + (bibleMode === 'novum' ? ' active' : '') + '" data-bible-mode="novum">Novum Testamentum (27)</button>');
-            $modeBar.append($segments);
+            $controlsRow.append($modeGroup);
 
-            var $searchBar = $('<div class="hdd-search-bar">')
-                .append('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="hdd-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
-                .append('<input type="text" id="hddSearchInput" class="hdd-search-input" placeholder="' + (uiLang === 'fr' ? 'Rechercher un livre ou un chapitre…' : 'Quaere librum vel caput…') + '" autocomplete="off" spellcheck="false">');
-
-            $('#hddControlsContainer').append($modeBar).append($searchBar);
+            $('#hddControlsContainer').append($searchBar).append($controlsRow);
         } else {
             var mode = doState.hddMode || 'temporum';
             var dateFormatted = formatLiturgicalDate(doState.date, uiLang);
 
-            var $modeBar = $('<div class="hdd-mode-bar">');
-            var $segments = $('<div class="hdd-mode-segments">')
-                .append('<button class="hdd-mode-btn' + (mode === 'temporum' ? ' active' : '') + '" data-mode="temporum">Temporale</button>')
-                .append('<button class="hdd-mode-btn' + (mode === 'sanctorum' ? ' active' : '') + '" data-mode="sanctorum">Sanctorale</button>');
-            var $todayBtn = $('<button id="btnHddToday" class="hdd-today-btn">Hodie</button>');
-            $modeBar.append($segments).append($todayBtn);
-
-            var $dateBar = $('<div class="hdd-date-bar">')
-                .append('<button id="btnHddPrevDay" class="hdd-date-nav" title="Dies præcedens"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>')
-                .append(
-                    $('<button id="btnHddCalendarToggle" class="hdd-date-btn" title="Ouvrir le calendrier">')
-                        .append('<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>')
-                        .append('<span id="hddDateBtnText">' + escHtml(dateFormatted) + '</span>')
-                        .append('<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="hdd-cal-chevron' + (doState.calOpen ? ' open' : '') + '"><polyline points="6 9 12 15 18 9"></polyline></svg>')
-                )
-                .append('<button id="btnHddNextDay" class="hdd-date-nav" title="Dies sequens"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>');
-
             var $calContainer = $('<div id="hddCustomCalendar" class="hdd-custom-calendar' + (doState.calOpen ? '' : ' hidden') + '"></div>');
 
             var $searchBar = $('<div class="hdd-search-bar">')
-                .append('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="hdd-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
-                .append('<input type="text" id="hddSearchInput" class="hdd-search-input" placeholder="' + (uiLang === 'fr' ? 'Rechercher un jour ou une fête…' : 'Quaere diem vel festum…') + '" autocomplete="off" spellcheck="false">');
+                .append('<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="hdd-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
+                .append('<input type="text" id="hddSearchInput" class="hdd-search-input" placeholder="' + escHtml(searchPlaceholder) + '" autocomplete="off" spellcheck="false">');
 
-            $('#hddControlsContainer').append($modeBar).append($dateBar).append($calContainer).append($searchBar);
+            var $controlsRow = $('<div class="hdd-controls-row">');
+
+            var $modeGroup = $('<div class="hdd-mode-group">')
+                .append('<button class="hdd-mode-btn' + (mode === 'temporum' ? ' active' : '') + '" data-mode="temporum">' + escHtml(temporaleLabel) + '</button>')
+                .append('<button class="hdd-mode-btn' + (mode === 'sanctorum' ? ' active' : '') + '" data-mode="sanctorum">' + escHtml(sanctoraleLabel) + '</button>');
+
+            var $dateGroup = $('<div class="hdd-date-group">')
+                .append('<button id="btnHddPrevDay" class="hdd-date-nav" title="Præcedens"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>')
+                .append(
+                    $('<button id="btnHddCalendarToggle" class="hdd-date-btn" title="Calendrier">')
+                        .append('<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>')
+                        .append('<span id="hddDateBtnText">' + escHtml(dateFormatted) + '</span>')
+                        .append('<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" class="hdd-cal-chevron' + (doState.calOpen ? ' open' : '') + '"><polyline points="6 9 12 15 18 9"></polyline></svg>')
+                )
+                .append('<button id="btnHddNextDay" class="hdd-date-nav" title="Sequens"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>')
+                .append('<button id="btnHddToday" class="hdd-today-btn">' + escHtml(todayLabel) + '</button>');
+
+            $controlsRow.append($modeGroup).append($dateGroup);
+
+            $('#hddControlsContainer').append($calContainer).append($searchBar).append($controlsRow);
             if (doState.calOpen) {
                 renderCustomCalendarGrid();
             }
@@ -3229,11 +3391,16 @@ function renderHeaderDropdown() {
             var bibleMode = doState.hddBibleMode || 'vetus';
             $('.hdd-mode-btn[data-bible-mode]').removeClass('active');
             $('.hdd-mode-btn[data-bible-mode="' + bibleMode + '"]').addClass('active');
+            $('#hddSearchInput').attr('placeholder', bibleSearchPlaceholder);
         } else {
             var mode = doState.hddMode || 'temporum';
+            $('.hdd-mode-btn[data-mode="temporum"]').text(temporaleLabel);
+            $('.hdd-mode-btn[data-mode="sanctorum"]').text(sanctoraleLabel);
             $('.hdd-mode-btn[data-mode]').removeClass('active');
             $('.hdd-mode-btn[data-mode="' + mode + '"]').addClass('active');
+            $('#btnHddToday').text(todayLabel);
             $('#hddDateBtnText').text(formatLiturgicalDate(doState.date, uiLang));
+            $('#hddSearchInput').attr('placeholder', searchPlaceholder);
             if (doState.calOpen) {
                 renderCustomCalendarGrid();
             }

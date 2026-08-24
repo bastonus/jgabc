@@ -1645,6 +1645,7 @@ div.do-rubric-inline {
 
 /* =============================================================
    SACRED HEADER DROPDOWN (DATE & LITURGY SELECTOR)
+   Seamless Extended Header with Pure Uniform Blur & Grain
    ============================================================= */
 .do-header-dropdown {
     position: fixed !important;
@@ -1654,17 +1655,17 @@ div.do-rubric-inline {
     bottom: 0 !important;
     height: auto !important;
     max-height: calc(100vh - 64px) !important;
-    background-color: color-mix(in srgb, var(--background-base) 82%, transparent) !important;
+    background-color: color-mix(in srgb, var(--background-base) 80%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45) !important;
-    z-index: 1550 !important;
+    box-shadow: none !important;
+    border: none !important;
+    z-index: 95 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     animation: dropdownReveal 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    border: none !important;
 }
 
 @media (max-width: 900px) {
@@ -1674,6 +1675,7 @@ div.do-rubric-inline {
         top: 68px !important;
         bottom: 0 !important;
         max-height: calc(100vh - 68px) !important;
+        z-index: 95 !important;
     }
 }
 
@@ -1697,23 +1699,21 @@ div.do-rubric-inline {
 .hdd-items-list {
     overflow-y: auto;
     flex: 1;
-    padding: 8px 24px 16px;
+    padding: 0 24px 16px;
     max-width: 900px;
     width: 100%;
     margin: 0;
     box-sizing: border-box;
 }
 
-/* Floating Bottom Control Dock */
+/* Seamless Floating Bottom Control Dock */
 .hdd-bottom-controls,
 .hdd-header-controls {
     flex-shrink: 0;
-    background-color: color-mix(in srgb, var(--background-base) 88%, transparent) !important;
-    background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-top: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent) !important;
-    padding: 12px 24px 16px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 8px 24px 16px;
     max-width: 900px;
     width: 100%;
     margin: 0;
@@ -1724,18 +1724,13 @@ div.do-rubric-inline {
     z-index: 20;
 }
 
-[data-theme="oled"] .hdd-bottom-controls,
-[data-theme="oled"] .hdd-header-controls {
-    background-color: rgba(0, 0, 0, 0.9) !important;
-}
-
 @media (max-width: 900px) {
     .hdd-items-list {
-        padding: 6px 14px 12px !important;
+        padding: 0 14px 12px !important;
     }
     .hdd-bottom-controls,
     .hdd-header-controls {
-        padding: 10px 14px 14px !important;
+        padding: 6px 14px 14px !important;
     }
 }
 
@@ -1743,85 +1738,82 @@ div.do-rubric-inline {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.hdd-mode-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
 }
 
-.hdd-mode-segments {
+@media (max-width: 649px) {
+    .hdd-controls-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+.hdd-mode-group {
     display: flex;
-    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
-    border-radius: 12px;
-    padding: 3px;
-    gap: 3px;
-    flex: 1;
-    min-width: 180px;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 649px) {
+    .hdd-mode-group {
+        width: 100%;
+    }
 }
 
 .hdd-mode-btn {
-    flex: 1;
-    padding: 7px 12px;
+    padding: 8px 16px;
+    border-radius: 10px;
     border: none !important;
-    border-radius: 9px;
-    background: transparent;
+    background: var(--background-highlight);
     color: var(--text-secondary);
     font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.83rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 649px) {
+    .hdd-mode-btn {
+        flex: 1;
+    }
 }
 
 .hdd-mode-btn:hover {
     color: var(--text-primary);
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--background-highlight));
 }
 
 .hdd-mode-btn.active {
-    background: var(--background-surface) !important;
+    background: rgba(var(--primary-color-rgb), 0.16) !important;
     color: var(--primary-color) !important;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-.hdd-today-btn {
-    padding: 7px 14px;
-    border-radius: 10px;
-    border: none !important;
-    background: rgba(var(--primary-color-rgb), 0.14);
-    color: var(--primary-color);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.hdd-today-btn:hover {
-    background: rgba(var(--primary-color-rgb), 0.24);
-}
-
-.hdd-date-bar {
+.hdd-date-group {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex: 1;
-    min-width: 160px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 649px) {
+    .hdd-date-group {
+        width: 100%;
+    }
 }
 
 .hdd-date-nav {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--background-highlight);
     border: none !important;
     color: var(--text-secondary);
     display: flex;
@@ -1838,26 +1830,54 @@ div.do-rubric-inline {
 }
 
 .hdd-date-btn {
-    flex: 1;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
+    background: var(--background-highlight);
     color: var(--text-primary);
     border: none !important;
-    border-radius: 8px;
-    padding: 7px 10px;
+    border-radius: 10px;
+    padding: 0 12px;
     font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.83rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
+@media (max-width: 649px) {
+    .hdd-date-btn {
+        flex: 1;
+    }
+}
+
 .hdd-date-btn:hover {
-    background: color-mix(in srgb, var(--primary-color) 10%, var(--background-highlight));
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--background-highlight));
     color: var(--primary-color);
+}
+
+.hdd-today-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: none !important;
+    background: rgba(var(--primary-color-rgb), 0.14);
+    color: var(--primary-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hdd-today-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.24);
 }
 
 .hdd-cal-chevron {
@@ -2009,7 +2029,7 @@ div.do-rubric-inline {
 }
 
 .hdd-group-title {
-    padding: 12px 10px 8px !important;
+    padding: 6px 10px 4px !important;
     font-family: 'Inter', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
@@ -2018,7 +2038,7 @@ div.do-rubric-inline {
     color: var(--primary-color) !important;
     position: sticky !important;
     top: 0 !important;
-    background-color: color-mix(in srgb, var(--background-base) 90%, transparent) !important;
+    background-color: color-mix(in srgb, var(--background-base) 80%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
@@ -2026,8 +2046,12 @@ div.do-rubric-inline {
     margin: 0 !important;
 }
 
+.hdd-group-title:not(:first-child) {
+    margin-top: 8px !important;
+}
+
 [data-theme="oled"] .hdd-group-title {
-    background-color: rgba(0, 0, 0, 0.88) !important;
+    background-color: rgba(0, 0, 0, 0.78) !important;
 }
 
 .hdd-item-card {
