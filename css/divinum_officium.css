@@ -2207,244 +2207,409 @@ div.do-rubric-inline {
 /* =============================================================
    HOME / ACCUEIL DASHBOARD VIEW
    ============================================================= */
-.do-home-view {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+/* =============================================================
+   Stylized Liturgical Home with Vertical Timeline
+   ============================================================= */
+
+/* =============================================================
+   Complete Liturgical Home & Timeline CSS (Isolated Scroll & Layout)
+   ============================================================= */
+
+/* App Container & Main overflow-x protection */
+body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+
+.app-container, .app-layout, .app-main, .content-area {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.do-home-styled {
     width: 100%;
-    animation: fadeIn 0.25s ease;
-}
-
-.do-home-hero {
-    background: var(--background-surface);
-    border-radius: 18px;
-    padding: 24px 24px 20px;
+    max-width: 680px;
+    margin: 0 auto 50px;
+    padding: 6px 12px 30px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    gap: 20px;
+    min-width: 0;
+    overflow-x: hidden;
+    animation: fadeIn 0.2s ease;
 }
 
-.do-home-hero-top {
+/* Global Search Bar on Home */
+.do-home-search-bar-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    min-width: 0;
 }
 
-.do-home-date-badge {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.76rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--primary-color);
+.do-home-search-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-tertiary, #888);
+    pointer-events: none;
 }
 
-.do-home-rank-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 100px;
-    background: var(--background-highlight);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.do-home-feast-title {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.35;
-    margin: 0;
-}
-
-.do-home-hero-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 4px;
-    flex-wrap: wrap;
-}
-
-.do-home-current-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--primary-color);
-    color: #fff !important;
-    padding: 12px 20px;
+.do-home-search-input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    background: var(--background-surface);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none !important;
-    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb), 0.35);
-}
-
-.do-home-current-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.45);
-}
-
-.do-home-secondary-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--background-highlight);
-    color: var(--text-primary);
-    padding: 12px 18px;
-    border-radius: 12px;
+    padding: 0 40px 0 40px;
     font-family: 'Inter', sans-serif;
     font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
+    color: var(--text-primary);
+    outline: none;
     transition: all 0.2s ease;
-    border: none !important;
 }
 
-.do-home-secondary-btn:hover {
-    background: rgba(var(--primary-color-rgb), 0.15);
+.do-home-search-input:focus {
+    border-color: var(--primary-color);
+    background: var(--background-highlight);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.15);
+}
+
+.do-home-search-clear {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.do-home-search-clear:hover {
     color: var(--primary-color);
 }
 
-.do-home-section {
+.do-home-search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--background-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    max-height: 360px;
+    overflow-y: auto;
+    z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 14px;
 }
 
-.do-home-section-header {
+.do-home-search-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.15s ease;
 }
 
-.do-home-section-title {
+.do-home-search-item:last-child {
+    border-bottom: none;
+}
+
+.do-home-search-item:hover {
+    background: var(--background-highlight);
+}
+
+.do-search-item-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    padding-right: 12px;
+}
+
+.do-search-item-badge {
     font-family: 'Inter', sans-serif;
     font-size: 0.74rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.do-home-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-    width: 100%;
-}
-
-.do-home-card {
-    background: var(--background-surface);
-    border-radius: 14px;
-    padding: 16px 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none !important;
-    text-align: left;
-    width: 100%;
-}
-
-.do-home-card:hover {
-    background: var(--background-highlight);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-}
-
-.do-home-card.is-current {
-    background: rgba(var(--primary-color-rgb), 0.1) !important;
-}
-
-.do-home-card-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: var(--background-highlight);
+    font-weight: 600;
     color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    padding: 3px 8px;
+    border-radius: 6px;
     flex-shrink: 0;
 }
 
-.do-home-card.is-current .do-home-card-icon {
-    background: var(--primary-color);
-    color: #fff;
-}
-
-.do-home-card-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-    flex: 1;
-}
-
-.do-home-card-name {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.do-home-card-time {
+.do-search-no-results {
+    padding: 20px;
+    text-align: center;
     font-family: 'Inter', sans-serif;
-    font-size: 0.74rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
 }
 
-@media (max-width: 600px) {
-    .do-home-grid {
-        grid-template-columns: 1fr;
-    }
-    .do-home-hero {
-        padding: 20px 18px;
-    }
-    .do-home-feast-title {
-        font-size: 1.25rem;
-    }
-}
-*, *::before, *::after {
-    border-color: transparent !important;
+/* Horizontal Scrolling ONLY for the two Cards */
+.do-top-cards-scroll {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
-.year-segments,
-.segment,
-.settings-option,
-.settings-option-card,
-.settings-pill-btn,
-.color-swatch,
-.color-swatch-circle,
-.do-card,
-.do-card-header,
-.do-top-header,
-.do-sidebar,
-.do-sidebar-header,
-.do-sidebar-control,
-.do-sidebar-footer,
-.settings-header,
-.settings-panel,
-.do-officium-panel,
-.do-bible-main-toolbar,
-.do-bible-bookmark-banner,
-.do-header-dropdown,
-.do-date-popup {
+.do-top-cards-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.do-top-cards-scroll .do-extra-link-card {
+    flex: 0 0 78vw;
+    max-width: 320px;
+    min-width: 220px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px 18px;
+    background: var(--background-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+    flex-shrink: 0;
+}
+
+@media (min-width: 600px) {
+    .do-top-cards-scroll .do-extra-link-card {
+        flex: 1 1 0;
+        max-width: none;
+    }
+}
+
+.do-top-cards-scroll .do-extra-link-card:hover {
+    border-color: rgba(var(--primary-color-rgb), 0.45);
+    background: var(--background-highlight);
+    transform: translateY(-2px);
+}
+
+.do-extra-link-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+}
+
+.do-extra-link-title {
+    font-family: 'Libre Baskerville', 'Crimson Text', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.do-extra-link-card:hover .do-extra-link-title {
+    font-family: 'Libre Baskerville', 'Crimson Text', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.do-extra-link-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-top: 2px;
+}
+
+/* Stylized Vertical Timeline: exact dot border thickness, bounded between Matines and Complies */
+.do-home-section-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.do-styled-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Timeline row item */
+.do-timeline-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 12px 14px 12px 42px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    min-height: 44px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.do-timeline-row:hover {
+    background: var(--background-highlight);
+}
+
+.do-timeline-row.active {
+    background: rgba(var(--primary-color-rgb), 0.08);
+}
+
+/* Node Track with Top & Bottom Line Segments */
+.do-node-track {
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Line segments matching EXACT 2px thickness and exact border color */
+.do-line-segment {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: rgba(255, 255, 255, 0.45);
+    z-index: 1;
+}
+
+.do-line-top {
+    top: 0;
+    bottom: 50%;
+}
+
+.do-line-bottom {
+    top: 50%;
+    bottom: 0;
+}
+
+/* Stop line above Matines dot */
+.do-timeline-row:first-child .do-line-top {
+    display: none !important;
+}
+
+/* Stop line below Complies dot */
+.do-timeline-row:last-child .do-line-bottom {
+    display: none !important;
+}
+
+[data-theme="light"] .do-line-segment {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Standard Inactive Dot (2px border) */
+.do-node-dot {
+    position: relative;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #121212;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    box-sizing: border-box;
+    z-index: 2;
+    box-shadow: none !important;
+    transition: all 0.15s ease;
+}
+
+[data-theme="light"] .do-node-dot {
+    background: #ffffff;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+}
+
+.do-timeline-row:hover .do-node-dot {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+}
+
+/* Active Dot: Grand point foncé entourant un petit point clair au centre (aucun glow) */
+/* Active Dot: Gros point opaque plus fonce sans contour, entourant un petit point clair */
+.do-node-dot.is-active {
+    width: 16px;
+    height: 16px;
+    background: color-mix(in srgb, var(--primary-color) 32%, #000000);
     border: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-top: none !important;
-    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .do-node-dot.is-active {
+    background: color-mix(in srgb, var(--primary-color) 25%, #d1d5db);
+}
+
+.do-node-dot.is-active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    box-shadow: none !important;
+}
+
+.do-row-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.do-row-name {
+    font-family: 'Libre Baskerville', 'Crimson Text', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.do-timeline-row.active .do-row-name {
+    color: var(--primary-color);
+}
+
+.do-row-time {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.do-timeline-row.active .do-row-time {
+    color: var(--primary-color);
+    font-weight: 600;
 }

@@ -1,0 +1,119 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a GitHub Release?'
+        required: true
+        type: boolean
+        default: true
+      release_tag:
+        description: 'Release Tag (e.g. v1.0.0)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Divinum Officium APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Generate Release Keystore
+        run: |
+          mkdir -p android/app
+          if [ ! -f "android/app/release.keystore" ]; then
+            echo "Generating release keystore..."
+            keytool -genkey -v -keystore android/app/release.keystore -storepass android -alias androidreleasekey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=DivinumOfficium, OU=App, O=ChantTools, L=Paris, C=FR"
+          fi
+
+      - name: Build Release APK with Gradle
+        working-directory: ./android
+        run: |
+          gradle :app:assembleRelease --stacktrace
+
+      - name: Prepare APK Artifact
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/release/app-release.apk build-output/Divinum-Officium.apk
+          echo "APK ready at build-output/Divinum-Officium.apk"
+
+      - name: Upload APK Artifact (GitHub Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Divinum-Officium-APK
+          path: build-output/Divinum-Officium.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Determine Release Tag
+        id: tag_info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.release_tag }}" ]; then
+              TAG_NAME="${{ github.event.inputs.release_tag }}"
+            else
+              TAG_NAME="v$(date +'%Y.%m.%d-%H%M')"
+            fi
+            DO_RELEASE="${{ github.event.inputs.create_release }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            DO_RELEASE="true"
+          else
+            TAG_NAME=""
+            DO_RELEASE="false"
+          fi
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "do_release=$DO_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.tag_info.outputs.do_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_info.outputs.tag_name }}
+          name: "Divinum Officium & Missale ${{ steps.tag_info.outputs.tag_name }}"
+          body: |
+            ### 📱 Divinum Officium & Missale Romanum — Application Android (APK)
+
+            Application Android autonome et 100% hors-ligne pour la récitation du Bréviaire traditionnel et du Missel romain (1962 / 1960).
+
+            #### ✨ Caractéristiques :
+            - 📖 **Liturgia Diei & Cursus Horarum** : Missa, Matutinum, Laudes, Prima, Tertia, Sexta, Nona, Vesperæ, Completorium.
+            - 📜 **Affichage Bilingue** : Latin en regard avec traductions vernaculaires (Français, Anglais, Espagnol, Italien, Allemand, Portugais).
+            - 📖 **Sacra Biblia** : Lecteur complet Vulgata, AELF, Crampon, Douay-Rheims, Matos Soares.
+            - 🎵 **Partitions & Audio Grégorien** : Lecteur interactif avec tempo et tonalité ajustables.
+            - 🌙 **Thèmes** : Nocturnum (Sombre), OLED, Diurnum (Clair) et 8 couleurs liturgiques.
+
+            #### 📥 Installation :
+            Téléchargez le fichier `Divinum-Officium.apk` ci-dessous et ouvrez-le sur votre appareil Android pour l'installer.
+          files: |
+            build-output/Divinum-Officium.apk
+          draft: false
+          prerelease: ${{ contains(steps.tag_info.outputs.tag_name, 'beta') || contains(steps.tag_info.outputs.tag_name, 'alpha') || contains(steps.tag_info.outputs.tag_name, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

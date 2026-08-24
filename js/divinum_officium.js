@@ -8,7 +8,7 @@
 
 // ---- Global State ----
 var doState = window.doState = {
-    hora: localStorage.getItem('do_hora') || 'missa',
+    hora: localStorage.getItem('do_hora') || 'home',
     date: moment(),
     showLatin: (localStorage.getItem('do_show_latin') !== 'false'),
     vernacularLang: localStorage.getItem('do_vernacular_lang') || (localStorage.getItem('do_lang') === 'la' ? 'none' : (localStorage.getItem('do_lang') || 'fr')),
@@ -2701,117 +2701,183 @@ var DO_HORA_DESCRIPTIONS = {
     }
 };
 
+function setupHomeSearch() {
+    $(document).off('input', '#doHomeSearchInput').on('input', '#doHomeSearchInput', function() {
+        var query = $(this).val();
+        var $results = $('#doHomeSearchResults');
+        var $clear = $('#doHomeSearchClear');
+        var uiLang = getUiLang();
+        var year = doState.date.year();
+
+        if (!query || !query.trim()) {
+            $results.addClass('hidden').empty();
+            $clear.addClass('hidden');
+            return;
+        }
+
+        $clear.removeClass('hidden');
+        var normQuery = normalizeSearchStr(query);
+        var tokens = normQuery.split(/\s+/).filter(Boolean);
+
+        var matches = [];
+
+        // 1. Search Sanctoral
+        if (typeof saintKeys !== 'undefined' && Array.isArray(saintKeys)) {
+            var seenKeys = {};
+            saintKeys.forEach(function(item) {
+                if (!item.key) return;
+                var baseKey = item.key.replace(/_[a-z0-9]+$/i, '');
+                if (item.key.indexOf('_') !== -1 && seenKeys[baseKey]) return;
+                if (seenKeys[item.key]) return;
+                seenKeys[item.key] = true;
+                seenKeys[baseKey] = true;
+
+                var dispTitle = getVernacularItemTitle(item, uiLang);
+                var titleLa = item.title || item.key;
+                var searchTarget = normalizeSearchStr(dispTitle + ' ' + titleLa + ' ' + (item.en || '') + ' ' + item.key);
+
+                var matchesAll = tokens.every(function(t) { return searchTarget.indexOf(t) >= 0; });
+                if (matchesAll) {
+                    var itemDate = getDateForLiturgicalKey(item.key, year);
+                    matches.push({
+                        type: 'sanctoral',
+                        key: item.key,
+                        title: dispTitle,
+                        date: itemDate,
+                        dateBadge: itemDate ? formatBadgeDate(itemDate, uiLang) : ''
+                    });
+                }
+            });
+        }
+
+        // 2. Search Tempora
+        if (typeof temporaKeys !== 'undefined' && Array.isArray(temporaKeys)) {
+            temporaKeys.forEach(function(item) {
+                if (!item.key) return;
+                var dispTitle = getVernacularItemTitle(item, uiLang);
+                var titleLa = item.title || item.key;
+                var searchTarget = normalizeSearchStr(dispTitle + ' ' + titleLa + ' ' + (item.en || '') + ' ' + item.key);
+
+                var matchesAll = tokens.every(function(t) { return searchTarget.indexOf(t) >= 0; });
+                if (matchesAll) {
+                    var itemDate = getDateForLiturgicalKey(item.key, year);
+                    matches.push({
+                        type: 'tempora',
+                        key: item.key,
+                        title: dispTitle,
+                        date: itemDate,
+                        dateBadge: itemDate ? formatBadgeDate(itemDate, uiLang) : ''
+                    });
+                }
+            });
+        }
+
+        // 3. Search Bible Books
+        if (typeof DO_BIBLE_BOOKS !== 'undefined' && Array.isArray(DO_BIBLE_BOOKS)) {
+            DO_BIBLE_BOOKS.forEach(function(b) {
+                var nameFr = b.fr || b.name;
+                var nameLa = b.la || b.name;
+                var searchTarget = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.code);
+                var matchesAll = tokens.every(function(t) { return searchTarget.indexOf(t) >= 0; });
+                if (matchesAll) {
+                    matches.push({
+                        type: 'bible',
+                        code: b.code,
+                        title: (uiLang === 'fr' ? nameFr : nameLa) + ' (Bible)',
+                        dateBadge: b.testament === 'NT' ? 'Nouveau Test.' : 'Ancien Test.'
+                    });
+                }
+            });
+        }
+
+        if (!matches.length) {
+            $results.html('<div class="do-search-no-results">' + (uiLang === 'fr' ? 'Aucun résultat trouvé' : 'Nullum inventum') + '</div>').removeClass('hidden');
+            return;
+        }
+
+        $results.empty().removeClass('hidden');
+        var capped = matches.slice(0, 15);
+
+        capped.forEach(function(m) {
+            var $item = $('<div class="do-home-search-item">')
+                .append('<span class="do-search-item-title">' + escHtml(m.title) + '</span>')
+                .append('<span class="do-search-item-badge">' + escHtml(m.dateBadge) + '</span>')
+                .on('click', function(e) {
+                    e.stopPropagation();
+                    if (m.type === 'bible') {
+                        openBible(m.code, 1, 1);
+                    } else {
+                        if (m.date && m.date.isValid()) {
+                            doState.date = m.date;
+                            doState.officiumKey = m.key;
+                            localStorage.setItem('do_officiumKey', m.key);
+                            $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+                        }
+                        renderDO();
+                    }
+                    $results.addClass('hidden').empty();
+                    $('#doHomeSearchInput').val('');
+                    $clear.addClass('hidden');
+                });
+
+            $results.append($item);
+        });
+    });
+
+    $(document).off('click', '#doHomeSearchClear').on('click', '#doHomeSearchClear', function(e) {
+        e.stopPropagation();
+        $('#doHomeSearchInput').val('').focus();
+        $('#doHomeSearchResults').addClass('hidden').empty();
+        $(this).addClass('hidden');
+    });
+
+    $(document).off('click.homeSearch').on('click.homeSearch', function(e) {
+        if (!$(e.target).closest('.do-home-search-bar-wrap').length) {
+            $('#doHomeSearchResults').addClass('hidden');
+        }
+    });
+}
+
+
 function renderHomeView() {
     var $stream = $('#do-content-stream').empty();
     var uiLang = getUiLang();
     var curDateFormatted = formatLiturgicalDate(doState.date, uiLang);
     var curHora = getCurrentLiturgicalHora();
     var descs = DO_HORA_DESCRIPTIONS[uiLang] || DO_HORA_DESCRIPTIONS['fr'];
-    var curHoraInfo = descs[curHora] || { name: curHora, time: '', desc: '' };
 
-    $('#doHourLabel').text(uiLang === 'fr' ? 'ACCUEIL • ' + curDateFormatted.toUpperCase() : 'HODIE • ' + curDateFormatted.toUpperCase());
-    $('#doHeaderTitle .title-text').text(uiLang === 'fr' ? 'Tableau de bord liturgique' : 'Tabularium Liturgicum');
+    // Header label shows formatted date
+    $('#doHourLabel').text(curDateFormatted.toUpperCase());
 
-    loadMissaData(doState.date, 'la', function(err, laResult) {
-        var feastTitle = (laResult && laResult.title) ? laResult.title : curDateFormatted;
+    loadMissaData(doState.date, (uiLang === 'la' ? 'la' : 'fr'), function(err, result) {
+        var rawTitle = (result && result.title) ? result.title : curDateFormatted;
+        var feastTitle = getLocalizedFeastTitle(rawTitle, uiLang);
 
-        var $home = $('<div class="do-home-view">');
+        // Put the feast title directly in the header
+        $('#doHeaderTitle .title-text').text(feastTitle);
+        $('#doSidebarFeastTitle').text(feastTitle);
 
-        // Hero Card
-        var $hero = $('<div class="do-home-hero">')
-            .append(
-                $('<div class="do-home-hero-top">')
-                    .append('<span class="do-home-date-badge">' + escHtml(curDateFormatted) + '</span>')
-                    .append('<span class="do-home-rank-pill"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="12" cy="12" r="6"></circle></svg> ' + (uiLang === 'fr' ? 'Heure actuelle : ' + curHoraInfo.name : 'Hora apta : ' + curHoraInfo.name) + '</span>')
-            )
-            .append('<h2 class="do-home-feast-title">' + escHtml(feastTitle) + '</h2>')
-            .append(
-                $('<div class="do-home-hero-actions">')
-                    .append(
-                        $('<button class="do-home-current-btn">')
-                            .html('<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>' + (uiLang === 'fr' ? 'Prier ' + curHoraInfo.name : 'Ora ' + curHoraInfo.name) + '</span>')
-                            .on('click', function() {
-                                doState.hora = curHora;
-                                localStorage.setItem('do_hora', curHora);
-                                renderDO();
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            })
-                    )
-                    .append(
-                        $('<button class="do-home-secondary-btn">')
-                            .html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> <span>' + (uiLang === 'fr' ? 'Sainte Messe' : 'Sancta Missa') + '</span>')
-                            .on('click', function() {
-                                doState.hora = 'missa';
-                                localStorage.setItem('do_hora', 'missa');
-                                renderDO();
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            })
-                    )
-            );
+        var $view = $('<div class="do-home-styled">');
 
-        $home.append($hero);
+        // ---- BARRE DE RECHERCHE GLOBALE ----
+        var searchPlaceholder = (uiLang === 'fr') ? "Rechercher un saint, un dimanche, une fête ou un livre biblique..." : "Quære sanctum, dominicam aut librum...";
+        var $searchBar = $('<div class="do-home-search-bar-wrap">')
+            .append('<svg class="do-home-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
+            .append('<input type="text" id="doHomeSearchInput" class="do-home-search-input" placeholder="' + escHtml(searchPlaceholder) + '" autocomplete="off">')
+            .append('<button id="doHomeSearchClear" class="do-home-search-clear hidden">&times;</button>')
+            .append('<div id="doHomeSearchResults" class="do-home-search-results hidden"></div>');
 
-        // Section: Cursus Horarum
-        var $horaeSection = $('<div class="do-home-section">')
-            .append(
-                $('<div class="do-home-section-header">')
-                    .append('<h3 class="do-home-section-title">' + (uiLang === 'fr' ? 'Les Heures de l’Office Divin' : 'Cursus Horarum Divini Officii') + '</h3>')
-            );
+        $view.append($searchBar);
 
-        var $horaeGrid = $('<div class="do-home-grid">');
-        var hoursList = ['matutinum', 'laudes', 'prima', 'tertia', 'sexta', 'nona', 'vesperae', 'completorium'];
-
-        var horaIcons = {
-            matutinum: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
-            laudes: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>',
-            prima: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>',
-            tertia: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 15 11"></polyline></svg>',
-            sexta: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 12 17"></polyline></svg>',
-            nona: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 9 15"></polyline></svg>',
-            vesperae: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="2" x2="12" y2="9"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line></svg>',
-            completorium: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
-        };
-
-        hoursList.forEach(function(hKey) {
-            var hInfo = descs[hKey] || { name: hKey, time: '', desc: '' };
-            var isCurrent = (hKey === curHora);
-
-            var $card = $('<button class="do-home-card' + (isCurrent ? ' is-current' : '') + '">')
-                .append('<div class="do-home-card-icon">' + (horaIcons[hKey] || '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>') + '</div>')
-                .append(
-                    $('<div class="do-home-card-info">')
-                        .append('<span class="do-home-card-name">' + escHtml(hInfo.name) + (isCurrent ? ' <small style="color:var(--primary-color); font-weight:700;">● ' + (uiLang === 'fr' ? 'En ce moment' : 'Nunc') + '</small>' : '') + '</span>')
-                        .append('<span class="do-home-card-time">' + escHtml(hInfo.time + ' • ' + hInfo.desc) + '</span>')
-                )
-                .on('click', function() {
-                    doState.hora = hKey;
-                    localStorage.setItem('do_hora', hKey);
-                    renderDO();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-
-            $horaeGrid.append($card);
-        });
-
-        $horaeSection.append($horaeGrid);
-        $home.append($horaeSection);
-
-        // Section: Missa & Biblia
-        var $extraSection = $('<div class="do-home-section">')
-            .append(
-                $('<div class="do-home-section-header">')
-                    .append('<h3 class="do-home-section-title">' + (uiLang === 'fr' ? 'Messe & Sainte Écriture' : 'Missa & Sacra Biblia') + '</h3>')
-            );
-
-        var $extraGrid = $('<div class="do-home-grid">');
+        // ---- SECTION MESSE & BIBLE (CÔTE À CÔTE SUR LA MÊME LIGNE SANS FLÈCHE) ----
+        var $topCardsGrid = $('<div class="do-top-cards-scroll">');
 
         // Missa Card
-        var $missaCard = $('<button class="do-home-card">')
-            .append('<div class="do-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"></path></svg></div>')
+        var $missaCard = $('<div class="do-extra-link-card">')
             .append(
-                $('<div class="do-home-card-info">')
-                    .append('<span class="do-home-card-name">' + (uiLang === 'fr' ? 'Sainte Messe du Jour' : 'Sancta Missa') + '</span>')
-                    .append('<span class="do-home-card-time">' + (uiLang === 'fr' ? 'Propre des lectures et prières de la Messe' : 'Proprium et Ordinarium Missae') + '</span>')
+                $('<div class="do-extra-link-content">')
+                    .append('<div class="do-extra-link-title">' + (uiLang === 'fr' ? 'Sainte Messe du Jour' : 'Sancta Missa Diei') + '</div>')
+                    .append('<div class="do-extra-link-subtitle">' + (uiLang === 'fr' ? 'Introït, Collecte, Épître, Graduel, Évangile, Offertoire, Secrète, Communion...' : 'Introitus, Oratio, Epistola, Graduale, Evangelium, Offertorium, Secreta, Communio...') + '</div>')
             )
             .on('click', function() {
                 doState.hora = 'missa';
@@ -2821,26 +2887,59 @@ function renderHomeView() {
             });
 
         // Bible Card
-        var $bibleCard = $('<button class="do-home-card">')
-            .append('<div class="do-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>')
+        var $bibleCard = $('<div class="do-extra-link-card">')
             .append(
-                $('<div class="do-home-card-info">')
-                    .append('<span class="do-home-card-name">' + (uiLang === 'fr' ? 'Sainte Bible (Vulgate)' : 'Sacra Biblia Vulgata') + '</span>')
-                    .append('<span class="do-home-card-time">' + (uiLang === 'fr' ? '73 livres avec traduction verset par verset' : 'Vetus et Novum Testamentum') + '</span>')
+                $('<div class="do-extra-link-content">')
+                    .append('<div class="do-extra-link-title">' + (uiLang === 'fr' ? 'Sainte Bible (Vulgate)' : 'Sacra Biblia Vulgata') + '</div>')
+                    .append('<div class="do-extra-link-subtitle">' + (uiLang === 'fr' ? 'Les 73 livres de l’Ancien et du Nouveau Testament bilingue' : '73 libri Canonici Veteris et Novi Testamenti bilinguis') + '</div>')
             )
             .on('click', function() {
                 openBible('Matt', 1, 1);
             });
 
-        $extraGrid.append($missaCard).append($bibleCard);
-        $extraSection.append($extraGrid);
-        $home.append($extraSection);
+        $topCardsGrid.append($missaCard).append($bibleCard);
+        $view.append($topCardsGrid);
 
-        $stream.append($home);
+        // ---- TIMELINE VERTICALE DE L'OFFICE DIVIN (LIGNE BORNEE MATINES -> COMPLIES) ----
+        var $timelineSection = $('<div class="do-home-section-wrap">');
+        var $timeline = $('<div class="do-styled-timeline">');
+
+        var hoursList = ['matutinum', 'laudes', 'prima', 'tertia', 'sexta', 'nona', 'vesperae', 'completorium'];
+
+        hoursList.forEach(function(hKey) {
+            var hInfo = descs[hKey] || { name: hKey, time: '', desc: '' };
+            var isCurrent = (hKey === curHora);
+
+            var $row = $('<div class="do-timeline-row' + (isCurrent ? ' active' : '') + '">')
+                .append(
+                    $('<div class="do-node-track">')
+                        .append('<div class="do-line-segment do-line-top"></div>')
+                        .append('<div class="do-node-dot' + (isCurrent ? ' is-active' : '') + '"></div>')
+                        .append('<div class="do-line-segment do-line-bottom"></div>')
+                )
+                .append(
+                    $('<div class="do-row-main">')
+                        .append('<span class="do-row-name">' + escHtml(hInfo.name) + '</span>')
+                        .append('<span class="do-row-time">' + escHtml(hInfo.time) + '</span>')
+                )
+                .on('click', function() {
+                    doState.hora = hKey;
+                    localStorage.setItem('do_hora', hKey);
+                    renderDO();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+            $timeline.append($row);
+        });
+
+        $timelineSection.append($timeline);
+        $view.append($timelineSection);
+
+        $stream.append($view);
+        setupHomeSearch();
     });
 }
 
-// ---- Main Render Function ----
 function renderDO() {
     updateSidebarAndHeader();
     closeHeaderDropdown();

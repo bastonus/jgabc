@@ -9,7 +9,7 @@ Psalms-RGP
 gr1961
 platforms
 plugins
-res
+/res/
 icon.png
 douay-rheims/src
 MR1962
@@ -25,3 +25,13 @@ pac.bak*
 psalms and canticles/ps*
 divinum-officium-master/
 missalemeum-master/
+
+# Android build outputs & caches
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/
+build-output/
+*.keystore
+*.jks
+
