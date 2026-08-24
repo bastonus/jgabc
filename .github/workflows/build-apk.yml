@@ -65,7 +65,7 @@ jobs:
         run: |
           gradle :app:assembleRelease --stacktrace
 
-      - name: Sign and Verify APK
+      - name: Prepare and Verify APK
         run: |
           BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
           echo "Using Android Build Tools: $BUILD_TOOLS_DIR"
@@ -74,17 +74,11 @@ jobs:
           echo "Found compiled APK: $RAW_APK"
           
           mkdir -p build-output
-          # Sign using apksigner with v1, v2, v3 schemes
-          $BUILD_TOOLS_DIR/apksigner sign \
-            --ks android/app/release.keystore \
-            --ks-pass pass:android \
-            --ks-key-alias androidreleasekey \
-            --key-pass pass:android \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --out build-output/Divinum-Officium.apk \
-            "$RAW_APK"
+          cp "$RAW_APK" build-output/Divinum-Officium.apk
+          
+          # Verify 4-byte zip alignment
+          echo "Verifying ZIP alignment..."
+          $BUILD_TOOLS_DIR/zipalign -c -v 4 build-output/Divinum-Officium.apk
           
           # Verify the signature
           echo "Verifying APK signature..."

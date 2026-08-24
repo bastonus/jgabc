@@ -33,5 +33,6 @@ android/app/build/
 android/app/src/main/assets/
 build-output/
 *.keystore
+!android/app/release.keystore
 *.jks
 

@@ -11,8 +11,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=16.0&ts=202608250645">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=16.0&ts=202608250645">
+    <link rel="stylesheet" href="css/modern.css?v=16.1&ts=202608250700">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=16.1&ts=202608250700">
     <script src="jquery.min.js"></script>
     <script src="moment.min.js"></script>
     <script src="moment.easter.js"></script>
@@ -20,13 +20,17 @@
     <script src="ordinarydata.js"></script>
     <script src="miscChants.js"></script>
     <script src="incipits.js"></script>
+    <script src="js/Tone.min.js"></script>
+    <script src="js/tones.js"></script>
+    <script src="util.js"></script>
+    <script src="exsurge.min.js"></script>
     <script src="jquery.hypher.js"></script>
     <script src="patterns/la-hypher.js"></script>
     <script src="patterns/fr-FR.js"></script>
     <script src="patterns/en-us.js"></script>
     <script src="patterns/it.js"></script>
     <script src="patterns/pl.js"></script>
-    <script src="js/divinum_officium.js?v=16.0&ts=202608250645"></script>
+    <script src="js/divinum_officium.js?v=16.3&ts=202608250710"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -322,6 +326,14 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Discreet Test Page Link -->
+            <div class="settings-group" style="padding-top: 14px; margin-top: 10px; border-top: 1px solid rgba(var(--primary-color-rgb), 0.15); text-align: center;">
+                <button id="btnOpenTestMissa" style="background: none; border: none; padding: 6px 8px; color: var(--text-tertiary); font-size: 0.78rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; gap: 6px; opacity: 0.75; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='var(--primary-color)';" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-tertiary)';">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>🧪 Page de test (Messe &amp; Chant Grégorien)</span>
+                </button>
             </div>
 
         </div>

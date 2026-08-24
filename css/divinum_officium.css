@@ -2763,3 +2763,331 @@ body, html {
     word-break: normal !important;
     overflow-wrap: break-word !important;
 }
+
+/* =============================================================
+   GREGORIAN CHANT TEST PAGE & INTERCALATED SCORES (GABC / EXSURGE)
+   ============================================================= */
+
+.do-test-banner {
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--background-surface));
+    border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.do-test-banner-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.do-test-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.14);
+    padding: 3px 9px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.do-test-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.do-test-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 720px;
+}
+
+.do-test-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.do-test-ctrl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: var(--background-highlight);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.do-test-ctrl-btn:hover {
+    background: color-mix(in srgb, var(--primary-color) 12%, var(--background-highlight));
+    color: var(--text-primary);
+}
+
+.do-test-ctrl-btn.active {
+    background: rgba(var(--primary-color-rgb), 0.2);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.do-test-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.do-test-select-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.do-test-select {
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    background: var(--background-highlight);
+    color: var(--text-primary);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 260px;
+}
+
+.do-test-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+/* Intercalated Chant Cards */
+.do-chant-card-wrapper {
+    margin: 14px 0 18px 0;
+    transition: all 0.25s ease;
+}
+
+.do-chant-card {
+    background: var(--background-surface);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+    border-radius: 12px;
+    padding: 16px 18px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .do-chant-card {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.do-chant-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-tertiary) 15%, transparent);
+}
+
+.do-chant-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.do-chant-part {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.12);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.do-chant-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.do-chant-mode-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--background-highlight);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.do-chant-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.do-chant-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--background-highlight);
+    border: 1px solid color-mix(in srgb, var(--text-tertiary) 20%, transparent);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.do-chant-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.do-chant-play-btn.is-playing {
+    background: rgba(var(--primary-color-rgb), 0.22);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    animation: doPulseChant 1.8s infinite;
+}
+
+@keyframes doPulseChant {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0); }
+}
+
+.do-chant-pitch-badge {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.do-chant-preview {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 0;
+    margin: 4px 0;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.do-chant-preview svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.do-chant-preview svg text {
+    user-select: none;
+}
+
+.do-chant-preview svg use[source-index] {
+    cursor: pointer;
+    transition: fill 0.15s ease;
+}
+
+.do-chant-preview svg use[source-index]:hover,
+.do-chant-preview svg use[source-index].active {
+    fill: var(--primary-color) !important;
+    filter: drop-shadow(0 0 3px var(--primary-color));
+}
+
+.do-chant-gabc-raw {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--background-base);
+    border: 1px dashed color-mix(in srgb, var(--primary-color) 30%, transparent);
+    border-radius: 6px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.do-chant-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.do-chant-error {
+    padding: 12px;
+    color: #ef5350;
+    font-size: 0.82rem;
+    background: rgba(239, 83, 80, 0.1);
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .do-test-banner {
+        padding: 16px 14px;
+    }
+    .do-test-title {
+        font-size: 1.15rem;
+    }
+    .do-test-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .do-test-select {
+        max-width: 100%;
+        width: 100%;
+    }
+    .do-chant-card {
+        padding: 12px 12px;
+    }
+}
+

@@ -16,6 +16,8 @@ var doState = window.doState = {
     rite: localStorage.getItem('do_rite') || 'traditional',
     officiumKey: localStorage.getItem('do_officiumKey') || null,
     includeOrdinarium: localStorage.getItem('do_ordinarium') === 'true',
+    includeGregorian: (localStorage.getItem('do_include_gregorian') !== 'false'),
+    selectedKyriale: localStorage.getItem('do_selected_kyriale') || 'auto',
     tempo: parseInt(localStorage.getItem('do_tempo'), 10) || 150,
     mobileLang: 'la',
     settings: {
@@ -41,52 +43,56 @@ function getUiLang() {
 
 var DO_HORA_TITLES_BY_LANG = {
     fr: {
-        missa:        'Sainte Messe',
-        matutinum:    'Matines',
-        laudes:       'Laudes',
-        prima:        'Prime',
-        tertia:       'Tierce',
-        sexta:        'Sexte',
-        nona:         'None',
-        vesperae:     'Vêpres',
-        completorium: 'Complies',
-        bible:        'Sainte Bible'
+        missa:            'Sainte Messe',
+        missa_gregorian:  'Messe & Grégorien',
+        matutinum:        'Matines',
+        laudes:           'Laudes',
+        prima:            'Prime',
+        tertia:           'Tierce',
+        sexta:            'Sexte',
+        nona:             'None',
+        vesperae:         'Vêpres',
+        completorium:     'Complies',
+        bible:            'Sainte Bible'
     },
     la: {
-        missa:        'Sancta Missa',
-        matutinum:    'Ad Matutinum',
-        laudes:       'Ad Laudes',
-        prima:        'Ad Primam',
-        tertia:       'Ad Tertiam',
-        sexta:        'Ad Sextam',
-        nona:         'Ad Nonam',
-        vesperae:     'Ad Vesperas',
-        completorium: 'Ad Completorium',
-        bible:        'Sacra Biblia'
+        missa:            'Sancta Missa',
+        missa_gregorian:  'Missa cum Cantu',
+        matutinum:        'Ad Matutinum',
+        laudes:           'Ad Laudes',
+        prima:            'Ad Primam',
+        tertia:           'Ad Tertiam',
+        sexta:            'Ad Sextam',
+        nona:             'Ad Nonam',
+        vesperae:         'Ad Vesperas',
+        completorium:     'Ad Completorium',
+        bible:            'Sacra Biblia'
     },
     en: {
-        missa:        'Holy Mass',
-        matutinum:    'Matins',
-        laudes:       'Lauds',
-        prima:        'Prime',
-        tertia:       'Terce',
-        sexta:        'Sext',
-        nona:         'None',
-        vesperae:     'Vespers',
-        completorium: 'Compline',
-        bible:        'Holy Bible'
+        missa:            'Holy Mass',
+        missa_gregorian:  'Mass & Chant',
+        matutinum:        'Matins',
+        laudes:           'Lauds',
+        prima:            'Prime',
+        tertia:           'Terce',
+        sexta:            'Sext',
+        nona:             'None',
+        vesperae:         'Vespers',
+        completorium:     'Compline',
+        bible:            'Holy Bible'
     },
     es: {
-        missa:        'Santa Misa',
-        matutinum:    'Maitines',
-        laudes:       'Laudes',
-        prima:        'Prima',
-        tertia:       'Tercia',
-        sexta:        'Sexta',
-        nona:         'Nona',
-        vesperae:     'Vísperas',
-        completorium: 'Completas',
-        bible:        'Santa Biblia'
+        missa:            'Santa Misa',
+        missa_gregorian:  'Misa y Canto',
+        matutinum:        'Maitines',
+        laudes:           'Laudes',
+        prima:            'Prima',
+        tertia:           'Tercia',
+        sexta:            'Sexta',
+        nona:             'Nona',
+        vesperae:         'Vísperas',
+        completorium:     'Completas',
+        bible:            'Santa Biblia'
     }
 };
 
@@ -359,6 +365,8 @@ var DO_UI_TRANSLATIONS = {
         sacra_biblia_tag: 'Vulgata & AELF',
         missa: 'Messe',
         missa_tag: 'Sainte Messe',
+        missa_gregorian: 'Messe & Grégorien',
+        missa_gregorian_tag: 'Page de Test',
         matutinum: 'Matines',
         matutinum_tag: 'Vigiles',
         laudes: 'Laudes',
@@ -414,6 +422,8 @@ var DO_UI_TRANSLATIONS = {
         sacra_biblia_tag: 'Vulgata',
         missa: 'Missa',
         missa_tag: 'Sancta Missa',
+        missa_gregorian: 'Missa & Cantus',
+        missa_gregorian_tag: 'Experimentum',
         matutinum: 'Matutinum',
         matutinum_tag: 'Vigiliae',
         laudes: 'Laudes',
@@ -467,6 +477,8 @@ var DO_UI_TRANSLATIONS = {
         sacra_biblia_tag: 'Vulgate & Douay-Rheims',
         missa: 'Mass',
         missa_tag: 'Holy Mass',
+        missa_gregorian: 'Mass & Chant',
+        missa_gregorian_tag: 'Test Page',
         matutinum: 'Matins',
         matutinum_tag: 'Vigils',
         laudes: 'Lauds',
@@ -519,6 +531,8 @@ var DO_UI_TRANSLATIONS = {
         sacra_biblia_tag: 'Vulgata',
         missa: 'Misa',
         missa_tag: 'Santa Misa',
+        missa_gregorian: 'Misa y Canto',
+        missa_gregorian_tag: 'Página de Prueba',
         matutinum: 'Maitines',
         matutinum_tag: 'Vigilias',
         laudes: 'Laudes',
@@ -588,6 +602,8 @@ function updateUiTranslations() {
     $('.do-nav-item[data-hora="home"] .do-nav-tag').text(t.home_tag);
     $('.do-nav-item[data-hora="missa"] .do-nav-label').text(t.missa);
     $('.do-nav-item[data-hora="missa"] .do-nav-tag').text(t.missa_tag);
+    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-label').text(t.missa_gregorian || 'Messe & Grégorien');
+    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-tag').text(t.missa_gregorian_tag || 'Page de Test');
     $('.do-nav-item[data-hora="matutinum"] .do-nav-label').text(t.matutinum);
     $('.do-nav-item[data-hora="matutinum"] .do-nav-tag').text(t.matutinum_tag);
     $('.do-nav-item[data-hora="laudes"] .do-nav-label').text(t.laudes);
@@ -1408,8 +1424,9 @@ function loadMissaData(date, lang, callback) {
     var sanctiCode = feastKey || codes.sancti;
     var temporaCode = feastKey || codes.tempora;
 
-    var primaryPath = 'Sancti/' + sanctiCode;
-    var fallbackPath = 'Tempora/' + temporaCode;
+    var isDirectTempora = feastKey && /^(Adv|Quad|Pasc|Pent|Epi|7a|6a|5a)/i.test(feastKey);
+    var primaryPath = isDirectTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode);
+    var fallbackPath = isDirectTempora ? ('Sancti/' + sanctiCode) : ('Tempora/' + temporaCode);
 
     if (codes.isSunday && !feastKey) {
         fetchLocalFile('do_data/missa/Latin/Sancti/' + sanctiCode + '.txt', function(errS, laSData) {
@@ -1577,6 +1594,32 @@ function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback)
 
 function convertFeastKeyToCode(key) {
     if (!key) return null;
+
+    // Direct season / proper mappings to Divinum Officium file codes
+    var seasonMap = {
+        'Adv1': 'Adv1-0', 'Adv2': 'Adv2-0', 'Adv3': 'Adv3-0', 'Adv4': 'Adv4-0',
+        'Dec25_1': '12-25', 'Dec25_2': '12-25', 'Dec25_3': '12-25',
+        'Epi': '01-06', 'Epi1': 'Epi1-0', 'Epi2': 'Epi2-0', 'Epi3': 'Epi3-0', 'Epi4': 'Epi4-0', 'Epi5': 'Epi5-0', 'Epi6': 'Epi6-0',
+        '7a': 'Quadp1-0', '6a': 'Quadp2-0', '5a': 'Quadp3-0', '5aw': 'Quadp3-3',
+        'Quad1': 'Quad1-0', 'Quad2': 'Quad2-0', 'Quad3': 'Quad3-0', 'Quad4': 'Quad4-0',
+        'Quad5': 'Quad5-0', 'Quad6': 'Quad6-0', 'Quad6h': 'Quad6-4', 'Quad6f': 'Quad6-5', 'Quad6s': 'Quad6-6',
+        'Pasc0': 'Pasc0-0', 'Pasc1': 'Pasc1-0', 'Pasc2': 'Pasc2-0', 'Pasc3': 'Pasc3-0', 'Pasc4': 'Pasc4-0', 'Pasc5': 'Pasc5-0',
+        'Asc': 'Pasc5-4', 'Pasc6': 'Pasc6-0', 'Pent0': 'Pasc7-0',
+        'Trin': 'Pent01-0', 'Corp': 'Pent01-4', 'SH': 'Pent02-5', 'ChristRex': '10-DU',
+        'SMadvent': 'C11', 'SMchristmas': 'C11', 'SMlent': 'C11', 'SMpasch': 'C11', 'SMperannum': 'C11',
+        'requiem': 'Defunctorum', 'nuptial': 'C12', 'angels': '09-29'
+    };
+
+    if (seasonMap[key]) return seasonMap[key];
+
+    // Pent01 - Pent24
+    var pentMatch = key.match(/^Pent(\d+)$/i);
+    if (pentMatch) {
+        var pNum = parseInt(pentMatch[1], 10);
+        var pStr = (pNum < 10 ? '0' + pNum : '' + pNum);
+        return 'Pent' + pStr + '-0';
+    }
+
     var m = key.match(/^([A-Za-z]{3})(\d+)(.*)$/);
     if (m) {
         var mon = m[1], day = m[2], sfx = m[3];
@@ -2634,7 +2677,8 @@ function formatTextBlock(lines, langKey) {
 }
 
 function escHtml(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (str == null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function renderLoading() {
@@ -3197,7 +3241,7 @@ function renderDO() {
     var $stream = $('#do-content-stream');
     $stream.html(renderLoading());
 
-    var isMissa = (doState.hora === 'missa');
+    var isMissa = (doState.hora === 'missa' || doState.hora === 'missa_gregorian');
     var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : null;
 
     if (isMissa) {
@@ -3246,6 +3290,418 @@ function getLocalizedFeastTitle(rawTitle, uiLang) {
     return clean;
 }
 
+// =============================================================
+// GREGORIAN CHANT ENGINE (PROPRIUM, KYRIALE & EXSURGE NOTATION)
+// =============================================================
+
+var GABC_LOCAL_CACHE = {};
+
+function parseGabcHeader(gabc) {
+    var header = {};
+    if (!gabc) return header;
+    var lines = gabc.split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+        var l = lines[i].trim();
+        if (l === '%%') break;
+        var m = l.match(/^([\w-]+)\s*:\s*([^;]+);/);
+        if (m) {
+            header[m[1].toLowerCase()] = m[2].trim();
+        }
+    }
+    return header;
+}
+
+function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale) {
+    var result = {};
+    if (typeof proprium === 'undefined') return result;
+
+    var prop = null;
+    var matchedKey = null;
+
+    // 1. Direct key match (from officiumKey if set)
+    if (officiumKey) {
+        var baseKey = officiumKey.replace(/-0$/, '');
+        var cleanKey = convertFeastKeyToCode(officiumKey) || officiumKey;
+        var cleanBaseKey = cleanKey ? cleanKey.replace(/-0$/, '') : '';
+
+        if (proprium[officiumKey]) {
+            prop = proprium[officiumKey];
+            matchedKey = officiumKey;
+        } else if (proprium[baseKey]) {
+            prop = proprium[baseKey];
+            matchedKey = baseKey;
+        } else if (cleanKey && proprium[cleanKey]) {
+            prop = proprium[cleanKey];
+            matchedKey = cleanKey;
+        } else if (cleanBaseKey && proprium[cleanBaseKey]) {
+            prop = proprium[cleanBaseKey];
+            matchedKey = cleanBaseKey;
+        }
+    }
+
+    // 2. Date-based matching (Saints MM-DD or Tempora)
+    if (!prop && mom && mom.isValid()) {
+        var mmdd = mom.format('MM-DD');
+        if (proprium[mmdd]) {
+            prop = proprium[mmdd];
+            matchedKey = mmdd;
+        } else {
+            var codes = computeLiturgicalCodes(mom);
+            var tempKey = codes.tempora ? codes.tempora.replace(/-\d+$/, '') : '';
+            if (tempKey && proprium[tempKey]) {
+                prop = proprium[tempKey];
+                matchedKey = tempKey;
+            } else if (codes.sancti && proprium[codes.sancti]) {
+                prop = proprium[codes.sancti];
+                matchedKey = codes.sancti;
+            }
+        }
+    }
+
+    // Handle reference redirects in proprium
+    if (prop && prop.ref && proprium[prop.ref]) {
+        prop = proprium[prop.ref];
+    }
+
+    // Default fallback if still null
+    if (!prop) {
+        prop = proprium['Pent12'] || proprium['SMperannum'] || proprium['C4'] || {};
+    }
+
+    // 3. Resolve Kyriale Ordinary Chants
+    var ord = null;
+    if (typeof massOrdinary !== 'undefined' && massOrdinary.length) {
+        var ordIdx = -1;
+        if (selectedKyriale && selectedKyriale !== 'auto') {
+            ordIdx = parseInt(selectedKyriale, 10) - 1;
+        }
+        if (ordIdx >= 0 && ordIdx < massOrdinary.length) {
+            ord = massOrdinary[ordIdx];
+        } else {
+            // Auto selection based on liturgical season
+            var y = mom ? mom.year() : moment().year();
+            var easter = moment(moment.easter(y));
+            var septuagesima = moment(easter).subtract(63, 'days');
+            var pentecost = moment(easter).add(49, 'days');
+
+            if (mom && mom.isSameOrAfter(easter) && mom.isBefore(pentecost)) {
+                ord = massOrdinary[0]; // Missa I (Lux et origo - Paschal)
+            } else if (mom && (mom.isSameOrAfter(septuagesima) && mom.isBefore(easter))) {
+                ord = massOrdinary[16]; // Missa XVII (Advent & Lent)
+            } else if (mom && (mom.day() === 0)) {
+                ord = massOrdinary[10]; // Missa XI (Orbis factor - Sundays)
+            } else {
+                ord = massOrdinary[7]; // Missa VIII (De Angelis)
+            }
+        }
+    }
+
+    function getOrdId(part) {
+        if (!part) return null;
+        if (Array.isArray(part)) return part[0] ? (part[0].id || part[0]) : null;
+        return part.id || part;
+    }
+    function getOrdName(part, defaultName) {
+        if (!part) return defaultName;
+        if (Array.isArray(part)) return (part[0] && part[0].name) ? part[0].name : defaultName;
+        return part.name || defaultName;
+    }
+
+    var isPaschal = mom ? (mom.isSameOrAfter(moment(moment.easter(mom.year()))) && mom.isBefore(moment(moment.easter(mom.year())).add(49, 'days'))) : false;
+    var aspId = isPaschal ? 958 : 497;
+    var aspName = isPaschal ? 'Vidi aquam' : 'Asperges me';
+
+    // Map into section IDs matching assembleFullMissa card IDs
+    result['incipit'] = [{ id: aspId, name: aspName, part: 'Antiphona' }];
+    if (prop.inID) result['introitus'] = [{ id: prop.inID, name: 'Introitus', part: 'Introitus' }];
+    
+    if (ord) {
+        var kyrieList = [];
+        var kId = getOrdId(ord.kyrie);
+        if (kId) kyrieList.push({ id: kId, name: getOrdName(ord.kyrie, 'Kyrie eleison'), part: 'Kyrie' });
+        var gId = getOrdId(ord.gloria);
+        if (gId) kyrieList.push({ id: gId, name: getOrdName(ord.gloria, 'Gloria in excelsis Deo'), part: 'Gloria' });
+        if (kyrieList.length) result['kyrie'] = kyrieList;
+    }
+
+    if (prop.grID) result['graduale'] = [{ id: prop.grID, name: 'Graduale', part: 'Graduale' }];
+    if (prop.trID) result['tractus'] = [{ id: prop.trID, name: 'Tractus', part: 'Tractus' }];
+    if (prop.alID) result['alleluia'] = [{ id: prop.alID, name: 'Alleluia', part: 'Alleluia' }];
+    if (prop.seqID) result['sequentia'] = [{ id: prop.seqID, name: 'Sequentia', part: 'Sequentia' }];
+
+    // Credo (Credo III 749 by default or Credo I 344)
+    var credoId = (ord && ord.credo) ? getOrdId(ord.credo) : 749;
+    var credoName = (ord && ord.credo) ? getOrdName(ord.credo, 'Credo III') : 'Credo III';
+    result['credo'] = [{ id: credoId, name: credoName, part: 'Credo' }];
+
+    if (prop.ofID) result['offertorium'] = [{ id: prop.ofID, name: 'Offertorium', part: 'Offertorium' }];
+
+    if (ord && ord.sanctus) {
+        var sId = getOrdId(ord.sanctus);
+        if (sId) result['praefatio'] = [{ id: sId, name: getOrdName(ord.sanctus, 'Sanctus'), part: 'Sanctus' }];
+    }
+
+    if (ord && ord.agnus) {
+        var aId = getOrdId(ord.agnus);
+        if (aId) result['communion_prep'] = [{ id: aId, name: getOrdName(ord.agnus, 'Agnus Dei'), part: 'Agnus Dei' }];
+    }
+
+    if (prop.coID) result['communio'] = [{ id: prop.coID, name: 'Communio', part: 'Communio' }];
+
+    if (ord && ord.ite) {
+        var iId = getOrdId(ord.ite);
+        if (iId) result['conclusio'] = [{ id: iId, name: getOrdName(ord.ite, 'Ite Missa est'), part: 'Ite Missa est' }];
+    }
+
+    return result;
+}
+
+function renderSingleChantScore($wrapper) {
+    if ($wrapper.data('do-rendered')) return;
+    var chantId = $wrapper.data('chant-id');
+    var defaultPart = $wrapper.data('chant-part') || 'Chant';
+    var defaultName = $wrapper.data('chant-name') || defaultPart;
+    if (!chantId) return;
+
+    $wrapper.data('do-rendered', true);
+    var gabcUrl = 'gabc/' + chantId + '.gabc';
+
+    function processGabcData(data) {
+        if (!data) {
+            $wrapper.html('<div class="do-chant-error">Partition ' + chantId + ' non disponible.</div>');
+            return;
+        }
+        var header = parseGabcHeader(data);
+        var title = header.name || defaultName;
+        var officePart = header['office-part'] || defaultPart;
+        var mode = header.mode || '';
+
+        var modeHtml = mode ? '<span class="do-chant-mode-badge">Ton ' + escHtml(mode) + '</span>' : '';
+
+        var cardHtml = 
+            '<div class="do-chant-card">' +
+                '<div class="do-chant-header">' +
+                    '<div class="do-chant-info">' +
+                        '<span class="do-chant-part">' + escHtml(officePart) + '</span>' +
+                        '<h4 class="do-chant-title">' + escHtml(title) + '</h4>' +
+                        modeHtml +
+                    '</div>' +
+                    '<div class="do-chant-actions">' +
+                        '<span class="do-chant-pitch-badge" style="display:none;" title="Ton de départ"></span>' +
+                        '<button class="do-chant-btn do-chant-play-btn" title="Écouter le chant">' +
+                            '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
+                            '<span>Écouter</span>' +
+                        '</button>' +
+                        '<button class="do-chant-btn do-chant-gabc-btn" title="Afficher/Masquer le code GABC">' +
+                            '<span>&lt;/&gt; GABC</span>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="do-chant-preview"><div class="do-chant-loading">Génération de la partition vectorielle…</div></div>' +
+                '<pre class="do-chant-gabc-raw hidden">' + escHtml(data) + '</pre>' +
+            '</div>';
+
+        var $card = $(cardHtml);
+        $wrapper.empty().append($card);
+
+        var $preview = $card.find('.do-chant-preview');
+        var $gabcRaw = $card.find('.do-chant-gabc-raw');
+        var $playBtn = $card.find('.do-chant-play-btn');
+        var $pitchBadge = $card.find('.do-chant-pitch-badge');
+        var $gabcBtn = $card.find('.do-chant-gabc-btn');
+
+        // Toggle GABC raw
+        $gabcBtn.on('click', function(e) {
+            e.stopPropagation();
+            $gabcRaw.toggleClass('hidden');
+            $gabcBtn.toggleClass('active');
+        });
+
+        // Exsurge Rendering
+        if (typeof exsurge !== 'undefined') {
+            try {
+                var ctxt = new exsurge.ChantContext();
+                var isDark = $('html').attr('data-theme') !== 'light';
+                var accentColor = doState.settings.color || '#c96b63';
+
+                ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.45)';
+                ctxt.noteColor = isDark ? '#f8fafc' : '#111317';
+                ctxt.rubricColor = accentColor;
+                ctxt.specialCharColor = accentColor;
+                ctxt.lyricTextColor = isDark ? '#f8fafc' : '#111317';
+                ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
+                ctxt.annotationTextFont = ctxt.lyricTextFont;
+
+                var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, data);
+                var score = new exsurge.ChantScore(ctxt, mappings, true);
+
+                var width = Math.max(280, $card.width() - 20);
+                ctxt.width = width;
+
+                score.performLayout(ctxt);
+                score.layoutChantLines(ctxt, width, function() {
+                    var svg = score.createSvgNode(ctxt);
+                    $preview.empty().append(svg);
+                    $card.data('chant-score', score);
+
+                    // Compute start pitch
+                    if (score.defaultStartPitch) {
+                        var pitchInt = (typeof score.defaultStartPitch.toInt === 'function') ? score.defaultStartPitch.toInt() : (typeof score.defaultStartPitch === 'number' ? score.defaultStartPitch : 0);
+                        if (pitchInt) {
+                            var pObj = new exsurge.Pitch(pitchInt);
+                            var noteNames = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+                            var stepName = noteNames[pObj.step] || '';
+                            $pitchBadge.text('Ton: ' + stepName + ' ' + pObj.octave).show();
+                        }
+                    }
+
+                    // Neume note click
+                    $(svg).find('use[source-index]').on('click', function(e) {
+                        e.stopPropagation();
+                        var note = this.source && this.source.neume ? this.source : null;
+                        if (note) {
+                            $(svg).find('use[source-index].active').removeClass('active');
+                            this.classList.add('active');
+                            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                                Tone.context.resume();
+                            }
+                            if (window.playScore) {
+                                window.playScore(score, null, note);
+                            }
+                        }
+                    });
+                });
+            } catch(e) {
+                console.warn('Exsurge error:', e);
+                $preview.html('<div class="do-chant-error">Erreur de rendu Exsurge: ' + escHtml(e.message) + '</div>');
+            }
+        } else {
+            $preview.html('<div class="do-chant-error">Moteur Exsurge non chargé.</div>');
+        }
+
+        // Play / Stop Button
+        $playBtn.on('click', function(e) {
+            e.stopPropagation();
+            var score = $card.data('chant-score');
+            if (!score) return;
+
+            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+
+            if (window.isPlayingChant && window.isPlayingChant()) {
+                window.stopScore && window.stopScore();
+                $('.do-chant-play-btn').removeClass('is-playing').find('span').text('Écouter');
+                $('.do-chant-play-btn').find('svg').html('<polygon points="5 3 19 12 5 21 5 3"></polygon>');
+            } else {
+                $('.do-chant-play-btn').removeClass('is-playing').find('span').text('Écouter');
+                $('.do-chant-play-btn').find('svg').html('<polygon points="5 3 19 12 5 21 5 3"></polygon>');
+
+                $playBtn.addClass('is-playing').find('span').text('Arrêter');
+                $playBtn.find('svg').html('<rect x="6" y="6" width="12" height="12" rx="2"></rect>');
+                window.playScore && window.playScore(score);
+            }
+        });
+    }
+
+    if (GABC_LOCAL_CACHE[chantId]) {
+        processGabcData(GABC_LOCAL_CACHE[chantId]);
+    } else {
+        $.ajax({
+            url: gabcUrl,
+            dataType: 'text',
+            cache: true
+        }).done(function(data) {
+            GABC_LOCAL_CACHE[chantId] = data;
+            processGabcData(data);
+        }).fail(function() {
+            $wrapper.html('<div class="do-chant-error">Impossible de charger la partition ' + chantId + '.</div>');
+        });
+    }
+}
+
+function renderAllChantScoresInDOM($root) {
+    var $wrappers = ($root || $('#do-content-stream')).find('.do-chant-card-wrapper');
+    $wrappers.each(function() {
+        if (doState.includeGregorian) {
+            $(this).show();
+            renderSingleChantScore($(this));
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
+function renderTestMissaBannerAndToolbar() {
+    var isGregorianOn = (doState.includeGregorian !== false);
+    var curKyriale = doState.selectedKyriale || 'auto';
+
+    var kyrialeOptionsHtml = 
+        '<option value="auto"' + (curKyriale === 'auto' ? ' selected' : '') + '>⚡ Automatique (selon le temps)</option>' +
+        '<option value="1"' + (curKyriale === '1' ? ' selected' : '') + '>Missa I : Lux et origo (Temps Pascal)</option>' +
+        '<option value="2"' + (curKyriale === '2' ? ' selected' : '') + '>Missa II : Kyrie fons bonitatis (Ière classe)</option>' +
+        '<option value="3"' + (curKyriale === '3' ? ' selected' : '') + '>Missa III : Kyrie Deus sempiterne (Ière classe)</option>' +
+        '<option value="4"' + (curKyriale === '4' ? ' selected' : '') + '>Missa IV : Cunctipotens Genitor Deus (IIème classe)</option>' +
+        '<option value="8"' + (curKyriale === '8' ? ' selected' : '') + '>Missa VIII : De Angelis (Solennités)</option>' +
+        '<option value="9"' + (curKyriale === '9' ? ' selected' : '') + '>Missa IX : Cum jubilo (Sainte Vierge)</option>' +
+        '<option value="10"' + (curKyriale === '10' ? ' selected' : '') + '>Missa X : Alme Pater (Sainte Vierge)</option>' +
+        '<option value="11"' + (curKyriale === '11' ? ' selected' : '') + '>Missa XI : Orbis factor (Dimanches de l\'année)</option>' +
+        '<option value="17"' + (curKyriale === '17' ? ' selected' : '') + '>Missa XVII : Avent &amp; Carême</option>' +
+        '<option value="18"' + (curKyriale === '18' ? ' selected' : '') + '>Missa XVIII : Deus Genitor alme (Féries)</option>' +
+        '<option value="19"' + (curKyriale === '19' ? ' selected' : '') + '>Missa pro defunctis (Requiem)</option>';
+
+    var properOptionsHtml = '<option value="">— Propre du jour (Automatique) —</option>';
+    if (typeof sundayKeys !== 'undefined') {
+        properOptionsHtml += '<optgroup label="Proprium de Tempore">';
+        sundayKeys.forEach(function(item) {
+            if (item.key) {
+                var isSel = (doState.officiumKey === item.key);
+                properOptionsHtml += '<option value="' + escHtml(item.key) + '"' + (isSel ? ' selected' : '') + '>' + escHtml(item.title || item.en) + '</option>';
+            }
+        });
+        properOptionsHtml += '</optgroup>';
+    }
+    if (typeof otherKeys !== 'undefined') {
+        properOptionsHtml += '<optgroup label="Messes Votives &amp; Communs">';
+        otherKeys.forEach(function(item) {
+            if (item.key) {
+                var isSel = (doState.officiumKey === item.key);
+                properOptionsHtml += '<option value="' + escHtml(item.key) + '"' + (isSel ? ' selected' : '') + '>' + escHtml(item.title || item.en) + '</option>';
+            }
+        });
+        properOptionsHtml += '</optgroup>';
+    }
+
+    var html = 
+        '<div class="do-test-banner">' +
+            '<div class="do-test-banner-header">' +
+                '<div>' +
+                    '<div class="do-test-badge">🧪 Experimentum • Liturgia &amp; Cantus</div>' +
+                    '<h2 class="do-test-title">Sainte Messe &amp; Chant Grégorien Intercalé</h2>' +
+                    '<p class="do-test-desc">' +
+                        'Page de test unifiée : Textes liturgiques bilingues du Missel Romain (Divinum Officium) avec partitions grégoriennes interactives (GABC / Exsurge) intercalées.' +
+                    '</p>' +
+                '</div>' +
+            '</div>' +
+            '<div class="do-test-toolbar">' +
+                '<button id="btnToggleGregorianChants" class="do-test-ctrl-btn' + (isGregorianOn ? ' active' : '') + '">' +
+                    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' +
+                    '<span>Partitions Grégoriennes : ' + (isGregorianOn ? 'ACTIVÉES' : 'DÉSACTIVÉES') + '</span>' +
+                '</button>' +
+                '<div class="do-test-select-wrapper">' +
+                    '<span class="do-test-select-label">Kyriale :</span>' +
+                    '<select id="doKyrialeSelect" class="do-test-select">' + kyrialeOptionsHtml + '</select>' +
+                '</div>' +
+                '<div class="do-test-select-wrapper">' +
+                    '<span class="do-test-select-label">Propre :</span>' +
+                    '<select id="doTestProperSelect" class="do-test-select">' + properOptionsHtml + '</select>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    return html;
+}
+
 function displayResult(result, vernResult) {
     var $stream = $('#do-content-stream').empty();
     var uiLang = getUiLang();
@@ -3255,6 +3711,13 @@ function displayResult(result, vernResult) {
         var notFoundDesc = (uiLang === 'fr') ? 'Les textes pour ce jour ne sont pas disponibles.' : 'Textus pro hac die non inveniuntur in repositorio locali.';
         $stream.html('<div class="do-empty"><h3>' + notFoundTitle + '</h3><p>' + notFoundDesc + '</p></div>');
         return;
+    }
+
+    var isTestMissa = (doState.hora === 'missa_gregorian');
+    var isMissa = (doState.hora === 'missa' || isTestMissa);
+
+    if (isTestMissa) {
+        $stream.append(renderTestMissaBannerAndToolbar());
     }
 
     var title = '';
@@ -3278,10 +3741,29 @@ function displayResult(result, vernResult) {
         });
     }
 
+    var chantsMap = isMissa ? getGregorianChantsMapForMissa(doState.date, doState.officiumKey, doState.selectedKyriale) : {};
+
     result.cards.forEach(function(card) {
         var vernCard = (card.id && vernMap[card.id]) ? vernMap[card.id] : null;
         var cardHtml = renderOfficeCardHTML(card, vernCard);
-        $stream.append(cardHtml);
+        var $cardNode = $(cardHtml);
+
+        // If card has associated Gregorian chant(s)
+        var chantList = (isMissa && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
+        if (chantList && chantList.length) {
+            chantList.forEach(function(ch) {
+                var wrapperHtml = 
+                    '<div class="do-chant-card-wrapper' + (doState.includeGregorian ? '' : ' hidden') + '" ' +
+                    'data-chant-id="' + escHtml(ch.id) + '" ' +
+                    'data-chant-name="' + escHtml(ch.name) + '" ' +
+                    'data-chant-part="' + escHtml(ch.part) + '"' +
+                    (doState.includeGregorian ? '' : ' style="display:none;"') + '></div>';
+                
+                $cardNode.find('.do-card-body').prepend(wrapperHtml);
+            });
+        }
+
+        $stream.append($cardNode);
     });
 
     applyHyphenationToContainer($stream);
@@ -3290,6 +3772,9 @@ function displayResult(result, vernResult) {
         var offsetVal = (doState.mobileLang === 'vern') ? 'calc(-50% - 12px)' : '0%';
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
+
+    // Render all chant scores in DOM
+    renderAllChantScoresInDOM($stream);
 
     startBilingualSwipeHint();
 }
@@ -3375,6 +3860,10 @@ function updateSidebarAndHeader() {
     // Ordinarium Missæ UI state
     $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
     $('#doOrdinariumOptions [data-value="' + doState.includeOrdinarium + '"]').addClass('active');
+
+    // Gregorian Chant UI state in settings
+    $('#doGregorianOptions .settings-option-card').removeClass('active');
+    $('#doGregorianOptions [data-value="' + doState.includeGregorian + '"]').addClass('active');
 
     // 2 Distinct Language settings UI state
     $('#doLatinOptions .settings-option-card, #doLatinOptions .settings-pill-btn, #doLatinOptions .segment').removeClass('active');
@@ -5942,6 +6431,56 @@ function setupEventListeners() {
         localStorage.setItem('do_ordinarium', val);
         $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
         $(this).addClass('active');
+        renderDO();
+    });
+
+    // Gregorian Chant Toggle in Settings
+    $('#doGregorianOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
+        var val = $(this).data('value') === true || $(this).data('value') === 'true';
+        doState.includeGregorian = val;
+        localStorage.setItem('do_include_gregorian', val);
+        $('#doGregorianOptions .settings-option-card, #doGregorianOptions .settings-pill-btn, #doGregorianOptions .segment').removeClass('active');
+        $(this).addClass('active');
+        renderDO();
+    });
+
+    // Open Test Page Button in Settings
+    $(document).on('click', '#btnOpenTestMissa', function(e) {
+        e.preventDefault();
+        doState.hora = 'missa_gregorian';
+        localStorage.setItem('do_hora', 'missa_gregorian');
+        closeModals();
+        renderDO();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Test Banner Toolbar Controls
+    $(document).on('click', '#btnToggleGregorianChants', function(e) {
+        e.preventDefault();
+        doState.includeGregorian = !doState.includeGregorian;
+        localStorage.setItem('do_include_gregorian', doState.includeGregorian);
+        var isNowOn = doState.includeGregorian;
+        $(this).toggleClass('active', isNowOn);
+        $(this).find('span').text('Partitions Grégoriennes : ' + (isNowOn ? 'ACTIVÉES' : 'DÉSACTIVÉES'));
+        $('#doGregorianOptions .settings-option-card').removeClass('active');
+        $('#doGregorianOptions [data-value="' + isNowOn + '"]').addClass('active');
+        renderAllChantScoresInDOM($('#do-content-stream'));
+    });
+
+    $(document).on('change', '#doKyrialeSelect', function() {
+        doState.selectedKyriale = $(this).val();
+        localStorage.setItem('do_selected_kyriale', doState.selectedKyriale);
+        renderDO();
+    });
+
+    $(document).on('change', '#doTestProperSelect', function() {
+        var val = $(this).val();
+        doState.officiumKey = val || null;
+        if (val) {
+            localStorage.setItem('do_officiumKey', val);
+        } else {
+            localStorage.removeItem('do_officiumKey');
+        }
         renderDO();
     });
 
