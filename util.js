@@ -816,23 +816,37 @@ function calculateDefaultStartPitch(startPitch, lowPitch, highPitch) {
 }
 var Tone;
 if(typeof window=='object') (function(window) {
+  // Lazy-init: synth is created on first playScore() call (requires user gesture)
   var synth;
+  var synthConfig = {
+    "oscillator": { type: "custom", partials: [0.3, 0.03, 0.05] },
+    "envelope": { "attack": 0.05, "decay": 0.3, "sustain": 0.4, "release": 0.8 }
+  };
+
+  function ensureSynth() {
+    if (!synth && Tone) {
+      var s = new Tone.Synth(synthConfig);
+      // Tone ≥14 uses toDestination(), Tone ≤13 uses toMaster()
+      try {
+        synth = typeof s.toDestination === 'function' ? s.toDestination() : s.toMaster();
+      } catch(e) {
+        try { synth = s.toMaster(); } catch(e2) { synth = s; }
+      }
+      if (Tone.Transport) Tone.Transport.bpm.value = parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+    }
+    // Resume AudioContext if suspended (Chrome autoplay policy)
+    if (Tone && Tone.context && Tone.context.state !== 'running') {
+      var p = Tone.context.resume ? Tone.context.resume() : null;
+      if (p && p.catch) p.catch(function(){});
+    }
+  }
+
   if(Tone) {
-    synth = new Tone.Synth({
-      "oscillator" : {
-          type: "custom",
-          partials: [0.3,0.03,0.05]
-        },
-        "envelope" : {
-          "attack" : 0.05,
-          "decay" : 0.3,
-          "sustain" : 0.4,
-          "release" : 0.8,
-        }
-    }).toMaster();
-    Tone.Transport.bpm.value = 165;
-    window.setTempo = function(newTempo) { Tone.Transport.bpm.value = newTempo || 165; }
+    window.setTempo = function(newTempo) {
+      if (Tone.Transport) Tone.Transport.bpm.value = newTempo || 165;
+    }
     window.setRelativeTempo = function(delta) {
+      if (!Tone.Transport) return 165;
       var state = Tone.Transport.state;
       Tone.Transport.stop();
       var val = Tone.Transport.bpm.value = Math.round(Math.max(0, Tone.Transport.bpm.value + delta)) || 165;
@@ -853,6 +867,10 @@ if(typeof window=='object') (function(window) {
       return (localStorage.isUsingSolesmesLengths = !getIsUsingSolesmesLengths());
     }
     window.playScore = function(score, firstPitch, startNote){
+      // Ensure AudioContext + synth are ready (requires prior user gesture)
+      ensureSynth();
+      if (!synth) return; // synth failed to init, silently abort
+
       Tone.Transport.clear(timeoutNextNote);
       Tone.Transport.start();
       if($('#mediaControls').length == 0) {

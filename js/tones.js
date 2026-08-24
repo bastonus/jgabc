@@ -2,7 +2,7 @@
 // this file also includes unmute.js
 (function (window) {
   var context = (window.Tone && window.Tone.context && window.Tone.context._context) || new (window.AudioContext || window.webkitAudioContext)();
-  unmute(context);
+  try { unmute(context); } catch(e) {}
   var tones = {
     context: context,
     attack: 100,

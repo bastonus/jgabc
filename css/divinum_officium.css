@@ -3193,373 +3193,342 @@ body, html {
     display: none !important;
 }
 
-.modern-player-bar,
-.do-player-floating {
+/* ── Dock container (ID selector wins over any class conflict) ── */
+#modernPlayerBar {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
+    top: auto !important;
     width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     padding: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    margin: 0 !important;
     border-radius: 0 !important;
     overflow: visible !important;
     background-color: rgba(10, 11, 14, 0.92) !important;
+    background-image: none !important;
     backdrop-filter: blur(40px) saturate(200%) !important;
     -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
     border-top: 1px solid color-mix(in srgb, var(--primary-color) 18%, rgba(255,255,255,0.08)) !important;
     border-left: none !important;
     border-right: none !important;
     border-bottom: none !important;
-    box-shadow: 0 -4px 32px rgba(0,0,0,0.45), 0 -1px 0 rgba(255,255,255,0.04) !important;
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.45) !important;
     z-index: 1200 !important;
-    opacity: 0;
-    visibility: hidden;
+    opacity: 0 !important;
+    visibility: hidden !important;
     transform: translateY(100%) !important;
-    transition: transform 0.30s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.22s ease,
-                visibility 0.30s !important;
+    transition: transform 0.30s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.30s !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }
 
-[data-theme="dark"] .modern-player-bar,
-[data-theme="dark"] .do-player-floating,
-[data-theme="oled"] .modern-player-bar,
-[data-theme="oled"] .do-player-floating {
+[data-theme="dark"] #modernPlayerBar,
+[data-theme="oled"] #modernPlayerBar {
     background-color: rgba(0, 0, 0, 0.90) !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, rgba(255, 255, 255, 0.10)) !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.80), 0 -1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.80) !important;
 }
 
-[data-theme="light"] .modern-player-bar,
-[data-theme="light"] .do-player-floating {
+[data-theme="light"] #modernPlayerBar {
     background-color: color-mix(in srgb, var(--background-base) 92%, transparent) !important;
     border-top: 1px solid color-mix(in srgb, var(--primary-color) 14%, rgba(0, 0, 0, 0.10)) !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08), 0 -1px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08) !important;
 }
 
-.modern-player-bar.visible,
-.do-player-floating.visible {
+#modernPlayerBar.visible {
     transform: translateY(0) !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Integrated Progress Track */
-.do-player-progress-track,
-.player-progress-container {
+/* ── Progress bar ─────────────────────────────────────────────── */
+#modernPlayerBar #playerProgressBarContainer,
+#modernPlayerBar .do-player-progress-track,
+#modernPlayerBar .player-progress-container {
     position: relative !important;
     top: auto !important;
+    left: auto !important;
+    right: auto !important;
     width: 100% !important;
     height: 3px !important;
     background: rgba(128, 128, 128, 0.15) !important;
     cursor: pointer !important;
     overflow: hidden !important;
     flex-shrink: 0 !important;
+    z-index: 1 !important;
     transition: height 0.15s ease !important;
-    z-index: auto !important;
 }
-
-.do-player-progress-track:hover,
-.player-progress-container:hover {
+#modernPlayerBar #playerProgressBarContainer:hover,
+#modernPlayerBar .do-player-progress-track:hover {
     height: 5px !important;
 }
-
-.do-player-progress-bar,
-.player-progress-bar {
+#modernPlayerBar .do-player-progress-bar,
+#modernPlayerBar .player-progress-bar {
     width: 100% !important;
     height: 100% !important;
     position: relative !important;
-    bottom: auto !important;
-    left: auto !important;
-    right: auto !important;
 }
-
-.do-player-progress-fill,
-.player-progress-fill {
+#modernPlayerBar #playerProgressFill,
+#modernPlayerBar .do-player-progress-fill,
+#modernPlayerBar .player-progress-fill {
     height: 100% !important;
-    width: 0%;
     background: var(--primary-color) !important;
     border-radius: 0 !important;
     transition: width 0.1s linear !important;
 }
 
-/* Main Body Row */
-.do-player-body,
-.player-bar-inner {
+/* ── Body row ─────────────────────────────────────────────────── */
+#modernPlayerBar .do-player-body,
+#modernPlayerBar .player-bar-inner {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 7px 16px 8px 16px !important;
+    padding: 8px 16px 9px 16px !important;
     gap: 12px !important;
     width: 100% !important;
     max-width: none !important;
     box-sizing: border-box !important;
     margin: 0 !important;
-}
-
-/* Left: Identity */
-.do-player-info,
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.do-player-badge,
-.player-chant-sub {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--primary-color);
-    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
-    padding: 2px 6px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    line-height: 1.3;
-}
-
-.do-player-name,
-.player-chant-name {
-    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
-    font-size: 0.98rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
-}
-
-/* Center: Core Playback Controls */
-.do-player-center-controls,
-.player-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 0 0 auto;
-}
-
-.do-player-action-btn,
-.player-btn-secondary {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: var(--background-highlight);
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.18s ease;
-    padding: 0;
-}
-
-.do-player-action-btn:hover,
-.player-btn-secondary:hover {
-    background: color-mix(in srgb, var(--primary-color) 18%, var(--background-highlight));
-    color: var(--primary-color);
-    transform: scale(1.05);
-}
-
-.do-player-play-btn,
-.player-btn-primary {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: none;
-    background: var(--primary-color);
-    color: #ffffff !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 14px color-mix(in srgb, var(--primary-color) 50%, transparent);
-    transition: transform 0.15s ease, filter 0.15s ease;
-    padding: 0;
-}
-
-.do-player-play-btn svg,
-.player-btn-primary svg {
-    fill: #ffffff !important;
-}
-
-.do-player-play-btn:hover,
-.player-btn-primary:hover {
-    transform: scale(1.08);
-    filter: brightness(1.10);
-}
-
-/* Right: App Pill Segment Controls */
-.do-player-settings-group,
-.player-options {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex: 0 0 auto !important;
-    flex-wrap: nowrap !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
     border-top: none !important;
 }
 
-.do-player-pill-control,
-.player-pitch-group,
-.player-tempo-group {
-    display: inline-flex;
-    align-items: center;
-    background: var(--background-highlight);
-    border-radius: 8px;
-    padding: 2px;
-    height: 28px;
-    box-sizing: border-box;
+/* ── Left: Identity ───────────────────────────────────────────── */
+#modernPlayerBar .do-player-info,
+#modernPlayerBar .player-info,
+#modernPlayerBar .player-meta {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+#modernPlayerBar #playerChantPart,
+#modernPlayerBar .do-player-badge,
+#modernPlayerBar .player-chant-sub {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.09em !important;
+    color: var(--primary-color) !important;
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;
+    padding: 2px 6px !important;
+    border-radius: 5px !important;
+    flex-shrink: 0 !important;
+    line-height: 1.3 !important;
+}
+#modernPlayerBar #playerChantName,
+#modernPlayerBar .do-player-name,
+#modernPlayerBar .player-chant-name {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    font-size: 0.97rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    flex-shrink: 1 !important;
 }
 
-.do-player-pill-arrow,
-.player-btn-option {
-    width: 22px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    padding: 0;
+/* ── Center: Playback controls ────────────────────────────────── */
+#modernPlayerBar .do-player-center-controls,
+#modernPlayerBar .player-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    justify-content: center !important;
+}
+#modernPlayerBar .do-player-action-btn,
+#modernPlayerBar .player-btn-secondary,
+#modernPlayerBar #playerBtnStop,
+#modernPlayerBar #playerBtnNext {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: rgba(255,255,255,0.07) !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    box-shadow: none !important;
+    font-size: inherit !important;
+}
+#modernPlayerBar .do-player-action-btn:hover,
+#modernPlayerBar #playerBtnStop:hover,
+#modernPlayerBar #playerBtnNext:hover {
+    background: color-mix(in srgb, var(--primary-color) 20%, rgba(255,255,255,0.07)) !important;
+    color: var(--primary-color) !important;
+}
+#modernPlayerBar #playerBtnPlay,
+#modernPlayerBar .do-player-play-btn,
+#modernPlayerBar .player-btn-primary {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    background: var(--primary-color) !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 14px color-mix(in srgb, var(--primary-color) 50%, transparent) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+}
+#modernPlayerBar #playerBtnPlay svg,
+#modernPlayerBar .do-player-play-btn svg,
+#modernPlayerBar .player-btn-primary svg {
+    fill: #ffffff !important;
 }
 
-.do-player-pill-arrow:hover,
-.player-btn-option:hover {
-    background: var(--background-surface);
-    color: var(--text-primary);
+/* ── Right: Pill controls ─────────────────────────────────────── */
+#modernPlayerBar .do-player-settings-group,
+#modernPlayerBar .player-options {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 5px !important;
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    justify-content: flex-end !important;
 }
-
-.do-player-pill-val,
-#playerStartingPitch,
-#playerTempoValue {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    min-width: 32px;
-    text-align: center;
-    padding: 0 3px;
-    user-select: none;
+#modernPlayerBar .do-player-pill-control,
+#modernPlayerBar .player-pitch-group,
+#modernPlayerBar .player-tempo-group {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    background: rgba(255,255,255,0.08) !important;
+    border-radius: 8px !important;
+    padding: 2px !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    flex-wrap: nowrap !important;
 }
-
-.do-player-toggle-btn,
-#playerBtnSolesmes {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: var(--background-highlight);
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    padding: 0;
+#modernPlayerBar .do-player-pill-arrow,
+#modernPlayerBar .player-btn-option,
+#modernPlayerBar #playerPitchDown,
+#modernPlayerBar #playerPitchUp,
+#modernPlayerBar #playerTempoMinus,
+#modernPlayerBar #playerTempoPlus {
+    width: 20px !important;
+    height: 22px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    font-size: 1rem !important;
 }
-
-.do-player-toggle-btn img,
-#playerBtnSolesmes img {
-    opacity: 0.75;
-    transition: opacity 0.15s ease, filter 0.15s ease;
+#modernPlayerBar #playerStartingPitch,
+#modernPlayerBar #playerTempoValue,
+#modernPlayerBar .do-player-pill-val {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    color: var(--primary-color) !important;
+    min-width: 28px !important;
+    text-align: center !important;
+    padding: 0 2px !important;
+    user-select: none !important;
+    white-space: nowrap !important;
 }
-
-.do-player-toggle-btn:hover,
-#playerBtnSolesmes:hover {
-    background: color-mix(in srgb, var(--primary-color) 12%, var(--background-highlight));
+#modernPlayerBar #playerBtnSolesmes,
+#modernPlayerBar .do-player-toggle-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
 }
-
-.do-player-toggle-btn.active,
-#playerBtnSolesmes.active {
+#modernPlayerBar #playerBtnSolesmes img {
+    opacity: 0.75 !important;
+}
+#modernPlayerBar #playerBtnSolesmes.active {
     background: color-mix(in srgb, var(--primary-color) 22%, transparent) !important;
-    color: var(--primary-color);
+}
+#modernPlayerBar #playerBtnSolesmes.active img {
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 3px var(--primary-color)) !important;
 }
 
-.do-player-toggle-btn.active img,
-#playerBtnSolesmes.active img {
-    opacity: 1;
-    filter: drop-shadow(0 0 2px var(--primary-color));
-}
-
+/* ── Chant card playing state ─────────────────────────────────── */
 .do-chant-card {
     cursor: pointer;
     transition: border-color 0.2s ease;
 }
-
 .do-chant-card.is-playing {
     border-left: 3px solid var(--primary-color);
     padding-left: 12px;
 }
 
-/* ── Padding for content so dock doesn't cover last item ────── */
+/* ── Content padding when dock is open ───────────────────────── */
 .app-main {
     transition: padding-bottom 0.3s ease;
 }
-
 body.player-dock-open .app-main {
     padding-bottom: 72px;
 }
 
-@media (max-width: 768px) {
+/* ── Mobile ───────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    #modernPlayerBar .do-player-body,
+    #modernPlayerBar .player-bar-inner {
+        padding: 7px 10px 8px 10px !important;
+        gap: 8px !important;
+    }
+    #modernPlayerBar #playerChantPart,
+    #modernPlayerBar .do-player-badge {
+        display: none !important;
+    }
+    #modernPlayerBar #playerChantName,
+    #modernPlayerBar .do-player-name {
+        font-size: 0.84rem !important;
+        max-width: 110px !important;
+    }
+    #modernPlayerBar #playerBtnPlay {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    #modernPlayerBar #playerBtnStop,
+    #modernPlayerBar #playerBtnNext {
+        width: 26px !important;
+        height: 26px !important;
+    }
     body.player-dock-open .app-main {
-        padding-bottom: 66px;
-    }
-}
-
-@media (max-width: 768px) {
-    .modern-player-bar,
-    .do-player-floating {
-        /* keep full-width dock on mobile */
-        border-radius: 0;
-    }
-    .do-player-body,
-    .player-bar-inner {
-        padding: 7px 12px 8px 12px;
-        gap: 8px;
-    }
-    .do-player-badge,
-    .player-chant-sub {
-        display: none;
-    }
-    .do-player-name,
-    .player-chant-name {
-        font-size: 0.86rem;
-        max-width: 120px;
-    }
-    .do-player-play-btn,
-    .player-btn-primary {
-        width: 36px;
-        height: 36px;
-    }
-    .do-player-action-btn,
-    .player-btn-secondary {
-        width: 28px;
-        height: 28px;
     }
     .do-player-settings-group,
     .player-options {
