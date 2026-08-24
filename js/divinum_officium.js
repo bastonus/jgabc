@@ -1044,15 +1044,23 @@ function resolveSectionText(sectionName, sectionLines, baseSectionObj, langFolde
 
         if (!/\.txt$/i.test(filePath)) filePath += '.txt';
 
-        var primaryCorpus = isMissa ? 'missa' : 'horas';
-        var altCorpus = isMissa ? 'horas' : 'missa';
-
+        var isCommune = /^(?:Commune\/|C\d+)/i.test(filePath);
         var candidatePaths = [];
-        candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + filePath);
-        candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + filePath);
-        if (langFolder !== 'Latin') {
-            candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + filePath);
-            candidatePaths.push('do_data/' + altCorpus + '/Latin/' + filePath);
+        if (isCommune) {
+            var cPath = filePath.startsWith('Commune/') ? filePath : ('Commune/' + filePath);
+            candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
+            candidatePaths.push('do_data/horas/Latin/' + cPath);
+            candidatePaths.push('do_data/missa/' + langFolder + '/' + cPath);
+            candidatePaths.push('do_data/missa/Latin/' + cPath);
+        } else {
+            var primaryCorpus = isMissa ? 'missa' : 'horas';
+            var altCorpus = isMissa ? 'horas' : 'missa';
+            candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + filePath);
+            candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + filePath);
+            if (langFolder !== 'Latin') {
+                candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + filePath);
+                candidatePaths.push('do_data/' + altCorpus + '/Latin/' + filePath);
+            }
         }
 
         var tryIdx = 0;
@@ -1217,20 +1225,21 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
     var cleanPath = relPath;
     if (!/\.txt$/i.test(cleanPath)) cleanPath += '.txt';
 
-    var primaryCorpus = isMissa ? 'missa' : 'horas';
-    var altCorpus = isMissa ? 'horas' : 'missa';
-
+    var isCommune = /^(?:Commune\/|C\d+)/i.test(cleanPath);
     var candidatePaths = [];
-    if (/^(Sancti|Tempora|Commune)\//i.test(cleanPath)) {
+    if (isCommune) {
+        var cPath = cleanPath.startsWith('Commune/') ? cleanPath : ('Commune/' + cleanPath);
+        candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
+        candidatePaths.push('do_data/horas/Latin/' + cPath);
+        candidatePaths.push('do_data/missa/' + langFolder + '/' + cPath);
+        candidatePaths.push('do_data/missa/Latin/' + cPath);
+    } else {
+        var primaryCorpus = isMissa ? 'missa' : 'horas';
+        var altCorpus = isMissa ? 'horas' : 'missa';
         candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + cleanPath);
         candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + cleanPath);
         candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + cleanPath);
         candidatePaths.push('do_data/' + altCorpus + '/Latin/' + cleanPath);
-    } else {
-        candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/Commune/' + cleanPath);
-        candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/Commune/' + cleanPath);
-        candidatePaths.push('do_data/' + primaryCorpus + '/Latin/Commune/' + cleanPath);
-        candidatePaths.push('do_data/' + altCorpus + '/Latin/Commune/' + cleanPath);
     }
 
     var tryIdx = 0;
@@ -1441,7 +1450,7 @@ function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback)
         if (conclusio.length) cards.push({ id: 'conclusio', type: 'Ite Missa est & Ultimum Evangelium', badge: 'Ordinarium', lines: conclusio });
         if (leonis.length) cards.push({ id: 'leonis', type: 'Orationes Leonis XIII', badge: 'Preces', lines: leonis });
 
-        resolveAllHoursCards(cards, Object.assign({}, activeCom, activeDay), langFolder, function(finalCards) { callback(null, { title: feastTitle, cards: finalCards }); });
+        callback(null, { title: feastTitle, cards: cards });
     }
 }
 
@@ -2877,6 +2886,29 @@ function renderDO() {
     }
 }
 
+function getLocalizedFeastTitle(rawTitle, uiLang) {
+    if (!uiLang) uiLang = getUiLang();
+    if (!rawTitle) return '';
+    if (uiLang === 'la') return rawTitle;
+
+    var clean = rawTitle.trim();
+    if (typeof DO_UNIFIED_TITLES !== 'undefined' && DO_UNIFIED_TITLES[uiLang]) {
+        var dict = DO_UNIFIED_TITLES[uiLang];
+        if (dict[clean]) return dict[clean];
+        var keys = Object.keys(dict);
+        for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            if (DO_UNIFIED_TITLES.la && DO_UNIFIED_TITLES.la[k] === clean) {
+                return dict[k];
+            }
+        }
+    }
+    if (uiLang === 'fr' && typeof DO_FR_TEMPORA_TITLES !== 'undefined' && DO_FR_TEMPORA_TITLES[clean]) {
+        return DO_FR_TEMPORA_TITLES[clean];
+    }
+    return clean;
+}
+
 function displayResult(result, vernResult) {
     var $stream = $('#do-content-stream').empty();
     var uiLang = getUiLang();
@@ -2896,8 +2928,8 @@ function displayResult(result, vernResult) {
     }
 
     if (title) {
-        $('#doSidebarFeastTitle').text(title);
-        $('#doHeaderTitle .title-text').text(title);
+        $('#doSidebarFeastTitle').text(getLocalizedFeastTitle(title, getUiLang()));
+        $('#doHeaderTitle .title-text').text(getLocalizedFeastTitle(title, getUiLang()));
     }
 
     var vernMap = {};
@@ -3234,9 +3266,9 @@ var DO_UNIFIED_TITLES = {
         "Adv3w": "Mercredi des Quatre-Temps de l'Avent",
         "Adv3f": "Vendredi des Quatre-Temps de l'Avent",
         "Adv3s": "Samedi des Quatre-Temps de l'Avent",
-        "Adv3ss": "Sabbato IV Temporum (forma brevior)",
+        "Adv3ss": "Samedi des Quatre-Temps de l'Avent (forme brève)",
         "Adv4": "4e Dimanche de l'Avent",
-        "Dec24": "pridie Nativitas",
+        "Dec24": "Vigile de la Nativité",
         "Dec25_1": "Nativitas Domini, Missa ad media noctem",
         "Dec25_2": "Nativitas Domini, Missa ad matutinam",
         "Dec25_3": "Nativitas Domini, Missa interdiu",
@@ -3695,20 +3727,20 @@ var DO_UNIFIED_TITLES = {
         "Dec5": "St Sabba Abbé",
         "Dec6": "St Nicolas Evêque et Confesseur",
         "Dec7": "St Ambroise Evêque Confesseur et Docteur de l'Eglise",
-        "Dec8": "The Immaculate Conception of BVM",
-        "Dec10": "St Melchiades",
-        "Dec11": "St Damase Ier, pape et confesseur",
-        "Dec12": "Our Lady of Guadalupe",
-        "Dec13": "Ste Lucie Vierge et Martyre",
-        "Dec16": "Ste Eusebe Evêque et Martyre",
-        "Dec20": "In Vigilia S Thomæ Apostoli",
-        "Dec21": "St Thomas, Apôtre",
-        "Dec26": "St Etienne Protomartyr",
-        "Dec27": "St Jean Apôtre et Evangéliste",
-        "Dec28": "Les Saints Innocents",
-        "Dec29": "St Thomas Evêque et Martyr",
-        "Dec31": "St Sylvestre Pape et Confesseur",
-        "Dec31_v": "St Sylvestre Pape et Confesseur",
+        "Dec8": "Immaculée Conception de la Vierge Marie",
+        "Dec10": "Saint Melchiade, Pape et Martyr",
+        "Dec11": "Saint Damase Ier, Pape et Confesseur",
+        "Dec12": "Notre-Dame de Guadalupe",
+        "Dec13": "Sainte Lucie, Vierge et Martyre",
+        "Dec16": "Saint Eusèbe, Évêque et Martyr",
+        "Dec20": "Vigile de Saint Thomas, Apôtre",
+        "Dec21": "Saint Thomas, Apôtre",
+        "Dec26": "Saint Étienne, Premier Martyr",
+        "Dec27": "Saint Jean, Apôtre et Évangéliste",
+        "Dec28": "Les Saints Innocents, Martyrs",
+        "Dec29": "Saint Thomas de Cantorbéry, Évêque et Martyr",
+        "Dec31": "Saint Sylvestre Ier, Pape et Confesseur",
+        "Dec31_v": "Saint Sylvestre Ier, Pape et Confesseur",
         "Quad": "Septuagesima usque ad Finem Quadragesimæ",
         "Pasch": "Tempus Paschale",
         "Nat0": "Vigile de la Nativité",
@@ -3718,7 +3750,15 @@ var DO_UNIFIED_TITLES = {
         "Quadw": "Mercredi des Cendres",
         "HolyThurs": "Jeudi Saint (In Cœna Domini)",
         "GoodFri": "Vendredi Saint (In Parasceve)",
-        "HolySat": "Samedi Saint (Vigile Pascale)"
+        "HolySat": "Samedi Saint (Vigile Pascale)",
+        "Dec25": "Nativité de Notre Seigneur (Noël)",
+        "Dec25a": "Nativité de Notre Seigneur (Messe de Minuit)",
+        "Dec25b": "Nativité de Notre Seigneur (Messe de l'Aurore)",
+        "Dec25c": "Nativité de Notre Seigneur (Messe du Jour)",
+        "Dominica I Adventus": "1er Dimanche de l'Avent",
+        "Dominica II Adventus": "2e Dimanche de l'Avent",
+        "Dominica III Adventus": "3e Dimanche de l'Avent (Gaudete)",
+        "Dominica IV Adventus": "4e Dimanche de l'Avent"
     },
     "la": {
         "Adv1": "Dominica I Adventus",
@@ -5135,8 +5175,15 @@ function renderHeaderDropdownItems() {
                 groups[grp].push(item);
             });
         } else {
+            var seenKeys = {};
             allSaints.forEach(function(item) {
                 if (!item.key) return;
+                // Deduplicate edition variants (e.g. Dec31_v, Quad6_v)
+                var baseKey = item.key.replace(/_[a-z0-9]+$/i, '');
+                if (item.key.indexOf('_') !== -1 && seenKeys[baseKey]) return;
+                if (seenKeys[item.key]) return;
+                seenKeys[item.key] = true;
+                seenKeys[baseKey] = true;
                 var titleLa = item.title || item.key;
                 var titleEn = item.en || '';
                 var titleFr = (typeof item.fr === 'string' ? item.fr : '');
@@ -5164,7 +5211,7 @@ function renderHeaderDropdownItems() {
 
             items.forEach(function(item) {
                 var itemDate = getDateForLiturgicalKey(item.key, year);
-                var isSel = itemDate && itemDate.format('YYYY-MM-DD') === curDateStr;
+                var isSel = doState.officiumKey ? (item.key === doState.officiumKey) : (itemDate && itemDate.format('YYYY-MM-DD') === curDateStr && !item.key.match(/_[a-z0-9]+$/i));
                 var dateBadge = itemDate ? formatBadgeDate(itemDate, uiLang) : '';
                 var dispTitle = getVernacularItemTitle(item, uiLang);
 
@@ -5688,7 +5735,6 @@ function setupEventListeners() {
         }
 
         var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-
         if (isBilingual && isDraggingBilingual) {
             var $stream = $('#do-content-stream');
             if (initialOffsetPx === 0) {
