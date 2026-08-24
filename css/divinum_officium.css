@@ -2889,6 +2889,8 @@ body, html {
 .do-test-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
 /* Intercalated Chant Cards */
 .do-chant-card-wrapper {
     width: 100% !important;
@@ -2902,112 +2904,18 @@ body, html {
 .do-chant-card {
     width: 100% !important;
     box-sizing: border-box !important;
-    background: var(--background-secondary);
-    border: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
-    border-radius: 12px;
-    padding: 16px 18px;
+    background: transparent;
+    border: none !important;
+    border-radius: 0;
+    padding: 8px 0;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: none !important;
+    margin: 4px 0;
 }
 
 [data-theme="light"] .do-chant-card {
-    background: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.do-chant-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid color-mix(in srgb, var(--text-tertiary) 15%, transparent);
-}
-
-.do-chant-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.do-chant-part {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--primary-color);
-    background: rgba(var(--primary-color-rgb), 0.12);
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.do-chant-title {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.do-chant-mode-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--background-highlight);
-    padding: 2px 8px;
-    border-radius: 12px;
-}
-
-.do-chant-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.do-chant-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    background: var(--background-highlight);
-    border: 1px solid color-mix(in srgb, var(--text-tertiary) 20%, transparent);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    user-select: none;
-}
-
-.do-chant-btn:hover {
-    color: var(--text-primary);
-    border-color: var(--primary-color);
-    background: rgba(var(--primary-color-rgb), 0.1);
-}
-
-.do-chant-play-btn.is-playing {
-    background: rgba(var(--primary-color-rgb), 0.22);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    animation: doPulseChant 1.8s infinite;
-}
-
-@keyframes doPulseChant {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0); }
-}
-
-.do-chant-pitch-badge {
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    background: rgba(var(--primary-color-rgb), 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
+    background: transparent;
+    box-shadow: none !important;
 }
 
 .do-chant-preview {
@@ -3141,6 +3049,8 @@ body, html {
 .do-chant-preview svg text.active tspan,
 .do-chant-preview svg tspan.active,
 .do-chant-preview svg text.dropCap.active,
+.do-chant-preview svg text.lyric.active,
+.do-chant-preview svg text.aboveLinesText.active,
 .do-chant-preview svg .note.active,
 .do-chant-preview svg .active {
     fill: var(--primary-color) !important;
@@ -3157,6 +3067,17 @@ body, html {
 .do-chant-preview svg use[source-index] {
     cursor: pointer;
     transition: fill 0.1s ease;
+}
+
+/* Syllabes et textes cliquables */
+.do-chant-preview svg text.lyric,
+.do-chant-preview svg text.aboveLinesText {
+    cursor: pointer;
+    transition: fill 0.1s ease;
+}
+.do-chant-preview svg text.lyric:hover,
+.do-chant-preview svg text.aboveLinesText:hover {
+    fill: color-mix(in srgb, var(--primary-color) 70%, currentColor) !important;
 }
 
 .do-chant-gabc-raw {
@@ -3186,6 +3107,42 @@ body, html {
     font-style: italic;
 }
 
+/* ── Settings Gregorian Note Keyboard ── */
+.do-note-keyboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 6px;
+}
+.do-note-key-btn {
+    padding: 7px 4px;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 22%, rgba(255,255,255,0.08));
+    background: var(--background-highlight);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    user-select: none;
+    box-shadow: none;
+    outline: none;
+}
+.do-note-key-btn:hover {
+    background: color-mix(in srgb, var(--primary-color) 15%, var(--background-highlight));
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.do-note-key-btn:active,
+.do-note-key-btn.playing {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    transform: scale(0.96);
+}
+
 /* =============================================================
    APP-NATIVE COMPACT BOTTOM PLAYER (DOCK STYLE)
    ============================================================= */
@@ -3196,53 +3153,65 @@ body, html {
 /* ── Dock container (ID selector wins over any class conflict) ── */
 #modernPlayerBar {
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    bottom: 16px !important;
+    /* Center on the content area (viewport minus 280px sidebar) */
+    left: calc(140px + 50%) !important;
+    transform: translateX(-50%) translateY(calc(100% + 40px)) !important;
+    right: auto !important;
     top: auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: min(800px, calc(100vw - 280px - 32px)) !important;
+    max-width: calc(100vw - 280px - 32px) !important;
     height: auto !important;
     padding: 0 !important;
     padding-bottom: env(safe-area-inset-bottom, 0px) !important;
     margin: 0 !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-    background-color: rgba(10, 11, 14, 0.92) !important;
-    background-image: none !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 18%, rgba(255,255,255,0.08)) !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    box-shadow: 0 -4px 32px rgba(0,0,0,0.45) !important;
-    z-index: 1200 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: translateY(100%) !important;
-    transition: transform 0.30s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.30s !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    /* Frosted glass + noise – same recipe as .do-top-header */
+    background-color: color-mix(in srgb, var(--background-base) 72%, transparent) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 18%, rgba(255,255,255,0.10)) !important;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.40), 0 2px 8px rgba(0,0,0,0.20) !important;
+    z-index: 99999 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.30s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.30s !important;
 }
 
 [data-theme="dark"] #modernPlayerBar,
 [data-theme="oled"] #modernPlayerBar {
-    background-color: rgba(0, 0, 0, 0.90) !important;
-    box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.80) !important;
+    background-color: color-mix(in srgb, var(--background-base) 78%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 22%, rgba(255,255,255,0.08)) !important;
+    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0,0,0,0.40) !important;
 }
 
 [data-theme="light"] #modernPlayerBar {
-    background-color: color-mix(in srgb, var(--background-base) 92%, transparent) !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 14%, rgba(0, 0, 0, 0.10)) !important;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08) !important;
+    background-color: color-mix(in srgb, var(--background-base) 82%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 14%, rgba(0,0,0,0.10)) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0,0,0,0.08) !important;
 }
 
-#modernPlayerBar.visible {
-    transform: translateY(0) !important;
+#modernPlayerBar.visible,
+body.player-dock-open #modernPlayerBar {
+    transform: translateX(-50%) translateY(0) !important;
     opacity: 1 !important;
     visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* ── Mobile: no sidebar, center on full viewport ─────────────── */
+@media (max-width: 900px) {
+    #modernPlayerBar {
+        left: 50% !important;
+        width: min(800px, calc(100vw - 32px)) !important;
+        max-width: calc(100vw - 32px) !important;
+    }
 }
 
 /* ── Progress bar ─────────────────────────────────────────────── */
@@ -3488,11 +3457,11 @@ body, html {
 /* ── Chant card playing state ─────────────────────────────────── */
 .do-chant-card {
     cursor: pointer;
-    transition: border-color 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 .do-chant-card.is-playing {
-    border-left: 3px solid var(--primary-color);
-    padding-left: 12px;
+    /* No border, no outline — just subtle opacity lift */
+    opacity: 1;
 }
 
 /* ── Content padding when dock is open ───────────────────────── */

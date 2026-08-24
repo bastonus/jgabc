@@ -3306,7 +3306,15 @@ function parseGabcHeader(gabc) {
         if (l === '%%') break;
         var m = l.match(/^([\w-]+)\s*:\s*([^;]+);/);
         if (m) {
-            header[m[1].toLowerCase()] = m[2].trim();
+            var key = m[1].toLowerCase();
+            var val = m[2].trim();
+            if (key === 'annotation') {
+                if (!header.annotations) header.annotations = [];
+                header.annotations.push(val);
+                header.annotation = val;
+            } else {
+                header[key] = val;
+            }
         }
     }
     return header;
@@ -3524,6 +3532,18 @@ function preprocessGabcForExsurge(gabc) {
 var _doCurrentPlayerCard = null;
 var _doCurrentScore = null;
 var _doProgressInterval = null;
+var _doActiveNoteEl = null; // The single currently-highlighted note element
+
+function clearActiveNote() {
+    if (_doActiveNoteEl) {
+        _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        _doActiveNoteEl = null;
+    }
+    // Belt-and-suspenders: clear any stragglers
+    document.querySelectorAll('.do-chant-card svg use.active, .do-chant-card svg text.active').forEach(function(el) {
+        el.classList.remove('active', 'porrectus-left', 'porrectus-right');
+    });
+}
 
 function initDoPlayer() {
     // Play/Pause button
@@ -3555,8 +3575,20 @@ function initDoPlayer() {
         if (window.stopScore) window.stopScore();
         setDoPlayerBarState(false);
         $('#playerProgressFill').css('width', '0%');
-        $('#modernPlayerBar').removeClass('visible');
+
+        // Close the floating player with animation
+        var playerBar = document.getElementById('modernPlayerBar');
+        if (playerBar) {
+            playerBar.classList.remove('visible');
+            playerBar.style.transform = 'translateX(-50%) translateY(calc(100% + 40px))';
+            playerBar.style.opacity = '0';
+            setTimeout(function() {
+                playerBar.style.visibility = 'hidden';
+                playerBar.style.pointerEvents = 'none';
+            }, 320);
+        }
         $('body').removeClass('player-dock-open');
+
         if (_doCurrentPlayerCard) {
             _doCurrentPlayerCard.removeClass('is-playing');
             _doCurrentPlayerCard.removeData('selected-start-note');
@@ -3670,26 +3702,103 @@ function initDoPlayer() {
             }
         }
     });
+
+    // Delegated note + syllable click on content stream
+    var NOTE_SEL = '.do-chant-card svg use[source-index], .do-chant-card svg text[source-index], .do-chant-card svg text.lyric, .do-chant-card svg text.aboveLinesText';
+    $('#do-content-stream').off('click', NOTE_SEL).on('click', NOTE_SEL, function(e) {
+        e.stopPropagation();
+
+        // Clear the previous active note (single source of truth)
+        clearActiveNote();
+
+        // Find the clickable note element — for lyric text, walk up to find the
+        // associated use[source-index] in the same notation group
+        var targetEl = this;
+        var note = null;
+        var $card = $(this).closest('.do-chant-card');
+        var score = $card.data('chant-score');
+
+        if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
+            // Syllable or above-lines text — find the notation's first note use element
+            var elemIdx = this.getAttribute('element-index');
+            // Try parent <g> then siblings
+            var $group = $(this).closest('g');
+            var $noteEl = $group.find('use[source-index]').first();
+            if (!$noteEl.length) {
+                // Fallback: find use with same element-index in this SVG
+                var $svg = $(this).closest('svg');
+                if (elemIdx !== null) {
+                    $noteEl = $svg.find('use[element-index="' + elemIdx + '"]').first();
+                }
+            }
+            if ($noteEl.length) {
+                targetEl = $noteEl[0];
+                note = targetEl.source || null;
+                if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) {
+                    note = score.notes[elemIdx];
+                }
+            }
+            // Also highlight the syllable text itself
+            this.classList.add('active');
+        } else {
+            // Direct note click (use[source-index])
+            note = this.source || null;
+            if (!note && score && score.notes) {
+                var elemIdx2 = this.getAttribute('element-index');
+                if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
+            }
+        }
+
+        // Mark the note element active and store reference
+        targetEl.classList.add('active');
+        _doActiveNoteEl = targetEl;
+
+        if (note) {
+            $card.data('selected-start-note', note);
+        }
+        // Show player in paused state — user must click Play to hear the chant
+        updateDoPlayerUI($card, score, false);
+    });
+
+    // Delegated click on chant cards (anywhere except notes/syllables)
+    $('#do-content-stream').off('click', '.do-chant-card').on('click', '.do-chant-card', function(e) {
+        if ($(e.target).closest('use[source-index], text[source-index], text.lyric').length) return;
+        var $card = $(this);
+        var score = $card.data('chant-score');
+        updateDoPlayerUI($card, score, false);
+    });
 }
 
 function updateDoPlayerUI($card, score, isPlaying, startNote) {
     _doCurrentPlayerCard = $card;
     _doCurrentScore = score;
 
-    var part = $card.data('chant-part') || '';
-    var title = $card.data('chant-title') || '';
+    var part = ($card && $card.data('chant-part')) || '';
+    var title = ($card && $card.data('chant-title')) || '';
 
     $('#playerChantPart').text(part);
     $('#playerChantName').text(title);
 
-    updateDoPitchUI(score);
+    if (score) {
+        try {
+            updateDoPitchUI(score);
+        } catch(e) {}
+    }
 
-    $('#modernPlayerBar').addClass('visible');
-    $('body').addClass('player-dock-open');
+    // Force display of the player bar dock directly
+    var playerBar = document.getElementById('modernPlayerBar');
+    if (playerBar) {
+        playerBar.classList.add('visible');
+        playerBar.style.transform = 'translateX(-50%) translateY(0)';
+        playerBar.style.opacity = '1';
+        playerBar.style.visibility = 'visible';
+        playerBar.style.pointerEvents = 'auto';
+    }
+    document.body.classList.add('player-dock-open');
     setDoPlayerBarState(isPlaying);
 
     $('.do-chant-card').removeClass('is-playing');
-    $card.addClass('is-playing');
+    if ($card) $card.addClass('is-playing');
 }
 
 function setDoPlayerBarState(isPlaying) {
@@ -3751,8 +3860,9 @@ function updateDoPitchUI(score) {
         ? score.defaultStartPitch 
         : new exsurge.Pitch(startPitch);
 
-    var noteNames = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
-    var stepName = noteNames[pitchObj.step] || '';
+    var noteNames = ['Do', 'Do♯', 'Ré', 'Ré♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'];
+    var stepIndex = (typeof pitchObj.step === 'number') ? (pitchObj.step % 12) : 0;
+    var stepName = noteNames[stepIndex] || 'La';
     $('#playerStartingPitch').text(stepName + (pitchObj.octave !== undefined ? pitchObj.octave : ''));
 }
 
@@ -3792,13 +3902,6 @@ function renderSingleChantScore($wrapper, force) {
 
         var cardHtml = 
             '<div class="do-chant-card">' +
-                '<div class="do-chant-header">' +
-                    '<div class="do-chant-info">' +
-                        '<span class="do-chant-part">' + escHtml(officePart) + '</span>' +
-                        '<h4 class="do-chant-title">' + escHtml(title) + '</h4>' +
-                        modeHtml +
-                    '</div>' +
-                '</div>' +
                 '<div class="do-chant-preview"><div class="do-chant-loading">Génération de la partition vectorielle…</div></div>' +
             '</div>';
 
@@ -3845,6 +3948,54 @@ function renderSingleChantScore($wrapper, force) {
                 var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
                 var score = new exsurge.ChantScore(ctxt, mappings, true);
 
+                // Setup Exsurge annotations (propers.html Solesmes style above drop cap)
+                var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+                var partAbbrev = {
+                    verse: 'V/.',
+                    tractus: 'Tract.',
+                    offertorium: 'Offert.',
+                    introitus: 'Intr.',
+                    graduale: 'Grad.',
+                    communio: 'Comm.',
+                    sequentia: 'Seq.',
+                    hymnus: 'Hymn.',
+                    antiphona: 'Ant.',
+                    responsorium: 'Resp.',
+                    canticum: 'Cant.',
+                    alleluia: 'Allel.'
+                };
+
+                var topAnnotation = '';
+                var bottomAnnotation = '';
+
+                if (header.annotations && header.annotations.length >= 2) {
+                    topAnnotation = header.annotations[0];
+                    bottomAnnotation = header.annotations[1];
+                } else if (header.annotations && header.annotations.length === 1) {
+                    topAnnotation = header.annotations[0];
+                    if (header.mode) {
+                        var mInt = parseInt(header.mode, 10);
+                        bottomAnnotation = (mInt >= 1 && mInt <= 8) ? romanNumeral[mInt] : header.mode;
+                    }
+                } else {
+                    var rawPart = (officePart || header['office-part'] || '').toLowerCase();
+                    var abbrev = partAbbrev[rawPart] || officePart || '';
+                    if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'Tract.' || abbrev === 'Seq.') ? abbrev : abbrev.toUpperCase();
+                    var rawMode = header.mode || mode;
+                    if (rawMode) {
+                        var modeNum = parseInt(rawMode, 10);
+                        bottomAnnotation = (modeNum >= 1 && modeNum <= 8) ? romanNumeral[modeNum] : rawMode;
+                    }
+                }
+
+                if (topAnnotation && bottomAnnotation) {
+                    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%', '%' + bottomAnnotation + '%');
+                } else if (topAnnotation) {
+                    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%');
+                } else if (bottomAnnotation) {
+                    score.annotation = new exsurge.Annotations(ctxt, '%' + bottomAnnotation + '%');
+                }
+
                 var width = getOptimalChantWidth($card);
                 ctxt.width = width;
 
@@ -3866,23 +4017,50 @@ function renderSingleChantScore($wrapper, force) {
                         $card.data('chant-ctxt', ctxt);
                         $card.data('chant-gabc', processedGabc);
 
-                        // Neume note click → select note + show player, but don't auto-play
-                        $(svg).find('use[source-index]').on('click', function(e) {
+                        // Auto-display player dock at the bottom of the page on first chant loaded
+                        if (!_doCurrentScore) {
+                            updateDoPlayerUI($card, score, false);
+                        }
+
+                        // Neume note + syllable click → select + show player dock in paused state
+                        $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
                             e.stopPropagation();
-                            var note = this.source && this.source.neume ? this.source : null;
-                            if (note) {
-                                $(svg).find('use.active').removeClass('active');
+                            clearActiveNote();
+
+                            var targetEl = this;
+                            var note = null;
+
+                            if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
+                                var elemIdx = this.getAttribute('element-index');
+                                var $noteEl = $(this).closest('g').find('use[source-index]').first();
+                                if (!$noteEl.length && elemIdx !== null) {
+                                    $noteEl = $(svg).find('use[element-index="' + elemIdx + '"]').first();
+                                }
+                                if ($noteEl.length) {
+                                    targetEl = $noteEl[0];
+                                    note = targetEl.source || null;
+                                    if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) note = score.notes[elemIdx];
+                                }
                                 this.classList.add('active');
-                                // Store the selected start note so Play button uses it
-                                $card.data('selected-start-note', note);
-                                // Show the player in paused state, don't start playback
-                                updateDoPlayerUI($card, score, false);
+                            } else {
+                                note = this.source || null;
+                                if (!note && score && score.notes) {
+                                    var elemIdx2 = this.getAttribute('element-index');
+                                    if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
+                                }
                             }
+
+                            targetEl.classList.add('active');
+                            _doActiveNoteEl = targetEl;
+
+                            if (note) {
+                                $card.data('selected-start-note', note);
+                            }
+                            updateDoPlayerUI($card, score, false);
                         });
 
                         // Clicking anywhere on the card/preview activates the player
                         $card.on('click', function(e) {
-                            if ($(e.target).closest('use[source-index]').length) return;
                             updateDoPlayerUI($card, score, false);
                         });
                     }
@@ -3958,20 +4136,41 @@ function relayoutAllChantScores() {
 
                         $card.find('.do-chant-preview').empty().append(svg);
 
-                        // Rebind note click for playback
-                        $(svg).find('use[source-index]').on('click', function(e) {
+                        // Rebind note + syllable click
+                        $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
                             e.stopPropagation();
-                            var note = this.source && this.source.neume ? this.source : null;
-                            if (note) {
-                                $(svg).find('use[source-index].active').removeClass('active');
-                                this.classList.add('active');
-                                if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                                    Tone.context.resume();
+                            clearActiveNote();
+
+                            var targetEl = this;
+                            var note = null;
+
+                            if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
+                                var elemIdx = this.getAttribute('element-index');
+                                var $noteEl = $(this).closest('g').find('use[source-index]').first();
+                                if (!$noteEl.length && elemIdx !== null) {
+                                    $noteEl = $(svg).find('use[element-index="' + elemIdx + '"]').first();
                                 }
-                                if (window.playScore) {
-                                    window.playScore(score, null, note);
+                                if ($noteEl.length) {
+                                    targetEl = $noteEl[0];
+                                    note = targetEl.source || null;
+                                    if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) note = score.notes[elemIdx];
+                                }
+                                this.classList.add('active');
+                            } else {
+                                note = this.source || null;
+                                if (!note && score && score.notes) {
+                                    var elemIdx2 = this.getAttribute('element-index');
+                                    if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
                                 }
                             }
+
+                            targetEl.classList.add('active');
+                            _doActiveNoteEl = targetEl;
+
+                            if (note) {
+                                $card.data('selected-start-note', note);
+                            }
+                            updateDoPlayerUI($card, score, false);
                         });
                     }
                 });
@@ -6866,8 +7065,38 @@ function setupEventListeners() {
         renderDO();
     });
 
+    // Note Keyboard buttons in Settings (Instant pitch playback)
+    $(document).on('click', '#doNoteKeyboard .do-note-key-btn', function(e) {
+        e.preventDefault();
+        var pitch = $(this).data('pitch');
+        var $btn = $(this);
+        $btn.addClass('playing');
+        setTimeout(function() { $btn.removeClass('playing'); }, 260);
+
+        if (window.Tone) {
+            if (Tone.context && Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+            var s = window._doSynth || (window._doSynth = new Tone.Synth({
+                "oscillator": { type: "custom", partials: [0.3, 0.03, 0.05] },
+                "envelope": { "attack": 0.04, "decay": 0.3, "sustain": 0.4, "release": 0.6 }
+            }).toDestination ? new Tone.Synth().toDestination() : new Tone.Synth().toMaster());
+            s.triggerAttackRelease(pitch, "8n");
+        }
+    });
+
+    // Floating Player Dock Toggle in Settings
+    $(document).on('click', '#btnTogglePlayerDock', function(e) {
+        e.preventDefault();
+        var $bar = $('#modernPlayerBar');
+        var isNowVis = !$bar.hasClass('visible');
+        $bar.toggleClass('visible', isNowVis);
+        $('body').toggleClass('player-dock-open', isNowVis);
+        $(this).find('span').text(isNowVis ? 'Masquer le lecteur' : 'Afficher le lecteur');
+    });
+
     // Open Test Page Button in Settings
-    $(document).on('click', '#btnOpenTestMissa', function(e) {
+    $(document).on('click', '#btnOpenTestMissa, #btnOpenTestMissaDirect', function(e) {
         e.preventDefault();
         doState.hora = 'missa_gregorian';
         localStorage.setItem('do_hora', 'missa_gregorian');

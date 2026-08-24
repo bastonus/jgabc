@@ -11,8 +11,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=16.2&ts=202608250047">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=17.2&ts=202608250047">
+    <link rel="stylesheet" href="css/modern.css?v=16.6&ts=202608250112">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=18.3&ts=202608250120">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'dark';
@@ -32,8 +32,8 @@
     <script src="miscChants.js"></script>
     <script src="incipits.js"></script>
     <script src="js/Tone.min.js"></script>
-    <script src="js/tones.js?v=16.6&ts=202608250044"></script>
-    <script src="util.js?ts=202608250044"></script>
+    <script src="js/tones.js?v=16.9&ts=202608250120"></script>
+    <script src="util.js?ts=202608250120"></script>
     <script src="exsurge.min.js"></script>
     <script src="jquery.hypher.js"></script>
     <script src="patterns/la-hypher.js"></script>
@@ -41,7 +41,7 @@
     <script src="patterns/en-us.js"></script>
     <script src="patterns/it.js"></script>
     <script src="patterns/pl.js"></script>
-    <script src="js/divinum_officium.js?v=17.9&ts=202608250041"></script>
+    <script src="js/divinum_officium.js?v=19.3&ts=202608250120"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -229,7 +229,44 @@
                 </div>
             </div>
 
-            <!-- 6. De hoc opere (About, Missals, Translations & Credits) -->
+            <!-- 6. Cantus Gregorianus & Lecteur Audio (Expérimental) -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelGregorianText">Cantus Gregorianus (Partitions &amp; Audio)</label>
+                <div class="settings-grid cols-2" id="doGregorianOptions">
+                    <button class="settings-option-card active" data-value="true">Partitions &amp; Audio Actifs</button>
+                    <button class="settings-option-card" data-value="false">Sans Partitions</button>
+                </div>
+
+                <div style="margin-top: 12px; margin-bottom: 6px; font-size: 0.74rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;">
+                    Clavier de Notes Grégoriennes (Écoute instantanée)
+                </div>
+                <div class="do-note-keyboard" id="doNoteKeyboard">
+                    <button class="do-note-key-btn" data-pitch="C3">Ut₂ (Do)</button>
+                    <button class="do-note-key-btn" data-pitch="D3">Re₃ (Ré)</button>
+                    <button class="do-note-key-btn" data-pitch="E3">Mi₃ (Mi)</button>
+                    <button class="do-note-key-btn" data-pitch="F3">Fa₃ (Fa)</button>
+                    <button class="do-note-key-btn" data-pitch="G3">Sol₃ (Sol)</button>
+                    <button class="do-note-key-btn" data-pitch="A3">La₃ (La)</button>
+                    <button class="do-note-key-btn" data-pitch="B3">Si₃ (Si)</button>
+                    <button class="do-note-key-btn" data-pitch="C4">Ut₄ (Do)</button>
+                    <button class="do-note-key-btn" data-pitch="D4">Re₄ (Ré)</button>
+                    <button class="do-note-key-btn" data-pitch="E4">Mi₄ (Mi)</button>
+                    <button class="do-note-key-btn" data-pitch="F4">Fa₄ (Fa)</button>
+                </div>
+
+                <div class="settings-grid cols-2" style="margin-top: 10px;">
+                    <button id="btnTogglePlayerDock" class="settings-option-card" style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Afficher le lecteur</span>
+                    </button>
+                    <button id="btnOpenTestMissaDirect" class="settings-option-card" style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                        <span>Messe &amp; Chant</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 7. De hoc opere (About, Missals, Translations & Credits) -->
             <div class="settings-group settings-about-group">
                 <label class="settings-label" id="labelAboutText">De hoc opere (À propos &amp; Sources)</label>
                 <div class="settings-about-card">

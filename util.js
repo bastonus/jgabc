@@ -1028,7 +1028,11 @@ if(typeof window=='object') (function(window) {
 
       function playNextNote (time){
         var note = notes[noteId];
-        if(noteElem) noteElem.classList.remove('active','porrectus-left','porrectus-right');
+        $('svg use.active, svg text.active').removeClass('active porrectus-left porrectus-right');
+        if(noteElem) {
+          noteElem.classList.remove('active','porrectus-left','porrectus-right');
+          noteElem = null;
+        }
         if(originalSvg != score.svg || note == null) {
           if(syllable) syllable.classList.remove('active');
           _isPlaying = false;
@@ -1122,6 +1126,7 @@ if(typeof window=='object') (function(window) {
     window.stopScore = function(){
       Tone.Transport.stop();
       _isPlaying=false;
+      $('svg use.active, svg text.active').removeClass('active porrectus-left porrectus-right');
       $('#mediaControls').addClass('offscreen');
     }
   } else {
