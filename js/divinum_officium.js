@@ -4017,10 +4017,7 @@ function renderSingleChantScore($wrapper, force) {
                         $card.data('chant-ctxt', ctxt);
                         $card.data('chant-gabc', processedGabc);
 
-                        // Auto-display player dock at the bottom of the page on first chant loaded
-                        if (!_doCurrentScore) {
-                            updateDoPlayerUI($card, score, false);
-                        }
+                        // Player only opens when user clicks a note or syllable (no auto-open)
 
                         // Neume note + syllable click → select + show player dock in paused state
                         $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {

@@ -390,7 +390,7 @@
     <!-- App-Native Floating Audio Player -->
     <div id="modernPlayerBar" class="modern-player-bar do-player-floating">
         <!-- Progress Track -->
-        <div id="playerProgressBarContainer" class="do-player-progress-track" title="Cliquer pour naviguer dans la pièce">
+        <div id="playerProgressBarContainer" class="do-player-progress-track">
             <div class="do-player-progress-bar">
                 <div id="playerProgressFill" class="do-player-progress-fill"></div>
             </div>
@@ -398,51 +398,61 @@
 
         <!-- Player Body -->
         <div class="do-player-body">
-            <!-- Left: Chant Identity -->
+
+            <!-- Left: Chant name -->
             <div class="do-player-info">
-                <span id="playerChantPart" class="do-player-badge">—</span>
                 <span id="playerChantName" class="do-player-name">—</span>
             </div>
 
-            <!-- Center: Core Controls (Stop, Play/Pause, Next Note) -->
+            <!-- Center: Controls -->
             <div class="do-player-center-controls">
-                <button id="playerBtnStop" class="do-player-action-btn do-player-btn-stop" title="Arrêter">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                <!-- Stop -->
+                <button id="playerBtnStop" class="do-player-action-btn" title="Arrêter et fermer">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="6" width="12" height="12" rx="2"/>
+                    </svg>
                 </button>
+                <!-- Play/Pause -->
                 <button id="playerBtnPlay" class="do-player-play-btn" title="Lecture / Pause">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
+                    </svg>
                 </button>
-                <button id="playerBtnNext" class="do-player-action-btn do-player-btn-next" title="Note suivante">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><rect x="17" y="4" width="3" height="16"></rect></svg>
+                <!-- Next note -->
+                <button id="playerBtnNext" class="do-player-action-btn" title="Note suivante">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/>
+                        <line x1="19" y1="5" x2="19" y2="19"/>
+                    </svg>
                 </button>
             </div>
 
-            <!-- Right: App Segmented Musical Controls -->
+            <!-- Right: Parameters -->
             <div class="do-player-settings-group">
-                <!-- Pitch Transpose Pill -->
-                <div class="do-player-pill-control" title="Transposition du ton">
-                    <button id="playerPitchDown" class="do-player-pill-arrow" title="Transposer vers le bas (-1 demi-ton)">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <!-- Pitch -->
+                <div class="do-player-pill-control" title="Transposition">
+                    <button id="playerPitchDown" class="do-player-pill-arrow" title="Baisser (-1 demi-ton)">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <span id="playerStartingPitch" class="do-player-pill-val">—</span>
-                    <button id="playerPitchUp" class="do-player-pill-arrow" title="Transposer vers le haut (+1 demi-ton)">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    <button id="playerPitchUp" class="do-player-pill-arrow" title="Hausser (+1 demi-ton)">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
                     </button>
                 </div>
 
-                <!-- Solesmes Toggle Button -->
-                <button id="playerBtnSolesmes" class="do-player-toggle-btn" title="Allongement Solesmes pour le Salicus">
-                    <img src="salicus.svg" alt="Solesmes" style="height:12px;">
+                <!-- Solesmes -->
+                <button id="playerBtnSolesmes" class="do-player-toggle-btn" title="Solesmes">
+                    <img src="salicus.svg" alt="Solesmes" style="height:11px; opacity:0.7;">
                 </button>
 
-                <!-- Tempo Pill -->
+                <!-- Tempo -->
                 <div class="do-player-pill-control" title="Tempo (BPM)">
-                    <button id="playerTempoMinus" class="do-player-pill-arrow tempo-minus" title="Ralentir (-10 BPM)">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <button id="playerTempoMinus" class="do-player-pill-arrow tempo-minus" title="Ralentir">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <span id="playerTempoValue" class="do-player-pill-val tempo-value">150</span>
-                    <button id="playerTempoPlus" class="do-player-pill-arrow tempo-plus" title="Accélérer (+10 BPM)">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    <button id="playerTempoPlus" class="do-player-pill-arrow tempo-plus" title="Accélérer">
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
                     </button>
                 </div>
             </div>
