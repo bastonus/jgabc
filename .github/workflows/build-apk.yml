@@ -147,5 +147,6 @@ jobs:
             build-output/Oremus.apk
           draft: false
           prerelease: ${{ contains(steps.tag_info.outputs.tag_name, 'beta') || contains(steps.tag_info.outputs.tag_name, 'alpha') || contains(steps.tag_info.outputs.tag_name, 'rc') }}
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
