@@ -4676,7 +4676,7 @@ function getOptimalChantWidth($card) {
 }
 
 function relayoutAllChantScores() {
-    if (doState.hora !== 'missa_gregorian') return;
+    if (!doState.includeGregorian) return;
     $('.do-chant-card').each(function() {
         var $card = $(this);
         var score = $card.data('chant-score');
@@ -4730,7 +4730,7 @@ function setupChantResizeObserver() {
     chantResizeObserver = new ResizeObserver(function() {
         if (chantResizeTimer) clearTimeout(chantResizeTimer);
         chantResizeTimer = setTimeout(function() {
-            if (doState.hora === 'missa_gregorian') {
+            if (doState.includeGregorian) {
                 relayoutAllChantScores();
             }
         }, 50);
@@ -4744,7 +4744,7 @@ function setupChantResizeObserver() {
 }
 
 $(window).on('resize orientationchange', function() {
-    if (doState.hora !== 'missa_gregorian') return;
+    if (!doState.includeGregorian) return;
     if (chantResizeTimer) clearTimeout(chantResizeTimer);
     chantResizeTimer = setTimeout(function() {
         relayoutAllChantScores();

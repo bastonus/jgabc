@@ -11,8 +11,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=16.9&ts=202608251129">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=21.6&ts=202608251129">
+    <link rel="stylesheet" href="css/modern.css?v=16.9&ts=202608251211">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=21.9&ts=202608251211">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'dark';
@@ -41,8 +41,8 @@
     <script src="patterns/en-us.js"></script>
     <script src="patterns/it.js"></script>
     <script src="patterns/pl.js"></script>
-    <script src="do_manifest.js?v=20.9&ts=202608251120"></script>
-    <script src="js/divinum_officium.js?v=22.9&ts=202608251125"></script>
+    <script src="do_manifest.js?v=20.10&ts=202608251205"></script>
+    <script src="js/divinum_officium.js?v=23.1&ts=202608251206"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -175,8 +175,8 @@
             <!-- 0. Rubricæ / Editio Liturgica -->
             <div class="settings-group">
                 <label class="settings-label" id="labelEditionText">Rubricæ &amp; Editio</label>
-                <div class="settings-select-wrapper" style="margin-top: 6px;">
-                    <select id="doEditionSelect" class="settings-select" style="width: 100%; background: var(--bg-tertiary, #1e293b); color: var(--text-primary, #f8fafc); border: 1px solid var(--border-color, #334155); border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; font-family: inherit; cursor: pointer;">
+                <div class="settings-select-wrapper do-edition-wrapper">
+                    <select id="doEditionSelect" class="do-edition-select">
                         <option value="1960" selected>Rubrics 1960 - 1960 (Défaut)</option>
                         <option value="1960_usa">Rubrics 1960 - 2020 USA</option>
                         <option value="1955">Reduced - 1955</option>
@@ -193,6 +193,9 @@
                         <option value="cistercian_altovado">Ordo Cisterciensis - Altovado</option>
                         <option value="dominican_1962">Ordo Praedicatorum - 1962</option>
                     </select>
+                    <span class="do-edition-chevron">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
                 </div>
             </div>
 
