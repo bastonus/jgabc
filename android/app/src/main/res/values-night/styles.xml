@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme (Night). -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -15,10 +15,10 @@
         <item name="android:fitsSystemWindows">true</item>
     </style>
 
-    <!-- Android 12+ / Capacitor Launch Theme (Light Mode: Black logo on #faf8f5 background, no borders) -->
+    <!-- Android 12+ / Capacitor Launch Theme (Dark Mode: White logo on #121214 background, no borders) -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#faf8f5</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_light</item>
+        <item name="windowSplashScreenBackground">#121214</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_dark</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>
