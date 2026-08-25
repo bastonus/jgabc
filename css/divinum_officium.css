@@ -4366,3 +4366,127 @@ body.player-dock-open .app-main {
     transform: translateY(0);
 }
 
+/* Feedback In-App Modal */
+.feedback-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    max-width: 660px;
+    height: 86vh;
+    max-height: 740px;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feedback-card {
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 18px 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: #f4f4f5;
+    box-sizing: border-box;
+}
+
+[data-theme="light"] .feedback-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    color: #18181b;
+}
+
+.feedback-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .feedback-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.feedback-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.feedback-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.feedback-subtitle {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+}
+
+.feedback-body {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-height: 0;
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tally-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+}
+
+.feedback-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--background-main);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    z-index: 1;
+    transition: opacity 0.2s ease;
+}
+
+@media (max-width: 649px) {
+    .feedback-modal {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        top: 0;
+        left: 0;
+        transform: none;
+    }
+    .feedback-card {
+        border-radius: 0;
+        border: none;
+        padding: 16px;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+}
+

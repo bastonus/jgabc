@@ -8,13 +8,13 @@
 
 // ---- Global State ----
 var doState = window.doState = {
-    hora: 'home',
+    hora: localStorage.getItem('do_hora') || 'home',
     date: moment(),
     showLatin: (localStorage.getItem('do_show_latin') !== 'false'),
     vernacularLang: localStorage.getItem('do_vernacular_lang') || (localStorage.getItem('do_lang') === 'la' ? 'none' : (localStorage.getItem('do_lang') || 'fr')),
     edition: localStorage.getItem('do_edition') || '1960',
     rite: localStorage.getItem('do_rite') || 'traditional',
-    officiumKey: null,
+    officiumKey: localStorage.getItem('do_officiumKey') || null,
     testFeastKey: null,
     includeOrdinarium: localStorage.getItem('do_ordinarium') === 'true',
     includeGregorian: (localStorage.getItem('do_include_gregorian') !== 'false'),
@@ -7973,6 +7973,42 @@ function hideUpdateModal() {
     $('#updateModalBackdrop, #updateModal').addClass('hidden');
 }
 
+function openFeedbackModal() {
+    var formId = "b5QOV2";
+    var curVersion = typeof CURRENT_APP_VERSION !== 'undefined' ? CURRENT_APP_VERSION : 'beta';
+    var curDate = doState.date ? doState.date.format('YYYY-MM-DD') : '';
+    var curHora = doState.hora || 'missa';
+    var platform = window.Capacitor ? 'Android App' : 'Web';
+    var theme = doState.theme || 'dark';
+
+    var tallyUrl = 'https://tally.so/embed/' + formId +
+        '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=0' +
+        '&app_version=' + encodeURIComponent(curVersion) +
+        '&liturgical_date=' + encodeURIComponent(curDate) +
+        '&office=' + encodeURIComponent(curHora) +
+        '&platform=' + encodeURIComponent(platform) +
+        '&theme=' + encodeURIComponent(theme);
+
+    var $iframe = $('#tallyFeedbackIframe');
+    var $loading = $('#feedbackLoading').show();
+
+    $iframe.off('load').on('load', function() {
+        $loading.fadeOut(150);
+    });
+
+    if ($iframe.attr('src') !== tallyUrl) {
+        $iframe.attr('src', tallyUrl);
+    } else {
+        $loading.hide();
+    }
+
+    $('#feedbackModalBackdrop, #feedbackModal').removeClass('hidden');
+}
+
+function closeFeedbackModal() {
+    $('#feedbackModalBackdrop, #feedbackModal').addClass('hidden');
+}
+
 function applyColor(hex) {
     doState.settings.color = hex;
     var r = parseInt(hex.slice(1,3), 16);
@@ -7991,6 +8027,20 @@ function applyColor(hex) {
 
 // ---- Event Listeners ----
 function setupEventListeners() {
+    // Feedback Modal Triggers
+    $(document).on('click', '#btnFeedbackSidebar, #btnFeedbackSettings', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModals();
+        openFeedbackModal();
+    });
+
+    $(document).on('click', '#btnCloseFeedbackModal, #feedbackModalBackdrop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeFeedbackModal();
+    });
+
     $(document).on('click', '.do-brand, #btnBrandHome', function(e) {
         e.preventDefault();
         doState.hora = 'home';
