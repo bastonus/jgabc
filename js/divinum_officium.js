@@ -41,8 +41,9 @@ var doState = window.doState = {
     tempo: parseInt(localStorage.getItem('do_tempo'), 10) || 150,
     mobileLang: 'la',
     settings: {
-        theme: localStorage.getItem('do_theme') || 'dark',
+        theme: localStorage.getItem('do_theme') || 'auto',
         color: localStorage.getItem('do_color') || '#c96b63',
+        liturgicalColorSync: (localStorage.getItem('do_liturgical_color_sync') === 'true'),
         iconSync: localStorage.getItem('do_icon_sync') === 'true',
         iconColor: localStorage.getItem('do_icon_color') || 'default'
     },
@@ -515,21 +516,25 @@ var DO_UI_TRANSLATIONS = {
         completorium_tag: 'Nuit',
         horae: 'Heures',
         settings_title: 'Paramètres',
-        edition_label: 'Édition',
-        ordinarium_label: 'Ordinaire de la Messe',
-        ordinarium_false: 'Propre uniquement',
-        ordinarium_true: 'Avec l\'Ordinaire',
-        latin_label: 'Texte Latin',
+        edition_label: 'Rubricæ & Editio',
+        content_label: 'Textus & Cantus',
+        ordinarium_label: 'Ordinarium Missæ',
+        gregorian_label: 'Cantus Gregorianus',
+        latin_label: 'Textus Latinus',
         latin_true: 'Latin actif',
         latin_false: 'Sans Latin',
-        vernacular_label: 'Traduction vernaculaire',
+        vernacular_label: 'Translatio Vernacula',
         vernacular_none: 'Aucune traduction',
-        theme_label: 'Thème d\'affichage',
-        theme_light: 'Diurne (Blanc)',
-        theme_dark: 'Nocturne (Noir)',
-        theme_oled: 'OLED (Noir pur)',
-        theme_auto: 'Automatique (Système)',
-        color_label: 'Couleur d\'accentuation',
+        theme_label: 'Thema',
+        theme_light: 'Diurnum',
+        theme_dark: 'Nocturnum',
+        theme_oled: 'OLED',
+        theme_auto: 'Automaticum',
+        color_label: 'Color',
+        icon_label: 'Imago applicationis',
+        haptics_label: 'Gestus & Haptica',
+        updates_label: 'Renovatio Applicationis',
+        liturgical_color_sync: 'Couleur selon la journée liturgique',
         officium_modal_title: 'Choisir un Office / une Fête',
         officium_search_placeholder: 'Rechercher une fête ou un office...',
         officium_tab_tempora: 'Temps liturgique',
@@ -572,21 +577,25 @@ var DO_UI_TRANSLATIONS = {
         completorium_tag: 'Noctis',
         horae: 'Horæ',
         settings_title: 'Optiones',
-        edition_label: 'Editio',
+        edition_label: 'Rubricæ & Editio',
+        content_label: 'Textus & Cantus',
         ordinarium_label: 'Ordinarium Missæ',
-        ordinarium_false: 'Tantum Proprium',
-        ordinarium_true: 'Cum Ordinario',
+        gregorian_label: 'Cantus Gregorianus',
         latin_label: 'Textus Latinus',
         latin_true: 'Latina activa',
         latin_false: 'Sine Latina',
         vernacular_label: 'Translatio Vernacula',
         vernacular_none: 'Nulla translatio',
         theme_label: 'Thema',
-        theme_light: 'Diurnum (Album)',
-        theme_dark: 'Nocturnum (Nigrum)',
-        theme_oled: 'OLED (Purum)',
+        theme_light: 'Diurnum',
+        theme_dark: 'Nocturnum',
+        theme_oled: 'OLED',
         theme_auto: 'Automaticum',
         color_label: 'Color',
+        icon_label: 'Imago applicationis',
+        haptics_label: 'Gestus & Haptica',
+        updates_label: 'Renovatio Applicationis',
+        liturgical_color_sync: 'Color secundum diem liturgicum',
         officium_modal_title: 'Officium Elige',
         officium_search_placeholder: 'Quaere officium aut diem...',
         officium_tab_tempora: 'Tempora',
@@ -626,21 +635,25 @@ var DO_UI_TRANSLATIONS = {
         completorium_tag: 'Night',
         horae: 'Hours',
         settings_title: 'Settings',
-        edition_label: 'Edition',
-        ordinarium_label: 'Order of Mass',
-        ordinarium_false: 'Proper Only',
-        ordinarium_true: 'With Ordinary',
-        latin_label: 'Latin Text',
+        edition_label: 'Rubricæ & Editio',
+        content_label: 'Textus & Cantus',
+        ordinarium_label: 'Ordinarium Missæ',
+        gregorian_label: 'Cantus Gregorianus',
+        latin_label: 'Textus Latinus',
         latin_true: 'Latin active',
         latin_false: 'Without Latin',
-        vernacular_label: 'Vernacular Translation',
+        vernacular_label: 'Translatio Vernacula',
         vernacular_none: 'No translation',
-        theme_label: 'Display Theme',
-        theme_light: 'Light (White)',
-        theme_dark: 'Dark (Black)',
-        theme_oled: 'OLED (Pure Black)',
-        theme_auto: 'Automatic (System)',
-        color_label: 'Accent Color',
+        theme_label: 'Thema',
+        theme_light: 'Diurnum',
+        theme_dark: 'Nocturnum',
+        theme_oled: 'OLED',
+        theme_auto: 'Automaticum',
+        color_label: 'Color',
+        icon_label: 'Imago applicationis',
+        haptics_label: 'Gestus & Haptica',
+        updates_label: 'Renovatio Applicationis',
+        liturgical_color_sync: 'Color by liturgical day',
         officium_modal_title: 'Select Office / Feast',
         officium_search_placeholder: 'Search a feast or office...',
         officium_tab_tempora: 'Proper of Seasons',
@@ -681,21 +694,25 @@ var DO_UI_TRANSLATIONS = {
         completorium_tag: 'Noche',
         horae: 'Horas',
         settings_title: 'Ajustes',
-        edition_label: 'Edición',
-        ordinarium_label: 'Ordinario de la Misa',
-        ordinarium_false: 'Solo Propio',
-        ordinarium_true: 'Con Ordinario',
-        latin_label: 'Texto Latino',
+        edition_label: 'Rubricæ & Editio',
+        content_label: 'Textus & Cantus',
+        ordinarium_label: 'Ordinarium Missæ',
+        gregorian_label: 'Cantus Gregorianus',
+        latin_label: 'Textus Latinus',
         latin_true: 'Latín activo',
         latin_false: 'Sin Latín',
-        vernacular_label: 'Traducción vernácula',
+        vernacular_label: 'Translatio Vernacula',
         vernacular_none: 'Sin traducción',
-        theme_label: 'Tema visual',
-        theme_light: 'Diurno (Blanco)',
-        theme_dark: 'Nocturno (Negro)',
-        theme_oled: 'OLED (Negro puro)',
-        theme_auto: 'Automático (Sistema)',
-        color_label: 'Color de acento',
+        theme_label: 'Thema',
+        theme_light: 'Diurnum',
+        theme_dark: 'Nocturnum',
+        theme_oled: 'OLED',
+        theme_auto: 'Automaticum',
+        color_label: 'Color',
+        icon_label: 'Imago applicationis',
+        haptics_label: 'Gestus & Haptica',
+        updates_label: 'Renovatio Applicationis',
+        liturgical_color_sync: 'Color según el día litúrgico',
         officium_modal_title: 'Seleccionar Oficio / Fiesta',
         officium_search_placeholder: 'Buscar una fiesta u oficio...',
         officium_tab_tempora: 'Tiempo Litúrgico',
@@ -709,29 +726,22 @@ var DO_UI_TRANSLATIONS = {
         select_chapter: 'Capítulo'
     }
 };
+var DO_TRANSLATIONS = window.DO_TRANSLATIONS = DO_UI_TRANSLATIONS;
 
-function updateUiTranslations() {
-    var uiLang = getUiLang();
-    var t = DO_UI_TRANSLATIONS[uiLang] || DO_UI_TRANSLATIONS['fr'] || DO_UI_TRANSLATIONS['la'];
+function updateUiLanguage() {
+    var lang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : 'la';
+    var t = DO_UI_TRANSLATIONS[lang] || DO_UI_TRANSLATIONS.la || DO_UI_TRANSLATIONS.fr;
 
+    // Header & Subtitle
     $('.do-brand-sub').text(t.app_sub);
 
-    // Sidebar titles
-    var $titles = $('.do-sidebar-nav .do-nav-section-title');
-    if ($titles.length >= 3) {
-        $titles.eq(0).text(t.liturgia_diei);
-        $titles.eq(1).text(t.cursus_horarum);
-        $titles.eq(2).text(t.sacra_biblia.toUpperCase());
-    } else if ($titles.length >= 2) {
-        $titles.eq(0).text(t.liturgia_diei);
-        $titles.eq(1).text(t.cursus_horarum);
-    }
-
-    // Nav items in Sidebar
-    $('.do-nav-item[data-hora="home"] .do-nav-label').text(t.home);
-    $('.do-nav-item[data-hora="home"] .do-nav-tag').text(t.home_tag);
+    // Sidebar items
+    $('#btnNavHome .do-nav-label').text(t.liturgia_diei);
+    $('#btnNavCursus .do-nav-label').text(t.cursus_horarum);
     $('.do-nav-item[data-hora="missa"] .do-nav-label').text(t.missa);
     $('.do-nav-item[data-hora="missa"] .do-nav-tag').text(t.missa_tag);
+    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-label').text(t.missa_gregorian);
+    $('.do-nav-item[data-hora="missa_gregorian"] .do-nav-tag').text(t.missa_gregorian_tag);
     $('.do-nav-item[data-hora="matutinum"] .do-nav-label').text(t.matutinum);
     $('.do-nav-item[data-hora="matutinum"] .do-nav-tag').text(t.matutinum_tag);
     $('.do-nav-item[data-hora="laudes"] .do-nav-label').text(t.laudes);
@@ -764,30 +774,32 @@ function updateUiTranslations() {
     $('#settingsPanel .settings-header h2').text(t.settings_title);
     $('#btnSettingsSidebar span').text(t.settings_title);
     
-    // Ordinarium Missæ
-    $('#labelOrdinariumText').text(t.ordinarium_label);
-    $('#doOrdinariumOptions .settings-option-card[data-value="false"], #doOrdinariumOptions .settings-pill-btn[data-value="false"]').text(t.ordinarium_false);
-    $('#doOrdinariumOptions .settings-option-card[data-value="true"], #doOrdinariumOptions .settings-pill-btn[data-value="true"]').text(t.ordinarium_true);
-
-    // 2 Distinct Language settings
-    $('#labelLatinText').text(t.latin_label);
-    $('#doLatinOptions .settings-option-card[data-value="true"], #doLatinOptions .settings-pill-btn[data-value="true"], #doLatinOptions .segment[data-value="true"]').text(t.latin_true);
-    $('#doLatinOptions .settings-option-card[data-value="false"], #doLatinOptions .settings-pill-btn[data-value="false"], #doLatinOptions .segment[data-value="false"]').text(t.latin_false);
-    $('#labelVernacularText').text(t.vernacular_label);
+    // Category Headers in Latin
+    $('#labelEditionText').text(t.edition_label || 'Rubricæ & Editio');
+    $('#labelContentText').text(t.content_label || 'Textus & Cantus');
+    $('#labelOrdinariumText').text(t.ordinarium_label || 'Ordinarium Missæ');
+    $('#labelGregorianText').text(t.gregorian_label || 'Cantus Gregorianus');
+    $('#labelLatinText').text(t.latin_label || 'Textus Latinus');
+    $('#labelVernacularText').text(t.vernacular_label || 'Translatio Vernacula');
     $('#doVernacularOptions .settings-option-card[data-value="none"], #doVernacularOptions .settings-option[data-value="none"]').text(t.vernacular_none);
 
     // Theme in Settings
-    $('#labelThemeText').text(t.theme_label);
-    $('#doThemeOptions .settings-option-card[data-value="light"], #doThemeOptions .settings-option[data-value="light"]').text(t.theme_light);
-    $('#doThemeOptions .settings-option-card[data-value="dark"], #doThemeOptions .settings-option[data-value="dark"]').text(t.theme_dark);
-    $('#doThemeOptions .settings-option-card[data-value="oled"], #doThemeOptions .settings-option[data-value="oled"]').text(t.theme_oled);
-    $('#doThemeOptions .settings-option-card[data-value="auto"], #doThemeOptions .settings-option[data-value="auto"]').text(t.theme_auto);
-    $('#labelColorText').text(t.color_label);
+    $('#labelThemeText').text(t.theme_label || 'Thema');
+    $('#doThemeOptions .settings-option-card[data-value="light"] .theme-name').text(t.theme_light || 'Diurnum');
+    $('#doThemeOptions .settings-option-card[data-value="dark"] .theme-name').text(t.theme_dark || 'Nocturnum');
+    $('#doThemeOptions .settings-option-card[data-value="oled"] .theme-name').text(t.theme_oled || 'OLED');
+    $('#doThemeOptions .settings-option-card[data-value="auto"] .theme-name').text(t.theme_auto || 'Automaticum');
+    $('#labelColorText').text(t.color_label || 'Color');
+    $('#labelLiturgicalColorText').text(t.liturgical_color_sync);
+    $('#labelIconText').text(t.icon_label || 'Imago applicationis');
+    $('#labelHapticsText').text(t.haptics_label || 'Gestus & Haptica');
+    $('#labelUpdatesText').text(t.updates_label || 'Renovatio Applicationis');
 
     // Date picker popup
     $('#datePickerPopup .do-date-label').text(t.date_label);
     $('#btnDateToday').text(t.btn_today);
 }
+var updateUiTranslations = window.updateUiTranslations = updateUiLanguage;
 
 // ---- Standard Liturgical Formulas & Prayers ----
 var DO_PRAYER_ENDINGS = {
@@ -2982,14 +2994,14 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     var bookTitle = bkObj[uiLang] || bkObj.fr || bkObj.la;
     var maxCh = bkObj.chapters || 1;
 
-    var laKeys = Object.keys(laVerses || {}).map(Number);
-    var vernKeys = vernVerses ? Object.keys(vernVerses).map(Number) : [];
-    var allKeys = Array.from(new Set(laKeys.concat(vernKeys))).sort(function(a, b) { return a - b; });
+    var alignedRows = (typeof getBibleAlignedRows === 'function')
+        ? getBibleAlignedRows(bookId, vernLang, chapterNum, laVerses, vernVerses)
+        : [];
 
     // Pagination computations
     var isAll = (pageSize === 'all' || pageSize === 0 || !pageSize);
-    var vpp = isAll ? (allKeys.length || 1) : parseInt(pageSize, 10);
-    var totalPages = isAll ? 1 : Math.max(1, Math.ceil(allKeys.length / vpp));
+    var vpp = isAll ? (alignedRows.length || 1) : parseInt(pageSize, 10);
+    var totalPages = isAll ? 1 : Math.max(1, Math.ceil(alignedRows.length / vpp));
 
     if (pageNum > totalPages) pageNum = totalPages;
     if (pageNum < 1) pageNum = 1;
@@ -3002,11 +3014,11 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     localStorage.setItem('do_bible_pageSize', isAll ? 'all' : vpp);
 
     var startIdx = isAll ? 0 : (pageNum - 1) * vpp;
-    var endIdx = isAll ? allKeys.length : Math.min(startIdx + vpp, allKeys.length);
-    var visibleKeys = allKeys.slice(startIdx, endIdx);
+    var endIdx = isAll ? alignedRows.length : Math.min(startIdx + vpp, alignedRows.length);
+    var visibleRows = alignedRows.slice(startIdx, endIdx);
 
-    var vStart = visibleKeys.length ? visibleKeys[0] : 1;
-    var vEnd = visibleKeys.length ? visibleKeys[visibleKeys.length - 1] : 1;
+    var vStart = visibleRows.length ? (visibleRows[0].laVNum || visibleRows[0].vernVNum || 1) : 1;
+    var vEnd = visibleRows.length ? (visibleRows[visibleRows.length - 1].laVNum || visibleRows[visibleRows.length - 1].vernVNum || 1) : 1;
 
     // Update Header
     var headerText = bookTitle + ' ' + chapterNum + ' (p. ' + pageNum + '/' + totalPages + ')';
@@ -3021,18 +3033,21 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     var isBilingual = (doState.showLatin && vernLang && vernVerses);
     var isVernOnly = (!doState.showLatin && vernLang && vernVerses);
 
-    if (visibleKeys.length) {
+    if (visibleRows.length) {
         if (isBilingual) {
             var rows = [];
-            visibleKeys.forEach(function(vNum) {
-                var laText = laVerses[vNum] || '';
-                var vernText = vernVerses ? (vernVerses[vNum] || '') : '';
-                var laFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(laText)), 'la');
-                var vernFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(vernText)), vernLang || 'fr');
+            visibleRows.forEach(function(r) {
+                var laFormatted = r.laText ? hyphenateHtmlText(formatLiturgicalSymbols(escHtml(r.laText)), 'la') : '';
+                var vernFormatted = r.vernText ? hyphenateHtmlText(formatLiturgicalSymbols(escHtml(r.vernText)), vernLang || 'fr') : '';
+                var laVNumHtml = r.laVNum ? ('<span class="do-bible-vnum">' + r.laVNum + '</span> ') : '';
+                var vernVNumHtml = r.vernVNum ? ('<span class="do-bible-vnum">' + r.vernVNum + '</span> ') : '';
+                if (r.isVulgateSuppl) {
+                    vernVNumHtml = '<span class="do-bible-vnum">' + (r.vernVNum || '') + '</span> <span class="do-bible-suppl-badge" style="font-size:0.75rem; color:var(--primary-color); opacity:0.85; font-style:italic; margin-right:0.35em;">[Vulgate]</span> ';
+                }
                 rows.push(
                     '<div class="do-bilingual-row do-bible-row">' +
-                        '<div class="do-col-la" lang="la"><span class="do-bible-vnum">' + vNum + '</span> ' + laFormatted + '</div>' +
-                        '<div class="do-col-vernacular" lang="' + (vernLang || 'fr') + '"><span class="do-bible-vnum">' + vNum + '</span> ' + vernFormatted + '</div>' +
+                        '<div class="do-col-la" lang="la">' + laVNumHtml + laFormatted + '</div>' +
+                        '<div class="do-col-vernacular" lang="' + (vernLang || 'fr') + '">' + vernVNumHtml + vernFormatted + '</div>' +
                     '</div>'
                 );
             });
@@ -3043,24 +3058,27 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
             '</div>';
         } else if (isVernOnly) {
             var rows = [];
-            visibleKeys.forEach(function(vNum) {
-                var vernText = vernVerses ? (vernVerses[vNum] || '') : '';
-                var vernFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(vernText)), vernLang || 'fr');
+            visibleRows.forEach(function(r) {
+                var vernFormatted = r.vernText ? hyphenateHtmlText(formatLiturgicalSymbols(escHtml(r.vernText)), vernLang || 'fr') : '';
+                var vernVNumHtml = r.vernVNum ? ('<span class="do-bible-vnum">' + r.vernVNum + '</span> ') : '';
+                if (r.isVulgateSuppl) {
+                    vernVNumHtml = '<span class="do-bible-vnum">' + (r.vernVNum || '') + '</span> <span class="do-bible-suppl-badge" style="font-size:0.75rem; color:var(--primary-color); opacity:0.85; font-style:italic; margin-right:0.35em;">[Vulgate]</span> ';
+                }
                 rows.push(
                     '<div class="do-bible-single-verse" lang="' + (vernLang || 'fr') + '">' +
-                        '<span class="do-bible-vnum">' + vNum + '</span> ' + vernFormatted +
+                        vernVNumHtml + vernFormatted +
                     '</div>'
                 );
             });
             bodyHtml = '<div class="do-bible-single-col">' + rows.join('') + '</div>';
         } else {
             var rows = [];
-            visibleKeys.forEach(function(vNum) {
-                var laText = laVerses[vNum] || '';
-                var laFormatted = hyphenateHtmlText(formatLiturgicalSymbols(escHtml(laText)), 'la');
+            visibleRows.forEach(function(r) {
+                var laFormatted = r.laText ? hyphenateHtmlText(formatLiturgicalSymbols(escHtml(r.laText)), 'la') : '';
+                var laVNumHtml = r.laVNum ? ('<span class="do-bible-vnum">' + r.laVNum + '</span> ') : '';
                 rows.push(
                     '<div class="do-bible-single-verse" lang="la">' +
-                        '<span class="do-bible-vnum">' + vNum + '</span> ' + laFormatted +
+                        laVNumHtml + laFormatted +
                     '</div>'
                 );
             });
@@ -3072,7 +3090,7 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
 
     // Main Card HTML
     var cardTitle = bookTitle + ' — ' + (uiLang === 'fr' ? 'Chapitre ' : 'Capitulum ') + chapterNum;
-    var pageBadge = 'Page ' + pageNum + ' / ' + totalPages + (visibleKeys.length ? ' (v. ' + vStart + '–' + vEnd + ')' : '');
+    var pageBadge = 'Page ' + pageNum + ' / ' + totalPages + (visibleRows.length ? ' (v. ' + vStart + '–' + vEnd + ')' : '');
 
     var cardHtml = '<div class="do-card is-bible">' +
         '<div class="do-card-header">' +
@@ -3098,9 +3116,12 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
 
     var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select" style="min-width:130px; text-align:center; padding:6px 12px; font-size:0.85rem;">');
     for (var p = 1; p <= totalPages; p++) {
-        var pStart = (p - 1) * vpp + 1;
-        var pEnd = Math.min(p * vpp, allKeys.length);
-        var $opt = $('<option>').val(p).text('Page ' + p + '/' + totalPages + (allKeys.length ? ' (v. ' + pStart + '–' + pEnd + ')' : ''));
+        var pStartIdx = (p - 1) * vpp;
+        var pEndIdx = Math.min(pStartIdx + vpp, alignedRows.length);
+        var pRows = alignedRows.slice(pStartIdx, pEndIdx);
+        var pStart = pRows.length ? (pRows[0].laVNum || pRows[0].vernVNum || (pStartIdx + 1)) : (pStartIdx + 1);
+        var pEnd = pRows.length ? (pRows[pRows.length - 1].laVNum || pRows[pRows.length - 1].vernVNum || pEndIdx) : pEndIdx;
+        var $opt = $('<option>').val(p).text('Page ' + p + '/' + totalPages + (alignedRows.length ? ' (v. ' + pStart + '–' + pEnd + ')' : ''));
         if (p === pageNum) $opt.prop('selected', true);
         $pgSelect.append($opt);
     }
@@ -3399,6 +3420,7 @@ function renderHomeView() {
 }
 
 function renderDO() {
+    updateEffectiveColor();
     updateSidebarAndHeader();
     closeHeaderDropdown();
 
@@ -5140,6 +5162,10 @@ function renderTestMissaBannerAndToolbar() {
                     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' +
                     '<span>Partitions Grégoriennes : ' + (isGregorianOn ? 'ACTIVÉES' : 'DÉSACTIVÉES') + '</span>' +
                 '</button>' +
+                '<button id="btnDemoUpdateBannerTestPage" class="do-test-ctrl-btn" title="Tester l\'animation de la bannière de mise à jour">' +
+                    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                    '<span>🚀 Démo Bannière MAJ</span>' +
+                '</button>' +
                 '<div class="do-test-select-wrapper">' +
                     '<span class="do-test-select-label">Kyriale :</span>' +
                     '<select id="doKyrialeSelect" class="do-test-select">' + kyrialeOptionsHtml + '</select>' +
@@ -5317,17 +5343,10 @@ function updateSidebarAndHeader() {
     // Rubricæ / Editio UI state
     $('#doEditionSelect').val(doState.edition || '1960');
 
-    // Ordinarium Missæ UI state
-    $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
-    $('#doOrdinariumOptions [data-value="' + doState.includeOrdinarium + '"]').addClass('active');
-
-    // Gregorian Chant UI state in settings
-    $('#doGregorianOptions .settings-option-card').removeClass('active');
-    $('#doGregorianOptions [data-value="' + doState.includeGregorian + '"]').addClass('active');
-
-    // 2 Distinct Language settings UI state
-    $('#doLatinOptions .settings-option-card, #doLatinOptions .settings-pill-btn, #doLatinOptions .segment').removeClass('active');
-    $('#doLatinOptions [data-value="' + doState.showLatin + '"]').addClass('active');
+    // Toggles UI state (Ordinarium, Gregorian, Latin)
+    $('#toggleOrdinarium').prop('checked', doState.includeOrdinarium);
+    $('#toggleGregorian').prop('checked', doState.includeGregorian);
+    $('#toggleLatin').prop('checked', doState.showLatin);
 
     $('#doVernacularOptions .settings-option-card, #doVernacularOptions .settings-option').removeClass('active');
     $('#doVernacularOptions [data-value="' + doState.vernacularLang + '"]').addClass('active');
@@ -5335,8 +5354,15 @@ function updateSidebarAndHeader() {
     $('#doThemeOptions .settings-option-card, #doThemeOptions .settings-option').removeClass('active');
     $('#doThemeOptions [data-value="' + doState.settings.theme + '"]').addClass('active');
 
+    // Liturgical color sync state & swatches
+    $('#toggleLiturgicalColor').prop('checked', doState.settings.liturgicalColorSync);
     $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
     $('#doColorOptions [data-color="' + doState.settings.color + '"]').addClass('active');
+    if (doState.settings.liturgicalColorSync) {
+        $('#doColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
+    } else {
+        $('#doColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+    }
 
     // Icon color & sync state
     $('#toggleSyncIconColor').prop('checked', doState.settings.iconSync);
@@ -5375,8 +5401,9 @@ function openBible(bookId, chapterNum, pageNum) {
 }
 
 function closeModals() {
-    $('#settingsPanel, #doSidebar').removeClass('open active');
-    $('#settingsBackdrop, #sidebarBackdrop').removeClass('open active');
+    $('#settingsPanel, #doSidebar').removeClass('open active anim-overshoot').css('transform', '');
+    $('#settingsBackdrop, #sidebarBackdrop').removeClass('open active').css({ 'opacity': '', 'display': '' });
+    $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
 }
@@ -7704,7 +7731,7 @@ function closeHeaderDropdown() {
 
 // ---- Theme & Color Management ----
 function initTheme() {
-    var theme = doState.settings.theme || 'dark';
+    var theme = doState.settings.theme || 'auto';
     var effectiveTheme = theme;
     if (theme === 'auto') {
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -7714,7 +7741,7 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', theme);
     }
     updateStatusBarTheme(effectiveTheme);
-    applyColor(doState.settings.color);
+    updateEffectiveColor();
     updateFaviconAndAppIcon();
     if (doState.hora === 'missa_gregorian') {
         renderAllChantScoresInDOM($('#do-content-stream'), true);
@@ -7804,14 +7831,61 @@ function updateFaviconAndAppIcon() {
         '#202022': 'Default',
         '#e4e4e7': 'Default'
     };
-    var alias = colorAliasMap[(effColor || '').toLowerCase()] || 'Default';
-    applyNativeAndroidAppIcon(alias);
+    // Check pending native icon alias from previous 'Apply later' selection
+    var pendingAlias = localStorage.getItem('do_pending_icon_alias');
+    if (pendingAlias) {
+        applyNativeAndroidAppIcon(pendingAlias, false);
+        localStorage.removeItem('do_pending_icon_alias');
+    }
 }
 
-function applyNativeAndroidAppIcon(aliasSuffix) {
+var pendingIconConfig = null;
+
+function isAndroidNativeApp() {
+    return !!(window.AndroidAppIcon || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()));
+}
+
+function requestIconColorChange(color, isSync) {
+    var effColor = (isSync !== undefined ? isSync : doState.settings.iconSync) 
+        ? (doState.settings.color || '#c96b63') 
+        : ((color !== undefined ? color : doState.settings.iconColor) === 'default' ? '#e4e4e7' : (color || doState.settings.iconColor || '#e4e4e7'));
+    
+    var colorAliasMap = {
+        '#c96b63': 'Red',
+        '#987dc2': 'Purple',
+        '#8a6b9a': 'Purple',
+        '#589c77': 'Green',
+        '#5b8a72': 'Green',
+        '#c4984f': 'Gold',
+        '#c49b4b': 'Gold',
+        '#5c8bb8': 'Blue',
+        '#5078a0': 'Blue',
+        '#cc738a': 'Rose',
+        '#c46b85': 'Rose',
+        '#ba8155': 'Amber',
+        '#7e8590': 'Grey',
+        '#202022': 'Default',
+        '#e4e4e7': 'Default'
+    };
+    var alias = colorAliasMap[(effColor || '').toLowerCase()] || 'Default';
+
+    if (isAndroidNativeApp()) {
+        pendingIconConfig = { color: color, isSync: isSync, alias: alias };
+        $('#appIconModalBackdrop, #appIconModal').removeClass('hidden');
+    } else {
+        applyIconColor(color, isSync);
+    }
+}
+
+function closeAppIconModal() {
+    $('#appIconModalBackdrop, #appIconModal').addClass('hidden');
+    pendingIconConfig = null;
+}
+
+function applyNativeAndroidAppIcon(aliasSuffix, restartNow) {
     try {
         if (window.AndroidAppIcon && typeof window.AndroidAppIcon.setIcon === 'function') {
-            window.AndroidAppIcon.setIcon(aliasSuffix || 'Default');
+            window.AndroidAppIcon.setIcon(aliasSuffix || 'Default', !!restartNow);
         } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppIcon) {
             if (aliasSuffix && aliasSuffix !== 'Default') {
                 window.Capacitor.Plugins.AppIcon.setName({ name: 'MainActivity' + aliasSuffix }).catch(function() {});
@@ -7855,7 +7929,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.24';
+var CURRENT_APP_VERSION = 'beta-0.0.25';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7993,7 +8067,7 @@ function parseMarkdownToHtml(md) {
     return '<div class="update-md-content"><p class="update-md-p">' + escaped + '</p></div>';
 }
 
-function showUpdateModal(release) {
+function showUpdateBanner(release) {
     var tagName = release.tag_name || 'Nouvelle version';
     var isBeta = release.prerelease;
     var bodyNotes = release.body || 'Améliorations générales et corrections de stabilité.';
@@ -8007,20 +8081,87 @@ function showUpdateModal(release) {
     }
     var downloadUrl = (apkAsset && apkAsset.browser_download_url) ? apkAsset.browser_download_url : (release.html_url || 'https://github.com/bastonus/jgabc/releases');
 
-    $('#updateModalTitle').text('Mise à jour disponible');
-    $('#updateVersionTag').text(tagName + (isBeta ? ' (Bêta)' : ' (Stable)'));
+    $('#updateVersionTag').text(tagName + (isBeta ? ' (Bêta)' : ''));
     $('#updateNotesContent').html(parseMarkdownToHtml(bodyNotes));
 
-    $('#btnDownloadUpdate').off('click').on('click', function() {
-        hideUpdateModal();
+    // Setup progress callback hooks
+    window.onUpdateDownloadProgress = function(percent) {
+        $('#updateDownloadProgressWrapper').removeClass('hidden');
+        $('#btnDownloadUpdate').addClass('hidden');
+        $('#updateDownloadProgressBar').css('width', percent + '%');
+        $('#updateDownloadProgressText').text(percent + '%');
+        if (percent >= 100) {
+            $('#updateDownloadProgressText').text('Installation…');
+            setTimeout(function() {
+                $('#updateDownloadProgressWrapper').addClass('hidden');
+                $('#btnDownloadUpdate').removeClass('hidden');
+            }, 3500);
+        }
+    };
+
+    window.onUpdateDownloadError = function(errMsg) {
+        $('#updateDownloadProgressWrapper').addClass('hidden');
+        $('#btnDownloadUpdate').removeClass('hidden');
+        console.warn('Update download error:', errMsg);
+    };
+
+    $('#btnDownloadUpdate').off('click').on('click', function(e) {
+        e.preventDefault();
+        
+        // 1. Android Native In-App Direct APK Downloader & Installer
+        if (window.AndroidAppUpdate && typeof window.AndroidAppUpdate.downloadAndInstallApk === 'function') {
+            $('#updateDownloadProgressWrapper').removeClass('hidden');
+            $('#btnDownloadUpdate').addClass('hidden');
+            $('#updateDownloadProgressBar').css('width', '0%');
+            $('#updateDownloadProgressText').text('0%');
+            window.AndroidAppUpdate.downloadAndInstallApk(downloadUrl, tagName);
+            return;
+        }
+
+        // 2. Demo mode / Web simulation (smooth visual progress)
+        if (tagName.includes('Démo') || !isNativeAndroidApp()) {
+            $('#updateDownloadProgressWrapper').removeClass('hidden');
+            $('#btnDownloadUpdate').addClass('hidden');
+            var simPercent = 0;
+            var simInterval = setInterval(function() {
+                simPercent += Math.floor(Math.random() * 12) + 8;
+                if (simPercent >= 100) {
+                    simPercent = 100;
+                    clearInterval(simInterval);
+                    window.onUpdateDownloadProgress(100);
+                    if (!tagName.includes('Démo')) {
+                        setTimeout(function() { window.open(downloadUrl, '_system'); }, 600);
+                    }
+                } else {
+                    window.onUpdateDownloadProgress(simPercent);
+                }
+            }, 120);
+            return;
+        }
+
+        // 3. Fallback
         window.open(downloadUrl, '_system');
     });
 
-    $('#updateModalBackdrop, #updateModal').removeClass('hidden');
+    var $banner = $('#appUpdateBanner');
+    $('#updateDownloadProgressWrapper').addClass('hidden');
+    $('#btnDownloadUpdate').removeClass('hidden');
+    $banner.addClass('is-visible');
+}
+
+function hideUpdateBanner() {
+    var $banner = $('#appUpdateBanner');
+    $banner.removeClass('is-visible');
+    $('#updateNotesCollapsible').removeClass('is-open');
+    $('#btnToggleUpdateNotes').removeClass('is-active');
+}
+
+function showUpdateModal(release) {
+    showUpdateBanner(release);
 }
 
 function hideUpdateModal() {
-    $('#updateModalBackdrop, #updateModal').addClass('hidden');
+    hideUpdateBanner();
 }
 
 function openFeedbackModal() {
@@ -8073,19 +8214,94 @@ function closeFeedbackModal() {
     $('#feedbackModalBackdrop, #feedbackModal').addClass('hidden');
 }
 
-function applyColor(hex) {
+function applyColor(hex, isDynamic) {
+    if (!hex) hex = '#c96b63';
     doState.settings.color = hex;
     var r = parseInt(hex.slice(1,3), 16);
     var g = parseInt(hex.slice(3,5), 16);
     var b = parseInt(hex.slice(5,7), 16);
     document.documentElement.style.setProperty('--primary-color', hex);
     document.documentElement.style.setProperty('--primary-color-rgb', r + ',' + g + ',' + b);
-    localStorage.setItem('do_color', hex);
+    if (!isDynamic) {
+        localStorage.setItem('do_color', hex);
+    }
     if (doState.settings.iconSync) {
         updateFaviconAndAppIcon();
     }
     if (doState.hora === 'missa_gregorian') {
         renderAllChantScoresInDOM($('#do-content-stream'), true);
+    }
+    $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
+    $('#doColorOptions [data-color="' + hex + '"]').addClass('active');
+}
+
+function getLiturgicalColorForDay(date, officiumKey, callback) {
+    var codes = computeLiturgicalCodes(date);
+    var feastKey = convertFeastKeyToCode(officiumKey) || null;
+    var targetKey = feastKey || codes.sancti;
+
+    function evalSanctiColor(sanctiText) {
+        if (!sanctiText) return null;
+        var text = sanctiText.toLowerCase();
+        if (text.indexOf('vide c2') !== -1 || text.indexOf('vide c3') !== -1 || text.indexOf('martyr') !== -1) {
+            return '#c96b63'; // Rouge (Martyrs)
+        }
+        if (text.indexOf('vide c9') !== -1 || text.indexOf('vide c11') !== -1 || text.indexOf('mariæ') !== -1 || text.indexOf('mariae') !== -1 || text.indexOf('virginis mari') !== -1) {
+            return '#c4984f'; // Or / Blanc (Vierge Marie)
+        }
+        if (text.indexOf('vide c4') !== -1 || text.indexOf('vide c5') !== -1 || text.indexOf('vide c6') !== -1 || text.indexOf('vide c7') !== -1 || text.indexOf('vide c8') !== -1 || text.indexOf('vide c12') !== -1) {
+            return '#c4984f'; // Or / Blanc (Confesseurs, Vierges, Dédicaces)
+        }
+        if (text.indexOf('vide c10') !== -1 || text.indexOf('defunctorum') !== -1) {
+            return '#7e8590'; // Gris minéral / Noir (Défunts)
+        }
+        if (text.indexOf('vide c1') !== -1) {
+            return '#c96b63'; // Rouge (Apôtres)
+        }
+        return null;
+    }
+
+    function evalTemporaColor(tempCode) {
+        if (!tempCode) return '#589c77';
+        if (tempCode === 'Adv3-0') return '#cc738a'; // Gaudete Rose
+        if (tempCode.indexOf('Adv') === 0) return '#987dc2'; // Avent Violet
+        if (tempCode.indexOf('Nat') === 0) return '#c4984f'; // Noël Or/Blanc
+        if (tempCode === 'Quad4-0') return '#cc738a'; // Laetare Rose
+        if (tempCode.indexOf('Quadp') === 0 || tempCode.indexOf('Quad') === 0) return '#987dc2'; // Carême/Septuagésime Violet
+        if (tempCode.indexOf('Pasc7') === 0) return '#c96b63'; // Octave de Pentecôte Rouge
+        if (tempCode.indexOf('Pasc') === 0) return '#c4984f'; // Temps Pascal Or/Blanc
+        if (tempCode.indexOf('Pent01-0') === 0) return '#c4984f'; // Trinité Or/Blanc
+        return '#589c77'; // Vert (Temps après la Pentecôte / Épiphanie)
+    }
+
+    var laDayPath = 'do_data/horas/Latin/Sancti/' + targetKey + '.txt';
+    fetchLocalFile(laDayPath, function(err, data) {
+        if (!err && data) {
+            var sanctiColor = evalSanctiColor(data);
+            if (sanctiColor) {
+                if (codes.isSunday && !feastKey) {
+                    var isGreater = isSanctiGreaterFeastOnSunday(data);
+                    if (!isGreater) {
+                        callback(evalTemporaColor(codes.tempora));
+                        return;
+                    }
+                }
+                callback(sanctiColor);
+                return;
+            }
+        }
+        callback(evalTemporaColor(codes.tempora));
+    });
+}
+
+function updateEffectiveColor() {
+    if (doState.settings.liturgicalColorSync) {
+        getLiturgicalColorForDay(doState.date, doState.officiumKey, function(color) {
+            applyColor(color, true);
+        });
+    } else {
+        var manualColor = localStorage.getItem('do_color') || '#c96b63';
+        applyColor(manualColor, false);
     }
 }
 
@@ -8255,7 +8471,10 @@ function setupEventListeners() {
             var vernFolder = (vernLang === 'fr') ? 'aelf' : (vernLang === 'en') ? 'douay-rheims' : (vernLang === 'pt') ? 'matos-soares' : null;
             var vernData = vernFolder ? DO_LOCAL_CACHE[vernFolder + '/' + bkObj.id + '.txt'] : null;
             var vernVerses = vernData ? parseBibleFileVerses(vernData, doState.bible.chapter) : {};
-            var totalVerses = Math.max(Object.keys(laVerses).length, Object.keys(vernVerses).length);
+            var aligned = (typeof getBibleAlignedRows === 'function')
+                ? getBibleAlignedRows(bkObj.id, vernLang, doState.bible.chapter, laVerses, vernVerses)
+                : [];
+            var totalVerses = aligned.length || Math.max(Object.keys(laVerses).length, Object.keys(vernVerses).length);
             var isAll = (doState.bible.pageSize === 'all');
             var vpp = isAll ? totalVerses : (parseInt(doState.bible.pageSize, 10) || 15);
             var totalPages = isAll ? 1 : Math.max(1, Math.ceil(totalVerses / vpp));
@@ -8415,39 +8634,21 @@ function setupEventListeners() {
     });
 
     $(document).on('click', '#btnOpenSidebarMobile', function(e) {
+        e.preventDefault();
         e.stopPropagation();
         triggerHapticFeedback(20);
-        $('#doSidebar').addClass('open active');
+        var $sb = $('#doSidebar');
+        $sb.removeClass('anim-overshoot');
+        if ($sb[0]) void $sb[0].offsetWidth; // force reflow
+        $sb.addClass('open active anim-overshoot');
         $('#sidebarBackdrop').addClass('open active');
+        $('body').addClass('sidebar-open');
         document.body.style.overflow = 'hidden';
     });
 
     $('#btnCloseSidebar, #sidebarBackdrop').on('click', function() {
-        document.body.style.overflow = '';
         closeModals();
     });
-
-    // Block scroll propagation through sidebar and backdrop
-    (function() {
-        var sidebarEl = document.getElementById('doSidebar');
-        var backdropEl = document.getElementById('sidebarBackdrop');
-        function blockScroll(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        if (backdropEl) {
-            backdropEl.addEventListener('wheel', blockScroll, { passive: false });
-            backdropEl.addEventListener('touchmove', blockScroll, { passive: false });
-        }
-        if (sidebarEl) {
-            sidebarEl.addEventListener('wheel', function(e) {
-                e.stopPropagation();
-            }, { passive: false });
-            sidebarEl.addEventListener('touchmove', function(e) {
-                e.stopPropagation();
-            }, { passive: false });
-        }
-    })();
 
     $('#btnSettings, #btnSettingsSidebar').on('click', function() {
         $('#settingsPanel').addClass('open active');
@@ -8459,22 +8660,22 @@ function setupEventListeners() {
     });
 
     // Ordinarium Missæ Toggle
-    $('#doOrdinariumOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
-        var val = $(this).data('value') === true || $(this).data('value') === 'true';
-        doState.includeOrdinarium = val;
-        localStorage.setItem('do_ordinarium', val);
-        $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
-        $(this).addClass('active');
+    $('#toggleOrdinarium').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        doState.includeOrdinarium = isChecked;
+        localStorage.setItem('do_ordinarium', isChecked);
         renderDO();
     });
 
     // Gregorian Chant Toggle in Settings
-    $('#doGregorianOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
-        var val = $(this).data('value') === true || $(this).data('value') === 'true';
-        doState.includeGregorian = val;
-        localStorage.setItem('do_include_gregorian', val);
-        $('#doGregorianOptions .settings-option-card, #doGregorianOptions .settings-pill-btn, #doGregorianOptions .segment').removeClass('active');
-        $(this).addClass('active');
+    $('#toggleGregorian').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        doState.includeGregorian = isChecked;
+        localStorage.setItem('do_include_gregorian', isChecked);
+        if (!isChecked && doState.hora === 'missa_gregorian') {
+            doState.hora = 'missa';
+            localStorage.setItem('do_hora', 'missa');
+        }
         renderDO();
     });
 
@@ -8521,6 +8722,18 @@ function setupEventListeners() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    // Demo Update Banner Trigger (from Settings or Test Page)
+    $(document).on('click', '#btnDemoUpdateBanner, #btnDemoUpdateBannerTestPage', function(e) {
+        e.preventDefault();
+        showUpdateBanner({
+            tag_name: 'beta-1.0.0 (Démo)',
+            prerelease: true,
+            body: '### Mise à jour de démonstration\n- ✨ **Bannière discrète en haut** qui décale le contenu vers le bas façon Compose / NuvioMobile.\n- 🚀 Animations fluides 60fps sans pop-up intrusive bloquante.\n- 📖 Notes de version intégrées avec accordéon repliable.\n- 🎵 Partitions grégoriennes interactives synchronisées.'
+        });
+        closeModals();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
     // Test Banner Toolbar Controls
     $(document).on('click', '#btnToggleGregorianChants', function(e) {
         e.preventDefault();
@@ -8529,8 +8742,7 @@ function setupEventListeners() {
         var isNowOn = doState.includeGregorian;
         $(this).toggleClass('active', isNowOn);
         $(this).find('span').text('Partitions Grégoriennes : ' + (isNowOn ? 'ACTIVÉES' : 'DÉSACTIVÉES'));
-        $('#doGregorianOptions .settings-option-card').removeClass('active');
-        $('#doGregorianOptions [data-value="' + isNowOn + '"]').addClass('active');
+        $('#toggleGregorian').prop('checked', isNowOn);
         renderAllChantScoresInDOM($('#do-content-stream'));
     });
 
@@ -8546,7 +8758,6 @@ function setupEventListeners() {
         renderDO();
     });
 
-    // 2 Distinct Settings: Latin Text Toggle
     // 0. Rubricæ & Editio Select
     $('#doEditionSelect').on('change', function() {
         var val = $(this).val();
@@ -8556,16 +8767,17 @@ function setupEventListeners() {
         renderDO();
     });
 
-    $('#doLatinOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
-        var val = $(this).data('value') === true || $(this).data('value') === 'true';
-        if (!val && (!doState.vernacularLang || doState.vernacularLang === 'none')) {
+    // 3. Textus Latinus Toggle
+    $('#toggleLatin').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        if (!isChecked && (!doState.vernacularLang || doState.vernacularLang === 'none')) {
             doState.vernacularLang = 'fr';
             localStorage.setItem('do_vernacular_lang', 'fr');
+            $('#doVernacularOptions .settings-option-card, #doVernacularOptions .settings-option').removeClass('active');
+            $('#doVernacularOptions [data-value="fr"]').addClass('active');
         }
-        doState.showLatin = val;
-        localStorage.setItem('do_show_latin', val);
-        $('#doLatinOptions .settings-option-card, #doLatinOptions .settings-pill-btn, #doLatinOptions .segment').removeClass('active');
-        $(this).addClass('active');
+        doState.showLatin = isChecked;
+        localStorage.setItem('do_show_latin', isChecked);
         renderDO();
     });
 
@@ -8591,15 +8803,32 @@ function setupEventListeners() {
         initTheme();
     });
 
+    $('#toggleLiturgicalColor').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        doState.settings.liturgicalColorSync = isChecked;
+        localStorage.setItem('do_liturgical_color_sync', isChecked);
+        if (isChecked) {
+            $('#doColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
+        } else {
+            $('#doColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+        }
+        updateEffectiveColor();
+    });
+
     $('#doColorOptions').on('click', '.color-swatch-circle, .color-swatch', function() {
+        if (doState.settings.liturgicalColorSync) {
+            doState.settings.liturgicalColorSync = false;
+            localStorage.setItem('do_liturgical_color_sync', false);
+            $('#toggleLiturgicalColor').prop('checked', false);
+            $('#doColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+        }
         $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
         $(this).addClass('active');
-        applyColor($(this).data('color'));
+        applyColor($(this).data('color'), false);
     });
 
     $('#toggleSyncIconColor').on('change', function() {
         var isChecked = $(this).is(':checked');
-        applyIconColor(undefined, isChecked);
         if (isChecked) {
             $('#doIconColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
             $('#doIconColorOptions .color-swatch-circle').removeClass('active');
@@ -8608,15 +8837,46 @@ function setupEventListeners() {
             $('#doIconColorOptions .color-swatch-circle').removeClass('active');
             $('#doIconColorOptions [data-icon-color="' + doState.settings.iconColor + '"]').addClass('active');
         }
+        requestIconColorChange(undefined, isChecked);
     });
 
     $('#doIconColorOptions').on('click', '.color-swatch-circle', function() {
         var chosenColor = $(this).data('icon-color');
         $('#doIconColorOptions .color-swatch-circle').removeClass('active');
         $(this).addClass('active');
-        applyIconColor(chosenColor, false);
         $('#toggleSyncIconColor').prop('checked', false);
         $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+        requestIconColorChange(chosenColor, false);
+    });
+
+    // App Icon Modal Listeners (Android restart / delay)
+    $(document).on('click', '#btnRestartAppIcon', function(e) {
+        e.preventDefault();
+        if (pendingIconConfig) {
+            applyIconColor(pendingIconConfig.color, pendingIconConfig.isSync);
+            applyNativeAndroidAppIcon(pendingIconConfig.alias, true);
+            closeAppIconModal();
+            triggerHapticFeedback(30);
+            setTimeout(function() {
+                if (window.AndroidAppIcon && typeof window.AndroidAppIcon.restartApp === 'function') {
+                    window.AndroidAppIcon.restartApp();
+                } else {
+                    location.reload();
+                }
+            }, 300);
+        } else {
+            closeAppIconModal();
+        }
+    });
+
+    $(document).on('click', '#btnDismissAppIcon, #btnCloseAppIconModal, #appIconModalBackdrop', function(e) {
+        e.preventDefault();
+        if (pendingIconConfig) {
+            // Apply later: save locally and schedule silent apply on next launch
+            applyIconColor(pendingIconConfig.color, pendingIconConfig.isSync);
+            localStorage.setItem('do_pending_icon_alias', pendingIconConfig.alias);
+        }
+        closeAppIconModal();
     });
 
     // Haptics & Updates settings listeners
@@ -8639,111 +8899,244 @@ function setupEventListeners() {
         checkForAppUpdates(true);
     });
 
-    $(document).on('click', '#btnCloseUpdateModal, #btnDismissUpdate, #updateModalBackdrop', function(e) {
+    $(document).on('click', '#btnToggleUpdateNotes', function(e) {
         e.preventDefault();
-        hideUpdateModal();
+        var $notes = $('#updateNotesCollapsible');
+        var isOpen = $notes.hasClass('is-open');
+        $notes.toggleClass('is-open', !isOpen);
+        $(this).toggleClass('is-active', !isOpen);
     });
 
-    if (!isNativeAndroidApp()) {
-        $('#settingsGroupUpdates').hide();
-    } else if (localStorage.getItem('do_auto_update') !== 'false') {
-        setTimeout(function() {
-            checkForAppUpdates(false);
-        }, 2500);
+    $(document).on('click', '#btnCloseUpdateBanner, #btnCloseUpdateModal, #btnDismissUpdate', function(e) {
+        e.preventDefault();
+        hideUpdateBanner();
+    });
+
+    $(document).on('click', '#btnDownloadAppWebSidebar, #btnDownloadAppSettings', function(e) {
+        e.preventDefault();
+        window.open('https://github.com/bastonus/jgabc/releases', '_blank');
+    });
+
+    if (isNativeAndroidApp()) {
+        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings').hide();
+        if (localStorage.getItem('do_auto_update') !== 'false') {
+            setTimeout(function() {
+                checkForAppUpdates(false);
+            }, 2500);
+        }
+    } else {
+        // Web platform: show download app button, hide native updater controls
+        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings').show();
+        $('#toggleAutoUpdate').closest('.settings-toggle-row').hide();
+        $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
+        $('.update-check-wrapper').hide();
+        $('#labelUpdatesText').text('Application & Retours');
     }
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)
+    // Global Touch Gestures (Interactive smooth mobile drawer drag & Bilingual swipe)
     var touchStartX = 0;
     var touchStartY = 0;
-    var touchIsEdge = false;
-    var isDraggingBilingual = false;
+    var touchStartTime = 0;
+    var isTouchActive = false;
+    var touchMode = 'none'; // 'none' | 'candidate_sidebar_open' | 'candidate_sidebar_close' | 'candidate_bilingual' | 'sidebar_open' | 'sidebar_close' | 'bilingual'
     var shiftDistance = 0;
     var initialOffsetPx = 0;
 
-    $(document).on('touchstart', function(e) {
-        if (e.originalEvent.touches && e.originalEvent.touches.length === 1) {
-            touchStartX = e.originalEvent.touches[0].clientX;
-            touchStartY = e.originalEvent.touches[0].clientY;
-            touchIsEdge = (touchStartX <= 35);
-            isDraggingBilingual = false;
+    function handleGlobalTouchStart(e) {
+        if (!e.touches || e.touches.length !== 1) return;
+        var t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTime = Date.now();
+        isTouchActive = true;
+        touchMode = 'none';
 
-            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-            var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
+        // Check if on mobile view
+        var isMobile = (window.innerWidth < 900);
+        var $sidebar = $('#doSidebar');
+        $sidebar.removeClass('anim-overshoot');
+        var isSidebarOpen = $sidebar.hasClass('open') || $sidebar.hasClass('active');
+        var target = e.target;
+        var isTargetInsideSidebar = $(target).closest('#doSidebar').length > 0;
+        var isTargetBackdrop = $(target).closest('#sidebarBackdrop').length > 0;
+        var isTargetMenuBtn = $(target).closest('#btnOpenSidebarMobile').length > 0;
 
-            if (isBilingual && !isSidebarOpen) {
-                var $wrapper = $('.do-bilingual-wrapper').first();
-                var cardW = $wrapper.length ? $wrapper.width() : $(window).width();
-                shiftDistance = cardW + 24; // width + gap
-                initialOffsetPx = (doState.mobileLang === 'vern') ? -shiftDistance : 0;
-            }
-        }
-    });
-
-    $(document).on('touchmove', function(e) {
-        if (!touchStartX || !e.originalEvent.touches || !e.originalEvent.touches.length) return;
-        var currentX = e.originalEvent.touches[0].clientX;
-        var currentY = e.originalEvent.touches[0].clientY;
-        var deltaX = currentX - touchStartX;
-        var deltaY = currentY - touchStartY;
-        var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
-
-        if (isSidebarOpen) return;
-
-        // If swiping right from left edge while in Latin -> intend to open drawer, don't drag cards
-        if (touchIsEdge && deltaX > 0 && doState.mobileLang === 'la') return;
-
-        // Detect horizontal intent
-        if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
-            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-            if (isBilingual && shiftDistance > 0) {
-                isDraggingBilingual = true;
-                stopBilingualSwipeHint();
-                $('.do-bilingual-row').addClass('is-dragging');
-
-                var targetOffset = initialOffsetPx + deltaX;
-                // Clamp with gentle rubber banding
-                if (targetOffset > 0) {
-                    targetOffset = targetOffset * 0.25;
-                } else if (targetOffset < -shiftDistance) {
-                    var over = targetOffset + shiftDistance;
-                    targetOffset = -shiftDistance + (over * 0.25);
-                }
-
-                var $stream = $('#do-content-stream');
-                if ($stream.length && $stream[0]) {
-                    $stream[0].style.setProperty('--bilingual-offset', targetOffset + 'px');
-                }
-            }
-        }
-    });
-
-    $(document).on('touchend', function(e) {
-        if (!touchStartX || !e.originalEvent.changedTouches || !e.originalEvent.changedTouches.length) return;
-        var touchEndX = e.originalEvent.changedTouches[0].clientX;
-        var touchEndY = e.originalEvent.changedTouches[0].clientY;
-        var deltaX = touchEndX - touchStartX;
-        var deltaY = touchEndY - touchStartY;
-        var isSidebarOpen = $('#doSidebar').hasClass('open') || $('#doSidebar').hasClass('active');
-
-        $('.do-bilingual-row').removeClass('is-dragging');
-
-        // Swiping left when sidebar is open -> close sidebar
-        if (isSidebarOpen && deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-            closeModals();
-            touchStartX = 0;
-            touchStartY = 0;
-            touchIsEdge = false;
-            isDraggingBilingual = false;
+        // Form control & menu button exception (do not intercept inputs/selects or menu button tap)
+        if ($(target).closest('input, select, textarea, .do-edition-select, .settings-select-wrapper, #btnOpenSidebarMobile').length) {
             return;
         }
 
-        var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-        if (isBilingual && isDraggingBilingual) {
+        if (isMobile) {
+            if (isSidebarOpen) {
+                if (isTargetInsideSidebar || isTargetBackdrop) {
+                    touchMode = 'candidate_sidebar_close';
+                }
+            } else {
+                if (touchStartX <= 80) {
+                    touchMode = 'candidate_sidebar_open';
+                }
+            }
+        }
+
+        // If not a sidebar candidate, check bilingual swipe candidate
+        if (touchMode === 'none' && !isSidebarOpen) {
+            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+            if (isBilingual) {
+                var $wrapper = $('.do-bilingual-wrapper').first();
+                var cardW = $wrapper.length ? $wrapper.width() : $(window).width();
+                shiftDistance = cardW + 24;
+                initialOffsetPx = (doState.mobileLang === 'vern') ? -shiftDistance : 0;
+                touchMode = 'candidate_bilingual';
+            }
+        }
+    }
+
+    function handleGlobalTouchMove(e) {
+        if (!isTouchActive || !e.touches || !e.touches.length) return;
+        var t = e.touches[0];
+        var currentX = t.clientX;
+        var currentY = t.clientY;
+        var deltaX = currentX - touchStartX;
+        var deltaY = currentY - touchStartY;
+        var absX = Math.abs(deltaX);
+        var absY = Math.abs(deltaY);
+
+        var $sidebar = $('#doSidebar');
+        var $backdrop = $('#sidebarBackdrop');
+        var sidebarW = 290;
+
+        // Disambiguate candidate modes
+        if (touchMode === 'candidate_sidebar_open') {
+            if (absX > 6 && absX > absY) {
+                if (deltaX > 0) {
+                    touchMode = 'sidebar_open';
+                    $('body').addClass('is-dragging-sidebar');
+                    $backdrop.css('display', 'block');
+                } else {
+                    touchMode = 'none';
+                }
+            } else if (absY > 10) {
+                touchMode = 'none';
+            }
+        } else if (touchMode === 'candidate_sidebar_close') {
+            if (absX > 6 && absX > absY) {
+                touchMode = 'sidebar_close';
+                $('body').addClass('is-dragging-sidebar');
+                $backdrop.css('display', 'block');
+            } else if (absY > 10) {
+                touchMode = 'none'; // allow vertical scroll in nav
+            }
+        } else if (touchMode === 'candidate_bilingual') {
+            if (absX > 10 && absX > absY) {
+                touchMode = 'bilingual';
+                stopBilingualSwipeHint();
+                $('.do-bilingual-row').addClass('is-dragging');
+            } else if (absY > 12) {
+                touchMode = 'none';
+            }
+        }
+
+        // Active smooth tracking with natural response
+        if (touchMode === 'sidebar_open') {
+            if (e.cancelable) e.preventDefault();
+            var currentOffset = -sidebarW + deltaX;
+            if (currentOffset > 0) {
+                currentOffset = currentOffset * 0.40; // light natural over-drag
+            }
+            var progress = Math.min(1, Math.max(0, (sidebarW + currentOffset) / sidebarW));
+            if ($sidebar[0]) $sidebar[0].style.setProperty('transform', 'translateX(' + currentOffset + 'px)', 'important');
+            if ($backdrop[0]) $backdrop[0].style.setProperty('opacity', progress.toFixed(3), 'important');
+        } else if (touchMode === 'sidebar_close') {
+            if (e.cancelable) e.preventDefault();
+            var currentOffset = deltaX;
+            if (currentOffset > 0) {
+                currentOffset = currentOffset * 0.40;
+            } else if (currentOffset < -sidebarW) {
+                currentOffset = -sidebarW + (currentOffset + sidebarW) * 0.40;
+            }
+            var progress = Math.min(1, Math.max(0, (sidebarW + currentOffset) / sidebarW));
+            if ($sidebar[0]) $sidebar[0].style.setProperty('transform', 'translateX(' + currentOffset + 'px)', 'important');
+            if ($backdrop[0]) $backdrop[0].style.setProperty('opacity', progress.toFixed(3), 'important');
+        } else if (touchMode === 'bilingual') {
+            if (e.cancelable) e.preventDefault();
+            var targetOffset = initialOffsetPx + deltaX;
+            if (targetOffset > 0) {
+                targetOffset = targetOffset * 0.25;
+            } else if (targetOffset < -shiftDistance) {
+                var over = targetOffset + shiftDistance;
+                targetOffset = -shiftDistance + (over * 0.25);
+            }
+            var $stream = $('#do-content-stream');
+            if ($stream.length && $stream[0]) {
+                $stream[0].style.setProperty('--bilingual-offset', targetOffset + 'px');
+            }
+        }
+    }
+
+    function handleGlobalTouchEnd(e) {
+        if (!isTouchActive) return;
+        isTouchActive = false;
+
+        var touchEndX = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientX : touchStartX;
+        var touchEndY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : touchStartY;
+        var deltaX = touchEndX - touchStartX;
+        var deltaY = touchEndY - touchStartY;
+        var dt = Math.max(1, Date.now() - touchStartTime);
+        var vx = deltaX / dt; // velocity in px/ms
+
+        var $sidebar = $('#doSidebar');
+        var $backdrop = $('#sidebarBackdrop');
+        var sidebarW = 290;
+
+        $('.do-bilingual-row').removeClass('is-dragging');
+
+        if (touchMode === 'sidebar_open') {
+            $('body').removeClass('is-dragging-sidebar');
+            $sidebar.css('transform', '');
+            $backdrop.css({ 'opacity': '', 'display': '' });
+
+            var currentOffset = -sidebarW + deltaX;
+            var progress = (sidebarW + currentOffset) / sidebarW;
+
+            if (progress > 0.20 || (vx > 0.18 && deltaX > 15) || deltaX > 45) {
+                // Snap Open instantly
+                $sidebar.addClass('open active');
+                $backdrop.addClass('open active');
+                $('body').addClass('sidebar-open');
+                document.body.style.overflow = 'hidden';
+                triggerHapticFeedback(20);
+            } else {
+                // Snap Back Closed instantly
+                $sidebar.removeClass('open active');
+                $backdrop.removeClass('open active');
+                $('body').removeClass('sidebar-open');
+                document.body.style.overflow = '';
+            }
+        } else if (touchMode === 'sidebar_close') {
+            $('body').removeClass('is-dragging-sidebar');
+            $sidebar.css('transform', '');
+            $backdrop.css({ 'opacity': '', 'display': '' });
+
+            var currentOffset = deltaX;
+            var progress = (sidebarW + currentOffset) / sidebarW;
+
+            if (progress < 0.80 || (vx < -0.18 && deltaX < -15) || deltaX < -45) {
+                // Snap Closed instantly
+                closeModals();
+                triggerHapticFeedback(20);
+            } else {
+                // Snap Back Open instantly
+                $sidebar.addClass('open active');
+                $backdrop.addClass('open active');
+                $('body').addClass('sidebar-open');
+                document.body.style.overflow = 'hidden';
+            }
+        } else if (touchMode === 'bilingual') {
             var $stream = $('#do-content-stream');
             if (initialOffsetPx === 0) {
                 // Was at Latin
-                if (deltaX < -50) {
-                    // Snap all cards simultaneously to Vernacular
+                if (deltaX < -50 || (vx < -0.32 && deltaX < -20)) {
                     var prevLang = doState.mobileLang;
                     doState.mobileLang = 'vern';
                     if (prevLang !== 'vern') triggerHapticFeedback();
@@ -8751,7 +9144,6 @@ function setupEventListeners() {
                         $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
                     }
                 } else {
-                    // Snap back to Latin
                     doState.mobileLang = 'la';
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', '0%');
@@ -8759,8 +9151,7 @@ function setupEventListeners() {
                 }
             } else {
                 // Was at Vernacular
-                if (deltaX > 50) {
-                    // Snap all cards simultaneously to Latin
+                if (deltaX > 50 || (vx > 0.32 && deltaX > 20)) {
                     var prevLang = doState.mobileLang;
                     doState.mobileLang = 'la';
                     if (prevLang !== 'la') triggerHapticFeedback();
@@ -8768,28 +9159,21 @@ function setupEventListeners() {
                         $stream[0].style.setProperty('--bilingual-offset', '0%');
                     }
                 } else {
-                    // Snap back to Vernacular
                     doState.mobileLang = 'vern';
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
                     }
                 }
             }
-        } else if (!isSidebarOpen) {
-            // Not dragging bilingual (e.g. edge swipe or already at Latin)
-            var isAtLatin = (doState.mobileLang === 'la');
-            if ((touchIsEdge || isAtLatin) && deltaX > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-                triggerHapticFeedback(20);
-                $('#doSidebar').addClass('open active');
-                $('#sidebarBackdrop').addClass('open active');
-            }
         }
 
-        touchStartX = 0;
-        touchStartY = 0;
-        touchIsEdge = false;
-        isDraggingBilingual = false;
-    });
+        touchMode = 'none';
+    }
+
+    document.addEventListener('touchstart', handleGlobalTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+    document.addEventListener('touchend', handleGlobalTouchEnd, { passive: true });
+    document.addEventListener('touchcancel', handleGlobalTouchEnd, { passive: true });
 
     if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
