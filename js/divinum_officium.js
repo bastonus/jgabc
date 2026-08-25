@@ -7805,7 +7805,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.22';
+var CURRENT_APP_VERSION = 'beta-0.0.23';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7981,26 +7981,40 @@ function openFeedbackModal() {
     var platform = window.Capacitor ? 'Android App' : 'Web';
     var theme = doState.theme || 'dark';
 
-    var tallyUrl = 'https://tally.so/embed/' + formId +
-        '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=0' +
-        '&app_version=' + encodeURIComponent(curVersion) +
+    var queryParams = 'app_version=' + encodeURIComponent(curVersion) +
         '&liturgical_date=' + encodeURIComponent(curDate) +
         '&office=' + encodeURIComponent(curHora) +
         '&platform=' + encodeURIComponent(platform) +
         '&theme=' + encodeURIComponent(theme);
 
+    var tallyEmbedUrl = 'https://tally.so/embed/' + formId + '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=0&' + queryParams;
+    var tallyDirectUrl = 'https://tally.so/r/' + formId + '?' + queryParams;
+
     var $iframe = $('#tallyFeedbackIframe');
     var $loading = $('#feedbackLoading').show();
+    $('#feedbackFallbackLink').attr('href', tallyDirectUrl);
+
+    var safetyTimer = setTimeout(function() {
+        $loading.fadeOut(180);
+    }, 1200);
 
     $iframe.off('load').on('load', function() {
+        clearTimeout(safetyTimer);
         $loading.fadeOut(150);
     });
 
-    if ($iframe.attr('src') !== tallyUrl) {
-        $iframe.attr('src', tallyUrl);
+    if ($iframe.attr('src') !== tallyEmbedUrl) {
+        $iframe.attr('src', tallyEmbedUrl);
     } else {
+        clearTimeout(safetyTimer);
         $loading.hide();
     }
+
+    $('#btnOpenFeedbackExternal').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(tallyDirectUrl, '_system');
+    });
 
     $('#feedbackModalBackdrop, #feedbackModal').removeClass('hidden');
 }
