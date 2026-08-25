@@ -8,7 +8,7 @@
 
 // ---- Global State ----
 var doState = window.doState = {
-    hora: localStorage.getItem('do_hora') || 'home',
+    hora: 'home',
     date: moment(),
     showLatin: (localStorage.getItem('do_show_latin') !== 'false'),
     vernacularLang: localStorage.getItem('do_vernacular_lang') || (localStorage.getItem('do_lang') === 'la' ? 'none' : (localStorage.getItem('do_lang') || 'fr')),
@@ -7407,7 +7407,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.18';
+var CURRENT_APP_VERSION = 'beta-0.0.19';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7498,10 +7498,39 @@ function checkForAppUpdates(isManual) {
         });
 }
 
+function parseMarkdownToHtml(md) {
+    if (!md) return '';
+    var escaped = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Headings
+    escaped = escaped.replace(/^#### (.*?)$/gm, '<h5 class="update-md-h4">$1</h5>');
+    escaped = escaped.replace(/^### (.*?)$/gm, '<h4 class="update-md-h3">$1</h4>');
+    escaped = escaped.replace(/^## (.*?)$/gm, '<h3 class="update-md-h2">$1</h3>');
+    escaped = escaped.replace(/^# (.*?)$/gm, '<h2 class="update-md-h1">$1</h2>');
+
+    // Bold & Italic & Code
+    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Lists
+    escaped = escaped.replace(/^[ \t]*[-*+][ \t]+(.*?)$/gm, '<li class="update-md-li">$1</li>');
+    escaped = escaped.replace(/(<li class="update-md-li">[\s\S]*?<\/li>)/g, '<ul class="update-md-ul">$1</ul>');
+    escaped = escaped.replace(/<\/ul>\s*<ul class="update-md-ul">/g, '');
+
+    // Paragraphs
+    escaped = escaped.replace(/\n\n+/g, '</p><p class="update-md-p">');
+    escaped = escaped.replace(/\n/g, '<br>');
+
+    return '<div class="update-md-content"><p class="update-md-p">' + escaped + '</p></div>';
+}
+
 function showUpdateModal(release) {
     var tagName = release.tag_name || 'Nouvelle version';
     var isBeta = release.prerelease;
-    var releaseName = release.name || ('Oremus ' + tagName);
     var bodyNotes = release.body || 'Améliorations générales et corrections de stabilité.';
     
     // Find APK asset
@@ -7515,8 +7544,7 @@ function showUpdateModal(release) {
 
     $('#updateModalTitle').text('Mise à jour disponible');
     $('#updateVersionTag').text(tagName + (isBeta ? ' (Bêta)' : ' (Stable)'));
-    $('#updateModalDesc').text(releaseName);
-    $('#updateNotesContent').text(bodyNotes);
+    $('#updateNotesContent').html(parseMarkdownToHtml(bodyNotes));
 
     $('#btnDownloadUpdate').off('click').on('click', function() {
         hideUpdateModal();
