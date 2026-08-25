@@ -578,7 +578,7 @@ text.annotation {
     -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 8px 24px;
-    padding-bottom: 24px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
 }
 
 [data-theme="light"] .bottom-nav-inner,

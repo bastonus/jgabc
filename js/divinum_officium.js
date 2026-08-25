@@ -97,6 +97,114 @@ var DO_HORA_TITLES_BY_LANG = {
     }
 };
 
+var DO_EDITIONS = {
+    '1960': {
+        name: 'Rubrics 1960 - 1960',
+        label: 'Rubriques 1960 (Défaut)',
+        short: '1960',
+        suffixes: ['r', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1960_usa': {
+        name: 'Rubrics 1960 - 2020 USA',
+        label: 'Rubriques 1960 (USA)',
+        short: '1960 USA',
+        suffixes: ['usa', 'r', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1955': {
+        name: 'Reduced - 1955',
+        label: 'Rubriques 1955 (Simplifié)',
+        short: '1955',
+        suffixes: ['1955', 'r', 'da', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1954': {
+        name: 'Divino Afflatu - 1954',
+        label: 'Divino Afflatu (1954)',
+        short: 'DA 1954',
+        suffixes: ['1954', 'da', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1939': {
+        name: 'Divino Afflatu - 1939',
+        label: 'Divino Afflatu (1939)',
+        short: 'DA 1939',
+        suffixes: ['1939', 'da', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1570': {
+        name: 'Tridentine - 1570',
+        label: 'Tridentin (1570)',
+        short: 'Tridentin 1570',
+        suffixes: ['1570', 'o', 't', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1888': {
+        name: 'Tridentine - 1888',
+        label: 'Tridentin (1888)',
+        short: 'Tridentin 1888',
+        suffixes: ['1888', 'o', 't', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    '1906': {
+        name: 'Tridentine - 1906',
+        label: 'Tridentin (1906)',
+        short: 'Tridentin 1906',
+        suffixes: ['1906', 'o', 't', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    'monastic_1963': {
+        name: 'Monastic - 1963',
+        label: 'Monastique (1963)',
+        short: 'Monastique 1963',
+        suffixes: ['m3', 'm', ''],
+        folders: ['SanctiM', 'Sancti', 'Tempora', 'Commune']
+    },
+    'monastic_barroux': {
+        name: 'Monastic - 1963 - Barroux',
+        label: 'Monastique (Barroux)',
+        short: 'Barroux',
+        suffixes: ['bar', 'm3', 'm', ''],
+        folders: ['SanctiM', 'Sancti', 'Tempora', 'Commune']
+    },
+    'monastic_1930': {
+        name: 'Monastic - 1930',
+        label: 'Monastique (1930)',
+        short: 'Monastique 1930',
+        suffixes: ['m2', 'm', ''],
+        folders: ['SanctiM', 'Sancti', 'Tempora', 'Commune']
+    },
+    'monastic_1617': {
+        name: 'Monastic - 1617',
+        label: 'Monastique (1617)',
+        short: 'Monastique 1617',
+        suffixes: ['m1', 'm', ''],
+        folders: ['SanctiM', 'Sancti', 'Tempora', 'Commune']
+    },
+    'cistercian_1951': {
+        name: 'Ordo Cisterciensis - 1951',
+        label: 'Cistercien (1951)',
+        short: 'Cistercien 1951',
+        suffixes: ['cist', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    'cistercian_altovado': {
+        name: 'Ordo Cisterciensis - Altovado',
+        label: 'Cistercien (Altovado)',
+        short: 'Altovado',
+        suffixes: ['AV', 'cist', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    },
+    'dominican_1962': {
+        name: 'Ordo Praedicatorum - 1962',
+        label: 'Dominicain (1962)',
+        short: 'Dominicain',
+        suffixes: ['op', ''],
+        folders: ['Sancti', 'Tempora', 'Commune']
+    }
+};
+
 var LATIN_MONTHS = ['Januarii', 'Februarii', 'Martii', 'Aprilis', 'Maii', 'Junii', 'Julii', 'Augusti', 'Septembris', 'Octobris', 'Novembris', 'Decembris'];
 var FRENCH_MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 var SPANISH_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -927,6 +1035,12 @@ function getLangFolder(langKey) {
         de: 'Deutsch',
         pl: 'Polski',
         pt: 'Portugues',
+        nl: 'Nederlands',
+        hu: 'Magyar',
+        cs: 'Bohemice',
+        da: 'Dansk',
+        uk: 'Ukrainian',
+        vi: 'Vietnamice',
         la: 'Latin'
     };
     return map[langKey] || 'Latin';
@@ -980,10 +1094,23 @@ function computeLiturgicalCodes(mom) {
     };
 }
 
-// ---- File Fetcher (100% Local Relative Path) ----
+// ---- Manifest & File Existence Checker (Prevents 404 console errors) ----
+function fileExistsInManifest(path) {
+    if (!window.DO_MANIFEST) return true; // If manifest not loaded, fallback to network
+    if (!path) return false;
+    var norm = path.toLowerCase().replace(/\\/g, '/');
+    return !!window.DO_MANIFEST[norm];
+}
+
+// ---- File Fetcher (100% Local Relative Path with 404 Prevention) ----
 function fetchLocalFile(path, callback) {
     if (DO_LOCAL_CACHE[path] !== undefined) {
         callback(null, DO_LOCAL_CACHE[path]);
+        return;
+    }
+    if (!fileExistsInManifest(path)) {
+        DO_LOCAL_CACHE[path] = null;
+        callback('File not found in manifest', null);
         return;
     }
     $.ajax({
@@ -1363,20 +1490,54 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
 
     var isCommune = /^(?:Commune\/|C\d+)/i.test(cleanPath);
     var candidatePaths = [];
+
+    var ed = DO_EDITIONS[doState.edition] || DO_EDITIONS['1960'];
+    var suffixes = (ed && ed.suffixes) ? ed.suffixes : ['r', ''];
+
     if (isCommune) {
         var cPath = cleanPath.startsWith('Commune/') ? cleanPath : ('Commune/' + cleanPath);
-        candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
-        candidatePaths.push('do_data/horas/Latin/' + cPath);
         candidatePaths.push('do_data/missa/' + langFolder + '/' + cPath);
+        candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
         candidatePaths.push('do_data/missa/Latin/' + cPath);
+        candidatePaths.push('do_data/horas/Latin/' + cPath);
     } else {
+        var rawStem = cleanPath.replace(/\.txt$/i, '');
+        var parts = rawStem.split('/');
+        var subfolder = parts.length > 1 ? parts[0] : '';
+        var filename = parts.length > 1 ? parts[1] : parts[0];
+
         var primaryCorpus = isMissa ? 'missa' : 'horas';
         var altCorpus = isMissa ? 'horas' : 'missa';
+
+        var folderCandidates = [subfolder];
+        if (ed && ed.folders && ed.folders.indexOf('SanctiM') !== -1 && subfolder === 'Sancti') {
+            folderCandidates.unshift('SanctiM');
+        }
+
+        folderCandidates.forEach(function(fld) {
+            suffixes.forEach(function(sfx) {
+                var fileWithSfx = (fld ? (fld + '/') : '') + filename + (sfx ? sfx : '') + '.txt';
+                candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + fileWithSfx);
+                candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + fileWithSfx);
+                candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + fileWithSfx);
+                candidatePaths.push('do_data/' + altCorpus + '/Latin/' + fileWithSfx);
+            });
+        });
+
         candidatePaths.push('do_data/' + primaryCorpus + '/' + langFolder + '/' + cleanPath);
         candidatePaths.push('do_data/' + altCorpus + '/' + langFolder + '/' + cleanPath);
         candidatePaths.push('do_data/' + primaryCorpus + '/Latin/' + cleanPath);
         candidatePaths.push('do_data/' + altCorpus + '/Latin/' + cleanPath);
     }
+
+    // Filter candidate paths with manifest so only existing files are requested
+    if (window.DO_MANIFEST) {
+        var existingOnly = candidatePaths.filter(function(p) { return fileExistsInManifest(p); });
+        if (existingOnly.length > 0) {
+            candidatePaths = existingOnly;
+        }
+    }
+    candidatePaths = candidatePaths.filter(function(v, i, a) { return a.indexOf(v) === i; });
 
     var tryIdx = 0;
     function tryLoad() {
@@ -2717,6 +2878,8 @@ function parseBibleFileVerses(rawText, targetChapter) {
 }
 
 function renderBibleMainView() {
+    closeDoPlayer();
+    $('body').addClass('is-bible-mode');
     var $stream = $('#do-content-stream');
     $stream.html(renderLoading());
 
@@ -2758,13 +2921,14 @@ function renderBibleMainView() {
 function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, vernVerses) {
     var $stream = $('#do-content-stream').empty();
     var uiLang = getUiLang();
+    var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : null;
     var t = DO_UI_TRANSLATIONS[uiLang] || DO_UI_TRANSLATIONS['fr'];
 
     var bookId = bkObj.id;
     var bookTitle = bkObj[uiLang] || bkObj.fr || bkObj.la;
     var maxCh = bkObj.chapters || 1;
 
-    var laKeys = Object.keys(laVerses).map(Number);
+    var laKeys = Object.keys(laVerses || {}).map(Number);
     var vernKeys = vernVerses ? Object.keys(vernVerses).map(Number) : [];
     var allKeys = Array.from(new Set(laKeys.concat(vernKeys))).sort(function(a, b) { return a - b; });
 
@@ -2795,75 +2959,13 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     $('#doHeaderTitle .title-text').text(headerText);
     $('#doHourLabel').text(('SACRA BIBLIA • ' + (bkObj.cat || 'Vetus Testamentum')).toUpperCase());
 
-    // Top Bookmark Banner
-    var $bookmarkBanner = $('<div class="do-bible-bookmark-banner">')
-        .html('<span class="do-bookmark-badge">🔖 Signet automatique</span> <span class="do-bookmark-info"><strong>' +
-            escHtml(bookTitle) + ' ' + chapterNum + '</strong> — Page ' + pageNum + '/' + totalPages +
-            (visibleKeys.length ? ' (versets ' + vStart + ' à ' + vEnd + ')' : '') + '</span>');
-
-    // Controls Toolbar HTML
-    var $toolbar = $('<div class="do-bible-main-toolbar">');
-
-    // Book Select
-    var $bookSelect = $('<select id="doBibleMainBookSelect" class="do-bible-select">');
-    var categories = ['Pentateuque', 'Livres Historiques', 'Livres Sapientiaux', 'Grands Prophètes', 'Petits Prophètes', 'Évangiles & Actes', 'Épîtres de saint Paul', 'Épîtres Catholiques', 'Apocalypse'];
-    categories.forEach(function(cat) {
-        var $group = $('<optgroup>').attr('label', cat.toUpperCase());
-        DO_BIBLE_BOOKS.filter(function(b) { return b.cat === cat; }).forEach(function(b) {
-            var label = b[uiLang] || b.fr || b.la;
-            var $opt = $('<option>').val(b.id).text(label);
-            if (b.id === bookId) $opt.prop('selected', true);
-            $group.append($opt);
-        });
-        $bookSelect.append($group);
-    });
-
-    // Chapter Select
-    var $chSelect = $('<select id="doBibleMainChapterSelect" class="do-bible-select" style="min-width:110px;">');
-    for (var c = 1; c <= maxCh; c++) {
-        var $opt = $('<option>').val(c).text((uiLang === 'fr' ? 'Chap. ' : uiLang === 'la' ? 'Cap. ' : 'Ch. ') + c);
-        if (c === chapterNum) $opt.prop('selected', true);
-        $chSelect.append($opt);
-    }
-
-    // Page Select
-    var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select" style="min-width:140px;">');
-    for (var p = 1; p <= totalPages; p++) {
-        var pStart = (p - 1) * vpp + 1;
-        var pEnd = Math.min(p * vpp, allKeys.length);
-        var $opt = $('<option>').val(p).text('Page ' + p + '/' + totalPages + (allKeys.length ? ' (v. ' + pStart + '–' + pEnd + ')' : ''));
-        if (p === pageNum) $opt.prop('selected', true);
-        $pgSelect.append($opt);
-    }
-
-    // Page Size Select
-    var $vppSelect = $('<select id="doBibleMainVppSelect" class="do-bible-select" style="min-width:120px;">')
-        .append('<option value="10"' + (vpp === 10 && !isAll ? ' selected' : '') + '>10 versets / p.</option>')
-        .append('<option value="15"' + (vpp === 15 && !isAll ? ' selected' : '') + '>15 versets / p.</option>')
-        .append('<option value="25"' + (vpp === 25 && !isAll ? ' selected' : '') + '>25 versets / p.</option>')
-        .append('<option value="50"' + (vpp === 50 && !isAll ? ' selected' : '') + '>50 versets / p.</option>')
-        .append('<option value="all"' + (isAll ? ' selected' : '') + '>Tout le chapitre</option>');
-
     var isFirstPage = (pageNum <= 1 && chapterNum <= 1 && DO_BIBLE_BOOKS.indexOf(bkObj) === 0);
     var isLastPage = (pageNum >= totalPages && chapterNum >= maxCh && DO_BIBLE_BOOKS.indexOf(bkObj) === DO_BIBLE_BOOKS.length - 1);
 
-    var $prevBtn = $('<button class="do-bible-nav-btn" id="btnBiblePrev">')
-        .html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> <span>' + (uiLang === 'fr' ? 'Page préc.' : 'Præcedens') + '</span>')
-        .prop('disabled', isFirstPage);
-
-    var $nextBtn = $('<button class="do-bible-nav-btn" id="btnBibleNext">')
-        .html('<span>' + (uiLang === 'fr' ? 'Page suiv.' : 'Sequens') + '</span> <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>')
-        .prop('disabled', isLastPage);
-
-    $toolbar.append(
-        $('<div class="do-bible-select-group">').append($bookSelect).append($chSelect).append($pgSelect).append($vppSelect),
-        $('<div class="do-bible-nav-group">').append($prevBtn).append($nextBtn)
-    );
-
     // Verses Body
     var bodyHtml = '';
-    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none' && vernVerses);
-    var isVernOnly = (!doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none' && vernVerses);
+    var isBilingual = (doState.showLatin && vernLang && vernVerses);
+    var isVernOnly = (!doState.showLatin && vernLang && vernVerses);
 
     if (visibleKeys.length) {
         if (isBilingual) {
@@ -2931,11 +3033,30 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
         '<div class="do-card-body">' + bodyHtml + '</div>' +
     '</div>';
 
-    // Bottom Navigation Bar
+    // Bottom Navigation Floating Bar
+    var $prevBtnBottom = $('<button class="do-bible-nav-btn btnBiblePrev" id="btnBiblePrevBottom">')
+        .html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> <span>' + (uiLang === 'fr' ? 'Page préc.' : 'Præcedens') + '</span>')
+        .prop('disabled', isFirstPage);
+
+    var $nextBtnBottom = $('<button class="do-bible-nav-btn btnBibleNext" id="btnBibleNextBottom">')
+        .html('<span>' + (uiLang === 'fr' ? 'Page suiv.' : 'Sequens') + '</span> <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>')
+        .prop('disabled', isLastPage);
+
+    var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select" style="min-width:130px; text-align:center; padding:6px 12px; font-size:0.85rem;">');
+    for (var p = 1; p <= totalPages; p++) {
+        var pStart = (p - 1) * vpp + 1;
+        var pEnd = Math.min(p * vpp, allKeys.length);
+        var $opt = $('<option>').val(p).text('Page ' + p + '/' + totalPages + (allKeys.length ? ' (v. ' + pStart + '–' + pEnd + ')' : ''));
+        if (p === pageNum) $opt.prop('selected', true);
+        $pgSelect.append($opt);
+    }
+
     var $bottomBar = $('<div class="do-bible-bottom-nav">').append(
-        $prevBtn,
-        $('<span class="do-bible-page-indicator">').text('Page ' + pageNum + ' / ' + totalPages),
-        $nextBtn
+        $('<div class="do-bible-bottom-nav-inner">').append(
+            $prevBtnBottom,
+            $pgSelect,
+            $nextBtnBottom
+        )
     );
 
     $stream.append(cardHtml).append($bottomBar);
@@ -3228,13 +3349,16 @@ function renderDO() {
     closeHeaderDropdown();
 
     var isHome = (doState.hora === 'home');
+    var isBible = (doState.hora === 'bible');
+    $('body').toggleClass('is-bible-mode', isBible);
+
     if (isHome) {
         renderHomeView();
         return;
     }
 
-    var isBible = (doState.hora === 'bible');
     if (isBible) {
+        closeDoPlayer();
         renderBibleMainView();
         return;
     }
@@ -3529,23 +3653,373 @@ function preprocessGabcForExsurge(gabc) {
     return gabc;
 }
 
+function formatChantTime(s) {
+    if (isNaN(s) || s < 0) s = 0;
+    var m = Math.floor(s / 60);
+    var sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function updateDoPlayerProgressAndTime(score, note, progressFraction) {
+    if (!score || !score.notations) return;
+    var allNotes = [].concat.apply([], score.notations.map(function(notat) { return notat.notes || []; }));
+    if (!allNotes.length) return;
+
+    var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
+    var secPerNote = 60 / tempoBpm;
+    var totalSeconds = allNotes.length * secPerNote;
+
+    var pct = 0;
+    var currentIdx = 0;
+
+    if (typeof progressFraction === 'number') {
+        pct = Math.max(0, Math.min(100, progressFraction * 100));
+        currentIdx = Math.floor(progressFraction * allNotes.length);
+    } else if (note) {
+        var idx = allNotes.indexOf(note);
+        if (idx < 0) {
+            for (var i = 0; i < allNotes.length; i++) {
+                if (allNotes[i] === note || (note.sourceIndex !== undefined && allNotes[i].sourceIndex === note.sourceIndex) || (note.elementIndex !== undefined && allNotes[i].elementIndex === note.elementIndex)) {
+                    idx = i;
+                    break;
+                }
+            }
+        }
+        currentIdx = Math.max(0, idx);
+        pct = (currentIdx / allNotes.length) * 100;
+    }
+
+    var elapsedSec = currentIdx * secPerNote;
+    var remainingSec = Math.max(0, totalSeconds - elapsedSec);
+    $('#playerProgressFill').css('width', pct + '%');
+    $('#playerCurrentTime').text(formatChantTime(elapsedSec));
+    $('#playerChantTime').text(formatChantTime(totalSeconds)).attr('title', 'Durée totale : ' + formatChantTime(totalSeconds) + ' (restant : ' + formatChantTime(remainingSec) + ')');
+}
+
+function findNearestChantElement(svg, pageX, pageY) {
+    if (!svg) return null;
+    var candidates = svg.querySelectorAll('use[source-index], text.lyric, text.dropCap, text.aboveLinesText, text[source-index]');
+    if (!candidates.length) return null;
+
+    var bestEl = null;
+    var bestDist = Infinity;
+
+    for (var i = 0; i < candidates.length; i++) {
+        var el = candidates[i];
+        var rect = el.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) continue;
+
+        var cx = window.pageXOffset + rect.left + rect.width / 2;
+        var cy = window.pageYOffset + rect.top + rect.height / 2;
+
+        var dx = pageX - cx;
+        var dy = pageY - cy;
+        // Weight vertical distance slightly higher to favor elements on the clicked line
+        var dist = (dx * dx) + (dy * dy * 3);
+
+        if (dist < bestDist) {
+            bestDist = dist;
+            bestEl = el;
+        }
+    }
+
+    return bestEl;
+}
+
 var _doCurrentPlayerCard = null;
 var _doCurrentScore = null;
 var _doProgressInterval = null;
 var _doActiveNoteEl = null; // The single currently-highlighted note element
+var _doActiveLyricEl = null; // The single currently-highlighted lyric text element
 
 function clearActiveNote() {
     if (_doActiveNoteEl) {
         _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        _doActiveNoteEl.style.removeProperty('fill');
         _doActiveNoteEl = null;
     }
-    // Belt-and-suspenders: clear any stragglers
-    document.querySelectorAll('.do-chant-card svg use.active, .do-chant-card svg text.active').forEach(function(el) {
+    if (_doActiveLyricEl) {
+        _doActiveLyricEl.classList.remove('active');
+        _doActiveLyricEl.style.removeProperty('fill');
+        $(_doActiveLyricEl).find('tspan').each(function() {
+            this.classList.remove('active');
+            this.style.removeProperty('fill');
+        });
+        _doActiveLyricEl = null;
+    }
+    // Remove active class and inline fill from all notes, texts, tspans across all chant cards
+    document.querySelectorAll('.do-chant-card svg .active, .do-chant-card svg text.active, .do-chant-card svg tspan.active, .do-chant-card svg use.active').forEach(function(el) {
         el.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        el.style.removeProperty('fill');
+    });
+    document.querySelectorAll('.do-chant-card svg text tspan').forEach(function(el) {
+        el.classList.remove('active');
+        el.style.removeProperty('fill');
     });
 }
 
+function handleChantElementClick(clickedEl, e) {
+    if (e) e.stopPropagation();
+
+    // Deactivate on Bible pages
+    if (window.doState && window.doState.hora === 'bible') return;
+
+    // Stop previous chant cleanly if one was playing
+    var wasPlaying = (window.isPlayingChant && window.isPlayingChant());
+    if (window.stopScore) {
+        window.stopScore();
+    }
+    setDoPlayerBarState(false);
+
+    // Clear previous selection
+    clearActiveNote();
+
+    var $clicked = $(clickedEl);
+    var $card = $clicked.closest('.do-chant-card');
+    if (!$card.length) return;
+    var score = $card.data('chant-score');
+    if (!score) return;
+
+    var noteEl = null;
+    var lyricEl = null;
+    var note = null;
+
+    var accentColor = (window.doState && window.doState.settings && window.doState.settings.color) || localStorage.getItem('do_color') || '#c96b63';
+
+    if (clickedEl.tagName.toLowerCase() === 'use') {
+        // Direct note glyph clicked
+        noteEl = clickedEl;
+        note = noteEl.source || null;
+
+        // Fallback: search score notations if note.source is not attached
+        if (!note && score && score.notations) {
+            var elemIdx = noteEl.getAttribute('element-index');
+            var srcIdx = noteEl.getAttribute('source-index');
+            for (var i = 0; i < score.notations.length; i++) {
+                var notat = score.notations[i];
+                if (notat.notes) {
+                    for (var j = 0; j < notat.notes.length; j++) {
+                        var n = notat.notes[j];
+                        if ((elemIdx !== null && n.elementIndex == elemIdx) || (srcIdx !== null && n.sourceIndex == srcIdx) || (n.svgNode === noteEl)) {
+                            note = n;
+                            break;
+                        }
+                    }
+                    if (note) break;
+                }
+            }
+        }
+
+        // Find associated syllable/lyric text
+        if (note && note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
+            lyricEl = note.neume.lyrics[0].svgNode;
+        } else {
+            var $group = $clicked.closest('g.ChantNotationElement, g[class*="ChantNotation"]');
+            if (!$group.length) $group = $clicked.parent().parent();
+            var $txt = $group.find('text.lyric, text.dropCap, text.aboveLinesText, text');
+            if ($txt.length) {
+                lyricEl = $txt[0];
+            }
+        }
+    } else {
+        // Text / tspan clicked (syllable or dropCap or aboveLines)
+        var $textEl = $clicked.closest('text');
+        lyricEl = $textEl[0] || clickedEl;
+
+        // Try resolving note from Lyric object
+        var lyricObj = lyricEl.source || null;
+        if (lyricObj && lyricObj.notation && lyricObj.notation.notes && lyricObj.notation.notes.length > 0) {
+            note = lyricObj.notation.notes[0];
+            noteEl = note.svgNode || null;
+        }
+
+        if (!noteEl) {
+            var $group = $(lyricEl).closest('g.ChantNotationElement, g[class*="ChantNotation"]');
+            if (!$group.length) $group = $(lyricEl).parent();
+            var $noteEl = $group.find('use[source-index], use.note, use').first();
+            if ($noteEl.length) {
+                noteEl = $noteEl[0];
+                note = noteEl.source || null;
+            }
+        }
+
+        if (!note && noteEl && score && score.notations) {
+            var elemIdx2 = noteEl.getAttribute('element-index');
+            var srcIdx2 = noteEl.getAttribute('source-index');
+            for (var k = 0; k < score.notations.length; k++) {
+                var notat2 = score.notations[k];
+                if (notat2.notes) {
+                    for (var m = 0; m < notat2.notes.length; m++) {
+                        var n2 = notat2.notes[m];
+                        if ((elemIdx2 !== null && n2.elementIndex == elemIdx2) || (srcIdx2 !== null && n2.sourceIndex == srcIdx2) || (n2.svgNode === noteEl)) {
+                            note = n2;
+                            break;
+                        }
+                    }
+                    if (note) break;
+                }
+            }
+        }
+    }
+
+    if (noteEl) {
+        noteEl.classList.add('active');
+        noteEl.style.setProperty('fill', accentColor, 'important');
+        _doActiveNoteEl = noteEl;
+    }
+    if (lyricEl) {
+        lyricEl.classList.add('active');
+        lyricEl.style.setProperty('fill', accentColor, 'important');
+        $(lyricEl).find('tspan').each(function() {
+            this.classList.add('active');
+            this.style.setProperty('fill', accentColor, 'important');
+        });
+        _doActiveLyricEl = lyricEl;
+    }
+
+    if (note) {
+        $card.data('selected-start-note', note);
+    }
+    // Update player UI to target card and score
+    updateDoPlayerUI($card, score, wasPlaying);
+    updateDoPlayerProgressAndTime(score, note);
+
+    if (wasPlaying) {
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+            Tone.context.resume();
+        }
+        if (window.playScore) {
+            window.playScore(score, score.defaultStartPitch, note);
+            setDoPlayerBarState(true);
+        }
+    }
+}
+
+function switchToChantCard($targetCard, autoPlay) {
+    if (!$targetCard || !$targetCard.length) return false;
+    var score = $targetCard.data('chant-score');
+    if (!score) return false;
+
+    if (window.stopScore) window.stopScore();
+    clearActiveNote();
+    $('.do-chant-card').removeClass('is-playing');
+
+    _doCurrentPlayerCard = $targetCard;
+    _doCurrentScore = score;
+    $targetCard.removeData('selected-start-note');
+
+    updateDoPlayerUI($targetCard, score, !!autoPlay);
+    updateDoPlayerProgressAndTime(score, null, 0);
+
+    try {
+        var cardEl = $targetCard[0];
+        var rect = cardEl.getBoundingClientRect();
+        if (rect.top < 70 || rect.bottom > window.innerHeight - 100) {
+            cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    } catch(e) {}
+
+    if (autoPlay) {
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+            Tone.context.resume();
+        }
+        if (window.playScore) {
+            window.playScore(score, score.defaultStartPitch, null);
+            setDoPlayerBarState(true);
+        }
+    }
+    return true;
+}
+
+function switchToNextChantCard(autoPlay) {
+    var $allCards = $('.do-chant-card:visible');
+    if (!$allCards.length) return false;
+    if (!_doCurrentPlayerCard) {
+        return switchToChantCard($allCards.first(), autoPlay);
+    }
+    var idx = $allCards.index(_doCurrentPlayerCard);
+    if (idx >= 0 && idx + 1 < $allCards.length) {
+        return switchToChantCard($allCards.eq(idx + 1), autoPlay);
+    }
+    return false;
+}
+
+function switchToPrevChantCard(autoPlay) {
+    var $allCards = $('.do-chant-card:visible');
+    if (!$allCards.length) return false;
+    if (!_doCurrentPlayerCard) {
+        return switchToChantCard($allCards.first(), autoPlay);
+    }
+    var idx = $allCards.index(_doCurrentPlayerCard);
+    if (idx > 0) {
+        return switchToChantCard($allCards.eq(idx - 1), autoPlay);
+    }
+    return false;
+}
+
+window.switchToChantCard = switchToChantCard;
+window.switchToNextChantCard = switchToNextChantCard;
+window.switchToPrevChantCard = switchToPrevChantCard;
+
+function closeDoPlayer() {
+    if (window.stopScore) {
+        window.stopScore();
+    }
+    setDoPlayerBarState(false);
+    if (_doProgressInterval) clearInterval(_doProgressInterval);
+    $('#playerProgressFill').css('width', '0%');
+    $('#playerCurrentTime').text('0:00');
+    $('#playerChantTime').text('0:00');
+
+    // Animate the player bar down and hide it completely
+    var playerBar = document.getElementById('modernPlayerBar');
+    if (playerBar) {
+        playerBar.classList.remove('visible');
+        playerBar.style.transform = 'translateY(100%)';
+        playerBar.style.opacity = '0';
+        playerBar.style.pointerEvents = 'none';
+        setTimeout(function() {
+            if (!playerBar.classList.contains('visible')) {
+                playerBar.style.visibility = 'hidden';
+            }
+        }, 300);
+    }
+    $('body').removeClass('player-dock-open');
+
+    if (_doCurrentPlayerCard) {
+        _doCurrentPlayerCard.removeClass('is-playing');
+        _doCurrentPlayerCard.removeData('selected-start-note');
+        var svg = _doCurrentPlayerCard.find('svg')[0];
+        if (svg) $(svg).find('use.active, text.active, tspan.active').removeClass('active porrectus-left porrectus-right');
+    }
+    _doCurrentPlayerCard = null;
+    _doCurrentScore = null;
+}
+
 function initDoPlayer() {
+    // Restart from beginning button
+    $('#playerBtnRestart').off('click').on('click', function(e) {
+        e.stopPropagation();
+        if (!_doCurrentScore) return;
+        if (window.stopScore) window.stopScore();
+        if (_doCurrentPlayerCard) {
+            _doCurrentPlayerCard.removeData('selected-start-note');
+            var svg = _doCurrentPlayerCard.find('svg')[0];
+            if (svg) $(svg).find('use.active, text.active, tspan.active').removeClass('active porrectus-left porrectus-right');
+        }
+        if (window.clearActiveNote) window.clearActiveNote();
+        $('#playerProgressFill').css('width', '0%');
+        updateDoPlayerProgressAndTime(_doCurrentScore, null, 0);
+
+        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+            Tone.context.resume();
+        }
+        if (window.playScore) {
+            window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, null);
+            setDoPlayerBarState(true);
+        }
+    });
+
     // Play/Pause button
     $('#playerBtnPlay').off('click').on('click', function(e) {
         e.stopPropagation();
@@ -3564,132 +4038,102 @@ function initDoPlayer() {
         } else if (_doCurrentScore && window.playScore) {
             // Start from selected note (if user clicked a note) or from beginning
             var startNote = _doCurrentPlayerCard ? _doCurrentPlayerCard.data('selected-start-note') : null;
-            window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, startNote || undefined);
+            window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, startNote);
             setDoPlayerBarState(true);
         }
     });
 
-    // Stop button
-    $('#playerBtnStop').off('click').on('click', function(e) {
+    // Close and stop player buttons
+    $('#playerBtnClose, #playerBtnStop').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (window.stopScore) window.stopScore();
-        setDoPlayerBarState(false);
-        $('#playerProgressFill').css('width', '0%');
-
-        // Close the floating player with animation
-        var playerBar = document.getElementById('modernPlayerBar');
-        if (playerBar) {
-            playerBar.classList.remove('visible');
-            playerBar.style.transform = 'translateX(-50%) translateY(calc(100% + 40px))';
-            playerBar.style.opacity = '0';
-            setTimeout(function() {
-                playerBar.style.visibility = 'hidden';
-                playerBar.style.pointerEvents = 'none';
-            }, 320);
-        }
-        $('body').removeClass('player-dock-open');
-
-        if (_doCurrentPlayerCard) {
-            _doCurrentPlayerCard.removeClass('is-playing');
-            _doCurrentPlayerCard.removeData('selected-start-note');
-            var svg = _doCurrentPlayerCard.find('svg')[0];
-            if (svg) $(svg).find('use.active, text.active').removeClass('active');
-        }
-        _doCurrentPlayerCard = null;
-        _doCurrentScore = null;
+        closeDoPlayer();
     });
 
-    // Next note button
+    // Next note button (step forward)
     $('#playerBtnNext').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (window.playNextNote) window.playNextNote();
+        if (window.stepForward) {
+            window.stepForward();
+        }
     });
 
-    // Pitch Transpose Down (-1 semitone)
+    // Transposition Pitch Down / Up (pure parameter adjustment, no auto-play)
     $('#playerPitchDown').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (_doCurrentScore && window.exsurge) {
-            var curPitch = _doCurrentScore.defaultStartPitch ? (typeof _doCurrentScore.defaultStartPitch.toInt === 'function' ? _doCurrentScore.defaultStartPitch.toInt() : _doCurrentScore.defaultStartPitch) : null;
-            if (curPitch != null) {
-                _doCurrentScore.defaultStartPitch = new exsurge.Pitch(curPitch - 1);
-                updateDoPitchUI(_doCurrentScore);
-            }
-        }
+        if (!_doCurrentScore) return;
+        var p = _doCurrentScore.defaultStartPitch;
+        var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
+        var newVal = curVal - 1;
+        _doCurrentScore.defaultStartPitch = (window.exsurge && window.exsurge.Pitch) ? new exsurge.Pitch(newVal) : newVal;
+        updateDoPitchUI(_doCurrentScore);
     });
 
-    // Pitch Transpose Up (+1 semitone)
     $('#playerPitchUp').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (_doCurrentScore && window.exsurge) {
-            var curPitch = _doCurrentScore.defaultStartPitch ? (typeof _doCurrentScore.defaultStartPitch.toInt === 'function' ? _doCurrentScore.defaultStartPitch.toInt() : _doCurrentScore.defaultStartPitch) : null;
-            if (curPitch != null) {
-                _doCurrentScore.defaultStartPitch = new exsurge.Pitch(curPitch + 1);
-                updateDoPitchUI(_doCurrentScore);
-            }
-        }
+        if (!_doCurrentScore) return;
+        var p = _doCurrentScore.defaultStartPitch;
+        var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
+        var newVal = curVal + 1;
+        _doCurrentScore.defaultStartPitch = (window.exsurge && window.exsurge.Pitch) ? new exsurge.Pitch(newVal) : newVal;
+        updateDoPitchUI(_doCurrentScore);
     });
 
-    // Solesmes Lengths Toggle (Salicus)
+    // Solesmes Salicus Lengthening toggle
     $('#playerBtnSolesmes').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (window.toggleIsUsingSolesmesLengths) {
-            var isUsing = window.toggleIsUsingSolesmesLengths();
-            $(this).toggleClass('active', !!isUsing);
+        if (window.getIsUsingSolesmesLengths && window.setIsUsingSolesmesLengths) {
+            var next = !window.getIsUsingSolesmesLengths();
+            window.setIsUsingSolesmesLengths(next);
+            $(this).toggleClass('active', next);
         }
     });
-    if (window.getIsUsingSolesmesLengths) {
-        $('#playerBtnSolesmes').toggleClass('active', !!window.getIsUsingSolesmesLengths());
-    }
 
-    // Tempo -
-    $('#playerTempoMinus, .tempo-minus').off('click').on('click', function(e) {
+    // Tempo minus / plus (10 BPM increments)
+    $('#playerTempoMinus').off('click').on('click', function(e) {
         e.stopPropagation();
-        var bpm = window.setRelativeTempo ? window.setRelativeTempo(-10) : 140;
-        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+        var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
+        var next = Math.max(60, cur - 10);
+        $('#playerTempoValue').text(next);
+        if (window.setTempo) window.setTempo(next);
+        if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
     });
 
-    // Tempo +
-    $('#playerTempoPlus, .tempo-plus').off('click').on('click', function(e) {
+    $('#playerTempoPlus').off('click').on('click', function(e) {
         e.stopPropagation();
-        var bpm = window.setRelativeTempo ? window.setRelativeTempo(10) : 160;
-        $('#playerTempoValue').text(Math.round(bpm) + ' BPM');
+        var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
+        var next = Math.min(300, cur + 10);
+        $('#playerTempoValue').text(next);
+        if (window.setTempo) window.setTempo(next);
+        if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
     });
 
-    // Seek via Progress Bar Click
+    // Progress bar click to seek
     $('#playerProgressBarContainer').off('click').on('click', function(e) {
         e.stopPropagation();
         if (!_doCurrentPlayerCard || !_doCurrentScore) return;
-
         var rect = this.getBoundingClientRect();
         var clickX = e.clientX - rect.left;
         var percent = Math.max(0, Math.min(1, clickX / rect.width));
 
+        var allNotes = [].concat.apply([], (_doCurrentScore.notations || []).map(function(n) { return n.notes || []; }));
+        if (!allNotes.length) return;
+        var targetIdx = Math.floor(percent * (allNotes.length - 1));
+        var note = allNotes[targetIdx];
+
         var svg = _doCurrentPlayerCard.find('svg')[0];
-        if (!svg) return;
-
-        var $notes = $(svg).find('use[source-index]');
-        var total = $notes.length;
-        if (total === 0) return;
-
-        var targetIndex = Math.floor(total * percent);
-        if (targetIndex >= total) targetIndex = total - 1;
-
-        var note = null;
-        var targetNode = null;
-        for (var i = targetIndex; i < total; i++) {
-            var n = $notes[i];
-            if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
-        }
-        if (!note && targetIndex > 0) {
-            for (var i = targetIndex - 1; i >= 0; i--) {
-                var n = $notes[i];
-                if (n && n.source && n.source.neume) { targetNode = n; note = n.source; break; }
+        var targetNode = (note && note.svgNode) || null;
+        if (!targetNode && svg && note) {
+            var elemIdx = note.elementIndex;
+            if (elemIdx !== undefined) {
+                targetNode = $(svg).find('use[element-index="' + elemIdx + '"]')[0];
+            }
+            if (!targetNode && note.sourceIndex !== undefined) {
+                targetNode = $(svg).find('use[source-index="' + note.sourceIndex + '"]')[0];
             }
         }
 
         if (note && targetNode) {
-            $(svg).find('use.active').removeClass('active');
-            targetNode.classList.add('active');
+            handleChantElementClick(targetNode, e);
 
             if (window.Tone && Tone.context && Tone.context.state !== 'running') {
                 Tone.context.resume();
@@ -3698,89 +4142,177 @@ function initDoPlayer() {
             if (window.playScore) {
                 window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, note);
                 setDoPlayerBarState(true);
-                $('#playerProgressFill').css('width', (percent * 100) + '%');
             }
         }
     });
 
     // Delegated note + syllable click on content stream
-    var NOTE_SEL = '.do-chant-card svg use[source-index], .do-chant-card svg text[source-index], .do-chant-card svg text.lyric, .do-chant-card svg text.aboveLinesText';
+    var NOTE_SEL = '.do-chant-card svg use[source-index], .do-chant-card svg text[source-index], .do-chant-card svg text.lyric, .do-chant-card svg text.lyric tspan, .do-chant-card svg text.dropCap, .do-chant-card svg text.dropCap tspan, .do-chant-card svg text.aboveLinesText, .do-chant-card svg text.aboveLinesText tspan';
     $('#do-content-stream').off('click', NOTE_SEL).on('click', NOTE_SEL, function(e) {
-        e.stopPropagation();
-
-        // Ignore clicks during playback — can't reinitialize while playing
-        if (window.isPlayingChant && window.isPlayingChant()) return;
-
-        // Clear the previous active note (single source of truth)
-        clearActiveNote();
-
-        // Find the clickable note element — for lyric text, walk up to find the
-        // associated use[source-index] in the same notation group
-        var targetEl = this;
-        var note = null;
-        var $card = $(this).closest('.do-chant-card');
-        var score = $card.data('chant-score');
-
-        if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
-            // Syllable or above-lines text — find the notation's first note use element
-            var elemIdx = this.getAttribute('element-index');
-            // Try parent <g> then siblings
-            var $group = $(this).closest('g');
-            var $noteEl = $group.find('use[source-index]').first();
-            if (!$noteEl.length) {
-                // Fallback: find use with same element-index in this SVG
-                var $svg = $(this).closest('svg');
-                if (elemIdx !== null) {
-                    $noteEl = $svg.find('use[element-index="' + elemIdx + '"]').first();
-                }
-            }
-            if ($noteEl.length) {
-                targetEl = $noteEl[0];
-                note = targetEl.source || null;
-                if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) {
-                    note = score.notes[elemIdx];
-                }
-            }
-            // Also highlight the syllable text itself
-            this.classList.add('active');
-        } else {
-            // Direct note click (use[source-index])
-            note = this.source || null;
-            if (!note && score && score.notes) {
-                var elemIdx2 = this.getAttribute('element-index');
-                if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
-            }
-        }
-
-        // Mark the note element active and store reference
-        targetEl.classList.add('active');
-        _doActiveNoteEl = targetEl;
-
-        if (note) {
-            $card.data('selected-start-note', note);
-        }
-        // Show player in paused state — user must click Play to hear the chant
-        updateDoPlayerUI($card, score, false);
+        handleChantElementClick(this, e);
     });
 
-    // Delegated click on chant cards (anywhere except notes/syllables)
-    $('#do-content-stream').off('click', '.do-chant-card').on('click', '.do-chant-card', function(e) {
-        if ($(e.target).closest('use[source-index], text[source-index], text.lyric').length) return;
-        var $card = $(this);
-        var score = $card.data('chant-score');
-        updateDoPlayerUI($card, score, false);
+    // Delegated click on chant cards / previews (clicks near notes/syllables or anywhere on card)
+    $('#do-content-stream').off('click', '.do-chant-card, .do-chant-preview, .do-chant-preview svg').on('click', '.do-chant-card, .do-chant-preview, .do-chant-preview svg', function(e) {
+        if ($(e.target).closest('use[source-index], text[source-index], text.lyric, text.dropCap, text.aboveLinesText').length) return;
+        var $card = $(this).closest('.do-chant-card');
+        if (!$card.length) return;
+
+        var svg = $card.find('svg')[0];
+        if (svg) {
+            var nearest = findNearestChantElement(svg, e.pageX, e.pageY);
+            if (nearest) {
+                handleChantElementClick(nearest, e);
+                return;
+            }
+        }
+        switchToChantCard($card, false);
+    });
+
+    // Keyboard shortcuts: Escape to close, Space for Play/Pause, PageUp/PageDown or Alt+Arrows for Partition switching
+    $(document).off('keydown.doplayer').on('keydown.doplayer', function(e) {
+        if ($(e.target).is('input, select, textarea, [contenteditable="true"]')) return;
+        var playerBar = document.getElementById('modernPlayerBar');
+        if (!playerBar || !playerBar.classList.contains('visible')) return;
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeDoPlayer();
+        } else if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            $('#playerBtnPlay').trigger('click');
+        } else if (e.key === 'PageDown' || (e.altKey && e.key === 'ArrowRight') || (e.ctrlKey && e.key === 'ArrowRight')) {
+            e.preventDefault();
+            switchToNextChantCard(window.isPlayingChant && window.isPlayingChant());
+        } else if (e.key === 'PageUp' || (e.altKey && e.key === 'ArrowLeft') || (e.ctrlKey && e.key === 'ArrowLeft')) {
+            e.preventDefault();
+            switchToPrevChantCard(window.isPlayingChant && window.isPlayingChant());
+        }
+    });
+
+    // Click on Chant Title or Badge to center view on active note / score
+    $(document).off('click.docenter', '#playerChantName, .do-player-name-wrapper, #playerChantPart, .do-player-info-col')
+        .on('click.docenter', '#playerChantName, .do-player-name-wrapper, #playerChantPart, .do-player-info-col', function(e) {
+            e.preventDefault();
+            _userIsScrolling = false;
+            if (_userScrollTimer) clearTimeout(_userScrollTimer);
+            centerActiveNote(true);
+        });
+
+    initUserScrollTracker();
+
+    $(window).off('resize.domarquee').on('resize.domarquee', function() {
+        if (_doCurrentPlayerCard) checkTitleMarquee();
+    });
+}
+
+var _userIsScrolling = false;
+var _userScrollTimer = null;
+var _isAutoScrolling = false;
+
+function isElementInVisibleViewport(el) {
+    if (!el) return false;
+    var rect = el.getBoundingClientRect();
+    var playerBar = document.getElementById('modernPlayerBar');
+    var bottomReserved = (playerBar && playerBar.classList.contains('visible')) ? playerBar.offsetHeight + 20 : 80;
+    var topReserved = 70; // Top header navbar
+
+    return (
+        rect.top >= topReserved &&
+        rect.bottom <= (window.innerHeight - bottomReserved) &&
+        rect.left >= 0 &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
+
+function centerActiveNote(force) {
+    var activeElem = document.querySelector('svg use.active, svg .active');
+    if (!activeElem && _doCurrentPlayerCard && _doCurrentPlayerCard.length) {
+        activeElem = _doCurrentPlayerCard[0];
+    }
+    if (!activeElem) return;
+
+    if (!force && isElementInVisibleViewport(activeElem)) {
+        return;
+    }
+
+    try {
+        var rect = activeElem.getBoundingClientRect();
+        var playerBar = document.getElementById('modernPlayerBar');
+        var bottomBarH = (playerBar && playerBar.classList.contains('visible')) ? playerBar.offsetHeight : 100;
+        var topBarH = 60;
+        var visibleH = window.innerHeight - topBarH - bottomBarH;
+        var targetY = window.scrollY + rect.top - (topBarH + visibleH / 2) + (rect.height / 2);
+
+        _isAutoScrolling = true;
+        window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+        });
+        setTimeout(function() {
+            _isAutoScrolling = false;
+        }, 600);
+    } catch(e) {
+        if (activeElem.scrollIntoView) {
+            _isAutoScrolling = true;
+            activeElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function() { _isAutoScrolling = false; }, 600);
+        }
+    }
+}
+
+window.onChantNoteActive = function(el) {
+    if (!window.isPlayingChant || !window.isPlayingChant()) return;
+    if (_userIsScrolling) return; // Do not interrupt manual user scrolling
+    if (el && !isElementInVisibleViewport(el)) {
+        centerActiveNote(false);
+    }
+};
+
+function initUserScrollTracker() {
+    function handleUserScrollInteraction() {
+        if (_isAutoScrolling) return;
+        _userIsScrolling = true;
+        if (_userScrollTimer) clearTimeout(_userScrollTimer);
+        _userScrollTimer = setTimeout(function() {
+            _userIsScrolling = false;
+            // After 2.5s without scroll, if chant is playing and active note is out of view, re-center!
+            if (window.isPlayingChant && window.isPlayingChant()) {
+                var activeElem = document.querySelector('svg use.active, svg .active');
+                if (activeElem && !isElementInVisibleViewport(activeElem)) {
+                    centerActiveNote(false);
+                }
+            }
+        }, 2500);
+    }
+
+    window.removeEventListener('wheel', handleUserScrollInteraction);
+    window.removeEventListener('touchmove', handleUserScrollInteraction);
+    window.addEventListener('wheel', handleUserScrollInteraction, { passive: true });
+    window.addEventListener('touchmove', handleUserScrollInteraction, { passive: true });
+    $(window).off('scroll.douser').on('scroll.douser', function() {
+        if (!_isAutoScrolling) {
+            handleUserScrollInteraction();
+        }
     });
 }
 
 function updateDoPlayerUI($card, score, isPlaying, startNote) {
+    if (window.doState && window.doState.hora === 'bible') return;
+
     _doCurrentPlayerCard = $card;
     _doCurrentScore = score;
 
     var part = ($card && $card.data('chant-part')) || '';
     var title = ($card && $card.data('chant-title')) || '';
 
-    $('#playerChantPart').text(part);
+    if (part) {
+        $('#playerChantPart').text(part.toUpperCase()).show();
+    } else {
+        $('#playerChantPart').hide();
+    }
     $('#playerChantName').text(title);
+    checkTitleMarquee();
 
     if (score) {
         try {
@@ -3792,7 +4324,7 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     var playerBar = document.getElementById('modernPlayerBar');
     if (playerBar) {
         playerBar.classList.add('visible');
-        playerBar.style.transform = 'translateX(-50%) translateY(0)';
+        playerBar.style.transform = 'translateY(0)';
         playerBar.style.opacity = '1';
         playerBar.style.visibility = 'visible';
         playerBar.style.pointerEvents = 'auto';
@@ -3804,16 +4336,93 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     if ($card) $card.addClass('is-playing');
 }
 
+var _marqueeRaf = null;
+
+function checkTitleMarquee() {
+    var wrapper = document.querySelector('.do-player-name-wrapper');
+    var el = document.getElementById('playerChantName');
+    if (!wrapper || !el) return;
+
+    if (_marqueeRaf) {
+        cancelAnimationFrame(_marqueeRaf);
+        _marqueeRaf = null;
+    }
+    el.style.transform = 'none';
+    wrapper.style.webkitMaskImage = 'none';
+    wrapper.style.maskImage = 'none';
+
+    setTimeout(function() {
+        var wrapperW = wrapper.getBoundingClientRect().width;
+        var textW = el.scrollWidth;
+        if (textW > wrapperW + 2 && wrapperW > 0) {
+            var maxDist = Math.ceil(textW - wrapperW + 8);
+            startSmoothMarquee(el, wrapper, maxDist);
+        }
+    }, 60);
+}
+
+function startSmoothMarquee(el, wrapper, maxDist) {
+    if (_marqueeRaf) cancelAnimationFrame(_marqueeRaf);
+
+    var startPause = 1800; // ms to pause at start
+    var endPause = 1800;   // ms to pause at end
+    var speed = 25;        // px per second
+    var scrollDuration = Math.max(1200, (maxDist / speed) * 1000); // ms
+    var totalCycle = startPause + scrollDuration + endPause + scrollDuration;
+
+    var startTime = null;
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var elapsed = (timestamp - startTime) % totalCycle;
+        var currentX = 0;
+
+        if (elapsed < startPause) {
+            currentX = 0;
+        } else if (elapsed < startPause + scrollDuration) {
+            var progress = (elapsed - startPause) / scrollDuration;
+            // Smooth easeInOut cubic
+            var ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            currentX = -maxDist * ease;
+        } else if (elapsed < startPause + scrollDuration + endPause) {
+            currentX = -maxDist;
+        } else {
+            var progress = (elapsed - startPause - scrollDuration - endPause) / scrollDuration;
+            var ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            currentX = -maxDist * (1 - ease);
+        }
+
+        el.style.transform = 'translateX(' + currentX.toFixed(2) + 'px)';
+
+        // Exact physical edge fades:
+        // Left fade: 0 at currentX === 0, smoothly ramping to 1 over first 8px of movement
+        var leftFade = Math.min(1, Math.max(0, Math.abs(currentX) / 8));
+        // Right fade: 0 at currentX === -maxDist, smoothly ramping to 1 over last 8px of movement
+        var rightFade = Math.min(1, Math.max(0, (maxDist - Math.abs(currentX)) / 8));
+
+        // When leftFade is 0: gradient starts at solid #000 (0% transparent, 100% opaque, zero fade)
+        // When leftFade is 1: gradient starts at transparent 0px, fading to #000 at 12px
+        var maskStr = 'linear-gradient(to right, rgba(0,0,0,' + (1 - leftFade).toFixed(3) + ') 0px, #000 ' + (12 * leftFade).toFixed(1) + 'px, #000 calc(100% - ' + (12 * rightFade).toFixed(1) + 'px), rgba(0,0,0,' + (1 - rightFade).toFixed(3) + ') 100%)';
+
+        wrapper.style.webkitMaskImage = maskStr;
+        wrapper.style.maskImage = maskStr;
+
+        _marqueeRaf = requestAnimationFrame(step);
+    }
+
+    _marqueeRaf = requestAnimationFrame(step);
+}
+
 function setDoPlayerBarState(isPlaying) {
     if (isPlaying) {
         $('#playerBtnPlay').addClass('playing');
-        // Pause icon — two vertical bars, stroke style
-        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>');
+        // Pause icon — two clean vertical bars
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>');
         startDoProgressTracking();
     } else {
         $('#playerBtnPlay').removeClass('playing');
-        // Play icon — filled triangle
-        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>');
+        // Play icon — clean filled triangle
+        $('#playerBtnPlay').html('<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>');
         if (_doProgressInterval) clearInterval(_doProgressInterval);
     }
 }
@@ -4021,52 +4630,6 @@ function renderSingleChantScore($wrapper, force) {
                         $card.data('chant-score', score);
                         $card.data('chant-ctxt', ctxt);
                         $card.data('chant-gabc', processedGabc);
-
-                        // Player only opens when user clicks a note or syllable (no auto-open)
-
-                        // Neume note + syllable click → select + show player dock in paused state
-                        $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
-                            e.stopPropagation();
-                            // Ignore clicks during playback
-                            if (window.isPlayingChant && window.isPlayingChant()) return;
-                            clearActiveNote();
-
-                            var targetEl = this;
-                            var note = null;
-
-                            if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
-                                var elemIdx = this.getAttribute('element-index');
-                                var $noteEl = $(this).closest('g').find('use[source-index]').first();
-                                if (!$noteEl.length && elemIdx !== null) {
-                                    $noteEl = $(svg).find('use[element-index="' + elemIdx + '"]').first();
-                                }
-                                if ($noteEl.length) {
-                                    targetEl = $noteEl[0];
-                                    note = targetEl.source || null;
-                                    if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) note = score.notes[elemIdx];
-                                }
-                                this.classList.add('active');
-                            } else {
-                                note = this.source || null;
-                                if (!note && score && score.notes) {
-                                    var elemIdx2 = this.getAttribute('element-index');
-                                    if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
-                                }
-                            }
-
-                            targetEl.classList.add('active');
-                            _doActiveNoteEl = targetEl;
-
-                            if (note) {
-                                $card.data('selected-start-note', note);
-                            }
-                            updateDoPlayerUI($card, score, false);
-                        });
-
-                        // Clicking anywhere on the card/preview activates the player
-                        $card.on('click', function(e) {
-                            updateDoPlayerUI($card, score, false);
-                        });
                     }
                 });
             } catch(e) {
@@ -4140,43 +4703,14 @@ function relayoutAllChantScores() {
 
                         $card.find('.do-chant-preview').empty().append(svg);
 
-                        // Rebind note + syllable click
-                        $(svg).find('use[source-index], text[source-index], text.lyric, text.aboveLinesText').on('click', function(e) {
-                            e.stopPropagation();
-                            // Ignore clicks during playback
-                            if (window.isPlayingChant && window.isPlayingChant()) return;
-                            clearActiveNote();
-
-                            var targetEl = this;
-                            var note = null;
-
-                            if (this.tagName.toLowerCase() === 'text' && !this.hasAttribute('source-index')) {
-                                var elemIdx = this.getAttribute('element-index');
-                                var $noteEl = $(this).closest('g').find('use[source-index]').first();
-                                if (!$noteEl.length && elemIdx !== null) {
-                                    $noteEl = $(svg).find('use[element-index="' + elemIdx + '"]').first();
-                                }
-                                if ($noteEl.length) {
-                                    targetEl = $noteEl[0];
-                                    note = targetEl.source || null;
-                                    if (!note && score && score.notes && elemIdx !== null && score.notes[elemIdx]) note = score.notes[elemIdx];
-                                }
-                                this.classList.add('active');
+                        // Rebind note + syllable click with proximity detection
+                        $(svg).on('click', function(e) {
+                            var nearest = findNearestChantElement(svg, e.pageX, e.pageY);
+                            if (nearest) {
+                                handleChantElementClick(nearest, e);
                             } else {
-                                note = this.source || null;
-                                if (!note && score && score.notes) {
-                                    var elemIdx2 = this.getAttribute('element-index');
-                                    if (elemIdx2 !== null && score.notes[elemIdx2]) note = score.notes[elemIdx2];
-                                }
+                                updateDoPlayerUI($card, score, false);
                             }
-
-                            targetEl.classList.add('active');
-                            _doActiveNoteEl = targetEl;
-
-                            if (note) {
-                                $card.data('selected-start-note', note);
-                            }
-                            updateDoPlayerUI($card, score, false);
                         });
                     }
                 });
@@ -4342,15 +4876,15 @@ function displayResult(result, vernResult) {
         });
     }
 
-    var chantsMap = isTestMissa ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale) : {};
+    var chantsMap = (isMissa && doState.includeGregorian) ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale) : {};
 
     result.cards.forEach(function(card) {
         var vernCard = (card.id && vernMap[card.id]) ? vernMap[card.id] : null;
         var cardHtml = renderOfficeCardHTML(card, vernCard);
         var $cardNode = $(cardHtml);
 
-        // If card has associated Gregorian chant(s) (strictly on Test Page)
-        var chantList = (isTestMissa && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
+        // If card has associated Gregorian chant(s)
+        var chantList = (isMissa && doState.includeGregorian && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
         if (chantList && chantList.length) {
             chantList.forEach(function(ch) {
                 var wrapperHtml = 
@@ -4374,8 +4908,8 @@ function displayResult(result, vernResult) {
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 
-    // Render all chant scores in DOM strictly when in Test Missa mode
-    if (isTestMissa) {
+    // Render all chant scores in DOM when Gregorian is enabled
+    if (isMissa && doState.includeGregorian) {
         renderAllChantScoresInDOM($stream);
     }
 
@@ -4460,6 +4994,9 @@ function updateSidebarAndHeader() {
         $('#doHourLabel').text((horaLabel + ' • ' + dateFormatted).toUpperCase());
     }
 
+    // Rubricæ / Editio UI state
+    $('#doEditionSelect').val(doState.edition || '1960');
+
     // Ordinarium Missæ UI state
     $('#doOrdinariumOptions .settings-option-card, #doOrdinariumOptions .settings-pill-btn, #doOrdinariumOptions .segment').removeClass('active');
     $('#doOrdinariumOptions [data-value="' + doState.includeOrdinarium + '"]').addClass('active');
@@ -4504,6 +5041,7 @@ function closeModals() {
     $('#settingsPanel, #doSidebar').removeClass('open active');
     $('#settingsBackdrop, #sidebarBackdrop').removeClass('open active');
     closeHeaderDropdown();
+    document.body.style.overflow = '';
 }
 
 // ---- Liturgical Dates & Computus for Dropdown ----
@@ -6511,7 +7049,7 @@ function renderHeaderDropdownItems() {
         var bookGroups = {};
 
         DO_BIBLE_BOOKS.forEach(function(bk) {
-            var isNT = (bk.cat === 'Évangiles' || bk.cat === 'Actes des Apôtres' || bk.cat === 'Épîtres de saint Paul' || bk.cat === 'Épîtres Catholiques' || bk.cat === 'Apocalypse');
+            var isNT = (bk.cat === 'Évangiles & Actes' || bk.cat === 'Évangiles' || bk.cat === 'Actes des Apôtres' || bk.cat === 'Épîtres de saint Paul' || bk.cat === 'Épîtres Catholiques' || bk.cat === 'Apocalypse');
             if (!tokens.length && ((bibleMode === 'vetus' && isNT) || (bibleMode === 'novum' && !isNT))) return;
 
             var titleLa = bk.la || bk.id;
@@ -6841,7 +7379,7 @@ function setupEventListeners() {
     });
 
     // Bible Previous Page / Chapter Navigation
-    $(document).on('click', '#btnBiblePrev', function() {
+    $(document).on('click', '#btnBiblePrev, .btnBiblePrev', function() {
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
         if (doState.bible.page > 1) {
             doState.bible.page--;
@@ -6866,14 +7404,17 @@ function setupEventListeners() {
     });
 
     // Bible Next Page / Chapter Navigation
-    $(document).on('click', '#btnBibleNext', function() {
+    $(document).on('click', '#btnBibleNext, .btnBibleNext', function() {
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
-        var currentLang = doState.vernacularLang || 'fr';
         var laPath = 'vulgate/' + bkObj.id + '.txt';
 
         fetchLocalFile(laPath, function(err, laData) {
             var laVerses = (!err && laData) ? parseBibleFileVerses(laData, doState.bible.chapter) : {};
-            var totalVerses = Object.keys(laVerses).length;
+            var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : null;
+            var vernFolder = (vernLang === 'fr') ? 'aelf' : (vernLang === 'en') ? 'douay-rheims' : (vernLang === 'pt') ? 'matos-soares' : null;
+            var vernData = vernFolder ? DO_LOCAL_CACHE[vernFolder + '/' + bkObj.id + '.txt'] : null;
+            var vernVerses = vernData ? parseBibleFileVerses(vernData, doState.bible.chapter) : {};
+            var totalVerses = Math.max(Object.keys(laVerses).length, Object.keys(vernVerses).length);
             var isAll = (doState.bible.pageSize === 'all');
             var vpp = isAll ? totalVerses : (parseInt(doState.bible.pageSize, 10) || 15);
             var totalPages = isAll ? 1 : Math.max(1, Math.ceil(totalVerses / vpp));
@@ -7036,11 +7577,35 @@ function setupEventListeners() {
         e.stopPropagation();
         $('#doSidebar').addClass('open active');
         $('#sidebarBackdrop').addClass('open active');
+        document.body.style.overflow = 'hidden';
     });
 
     $('#btnCloseSidebar, #sidebarBackdrop').on('click', function() {
+        document.body.style.overflow = '';
         closeModals();
     });
+
+    // Block scroll propagation through sidebar and backdrop
+    (function() {
+        var sidebarEl = document.getElementById('doSidebar');
+        var backdropEl = document.getElementById('sidebarBackdrop');
+        function blockScroll(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (backdropEl) {
+            backdropEl.addEventListener('wheel', blockScroll, { passive: false });
+            backdropEl.addEventListener('touchmove', blockScroll, { passive: false });
+        }
+        if (sidebarEl) {
+            sidebarEl.addEventListener('wheel', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
+            sidebarEl.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
+        }
+    })();
 
     $('#btnSettings, #btnSettingsSidebar').on('click', function() {
         $('#settingsPanel').addClass('open active');
@@ -7137,6 +7702,15 @@ function setupEventListeners() {
     });
 
     // 2 Distinct Settings: Latin Text Toggle
+    // 0. Rubricæ & Editio Select
+    $('#doEditionSelect').on('change', function() {
+        var val = $(this).val();
+        doState.edition = val;
+        localStorage.setItem('do_edition', val);
+        DO_LOCAL_CACHE = {}; // Vider le cache mémoire pour recharger immédiatement la nouvelle édition
+        renderDO();
+    });
+
     $('#doLatinOptions').on('click', '.settings-option-card, .settings-pill-btn, .segment', function() {
         var val = $(this).data('value') === true || $(this).data('value') === 'true';
         if (!val && (!doState.vernacularLang || doState.vernacularLang === 'none')) {

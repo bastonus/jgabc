@@ -1,0 +1,560 @@
+{
+  "Francais": {
+    "language": "Francais",
+    "label": "Français",
+    "total_days": 365,
+    "avg_completeness": 94.99,
+    "perfect_days": 323,
+    "imperfect_days": 42,
+    "missing_rate_pct": 11.5,
+    "top_errors": [
+      [
+        "Section 'Lectio' absente en Francais.",
+        17
+      ],
+      [
+        "Section 'Communio' absente en Francais.",
+        11
+      ],
+      [
+        "Section 'Secreta' absente en Francais.",
+        9
+      ],
+      [
+        "Section 'Evangelium' absente en Francais.",
+        8
+      ],
+      [
+        "Section 'Postcommunio' absente en Francais.",
+        8
+      ]
+    ]
+  },
+  "English": {
+    "language": "English",
+    "label": "English",
+    "total_days": 365,
+    "avg_completeness": 86.45,
+    "perfect_days": 244,
+    "imperfect_days": 121,
+    "missing_rate_pct": 33.2,
+    "top_errors": [
+      [
+        "Section 'Offertorium' absente en English.",
+        50
+      ],
+      [
+        "Section 'Communio' absente en English.",
+        47
+      ],
+      [
+        "Section 'Introitus' absente en English.",
+        33
+      ],
+      [
+        "Section 'Lectio' absente en English.",
+        33
+      ],
+      [
+        "Section 'Evangelium' absente en English.",
+        30
+      ]
+    ]
+  },
+  "Espanol": {
+    "language": "Espanol",
+    "label": "Español",
+    "total_days": 365,
+    "avg_completeness": 66.63,
+    "perfect_days": 185,
+    "imperfect_days": 180,
+    "missing_rate_pct": 49.3,
+    "top_errors": [
+      [
+        "Section 'Offertorium' absente en Espanol.",
+        98
+      ],
+      [
+        "Section 'Lectio' absente en Espanol.",
+        93
+      ],
+      [
+        "Section 'Communio' absente en Espanol.",
+        91
+      ],
+      [
+        "Section 'Postcommunio' absente en Espanol.",
+        91
+      ],
+      [
+        "Section 'Secreta' absente en Espanol.",
+        86
+      ]
+    ]
+  },
+  "Italiano": {
+    "language": "Italiano",
+    "label": "Italiano",
+    "total_days": 365,
+    "avg_completeness": 93.46,
+    "perfect_days": 315,
+    "imperfect_days": 50,
+    "missing_rate_pct": 13.7,
+    "top_errors": [
+      [
+        "Section 'Postcommunio' absente en Italiano.",
+        18
+      ],
+      [
+        "Section 'Lectio' absente en Italiano.",
+        17
+      ],
+      [
+        "Section 'Secreta' absente en Italiano.",
+        14
+      ],
+      [
+        "Section 'Communio' absente en Italiano.",
+        13
+      ],
+      [
+        "Section 'Offertorium' absente en Italiano.",
+        9
+      ]
+    ]
+  },
+  "Deutsch": {
+    "language": "Deutsch",
+    "label": "Deutsch",
+    "total_days": 365,
+    "avg_completeness": 25.8,
+    "perfect_days": 90,
+    "imperfect_days": 275,
+    "missing_rate_pct": 75.3,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Deutsch.",
+        228
+      ],
+      [
+        "Section 'Postcommunio' absente en Deutsch.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Deutsch.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Deutsch.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Deutsch.",
+        176
+      ]
+    ]
+  },
+  "Polski": {
+    "language": "Polski",
+    "label": "Polski",
+    "total_days": 365,
+    "avg_completeness": 91.23,
+    "perfect_days": 304,
+    "imperfect_days": 61,
+    "missing_rate_pct": 16.7,
+    "top_errors": [
+      [
+        "Section 'Postcommunio' absente en Polski.",
+        27
+      ],
+      [
+        "Section 'Lectio' absente en Polski.",
+        25
+      ],
+      [
+        "Section 'Secreta' absente en Polski.",
+        22
+      ],
+      [
+        "Section 'Offertorium' absente en Polski.",
+        20
+      ],
+      [
+        "Section 'Communio' absente en Polski.",
+        18
+      ]
+    ]
+  },
+  "Polski-Newer": {
+    "language": "Polski-Newer",
+    "label": "Polski (Nouveau)",
+    "total_days": 365,
+    "avg_completeness": 23.01,
+    "perfect_days": 84,
+    "imperfect_days": 281,
+    "missing_rate_pct": 77.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Polski-Newer.",
+        256
+      ],
+      [
+        "Section 'Postcommunio' absente en Polski-Newer.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Polski-Newer.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Polski-Newer.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Polski-Newer.",
+        176
+      ]
+    ]
+  },
+  "Magyar": {
+    "language": "Magyar",
+    "label": "Magyar",
+    "total_days": 365,
+    "avg_completeness": 45.62,
+    "perfect_days": 120,
+    "imperfect_days": 245,
+    "missing_rate_pct": 67.1,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Magyar.",
+        208
+      ],
+      [
+        "Section 'Secreta' absente en Magyar.",
+        160
+      ],
+      [
+        "Section 'Postcommunio' absente en Magyar.",
+        160
+      ],
+      [
+        "Section 'Communio' absente en Magyar.",
+        147
+      ],
+      [
+        "Section 'Offertorium' absente en Magyar.",
+        142
+      ]
+    ]
+  },
+  "Magyar-Kaldi": {
+    "language": "Magyar-Kaldi",
+    "label": "Magyar (Káldi)",
+    "total_days": 365,
+    "avg_completeness": 23.01,
+    "perfect_days": 84,
+    "imperfect_days": 281,
+    "missing_rate_pct": 77.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Magyar-Kaldi.",
+        256
+      ],
+      [
+        "Section 'Postcommunio' absente en Magyar-Kaldi.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Magyar-Kaldi.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Magyar-Kaldi.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Magyar-Kaldi.",
+        176
+      ]
+    ]
+  },
+  "Bohemice": {
+    "language": "Bohemice",
+    "label": "Česky (Bohemice)",
+    "total_days": 365,
+    "avg_completeness": 39.32,
+    "perfect_days": 127,
+    "imperfect_days": 238,
+    "missing_rate_pct": 65.2,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Bohemice.",
+        195
+      ],
+      [
+        "Section 'Postcommunio' absente en Bohemice.",
+        145
+      ],
+      [
+        "Section 'Secreta' absente en Bohemice.",
+        142
+      ],
+      [
+        "Section 'Lectio' absente en Bohemice.",
+        134
+      ],
+      [
+        "Section 'Communio' absente en Bohemice.",
+        128
+      ]
+    ]
+  },
+  "Cesky-Schaller": {
+    "language": "Cesky-Schaller",
+    "label": "Česky (Schaller)",
+    "total_days": 365,
+    "avg_completeness": 34.84,
+    "perfect_days": 119,
+    "imperfect_days": 246,
+    "missing_rate_pct": 67.4,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Cesky-Schaller.",
+        218
+      ],
+      [
+        "Section 'Postcommunio' absente en Cesky-Schaller.",
+        164
+      ],
+      [
+        "Section 'Secreta' absente en Cesky-Schaller.",
+        161
+      ],
+      [
+        "Section 'Lectio' absente en Cesky-Schaller.",
+        148
+      ],
+      [
+        "Section 'Evangelium' absente en Cesky-Schaller.",
+        143
+      ]
+    ]
+  },
+  "Portugues": {
+    "language": "Portugues",
+    "label": "Português",
+    "total_days": 365,
+    "avg_completeness": 90.37,
+    "perfect_days": 287,
+    "imperfect_days": 78,
+    "missing_rate_pct": 21.4,
+    "top_errors": [
+      [
+        "Section 'Postcommunio' absente en Portugues.",
+        26
+      ],
+      [
+        "Section 'Lectio' absente en Portugues.",
+        24
+      ],
+      [
+        "Section 'Tractus' absente en Portugues.",
+        23
+      ],
+      [
+        "Section 'Graduale' absente en Portugues.",
+        21
+      ],
+      [
+        "Section 'Secreta' absente en Portugues.",
+        20
+      ]
+    ]
+  },
+  "Dansk": {
+    "language": "Dansk",
+    "label": "Dansk",
+    "total_days": 365,
+    "avg_completeness": 23.46,
+    "perfect_days": 85,
+    "imperfect_days": 280,
+    "missing_rate_pct": 76.7,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Dansk.",
+        252
+      ],
+      [
+        "Section 'Postcommunio' absente en Dansk.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Dansk.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Dansk.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Dansk.",
+        176
+      ]
+    ]
+  },
+  "Nederlands": {
+    "language": "Nederlands",
+    "label": "Nederlands",
+    "total_days": 365,
+    "avg_completeness": 94.14,
+    "perfect_days": 318,
+    "imperfect_days": 47,
+    "missing_rate_pct": 12.9,
+    "top_errors": [
+      [
+        "Section 'Lectio' absente en Nederlands.",
+        20
+      ],
+      [
+        "Section 'Postcommunio' absente en Nederlands.",
+        18
+      ],
+      [
+        "Section 'Secreta' absente en Nederlands.",
+        16
+      ],
+      [
+        "Section 'Communio' absente en Nederlands.",
+        14
+      ],
+      [
+        "Section 'Offertorium' absente en Nederlands.",
+        11
+      ]
+    ]
+  },
+  "Ukrainian": {
+    "language": "Ukrainian",
+    "label": "Українська",
+    "total_days": 365,
+    "avg_completeness": 39.31,
+    "perfect_days": 135,
+    "imperfect_days": 230,
+    "missing_rate_pct": 63.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Ukrainian.",
+        198
+      ],
+      [
+        "Section 'Postcommunio' absente en Ukrainian.",
+        144
+      ],
+      [
+        "Section 'Secreta' absente en Ukrainian.",
+        142
+      ],
+      [
+        "Section 'Lectio' absente en Ukrainian.",
+        137
+      ],
+      [
+        "Section 'Evangelium' absente en Ukrainian.",
+        129
+      ]
+    ]
+  },
+  "Vietnamice": {
+    "language": "Vietnamice",
+    "label": "Tiếng Việt",
+    "total_days": 365,
+    "avg_completeness": 23.01,
+    "perfect_days": 84,
+    "imperfect_days": 281,
+    "missing_rate_pct": 77.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Vietnamice.",
+        256
+      ],
+      [
+        "Section 'Postcommunio' absente en Vietnamice.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Vietnamice.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Vietnamice.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Vietnamice.",
+        176
+      ]
+    ]
+  },
+  "Latin-Bea": {
+    "language": "Latin-Bea",
+    "label": "Latin (Psautier Bea)",
+    "total_days": 365,
+    "avg_completeness": 23.01,
+    "perfect_days": 84,
+    "imperfect_days": 281,
+    "missing_rate_pct": 77.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Latin-Bea.",
+        256
+      ],
+      [
+        "Section 'Postcommunio' absente en Latin-Bea.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Latin-Bea.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Latin-Bea.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Latin-Bea.",
+        176
+      ]
+    ]
+  },
+  "Latin-gabc": {
+    "language": "Latin-gabc",
+    "label": "Latin (Notations GABC)",
+    "total_days": 365,
+    "avg_completeness": 23.01,
+    "perfect_days": 84,
+    "imperfect_days": 281,
+    "missing_rate_pct": 77.0,
+    "top_errors": [
+      [
+        "Section 'Oratio' absente en Latin-gabc.",
+        256
+      ],
+      [
+        "Section 'Postcommunio' absente en Latin-gabc.",
+        193
+      ],
+      [
+        "Section 'Secreta' absente en Latin-gabc.",
+        190
+      ],
+      [
+        "Section 'Lectio' absente en Latin-gabc.",
+        178
+      ],
+      [
+        "Section 'Evangelium' absente en Latin-gabc.",
+        176
+      ]
+    ]
+  }
+}

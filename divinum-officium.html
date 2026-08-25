@@ -11,8 +11,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=16.6&ts=202608250112">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=18.4&ts=202608250126">
+    <link rel="stylesheet" href="css/modern.css?v=16.9&ts=202608251129">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=21.6&ts=202608251129">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'dark';
@@ -32,8 +32,8 @@
     <script src="miscChants.js"></script>
     <script src="incipits.js"></script>
     <script src="js/Tone.min.js"></script>
-    <script src="js/tones.js?v=16.9&ts=202608250120"></script>
-    <script src="util.js?ts=202608250120"></script>
+    <script src="js/tones.js?v=17.0&ts=202608251042"></script>
+    <script src="util.js?ts=202608251111"></script>
     <script src="exsurge.min.js"></script>
     <script src="jquery.hypher.js"></script>
     <script src="patterns/la-hypher.js"></script>
@@ -41,7 +41,8 @@
     <script src="patterns/en-us.js"></script>
     <script src="patterns/it.js"></script>
     <script src="patterns/pl.js"></script>
-    <script src="js/divinum_officium.js?v=19.5&ts=202608250129"></script>
+    <script src="do_manifest.js?v=20.9&ts=202608251120"></script>
+    <script src="js/divinum_officium.js?v=22.9&ts=202608251125"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -171,6 +172,30 @@
         </div>
         <div class="settings-body">
 
+            <!-- 0. Rubricæ / Editio Liturgica -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelEditionText">Rubricæ &amp; Editio</label>
+                <div class="settings-select-wrapper" style="margin-top: 6px;">
+                    <select id="doEditionSelect" class="settings-select" style="width: 100%; background: var(--bg-tertiary, #1e293b); color: var(--text-primary, #f8fafc); border: 1px solid var(--border-color, #334155); border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; font-family: inherit; cursor: pointer;">
+                        <option value="1960" selected>Rubrics 1960 - 1960 (Défaut)</option>
+                        <option value="1960_usa">Rubrics 1960 - 2020 USA</option>
+                        <option value="1955">Reduced - 1955</option>
+                        <option value="1954">Divino Afflatu - 1954</option>
+                        <option value="1939">Divino Afflatu - 1939</option>
+                        <option value="1570">Tridentine - 1570</option>
+                        <option value="1888">Tridentine - 1888</option>
+                        <option value="1906">Tridentine - 1906</option>
+                        <option value="monastic_1963">Monastic - 1963</option>
+                        <option value="monastic_barroux">Monastic - 1963 - Barroux</option>
+                        <option value="monastic_1930">Monastic - 1930</option>
+                        <option value="monastic_1617">Monastic - 1617</option>
+                        <option value="cistercian_1951">Ordo Cisterciensis - 1951</option>
+                        <option value="cistercian_altovado">Ordo Cisterciensis - Altovado</option>
+                        <option value="dominican_1962">Ordo Praedicatorum - 1962</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- 1. Ordinarium Missæ Toggle -->
             <div class="settings-group">
                 <label class="settings-label" id="labelOrdinariumText">Ordinarium Missæ</label>
@@ -200,6 +225,13 @@
                     <button class="settings-option-card" data-value="it">Italiano</button>
                     <button class="settings-option-card" data-value="de">Deutsch</button>
                     <button class="settings-option-card" data-value="pt">Português</button>
+                    <button class="settings-option-card" data-value="nl">Nederlands</button>
+                    <button class="settings-option-card" data-value="pl">Polski</button>
+                    <button class="settings-option-card" data-value="hu">Magyar</button>
+                    <button class="settings-option-card" data-value="cs">Česky</button>
+                    <button class="settings-option-card" data-value="da">Dansk</button>
+                    <button class="settings-option-card" data-value="uk">Українська</button>
+                    <button class="settings-option-card" data-value="vi">Tiếng Việt</button>
                 </div>
             </div>
 
@@ -237,33 +269,7 @@
                     <button class="settings-option-card" data-value="false">Sans Partitions</button>
                 </div>
 
-                <div style="margin-top: 12px; margin-bottom: 6px; font-size: 0.74rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;">
-                    Clavier de Notes Grégoriennes (Écoute instantanée)
-                </div>
-                <div class="do-note-keyboard" id="doNoteKeyboard">
-                    <button class="do-note-key-btn" data-pitch="C3">Ut₂ (Do)</button>
-                    <button class="do-note-key-btn" data-pitch="D3">Re₃ (Ré)</button>
-                    <button class="do-note-key-btn" data-pitch="E3">Mi₃ (Mi)</button>
-                    <button class="do-note-key-btn" data-pitch="F3">Fa₃ (Fa)</button>
-                    <button class="do-note-key-btn" data-pitch="G3">Sol₃ (Sol)</button>
-                    <button class="do-note-key-btn" data-pitch="A3">La₃ (La)</button>
-                    <button class="do-note-key-btn" data-pitch="B3">Si₃ (Si)</button>
-                    <button class="do-note-key-btn" data-pitch="C4">Ut₄ (Do)</button>
-                    <button class="do-note-key-btn" data-pitch="D4">Re₄ (Ré)</button>
-                    <button class="do-note-key-btn" data-pitch="E4">Mi₄ (Mi)</button>
-                    <button class="do-note-key-btn" data-pitch="F4">Fa₄ (Fa)</button>
-                </div>
 
-                <div class="settings-grid cols-2" style="margin-top: 10px;">
-                    <button id="btnTogglePlayerDock" class="settings-option-card" style="display:flex;align-items:center;justify-content:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <span>Afficher le lecteur</span>
-                    </button>
-                    <button id="btnOpenTestMissaDirect" class="settings-option-card" style="display:flex;align-items:center;justify-content:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                        <span>Messe &amp; Chant</span>
-                    </button>
-                </div>
             </div>
 
             <!-- 7. De hoc opere (About, Missals, Translations & Credits) -->
@@ -387,72 +393,105 @@
         </div>
     </aside>
 
-    <!-- App-Native Floating Audio Player -->
-    <div id="modernPlayerBar" class="modern-player-bar do-player-floating">
-        <!-- Progress Track -->
-        <div id="playerProgressBarContainer" class="do-player-progress-track">
-            <div class="do-player-progress-bar">
-                <div id="playerProgressFill" class="do-player-progress-fill"></div>
-            </div>
-        </div>
-
-        <!-- Player Body -->
-        <div class="do-player-body">
-
-            <!-- Left: Chant name -->
-            <div class="do-player-info">
-                <span id="playerChantName" class="do-player-name">—</span>
-            </div>
-
-            <!-- Center: Controls -->
-            <div class="do-player-center-controls">
-                <!-- Stop -->
-                <button id="playerBtnStop" class="do-player-action-btn" title="Arrêter et fermer">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="6" y="6" width="12" height="12" rx="2"/>
-                    </svg>
-                </button>
-                <!-- Play/Pause -->
-                <button id="playerBtnPlay" class="do-player-play-btn" title="Lecture / Pause">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
-                    </svg>
-                </button>
-                <!-- Next note -->
-                <button id="playerBtnNext" class="do-player-action-btn" title="Note suivante">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/>
-                        <line x1="19" y1="5" x2="19" y2="19"/>
-                    </svg>
-                </button>
+    <!-- App-Native Full-width Audio Player -->
+    <div id="modernPlayerBar" class="modern-player-bar">
+        <div class="do-player-inner-container">
+            <!-- Progress Section: Large, Accessible Seek Bar with Elapsed & Remaining Time -->
+            <div class="do-player-progress-section">
+                <span id="playerCurrentTime" class="do-player-time-label">0:00</span>
+                <div id="playerProgressBarContainer" class="do-player-progress-track" title="Cliquer pour naviguer dans le chant">
+                    <div class="do-player-progress-bar">
+                        <div id="playerProgressFill" class="do-player-progress-fill">
+                            <span class="do-player-progress-thumb"></span>
+                        </div>
+                    </div>
+                </div>
+                <span id="playerChantTime" class="do-player-time-label">0:00</span>
             </div>
 
-            <!-- Right: Parameters -->
-            <div class="do-player-settings-group">
-                <!-- Pitch -->
-                <div class="do-player-pill-control" title="Transposition">
-                    <button id="playerPitchDown" class="do-player-pill-arrow" title="Baisser (-1 demi-ton)">
-                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <span id="playerStartingPitch" class="do-player-pill-val">—</span>
-                    <button id="playerPitchUp" class="do-player-pill-arrow" title="Hausser (+1 demi-ton)">
-                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                    </button>
+            <!-- Controls & Metadata Main Row -->
+            <div class="do-player-main-row">
+                <!-- Top Row: Title (Auto-scroll) + Badge + Playback Controls -->
+                <div class="do-player-top-row">
+                    <div class="do-player-info-col" title="Cliquer pour centrer la vue sur la partition">
+                        <div class="do-player-name-wrapper">
+                            <span id="playerChantName" class="do-player-name">—</span>
+                        </div>
+                        <span id="playerChantPart" class="do-player-part-badge">CHANT</span>
+                    </div>
+
+                    <!-- Hero Playback Controls (Restart, Big Play/Pause, Step Forward) -->
+                    <div class="do-player-controls-col">
+                        <!-- Restart to Beginning -->
+                        <button id="playerBtnRestart" class="do-player-ctrl-btn" title="Recommencer depuis le début">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <polygon points="19,20 9,12 19,4"/>
+                                <line x1="5" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <!-- Play/Pause Hero Button -->
+                        <button id="playerBtnPlay" class="do-player-play-btn is-hero" title="Lecture / Pause (Espace)">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <polygon points="6,4 20,12 6,20"/>
+                            </svg>
+                        </button>
+                        <!-- Next Note -->
+                        <button id="playerBtnNext" class="do-player-ctrl-btn" title="Note suivante (Pas à pas)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <polygon points="5,4 15,12 5,20"/>
+                                <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Solesmes -->
-                <button id="playerBtnSolesmes" class="do-player-toggle-btn" title="Solesmes">
-                    <img src="salicus.svg" alt="Solesmes" style="height:11px; opacity:0.7;">
-                </button>
+                <!-- Bottom Row: Setting Pills (Transposition, Solesmes, Tempo) & Dedicated Close Button -->
+                <div class="do-player-settings-col">
+                    <!-- Pitch -->
+                    <div class="do-player-pill" title="Transposition de hauteur">
+                        <span class="do-player-pill-label">TON</span>
+                        <button id="playerPitchDown" class="do-player-pill-btn" title="Baisser (-1 demi-ton)">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <span id="playerStartingPitch" class="do-player-pill-value">—</span>
+                        <button id="playerPitchUp" class="do-player-pill-btn" title="Hausser (+1 demi-ton)">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                        </button>
+                    </div>
 
-                <!-- Tempo -->
-                <div class="do-player-pill-control" title="Tempo (BPM)">
-                    <button id="playerTempoMinus" class="do-player-pill-arrow tempo-minus" title="Ralentir">
-                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    <!-- Solesmes Toggle -->
+                    <button id="playerBtnSolesmes" class="do-player-toggle" title="Allongement rythmique Solesmes">
+                        <svg viewBox="0 0 12.5 20.4" width="10" height="15" fill="currentColor" class="do-solesmes-icon" aria-hidden="true">
+                            <g transform="translate(0,-59.443)">
+                                <g transform="translate(0,50.93)">
+                                    <path d="m 0,-60.906 c 33.333,0 50,9.635 50,28.906 V 62.53 C 39.062,51.595 22.396,46.126 0,46.126 c -22.396,0 -39.063,5.47 -50,16.406 V -32 c 0,-19.27 16.667,-28.906 50,-28.906 z" transform="translate(3.125,25) scale(0.0625)"/>
+                                    <path d="m -4.688,-30.28 c 22.396,0 34.636,-0.262 36.72,-0.782 5.728,-1.563 8.593,-5.21 8.593,-10.938 H 50 v 97.656 c 0,2.604 -1.302,4.167 -3.906,4.688 -5.21,0.52 -21.355,0.78 -48.438,0.78 -23.958,0 -38.54,-0.26 -43.75,-0.78 -2.604,0 -3.906,-1.302 -3.906,-3.906 v -82.032 c 0,-3.646 1.302,-5.468 3.906,-5.468 h 2.344 c 2.604,0.52 15.625,0.78 39.063,0.78 z" transform="translate(9.375,18.75) scale(0.0625)"/>
+                                    <path d="m -46.094,-63.78 c 13.542,0 24.61,2.473 33.203,7.42 C -4.298,-51.41 0,-43.99 0,-34.093 V 62 h -9.375 c 0,-10.938 -2.604,-19.14 -7.812,-24.61 -5.21,-5.468 -14.844,-8.203 -28.907,-8.202 -18.23,0 -33.333,4.166 -45.312,12.5 v -75.782 c 0,-19.79 15.104,-29.687 45.312,-29.687 z" transform="translate(12.5,12.5) scale(0.0625)"/>
+                                    <path d="m -8,56 c 2,3 6,4 8,4 2,0 6,-1 8,-4 V 4 C 6,1 2,0 0,0 -2,0 -6,1 -8,4 Z" transform="translate(9.375,23.75) scale(0.0625)"/>
+                                </g>
+                            </g>
+                        </svg>
+                        <span class="do-solesmes-text">Solesmes</span>
                     </button>
-                    <span id="playerTempoValue" class="do-player-pill-val tempo-value">150</span>
-                    <button id="playerTempoPlus" class="do-player-pill-arrow tempo-plus" title="Accélérer">
-                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+
+                    <!-- Tempo -->
+                    <div class="do-player-pill" title="Tempo (BPM)">
+                        <span class="do-player-pill-label">BPM</span>
+                        <button id="playerTempoMinus" class="do-player-pill-btn tempo-minus" title="Ralentir (-10 BPM)">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <span id="playerTempoValue" class="do-player-pill-value tempo-value">165</span>
+                        <button id="playerTempoPlus" class="do-player-pill-btn tempo-plus" title="Accélérer (+10 BPM)">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Distinct Close Player Button -->
+                    <button id="playerBtnClose" class="do-player-close-btn" title="Fermer le lecteur (Échap)" aria-label="Fermer le lecteur">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
                     </button>
                 </div>
             </div>

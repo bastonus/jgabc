@@ -895,12 +895,21 @@ if(typeof window=='object') (function(window) {
       $('#mediaControls').removeClass('offscreen');
       if(syllable) {
         syllable.classList.remove('active');
+        syllable.style.removeProperty('fill');
+        $(syllable).find('tspan').each(function() {
+          this.classList.remove('active');
+          this.style.removeProperty('fill');
+        });
         syllable = null;
       }
       var originalSvg = score.svg;
-      var dropCap = !startNote && $('text', originalSvg)[0];
-      if(dropCap)
-        dropCap.classList.add('active');
+      if (originalSvg) {
+        $(originalSvg).find('use.active, text.active, tspan.active').each(function() {
+          this.classList.remove('active', 'porrectus-left', 'porrectus-right');
+          this.style.removeProperty('fill');
+        });
+      }
+      dropCap = null;
       var noteId = 0;
       var notes = [].concat.apply([],score.notations.map(function(notation) { return notation.notes || notation; })).filter(function(notation) { return !notation.isAccidental; });
       if(startNote) noteId = Math.max(0, notes.indexOf(startNote));
@@ -1028,17 +1037,40 @@ if(typeof window=='object') (function(window) {
 
       function playNextNote (time){
         var note = notes[noteId];
-        $('svg use.active, svg text.active').removeClass('active porrectus-left porrectus-right');
+        var accentColor = (window.doState && window.doState.settings && window.doState.settings.color) || localStorage.getItem('do_color') || '#c96b63';
+        $('svg use.active').each(function() {
+          this.classList.remove('active', 'porrectus-left', 'porrectus-right');
+          this.style.removeProperty('fill');
+        });
         if(noteElem) {
           noteElem.classList.remove('active','porrectus-left','porrectus-right');
+          noteElem.style.removeProperty('fill');
           noteElem = null;
         }
         if(originalSvg != score.svg || note == null) {
-          if(syllable) syllable.classList.remove('active');
+          if(syllable) {
+            syllable.classList.remove('active');
+            syllable.style.removeProperty('fill');
+            $(syllable).find('tspan').each(function() {
+              this.classList.remove('active');
+              this.style.removeProperty('fill');
+            });
+          }
           _isPlaying = false;
         }
         if(!_isPlaying) {
-          if(dropCap) dropCap.classList.remove('active');
+          if(dropCap) {
+            dropCap.classList.remove('active');
+            dropCap.style.removeProperty('fill');
+          }
+          if(syllable) {
+            syllable.classList.remove('active');
+            syllable.style.removeProperty('fill');
+            $(syllable).find('tspan').each(function() {
+              this.classList.remove('active');
+              this.style.removeProperty('fill');
+            });
+          }
           $('#mediaControls').addClass('offscreen');
           return;
         }
@@ -1048,7 +1080,14 @@ if(typeof window=='object') (function(window) {
             if(!(note = notes[++noteId])) return;
           }
           if(note.isDivider) {
-            if(syllable) syllable.classList.remove('active');
+            if(syllable) {
+              syllable.classList.remove('active');
+              syllable.style.removeProperty('fill');
+              $(syllable).find('tspan').each(function() {
+                this.classList.remove('active');
+                this.style.removeProperty('fill');
+              });
+            }
             if(note.constructor === exsurge.FullBar || note.constructor === exsurge.DoubleBar) {
               duration = 2;
             } // otherwise (for half bar) duration is default of 1.
@@ -1065,12 +1104,53 @@ if(typeof window=='object') (function(window) {
             noteElem.classList.add('porrectus-left');
           }
           noteElem.classList.add('active');
-          var tmpSyllable = $(noteElem).parent().parent().find('text')[0];
+          noteElem.style.setProperty('fill', accentColor, 'important');
+
+          var tmpSyllable = null;
+          if (note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
+            tmpSyllable = note.neume.lyrics[0].svgNode;
+          }
+          if (!tmpSyllable) {
+            var $grp = $(noteElem).closest('g.ChantNotationElement, g[class*="ChantNotation"]');
+            if (!$grp.length) $grp = $(noteElem).parent().parent();
+            tmpSyllable = $grp.find('text.lyric, text.dropCap, text.aboveLinesText, text')[0];
+          }
+
           if(tmpSyllable && tmpSyllable != syllable) {
-            if(dropCap && syllable) dropCap.classList.remove('active');
-            if(syllable) syllable.classList.remove('active');
+            if(dropCap && syllable) {
+              dropCap.classList.remove('active');
+              dropCap.style.removeProperty('fill');
+            }
+            if(syllable) {
+              syllable.classList.remove('active');
+              syllable.style.removeProperty('fill');
+              $(syllable).find('tspan').each(function() {
+                this.classList.remove('active');
+                this.style.removeProperty('fill');
+              });
+            }
+            // Clear any other active text elements in the entire SVG to ensure no stray/previous syllable remains colored
+            var scoreSvg = (score && score.svg) || (noteElem && noteElem.ownerSVGElement);
+            if (scoreSvg) {
+              $(scoreSvg).find('text.active, tspan.active').each(function() {
+                if (this !== tmpSyllable && (!tmpSyllable || !tmpSyllable.contains(this))) {
+                  this.classList.remove('active');
+                  this.style.removeProperty('fill');
+                }
+              });
+            }
             syllable = tmpSyllable;
-            if(syllable) syllable.classList.add('active');
+          }
+          if(syllable) {
+            syllable.classList.add('active');
+            syllable.style.setProperty('fill', accentColor, 'important');
+            $(syllable).find('tspan').each(function() {
+              this.classList.add('active');
+              this.style.setProperty('fill', accentColor, 'important');
+            });
+          }
+          if (window.onChantNoteActive) {
+            window.onChantNoteActive(noteElem || syllable);
           }
         }
         if(note.constructor === exsurge.Note) {
@@ -1098,15 +1178,37 @@ if(typeof window=='object') (function(window) {
         ++noteId;
         if(noteId >= notes.length) _isPlaying = false;
         if(Tone.Transport.state != 'started') return;
-        timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds()*duration));
+        if(!_isPlaying) {
+          Tone.Transport.stop();
+          $('svg use.active, svg text.active, svg tspan.active').each(function() {
+            this.classList.remove('active', 'porrectus-left', 'porrectus-right');
+            this.style.removeProperty('fill');
+          });
+          if(syllable) {
+            syllable.classList.remove('active');
+            syllable.style.removeProperty('fill');
+            $(syllable).find('tspan').each(function() {
+              this.classList.remove('active');
+              this.style.removeProperty('fill');
+            });
+          }
+          if(dropCap) {
+            dropCap.classList.remove('active');
+            dropCap.style.removeProperty('fill');
+          }
+          $('#mediaControls').addClass('offscreen');
+          return;
+        }
+        timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds() * duration));
       };
       timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote);
       window.getChantProgress = function() { return notes && notes.length ? (noteId / notes.length) : 0; };
       window.playNextNote = playNextNote;
+      window.stepForward = playNextNote;
       window.playPauseScore = function() {
-        if(timeoutNextNote) {
-          Tone.Transport.clear(timeoutNextNote);
+        if(Tone.Transport.state == 'started') {
           Tone.Transport.pause();
+          Tone.Transport.clear(timeoutNextNote);
           timeoutNextNote = null;
         } else {
           Tone.Transport.start();
@@ -1115,18 +1217,42 @@ if(typeof window=='object') (function(window) {
         }
       }
       window.highlightCurrentlyPlayingNote = function() {
+        var accentColor = (window.doState && window.doState.settings && window.doState.settings.color) || localStorage.getItem('do_color') || '#c96b63';
         if(noteElem) {
           noteElem.classList.add('active');
+          noteElem.style.setProperty('fill', accentColor, 'important');
         }
         if(syllable) {
           syllable.classList.add('active');
+          syllable.style.setProperty('fill', accentColor, 'important');
+          $(syllable).find('tspan').each(function() {
+            this.classList.add('active');
+            this.style.setProperty('fill', accentColor, 'important');
+          });
         }
       }
     };
     window.stopScore = function(){
       Tone.Transport.stop();
       _isPlaying=false;
-      $('svg use.active, svg text.active').removeClass('active porrectus-left porrectus-right');
+      $('svg use.active, svg text.active, svg tspan.active, svg .active').each(function() {
+        this.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        this.style.removeProperty('fill');
+      });
+      if(syllable) {
+        syllable.classList.remove('active');
+        syllable.style.removeProperty('fill');
+        $(syllable).find('tspan').each(function() {
+          this.classList.remove('active');
+          this.style.removeProperty('fill');
+        });
+        syllable = null;
+      }
+      if(dropCap) {
+        dropCap.classList.remove('active');
+        dropCap.style.removeProperty('fill');
+        dropCap = null;
+      }
       $('#mediaControls').addClass('offscreen');
     }
   } else {
@@ -1135,7 +1261,7 @@ if(typeof window=='object') (function(window) {
   }
   var timeoutNextNote, transpose = 0;
   var _isPlaying=false;
-  var noteElem, syllable;
+  var noteElem, syllable, dropCap;
   window.isPlayingChant = function() {
     return _isPlaying;
   }
