@@ -2289,13 +2289,13 @@ body.is-bible-mode .modern-player-bar {
    ============================================================= */
 .do-header-dropdown {
     position: fixed !important;
-    top: 64px !important;
+    top: 64px;
     left: 280px !important;
     right: 0 !important;
     bottom: 0 !important;
-    height: auto !important;
-    max-height: calc(100vh - 64px) !important;
-    max-height: calc(100dvh - 64px) !important;
+    height: auto;
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
     background-color: color-mix(in srgb, var(--background-base) 80%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
@@ -2313,10 +2313,10 @@ body.is-bible-mode .modern-player-bar {
     .do-header-dropdown {
         left: 0 !important;
         right: 0 !important;
-        top: calc(58px + env(safe-area-inset-top, 0px)) !important;
+        top: calc(58px + env(safe-area-inset-top, 0px));
         bottom: 0 !important;
-        max-height: calc(100vh - (58px + env(safe-area-inset-top, 0px))) !important;
-        max-height: calc(100dvh - (58px + env(safe-area-inset-top, 0px))) !important;
+        max-height: calc(100vh - (58px + env(safe-area-inset-top, 0px)));
+        max-height: calc(100dvh - (58px + env(safe-area-inset-top, 0px)));
         padding-bottom: 0 !important;
         z-index: 960 !important;
     }
@@ -4252,20 +4252,7 @@ body.player-dock-open .app-main {
 
 .do-update-banner.is-visible + .do-top-header {
     top: calc(40px + env(safe-area-inset-top, 0px)) !important;
-}
-
-.do-update-banner.is-visible ~ .do-header-dropdown {
-    top: calc(64px + 40px) !important;
-    max-height: calc(100vh - 104px) !important;
-    max-height: calc(100dvh - 104px) !important;
-}
-
-@media (max-width: 900px) {
-    .do-update-banner.is-visible ~ .do-header-dropdown {
-        top: calc(58px + 40px + env(safe-area-inset-top, 0px)) !important;
-        max-height: calc(100vh - (58px + 40px + env(safe-area-inset-top, 0px))) !important;
-        max-height: calc(100dvh - (58px + 40px + env(safe-area-inset-top, 0px))) !important;
-    }
+    padding-top: 12px !important;
 }
 
 .do-update-banner-inner {

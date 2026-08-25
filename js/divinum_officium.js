@@ -7686,14 +7686,30 @@ function getDefaultHddModeForDate(date) {
     return 'annus';
 }
 
+function updateHeaderDropdownPosition() {
+    var $dd = $('#headerDropdown');
+    if ($dd.hasClass('hidden')) return;
+    var headerEl = document.querySelector('.do-top-header');
+    if (headerEl) {
+        var headerBottom = headerEl.getBoundingClientRect().bottom;
+        $dd.css({
+            'top': Math.round(headerBottom) + 'px',
+            'max-height': 'calc(100dvh - ' + Math.round(headerBottom) + 'px)',
+            'height': 'calc(100dvh - ' + Math.round(headerBottom) + 'px)'
+        });
+    }
+}
+
 function openHeaderDropdown() {
     if (!doState.userChangedHddMode) {
         doState.hddMode = getDefaultHddModeForDate(doState.date);
     }
     renderHeaderDropdown();
+    updateHeaderDropdownPosition();
     $('#headerDropdown').removeClass('hidden');
     $('.dropdown-icon').css('transform', 'rotate(180deg)');
     setTimeout(function() {
+        updateHeaderDropdownPosition();
         var $list = $('#hddItemsList');
         var $sel = $('#hddItemsList .hdd-item-card.selected, #hddItemsList .hdd-bible-ch-btn.active');
         if ($sel.length && $sel[0] && $list.length && $list[0]) {
@@ -7706,6 +7722,9 @@ function closeHeaderDropdown() {
     $('#headerDropdown').addClass('hidden');
     $('.dropdown-icon').css('transform', 'rotate(0deg)');
 }
+
+window.addEventListener('resize', updateHeaderDropdownPosition);
+window.addEventListener('scroll', updateHeaderDropdownPosition, { passive: true });
 
 // ---- Theme & Color Management ----
 function initTheme() {
@@ -7906,7 +7925,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.28';
+var CURRENT_APP_VERSION = 'beta-0.0.29';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -8136,11 +8155,13 @@ function showUpdateBanner(release) {
     $('#updateDownloadProgressWrapper').addClass('hidden');
     $('#btnDownloadUpdate').removeClass('hidden');
     $banner.addClass('is-visible');
+    setTimeout(updateHeaderDropdownPosition, 300);
 }
 
 function hideUpdateBanner() {
     var $banner = $('#appUpdateBanner');
     $banner.removeClass('is-visible');
+    setTimeout(updateHeaderDropdownPosition, 300);
     if (window._currentUpdateReleaseTag) {
         try {
             sessionStorage.setItem('do_dismissed_update_' + window._currentUpdateReleaseTag, 'true');
