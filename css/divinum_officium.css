@@ -4219,161 +4219,185 @@ body.player-dock-open .app-main {
    DISCREET TOP UPDATE BANNER (Flow-based, pushes content down)
    ============================================================= */
 .do-update-banner {
-    display: grid;
-    grid-template-rows: 0fr;
+    display: block;
+    max-height: 0;
     opacity: 0;
-    transition: grid-template-rows 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
-    background: color-mix(in srgb, var(--primary-color) 12%, var(--background-base, #121214));
-    background-image: var(--noise-overlay);
-    border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+    overflow: hidden;
+    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+    background: #18181b;
+    background-image: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
     width: 100%;
-    position: relative;
-    z-index: 950;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 960 !important;
+    flex-shrink: 0;
 }
 
 [data-theme="light"] .do-update-banner {
-    background: color-mix(in srgb, var(--primary-color) 10%, #ffffff);
-    border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    background: #e2e5eb;
+    border: none !important;
+}
+
+[data-theme="oled"] .do-update-banner {
+    background: #121214;
 }
 
 .do-update-banner.is-visible {
-    grid-template-rows: 1fr;
+    max-height: calc(40px + env(safe-area-inset-top, 0px));
     opacity: 1;
 }
 
-.do-update-banner-container {
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+.do-update-banner.is-visible + .do-top-header {
+    top: calc(40px + env(safe-area-inset-top, 0px)) !important;
+}
+
+.do-update-banner.is-visible ~ .do-header-dropdown {
+    top: calc(64px + 40px) !important;
+    max-height: calc(100vh - 104px) !important;
+    max-height: calc(100dvh - 104px) !important;
+}
+
+@media (max-width: 900px) {
+    .do-update-banner.is-visible ~ .do-header-dropdown {
+        top: calc(58px + 40px + env(safe-area-inset-top, 0px)) !important;
+        max-height: calc(100vh - (58px + 40px + env(safe-area-inset-top, 0px))) !important;
+        max-height: calc(100dvh - (58px + 40px + env(safe-area-inset-top, 0px))) !important;
+    }
 }
 
 .do-update-banner-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 24px 8px;
+    height: calc(40px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 16px 0;
     gap: 12px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-wrap: nowrap;
 }
 
 .do-update-banner-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
-    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .do-update-banner-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    animation: updatePulse 2.5s infinite ease-in-out;
-}
-
-@keyframes updatePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
-}
-
-.do-update-banner-text {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    min-width: 0;
+    color: var(--primary-color);
+    opacity: 0.9;
 }
 
 .do-update-banner-title {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-primary, #f4f4f5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .do-update-banner-tag {
     display: inline-flex;
     align-items: center;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-size: 0.74rem;
-    font-weight: 600;
-    background: color-mix(in srgb, var(--primary-color) 22%, transparent);
-    color: var(--primary-color);
-    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, transparent);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary, #a1a1aa);
+    border: none !important;
+    outline: none !important;
+    flex-shrink: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.do-update-banner-desc {
-    font-size: 0.8rem;
-    color: var(--text-secondary, #a1a1aa);
+[data-theme="light"] .do-update-banner-tag {
+    background: rgba(0, 0, 0, 0.06);
+    color: #4b5563;
 }
 
 .do-update-banner-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
-}
-
-.do-update-btn-notes {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: transparent;
-    border: 1px solid color-mix(in srgb, var(--text-primary, #ffffff) 14%, transparent);
-    color: var(--text-secondary, #a1a1aa);
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-
-.do-update-btn-notes:hover {
-    background: color-mix(in srgb, var(--text-primary, #ffffff) 8%, transparent);
-    color: var(--text-primary, #ffffff);
-}
-
-.do-update-btn-notes svg {
-    transition: transform 0.2s ease;
-}
-
-.do-update-btn-notes.is-active svg {
-    transform: rotate(180deg);
+    white-space: nowrap;
 }
 
 .do-update-btn-action {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: var(--primary-color);
     color: #ffffff;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.82rem;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 40%, transparent);
-    transition: transform 0.15s ease, filter 0.15s ease;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.do-update-btn-action:hover {
+    opacity: 0.88;
+}
+
+.do-update-btn-action:active {
+    opacity: 0.75;
+}
+
+.do-update-btn-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    background: transparent;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.do-update-btn-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #ffffff);
+}
+
+[data-theme="light"] .do-update-btn-close:hover {
+    background: rgba(0, 0, 0, 0.07);
+    color: #111827;
 }
 
 .do-update-progress-wrapper {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
-    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
-    padding: 5px 12px;
-    border-radius: 8px;
-    min-width: 140px;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none !important;
+    padding: 4px 8px;
+    border-radius: 5px;
+    min-width: 110px;
 }
 
 .do-update-progress-wrapper.hidden {
@@ -4382,11 +4406,11 @@ body.player-dock-open .app-main {
 
 .do-update-progress-bar-track {
     flex: 1;
-    height: 6px;
-    background: color-mix(in srgb, var(--text-primary, #ffffff) 15%, transparent);
+    height: 5px;
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 999px;
     overflow: hidden;
-    min-width: 70px;
+    min-width: 50px;
 }
 
 .do-update-progress-bar-fill {
@@ -4398,93 +4422,31 @@ body.player-dock-open .app-main {
 }
 
 .do-update-progress-text {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 600;
     font-family: 'Inter', system-ui, sans-serif;
-    color: var(--primary-color);
-    min-width: 32px;
-    text-align: right;
-}
-
-.do-update-btn-action:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-.do-update-btn-action:active {
-    transform: translateY(0);
-}
-
-.do-update-btn-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: transparent;
-    border: none;
-    color: var(--text-tertiary, #71717a);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.do-update-btn-close:hover {
-    background: color-mix(in srgb, var(--text-primary, #ffffff) 10%, transparent);
     color: var(--text-primary, #ffffff);
-}
-
-.do-update-notes-collapsible {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
-}
-
-.do-update-notes-collapsible.is-open {
-    grid-template-rows: 1fr;
-}
-
-.do-update-notes-box {
-    min-height: 0;
-    overflow: hidden;
-    padding: 0 24px 12px;
-}
-
-.do-update-notes-box .update-notes-text {
-    max-height: 180px;
-    overflow-y: auto;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    background: color-mix(in srgb, var(--background-base, #121214) 70%, transparent);
-    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: var(--text-secondary, #d4d4d8);
-}
-
-@media (max-width: 900px) {
-    .do-update-banner-inner {
-        padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
-    }
-    .do-update-notes-box {
-        padding: 0 16px 12px;
-    }
+    min-width: 28px;
+    text-align: right;
 }
 
 @media (max-width: 640px) {
     .do-update-banner-inner {
-        padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px;
-        gap: 8px;
-        flex-wrap: wrap;
+        padding: 0 10px;
+        gap: 6px;
     }
-    .do-update-banner-desc {
+    .do-update-banner-title {
+        font-size: 0.76rem;
+    }
+    .do-update-btn-action {
+        padding: 4px 8px;
+        font-size: 0.74rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .do-update-banner-tag {
         display: none;
-    }
-    .do-update-banner-actions {
-        width: 100%;
-        justify-content: flex-end;
-        padding-top: 2px;
     }
 }
 

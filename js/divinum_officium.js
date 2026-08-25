@@ -7906,7 +7906,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.26';
+var CURRENT_APP_VERSION = 'beta-0.0.27';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7998,8 +7998,16 @@ function checkForAppUpdates(isManual) {
             if (isNewer) {
                 if (isManual) {
                     $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+                    showUpdateModal(targetRelease);
+                } else {
+                    var isDismissed = false;
+                    try {
+                        isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
+                    } catch (e) {}
+                    if (!isDismissed) {
+                        showUpdateModal(targetRelease);
+                    }
                 }
-                showUpdateModal(targetRelease);
             } else {
                 if (isManual) {
                     $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
@@ -8048,6 +8056,7 @@ function showUpdateBanner(release) {
     var tagName = release.tag_name || 'Nouvelle version';
     var isBeta = release.prerelease;
     var bodyNotes = release.body || 'Améliorations générales et corrections de stabilité.';
+    window._currentUpdateReleaseTag = tagName;
     
     // Find APK asset
     var apkAsset = null;
@@ -8058,8 +8067,11 @@ function showUpdateBanner(release) {
     }
     var downloadUrl = (apkAsset && apkAsset.browser_download_url) ? apkAsset.browser_download_url : (release.html_url || 'https://github.com/bastonus/jgabc/releases');
 
-    $('#updateVersionTag').text(tagName + (isBeta ? ' (Bêta)' : ''));
-    $('#updateNotesContent').html(parseMarkdownToHtml(bodyNotes));
+    var displayTag = tagName;
+    if (isBeta && !/b[eê]ta/i.test(tagName)) {
+        displayTag += ' (Bêta)';
+    }
+    $('#updateVersionTag').text(displayTag);
 
     // Setup progress callback hooks
     window.onUpdateDownloadProgress = function(percent) {
@@ -8129,8 +8141,11 @@ function showUpdateBanner(release) {
 function hideUpdateBanner() {
     var $banner = $('#appUpdateBanner');
     $banner.removeClass('is-visible');
-    $('#updateNotesCollapsible').removeClass('is-open');
-    $('#btnToggleUpdateNotes').removeClass('is-active');
+    if (window._currentUpdateReleaseTag) {
+        try {
+            sessionStorage.setItem('do_dismissed_update_' + window._currentUpdateReleaseTag, 'true');
+        } catch (e) {}
+    }
 }
 
 function showUpdateModal(release) {
