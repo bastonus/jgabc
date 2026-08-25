@@ -51,6 +51,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Strip all native button gradients/appearance across every theme and browser */
+button {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: none !important; /* kills the OS gradient on Chrome/Edge light mode */
+    border: none;
+    outline: none;
+    font-family: inherit;
+}
+
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background-color: var(--background-base);
