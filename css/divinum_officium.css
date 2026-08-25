@@ -560,15 +560,22 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     margin: 0 auto;
     padding: 20px 20px 30px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     padding-bottom: 0 !important;
 }
 
 #do-content-stream {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 18px;
 }
 
@@ -2853,11 +2860,13 @@ body, html {
     width: 100%;
     max-width: 680px;
     margin: 0 auto;
-    padding: 0 0 10px;
+    padding: 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    flex: 1;
+    justify-content: space-between;
+    gap: 12px;
     min-width: 0;
     animation: fadeIn 0.2s ease;
 }
@@ -3081,7 +3090,8 @@ body, html {
 .do-home-section-wrap {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    flex: 1;
+    gap: 0;
     width: 100%;
     box-sizing: border-box;
 }
@@ -3090,7 +3100,9 @@ body, html {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 4px 0;
+    flex: 1;
+    justify-content: space-between;
+    padding: 2px 0;
     width: 100%;
     box-sizing: border-box;
 }
@@ -3100,11 +3112,12 @@ body, html {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 12px 14px 12px 42px;
+    padding: 8px 14px 8px 42px;
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease;
-    min-height: 44px;
+    min-height: 40px;
+    flex: 1;
     box-sizing: border-box;
     width: 100%;
 }
