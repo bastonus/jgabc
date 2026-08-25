@@ -4857,6 +4857,43 @@ body.player-dock-open .app-main {
     color: var(--primary-color) !important;
 }
 
+.feedback-reload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f4f4f5 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #3f3f46 !important;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.feedback-reload-btn:hover {
+    background: #e4e4e7 !important;
+    color: #09090b !important;
+    transform: translateY(-1px);
+}
+
+.feedback-reload-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 520px) {
+    .feedback-reload-btn span {
+        display: none;
+    }
+    .feedback-reload-btn {
+        padding: 7px 8px;
+    }
+}
+
 .feedback-header .update-close-btn {
     background: #f4f4f5 !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;

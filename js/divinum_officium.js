@@ -7925,7 +7925,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.36';
+var CURRENT_APP_VERSION = 'beta-0.0.37';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -8214,6 +8214,12 @@ function openFeedbackModal() {
         $loading.hide();
     }
 
+    $('#btnReloadFeedback').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        reloadFeedbackForm();
+    });
+
     $('#btnOpenFeedbackExternal').off('click').on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -8221,6 +8227,40 @@ function openFeedbackModal() {
     });
 
     $('#feedbackModalBackdrop, #feedbackModal').removeClass('hidden');
+}
+
+function reloadFeedbackForm() {
+    var formId = "b5QOV2";
+    var curVersion = typeof CURRENT_APP_VERSION !== 'undefined' ? CURRENT_APP_VERSION : 'beta';
+    var curDate = doState.date ? doState.date.format('YYYY-MM-DD') : '';
+    var curHora = doState.hora || 'missa';
+    var platform = window.Capacitor ? 'Android App' : 'Web';
+    var theme = doState.theme || 'dark';
+
+    var queryParams = 'app_version=' + encodeURIComponent(curVersion) +
+        '&liturgical_date=' + encodeURIComponent(curDate) +
+        '&office=' + encodeURIComponent(curHora) +
+        '&platform=' + encodeURIComponent(platform) +
+        '&theme=' + encodeURIComponent(theme) +
+        '&_t=' + Date.now();
+
+    var tallyEmbedUrl = 'https://tally.so/embed/' + formId + '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=0&' + queryParams;
+    var tallyDirectUrl = 'https://tally.so/r/' + formId + '?' + queryParams;
+
+    var $iframe = $('#tallyFeedbackIframe');
+    var $loading = $('#feedbackLoading').show();
+    $('#feedbackFallbackLink').attr('href', tallyDirectUrl);
+
+    var safetyTimer = setTimeout(function() {
+        $loading.fadeOut(180);
+    }, 1200);
+
+    $iframe.off('load').on('load', function() {
+        clearTimeout(safetyTimer);
+        $loading.fadeOut(150);
+    });
+
+    $iframe.attr('src', tallyEmbedUrl);
 }
 
 function closeFeedbackModal() {
