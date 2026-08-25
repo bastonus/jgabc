@@ -23,7 +23,9 @@ var doState = window.doState = {
     mobileLang: 'la',
     settings: {
         theme: localStorage.getItem('do_theme') || 'dark',
-        color: localStorage.getItem('do_color') || '#c96b63'
+        color: localStorage.getItem('do_color') || '#c96b63',
+        iconSync: localStorage.getItem('do_icon_sync') === 'true',
+        iconColor: localStorage.getItem('do_icon_color') || 'default'
     },
     bible: {
         book: localStorage.getItem('do_bible_book') || 'Genesis',
@@ -4979,6 +4981,7 @@ function updateSidebarAndHeader() {
 
     $('.do-nav-item').removeClass('active');
     $('.do-nav-item[data-hora="' + hora + '"]').addClass('active');
+    $('#btnBrandHome, .do-brand').toggleClass('active', hora === 'home');
 
     $('.bottom-nav .nav-item').removeClass('active');
     $('.bottom-nav .nav-item[data-hora="' + hora + '"]').addClass('active');
@@ -5017,6 +5020,17 @@ function updateSidebarAndHeader() {
 
     $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
     $('#doColorOptions [data-color="' + doState.settings.color + '"]').addClass('active');
+
+    // Icon color & sync state
+    $('#toggleSyncIconColor').prop('checked', doState.settings.iconSync);
+    $('#doIconColorOptions .color-swatch-circle').removeClass('active');
+    if (doState.settings.iconSync) {
+        $('#doIconColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
+    } else {
+        $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+        $('#doIconColorOptions [data-icon-color="' + doState.settings.iconColor + '"]').addClass('active');
+    }
+    updateFaviconAndAppIcon();
 }
 
 function openBible(bookId, chapterNum, pageNum) {
@@ -7244,9 +7258,57 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', theme);
     }
     applyColor(doState.settings.color);
+    updateFaviconAndAppIcon();
     if (doState.hora === 'missa_gregorian') {
         renderAllChantScoresInDOM($('#do-content-stream'), true);
     }
+}
+
+function getEffectiveIconColor() {
+    if (doState.settings.iconSync) {
+        return doState.settings.color || '#c96b63';
+    }
+    return (doState.settings.iconColor === 'default') ? '#e4e4e7' : (doState.settings.iconColor || '#e4e4e7');
+}
+
+function updateFaviconAndAppIcon() {
+    var effColor = getEffectiveIconColor();
+    var svgData = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">' +
+        '<rect width="512" height="512" rx="115" fill="#121214"/>' +
+        '<g transform="translate(256, 256) scale(1.7) translate(-163.926, -590.396)">' +
+        '<g transform="matrix(5.069816,0,0,5.069816,-1181.3253,-599.436706)">' +
+        '<path d="M265.345,214.945C268.352,214.945 271.145,215.453 273.725,216.47C276.305,217.487 278.57,218.903 280.52,220.72C282.47,222.537 283.987,224.662 285.07,227.095C286.154,229.528 286.695,232.162 286.695,234.995C286.695,237.695 286.148,240.228 285.054,242.595C283.96,244.962 282.438,247.028 280.488,248.795C278.539,250.562 276.273,251.945 273.691,252.945C271.108,253.945 268.329,254.445 265.354,254.445C262.378,254.445 259.599,253.945 257.017,252.945C254.435,251.945 252.169,250.562 250.219,248.795C248.27,247.028 246.745,244.962 245.645,242.595C244.545,240.228 243.995,237.695 243.995,234.995C243.995,232.162 244.537,229.528 245.62,227.095C246.704,224.662 248.22,222.537 250.17,220.72C252.12,218.903 254.385,217.487 256.965,216.47C259.545,215.453 262.338,214.945 265.345,214.945ZM265.351,251.195C267.947,251.195 270.187,250.545 272.07,249.245C273.954,247.945 275.412,246.088 276.445,243.675C277.479,241.261 277.995,238.418 277.995,235.145C277.995,231.678 277.487,228.678 276.47,226.145C275.454,223.612 273.998,221.653 272.103,220.27C270.208,218.887 267.958,218.195 265.353,218.195C262.748,218.195 260.503,218.883 258.617,220.259C256.732,221.635 255.273,223.593 254.242,226.134C253.211,228.675 252.695,231.678 252.695,235.141C252.695,238.411 253.212,241.253 254.245,243.67C255.279,246.087 256.739,247.945 258.626,249.245C260.515,250.545 262.756,251.195 265.351,251.195Z" fill="' + effColor + '" style="fill-rule:nonzero;"/>' +
+        '</g>' +
+        '<path d="M146.046,524.564L182.114,524.564C182.114,524.564 182.805,526.506 182.281,527.223C174.967,537.224 176.131,571.602 176.131,571.602C176.131,571.602 204.276,572.294 214.858,566.283C215.39,565.981 216.687,566.449 216.687,566.449L216.853,599.359C216.853,599.359 215.237,600.405 214.526,600.024C201.866,593.237 175.798,594.539 175.798,594.539C176.325,627.366 172.945,671.274 194.747,666.343C187.793,678.365 141.254,678.642 134.079,666.675C158.651,671.495 148.595,614.457 151.698,594.539C151.698,594.539 121.225,594.401 112.804,600.024C112.308,600.356 111.142,599.359 111.142,599.359L111.308,566.283C111.308,566.283 112.506,565.44 112.97,565.784C121.973,572.461 151.365,571.436 151.365,571.436C151.365,571.436 151.753,539.191 145.382,526.891C145.011,526.175 146.046,524.564 146.046,524.564Z" fill="' + effColor + '"/>' +
+        '</g></svg>';
+    var faviconUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
+    var $fav = $('#dynamicFavicon');
+    if ($fav.length) {
+        $fav.attr('href', faviconUri);
+    } else {
+        $('head').append('<link id="dynamicFavicon" rel="icon" type="image/svg+xml" href="' + faviconUri + '">');
+    }
+    var $apple = $('#dynamicAppleIcon');
+    if ($apple.length) {
+        $apple.attr('href', faviconUri);
+    }
+
+    // Update Live preview in Settings
+    $('#iconPreviewSvg path').attr('fill', effColor);
+    var labelText = doState.settings.iconSync ? 'Synchronisé avec l\'application (' + doState.settings.color + ')' : (doState.settings.iconColor === 'default' ? 'Sans couleur (Neutre / Blanc)' : 'Couleur personnalisée (' + doState.settings.iconColor + ')');
+    $('#iconPreviewDesc').text(labelText);
+}
+
+function applyIconColor(color, isSync) {
+    if (isSync !== undefined) {
+        doState.settings.iconSync = !!isSync;
+        localStorage.setItem('do_icon_sync', doState.settings.iconSync ? 'true' : 'false');
+    }
+    if (color !== undefined) {
+        doState.settings.iconColor = color;
+        localStorage.setItem('do_icon_color', color);
+    }
+    updateFaviconAndAppIcon();
 }
 
 function applyColor(hex) {
@@ -7257,6 +7319,9 @@ function applyColor(hex) {
     document.documentElement.style.setProperty('--primary-color', hex);
     document.documentElement.style.setProperty('--primary-color-rgb', r + ',' + g + ',' + b);
     localStorage.setItem('do_color', hex);
+    if (doState.settings.iconSync) {
+        updateFaviconAndAppIcon();
+    }
     if (doState.hora === 'missa_gregorian') {
         renderAllChantScoresInDOM($('#do-content-stream'), true);
     }
@@ -7750,6 +7815,28 @@ function setupEventListeners() {
         $('#doColorOptions .color-swatch-circle, #doColorOptions .color-swatch').removeClass('active');
         $(this).addClass('active');
         applyColor($(this).data('color'));
+    });
+
+    $('#toggleSyncIconColor').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        applyIconColor(undefined, isChecked);
+        if (isChecked) {
+            $('#doIconColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
+            $('#doIconColorOptions .color-swatch-circle').removeClass('active');
+        } else {
+            $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
+            $('#doIconColorOptions .color-swatch-circle').removeClass('active');
+            $('#doIconColorOptions [data-icon-color="' + doState.settings.iconColor + '"]').addClass('active');
+        }
+    });
+
+    $('#doIconColorOptions').on('click', '.color-swatch-circle', function() {
+        var chosenColor = $(this).data('icon-color');
+        $('#doIconColorOptions .color-swatch-circle').removeClass('active');
+        $(this).addClass('active');
+        applyIconColor(chosenColor, false);
+        $('#toggleSyncIconColor').prop('checked', false);
+        $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
     });
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)

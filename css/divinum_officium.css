@@ -165,7 +165,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 16px 10px;
+    padding: 12px 12px 6px;
     border-bottom: none !important;
     flex-shrink: 0;
 }
@@ -173,44 +173,38 @@
 .do-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
     cursor: pointer;
     user-select: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
+    padding: 6px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    background: transparent !important;
+    color: #ffffff;
+}
+
+[data-theme="light"] .do-brand {
+    color: #000000;
 }
 
 .do-brand:hover {
-    opacity: 0.88;
+    background: transparent !important;
+    color: var(--primary-color) !important;
     transform: translateY(-1px);
 }
 
-.do-brand-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: rgba(var(--primary-color-rgb), 0.15);
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none !important;
-    flex-shrink: 0;
+.do-brand.active {
+    background: transparent !important;
 }
 
-.do-brand-title {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
-}
-
-.do-brand-sub {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-secondary);
+.do-brand-logo-full {
+    height: 26px;
+    width: auto;
+    max-width: 170px;
+    display: block;
+    color: inherit;
+    fill: currentColor;
+    transition: fill 0.2s ease, color 0.2s ease;
 }
 
 .do-mobile-close {
@@ -1949,6 +1943,88 @@ body.is-bible-mode .modern-player-bar {
 .color-swatch-circle.active {
     transform: scale(1.12);
     box-shadow: 0 0 0 3px var(--background-sidebar), 0 0 0 5.5px var(--primary-color) !important;
+}
+
+#doIconColorOptions .color-swatch-circle.active {
+    box-shadow: 0 0 0 3px var(--background-sidebar), 0 0 0 5.5px var(--text-primary) !important;
+}
+
+.color-swatch-circle.is-neutral {
+    background: var(--background-highlight);
+    border: 1.5px solid var(--border-subtle) !important;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-swatch-circle.is-neutral:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary) !important;
+}
+
+/* Settings Toggle Switch Row */
+.settings-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 2px 14px;
+    gap: 12px;
+}
+
+.settings-toggle-label {
+    font-size: 0.86rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+/* Icon & Favicon Live Preview Box */
+.icon-preview-box {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--background-highlight);
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+}
+
+.icon-preview-square {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: #121214;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.icon-preview-box:hover .icon-preview-square {
+    transform: scale(1.05);
+}
+
+.icon-preview-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.icon-preview-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.icon-preview-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
 }
 
 /* About / De hoc opere Card */

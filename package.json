@@ -1,7 +1,7 @@
 {
-  "name": "divinum-officium",
-  "version": "0.0.8",
-  "description": "Divinum Officium & Missale Romanum — Application liturgique traditionnelle",
+  "name": "oremus",
+  "version": "0.0.9",
+  "description": "Oremus — Divinum Officium & Missale Romanum — Application liturgique traditionnelle",
   "homepage": "https://github.com/bastonus/jgabc#readme",
   "bugs": {
     "url": "https://github.com/bastonus/jgabc/issues"

@@ -1,6 +1,6 @@
-﻿{
+{
   "appId": "com.chanttools.divinumofficium",
-  "appName": "Divinum Officium",
+  "appName": "Oremus",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

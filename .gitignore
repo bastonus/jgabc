@@ -35,4 +35,5 @@ build-output/
 *.keystore
 !android/app/release.keystore
 *.jks
+scratch/
 
