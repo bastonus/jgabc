@@ -7,8 +7,8 @@ android {
         applicationId "com.chanttools.divinumofficium"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "beta-0.0.10"
+        versionCode 11
+        versionName "beta-0.0.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -102,6 +102,7 @@ task copyWebAssets(type: Copy) {
         include "aelf/**/*.txt"
         include "douay-rheims/**/*.txt"
         include "matos-soares/**/*.txt"
+        include "psalms/**/*.txt"
 
         exclude "douay-rheims/src/**"
         exclude "do_data/**/Help/**"
