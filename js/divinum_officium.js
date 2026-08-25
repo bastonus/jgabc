@@ -7320,17 +7320,23 @@ function applyIconColor(color, isSync) {
 // ── Haptic Feedback Engine ──
 function triggerHapticFeedback(duration) {
     if (localStorage.getItem('do_haptics') === 'false') return;
+    var dur = duration || 25;
     try {
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
-            window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' });
-        } else if (navigator && navigator.vibrate) {
-            navigator.vibrate(duration || 15);
+            window.Capacitor.Plugins.Haptics.impact({ style: 'MEDIUM' }).catch(function() {
+                try { window.Capacitor.Plugins.Haptics.vibrate({ duration: dur }); } catch (e) {}
+            });
+        }
+    } catch (e) {}
+    try {
+        if (navigator && navigator.vibrate) {
+            navigator.vibrate(dur);
         }
     } catch (e) {}
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.11';
+var CURRENT_APP_VERSION = 'beta-0.0.12';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

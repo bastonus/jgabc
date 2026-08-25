@@ -474,7 +474,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 24px 12px;
     width: 100%;
 }
 
@@ -494,7 +494,7 @@
         position: sticky !important;
         top: 0 !important;
         z-index: 900 !important;
-        padding: 14px !important;
+        padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px !important;
     }
 
     .do-top-left {
