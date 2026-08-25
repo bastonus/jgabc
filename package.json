@@ -1,6 +1,6 @@
 {
   "name": "oremus",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Oremus — Divinum Officium & Missale Romanum — Application liturgique traditionnelle",
   "homepage": "https://github.com/bastonus/jgabc#readme",
   "bugs": {
@@ -28,6 +28,7 @@
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@capacitor/haptics": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@capawesome/capacitor-app-icon": "^0.1.1",
     "@prettier/sync": "^0.6.1",
     "abbrev": "^3.0.1",

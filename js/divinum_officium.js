@@ -7256,18 +7256,54 @@ function closeHeaderDropdown() {
 
 // ---- Theme & Color Management ----
 function initTheme() {
-    var theme = doState.settings.theme;
+    var theme = doState.settings.theme || 'dark';
+    var effectiveTheme = theme;
     if (theme === 'auto') {
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        effectiveTheme = prefersDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', effectiveTheme);
     } else {
         document.documentElement.setAttribute('data-theme', theme);
     }
+    updateStatusBarTheme(effectiveTheme);
     applyColor(doState.settings.color);
     updateFaviconAndAppIcon();
     if (doState.hora === 'missa_gregorian') {
         renderAllChantScoresInDOM($('#do-content-stream'), true);
     }
+}
+
+function updateStatusBarTheme(theme) {
+    var isLight = (theme === 'light');
+    var bgColor = (theme === 'oled') ? '#000000' : (theme === 'light' ? '#faf8f5' : '#121214');
+
+    // 1. Update HTML meta theme-color
+    var $meta = $('meta[name="theme-color"]');
+    if (!$meta.length) {
+        $meta = $('<meta name="theme-color">').appendTo('head');
+    }
+    $meta.attr('content', bgColor);
+
+    // 2. Update Android native status bar via JavascriptInterface
+    try {
+        if (window.AndroidAppIcon && typeof window.AndroidAppIcon.setStatusBarTheme === 'function') {
+            window.AndroidAppIcon.setStatusBarTheme(theme, bgColor);
+        }
+    } catch (e) {
+        console.warn('StatusBar native error:', e);
+    }
+
+    // 3. Fallback to Capacitor StatusBar plugin
+    try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar) {
+            window.Capacitor.Plugins.StatusBar.setStyle({
+                style: isLight ? 'LIGHT' : 'DARK'
+            }).catch(function() {});
+            window.Capacitor.Plugins.StatusBar.setBackgroundColor({
+                color: bgColor
+            }).catch(function() {});
+        }
+    } catch (e) {}
 }
 
 function getEffectiveIconColor() {
@@ -7371,7 +7407,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.16';
+var CURRENT_APP_VERSION = 'beta-0.0.17';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

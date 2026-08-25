@@ -2,9 +2,13 @@ package com.chanttools.divinumofficium;
 
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Window;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -79,6 +83,29 @@ public class MainActivity extends BridgeActivity {
                                 PackageManager.DONT_KILL_APP
                             );
                         }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void setStatusBarTheme(String themeName, String hexColor) {
+            runOnUiThread(() -> {
+                try {
+                    Window window = getWindow();
+                    WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+                    boolean isLight = "light".equalsIgnoreCase(themeName);
+                    if (controller != null) {
+                        // true = Dark text/icons (for Light theme), false = White text/icons (for Dark/OLED theme)
+                        controller.setAppearanceLightStatusBars(isLight);
+                        controller.setAppearanceLightNavigationBars(isLight);
+                    }
+                    if (hexColor != null && !hexColor.trim().isEmpty()) {
+                        int parsedColor = Color.parseColor(hexColor.trim());
+                        window.setStatusBarColor(parsedColor);
+                        window.setNavigationBarColor(parsedColor);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
