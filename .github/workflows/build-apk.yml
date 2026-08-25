@@ -85,20 +85,20 @@ jobs:
           echo "Found compiled APK: $RAW_APK"
 
           mkdir -p build-output
-          cp "$RAW_APK" build-output/Divinum-Officium.apk
+          cp "$RAW_APK" build-output/Oremus.apk
 
           echo "Verifying ZIP alignment..."
-          $BUILD_TOOLS_DIR/zipalign -c -v 4 build-output/Divinum-Officium.apk
+          $BUILD_TOOLS_DIR/zipalign -c -v 4 build-output/Oremus.apk
 
           echo "Verifying APK signature..."
-          $BUILD_TOOLS_DIR/apksigner verify --verbose build-output/Divinum-Officium.apk
-          echo "APK successfully verified and ready at build-output/Divinum-Officium.apk"
+          $BUILD_TOOLS_DIR/apksigner verify --verbose build-output/Oremus.apk
+          echo "APK successfully verified and ready at build-output/Oremus.apk"
 
       - name: Upload APK Artifact (GitHub Actions)
         uses: actions/upload-artifact@v4
         with:
-          name: Divinum-Officium-APK
-          path: build-output/Divinum-Officium.apk
+          name: Oremus-APK
+          path: build-output/Oremus.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -127,9 +127,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag_info.outputs.tag_name }}
-          name: "Divinum Officium & Missale ${{ steps.tag_info.outputs.tag_name }}"
+          name: "Oremus ${{ steps.tag_info.outputs.tag_name }}"
           body: |
-            ### 📱 Divinum Officium & Missale Romanum — Application Android (APK)
+            ### 📱 Oremus — Divinum Officium & Missale Romanum — Application Android (APK)
 
             Application Android autonome et 100% hors-ligne pour la récitation du Bréviaire traditionnel et du Missel romain (1962 / 1960).
 
@@ -138,12 +138,13 @@ jobs:
             - 📜 **Affichage Bilingue** : Latin en regard avec traductions vernaculaires (Français, Anglais, Espagnol, Italien, Allemand, Portugais).
             - 📖 **Sacra Biblia** : Lecteur complet Vulgata, AELF, Crampon, Douay-Rheims, Matos Soares.
             - 🎵 **Partitions & Audio Grégorien** : Lecteur interactif avec tempo et tonalité ajustables.
-            - 🌙 **Thèmes** : Nocturnum (Sombre), OLED, Diurnum (Clair) et 8 couleurs liturgiques.
+            - 🌙 **Thèmes** : Nocturnum (Sombre), OLED, Diurnum (Clair) et couleurs liturgiques.
+            - 🎨 **Icônes personnalisables** : Emblème Oremus avec personnalisation et synchronisation de couleur.
 
             #### 📥 Installation :
-            Téléchargez le fichier `Divinum-Officium.apk` ci-dessous et ouvrez-le sur votre appareil Android pour l'installer.
+            Téléchargez le fichier `Oremus.apk` ci-dessous et ouvrez-le sur votre appareil Android pour l'installer.
           files: |
-            build-output/Divinum-Officium.apk
+            build-output/Oremus.apk
           draft: false
           prerelease: ${{ contains(steps.tag_info.outputs.tag_name, 'beta') || contains(steps.tag_info.outputs.tag_name, 'alpha') || contains(steps.tag_info.outputs.tag_name, 'rc') }}
         env:

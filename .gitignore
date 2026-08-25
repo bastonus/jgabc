@@ -36,4 +36,6 @@ build-output/
 !android/app/release.keystore
 *.jks
 scratch/
+*~lock~
+*.af~lock~
 

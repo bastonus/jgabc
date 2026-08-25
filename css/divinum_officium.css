@@ -165,7 +165,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 12px 6px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 6px;
     border-bottom: none !important;
     flex-shrink: 0;
 }
@@ -1752,7 +1752,7 @@ body.is-bible-mode .modern-player-bar {
     }
 
     .settings-header {
-        padding: 18px 20px 14px !important;
+        padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 14px !important;
         flex-shrink: 0;
     }
 
@@ -2161,10 +2161,10 @@ body.is-bible-mode .modern-player-bar {
     .do-header-dropdown {
         left: 0 !important;
         right: 0 !important;
-        top: 68px !important;
+        top: calc(58px + env(safe-area-inset-top, 0px)) !important;
         bottom: 0 !important;
-        max-height: calc(100vh - 68px) !important;
-        max-height: calc(100dvh - 68px) !important;
+        max-height: calc(100vh - (58px + env(safe-area-inset-top, 0px))) !important;
+        max-height: calc(100dvh - (58px + env(safe-area-inset-top, 0px))) !important;
         padding-bottom: 0 !important;
         z-index: 960 !important;
     }
