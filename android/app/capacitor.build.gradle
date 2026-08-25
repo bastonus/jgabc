@@ -10,6 +10,7 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-haptics')
+    implementation project(':capawesome-capacitor-app-icon')
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
 }
 

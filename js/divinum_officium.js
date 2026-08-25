@@ -7301,6 +7301,36 @@ function updateFaviconAndAppIcon() {
     $('#iconPreviewSvg path').attr('fill', effColor);
     var labelText = doState.settings.iconSync ? 'Synchronisé avec l\'application (' + doState.settings.color + ')' : (doState.settings.iconColor === 'default' ? 'Sans couleur (Neutre / Blanc)' : 'Couleur personnalisée (' + doState.settings.iconColor + ')');
     $('#iconPreviewDesc').text(labelText);
+
+    // Sync Android native launcher icon
+    var colorAliasMap = {
+        '#c96b63': 'Red',
+        '#5b8a72': 'Green',
+        '#8a6b9a': 'Purple',
+        '#c49b4b': 'Gold',
+        '#c46b85': 'Rose',
+        '#5078a0': 'Blue',
+        '#202022': 'Black',
+        '#7e8590': 'Grey'
+    };
+    var alias = colorAliasMap[effColor.toLowerCase()] || 'Default';
+    applyNativeAndroidAppIcon(alias);
+}
+
+function applyNativeAndroidAppIcon(aliasSuffix) {
+    try {
+        if (window.AndroidAppIcon && typeof window.AndroidAppIcon.setIcon === 'function') {
+            window.AndroidAppIcon.setIcon(aliasSuffix || 'Default');
+        } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppIcon) {
+            if (aliasSuffix && aliasSuffix !== 'Default') {
+                window.Capacitor.Plugins.AppIcon.setName({ name: 'MainActivity' + aliasSuffix }).catch(function() {});
+            } else {
+                window.Capacitor.Plugins.AppIcon.reset().catch(function() {});
+            }
+        }
+    } catch (e) {
+        console.warn('Native app icon error:', e);
+    }
 }
 
 function applyIconColor(color, isSync) {
@@ -7334,7 +7364,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.13';
+var CURRENT_APP_VERSION = 'beta-0.0.14';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7786,6 +7816,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnOpenSidebarMobile', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback(20);
         $('#doSidebar').addClass('open active');
         $('#sidebarBackdrop').addClass('open active');
         document.body.style.overflow = 'hidden';
@@ -8143,6 +8174,7 @@ function setupEventListeners() {
             // Not dragging bilingual (e.g. edge swipe or already at Latin)
             var isAtLatin = (doState.mobileLang === 'la');
             if ((touchIsEdge || isAtLatin) && deltaX > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                triggerHapticFeedback(20);
                 $('#doSidebar').addClass('open active');
                 $('#sidebarBackdrop').addClass('open active');
             }
