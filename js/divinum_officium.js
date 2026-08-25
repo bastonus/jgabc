@@ -2998,35 +2998,23 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
         ? getBibleAlignedRows(bookId, vernLang, chapterNum, laVerses, vernVerses)
         : [];
 
-    // Pagination computations
-    var isAll = (pageSize === 'all' || pageSize === 0 || !pageSize);
-    var vpp = isAll ? (alignedRows.length || 1) : parseInt(pageSize, 10);
-    var totalPages = isAll ? 1 : Math.max(1, Math.ceil(alignedRows.length / vpp));
-
-    if (pageNum > totalPages) pageNum = totalPages;
-    if (pageNum < 1) pageNum = 1;
-    doState.bible.page = pageNum;
+    // Full chapter display (no pagination)
+    doState.bible.page = 1;
 
     // Automatically persist reading position
     localStorage.setItem('do_bible_book', bookId);
     localStorage.setItem('do_bible_chapter', chapterNum);
-    localStorage.setItem('do_bible_page', pageNum);
-    localStorage.setItem('do_bible_pageSize', isAll ? 'all' : vpp);
+    localStorage.setItem('do_bible_page', 1);
 
-    var startIdx = isAll ? 0 : (pageNum - 1) * vpp;
-    var endIdx = isAll ? alignedRows.length : Math.min(startIdx + vpp, alignedRows.length);
-    var visibleRows = alignedRows.slice(startIdx, endIdx);
-
-    var vStart = visibleRows.length ? (visibleRows[0].laVNum || visibleRows[0].vernVNum || 1) : 1;
-    var vEnd = visibleRows.length ? (visibleRows[visibleRows.length - 1].laVNum || visibleRows[visibleRows.length - 1].vernVNum || 1) : 1;
+    var visibleRows = alignedRows;
 
     // Update Header
-    var headerText = bookTitle + ' ' + chapterNum + ' (p. ' + pageNum + '/' + totalPages + ')';
+    var headerText = bookTitle + ' ' + chapterNum;
     $('#doHeaderTitle .title-text').text(headerText);
     $('#doHourLabel').text(('SACRA BIBLIA • ' + (bkObj.cat || 'Vetus Testamentum')).toUpperCase());
 
-    var isFirstPage = (pageNum <= 1 && chapterNum <= 1 && DO_BIBLE_BOOKS.indexOf(bkObj) === 0);
-    var isLastPage = (pageNum >= totalPages && chapterNum >= maxCh && DO_BIBLE_BOOKS.indexOf(bkObj) === DO_BIBLE_BOOKS.length - 1);
+    var isFirstChapter = (chapterNum <= 1 && DO_BIBLE_BOOKS.indexOf(bkObj) === 0);
+    var isLastChapter = (chapterNum >= maxCh && DO_BIBLE_BOOKS.indexOf(bkObj) === DO_BIBLE_BOOKS.length - 1);
 
     // Verses Body
     var bodyHtml = '';
@@ -3089,8 +3077,8 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     }
 
     // Main Card HTML
-    var cardTitle = bookTitle + ' — ' + (uiLang === 'fr' ? 'Chapitre ' : 'Capitulum ') + chapterNum;
-    var pageBadge = 'Page ' + pageNum + ' / ' + totalPages + (visibleRows.length ? ' (v. ' + vStart + '–' + vEnd + ')' : '');
+    var cardTitle = bookTitle + ' — Cap. ' + chapterNum;
+    var countBadge = visibleRows.length ? (visibleRows.length + ' versus') : '';
 
     var cardHtml = '<div class="do-card is-bible">' +
         '<div class="do-card-header">' +
@@ -3098,38 +3086,23 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
                 '<span class="do-card-type">' + escHtml((bkObj.cat || 'Sacra Scriptura').toUpperCase()) + '</span>' +
                 '<h3 class="do-card-title">' + escHtml(cardTitle) + '</h3>' +
             '</div>' +
-            '<div class="do-card-actions">' +
-                '<span class="do-badge" style="font-size:0.8rem; color:var(--primary-color); font-weight:600;">' + escHtml(pageBadge) + '</span>' +
-            '</div>' +
+            (countBadge ? '<div class="do-card-actions"><span class="do-badge" style="font-size:0.8rem; color:var(--primary-color); font-weight:600;">' + escHtml(countBadge) + '</span></div>' : '') +
         '</div>' +
         '<div class="do-card-body">' + bodyHtml + '</div>' +
     '</div>';
 
-    // Bottom Navigation Floating Bar
+    // Bottom Navigation Floating Bar (Previous / Next Chapter in Latin)
     var $prevBtnBottom = $('<button class="do-bible-nav-btn btnBiblePrev" id="btnBiblePrevBottom">')
-        .html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> <span>' + (uiLang === 'fr' ? 'Page préc.' : 'Præcedens') + '</span>')
-        .prop('disabled', isFirstPage);
+        .html('<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> <span>Caput præcedens</span>')
+        .prop('disabled', isFirstChapter);
 
     var $nextBtnBottom = $('<button class="do-bible-nav-btn btnBibleNext" id="btnBibleNextBottom">')
-        .html('<span>' + (uiLang === 'fr' ? 'Page suiv.' : 'Sequens') + '</span> <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>')
-        .prop('disabled', isLastPage);
-
-    var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select">');
-    for (var p = 1; p <= totalPages; p++) {
-        var pStartIdx = (p - 1) * vpp;
-        var pEndIdx = Math.min(pStartIdx + vpp, alignedRows.length);
-        var pRows = alignedRows.slice(pStartIdx, pEndIdx);
-        var pStart = pRows.length ? (pRows[0].laVNum || pRows[0].vernVNum || (pStartIdx + 1)) : (pStartIdx + 1);
-        var pEnd = pRows.length ? (pRows[pRows.length - 1].laVNum || pRows[pRows.length - 1].vernVNum || pEndIdx) : pEndIdx;
-        var $opt = $('<option>').val(p).text('Page ' + p + '/' + totalPages + (alignedRows.length ? ' (v. ' + pStart + '–' + pEnd + ')' : ''));
-        if (p === pageNum) $opt.prop('selected', true);
-        $pgSelect.append($opt);
-    }
+        .html('<span>Caput sequens</span> <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>')
+        .prop('disabled', isLastChapter);
 
     var $bottomBar = $('<div class="do-bible-bottom-nav">').append(
         $('<div class="do-bible-bottom-nav-inner">').append(
             $prevBtnBottom,
-            $pgSelect,
             $nextBtnBottom
         )
     );
@@ -8435,16 +8408,12 @@ function setupEventListeners() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Bible Previous Page / Chapter Navigation
+    // Bible Previous Chapter Navigation
     $(document).on('click', '#btnBiblePrev, .btnBiblePrev', function() {
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
-        if (doState.bible.page > 1) {
-            doState.bible.page--;
-            renderBibleMainView();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (doState.bible.chapter > 1) {
+        if (doState.bible.chapter > 1) {
             doState.bible.chapter--;
-            doState.bible.page = 9999; // Automatically clamped to totalPages of the previous chapter
+            doState.bible.page = 1;
             renderBibleMainView();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -8453,49 +8422,32 @@ function setupEventListeners() {
                 var prevBk = DO_BIBLE_BOOKS[curIdx - 1];
                 doState.bible.book = prevBk.id;
                 doState.bible.chapter = prevBk.chapters;
-                doState.bible.page = 9999;
+                doState.bible.page = 1;
                 renderBibleMainView();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
     });
 
-    // Bible Next Page / Chapter Navigation
+    // Bible Next Chapter Navigation
     $(document).on('click', '#btnBibleNext, .btnBibleNext', function() {
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
-        var laPath = 'vulgate/' + bkObj.id + '.txt';
-
-        fetchLocalFile(laPath, function(err, laData) {
-            var laVerses = (!err && laData) ? parseBibleFileVerses(laData, doState.bible.chapter) : {};
-            var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : null;
-            var vernFolder = (vernLang === 'fr') ? 'aelf' : (vernLang === 'en') ? 'douay-rheims' : (vernLang === 'pt') ? 'matos-soares' : null;
-            var vernData = vernFolder ? DO_LOCAL_CACHE[vernFolder + '/' + bkObj.id + '.txt'] : null;
-            var vernVerses = vernData ? parseBibleFileVerses(vernData, doState.bible.chapter) : {};
-            var aligned = (typeof getBibleAlignedRows === 'function')
-                ? getBibleAlignedRows(bkObj.id, vernLang, doState.bible.chapter, laVerses, vernVerses)
-                : [];
-            var totalVerses = aligned.length || Math.max(Object.keys(laVerses).length, Object.keys(vernVerses).length);
-            var isAll = (doState.bible.pageSize === 'all');
-            var vpp = isAll ? totalVerses : (parseInt(doState.bible.pageSize, 10) || 15);
-            var totalPages = isAll ? 1 : Math.max(1, Math.ceil(totalVerses / vpp));
-
-            if (doState.bible.page < totalPages) {
-                doState.bible.page++;
-            } else if (doState.bible.chapter < bkObj.chapters) {
-                doState.bible.chapter++;
-                doState.bible.page = 1;
-            } else {
-                var curIdx = DO_BIBLE_BOOKS.indexOf(bkObj);
-                if (curIdx < DO_BIBLE_BOOKS.length - 1) {
-                    var nextBk = DO_BIBLE_BOOKS[curIdx + 1];
-                    doState.bible.book = nextBk.id;
-                    doState.bible.chapter = 1;
-                    doState.bible.page = 1;
-                }
-            }
+        if (doState.bible.chapter < bkObj.chapters) {
+            doState.bible.chapter++;
+            doState.bible.page = 1;
             renderBibleMainView();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        } else {
+            var curIdx = DO_BIBLE_BOOKS.indexOf(bkObj);
+            if (curIdx < DO_BIBLE_BOOKS.length - 1) {
+                var nextBk = DO_BIBLE_BOOKS[curIdx + 1];
+                doState.bible.book = nextBk.id;
+                doState.bible.chapter = 1;
+                doState.bible.page = 1;
+                renderBibleMainView();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
     });
 
     $('#btnPrevDay, #btnHddPrevDay').on('click', function(e) {
