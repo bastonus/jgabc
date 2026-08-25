@@ -117,10 +117,10 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".MainActivityBlack"
+            android:name=".MainActivityAmber"
             android:targetActivity=".MainActivity"
-            android:icon="@mipmap/ic_launcher_black"
-            android:roundIcon="@mipmap/ic_launcher_black_round"
+            android:icon="@mipmap/ic_launcher_amber"
+            android:roundIcon="@mipmap/ic_launcher_amber_round"
             android:label="@string/app_name"
             android:enabled="false"
             android:exported="true">

@@ -12,12 +12,12 @@ public class MainActivity extends BridgeActivity {
     private static final String[] ALIASES = {
         "MainActivityDefault",
         "MainActivityRed",
-        "MainActivityGreen",
         "MainActivityPurple",
+        "MainActivityGreen",
         "MainActivityGold",
-        "MainActivityRose",
         "MainActivityBlue",
-        "MainActivityBlack",
+        "MainActivityRose",
+        "MainActivityAmber",
         "MainActivityGrey"
     };
 

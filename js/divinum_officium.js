@@ -7305,15 +7305,22 @@ function updateFaviconAndAppIcon() {
     // Sync Android native launcher icon
     var colorAliasMap = {
         '#c96b63': 'Red',
-        '#5b8a72': 'Green',
+        '#987dc2': 'Purple',
         '#8a6b9a': 'Purple',
+        '#589c77': 'Green',
+        '#5b8a72': 'Green',
+        '#c4984f': 'Gold',
         '#c49b4b': 'Gold',
-        '#c46b85': 'Rose',
+        '#5c8bb8': 'Blue',
         '#5078a0': 'Blue',
-        '#202022': 'Black',
-        '#7e8590': 'Grey'
+        '#cc738a': 'Rose',
+        '#c46b85': 'Rose',
+        '#ba8155': 'Amber',
+        '#7e8590': 'Grey',
+        '#202022': 'Default',
+        '#e4e4e7': 'Default'
     };
-    var alias = colorAliasMap[effColor.toLowerCase()] || 'Default';
+    var alias = colorAliasMap[(effColor || '').toLowerCase()] || 'Default';
     applyNativeAndroidAppIcon(alias);
 }
 
@@ -7364,7 +7371,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.15';
+var CURRENT_APP_VERSION = 'beta-0.0.16';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
