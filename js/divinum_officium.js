@@ -3077,8 +3077,10 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
     }
 
     // Main Card HTML
-    var cardTitle = bookTitle + ' — Cap. ' + chapterNum;
-    var countBadge = visibleRows.length ? (visibleRows.length + ' versus') : '';
+    var chapterWord = (uiLang === 'fr') ? 'Chapitre ' : (uiLang === 'la' ? 'Caput ' : (uiLang === 'es' ? 'Capítulo ' : 'Chapter '));
+    var cardTitle = bookTitle + ' — ' + chapterWord + chapterNum;
+    var versesWord = (uiLang === 'fr') ? 'versets' : (uiLang === 'la' ? 'versus' : (uiLang === 'es' ? 'versículos' : 'verses'));
+    var countBadge = visibleRows.length ? (visibleRows.length + ' ' + versesWord) : '';
 
     var cardHtml = '<div class="do-card is-bible">' +
         '<div class="do-card-header">' +
