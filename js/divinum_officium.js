@@ -7407,7 +7407,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.19';
+var CURRENT_APP_VERSION = 'beta-0.0.20';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -7432,7 +7432,24 @@ function compareVersions(v1, v2) {
     return 0;
 }
 
+function isNativeAndroidApp() {
+    try {
+        return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+    } catch (e) {
+        return false;
+    }
+}
+
 function checkForAppUpdates(isManual) {
+    // Ne jamais exécuter ni afficher de pop-up de mise à jour sur le site Web
+    if (!isNativeAndroidApp()) {
+        if (isManual) {
+            var $statusText = $('#updateStatusText');
+            $statusText.text('Version Web en ligne (Toujours à jour)').css('color', 'var(--text-tertiary)');
+        }
+        return;
+    }
+
     var includeBeta = (localStorage.getItem('do_include_beta') !== 'false');
     var $statusText = $('#updateStatusText');
     if (isManual) {
@@ -8112,7 +8129,9 @@ function setupEventListeners() {
         hideUpdateModal();
     });
 
-    if (localStorage.getItem('do_auto_update') !== 'false') {
+    if (!isNativeAndroidApp()) {
+        $('#settingsGroupUpdates').hide();
+    } else if (localStorage.getItem('do_auto_update') !== 'false') {
         setTimeout(function() {
             checkForAppUpdates(false);
         }, 2500);
