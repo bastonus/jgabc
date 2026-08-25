@@ -3295,6 +3295,9 @@ function setupHomeSearch() {
 
 function renderHomeView() {
     var $stream = $('#do-content-stream').empty();
+    if ($stream[0]) {
+        $stream[0].style.setProperty('--bilingual-offset', '0%');
+    }
     var uiLang = getUiLang();
     var curDateFormatted = formatLiturgicalDate(doState.date, uiLang);
     var curHora = getCurrentLiturgicalHora();
@@ -8934,7 +8937,9 @@ function setupEventListeners() {
 
         // If not a sidebar candidate, check bilingual swipe candidate
         if (touchMode === 'none' && !isSidebarOpen) {
-            var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
+            var isHome = (doState.hora === 'home');
+            var hasBilingualRows = $('.do-bilingual-wrapper, .do-bilingual-grid, .do-bilingual-row').length > 0;
+            var isBilingual = !isHome && hasBilingualRows && (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
             if (isBilingual) {
                 var $wrapper = $('.do-bilingual-wrapper').first();
                 var cardW = $wrapper.length ? $wrapper.width() : $(window).width();
