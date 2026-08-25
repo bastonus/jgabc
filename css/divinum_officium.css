@@ -76,20 +76,36 @@
     --border-color: transparent;
 }
 
-[data-theme="dark"] .do-top-header,
 [data-theme="dark"] .do-sidebar,
 [data-theme="dark"] .do-header-dropdown,
 [data-theme="dark"] .settings-panel,
 [data-theme="dark"] .modern-player-bar,
-[data-theme="oled"] .do-top-header,
 [data-theme="oled"] .do-sidebar,
 [data-theme="oled"] .do-header-dropdown,
 [data-theme="oled"] .settings-panel,
 [data-theme="oled"] .modern-player-bar {
-    background-color: rgba(0, 0, 0, 0.78) !important;
+    background-color: rgba(0, 0, 0, 0.82) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+}
+
+[data-theme="dark"] .do-top-header,
+[data-theme="oled"] .do-top-header,
+[data-theme="dark"] .do-bible-bottom-nav,
+[data-theme="oled"] .do-bible-bottom-nav {
+    background-color: rgba(12, 12, 14, 0.58) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+}
+
+[data-theme="light"] .do-top-header,
+[data-theme="light"] .do-bible-bottom-nav {
+    background-color: rgba(250, 248, 245, 0.65) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
 /* ---- App Layout ---- */
@@ -484,10 +500,10 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
    TOP HEADER (Seamless & Borderless Frosted Glass)
    ============================================================= */
 .do-top-header {
-    background-color: color-mix(in srgb, var(--background-base) 70%, transparent) !important;
+    background-color: color-mix(in srgb, var(--background-base) 58%, transparent) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
     border-bottom: none !important;
     position: sticky !important;
     top: 0 !important;
