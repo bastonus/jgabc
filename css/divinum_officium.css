@@ -4270,18 +4270,18 @@ body.player-dock-open .app-main {
 
 @media (max-width: 900px) {
     .do-update-banner.is-visible {
-        max-height: calc(44px + max(28px, env(safe-area-inset-top, 0px)));
+        max-height: calc(44px + max(38px, env(safe-area-inset-top, 0px)));
     }
 
     .do-update-banner.is-visible + .do-top-header {
-        top: calc(44px + max(28px, env(safe-area-inset-top, 0px))) !important;
+        top: calc(44px + max(38px, env(safe-area-inset-top, 0px))) !important;
         padding-top: 10px !important;
     }
 
     .do-update-banner-inner {
-        height: calc(44px + max(28px, env(safe-area-inset-top, 0px)));
-        padding-top: max(28px, env(safe-area-inset-top, 0px));
-        padding-bottom: 4px;
+        height: calc(44px + max(38px, env(safe-area-inset-top, 0px)));
+        padding-top: max(38px, env(safe-area-inset-top, 0px));
+        padding-bottom: 6px;
         padding-left: 12px;
         padding-right: 12px;
     }
