@@ -1484,9 +1484,6 @@ function isSanctiGreaterFeastOnSunday(sanctiFileText) {
 
 function extractCommuneRef(text) {
     if (!text) return null;
-    var mTop = text.match(/(?:^|\n)\s*@([A-Za-z0-9_\-\/]+)(?:\s|\n|$)/);
-    if (mTop && !mTop[1].startsWith(':')) return mTop[1].trim();
-
     var mRule = text.match(/\[Rule\][^\n]*\n([^\[\n]+)/i);
     if (mRule) {
         var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
@@ -1497,6 +1494,10 @@ function extractCommuneRef(text) {
         var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
         if (mC2) return mC2[1].trim();
     }
+    var headerPart = text.split(/\n\s*\[/)[0];
+    var mTop = headerPart.match(/^\s*@([A-Za-z0-9_\-\/]+)(?:\s|\n|$)/);
+    if (mTop && !mTop[1].startsWith(':')) return mTop[1].trim();
+
     var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
     if (mGen) return mGen[1].trim();
     return null;
