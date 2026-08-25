@@ -1,7 +1,7 @@
 // https://github.com/bit101/tones
 // this file also includes unmute.js
 (function (window) {
-  var context = (window.Tone && window.Tone.context && window.Tone.context._context) || new (window.AudioContext || window.webkitAudioContext)();
+  var context = (window.Tone && window.Tone.context && (window.Tone.context.rawContext || window.Tone.context._context || window.Tone.context)) || new (window.AudioContext || window.webkitAudioContext)();
   try { unmute(context); } catch(e) {}
   var tones = {
     context: context,
@@ -12,6 +12,12 @@
 
 
     playFrequency: function (freq, options) {
+      if (this.context && this.context.state === 'suspended') {
+        try { this.context.resume(); } catch(e) {}
+      }
+      if (window.Tone && typeof window.Tone.start === 'function') {
+        try { window.Tone.start(); } catch(e) {}
+      }
       options = options || {};
       var attack = options.attack || this.attack || 1;
       var release = options.release || this.release || 1;
@@ -506,6 +512,9 @@ function unmute(
    */
   function win_mediaPlaybackEvent() {
     hasMediaPlaybackEventOccurred = true;
+    if (window.Tone && typeof window.Tone.start === 'function') {
+      try { window.Tone.start(); } catch(e) {}
+    }
     // This is an opportunity to resume the html audio channel control
     updateChannelState(true);
     // This is an opportunity to resume the context if paused

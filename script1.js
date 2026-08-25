@@ -8080,7 +8080,7 @@ gregorianSaints = {
   "title": "26 Aug - St Zephyrinus, Pope and Martyr",
   "date": "Aug26",
   "href": "http://www.introibo.fr/26-08-St-Zephyrin-pape-et-martyr",
-  "ref": "saints.html#mass_holy_pope"
+  "ref": "saints.html#mass_ii_martyr_bishop"
  },
  "st_joseph_calasanctius": {
   "title": "27 Aug - St Joseph Calasanctius, Confessor",

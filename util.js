@@ -824,6 +824,9 @@ if(typeof window=='object') (function(window) {
   };
 
   function ensureSynth() {
+    if (Tone && typeof Tone.start === 'function') {
+      try { Tone.start().catch(function(){}); } catch(e) {}
+    }
     if (!synth && Tone) {
       var s = new Tone.Synth(synthConfig);
       // Tone ≥14 uses toDestination(), Tone ≤13 uses toMaster()
@@ -836,7 +839,7 @@ if(typeof window=='object') (function(window) {
     }
     // Resume AudioContext if suspended (Chrome autoplay policy)
     if (Tone && Tone.context && Tone.context.state !== 'running') {
-      var p = Tone.context.resume ? Tone.context.resume() : null;
+      var p = Tone.start ? Tone.start() : (Tone.context.resume ? Tone.context.resume() : null);
       if (p && p.catch) p.catch(function(){});
     }
   }

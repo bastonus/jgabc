@@ -7412,7 +7412,7 @@ var proprium = {
         alID:836
       },
       Aug26: {
-        ref: "mass_holy_pope"
+        ref: "mass_ii_martyr_bishop"
       },
       Sep1: {
         inID:1374,

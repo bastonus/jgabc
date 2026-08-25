@@ -6,6 +6,25 @@
    Recursive Section (@:Tag & @File:Tag) & Variable ($Var) Resolution
    ============================================================= */
 
+// ---- Automatic Audio Context Unlock on First User Gesture ----
+(function() {
+    var unlocked = false;
+    function unlockAudio() {
+        if (unlocked) return;
+        if (window.Tone && typeof Tone.start === 'function') {
+            Tone.start().then(function() {
+                unlocked = true;
+            }).catch(function() {});
+        }
+        if (window.tones && window.tones.context && window.tones.context.state === 'suspended') {
+            window.tones.context.resume().catch(function() {});
+        }
+    }
+    ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(function(evt) {
+        window.addEventListener(evt, unlockAudio, { capture: true, passive: true });
+    });
+})();
+
 // ---- Global State ----
 var doState = window.doState = {
     hora: localStorage.getItem('do_hora') || 'home',
@@ -1470,15 +1489,15 @@ function extractCommuneRef(text) {
 
     var mRule = text.match(/\[Rule\][^\n]*\n([^\[\n]+)/i);
     if (mRule) {
-        var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+        var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
         if (mC) return mC[1].trim();
     }
     var mRank = text.match(/\[Rank\][^\n]*\n([^\[\n]+)/i);
     if (mRank) {
-        var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+        var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
         if (mC2) return mC2[1].trim();
     }
-    var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+[a-z]?|Sancti\/[^\s;]+)/i);
+    var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
     if (mGen) return mGen[1].trim();
     return null;
 }
@@ -1502,11 +1521,20 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
     var suffixes = (ed && ed.suffixes) ? ed.suffixes : ['r', ''];
 
     if (isCommune) {
-        var cPath = cleanPath.startsWith('Commune/') ? cleanPath : ('Commune/' + cleanPath);
-        candidatePaths.push('do_data/missa/' + langFolder + '/' + cPath);
-        candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
-        candidatePaths.push('do_data/missa/Latin/' + cPath);
-        candidatePaths.push('do_data/horas/Latin/' + cPath);
+        var cClean = cleanPath.replace(/^Commune\//i, '').replace(/\.txt$/i, '');
+        var cVariants = [cClean];
+        var cNoTrailing = cClean.replace(/[a-z]+$/i, '');
+        if (cNoTrailing && cVariants.indexOf(cNoTrailing) === -1) cVariants.push(cNoTrailing);
+        var cBase = cClean.replace(/-[0-9]+[a-z]*$/i, '').replace(/[a-z]+$/i, '');
+        if (cBase && cVariants.indexOf(cBase) === -1) cVariants.push(cBase);
+
+        cVariants.forEach(function(cv) {
+            var cPath = 'Commune/' + cv + '.txt';
+            candidatePaths.push('do_data/missa/' + langFolder + '/' + cPath);
+            candidatePaths.push('do_data/horas/' + langFolder + '/' + cPath);
+            candidatePaths.push('do_data/missa/Latin/' + cPath);
+            candidatePaths.push('do_data/horas/Latin/' + cPath);
+        });
     } else {
         var rawStem = cleanPath.replace(/\.txt$/i, '');
         var parts = rawStem.split('/');
@@ -1575,8 +1603,9 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
                     }
                 });
                 return;
+            } else {
+                tryLoad();
             }
-            tryLoad();
         });
     }
 
@@ -1635,7 +1664,7 @@ function processMissaSections(fullSections, langFolder, langKey, callback, loade
     var detectedCommune = null;
     try {
         var rawStr = JSON.stringify(fullSections);
-        var commMatch = rawStr.match(/@Commune\/(C\d+[a-z]?)/i) || rawStr.match(/vide\s+(C\d+[a-z]?)/i);
+        var commMatch = rawStr.match(/@Commune\/(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?)/i) || rawStr.match(/vide\s+(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?)/i);
         if (commMatch) detectedCommune = commMatch[1];
     } catch(e) {}
 
@@ -3540,40 +3569,53 @@ function parseGabcHeader(gabc) {
 
 var DO_COMMUNE_TO_PROPRIUM = {
     'C1': 'mass_i_martyr_bishop',
-    'C1a': 'mass_holy_pope',
-    'C1b': 'mass_ii_martyr_bishop',
-    'C1v': 'mass_vigil_apostle',
-    'C2': 'mass_i_martyr_not_bishop',
-    'C2a': 'mass_i_martyr_not_bishop',
-    'C2b': 'mass_ii_martyr_not_bishop',
+    'C1-1': 'mass_ii_martyr_bishop',
+    'C1A': 'mass_holy_pope',
+    'C1B': 'mass_ii_martyr_bishop',
+    'C1V': 'mass_vigil_apostle',
+    'C2': 'mass_i_martyr_bishop',
+    'C2-1': 'mass_ii_martyr_bishop',
+    'C2-1B': 'mass_ii_martyr_bishop',
+    'C2A': 'mass_i_martyr_not_bishop',
+    'C2A-1': 'mass_ii_martyr_not_bishop',
+    'C2B': 'mass_ii_martyr_not_bishop',
+    'C2B-1': 'mass_ii_martyr_not_bishop',
     'C3': 'mass_martyrs_paschal',
-    'C3a': 'mass_one_martyr',
-    'C3b': 'mass_i_two_or_more_martyr',
-    'C3c': 'mass_ii_two_or_more_martyr',
-    'C3d': 'mass_iii_two_or_more_martyr',
+    'C3A': 'mass_one_martyr',
+    'C3A-1': 'mass_one_martyr',
+    'C3B': 'mass_i_two_or_more_martyr',
+    'C3C': 'mass_ii_two_or_more_martyr',
+    'C3D': 'mass_iii_two_or_more_martyr',
     'C4': 'mass_i_confessor_bishop',
-    'C4a': 'mass_i_confessor_bishop',
-    'C4b': 'mass_ii_confessor_bishop',
-    'C4c': 'mass_doctors',
+    'C4-1': 'mass_ii_confessor_bishop',
+    'C4-1B': 'mass_ii_confessor_bishop',
+    'C4A': 'mass_i_confessor_bishop',
+    'C4B': 'mass_ii_confessor_bishop',
+    'C4B-1': 'mass_ii_confessor_bishop',
+    'C4C': 'mass_doctors',
     'C5': 'mass_i_confessor_not_bishop',
-    'C5a': 'mass_i_confessor_not_bishop',
-    'C5b': 'mass_i_confessor_not_bishop',
-    'C5c': 'mass_abbots',
+    'C5-1': 'mass_i_confessor_not_bishop',
+    'C5A': 'mass_i_confessor_not_bishop',
+    'C5B': 'mass_i_confessor_not_bishop',
+    'C5C': 'mass_abbots',
     'C6': 'mass_i_virgin_martyr',
-    'C6a': 'mass_i_virgin_martyr',
-    'C6b': 'mass_ii_virgin_martyr',
+    'C6A': 'mass_i_virgin_martyr',
+    'C6B': 'mass_ii_virgin_martyr',
     'C7': 'mass_i_virgin_not_martyr',
-    'C7a': 'mass_i_virgin_not_martyr',
-    'C7b': 'mass_ii_virgin_not_martyr',
+    'C7A': 'mass_i_virgin_not_martyr',
+    'C7B': 'mass_ii_virgin_not_martyr',
     'C8': 'mass_holy_woman_martyr',
-    'C8a': 'mass_holy_woman_martyr',
-    'C8b': 'mass_holy_woman_not_martyr',
+    'C8A': 'mass_holy_woman_martyr',
+    'C8B': 'mass_holy_woman_not_martyr',
     'C9': 'mass_dedication_church',
     'C10': 'mass_bvm',
-    'C10a': 'mass_bvm',
+    'C10A': 'mass_bvm',
+    'C10B': 'mass_bvm',
+    'C10C': 'mass_bvm',
+    'C10PASC': 'mass_bvm',
     'C11': 'SMperannum',
     'C12': 'nuptial_mass',
-    'Defunctorum': 'requiem'
+    'DEFUNCTORUM': 'requiem'
 };
 
 function convertDOKeyToPropriumKey(key, mom) {
@@ -3601,11 +3643,13 @@ function convertDOKeyToPropriumKey(key, mom) {
         }
     }
 
-    var commMatch = clean.match(/^C\d+[a-z]?/i);
+    var commMatch = clean.match(/^C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?/i);
     if (commMatch) {
         var cCode = commMatch[0].toUpperCase();
         if (DO_COMMUNE_TO_PROPRIUM[cCode]) return DO_COMMUNE_TO_PROPRIUM[cCode];
-        var cBase = cCode.replace(/[a-z]$/i, '');
+        var cNoTrailing = cCode.replace(/[a-z]+$/i, '');
+        if (DO_COMMUNE_TO_PROPRIUM[cNoTrailing]) return DO_COMMUNE_TO_PROPRIUM[cNoTrailing];
+        var cBase = cCode.replace(/-[0-9]+[a-z]*$/i, '').replace(/[a-z]+$/i, '');
         if (DO_COMMUNE_TO_PROPRIUM[cBase]) return DO_COMMUNE_TO_PROPRIUM[cBase];
     }
 
@@ -4094,8 +4138,9 @@ function handleChantElementClick(clickedEl, e) {
     updateDoPlayerProgressAndTime(score, note);
 
     if (wasPlaying) {
-        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-            Tone.context.resume();
+        if (window.Tone) {
+            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
         }
         if (window.playScore) {
             window.playScore(score, score.defaultStartPitch, note);
@@ -4129,8 +4174,9 @@ function switchToChantCard($targetCard, autoPlay) {
     } catch(e) {}
 
     if (autoPlay) {
-        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-            Tone.context.resume();
+        if (window.Tone) {
+            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
         }
         if (window.playScore) {
             window.playScore(score, score.defaultStartPitch, null);
@@ -4220,8 +4266,9 @@ function initDoPlayer() {
         $('#playerProgressFill').css('width', '0%');
         updateDoPlayerProgressAndTime(_doCurrentScore, null, 0);
 
-        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-            Tone.context.resume();
+        if (window.Tone) {
+            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
         }
         if (window.playScore) {
             window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, null);
@@ -4232,8 +4279,9 @@ function initDoPlayer() {
     // Play/Pause button
     $('#playerBtnPlay').off('click').on('click', function(e) {
         e.stopPropagation();
-        if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-            Tone.context.resume();
+        if (window.Tone) {
+            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
         }
         if (window.isPlayingChant && window.isPlayingChant()) {
             // Currently playing → pause/resume
@@ -4344,8 +4392,9 @@ function initDoPlayer() {
         if (note && targetNode) {
             handleChantElementClick(targetNode, e);
 
-            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                Tone.context.resume();
+            if (window.Tone) {
+                if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+                if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
             }
 
             if (window.playScore) {
@@ -7805,7 +7854,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.23';
+var CURRENT_APP_VERSION = 'beta-0.0.24';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -8437,13 +8486,16 @@ function setupEventListeners() {
         setTimeout(function() { $btn.removeClass('playing'); }, 260);
 
         if (window.Tone) {
-            if (Tone.context && Tone.context.state !== 'running') {
-                Tone.context.resume();
+            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
+            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
+            var s = window._doSynth;
+            if (!s) {
+                var newSynth = new Tone.Synth({
+                    "oscillator": { type: "custom", partials: [0.3, 0.03, 0.05] },
+                    "envelope": { "attack": 0.04, "decay": 0.3, "sustain": 0.4, "release": 0.6 }
+                });
+                s = window._doSynth = typeof newSynth.toDestination === 'function' ? newSynth.toDestination() : newSynth.toMaster();
             }
-            var s = window._doSynth || (window._doSynth = new Tone.Synth({
-                "oscillator": { type: "custom", partials: [0.3, 0.03, 0.05] },
-                "envelope": { "attack": 0.04, "decay": 0.3, "sustain": 0.4, "release": 0.6 }
-            }).toDestination ? new Tone.Synth().toDestination() : new Tone.Synth().toMaster());
             s.triggerAttackRelease(pitch, "8n");
         }
     });
