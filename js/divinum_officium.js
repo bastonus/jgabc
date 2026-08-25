@@ -3114,7 +3114,7 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
         .html('<span>' + (uiLang === 'fr' ? 'Page suiv.' : 'Sequens') + '</span> <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>')
         .prop('disabled', isLastPage);
 
-    var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select" style="min-width:130px; text-align:center; padding:6px 12px; font-size:0.85rem;">');
+    var $pgSelect = $('<select id="doBibleMainPageSelect" class="do-bible-select">');
     for (var p = 1; p <= totalPages; p++) {
         var pStartIdx = (p - 1) * vpp;
         var pEndIdx = Math.min(pStartIdx + vpp, alignedRows.length);
