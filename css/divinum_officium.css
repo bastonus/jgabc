@@ -1476,18 +1476,19 @@ div.do-rubric-inline {
     align-items: center !important;
     justify-content: center !important;
     width: 100% !important;
-    max-width: 520px !important;
-    gap: 10px !important;
+    max-width: 500px !important;
+    gap: 8px !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn {
     flex: 1 !important;
     border: none !important;
     outline: none !important;
-    background: var(--background-highlight) !important;
-    border-radius: 10px !important;
-    padding: 9px 18px !important;
-    font-size: 0.84rem !important;
+    box-shadow: none !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-radius: 8px !important;
+    padding: 7px 12px !important;
+    font-size: 0.8rem !important;
     font-weight: 600 !important;
     color: var(--text-secondary) !important;
     cursor: pointer !important;
@@ -1495,30 +1496,33 @@ div.do-rubric-inline {
     align-items: center !important;
     justify-content: center !important;
     gap: 8px !important;
-    transition: all 0.2s ease !important;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
+    font-family: 'Inter', sans-serif !important;
     white-space: nowrap !important;
     text-align: center !important;
-    min-height: 40px !important;
     box-sizing: border-box !important;
 }
 
+[data-theme="light"] .do-bible-bottom-nav .do-bible-nav-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
 .do-bible-bottom-nav .do-bible-nav-btn svg {
-    width: 15px !important;
-    height: 15px !important;
-    stroke-width: 2.2 !important;
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2 !important;
     flex-shrink: 0 !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:hover:not(:disabled) {
-    background: rgba(var(--primary-color-rgb, 201,107,99), 0.12) !important;
+    background: rgba(var(--primary-color-rgb), 0.08) !important;
     color: var(--primary-color) !important;
     border: none !important;
     transform: none !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:active:not(:disabled) {
-    background: rgba(var(--primary-color-rgb, 201,107,99), 0.18) !important;
+    background: rgba(var(--primary-color-rgb), 0.14) !important;
     color: var(--primary-color) !important;
     transform: none !important;
 }
@@ -1526,8 +1530,12 @@ div.do-rubric-inline {
 .do-bible-bottom-nav .do-bible-nav-btn:disabled {
     opacity: 0.25 !important;
     cursor: not-allowed !important;
-    background: var(--background-highlight) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
     color: var(--text-tertiary) !important;
+}
+
+[data-theme="light"] .do-bible-bottom-nav .do-bible-nav-btn:disabled {
+    background: rgba(0, 0, 0, 0.02) !important;
 }
 
 @media (max-width: 900px) {
@@ -1535,12 +1543,12 @@ div.do-rubric-inline {
         left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        padding: 8px 12px !important;
-        padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+        padding: 6px 12px !important;
+        padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
     }
     .do-bible-bottom-nav .do-bible-nav-btn {
-        padding: 8px 12px !important;
-        font-size: 0.80rem !important;
+        padding: 7px 10px !important;
+        font-size: 0.78rem !important;
         gap: 6px !important;
     }
 }
