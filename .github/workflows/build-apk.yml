@@ -33,16 +33,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          gradle-version: '8.7'
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Capacitor sync
+        run: npx cap sync android
 
       - name: Generate Release Keystore
         run: |
@@ -63,24 +72,23 @@ jobs:
       - name: Build Release APK with Gradle
         working-directory: ./android
         run: |
-          gradle :app:assembleRelease --stacktrace
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --stacktrace
 
       - name: Prepare and Verify APK
         run: |
           BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
           echo "Using Android Build Tools: $BUILD_TOOLS_DIR"
-          
+
           RAW_APK=$(find android/app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
           echo "Found compiled APK: $RAW_APK"
-          
+
           mkdir -p build-output
           cp "$RAW_APK" build-output/Divinum-Officium.apk
-          
-          # Verify 4-byte zip alignment
+
           echo "Verifying ZIP alignment..."
           $BUILD_TOOLS_DIR/zipalign -c -v 4 build-output/Divinum-Officium.apk
-          
-          # Verify the signature
+
           echo "Verifying APK signature..."
           $BUILD_TOOLS_DIR/apksigner verify --verbose build-output/Divinum-Officium.apk
           echo "APK successfully verified and ready at build-output/Divinum-Officium.apk"

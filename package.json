@@ -1,26 +1,32 @@
 {
-  "name": "jgabc",
-  "version": "1.11.3",
-  "description": "Chant Tools",
-  "homepage": "https://github.com/bbloomf/jgabc#readme",
+  "name": "divinum-officium",
+  "version": "0.0.8",
+  "description": "Divinum Officium & Missale Romanum — Application liturgique traditionnelle",
+  "homepage": "https://github.com/bastonus/jgabc#readme",
   "bugs": {
-    "url": "https://github.com/bbloomf/jgabc/issues"
+    "url": "https://github.com/bastonus/jgabc/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bbloomf/jgabc.git"
+    "url": "git+https://github.com/bastonus/jgabc.git"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "author": "Benjamin Bloomfield",
+  "author": "Azandikka",
   "type": "commonjs",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:build": "npx cap sync android && cd android && gradlew.bat assembleRelease"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@prettier/sync": "^0.6.1",
     "abbrev": "^3.0.1",
     "android-versions": "^2.1.0",

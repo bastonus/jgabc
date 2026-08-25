@@ -1,0 +1,13 @@
+﻿{
+  "appId": "com.chanttools.divinumofficium",
+  "appName": "Divinum Officium",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
