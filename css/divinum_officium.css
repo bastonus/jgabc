@@ -1437,18 +1437,18 @@ div.do-rubric-inline {
     width: calc(100vw - 280px) !important;
     max-width: calc(100vw - 280px) !important;
     height: auto !important;
-    padding: 12px 20px !important;
-    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    padding: 8px 20px !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
     margin: 0 !important;
     border-radius: 0 !important;
     border: none !important;
     outline: none !important;
-    border-top: 1px solid rgba(var(--primary-color-rgb, 201,107,99), 0.12) !important;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18) !important;
-    background-color: color-mix(in srgb, var(--background-base) 88%, transparent) !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    background-color: color-mix(in srgb, var(--background-base) 70%, transparent) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     z-index: 900 !important;
     display: flex !important;
     align-items: center !important;
@@ -1458,18 +1458,18 @@ div.do-rubric-inline {
 
 [data-theme="dark"] .do-bible-bottom-nav,
 [data-theme="oled"] .do-bible-bottom-nav {
-    background-color: rgba(18, 18, 20, 0.92) !important;
+    background-color: rgba(0, 0, 0, 0.78) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
 }
 
 [data-theme="light"] .do-bible-bottom-nav {
-    background-color: rgba(250, 248, 245, 0.92) !important;
+    background-color: color-mix(in srgb, var(--background-base) 75%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(20px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-top: none !important;
 }
 
 .do-bible-bottom-nav-inner {
@@ -1477,8 +1477,8 @@ div.do-rubric-inline {
     align-items: center !important;
     justify-content: center !important;
     width: 100% !important;
-    max-width: 620px !important;
-    gap: 12px !important;
+    max-width: 500px !important;
+    gap: 8px !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn {
@@ -1486,58 +1486,57 @@ div.do-rubric-inline {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
-    background-color: var(--background-highlight, rgba(255, 255, 255, 0.05)) !important;
-    border-radius: 14px !important;
-    padding: 12px 20px !important;
-    font-size: 0.94rem !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-radius: 8px !important;
+    padding: 7px 12px !important;
+    font-size: 0.8rem !important;
     font-weight: 600 !important;
     color: var(--text-secondary) !important;
     cursor: pointer !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px !important;
-    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease !important;
+    gap: 8px !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
     font-family: 'Inter', sans-serif !important;
     white-space: nowrap !important;
     text-align: center !important;
-    min-height: 48px !important;
     box-sizing: border-box !important;
 }
 
 [data-theme="light"] .do-bible-bottom-nav .do-bible-nav-btn {
-    background-color: rgba(0, 0, 0, 0.06) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn svg {
-    width: 18px !important;
-    height: 18px !important;
-    stroke-width: 2.2 !important;
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2 !important;
     flex-shrink: 0 !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:hover:not(:disabled) {
-    background-color: rgba(var(--primary-color-rgb), 0.10) !important;
+    background: rgba(var(--primary-color-rgb), 0.08) !important;
     color: var(--primary-color) !important;
     border: none !important;
     transform: none !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:active:not(:disabled) {
-    background-color: rgba(var(--primary-color-rgb), 0.16) !important;
+    background: rgba(var(--primary-color-rgb), 0.14) !important;
     color: var(--primary-color) !important;
-    transform: scale(0.98) !important;
+    transform: none !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:disabled {
     opacity: 0.25 !important;
     cursor: not-allowed !important;
-    background-color: rgba(255, 255, 255, 0.02) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
     color: var(--text-tertiary) !important;
 }
 
 [data-theme="light"] .do-bible-bottom-nav .do-bible-nav-btn:disabled {
-    background-color: rgba(0, 0, 0, 0.02) !important;
+    background: rgba(0, 0, 0, 0.02) !important;
 }
 
 @media (max-width: 900px) {
@@ -1545,22 +1544,21 @@ div.do-rubric-inline {
         left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
     }
     .do-bible-bottom-nav-inner {
-        gap: 10px !important;
+        gap: 8px !important;
     }
     .do-bible-bottom-nav .do-bible-nav-btn {
-        padding: 12px 16px !important;
-        font-size: 0.90rem !important;
-        min-height: 48px !important;
-        border-radius: 14px !important;
+        padding: 9px 14px !important;
+        font-size: 0.84rem !important;
+        border-radius: 10px !important;
         gap: 8px !important;
     }
 }
 
 .do-card.is-bible {
-    padding-bottom: 84px !important;
+    padding-bottom: 64px !important;
 }
 
 body.is-bible-mode #modernPlayerBar,
