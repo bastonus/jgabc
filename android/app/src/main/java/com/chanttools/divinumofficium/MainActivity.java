@@ -24,9 +24,20 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        registerAppIconInterface();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        registerAppIconInterface();
+    }
+
+    private void registerAppIconInterface() {
         try {
-            WebView webView = getBridge().getWebView();
-            webView.addJavascriptInterface(new AppIconInterface(), "AndroidAppIcon");
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                getBridge().getWebView().addJavascriptInterface(new AppIconInterface(), "AndroidAppIcon");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
