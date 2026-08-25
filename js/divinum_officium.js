@@ -7288,16 +7288,14 @@ function updateFaviconAndAppIcon() {
         '<path d="M146.046,524.564L182.114,524.564C182.114,524.564 182.805,526.506 182.281,527.223C174.967,537.224 176.131,571.602 176.131,571.602C176.131,571.602 204.276,572.294 214.858,566.283C215.39,565.981 216.687,566.449 216.687,566.449L216.853,599.359C216.853,599.359 215.237,600.405 214.526,600.024C201.866,593.237 175.798,594.539 175.798,594.539C176.325,627.366 172.945,671.274 194.747,666.343C187.793,678.365 141.254,678.642 134.079,666.675C158.651,671.495 148.595,614.457 151.698,594.539C151.698,594.539 121.225,594.401 112.804,600.024C112.308,600.356 111.142,599.359 111.142,599.359L111.308,566.283C111.308,566.283 112.506,565.44 112.97,565.784C121.973,572.461 151.365,571.436 151.365,571.436C151.365,571.436 151.753,539.191 145.382,526.891C145.011,526.175 146.046,524.564 146.046,524.564Z" fill="' + effColor + '"/>' +
         '</g></svg>';
     var faviconUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
-    var $fav = $('#dynamicFavicon');
-    if ($fav.length) {
-        $fav.attr('href', faviconUri);
-    } else {
-        $('head').append('<link id="dynamicFavicon" rel="icon" type="image/svg+xml" href="' + faviconUri + '">');
-    }
-    var $apple = $('#dynamicAppleIcon');
-    if ($apple.length) {
-        $apple.attr('href', faviconUri);
-    }
+    
+    // Remove existing favicon and apple touch icon links to force instant browser refresh
+    $('link[rel*="icon"]').remove();
+    $('link[rel="apple-touch-icon"]').remove();
+
+    var $newFavicon = $('<link rel="icon" id="dynamicFavicon" type="image/svg+xml">').attr('href', faviconUri);
+    var $newApple = $('<link rel="apple-touch-icon" id="dynamicAppleIcon">').attr('href', faviconUri);
+    $('head').append($newFavicon).append($newApple);
 
     // Update Live preview in Settings
     $('#iconPreviewSvg path').attr('fill', effColor);
