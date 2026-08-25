@@ -7366,8 +7366,11 @@ function checkForAppUpdates(isManual) {
         $statusText.text('Recherche en cours sur GitHub...').css('color', 'var(--text-secondary)');
     }
 
-    var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/releases';
-    fetch(apiUrl)
+    var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/releases?_ts=' + Date.now();
+    fetch(apiUrl, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' },
+        cache: 'no-cache'
+    })
         .then(function(res) {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
@@ -7380,22 +7383,26 @@ function checkForAppUpdates(isManual) {
                 return;
             }
 
-            var targetRelease = null;
-            for (var i = 0; i < releases.length; i++) {
-                var r = releases[i];
-                if (r.draft) continue;
-                if (!includeBeta && r.prerelease) continue;
-                targetRelease = r;
-                break;
-            }
+            // Filter out drafts and prereleases if beta not requested
+            var validReleases = releases.filter(function(r) {
+                if (r.draft) return false;
+                if (!includeBeta && r.prerelease) return false;
+                return true;
+            });
 
-            if (!targetRelease) {
+            // Sort descending by semantic version so the true newest release is always first
+            validReleases.sort(function(a, b) {
+                return compareVersions(b.tag_name, a.tag_name);
+            });
+
+            if (!validReleases.length) {
                 if (isManual) {
                     $statusText.text('Aucune version stable récente trouvée').css('color', 'var(--text-tertiary)');
                 }
                 return;
             }
 
+            var targetRelease = validReleases[0];
             var latestTag = targetRelease.tag_name;
             var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
 
@@ -7406,7 +7413,7 @@ function checkForAppUpdates(isManual) {
                 showUpdateModal(targetRelease);
             } else {
                 if (isManual) {
-                    $statusText.text('Vous êtes à jour (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
+                    $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
                 }
             }
         })
