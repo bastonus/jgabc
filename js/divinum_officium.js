@@ -1082,11 +1082,16 @@ function computeLiturgicalCodes(mom) {
         var wk = Math.floor(d.diff(ashWed, 'days') / 7) + 1;
         tempora = 'Quad' + wk + '-' + dow;
     } else if (d.isSameOrAfter(easter) && d.isBefore(pentecost)) {
-        var wk = Math.floor(d.diff(easter, 'days') / 7) + 1;
+        var wk = Math.floor(d.diff(easter, 'days') / 7);
         tempora = 'Pasc' + wk + '-' + dow;
     } else {
-        var wk = Math.floor(d.diff(pentecost, 'days') / 7) + 1;
-        tempora = 'Pent' + wk + '-' + dow;
+        var wk = Math.floor(d.diff(pentecost, 'days') / 7);
+        if (wk === 0) {
+            tempora = 'Pasc7-' + dow;
+        } else {
+            var pStr = (wk < 10 ? '0' + wk : '' + wk);
+            tempora = 'Pent' + pStr + '-' + dow;
+        }
     }
 
     return {
@@ -1599,10 +1604,10 @@ function loadMissaData(date, lang, callback) {
             var alt = isGreater ? fallbackPath : primaryPath;
             loadRecursiveDOFile(target, langFolder, true, function(sec) {
                 if (Object.keys(sec).length > 2) {
-                    processMissaSections(sec, langFolder, lang, callback);
+                    processMissaSections(sec, langFolder, lang, callback, target);
                 } else {
                     loadRecursiveDOFile(alt, langFolder, true, function(sec2) {
-                        processMissaSections(sec2, langFolder, lang, callback);
+                        processMissaSections(sec2, langFolder, lang, callback, alt);
                     });
                 }
             });
@@ -1610,22 +1615,29 @@ function loadMissaData(date, lang, callback) {
     } else {
         loadRecursiveDOFile(primaryPath, langFolder, true, function(sec) {
             if (Object.keys(sec).length > 2) {
-                processMissaSections(sec, langFolder, lang, callback);
+                processMissaSections(sec, langFolder, lang, callback, primaryPath);
             } else {
                 loadRecursiveDOFile(fallbackPath, langFolder, true, function(sec2) {
-                    processMissaSections(sec2, langFolder, lang, callback);
+                    processMissaSections(sec2, langFolder, lang, callback, fallbackPath);
                 });
             }
         });
     }
 }
 
-function processMissaSections(fullSections, langFolder, langKey, callback) {
+function processMissaSections(fullSections, langFolder, langKey, callback, loadedPath) {
     if (!fullSections || Object.keys(fullSections).length === 0) {
         callback(null, null);
         return;
     }
     var feastTitle = (fullSections['Officium'] && fullSections['Officium'][0]) ? fullSections['Officium'][0].trim() : 'Missa Diei';
+
+    var detectedCommune = null;
+    try {
+        var rawStr = JSON.stringify(fullSections);
+        var commMatch = rawStr.match(/@Commune\/(C\d+[a-z]?)/i) || rawStr.match(/vide\s+(C\d+[a-z]?)/i);
+        if (commMatch) detectedCommune = commMatch[1];
+    } catch(e) {}
 
     var standardPropers = [
         { key: 'Introitus', label: 'Introitus', badge: 'Proprium' },
@@ -1677,7 +1689,7 @@ function processMissaSections(fullSections, langFolder, langKey, callback) {
                     orderedCards.push(propDict[p.key]);
                 }
             });
-            callback(null, { title: feastTitle, cards: orderedCards });
+            callback(null, { title: feastTitle, cards: orderedCards, loadedPath: loadedPath || null, communeRef: detectedCommune || null });
         }
         return;
     }
@@ -1685,11 +1697,11 @@ function processMissaSections(fullSections, langFolder, langKey, callback) {
     var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
     fetchLocalFile(ordoPath, function(oErr, oData) {
         var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
-        assembleFullMissa(fullSections, ordoParts, langFolder, feastTitle, callback);
+        assembleFullMissa(fullSections, ordoParts, langFolder, feastTitle, callback, loadedPath, detectedCommune);
     });
 }
 
-function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback) {
+function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback, loadedPath, communeRef) {
     var cards = [];
 
     function getOrdoSection(keys) {
@@ -1752,7 +1764,7 @@ function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback)
         if (conclusio.length) cards.push({ id: 'conclusio', type: 'Ite Missa est & Ultimum Evangelium', badge: 'Ordinarium', lines: conclusio });
         if (leonis.length) cards.push({ id: 'leonis', type: 'Orationes Leonis XIII', badge: 'Preces', lines: leonis });
 
-        callback(null, { title: feastTitle, cards: cards });
+        callback(null, { title: feastTitle, cards: cards, loadedPath: loadedPath || null, communeRef: communeRef || null });
     }
 }
 
@@ -2857,6 +2869,16 @@ function renderLoading() {
     return '<div class="do-skeleton-list">' + skCard() + skCard() + skCard() + '</div>';
 }
 
+function renderChantSkeleton() {
+    return '<div class="do-chant-skeleton">' +
+        '<div class="do-skel w95"></div>' +
+        '<div class="do-skel w85"></div>' +
+        '<div class="do-skel w90"></div>' +
+        '<div class="do-skel w80"></div>' +
+        '<div class="do-skel w60"></div>' +
+    '</div>';
+}
+
 // ---- Sacra Biblia Paginated Main Reader View ----
 
 function parseBibleFileVerses(rawText, targetChapter) {
@@ -3394,6 +3416,23 @@ function renderDO() {
     }
 }
 
+var DO_ROMAN_TO_ORDINAL_FR = {
+    'I': '1er', 'II': '2e', 'III': '3e', 'IV': '4e', 'V': '5e', 'VI': '6e',
+    'VII': '7e', 'VIII': '8e', 'IX': '9e', 'X': '10e', 'XI': '11e', 'XII': '12e',
+    'XIII': '13e', 'XIV': '14e', 'XV': '15e', 'XVI': '16e', 'XVII': '17e',
+    'XVIII': '18e', 'XIX': '19e', 'XX': '20e', 'XXI': '21e', 'XXII': '22e',
+    'XXIII': '23e', 'XXIV': '24e'
+};
+
+var DO_FERIA_NAMES_FR = {
+    'Feria II': 'Lundi',
+    'Feria III': 'Mardi',
+    'Feria IV': 'Mercredi',
+    'Feria V': 'Jeudi',
+    'Feria VI': 'Vendredi',
+    'Sabbato': 'Samedi'
+};
+
 function getLocalizedFeastTitle(rawTitle, uiLang) {
     if (!uiLang) uiLang = getUiLang();
     if (!rawTitle) return '';
@@ -3411,8 +3450,61 @@ function getLocalizedFeastTitle(rawTitle, uiLang) {
             }
         }
     }
-    if (uiLang === 'fr' && typeof DO_FR_TEMPORA_TITLES !== 'undefined' && DO_FR_TEMPORA_TITLES[clean]) {
-        return DO_FR_TEMPORA_TITLES[clean];
+    if (uiLang === 'fr' || uiLang === 'bilingual') {
+        if (typeof DO_FR_TEMPORA_TITLES !== 'undefined' && DO_FR_TEMPORA_TITLES[clean]) {
+            return DO_FR_TEMPORA_TITLES[clean];
+        }
+
+        // Match "Dominica X Post/post Pentecosten"
+        var mPent = clean.match(/^Dominica\s+([IVXLCDM]+)\s+(?:post|Post)\s+Pentecosten?/i);
+        if (mPent && DO_ROMAN_TO_ORDINAL_FR[mPent[1].toUpperCase()]) {
+            return DO_ROMAN_TO_ORDINAL_FR[mPent[1].toUpperCase()] + ' Dimanche après la Pentecôte';
+        }
+
+        // Match "Feria X post Dominicam Y post Pentecosten"
+        var mFeriaPent = clean.match(/^(Feria\s+(?:II|III|IV|V|VI)|Sabbato)\s+(?:post\s+Dominicam\s+([IVXLCDM]+)\s+(?:post|Post)\s+Pentecosten?)/i);
+        if (mFeriaPent) {
+            var dayFr = DO_FERIA_NAMES_FR[mFeriaPent[1]] || mFeriaPent[1];
+            var sunOrd = DO_ROMAN_TO_ORDINAL_FR[mFeriaPent[2].toUpperCase()] || mFeriaPent[2];
+            return dayFr + ' après le ' + sunOrd + ' Dimanche après la Pentecôte';
+        }
+
+        // Match "Dominica X Adventus"
+        var mAdv = clean.match(/^Dominica\s+([IVXLCDM]+)\s+Adventus/i);
+        if (mAdv && DO_ROMAN_TO_ORDINAL_FR[mAdv[1].toUpperCase()]) {
+            return DO_ROMAN_TO_ORDINAL_FR[mAdv[1].toUpperCase()] + " Dimanche de l'Avent";
+        }
+
+        // Match "Dominica X in Quadragesima"
+        var mQuad = clean.match(/^Dominica\s+([IVXLCDM]+)\s+in\s+Quadragesim/i);
+        if (mQuad && DO_ROMAN_TO_ORDINAL_FR[mQuad[1].toUpperCase()]) {
+            return DO_ROMAN_TO_ORDINAL_FR[mQuad[1].toUpperCase()] + ' Dimanche de Carême';
+        }
+
+        // Match "Dominica X post Epiphaniam"
+        var mEpi = clean.match(/^Dominica\s+([IVXLCDM]+)\s+(?:post|Post)\s+Epiphaniam/i);
+        if (mEpi && DO_ROMAN_TO_ORDINAL_FR[mEpi[1].toUpperCase()]) {
+            return DO_ROMAN_TO_ORDINAL_FR[mEpi[1].toUpperCase()] + " Dimanche après l'Épiphanie";
+        }
+
+        // Match "Dominica X post Pascha"
+        var mPasc = clean.match(/^Dominica\s+([IVXLCDM]+)\s+(?:post|Post)\s+Pascha/i);
+        if (mPasc && DO_ROMAN_TO_ORDINAL_FR[mPasc[1].toUpperCase()]) {
+            return DO_ROMAN_TO_ORDINAL_FR[mPasc[1].toUpperCase()] + ' Dimanche après Pâques';
+        }
+
+        if (/^Dominica Resurrectionis/i.test(clean)) return "Dimanche de Pâques (Résurrection)";
+        if (/^Dominica in Albis/i.test(clean)) return "Dimanche de Quasimodo (In Albis)";
+        if (/^Dominica Pentecostes/i.test(clean)) return "Dimanche de la Pentecôte";
+        if (/^Dominica Sanctissimæ Trinitatis/i.test(clean)) return "La Très Sainte Trinité";
+        if (/^Dominica infra Octavam Nativitatis/i.test(clean)) return "Dimanche dans l'Octave de Noël";
+        if (/^Dominica post Ascensionem/i.test(clean)) return "Dimanche après l'Ascension";
+        if (/^Dominica Passionis/i.test(clean)) return "Dimanche de la Passion";
+        if (/^Dominica in Palmis/i.test(clean)) return "Dimanche des Rameaux";
+        if (/^Dominica in Septuagesima/i.test(clean)) return "Dimanche de la Septuagésime";
+        if (/^Dominica in Sexagesima/i.test(clean)) return "Dimanche de la Sexagésime";
+        if (/^Dominica in Quinquagesima/i.test(clean)) return "Dimanche de la Quinquagésime";
+        if (/^Feria IV Cinerum/i.test(clean)) return "Mercredi des Cendres";
     }
     return clean;
 }
@@ -3446,7 +3538,95 @@ function parseGabcHeader(gabc) {
     return header;
 }
 
-function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale) {
+var DO_COMMUNE_TO_PROPRIUM = {
+    'C1': 'mass_i_martyr_bishop',
+    'C1a': 'mass_holy_pope',
+    'C1b': 'mass_ii_martyr_bishop',
+    'C1v': 'mass_vigil_apostle',
+    'C2': 'mass_i_martyr_not_bishop',
+    'C2a': 'mass_i_martyr_not_bishop',
+    'C2b': 'mass_ii_martyr_not_bishop',
+    'C3': 'mass_martyrs_paschal',
+    'C3a': 'mass_one_martyr',
+    'C3b': 'mass_i_two_or_more_martyr',
+    'C3c': 'mass_ii_two_or_more_martyr',
+    'C3d': 'mass_iii_two_or_more_martyr',
+    'C4': 'mass_i_confessor_bishop',
+    'C4a': 'mass_i_confessor_bishop',
+    'C4b': 'mass_ii_confessor_bishop',
+    'C4c': 'mass_doctors',
+    'C5': 'mass_i_confessor_not_bishop',
+    'C5a': 'mass_i_confessor_not_bishop',
+    'C5b': 'mass_i_confessor_not_bishop',
+    'C5c': 'mass_abbots',
+    'C6': 'mass_i_virgin_martyr',
+    'C6a': 'mass_i_virgin_martyr',
+    'C6b': 'mass_ii_virgin_martyr',
+    'C7': 'mass_i_virgin_not_martyr',
+    'C7a': 'mass_i_virgin_not_martyr',
+    'C7b': 'mass_ii_virgin_not_martyr',
+    'C8': 'mass_holy_woman_martyr',
+    'C8a': 'mass_holy_woman_martyr',
+    'C8b': 'mass_holy_woman_not_martyr',
+    'C9': 'mass_dedication_church',
+    'C10': 'mass_bvm',
+    'C10a': 'mass_bvm',
+    'C11': 'SMperannum',
+    'C12': 'nuptial_mass',
+    'Defunctorum': 'requiem'
+};
+
+function convertDOKeyToPropriumKey(key, mom) {
+    if (!key && mom && mom.isValid()) {
+        var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return monthNames[mom.month()] + mom.date();
+    }
+    if (!key) return null;
+    var clean = key.replace(/^(Sancti|Tempora|Commune)\//i, '').replace(/\.txt$/i, '').trim();
+
+    if (typeof proprium !== 'undefined' && proprium[clean]) return clean;
+
+    var m = clean.match(/^(\d{2})-(\d{2})(.*)$/);
+    if (m) {
+        var monInt = parseInt(m[1], 10);
+        var dayInt = parseInt(m[2], 10);
+        var sfx = m[3] || '';
+        var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        if (monInt >= 1 && monInt <= 12) {
+            var saintKey = monthNames[monInt - 1] + dayInt + sfx;
+            if (typeof proprium !== 'undefined' && proprium[saintKey]) return saintKey;
+            var saintKeyBase = monthNames[monInt - 1] + dayInt;
+            if (typeof proprium !== 'undefined' && proprium[saintKeyBase]) return saintKeyBase;
+            return saintKey;
+        }
+    }
+
+    var commMatch = clean.match(/^C\d+[a-z]?/i);
+    if (commMatch) {
+        var cCode = commMatch[0].toUpperCase();
+        if (DO_COMMUNE_TO_PROPRIUM[cCode]) return DO_COMMUNE_TO_PROPRIUM[cCode];
+        var cBase = cCode.replace(/[a-z]$/i, '');
+        if (DO_COMMUNE_TO_PROPRIUM[cBase]) return DO_COMMUNE_TO_PROPRIUM[cBase];
+    }
+
+    var pentMatch = clean.match(/^Pent0?(\d+)/i);
+    if (pentMatch) {
+        var pNum = parseInt(pentMatch[1], 10);
+        if (typeof proprium !== 'undefined') {
+            if (proprium['Pent' + pNum]) return 'Pent' + pNum;
+            if (proprium['Pent0' + pNum]) return 'Pent0' + pNum;
+        }
+        return 'Pent' + pNum;
+    }
+    var tempMatch = clean.match(/^(Adv\d|Quad\d|Quadp\d|Pasc\d|Epi\d)/i);
+    if (tempMatch) {
+        return tempMatch[1];
+    }
+
+    return clean;
+}
+
+function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaResult) {
     var result = {};
     if (typeof proprium === 'undefined') return result;
 
@@ -3455,52 +3635,79 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale) {
 
     // 1. Direct key match (from officiumKey if set)
     if (officiumKey) {
-        var baseKey = officiumKey.replace(/-0$/, '');
-        var cleanKey = convertFeastKeyToCode(officiumKey) || officiumKey;
-        var cleanBaseKey = cleanKey ? cleanKey.replace(/-0$/, '') : '';
-
-        if (proprium[officiumKey]) {
+        var pk = convertDOKeyToPropriumKey(officiumKey, mom);
+        if (pk && proprium[pk]) {
+            prop = proprium[pk];
+            matchedKey = pk;
+        } else if (proprium[officiumKey]) {
             prop = proprium[officiumKey];
             matchedKey = officiumKey;
-        } else if (proprium[baseKey]) {
-            prop = proprium[baseKey];
-            matchedKey = baseKey;
-        } else if (cleanKey && proprium[cleanKey]) {
-            prop = proprium[cleanKey];
-            matchedKey = cleanKey;
-        } else if (cleanBaseKey && proprium[cleanBaseKey]) {
-            prop = proprium[cleanBaseKey];
-            matchedKey = cleanBaseKey;
         }
     }
 
-    // 2. Date-based matching (Saints MM-DD or Tempora)
-    if (!prop && mom && mom.isValid()) {
-        var mmdd = mom.format('MM-DD');
-        if (proprium[mmdd]) {
-            prop = proprium[mmdd];
-            matchedKey = mmdd;
-        } else {
-            var codes = computeLiturgicalCodes(mom);
-            var tempKey = codes.tempora ? codes.tempora.replace(/-\d+$/, '') : '';
-            if (tempKey && proprium[tempKey]) {
-                prop = proprium[tempKey];
-                matchedKey = tempKey;
-            } else if (codes.sancti && proprium[codes.sancti]) {
-                prop = proprium[codes.sancti];
-                matchedKey = codes.sancti;
+    // 2. From missaResult (loadedPath / communeRef)
+    if (!prop && missaResult) {
+        if (missaResult.loadedPath) {
+            var pkLoaded = convertDOKeyToPropriumKey(missaResult.loadedPath, mom);
+            if (pkLoaded && proprium[pkLoaded]) {
+                prop = proprium[pkLoaded];
+                matchedKey = pkLoaded;
+            }
+        }
+        if (!prop && missaResult.communeRef) {
+            var commKey = DO_COMMUNE_TO_PROPRIUM[missaResult.communeRef] || DO_COMMUNE_TO_PROPRIUM[missaResult.communeRef.replace(/[a-z]$/i, '')];
+            if (commKey && proprium[commKey]) {
+                prop = proprium[commKey];
+                matchedKey = commKey;
             }
         }
     }
 
-    // Handle reference redirects in proprium
-    if (prop && prop.ref && proprium[prop.ref]) {
+    // 3. Date-based matching (Sanctoral or Tempora based on liturgical day)
+    if (!prop && mom && mom.isValid()) {
+        var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var saintKey = monthNames[mom.month()] + mom.date();
+        var codes = computeLiturgicalCodes(mom);
+        var tempKey = codes.tempora ? codes.tempora.replace(/-\d+$/, '') : '';
+        var normTempKey = tempKey ? tempKey.replace(/^Pent0?(\d+)$/i, 'Pent$1') : '';
+
+        // If not Sunday, prioritize Sanctoral if today has a saint in proprium
+        if (!codes.isSunday) {
+            if (proprium[saintKey]) {
+                prop = proprium[saintKey];
+                matchedKey = saintKey;
+            } else if (normTempKey && proprium[normTempKey]) {
+                prop = proprium[normTempKey];
+                matchedKey = normTempKey;
+            } else if (tempKey && proprium[tempKey]) {
+                prop = proprium[tempKey];
+                matchedKey = tempKey;
+            }
+        } else {
+            // Sunday: prioritize Tempora unless feast is major Sanctoral
+            if (normTempKey && proprium[normTempKey]) {
+                prop = proprium[normTempKey];
+                matchedKey = normTempKey;
+            } else if (tempKey && proprium[tempKey]) {
+                prop = proprium[tempKey];
+                matchedKey = tempKey;
+            } else if (proprium[saintKey]) {
+                prop = proprium[saintKey];
+                matchedKey = saintKey;
+            }
+        }
+    }
+
+    // Handle reference redirects in proprium (e.g. Aug25 -> mass_i_confessor_not_bishop)
+    var refDepth = 0;
+    while (prop && prop.ref && proprium[prop.ref] && refDepth < 5) {
         prop = proprium[prop.ref];
+        refDepth++;
     }
 
     // Default fallback if still null
     if (!prop) {
-        prop = proprium['Pent12'] || proprium['SMperannum'] || proprium['C4'] || {};
+        prop = proprium['Pent14'] || proprium['Pent12'] || proprium['SMperannum'] || proprium['C4'] || {};
     }
 
     // 3. Resolve Kyriale Ordinary Chants
@@ -4518,7 +4725,7 @@ function renderSingleChantScore($wrapper, force) {
 
         var cardHtml = 
             '<div class="do-chant-card">' +
-                '<div class="do-chant-preview"><div class="do-chant-loading">Génération de la partition vectorielle…</div></div>' +
+                '<div class="do-chant-preview">' + renderChantSkeleton() + '</div>' +
             '</div>';
 
         var $card = $(cardHtml);
@@ -4753,16 +4960,74 @@ $(window).on('resize orientationchange', function() {
     }, 60);
 });
 
+var chantIntersectionObserver = null;
+
+function setupChantIntersectionObserver() {
+    if (chantIntersectionObserver) {
+        chantIntersectionObserver.disconnect();
+        chantIntersectionObserver = null;
+    }
+    if (typeof IntersectionObserver === 'undefined') return null;
+
+    chantIntersectionObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                var el = entry.target;
+                observer.unobserve(el);
+                var $wrapper = $(el);
+                if (doState.includeGregorian) {
+                    renderSingleChantScore($wrapper);
+                }
+            }
+        });
+    }, {
+        root: null,
+        rootMargin: '300px 0px 300px 0px',
+        threshold: 0.01
+    });
+
+    return chantIntersectionObserver;
+}
+
 function renderAllChantScoresInDOM($root, force) {
     var $wrappers = ($root || $('#do-content-stream')).find('.do-chant-card-wrapper');
+    if (!$wrappers.length) return;
+
+    if (!doState.includeGregorian) {
+        $wrappers.hide();
+        return;
+    }
+
+    $wrappers.show();
+
+    if (force) {
+        if (chantIntersectionObserver) {
+            chantIntersectionObserver.disconnect();
+        }
+        $wrappers.each(function() {
+            $(this).removeData('do-rendered');
+            renderSingleChantScore($(this), true);
+        });
+        setupChantResizeObserver();
+        return;
+    }
+
+    if (typeof IntersectionObserver !== 'undefined') {
+        var observer = setupChantIntersectionObserver();
+        if (observer) {
+            $wrappers.each(function() {
+                if (!$(this).data('do-rendered')) {
+                    observer.observe(this);
+                }
+            });
+            setupChantResizeObserver();
+            return;
+        }
+    }
+
     setTimeout(function() {
         $wrappers.each(function() {
-            if (doState.includeGregorian) {
-                $(this).show();
-                renderSingleChantScore($(this), force);
-            } else {
-                $(this).hide();
-            }
+            renderSingleChantScore($(this), force);
         });
         setupChantResizeObserver();
     }, 20);
@@ -4878,7 +5143,7 @@ function displayResult(result, vernResult) {
         });
     }
 
-    var chantsMap = (isMissa && doState.includeGregorian) ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale) : {};
+    var chantsMap = (isMissa && doState.includeGregorian) ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale, result) : {};
 
     result.cards.forEach(function(card) {
         var vernCard = (card.id && vernMap[card.id]) ? vernMap[card.id] : null;
@@ -4894,7 +5159,9 @@ function displayResult(result, vernResult) {
                     'data-chant-id="' + escHtml(ch.id) + '" ' +
                     'data-chant-name="' + escHtml(ch.name) + '" ' +
                     'data-chant-part="' + escHtml(ch.part) + '"' +
-                    (doState.includeGregorian ? '' : ' style="display:none;"') + '></div>';
+                    (doState.includeGregorian ? '' : ' style="display:none;"') + '>' +
+                    '<div class="do-chant-card"><div class="do-chant-preview">' + renderChantSkeleton() + '</div></div>' +
+                    '</div>';
                 
                 $cardNode.find('.do-card-body').prepend(wrapperHtml);
             });
@@ -6771,6 +7038,38 @@ var DO_FR_TEMPORA_TITLES = {
     'Asc1': "Dimanche après l'Ascension",
     'Pent0': "Dimanche de la Pentecôte",
     'Pent1': "La Très Sainte Trinité",
+    'Pent01': "La Très Sainte Trinité",
+    'Pent2': "2e Dimanche après la Pentecôte",
+    'Pent02': "2e Dimanche après la Pentecôte",
+    'Pent3': "3e Dimanche après la Pentecôte",
+    'Pent03': "3e Dimanche après la Pentecôte",
+    'Pent4': "4e Dimanche après la Pentecôte",
+    'Pent04': "4e Dimanche après la Pentecôte",
+    'Pent5': "5e Dimanche après la Pentecôte",
+    'Pent05': "5e Dimanche après la Pentecôte",
+    'Pent6': "6e Dimanche après la Pentecôte",
+    'Pent06': "6e Dimanche après la Pentecôte",
+    'Pent7': "7e Dimanche après la Pentecôte",
+    'Pent07': "7e Dimanche après la Pentecôte",
+    'Pent8': "8e Dimanche après la Pentecôte",
+    'Pent08': "8e Dimanche après la Pentecôte",
+    'Pent9': "9e Dimanche après la Pentecôte",
+    'Pent09': "9e Dimanche après la Pentecôte",
+    'Pent10': "10e Dimanche après la Pentecôte",
+    'Pent11': "11e Dimanche après la Pentecôte",
+    'Pent12': "12e Dimanche après la Pentecôte",
+    'Pent13': "13e Dimanche après la Pentecôte",
+    'Pent14': "14e Dimanche après la Pentecôte",
+    'Pent15': "15e Dimanche après la Pentecôte",
+    'Pent16': "16e Dimanche après la Pentecôte",
+    'Pent17': "17e Dimanche après la Pentecôte",
+    'Pent18': "18e Dimanche après la Pentecôte",
+    'Pent19': "19e Dimanche après la Pentecôte",
+    'Pent20': "20e Dimanche après la Pentecôte",
+    'Pent21': "21e Dimanche après la Pentecôte",
+    'Pent22': "22e Dimanche après la Pentecôte",
+    'Pent23': "23e Dimanche après la Pentecôte",
+    'Pent24': "24e et dernier Dimanche après la Pentecôte",
     'CorpusChristi': "Fête-Dieu (Très Saint Sacrement)",
     'SCJ': "Fête du Sacré-Cœur de Jésus",
     'ChristusRex': "Fête du Christ-Roi"
@@ -6909,10 +7208,25 @@ function createCalDayButton(dayNum, isOther, mDate, isToday, isSelected) {
     return $btn;
 }
 
+function formatMonthGroupTitle(momDate, uiLang) {
+    if (!momDate || !momDate.isValid()) return '';
+    var mIdx = momDate.month();
+    var yr = momDate.year();
+    var monthNamesFr = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    var monthNamesLa = ['Ianuarius', 'Februarius', 'Martius', 'Aprilis', 'Maius', 'Iunius', 'Iulius', 'Augustus', 'September', 'October', 'November', 'December'];
+    var monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var monthNamesEs = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    var mName = (uiLang === 'la') ? monthNamesLa[mIdx] : (uiLang === 'fr') ? monthNamesFr[mIdx] : (uiLang === 'es') ? monthNamesEs[mIdx] : monthNamesEn[mIdx];
+    return mName + ' ' + yr;
+}
+
 function renderHeaderDropdown() {
     var isBible = (doState.hora === 'bible');
     var uiLang = getUiLang();
 
+    var yearStr = doState.date ? doState.date.year() : moment().year();
+    var annusLabel = (uiLang === 'fr' ? 'Année ' + yearStr : (uiLang === 'es' ? 'Año ' + yearStr : (uiLang === 'en' ? 'Year ' + yearStr : 'Annus ' + yearStr)));
     var temporaleLabel = (uiLang === 'fr' ? 'Temporal' : (uiLang === 'es' ? 'Temporal' : (uiLang === 'en' ? 'Temporal' : 'Temporale')));
     var sanctoraleLabel = (uiLang === 'fr' ? 'Sanctoral' : (uiLang === 'es' ? 'Santoral' : (uiLang === 'en' ? 'Sanctoral' : 'Sanctorale')));
     var todayLabel = (uiLang === 'fr' ? "Aujourd'hui" : (uiLang === 'es' ? 'Hoy' : (uiLang === 'en' ? 'Today' : 'Hodie')));
@@ -6938,7 +7252,7 @@ function renderHeaderDropdown() {
 
             $('#hddControlsContainer').append($searchBar).append($controlsRow);
         } else {
-            var mode = doState.hddMode || 'temporum';
+            var mode = doState.hddMode || 'annus';
             var dateFormatted = formatLiturgicalDate(doState.date, uiLang);
 
             var $calContainer = $('<div id="hddCustomCalendar" class="hdd-custom-calendar' + (doState.calOpen ? '' : ' hidden') + '"></div>');
@@ -6950,6 +7264,7 @@ function renderHeaderDropdown() {
             var $controlsRow = $('<div class="hdd-controls-row">');
 
             var $modeGroup = $('<div class="hdd-mode-group">')
+                .append('<button class="hdd-mode-btn' + (mode === 'annus' ? ' active' : '') + '" data-mode="annus">' + escHtml(annusLabel) + '</button>')
                 .append('<button class="hdd-mode-btn' + (mode === 'temporum' ? ' active' : '') + '" data-mode="temporum">' + escHtml(temporaleLabel) + '</button>')
                 .append('<button class="hdd-mode-btn' + (mode === 'sanctorum' ? ' active' : '') + '" data-mode="sanctorum">' + escHtml(sanctoraleLabel) + '</button>');
 
@@ -6978,7 +7293,8 @@ function renderHeaderDropdown() {
             $('.hdd-mode-btn[data-bible-mode="' + bibleMode + '"]').addClass('active');
             $('#hddSearchInput').attr('placeholder', bibleSearchPlaceholder);
         } else {
-            var mode = doState.hddMode || 'temporum';
+            var mode = doState.hddMode || 'annus';
+            $('.hdd-mode-btn[data-mode="annus"]').text(annusLabel);
             $('.hdd-mode-btn[data-mode="temporum"]').text(temporaleLabel);
             $('.hdd-mode-btn[data-mode="sanctorum"]').text(sanctoraleLabel);
             $('.hdd-mode-btn[data-mode]').removeClass('active');
@@ -7028,6 +7344,7 @@ var DO_LITURGICAL_FR_ALIASES = {
     '06-29': 'Saints Pierre et Paul Apotres',
     '08-06': 'Transfiguration',
     '08-24': 'Saint Barthelemy Barthelemy Apotre',
+    '08-25': 'Saint Louis Roi de France',
     '09-14': 'Exaltation de la Sainte Croix',
     '09-29': 'Saint Michel Archange Anges',
     '10-07': 'Notre Dame du Rosaire'
@@ -7135,7 +7452,7 @@ function renderHeaderDropdownItems() {
         }
 
     } else {
-        var mode = doState.hddMode || 'temporum';
+        var mode = doState.hddMode || 'annus';
         var curDateStr = doState.date.format('YYYY-MM-DD');
         var year = doState.date.year();
 
@@ -7143,8 +7460,84 @@ function renderHeaderDropdownItems() {
         var allSaints = (typeof saintKeys !== 'undefined' ? saintKeys : (window.saintKeys || []));
 
         var groups = {};
+        var groupOrder = [];
 
-        if (mode === 'temporum') {
+        if (mode === 'annus') {
+            var allItems = [];
+            var seenKeys = {};
+
+            // 1. Temporale items
+            allSundays.forEach(function(item) {
+                if (!item.key) return;
+                var itemDate = getDateForLiturgicalKey(item.key, year);
+                if (!itemDate || !itemDate.isValid()) return;
+
+                var titleLa = item.title || item.key;
+                var titleEn = item.en || '';
+                var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+                var frAlias = getFrAliasesForKey(item.key);
+                var searchTarget = normalizeSearchStr(titleLa + ' ' + titleEn + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+
+                if (tokens.length > 0) {
+                    var matchesAll = tokens.every(function(tok) { return searchTarget.indexOf(tok) >= 0; });
+                    if (!matchesAll) return;
+                }
+
+                allItems.push({
+                    item: item,
+                    itemDate: itemDate,
+                    isTempora: true
+                });
+            });
+
+            // 2. Sanctorale items
+            allSaints.forEach(function(item) {
+                if (!item.key) return;
+                var baseKey = item.key.replace(/_[a-z0-9]+$/i, '');
+                if (item.key.indexOf('_') !== -1 && seenKeys[baseKey]) return;
+                if (seenKeys[item.key]) return;
+                seenKeys[item.key] = true;
+                seenKeys[baseKey] = true;
+
+                var itemDate = getDateForLiturgicalKey(item.key, year);
+                if (!itemDate || !itemDate.isValid()) return;
+
+                var titleLa = item.title || item.key;
+                var titleEn = item.en || '';
+                var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+                var frAlias = getFrAliasesForKey(item.key);
+                var searchTarget = normalizeSearchStr(titleLa + ' ' + titleEn + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+
+                if (tokens.length > 0) {
+                    var matchesAll = tokens.every(function(tok) { return searchTarget.indexOf(tok) >= 0; });
+                    if (!matchesAll) return;
+                }
+
+                allItems.push({
+                    item: item,
+                    itemDate: itemDate,
+                    isTempora: false
+                });
+            });
+
+            // Sort all items chronologically by date
+            allItems.sort(function(a, b) {
+                var diff = a.itemDate.valueOf() - b.itemDate.valueOf();
+                if (diff !== 0) return diff;
+                return a.isTempora ? -1 : 1;
+            });
+
+            // Group chronologically by month
+            allItems.forEach(function(entry) {
+                var grp = formatMonthGroupTitle(entry.itemDate, uiLang);
+                if (!groups[grp]) {
+                    groups[grp] = [];
+                    groupOrder.push(grp);
+                }
+                groups[grp].push(entry);
+            });
+
+        } else if (mode === 'temporum') {
             allSundays.forEach(function(item) {
                 if (!item.key) return;
                 var titleLa = item.title || item.key;
@@ -7159,14 +7552,16 @@ function renderHeaderDropdownItems() {
                 }
 
                 var grp = getLiturgicalSeasonGroup(item.key, uiLang);
-                if (!groups[grp]) groups[grp] = [];
+                if (!groups[grp]) {
+                    groups[grp] = [];
+                    groupOrder.push(grp);
+                }
                 groups[grp].push(item);
             });
         } else {
             var seenKeys = {};
             allSaints.forEach(function(item) {
                 if (!item.key) return;
-                // Deduplicate edition variants (e.g. Dec31_v, Quad6_v)
                 var baseKey = item.key.replace(/_[a-z0-9]+$/i, '');
                 if (item.key.indexOf('_') !== -1 && seenKeys[baseKey]) return;
                 if (seenKeys[item.key]) return;
@@ -7184,21 +7579,25 @@ function renderHeaderDropdownItems() {
                 }
 
                 var grp = getSanctoralMonthGroup(item.key, uiLang);
-                if (!groups[grp]) groups[grp] = [];
+                if (!groups[grp]) {
+                    groups[grp] = [];
+                    groupOrder.push(grp);
+                }
                 groups[grp].push(item);
             });
         }
 
         var hasItems = false;
-        Object.keys(groups).forEach(function(grpName) {
-            var items = groups[grpName];
-            if (!items || !items.length) return;
+        (groupOrder.length ? groupOrder : Object.keys(groups)).forEach(function(grpName) {
+            var rawList = groups[grpName];
+            if (!rawList || !rawList.length) return;
             hasItems = true;
 
             $list.append('<div class="hdd-group-title">' + escHtml(grpName) + '</div>');
 
-            items.forEach(function(item) {
-                var itemDate = getDateForLiturgicalKey(item.key, year);
+            rawList.forEach(function(rawEntry) {
+                var item = rawEntry.item ? rawEntry.item : rawEntry;
+                var itemDate = rawEntry.itemDate ? rawEntry.itemDate : getDateForLiturgicalKey(item.key, year);
                 var isSel = doState.officiumKey ? (item.key === doState.officiumKey) : (itemDate && itemDate.format('YYYY-MM-DD') === curDateStr && !item.key.match(/_[a-z0-9]+$/i));
                 var dateBadge = itemDate ? formatBadgeDate(itemDate, uiLang) : '';
                 var dispTitle = getVernacularItemTitle(item, uiLang);
@@ -7229,8 +7628,7 @@ function renderHeaderDropdownItems() {
 }
 
 function getDefaultHddModeForDate(date) {
-    var isSun = (date.day() === 0);
-    return isSun ? 'temporum' : 'sanctorum';
+    return 'annus';
 }
 
 function openHeaderDropdown() {
@@ -7407,7 +7805,7 @@ function triggerHapticFeedback(duration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.20';
+var CURRENT_APP_VERSION = 'beta-0.0.21';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

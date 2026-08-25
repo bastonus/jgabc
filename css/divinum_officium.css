@@ -1116,8 +1116,12 @@ div.do-rubric-inline {
 }
 
 .do-skel:last-child { margin-bottom: 0; }
+.do-skel.w95  { width: 95%; }
 .do-skel.w90  { width: 90%; }
+.do-skel.w85  { width: 85%; }
+.do-skel.w80  { width: 80%; }
 .do-skel.w70  { width: 70%; }
+.do-skel.w60  { width: 60%; }
 .do-skel.w50  { width: 50%; }
 .do-skel.w30  { width: 30%; }
 .do-skel.h20  { height: 22px; margin-bottom: 16px; }
@@ -1125,6 +1129,21 @@ div.do-rubric-inline {
 @keyframes do-pulse {
     0%   { background-position:  200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* Gregorian Chant Skeleton (5 lines lazy loader) */
+.do-chant-skeleton {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 0 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.do-chant-skeleton .do-skel {
+    margin-bottom: 0;
+    height: 14px;
 }
 
 /* Empty State */
