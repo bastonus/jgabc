@@ -82,12 +82,24 @@ public class MainActivity extends BridgeActivity {
     public class AppIconInterface {
         @JavascriptInterface
         public void setIcon(String aliasSuffix) {
+            applyAlias(aliasSuffix);
+        }
+
+        @JavascriptInterface
+        public void setIcon(String aliasSuffix, boolean restartNow) {
+            applyAlias(aliasSuffix);
+            if (restartNow) {
+                restartApp();
+            }
+        }
+
+        private void applyAlias(String aliasSuffix) {
             runOnUiThread(() -> {
                 try {
                     String targetAlias = "MainActivityDefault";
                     if (aliasSuffix != null && !aliasSuffix.trim().isEmpty() && !aliasSuffix.equalsIgnoreCase("default")) {
                         for (String a : ALIASES) {
-                            if (a.equalsIgnoreCase("MainActivity" + aliasSuffix.trim())) {
+                            if (a.equalsIgnoreCase("MainActivity" + aliasSuffix.trim()) || a.equalsIgnoreCase(aliasSuffix.trim())) {
                                 targetAlias = a;
                                 break;
                             }
@@ -115,6 +127,23 @@ public class MainActivity extends BridgeActivity {
                                 PackageManager.DONT_KILL_APP
                             );
                         }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void restartApp() {
+            runOnUiThread(() -> {
+                try {
+                    Context ctx = getApplicationContext();
+                    Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        ctx.startActivity(intent);
+                        Runtime.getRuntime().exit(0);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

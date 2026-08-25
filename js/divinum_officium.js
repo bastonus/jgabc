@@ -7806,11 +7806,9 @@ function updateFaviconAndAppIcon() {
         '#202022': 'Default',
         '#e4e4e7': 'Default'
     };
-    // Check pending native icon alias from previous 'Apply later' selection
-    var pendingAlias = localStorage.getItem('do_pending_icon_alias');
-    if (pendingAlias) {
-        applyNativeAndroidAppIcon(pendingAlias, false);
-        localStorage.removeItem('do_pending_icon_alias');
+    var currentAlias = colorAliasMap[(effColor || '').toLowerCase()] || 'Default';
+    if (isAndroidNativeApp()) {
+        applyNativeAndroidAppIcon(currentAlias, false);
     }
 }
 
@@ -7844,11 +7842,12 @@ function requestIconColorChange(color, isSync) {
     };
     var alias = colorAliasMap[(effColor || '').toLowerCase()] || 'Default';
 
+    applyIconColor(color, isSync);
+
     if (isAndroidNativeApp()) {
         pendingIconConfig = { color: color, isSync: isSync, alias: alias };
+        applyNativeAndroidAppIcon(alias, false);
         $('#appIconModalBackdrop, #appIconModal').removeClass('hidden');
-    } else {
-        applyIconColor(color, isSync);
     }
 }
 
