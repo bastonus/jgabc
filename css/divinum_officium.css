@@ -4042,3 +4042,162 @@ body.player-dock-open .app-main {
     padding-bottom: 110px !important;
 }
 
+/* ── Update System & Update Modal Dialog ── */
+.update-status-text {
+    font-size: 0.76rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+}
+
+.update-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2000;
+    transition: opacity 0.25s ease;
+}
+
+.update-modal-backdrop.hidden,
+.update-modal.hidden {
+    display: none !important;
+}
+
+.update-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2001;
+    width: 90%;
+    max-width: 440px;
+    box-sizing: border-box;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.update-card {
+    background: var(--background-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.update-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.update-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.update-icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(var(--primary-color-rgb), 0.15);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.update-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.update-version-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+}
+
+.update-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.update-notes-container {
+    background: var(--background-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px;
+    max-height: 160px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.update-notes-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+}
+
+.update-notes-text {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.update-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.update-btn-dismiss {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+}
+
+.update-btn-download {
+    flex: 1.5;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: var(--primary-color);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.update-btn-download:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+

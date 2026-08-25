@@ -5031,6 +5031,12 @@ function updateSidebarAndHeader() {
         $('#doIconColorOptions [data-icon-color="' + doState.settings.iconColor + '"]').addClass('active');
     }
     updateFaviconAndAppIcon();
+
+    // Haptics & Updates state
+    $('#toggleHaptics').prop('checked', localStorage.getItem('do_haptics') !== 'false');
+    $('#toggleAutoUpdate').prop('checked', localStorage.getItem('do_auto_update') !== 'false');
+    $('#toggleIncludeBeta').prop('checked', localStorage.getItem('do_include_beta') !== 'false');
+    $('#updateStatusText').text('Version actuelle : ' + CURRENT_APP_VERSION).css('color', 'var(--text-tertiary)');
 }
 
 function openBible(bookId, chapterNum, pageNum) {
@@ -7311,6 +7317,135 @@ function applyIconColor(color, isSync) {
     updateFaviconAndAppIcon();
 }
 
+// ── Haptic Feedback Engine ──
+function triggerHapticFeedback(duration) {
+    if (localStorage.getItem('do_haptics') === 'false') return;
+    try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+            window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' });
+        } else if (navigator && navigator.vibrate) {
+            navigator.vibrate(duration || 15);
+        }
+    } catch (e) {}
+}
+
+// ── GitHub Releases Update Engine ──
+var CURRENT_APP_VERSION = 'beta-0.0.10';
+
+function parseVersionString(str) {
+    if (!str) return [0, 0, 0];
+    var clean = str.replace(/^v/i, '').replace(/^beta-/i, '');
+    var parts = clean.split('.').map(function(p) {
+        var n = parseInt(p, 10);
+        return isNaN(n) ? 0 : n;
+    });
+    while (parts.length < 3) parts.push(0);
+    return parts;
+}
+
+function compareVersions(v1, v2) {
+    var p1 = parseVersionString(v1);
+    var p2 = parseVersionString(v2);
+    for (var i = 0; i < Math.max(p1.length, p2.length); i++) {
+        var num1 = p1[i] || 0;
+        var num2 = p2[i] || 0;
+        if (num1 > num2) return 1;
+        if (num1 < num2) return -1;
+    }
+    return 0;
+}
+
+function checkForAppUpdates(isManual) {
+    var includeBeta = (localStorage.getItem('do_include_beta') !== 'false');
+    var $statusText = $('#updateStatusText');
+    if (isManual) {
+        $statusText.text('Recherche en cours sur GitHub...').css('color', 'var(--text-secondary)');
+    }
+
+    var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/releases';
+    fetch(apiUrl)
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(releases) {
+            if (!Array.isArray(releases) || !releases.length) {
+                if (isManual) {
+                    $statusText.text('Aucune release disponible sur GitHub').css('color', 'var(--text-tertiary)');
+                }
+                return;
+            }
+
+            var targetRelease = null;
+            for (var i = 0; i < releases.length; i++) {
+                var r = releases[i];
+                if (r.draft) continue;
+                if (!includeBeta && r.prerelease) continue;
+                targetRelease = r;
+                break;
+            }
+
+            if (!targetRelease) {
+                if (isManual) {
+                    $statusText.text('Aucune version stable récente trouvée').css('color', 'var(--text-tertiary)');
+                }
+                return;
+            }
+
+            var latestTag = targetRelease.tag_name;
+            var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
+
+            if (isNewer) {
+                if (isManual) {
+                    $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+                }
+                showUpdateModal(targetRelease);
+            } else {
+                if (isManual) {
+                    $statusText.text('Vous êtes à jour (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
+                }
+            }
+        })
+        .catch(function(err) {
+            console.warn('Update check failed:', err);
+            if (isManual) {
+                $statusText.text('Impossible de vérifier les mises à jour (hors-ligne)').css('color', '#c96b63');
+            }
+        });
+}
+
+function showUpdateModal(release) {
+    var tagName = release.tag_name || 'Nouvelle version';
+    var isBeta = release.prerelease;
+    var releaseName = release.name || ('Oremus ' + tagName);
+    var bodyNotes = release.body || 'Améliorations générales et corrections de stabilité.';
+    
+    // Find APK asset
+    var apkAsset = null;
+    if (release.assets && release.assets.length) {
+        apkAsset = release.assets.filter(function(a) {
+            return a.name && a.name.toLowerCase().endsWith('.apk');
+        })[0] || release.assets[0];
+    }
+    var downloadUrl = (apkAsset && apkAsset.browser_download_url) ? apkAsset.browser_download_url : (release.html_url || 'https://github.com/bastonus/jgabc/releases');
+
+    $('#updateModalTitle').text('Mise à jour disponible');
+    $('#updateVersionTag').text(tagName + (isBeta ? ' (Bêta)' : ' (Stable)'));
+    $('#updateModalDesc').text(releaseName);
+    $('#updateNotesContent').text(bodyNotes);
+
+    $('#btnDownloadUpdate').off('click').on('click', function() {
+        hideUpdateModal();
+        window.open(downloadUrl, '_system');
+    });
+
+    $('#updateModalBackdrop, #updateModal').removeClass('hidden');
+}
+
+function hideUpdateModal() {
+    $('#updateModalBackdrop, #updateModal').addClass('hidden');
+}
+
 function applyColor(hex) {
     doState.settings.color = hex;
     var r = parseInt(hex.slice(1,3), 16);
@@ -7839,6 +7974,37 @@ function setupEventListeners() {
         $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
     });
 
+    // Haptics & Updates settings listeners
+    $('#toggleHaptics').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        localStorage.setItem('do_haptics', isChecked ? 'true' : 'false');
+        if (isChecked) triggerHapticFeedback(20);
+    });
+
+    $('#toggleAutoUpdate').on('change', function() {
+        localStorage.setItem('do_auto_update', $(this).is(':checked') ? 'true' : 'false');
+    });
+
+    $('#toggleIncludeBeta').on('change', function() {
+        localStorage.setItem('do_include_beta', $(this).is(':checked') ? 'true' : 'false');
+    });
+
+    $('#btnCheckUpdatesManual').on('click', function(e) {
+        e.preventDefault();
+        checkForAppUpdates(true);
+    });
+
+    $(document).on('click', '#btnCloseUpdateModal, #btnDismissUpdate, #updateModalBackdrop', function(e) {
+        e.preventDefault();
+        hideUpdateModal();
+    });
+
+    if (localStorage.getItem('do_auto_update') !== 'false') {
+        setTimeout(function() {
+            checkForAppUpdates(false);
+        }, 2500);
+    }
+
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)
     var touchStartX = 0;
     var touchStartY = 0;
@@ -7931,7 +8097,9 @@ function setupEventListeners() {
                 // Was at Latin
                 if (deltaX < -50) {
                     // Snap all cards simultaneously to Vernacular
+                    var prevLang = doState.mobileLang;
                     doState.mobileLang = 'vern';
+                    if (prevLang !== 'vern') triggerHapticFeedback();
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
                     }
@@ -7946,7 +8114,9 @@ function setupEventListeners() {
                 // Was at Vernacular
                 if (deltaX > 50) {
                     // Snap all cards simultaneously to Latin
+                    var prevLang = doState.mobileLang;
                     doState.mobileLang = 'la';
+                    if (prevLang !== 'la') triggerHapticFeedback();
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', '0%');
                     }
