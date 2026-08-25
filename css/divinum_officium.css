@@ -1511,13 +1511,16 @@ div.do-rubric-inline {
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:hover:not(:disabled) {
-    color: var(--text-primary) !important;
-    background: color-mix(in srgb, var(--primary-color) 8%, var(--background-highlight)) !important;
+    background: rgba(var(--primary-color-rgb, 201,107,99), 0.12) !important;
+    color: var(--primary-color) !important;
+    border: none !important;
+    transform: none !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:active:not(:disabled) {
-    background: rgba(var(--primary-color-rgb, 201,107,99), 0.16) !important;
+    background: rgba(var(--primary-color-rgb, 201,107,99), 0.18) !important;
     color: var(--primary-color) !important;
+    transform: none !important;
 }
 
 .do-bible-bottom-nav .do-bible-nav-btn:disabled {
