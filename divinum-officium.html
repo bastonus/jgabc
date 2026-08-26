@@ -5,15 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Oremus</title>
     <link rel="icon" id="dynamicFavicon" href="icon/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon/favicon.svg">
+    <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Oremus">
+    <meta name="application-name" content="Oremus">
+    <meta name="theme-color" content="#121214" id="metaThemeColor">
+    <meta name="format-detection" content="telephone=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=28.0&ts=202608260055">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=68.0&ts=202608260055">
+    <link rel="stylesheet" href="css/modern.css?v=28.1&ts=202608260930">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=68.1&ts=202608260930">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -23,6 +32,12 @@
             document.documentElement.setAttribute('data-theme', t);
             var c = localStorage.getItem('do_color') || '#c96b63';
             document.documentElement.style.setProperty('--primary-color', c);
+
+            // iOS Platform detection for early UI optimization
+            var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (isIos) {
+                document.documentElement.classList.add('is-ios');
+            }
 
             // Icon & Favicon color initialization (O + Cross)
             var sync = localStorage.getItem('do_icon_sync') === 'true';
@@ -59,7 +74,7 @@
     <script src="patterns/pl.js"></script>
     <script src="do_manifest.js?v=20.10&ts=202608251858"></script>
     <script src="js/bible_mappings.js?v=1.0&ts=202608252254"></script>
-    <script src="js/divinum_officium.js?v=68.0&ts=202608260055"></script>
+    <script src="js/divinum_officium.js?v=68.1&ts=202608260930"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -165,6 +180,37 @@
         </aside>
 
         <div class="do-main-wrapper">
+            <!-- Top Install Banner (PWA / iOS / Android) -->
+            <aside id="appInstallBanner" class="do-update-banner do-install-banner" aria-label="Installation de l'application">
+                <div class="do-update-banner-inner">
+                    <div class="do-update-banner-left">
+                        <svg class="do-update-banner-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="do-update-banner-title">Installer l'application</span>
+                        <span class="do-update-banner-tag" id="installPlatformTag">iOS / PWA</span>
+                    </div>
+                    <div class="do-update-banner-actions">
+                        <button id="btnInstallAppBanner" class="do-update-btn-action" title="Installer sur l'écran d'accueil">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Installer</span>
+                        </button>
+                        <button id="btnCloseInstallBanner" class="do-update-btn-close" aria-label="Fermer" title="Fermer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
             <!-- Top Update Banner (Clean 1-line, solid flat colors, borderless, sticky) -->
             <aside id="appUpdateBanner" class="do-update-banner" aria-label="Mise à jour">
                 <div class="do-update-banner-inner">
@@ -743,6 +789,92 @@
                     <a id="feedbackFallbackLink" href="https://tally.so/r/b5QOV2" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color); font-size:0.8rem; margin-top:6px; text-decoration:underline;">Ouvrir directement dans le navigateur</a>
                 </div>
                 <iframe id="tallyFeedbackIframe" class="tally-iframe" src="" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" title="Retours Oremus"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA / iOS Install Instruction Modal -->
+    <div id="pwaInstallModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="pwaInstallModal" class="update-modal hidden" role="dialog" aria-labelledby="pwaInstallModalTitle">
+        <div class="update-card">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="pwaInstallModalTitle" class="update-title">Installer Oremus</h3>
+                        <span class="update-version-tag" id="pwaInstallModalPlatformTag">iOS / Safari</span>
+                    </div>
+                </div>
+                <button id="btnClosePwaInstallModal" class="update-close-btn" aria-label="Fermer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body">
+                <div id="pwaIosInstructions">
+                    <p style="margin: 0 0 12px 0; font-size: 0.88rem; line-height: 1.5; color: var(--text-primary);">
+                        Sur iOS (Safari), l'installation s'effectue directement via le menu de partage :
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                        <div class="pwa-install-step" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05); padding: 10px 12px; border-radius: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                    <polyline points="16 6 12 2 8 6"></polyline>
+                                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div style="font-size: 0.84rem; line-height: 1.4; color: var(--text-primary);">
+                                <strong>1.</strong> Touchez l'icône <strong>Partager</strong> en bas de Safari.
+                            </div>
+                        </div>
+                        <div class="pwa-install-step" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05); padding: 10px 12px; border-radius: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                            </div>
+                            <div style="font-size: 0.84rem; line-height: 1.4; color: var(--text-primary);">
+                                <strong>2.</strong> Faites défiler et choisissez <strong>« Sur l'écran d'accueil »</strong>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="pwaGenericInstructions" class="hidden">
+                    <p style="margin: 0 0 12px 0; font-size: 0.88rem; line-height: 1.5; color: var(--text-primary);">
+                        Installez Oremus sur votre appareil pour une expérience plein écran fluide et hors-ligne :
+                    </p>
+                </div>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 10px 12px; border-radius: 10px;">
+                    <div class="update-notes-text" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                        ✨ <strong>Mode hors-ligne complet</strong> : l'application reste accessible et réactive même sans connexion Internet.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions">
+                <button id="btnDismissPwaInstallModal" class="update-btn-dismiss">Fermer</button>
+                <button id="btnActionPwaInstallModal" class="update-btn-download">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span id="btnActionPwaInstallText">Compris</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- App Icon Change / Restart Dialog (Android) -->
     <div id="appIconModalBackdrop" class="update-modal-backdrop hidden"></div>
     <div id="appIconModal" class="update-modal hidden" role="dialog" aria-labelledby="appIconModalTitle">

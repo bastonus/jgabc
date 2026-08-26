@@ -8358,6 +8358,158 @@ function updateEffectiveColor() {
     }
 }
 
+// ── PWA & Service Worker Engine ──
+var deferredInstallPrompt = null;
+
+function isIosDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function isAppStandalone() {
+    return !!(
+        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+        window.navigator.standalone === true ||
+        isNativeAndroidApp()
+    );
+}
+
+var _swRegistration = null;
+
+function requestPersistentStorage() {
+    try {
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persisted().then(function(isPersisted) {
+                console.log('[Storage] Storage persisted:', isPersisted);
+                if (!isPersisted) {
+                    navigator.storage.persist().then(function(granted) {
+                        console.log('[Storage] Persistence request granted:', granted);
+                    });
+                }
+            }).catch(function(e) {
+                console.warn('[Storage] Persistence check error:', e);
+            });
+        }
+    } catch (e) {}
+}
+
+function registerOremusServiceWorker() {
+    requestPersistentStorage();
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js')
+                .then(function(reg) {
+                    _swRegistration = reg;
+                    console.log('[PWA] Service Worker registered with scope:', reg.scope);
+
+                    reg.onupdatefound = function() {
+                        var installingWorker = reg.installing;
+                        if (!installingWorker) return;
+                        installingWorker.onstatechange = function() {
+                            if (installingWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Nouvelle version installée en arrière-plan.');
+                                }
+                            }
+                        };
+                    };
+                })
+                .catch(function(err) {
+                    console.warn('[PWA] Service Worker registration failed:', err);
+                });
+
+            // iOS app resume check: force check for updates when returning to the app
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && _swRegistration) {
+                    _swRegistration.update().catch(function() {});
+                }
+            });
+
+            window.addEventListener('focus', function() {
+                if (_swRegistration) {
+                    _swRegistration.update().catch(function() {});
+                }
+            });
+        });
+    }
+}
+
+function showInstallBanner() {
+    if (isAppStandalone()) return;
+    try {
+        if (sessionStorage.getItem('do_dismissed_install_banner') === 'true' ||
+            localStorage.getItem('do_dismissed_install_banner') === 'true') {
+            return;
+        }
+    } catch (e) {}
+
+    var $banner = $('#appInstallBanner');
+    if (!$banner.length) return;
+
+    if (isIosDevice()) {
+        $('#installPlatformTag').text('iOS');
+    } else if (deferredInstallPrompt) {
+        $('#installPlatformTag').text('PWA');
+    } else {
+        $('#installPlatformTag').text('Web App');
+    }
+
+    $banner.addClass('is-visible');
+    setTimeout(updateHeaderDropdownPosition, 300);
+}
+
+function hideInstallBanner(permanent) {
+    var $banner = $('#appInstallBanner');
+    $banner.removeClass('is-visible');
+    setTimeout(updateHeaderDropdownPosition, 300);
+    if (permanent) {
+        try {
+            sessionStorage.setItem('do_dismissed_install_banner', 'true');
+        } catch (e) {}
+    }
+}
+
+function showPwaInstallModal() {
+    var isIos = isIosDevice();
+    if (isIos) {
+        $('#pwaIosInstructions').removeClass('hidden');
+        $('#pwaGenericInstructions').addClass('hidden');
+        $('#pwaInstallModalPlatformTag').text('iOS / Safari');
+        $('#btnActionPwaInstallText').text('J\'ai compris');
+    } else if (deferredInstallPrompt) {
+        $('#pwaIosInstructions').addClass('hidden');
+        $('#pwaGenericInstructions').removeClass('hidden');
+        $('#pwaInstallModalPlatformTag').text('PWA');
+        $('#btnActionPwaInstallText').text('Installer maintenant');
+    } else {
+        $('#pwaIosInstructions').addClass('hidden');
+        $('#pwaGenericInstructions').removeClass('hidden');
+        $('#pwaInstallModalPlatformTag').text('Application Web');
+        $('#btnActionPwaInstallText').text('Fermer');
+    }
+    $('#pwaInstallModalBackdrop, #pwaInstallModal').removeClass('hidden');
+}
+
+function hidePwaInstallModal() {
+    $('#pwaInstallModalBackdrop, #pwaInstallModal').addClass('hidden');
+}
+
+function triggerPwaInstall() {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(function(choiceResult) {
+            if (choiceResult && choiceResult.outcome === 'accepted') {
+                console.log('[PWA] User accepted installation prompt');
+                hideInstallBanner(true);
+                hidePwaInstallModal();
+            }
+            deferredInstallPrompt = null;
+        });
+    } else {
+        showPwaInstallModal();
+    }
+}
+
 // ---- Event Listeners ----
 function setupEventListeners() {
     // Feedback Modal Triggers
@@ -8939,30 +9091,79 @@ function setupEventListeners() {
         $(this).toggleClass('is-active', !isOpen);
     });
 
-    $(document).on('click', '#btnCloseUpdateBanner, #btnCloseUpdateModal, #btnDismissUpdate', function(e) {
+    // ── PWA & Service Worker Listeners ──
+    window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
-        hideUpdateBanner();
+        deferredInstallPrompt = e;
+        if (!isAppStandalone()) {
+            showInstallBanner();
+        }
+    });
+
+    $(document).on('click', '#btnInstallAppBanner', function(e) {
+        e.preventDefault();
+        triggerPwaInstall();
+    });
+
+    $(document).on('click', '#btnCloseInstallBanner', function(e) {
+        e.preventDefault();
+        hideInstallBanner(true);
+    });
+
+    $(document).on('click', '#btnClosePwaInstallModal, #btnDismissPwaInstallModal, #pwaInstallModalBackdrop', function(e) {
+        e.preventDefault();
+        hidePwaInstallModal();
+    });
+
+    $(document).on('click', '#btnActionPwaInstallModal', function(e) {
+        e.preventDefault();
+        if (deferredInstallPrompt) {
+            triggerPwaInstall();
+        } else {
+            hidePwaInstallModal();
+        }
     });
 
     $(document).on('click', '#btnDownloadAppWebSidebar, #btnDownloadAppSettings', function(e) {
         e.preventDefault();
-        window.open('https://github.com/bastonus/jgabc/releases', '_blank');
+        triggerPwaInstall();
     });
 
-    if (isNativeAndroidApp()) {
-        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings').hide();
-        if (localStorage.getItem('do_auto_update') !== 'false') {
-            setTimeout(function() {
-                checkForAppUpdates(false);
-            }, 2500);
+    registerOremusServiceWorker();
+
+    if (isNativeAndroidApp() || isIosDevice() || isAppStandalone()) {
+        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings, .web-download-app-wrapper').hide();
+        if (isNativeAndroidApp()) {
+            if (localStorage.getItem('do_auto_update') !== 'false') {
+                setTimeout(function() {
+                    checkForAppUpdates(false);
+                }, 2500);
+            }
+        } else {
+            $('#toggleAutoUpdate').closest('.settings-toggle-row').hide();
+            $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
+            $('.update-check-wrapper').hide();
+            $('#labelUpdatesText').text('Retours & Suggestions');
+
+            if (!isAppStandalone()) {
+                setTimeout(function() {
+                    showInstallBanner();
+                }, 1800);
+            }
         }
     } else {
-        // Web platform: show download app button, hide native updater controls
-        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings').show();
+        // Desktop / Android Web platform: show download/install app button, hide native updater controls
+        $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings, .web-download-app-wrapper').show();
         $('#toggleAutoUpdate').closest('.settings-toggle-row').hide();
         $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
         $('.update-check-wrapper').hide();
         $('#labelUpdatesText').text('Application & Retours');
+
+        if (!isAppStandalone()) {
+            setTimeout(function() {
+                showInstallBanner();
+            }, 1800);
+        }
     }
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)
