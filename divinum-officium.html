@@ -21,8 +21,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=28.1&ts=202608260930">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=68.1&ts=202608260930">
+    <link rel="stylesheet" href="css/modern.css?v=28.1&ts=202608260940">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=68.2&ts=202608260940">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -33,10 +33,14 @@
             var c = localStorage.getItem('do_color') || '#c96b63';
             document.documentElement.style.setProperty('--primary-color', c);
 
-            // iOS Platform detection for early UI optimization
+            // iOS & Android Platform detection for early UI optimization
             var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             if (isIos) {
                 document.documentElement.classList.add('is-ios');
+            }
+            var isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                document.documentElement.classList.add('is-android');
             }
 
             // Icon & Favicon color initialization (O + Cross)

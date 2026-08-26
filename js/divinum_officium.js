@@ -8365,6 +8365,10 @@ function isIosDevice() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
+function isAndroidDevice() {
+    return /Android/i.test(navigator.userAgent);
+}
+
 function isAppStandalone() {
     return !!(
         (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
@@ -8435,8 +8439,10 @@ function registerOremusServiceWorker() {
 }
 
 function showInstallBanner() {
-    // Strictly only show on iOS non-standalone devices
-    if (!isIosDevice() || isAppStandalone() || (window.innerWidth && window.innerWidth > 900)) return;
+    // Only show on mobile (iOS or Android web), not standalone, not native app, not desktop
+    if (isNativeAndroidApp() || isAppStandalone() || (window.innerWidth && window.innerWidth > 900)) return;
+    if (!isIosDevice() && !isAndroidDevice()) return;
+
     try {
         if (sessionStorage.getItem('do_dismissed_install_banner') === 'true' ||
             localStorage.getItem('do_dismissed_install_banner') === 'true') {
@@ -8447,7 +8453,16 @@ function showInstallBanner() {
     var $banner = $('#appInstallBanner');
     if (!$banner.length) return;
 
-    $('#installPlatformTag').text('iOS');
+    if (isIosDevice()) {
+        $('#installPlatformTag').text('iOS');
+        $banner.find('.do-update-banner-title').text('Installer l\'application');
+        $('#btnInstallAppBanner span').text('Installer');
+    } else if (isAndroidDevice()) {
+        $('#installPlatformTag').text('APK');
+        $banner.find('.do-update-banner-title').text('Application Android');
+        $('#btnInstallAppBanner span').text('Télécharger');
+    }
+
     $banner.addClass('is-visible');
     setTimeout(updateHeaderDropdownPosition, 300);
 }
@@ -8475,6 +8490,8 @@ function hidePwaInstallModal() {
 function triggerPwaInstall() {
     if (isIosDevice()) {
         showPwaInstallModal();
+    } else if (isAndroidDevice()) {
+        window.open('https://github.com/bastonus/jgabc/releases', '_blank');
     } else if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then(function(choiceResult) {
@@ -9129,12 +9146,19 @@ function setupEventListeners() {
             }
         }
     } else {
-        // Desktop / Android Web platform: show download app button for APK, hide updater controls (never show iOS install banner on desktop)
+        // Desktop / Android Web platform: show download app button for APK, hide updater controls (never show on desktop)
         $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings, .web-download-app-wrapper').show();
         $('#toggleAutoUpdate').closest('.settings-toggle-row').hide();
         $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
         $('.update-check-wrapper').hide();
         $('#labelUpdatesText').text('Application & Retours');
+
+        // On mobile Android browser, show the mobile top banner leading to GitHub APK
+        if (isAndroidDevice() && !isAppStandalone()) {
+            setTimeout(function() {
+                showInstallBanner();
+            }, 1800);
+        }
     }
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)

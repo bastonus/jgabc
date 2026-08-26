@@ -4236,12 +4236,13 @@ body.player-dock-open .app-main {
     flex-shrink: 0;
 }
 
-/* Install banner is strictly for iOS mobile, hidden by default on desktop/generic */
+/* Install banner is for mobile (iOS & Android web), hidden by default on desktop/generic */
 .do-install-banner {
     display: none !important;
 }
 
-html.is-ios .do-install-banner {
+html.is-ios .do-install-banner,
+html.is-android .do-install-banner {
     display: block !important;
 }
 
@@ -4284,6 +4285,25 @@ html.is-ios .do-install-banner {
     white-space: nowrap;
     overflow: hidden;
     flex-wrap: nowrap;
+}
+
+/* Specific compact dimensions for Web iOS Install Banner (removes artificial 44px gap) */
+.do-install-banner.is-visible {
+    max-height: calc(40px + env(safe-area-inset-top, 0px)) !important;
+    opacity: 1 !important;
+}
+
+.do-install-banner.is-visible ~ .do-top-header {
+    top: calc(40px + env(safe-area-inset-top, 0px)) !important;
+    padding-top: 8px !important;
+}
+
+.do-install-banner .do-update-banner-inner {
+    height: calc(40px + env(safe-area-inset-top, 0px)) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: 0 !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
 }
 
 @media (min-width: 901px) {
