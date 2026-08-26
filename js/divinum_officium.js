@@ -8435,7 +8435,8 @@ function registerOremusServiceWorker() {
 }
 
 function showInstallBanner() {
-    if (isAppStandalone()) return;
+    // Strictly only show on iOS non-standalone devices
+    if (!isIosDevice() || isAppStandalone() || (window.innerWidth && window.innerWidth > 900)) return;
     try {
         if (sessionStorage.getItem('do_dismissed_install_banner') === 'true' ||
             localStorage.getItem('do_dismissed_install_banner') === 'true') {
@@ -8446,14 +8447,7 @@ function showInstallBanner() {
     var $banner = $('#appInstallBanner');
     if (!$banner.length) return;
 
-    if (isIosDevice()) {
-        $('#installPlatformTag').text('iOS');
-    } else if (deferredInstallPrompt) {
-        $('#installPlatformTag').text('PWA');
-    } else {
-        $('#installPlatformTag').text('Web App');
-    }
-
+    $('#installPlatformTag').text('iOS');
     $banner.addClass('is-visible');
     setTimeout(updateHeaderDropdownPosition, 300);
 }
@@ -8470,23 +8464,7 @@ function hideInstallBanner(permanent) {
 }
 
 function showPwaInstallModal() {
-    var isIos = isIosDevice();
-    if (isIos) {
-        $('#pwaIosInstructions').removeClass('hidden');
-        $('#pwaGenericInstructions').addClass('hidden');
-        $('#pwaInstallModalPlatformTag').text('iOS / Safari');
-        $('#btnActionPwaInstallText').text('J\'ai compris');
-    } else if (deferredInstallPrompt) {
-        $('#pwaIosInstructions').addClass('hidden');
-        $('#pwaGenericInstructions').removeClass('hidden');
-        $('#pwaInstallModalPlatformTag').text('PWA');
-        $('#btnActionPwaInstallText').text('Installer maintenant');
-    } else {
-        $('#pwaIosInstructions').addClass('hidden');
-        $('#pwaGenericInstructions').removeClass('hidden');
-        $('#pwaInstallModalPlatformTag').text('Application Web');
-        $('#btnActionPwaInstallText').text('Fermer');
-    }
+    if (!isIosDevice()) return;
     $('#pwaInstallModalBackdrop, #pwaInstallModal').removeClass('hidden');
 }
 
@@ -8495,18 +8473,16 @@ function hidePwaInstallModal() {
 }
 
 function triggerPwaInstall() {
-    if (deferredInstallPrompt) {
+    if (isIosDevice()) {
+        showPwaInstallModal();
+    } else if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then(function(choiceResult) {
             if (choiceResult && choiceResult.outcome === 'accepted') {
-                console.log('[PWA] User accepted installation prompt');
-                hideInstallBanner(true);
-                hidePwaInstallModal();
+                console.log('[PWA] User accepted installation');
             }
             deferredInstallPrompt = null;
         });
-    } else {
-        showPwaInstallModal();
     }
 }
 
@@ -9145,25 +9121,20 @@ function setupEventListeners() {
             $('.update-check-wrapper').hide();
             $('#labelUpdatesText').text('Retours & Suggestions');
 
-            if (!isAppStandalone()) {
+            // Strictly iOS mobile banner
+            if (isIosDevice() && !isAppStandalone()) {
                 setTimeout(function() {
                     showInstallBanner();
                 }, 1800);
             }
         }
     } else {
-        // Desktop / Android Web platform: show download/install app button, hide native updater controls
+        // Desktop / Android Web platform: show download app button for APK, hide updater controls (never show iOS install banner on desktop)
         $('.web-only-btn, #btnDownloadAppWebSidebar, #btnDownloadAppSettings, .web-download-app-wrapper').show();
         $('#toggleAutoUpdate').closest('.settings-toggle-row').hide();
         $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
         $('.update-check-wrapper').hide();
         $('#labelUpdatesText').text('Application & Retours');
-
-        if (!isAppStandalone()) {
-            setTimeout(function() {
-                showInstallBanner();
-            }, 1800);
-        }
     }
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)

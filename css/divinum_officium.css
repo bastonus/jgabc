@@ -4236,6 +4236,21 @@ body.player-dock-open .app-main {
     flex-shrink: 0;
 }
 
+/* Install banner is strictly for iOS mobile, hidden by default on desktop/generic */
+.do-install-banner {
+    display: none !important;
+}
+
+html.is-ios .do-install-banner {
+    display: block !important;
+}
+
+@media (min-width: 901px) {
+    .do-install-banner {
+        display: none !important;
+    }
+}
+
 [data-theme="light"] .do-update-banner {
     background: #e2e5eb;
     border: none !important;
