@@ -55,10 +55,10 @@
     },
     {
       "id": "notif-early-beta-warning",
-      "enabled": true,
-      "priority": 40,
+      "enabled": false,
+      "priority": 10,
       "platforms": ["all"],
-      "frequency": "always",
+      "frequency": "once",
       "style": "liturgical",
       "badge": "Beta Early",
       "icon": "alert",

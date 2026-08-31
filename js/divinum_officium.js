@@ -8557,6 +8557,7 @@ function checkForAppUpdates(isManual) {
             var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
 
             if (isNewer) {
+                window._hasPendingAppUpdate = true;
                 if (isManual) {
                     $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
                 }
@@ -8574,6 +8575,7 @@ function checkForAppUpdates(isManual) {
                     }
                 }
             } else {
+                window._hasPendingAppUpdate = false;
                 if (isManual) {
                     $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
                 }
@@ -9494,6 +9496,12 @@ var OremusNotifications = (function() {
 
             if (!valid.length) {
                 console.log('[RemoteNotifications] No pending notifications for current platform & state.');
+                return;
+            }
+
+            // Do not show remote notification if app update banner is visible or pending update is found
+            if ($('#appUpdateBanner').hasClass('is-visible') || window._hasPendingAppUpdate) {
+                console.log('[RemoteNotifications] App update banner has priority, postponing remote notification.');
                 return;
             }
 
@@ -10906,15 +10914,17 @@ $(function() {
         window.OremusSystemNotifications.initChannels();
     }
 
-    // Check for Remote GitHub Notifications and Releases after initial render
+    // Check for Releases FIRST (highest priority), then Remote Notifications
     setTimeout(function() {
-        if (window.OremusNotifications && typeof window.OremusNotifications.check === 'function') {
-            window.OremusNotifications.check(false);
-        }
         if (typeof checkForAppUpdates === 'function') {
             checkForAppUpdates(false);
         }
-    }, 1500);
+        setTimeout(function() {
+            if (window.OremusNotifications && typeof window.OremusNotifications.check === 'function') {
+                window.OremusNotifications.check(false);
+            }
+        }, 1200);
+    }, 1200);
 
     // Initialize 20-minute usage tracker
     if (window.OremusUsageTracker && typeof window.OremusUsageTracker.init === 'function') {
@@ -11015,12 +11025,14 @@ $(function() {
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
             checkInactivityReset();
-            if (window.OremusNotifications) {
-                window.OremusNotifications.check(false);
-            }
             if (typeof checkForAppUpdates === 'function') {
                 checkForAppUpdates(false);
             }
+            setTimeout(function() {
+                if (window.OremusNotifications) {
+                    window.OremusNotifications.check(false);
+                }
+            }, 1000);
         } else {
             recordActivity();
         }
