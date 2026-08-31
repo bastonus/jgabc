@@ -1,0 +1,131 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-08-31T12:43:00Z",
+  "channel": "official",
+  "notifications": [
+    {
+      "id": "notif-release-beta-0.0.38",
+      "enabled": true,
+      "priority": 100,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.38",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour beta-0.0.38",
+      "icon": "sparkles",
+      "title": "Notes de version beta-0.0.38",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Voici les nouveautés, les correctifs détaillés et les évolutions à venir suite à vos nombreux retours.",
+      "cancelsNotifications": ["notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus est à jour (beta-0.0.38) : Nouveautés et correctifs",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (beta-0.0.38)",
+        "subtitle": "Nouveautés, correctifs détaillés & retours communautaires",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "sparkles",
+            "title": "Nouveau Design Épuré des Popups",
+            "content": "Refonte visuelle intégrale des fenêtres d'information et dialogues : suppression des bordures dures, arrondi doux harmonisé avec les boutons de l'application, et adaptation aux thèmes Clair, Sombre et OLED."
+          },
+          {
+            "type": "card",
+            "icon": "bell",
+            "title": "Canal d'Alertes & Notifications en Direct",
+            "content": "Système de notifications en temps réel depuis GitHub, intégré avec fluidité au bandeau supérieur et sous forme d'alertes iOS et Android."
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Correctifs & Fixes Détaillés",
+            "content": "<ul><li><strong>Correctif du bandeau d'installation :</strong> Résolution des décalages d'affichage et meilleure détection PWA / iOS / Android.</li><li><strong>Stabilité des gestes tactiles :</strong> Optimisation du tiroir latéral (sidebar) et du glissement bilingue synchronisé.</li><li><strong>Rendu visuel :</strong> Suppression des bordures superflues et harmonisation des contrastes en mode sombre.</li><li><strong>Gestion du cache :</strong> Amélioration de la persistance hors-ligne des textes liturgiques et des hymnes.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos retours et suggestions",
+            "content": "Un grand merci à chacun pour vos retours ! <strong>Tous les autres retours et suggestions formulés ont bien été enregistrés et sont actuellement pris en compte</strong> pour les versions à venir."
+          },
+          {
+            "type": "steps",
+            "title": "Prochaines étapes en cours de développement",
+            "steps": [
+              "Enrichissement des partitions grégoriennes interactives et du moteur audio neumatique.",
+              "Améliorations continues des traductions bilingues et repères de lectures du Missel 1962.",
+              "Intégration progressive de l'ensemble des demandes issues du formulaire de feedback."
+            ]
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "notif-github-apk-android",
+      "enabled": true,
+      "priority": 20,
+      "platforms": ["android_web"],
+      "frequency": "always",
+      "style": "android",
+      "badge": "Android",
+      "icon": "download",
+      "title": "Application Android native disponible",
+      "subtitle": "Téléchargez l'APK pour une expérience fluide et hors-ligne",
+      "message": "Installez l'application Oremus au format APK Android pour bénéficier des alertes, du mode hors-ligne complet et du moteur audio optimisé.",
+      "banner": {
+        "show": true,
+        "text": "Application Android disponible au téléchargement (APK)",
+        "tag": "APK",
+        "actionLabel": "Télécharger",
+        "actionType": "open_url",
+        "url": "https://github.com/bastonus/jgabc/releases",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Télécharger Oremus pour Android",
+        "subtitle": "Fichier APK autonome sans dépendance",
+        "icon": "download",
+        "wrappers": [
+          {
+            "type": "steps",
+            "title": "Comment installer l'APK",
+            "steps": [
+              "Téléchargez le dernier fichier <code>.apk</code> depuis les releases GitHub.",
+              "Ouvrez le fichier téléchargé et autorisez l'installation depuis cette source.",
+              "Profitez de l'application avec démarrage ultra-rapide et accès hors-ligne garanti."
+            ]
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Télécharger l'APK sur GitHub",
+            "type": "primary",
+            "action": "open_url",
+            "url": "https://github.com/bastonus/jgabc/releases",
+            "dismissOnClick": true
+          },
+          {
+            "label": "Plus tard",
+            "type": "secondary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    }
+  ]
+}

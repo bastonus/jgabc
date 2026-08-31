@@ -21,8 +21,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/modern.css?v=28.1&ts=202608260940">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=68.3&ts=202608271331">
+    <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=69.0&ts=202608311235">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -78,7 +78,7 @@
     <script src="patterns/pl.js"></script>
     <script src="do_manifest.js?v=20.10&ts=202608251858"></script>
     <script src="js/bible_mappings.js?v=1.0&ts=202608252254"></script>
-    <script src="js/divinum_officium.js?v=68.4&ts=202608311150"></script>
+    <script src="js/divinum_officium.js?v=69.6&ts=202608311249"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -184,6 +184,64 @@
         </aside>
 
         <div class="do-main-wrapper">
+            <!-- Remote GitHub Notification Top Banner (Integrated in Download/Notification Bar) -->
+            <aside id="appRemoteNotificationBanner" class="do-update-banner do-remote-notif-banner" aria-label="Notification">
+                <div class="do-update-banner-inner">
+                    <div class="do-update-banner-left">
+                        <span id="remoteNotifBannerIcon" class="do-update-banner-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                        </span>
+                        <span id="remoteNotifBannerTitle" class="do-update-banner-title">Notification</span>
+                        <span id="remoteNotifBannerTag" class="do-update-banner-tag">Info</span>
+                    </div>
+                    <div class="do-update-banner-actions" id="remoteNotifBannerActions">
+                        <button id="btnRemoteNotifAction" class="do-update-btn-action">
+                            <span>Voir</span>
+                        </button>
+                        <button id="btnCloseRemoteNotifBanner" class="do-update-btn-close" aria-label="Fermer" title="Fermer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Floating iOS / Android Style Notification Pill / Bar -->
+            <aside id="appFloatingNotification" class="do-floating-notif hidden" aria-live="polite">
+                <div class="do-floating-notif-inner">
+                    <div class="do-floating-notif-icon-circle" id="floatingNotifIconCircle">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="do-floating-notif-content" id="floatingNotifContent">
+                        <div class="do-floating-notif-header">
+                            <span class="do-floating-notif-title" id="floatingNotifTitle">Oremus</span>
+                            <span class="do-floating-notif-badge" id="floatingNotifBadge">Nouveau</span>
+                            <span class="do-floating-notif-time">maintenant</span>
+                        </div>
+                        <div class="do-floating-notif-body" id="floatingNotifBody">Message</div>
+                    </div>
+                    <div class="do-floating-notif-actions">
+                        <button id="btnFloatingNotifAction" class="do-floating-btn-action" title="Action">
+                            <span>Voir</span>
+                        </button>
+                        <button id="btnCloseFloatingNotif" class="do-floating-btn-close" aria-label="Fermer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
             <!-- Top Install Banner (PWA / iOS / Android) -->
             <aside id="appInstallBanner" class="do-update-banner do-install-banner" aria-label="Installation de l'application">
                 <div class="do-update-banner-inner">
@@ -497,7 +555,7 @@
                         </svg>
                         <span>Vérifier les mises à jour</span>
                     </button>
-                    <div id="updateStatusText" class="update-status-text">Version actuelle : beta-0.0.26</div>
+                    <div id="updateStatusText" class="update-status-text">Version actuelle : beta-0.0.38</div>
                 </div>
                 <div class="web-download-app-wrapper web-only-btn" style="margin-top:8px;">
                     <button id="btnDownloadAppSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
@@ -861,7 +919,7 @@
                 </div>
                 <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 10px 12px; border-radius: 10px;">
                     <div class="update-notes-text" style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
-                        ✨ <strong>Accès hors-ligne</strong> : l'application reste accessible même sans connexion Internet.
+                        <strong>Accès hors-ligne</strong> : l'application reste accessible même sans connexion Internet.
                     </div>
                 </div>
             </div>
@@ -928,6 +986,45 @@
                     </svg>
                     <span>Redémarrer maintenant</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rich Remote Notification Popup Modal -->
+    <div id="remoteNotificationModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="remoteNotificationModal" class="update-modal hidden" role="dialog" aria-labelledby="remoteNotifModalTitle">
+        <div class="update-card remote-notif-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle" id="remoteNotifModalIconCircle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="remoteNotifModalTitle" class="update-title">Annonce</h3>
+                        <span class="update-version-tag" id="remoteNotifModalTag">Oremus</span>
+                    </div>
+                </div>
+                <button id="btnCloseRemoteNotifModal" class="update-close-btn" aria-label="Fermer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body" id="remoteNotifModalBody" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+                <!-- Subtitle / Main message -->
+                <div id="remoteNotifModalSubtitle" class="remote-notif-subtitle hidden"></div>
+                <div id="remoteNotifModalMessage" class="remote-notif-message"></div>
+
+                <!-- Structured Dynamic Wrappers (cards, callouts, steps, note boxes) -->
+                <div id="remoteNotifModalWrappers" class="remote-notif-wrappers-container"></div>
+            </div>
+            <div class="update-actions" id="remoteNotifModalActions">
+                <!-- Action buttons rendered dynamically based on JSON -->
+                <button id="btnDismissRemoteNotifModal" class="update-btn-dismiss">Fermer</button>
             </div>
         </div>
     </div>

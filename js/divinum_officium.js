@@ -1141,6 +1141,7 @@ function fileExistsInManifest(path) {
 }
 
 // ---- File Fetcher (100% Local Relative Path with 404 Prevention) ----
+var DO_DATA_BUILD_VERSION = '202608311249';
 function fetchLocalFile(path, callback) {
     if (DO_LOCAL_CACHE[path] !== undefined) {
         callback(null, DO_LOCAL_CACHE[path]);
@@ -1151,8 +1152,9 @@ function fetchLocalFile(path, callback) {
         callback('File not found in manifest', null);
         return;
     }
+    var reqUrl = path + (path.indexOf('?') >= 0 ? '&' : '?') + 'v=' + DO_DATA_BUILD_VERSION;
     $.ajax({
-        url: path,
+        url: reqUrl,
         dataType: 'text',
         cache: true
     }).done(function(data) {
@@ -1737,13 +1739,18 @@ function processMissaSections(fullSections, langFolder, langKey, callback, loade
     }
 
     var ordoPath = 'do_data/missa/' + langFolder + '/Ordo/Ordo.txt';
+    var prayersPath = 'do_data/missa/' + langFolder + '/Ordo/Prayers.txt';
     fetchLocalFile(ordoPath, function(oErr, oData) {
         var ordoParts = (!oErr && oData) ? parseOrdoFile(oData) : {};
-        assembleFullMissa(fullSections, ordoParts, langFolder, feastTitle, callback, loadedPath, detectedCommune);
+        fetchLocalFile(prayersPath, function(pErr, pData) {
+            var prayersSec = (!pErr && pData) ? parseSections(pData) : {};
+            var ultEv = prayersSec['Ultima Evangelium'] || prayersSec['UltimaEvangelium'] || prayersSec['Ultimaev'] || [];
+            assembleFullMissa(fullSections, ordoParts, ultEv, langFolder, feastTitle, callback, loadedPath, detectedCommune);
+        });
     });
 }
 
-function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback, loadedPath, communeRef) {
+function assembleFullMissa(propSec, ordoParts, ultEvLines, langFolder, feastTitle, callback, loadedPath, communeRef) {
     var cards = [];
 
     function getOrdoSection(keys) {
@@ -1764,6 +1771,16 @@ function assembleFullMissa(propSec, ordoParts, langFolder, feastTitle, callback,
     var communionPrep = getOrdoSection(['Preparatio Communionis', 'Préparation à la Communion']);
     var conclusio = getOrdoSection(['Conclusio', 'Conclusion']);
     var leonis = getOrdoSection(['Orationes Leonis XIII', 'Prières de Léon XIII']);
+
+    // Ensure Ultimum Evangelium (Saint Jean 1:1-14) is included in conclusio
+    if (ultEvLines && ultEvLines.length) {
+        var hasUltEvInConclusio = conclusio.some(function(l) {
+            return /In princípio erat Verbum|Au commencement était le Verbe|In the beginning was the Word/i.test(l);
+        });
+        if (!hasUltEvInConclusio) {
+            conclusio = conclusio.concat(ultEvLines);
+        }
+    }
 
     var propKeys = ['Introitus', 'Oratio', 'Lectio', 'Graduale', 'Tractus', 'Alleluia', 'Sequentia', 'Evangelium', 'Offertorium', 'Secreta', 'Communio', 'Postcommunio'];
     var resolvedProps = {};
@@ -2349,6 +2366,15 @@ function formatSingleParagraph(l, langKey) {
     // Skip lone dashes, hyphens, underscores or horizontal rule markers
     if (/^[-–—_~*]+$/.test(l)) return '';
 
+    // Consecration words (e.g. !!!HOC EST ENIM CORPUS MEUM or !!!CAR CECI EST MON CORPS)
+    // Must be rendered in black (normal body text color), bold/distinctive, NOT in red rubric color
+    if (/^!{3,}/.test(l) || /^!(HOC EST ENIM|HIC EST ENIM|CAR CECI EST)/i.test(l)) {
+        var cText = l.replace(/^!+/, '').trim();
+        var formattedConsecration = formatLiturgicalSymbols(escHtml(cText));
+        if (langKey) formattedConsecration = hyphenateHtmlText(formattedConsecration, langKey);
+        return '<p class="do-consecration-words"><strong>' + formattedConsecration + '</strong></p>';
+    }
+
     if (/^!/i.test(l)) {
         var rText = l.replace(/^!+/, '').trim();
         if (/^(Ps\.|[0-9]?\s?[A-Z][a-z]+ [0-9]+:)/i.test(rText) && rText.length < 35) {
@@ -2596,12 +2622,12 @@ function getSpeakerType(line) {
     if (!line) return null;
     line = line.trim();
     if (/^[-–—_~*]+$/.test(line)) return null;
-    if (/^[SMPCOvrVRD]\.[\s\u00a0]*/i.test(line)) {
-        return line.charAt(0).toUpperCase();
-    }
     // Lines starting with !, {, or entirely enclosed in parentheses or rubric text
     if (/^!/.test(line) || /^\{/.test(line) || /^\([^)]+\):?$/i.test(line) || (/^\(/.test(line) && /\)$/.test(line))) {
         return 'RUBRIC';
+    }
+    if (/^[SMPCOvrVRD]\.[\s\u00a0]*/i.test(line)) {
+        return line.charAt(0).toUpperCase();
     }
     return 'TEXT';
 }
@@ -2620,42 +2646,50 @@ function alignBilingualBlocks(laLines, vernLines) {
         var laSp = getSpeakerType(laL);
         var vernSp = getSpeakerType(vernL);
 
-        // Exact match of speaker / rubric type
+        // 1. Both lines have identical speaker/rubric type
         if (laSp && vernSp && laSp === vernSp) {
             rows.push({ la: laL, vern: vernL });
             i++; j++;
             continue;
         }
 
-        // Lookahead in Vernacular (up to 3 steps)
-        var matchInVern = -1;
-        for (var k = 1; k <= 3 && j + k < m; k++) {
-            if (getSpeakerType(vernLines[j + k]) === laSp) {
-                matchInVern = k;
-                break;
-            }
-        }
+        // 2. Both are liturgical prayer content (TEXT, V, R, S, P, M, C, O, D)
+        var isLaPrayer = (laSp !== 'RUBRIC' && laSp !== null);
+        var isVernPrayer = (vernSp !== 'RUBRIC' && vernSp !== null);
 
-        // Lookahead in Latin (up to 3 steps)
-        var matchInLa = -1;
-        for (var k = 1; k <= 3 && i + k < n; k++) {
-            if (getSpeakerType(laLines[i + k]) === vernSp) {
-                matchInLa = k;
-                break;
-            }
-        }
-
-        if (matchInVern > 0 && (matchInLa < 0 || matchInVern <= matchInLa)) {
-            rows.push({ la: '', vern: vernL });
-            j++;
-            continue;
-        } else if (matchInLa > 0) {
-            rows.push({ la: laL, vern: '' });
-            i++;
+        if (isLaPrayer && isVernPrayer) {
+            rows.push({ la: laL, vern: vernL });
+            i++; j++;
             continue;
         }
 
-        // Default: match row
+        // 3. Both are rubrics
+        if (laSp === 'RUBRIC' && vernSp === 'RUBRIC') {
+            rows.push({ la: laL, vern: vernL });
+            i++; j++;
+            continue;
+        }
+
+        // 4. One is a RUBRIC and the other is a PRAYER
+        // Check if the prayer is immediately followed by a rubric or if the rubric has a counterpart
+        if (laSp === 'RUBRIC' && isVernPrayer) {
+            // Check if Latin has a prayer immediately at i+1 matching vernL
+            if (i + 1 < n && getSpeakerType(laLines[i + 1]) !== 'RUBRIC') {
+                // If vernLines also has a rubric soon, don't desynchronize
+                rows.push({ la: laL, vern: '' });
+                i++;
+                continue;
+            }
+        } else if (vernSp === 'RUBRIC' && isLaPrayer) {
+            // Check if Vernacular has a prayer immediately at j+1 matching laL
+            if (j + 1 < m && getSpeakerType(vernLines[j + 1]) !== 'RUBRIC') {
+                rows.push({ la: '', vern: vernL });
+                j++;
+                continue;
+            }
+        }
+
+        // 5. Default lockstep
         rows.push({ la: laL, vern: vernL });
         if (i < n) i++;
         if (j < m) j++;
@@ -8082,7 +8116,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.37';
+var CURRENT_APP_VERSION = 'beta-0.0.38';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -8660,8 +8694,506 @@ function triggerPwaInstall() {
     }
 }
 
+// =============================================================
+// REMOTE GITHUB NOTIFICATION ENGINE (BARS, TOASTS & RICH POPUPS)
+// =============================================================
+
+var OremusNotifications = (function() {
+    var GITHUB_FEED_URL = 'https://raw.githubusercontent.com/bastonus/jgabc/master/notifications.json';
+    var LOCAL_FEED_URL = './notifications.json';
+    var activeNotifications = [];
+    var currentBannerNotif = null;
+    var currentModalNotif = null;
+    var floatingTimer = null;
+
+    function getPlatform() {
+        if (isNativeAndroidApp()) return 'android_native';
+        if (isIosDevice()) return isAppStandalone() ? 'ios_pwa' : 'ios_web';
+        if (isAndroidDevice()) return isAppStandalone() ? 'android_pwa' : 'android_web';
+        if (isAppStandalone()) return 'pwa';
+        return 'web';
+    }
+
+    function isPlatformMatching(platforms) {
+        if (!platforms || !Array.isArray(platforms) || platforms.includes('all')) return true;
+        var p = getPlatform();
+        var isIos = isIosDevice();
+        var isAndroid = isAndroidDevice();
+
+        for (var i = 0; i < platforms.length; i++) {
+            var target = platforms[i].toLowerCase();
+            if (target === p) return true;
+            if (target === 'ios' && isIos) return true;
+            if (target === 'android' && isAndroid) return true;
+            if (target === 'android_web' && isAndroid && !isNativeAndroidApp()) return true;
+            if (target === 'android_native' && isNativeAndroidApp()) return true;
+            if (target === 'pwa' && isAppStandalone()) return true;
+            if (target === 'web' && !isNativeAndroidApp() && !isAppStandalone()) return true;
+        }
+        return false;
+    }
+
+    function isFrequencyAllowed(notif) {
+        var freq = notif.frequency || 'once';
+        var id = notif.id;
+
+        // If cancelled by another notification, never show
+        if (localStorage.getItem('do_notif_status_' + id) === 'cancelled') {
+            return false;
+        }
+
+        if (freq === 'once') {
+            return localStorage.getItem('do_notif_status_' + id) !== 'dismissed';
+        } else if (freq === 'session') {
+            return sessionStorage.getItem('do_notif_session_' + id) !== 'dismissed';
+        } else if (freq === 'always') {
+            return sessionStorage.getItem('do_notif_temp_dismiss_' + id) !== 'true';
+        }
+        return true;
+    }
+
+    function markNotificationDismissed(notifId, freq) {
+        if (freq === 'once') {
+            try { localStorage.setItem('do_notif_status_' + notifId, 'dismissed'); } catch (e) {}
+        } else if (freq === 'session') {
+            try { sessionStorage.setItem('do_notif_session_' + notifId, 'dismissed'); } catch (e) {}
+        } else {
+            try { sessionStorage.setItem('do_notif_temp_dismiss_' + notifId, 'true'); } catch (e) {}
+        }
+    }
+
+    function getIconSvg(iconName) {
+        var icons = {
+            'sparkles': '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+            'bell': '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>',
+            'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>',
+            'music': '<path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>',
+            'book-open': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>',
+            'info': '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>',
+            'alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+            'check': '<polyline points="20 6 9 17 4 12"></polyline>',
+            'cross': '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
+        };
+
+        var path = icons[iconName] || icons['bell'];
+        return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+    }
+
+    function fetchFeed(forceRefresh) {
+        var url = GITHUB_FEED_URL + '?_ts=' + (forceRefresh ? Date.now() : Math.floor(Date.now() / 60000));
+        
+        return fetch(url, {
+            cache: 'no-cache',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .catch(function(err) {
+            console.warn('[RemoteNotifications] GitHub fetch failed, attempting local fallback:', err);
+            return fetch(LOCAL_FEED_URL + '?_ts=' + Date.now()).then(function(r) { return r.json(); });
+        })
+        .then(function(data) {
+            if (data && Array.isArray(data.notifications)) {
+                try {
+                    localStorage.setItem('do_remote_notifications_cache', JSON.stringify(data));
+                } catch (e) {}
+                return data.notifications;
+            }
+            return [];
+        })
+        .catch(function(err) {
+            console.warn('[RemoteNotifications] Unable to fetch feed:', err);
+            try {
+                var cached = localStorage.getItem('do_remote_notifications_cache');
+                if (cached) {
+                    var parsed = JSON.parse(cached);
+                    return parsed.notifications || [];
+                }
+            } catch (e) {}
+            return [];
+        });
+    }
+
+    function evaluateNotifications(list) {
+        if (!Array.isArray(list) || !list.length) return [];
+
+        var now = new Date();
+
+        // 1. Process cancellations first
+        list.forEach(function(n) {
+            if (n.enabled && Array.isArray(n.cancelsNotifications)) {
+                n.cancelsNotifications.forEach(function(cancelId) {
+                    try {
+                        localStorage.setItem('do_notif_status_' + cancelId, 'cancelled');
+                    } catch (e) {}
+                });
+            }
+        });
+
+        // 2. Filter valid notifications
+        var valid = list.filter(function(n) {
+            if (!n || !n.enabled) return false;
+            if (!n.id) return false;
+
+            // Platform check
+            if (!isPlatformMatching(n.platforms)) return false;
+
+            // Frequency / cancellation check
+            if (!isFrequencyAllowed(n)) return false;
+
+            // Date limits
+            if (n.startDate && new Date(n.startDate) > now) return false;
+            if (n.endDate && new Date(n.endDate) < now) return false;
+
+            // Version bounds
+            if (n.minVersion && typeof compareVersions === 'function') {
+                if (compareVersions(CURRENT_APP_VERSION, n.minVersion) < 0) return false;
+            }
+            if (n.maxVersion && typeof compareVersions === 'function') {
+                if (compareVersions(CURRENT_APP_VERSION, n.maxVersion) > 0) return false;
+            }
+
+            // Dependency check: only show if dependsOn was dismissed
+            if (n.dependsOn) {
+                var depStatus = localStorage.getItem('do_notif_status_' + n.dependsOn);
+                if (depStatus !== 'dismissed' && depStatus !== 'cancelled') {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        // 3. Sort by priority (higher priority first)
+        valid.sort(function(a, b) {
+            var pa = (typeof a.priority === 'number') ? a.priority : 0;
+            var pb = (typeof b.priority === 'number') ? b.priority : 0;
+            return pb - pa;
+        });
+
+        return valid;
+    }
+
+    function showBanner(notif) {
+        if (!notif) return;
+        currentBannerNotif = notif;
+        var bannerData = notif.banner || {};
+        var $banner = $('#appRemoteNotificationBanner');
+        if (!$banner.length) return;
+
+        // Reset style classes
+        $banner.removeClass('style-liturgical style-ios style-android style-warning style-accent');
+        if (notif.style) {
+            $banner.addClass('style-' + notif.style);
+        }
+
+        // Icon
+        var iconSvg = getIconSvg(notif.icon || 'bell');
+        $('#remoteNotifBannerIcon').html(iconSvg);
+
+        // Text and Badge
+        var bannerText = bannerData.text || notif.title || 'Notification';
+        var bannerTag = bannerData.tag || notif.badge || 'Info';
+        $('#remoteNotifBannerTitle').text(bannerText);
+        $('#remoteNotifBannerTag').text(bannerTag);
+
+        // Action button
+        var actionLabel = bannerData.actionLabel || 'Voir';
+        $('#btnRemoteNotifAction span').text(actionLabel);
+
+        if (bannerData.dismissible === false) {
+            $('#btnCloseRemoteNotifBanner').hide();
+        } else {
+            $('#btnCloseRemoteNotifBanner').show();
+        }
+
+        $banner.addClass('is-visible');
+        setTimeout(updateHeaderDropdownPosition, 300);
+    }
+
+    function hideBanner(markDismissed) {
+        var $banner = $('#appRemoteNotificationBanner');
+        $banner.removeClass('is-visible');
+        setTimeout(updateHeaderDropdownPosition, 300);
+
+        if (markDismissed && currentBannerNotif) {
+            markNotificationDismissed(currentBannerNotif.id, currentBannerNotif.frequency);
+        }
+    }
+
+    function showFloating(notif) {
+        if (!notif) return;
+        var $toast = $('#appFloatingNotification');
+        if (!$toast.length) return;
+
+        var iconSvg = getIconSvg(notif.icon || 'bell');
+        $('#floatingNotifIconCircle').html(iconSvg);
+        $('#floatingNotifTitle').text(notif.title || 'Oremus');
+        $('#floatingNotifBadge').text(notif.badge || 'Info');
+        $('#floatingNotifBody').text(notif.message || (notif.banner ? notif.banner.text : ''));
+
+        if (notif.banner && notif.banner.actionLabel) {
+            $('#btnFloatingNotifAction').show().find('span').text(notif.banner.actionLabel);
+        } else {
+            $('#btnFloatingNotifAction').show().find('span').text('Voir');
+        }
+
+        $toast.removeClass('hidden');
+        triggerHapticFeedback('light');
+
+        if (floatingTimer) clearTimeout(floatingTimer);
+        floatingTimer = setTimeout(function() {
+            hideFloating(false);
+        }, 9000);
+    }
+
+    function hideFloating(markDismissed) {
+        var $toast = $('#appFloatingNotification');
+        $toast.addClass('hidden');
+        if (floatingTimer) {
+            clearTimeout(floatingTimer);
+            floatingTimer = null;
+        }
+        if (markDismissed && currentBannerNotif) {
+            markNotificationDismissed(currentBannerNotif.id, currentBannerNotif.frequency);
+        }
+    }
+
+    function showModal(notif) {
+        if (!notif) return;
+        currentModalNotif = notif;
+        var modalData = notif.modal || {};
+
+        var title = modalData.title || notif.title || 'Annonce';
+        var subtitle = modalData.subtitle || notif.subtitle || '';
+        var badge = notif.badge || 'Oremus';
+        var message = notif.message || '';
+        var icon = modalData.icon || notif.icon || 'bell';
+
+        // Header
+        $('#remoteNotifModalTitle').text(title);
+        $('#remoteNotifModalTag').text(badge);
+        $('#remoteNotifModalIconCircle').html(getIconSvg(icon));
+
+        // Subtitle
+        if (subtitle) {
+            $('#remoteNotifModalSubtitle').text(subtitle).removeClass('hidden');
+        } else {
+            $('#remoteNotifModalSubtitle').addClass('hidden');
+        }
+
+        // Message body
+        if (message) {
+            var formatted = (typeof parseMarkdownToHtml === 'function') ? parseMarkdownToHtml(message) : message;
+            $('#remoteNotifModalMessage').html(formatted).removeClass('hidden');
+        } else {
+            $('#remoteNotifModalMessage').addClass('hidden');
+        }
+
+        // Render Wrappers (Cards, Callouts, Steps)
+        var $wrappersContainer = $('#remoteNotifModalWrappers');
+        $wrappersContainer.empty();
+
+        if (Array.isArray(modalData.wrappers) && modalData.wrappers.length) {
+            modalData.wrappers.forEach(function(w) {
+                if (w.type === 'card') {
+                    var cardIcon = getIconSvg(w.icon || 'sparkles');
+                    var cardHtml = '<div class="remote-notif-card-item">' +
+                        '<div class="remote-notif-card-icon">' + cardIcon + '</div>' +
+                        '<div class="remote-notif-card-text">' +
+                            '<div class="remote-notif-card-title">' + (w.title || '') + '</div>' +
+                            '<div class="remote-notif-card-desc">' + (w.content || '') + '</div>' +
+                        '</div>' +
+                    '</div>';
+                    $wrappersContainer.append(cardHtml);
+                } else if (w.type === 'callout') {
+                    var styleClass = w.style ? 'style-' + w.style : '';
+                    var calloutHtml = '<div class="remote-notif-callout ' + styleClass + '">' +
+                        (w.title ? '<div class="remote-notif-callout-title">' + w.title + '</div>' : '') +
+                        '<div class="remote-notif-callout-content">' + (w.content || '') + '</div>' +
+                    '</div>';
+                    $wrappersContainer.append(calloutHtml);
+                } else if (w.type === 'steps') {
+                    var stepsHtml = '<div class="remote-notif-steps-box">';
+                    if (w.title) stepsHtml += '<div class="remote-notif-steps-title">' + w.title + '</div>';
+                    stepsHtml += '<div class="remote-notif-steps-list">';
+                    if (Array.isArray(w.steps)) {
+                        w.steps.forEach(function(stepText, idx) {
+                            stepsHtml += '<div class="remote-notif-step-row">' +
+                                '<span class="remote-notif-step-num">' + (idx + 1) + '</span>' +
+                                '<span class="remote-notif-step-desc">' + stepText + '</span>' +
+                            '</div>';
+                        });
+                    }
+                    stepsHtml += '</div></div>';
+                    $wrappersContainer.append(stepsHtml);
+                }
+            });
+        }
+
+        // Render Action Buttons
+        var $actionsContainer = $('#remoteNotifModalActions');
+        $actionsContainer.empty();
+
+        var buttons = modalData.buttons;
+        if (!Array.isArray(buttons) || !buttons.length) {
+            buttons = [
+                { label: 'J\'ai compris', type: 'primary', action: 'dismiss', dismissOnClick: true }
+            ];
+        }
+
+        buttons.forEach(function(btn, idx) {
+            var btnTypeClass = 'remote-notif-btn-' + (btn.type || 'primary');
+            var $btn = $('<button class="remote-notif-btn ' + btnTypeClass + '"></button>');
+            $btn.text(btn.label || 'Action');
+            $btn.data('btn-index', idx);
+            $btn.data('btn-action', btn.action || 'dismiss');
+            $btn.data('btn-url', btn.url || '');
+            $btn.data('btn-target', btn.target || '');
+            $btn.data('btn-dismiss', btn.dismissOnClick !== false);
+            $actionsContainer.append($btn);
+        });
+
+        $('#remoteNotificationModalBackdrop, #remoteNotificationModal').removeClass('hidden');
+        triggerHapticFeedback('open');
+    }
+
+    function hideModal(markDismissed) {
+        $('#remoteNotificationModalBackdrop, #remoteNotificationModal').addClass('hidden');
+        if (markDismissed && currentModalNotif) {
+            markNotificationDismissed(currentModalNotif.id, currentModalNotif.frequency);
+        }
+    }
+
+    function handleAction(notif, actionType, url, target) {
+        if (!actionType) actionType = 'open_modal';
+
+        if (actionType === 'open_modal') {
+            showModal(notif);
+        } else if (actionType === 'open_url') {
+            if (url) {
+                window.open(url, '_blank');
+            }
+        } else if (actionType === 'open_page') {
+            if (target) {
+                closeModals();
+                doState.hora = target;
+                localStorage.setItem('do_hora', target);
+                renderDO();
+            }
+        } else if (actionType === 'copy_text') {
+            if (url && navigator.clipboard) {
+                navigator.clipboard.writeText(url);
+                triggerHapticFeedback('success');
+            }
+        } else if (actionType === 'dismiss') {
+            // Handled by caller
+        }
+    }
+
+    function checkAndRun(forceRefresh) {
+        fetchFeed(forceRefresh).then(function(list) {
+            var valid = evaluateNotifications(list);
+            activeNotifications = valid;
+
+            if (!valid.length) {
+                console.log('[RemoteNotifications] No pending notifications for current platform & state.');
+                return;
+            }
+
+            var primary = valid[0];
+
+            // Decide presentation
+            if (primary.banner && primary.banner.show !== false) {
+                showBanner(primary);
+            } else if (primary.target === 'toast' || primary.target === 'floating') {
+                showFloating(primary);
+            } else if (primary.target === 'modal' || primary.autoOpenModal) {
+                showModal(primary);
+            }
+        });
+    }
+
+    return {
+        check: checkAndRun,
+        showBanner: showBanner,
+        hideBanner: hideBanner,
+        showFloating: showFloating,
+        hideFloating: hideFloating,
+        showModal: showModal,
+        hideModal: hideModal,
+        handleAction: handleAction,
+        getActive: function() { return activeNotifications; },
+        getCurrentBanner: function() { return currentBannerNotif; },
+        getCurrentModal: function() { return currentModalNotif; }
+    };
+})();
+
 // ---- Event Listeners ----
 function setupEventListeners() {
+    // Remote Notification Event Listeners
+    $(document).on('click', '#btnRemoteNotifAction', function(e) {
+        e.preventDefault();
+        var notif = OremusNotifications.getCurrentBanner();
+        if (notif) {
+            var bannerData = notif.banner || {};
+            OremusNotifications.handleAction(notif, bannerData.actionType || 'open_modal', bannerData.url, bannerData.target);
+            if (bannerData.dismissOnClick) {
+                OremusNotifications.hideBanner(true);
+            }
+        }
+    });
+
+    $(document).on('click', '#btnCloseRemoteNotifBanner', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        OremusNotifications.hideBanner(true);
+    });
+
+    $(document).on('click', '#btnFloatingNotifAction', function(e) {
+        e.preventDefault();
+        var notif = OremusNotifications.getCurrentBanner() || (OremusNotifications.getActive().length ? OremusNotifications.getActive()[0] : null);
+        if (notif) {
+            var bannerData = notif.banner || {};
+            OremusNotifications.handleAction(notif, bannerData.actionType || 'open_modal', bannerData.url, bannerData.target);
+            OremusNotifications.hideFloating(true);
+        }
+    });
+
+    $(document).on('click', '#btnCloseFloatingNotif', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        OremusNotifications.hideFloating(true);
+    });
+
+    $(document).on('click', '#btnCloseRemoteNotifModal, #remoteNotificationModalBackdrop', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        OremusNotifications.hideModal(true);
+    });
+
+    $(document).on('click', '#remoteNotifModalActions .remote-notif-btn', function(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var notif = OremusNotifications.getCurrentModal();
+        var action = $btn.data('btn-action');
+        var url = $btn.data('btn-url');
+        var target = $btn.data('btn-target');
+        var shouldDismiss = $btn.data('btn-dismiss');
+
+        triggerHapticFeedback('selection');
+
+        if (notif) {
+            OremusNotifications.handleAction(notif, action, url, target);
+            if (shouldDismiss) {
+                OremusNotifications.hideModal(true);
+            }
+        } else {
+            OremusNotifications.hideModal(false);
+        }
+    });
     // Feedback Modal Triggers
     $(document).on('click', '#btnFeedbackSidebar, #btnFeedbackSettings', function(e) {
         e.preventDefault();
@@ -9652,4 +10184,19 @@ $(function() {
     initTheme();
     setupEventListeners();
     renderDO();
+
+    // Check for Remote GitHub Notifications after initial render
+    setTimeout(function() {
+        if (window.OremusNotifications && typeof window.OremusNotifications.check === 'function') {
+            window.OremusNotifications.check(false);
+        }
+    }, 1200);
+
+    // Recheck notifications on visibility return / focus
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && window.OremusNotifications) {
+            window.OremusNotifications.check(false);
+        }
+    });
 });
+
