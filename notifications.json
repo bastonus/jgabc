@@ -1,8 +1,50 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:43:00Z",
+  "updatedAt": "2026-09-01T01:05:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-test-push-20260901",
+      "enabled": true,
+      "priority": 150,
+      "platforms": ["all"],
+      "frequency": "once",
+      "style": "liturgical",
+      "category": "announcements",
+      "badge": "Test Canal",
+      "icon": "bell",
+      "title": "🕊️ Notification de Test — Canal Officiel",
+      "subtitle": "Test du canal officiel Oremus et de la nouvelle icône",
+      "message": "Ceci est une notification de test diffusée sur le canal officiel Oremus avec l'icône vectorielle officielle.",
+      "banner": {
+        "show": true,
+        "text": "🕊️ Canal Officiel : Test de notification et de l'icône Oremus",
+        "tag": "Test Canal",
+        "actionLabel": "Ouvrir",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Canal Officiel — Test de Notification",
+        "subtitle": "Validation du système de diffusion et de l'icône Android",
+        "icon": "bell",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Test Réussi !",
+            "content": "<p>La notification push du canal officiel fonctionne correctement avec :</p><ul><li>L'icône vectorielle officielle Oremus dans la barre d'état.</li><li>La déduplication permanente sans spam.</li><li>L'ouverture directe de ce message au clic.</li></ul>"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Compris",
+            "action": "dismiss",
+            "primary": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.50",
       "enabled": true,
