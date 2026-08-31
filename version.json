@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.45",
-  "versionCode": 45,
-  "releaseDate": "2026-08-31T18:55:00Z",
-  "tagName": "v0.0.45",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.45/app-release.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.45",
-  "body": "Release v0.0.45 — Résolution 403 Rate Limit, Sommaire de la Messe, Gestuelle retour & reset, Dernier Évangile"
+  "latestVersion": "beta-0.0.46",
+  "versionCode": 46,
+  "releaseDate": "2026-08-31T19:15:00Z",
+  "tagName": "v0.0.46",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.46/app-release.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.46",
+  "body": "Release v0.0.46 — Icône vectorielle personnalisée Android, Push en arrière-plan, Clic notification ouvrant la popup liée"
 }

@@ -1,5 +1,5 @@
 # 📋 Tâches & Retours Utilisateurs — Oremus
-*Suivi des actions issues des retours utilisateurs du 31 août 2026 (Version 0.0.45)*
+*Suivi des actions issues des retours utilisateurs du 31 août 2026 (Version 0.0.46)*
 
 ---
 
