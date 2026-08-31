@@ -1,62 +1,8 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:20:00Z",
+  "updatedAt": "2026-08-31T14:30:00Z",
   "channel": "official",
   "notifications": [
-    {
-      "id": "notif-official-live-test",
-      "enabled": true,
-      "priority": 1000,
-      "platforms": ["all"],
-      "frequency": "always",
-      "style": "liturgical",
-      "badge": "Canal GitHub",
-      "icon": "bell",
-      "title": "Canal officiel GitHub connecte",
-      "subtitle": "Notification en direct recue avec succes",
-      "message": "Cette notification est diffusee en temps reel depuis le canal officiel GitHub de l'application Oremus sans necessiter de mise a jour binaire.",
-      "banner": {
-        "show": true,
-        "text": "Canal officiel GitHub : Notification en direct recue avec succes",
-        "tag": "Direct",
-        "actionLabel": "Ouvrir",
-        "actionType": "open_modal",
-        "dismissible": true
-      },
-      "modal": {
-        "title": "Canal Officiel GitHub Connecte",
-        "subtitle": "Notification diffusee en direct",
-        "icon": "bell",
-        "wrappers": [
-          {
-            "type": "card",
-            "icon": "bell",
-            "title": "Diffusion en direct operationnelle",
-            "content": "Cette alerte provient directement du fichier notifications.json heberge sur GitHub. Elle est recue par toutes les applications et versions d'Oremus."
-          },
-          {
-            "type": "card",
-            "icon": "sparkles",
-            "title": "Nouveau design des popups",
-            "content": "Les fenetres et boites de dialogue beneficient du design epure sans bordure avec coins arrondis et boutons harmonises."
-          },
-          {
-            "type": "callout",
-            "style": "primary",
-            "title": "Notifications systeme & bandeau",
-            "content": "Le systeme prend en charge la barre de notification superieure, les alertes flottantes et les notifications systeme Android."
-          }
-        ],
-        "buttons": [
-          {
-            "label": "J'ai bien recu",
-            "type": "primary",
-            "action": "dismiss",
-            "dismissOnClick": true
-          }
-        ]
-      }
-    },
     {
       "id": "notif-release-beta-0.0.40",
       "enabled": true,
@@ -69,6 +15,7 @@
       "title": "Notes de version beta-0.0.40",
       "subtitle": "Votre application Oremus a ete mise a jour",
       "message": "Decouvrez les dernieres ameliorations apportees a Oremus : notifications systeme officielles Android, controle des alertes dans les parametres et prompt intelligent apres 20 minutes d'utilisation.",
+      "cancelsNotifications": ["notif-official-live-test", "notif-test-live-01", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
         "text": "Oremus est a jour : Decouvrez les nouveautes et correctifs",
