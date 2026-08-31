@@ -1,6 +1,6 @@
 # 📝 Notes de Version — Oremus
 
-## 🚀 Version 0.0.43 (31 Août 2026)
+## 🚀 Version 0.0.44 (31 Août 2026)
 
 ---
 

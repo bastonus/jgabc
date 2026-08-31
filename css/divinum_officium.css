@@ -5751,7 +5751,7 @@ html.is-ios .web-download-app-wrapper,
     }
 }
 
-/* ── Floating Trigger Button (Slender & Compact 30px Design, 100% Opaque) ── */
+/* ── Floating Trigger Button (Slender 30px Design, 100% Solid Opaque Grey, Flat No-Shadow) ── */
 .do-mass-toc-pill {
     position: fixed;
     right: var(--toc-margin, 16px);
@@ -5766,40 +5766,41 @@ html.is-ios .web-download-app-wrapper,
     border-radius: 8px !important;
     border: none !important;
     outline: none !important;
-    background: #18181c !important;
-    color: #f4f4f5 !important;
+    background: #202228 !important;
+    color: var(--text-secondary) !important;
     font-family: inherit;
     font-size: 12px !important;
     font-weight: 600;
     letter-spacing: 0.1px;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
     transform: translateY(var(--player-drag-y, 0px));
     opacity: 1 !important;
     box-sizing: border-box !important;
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 0.15s ease,
-                color 0.15s ease !important;
+                background-color 0.18s ease,
+                color 0.18s ease !important;
     user-select: none;
     touch-action: manipulation;
 }
 
 [data-theme="light"] .do-mass-toc-pill {
-    background: #ffffff !important;
-    color: #18181b !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 2px 5px rgba(0, 0, 0, 0.06) !important;
+    background: #e8ebf2 !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 @media (hover: hover) {
     .do-mass-toc-pill:hover {
-        background: #24242a !important;
-        color: #ffffff !important;
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
     }
 
     [data-theme="light"] .do-mass-toc-pill:hover {
-        background: #f4f4f6 !important;
-        color: #18181b !important;
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
     }
 }
 
@@ -5811,7 +5812,7 @@ html.is-ios .web-download-app-wrapper,
 .do-mass-toc-pill.is-open {
     background: var(--primary-color) !important;
     color: #ffffff !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+    box-shadow: none !important;
 }
 
 .do-mass-toc-pill.is-scrolling {
@@ -5853,7 +5854,7 @@ body.is-dragging-player .do-mass-toc-panel {
     transition: none !important;
 }
 
-/* ── Backdrop for TOC (Multi-layer True Progressive Blur & Circular Arc Gradient) ── */
+/* ── Backdrop for TOC (Multi-layer True Progressive Blur & Natural Circular Arc Gradient) ── */
 .do-mass-toc-backdrop {
     position: fixed;
     top: 0;
@@ -6020,7 +6021,7 @@ body.player-dock-open .do-mass-toc-panel,
     width: 100%;
 }
 
-/* ── TOC Item Row (Slender 30px height, 8px radius, 100% Opaque) ── */
+/* ── TOC Item Row (Slender 30px height, 8px radius, Identical to Sidebar Buttons, Flat No-Shadow) ── */
 .do-mass-toc-item {
     display: inline-flex;
     align-items: center;
@@ -6030,15 +6031,16 @@ body.player-dock-open .do-mass-toc-panel,
     border-radius: 8px !important;
     border: none !important;
     outline: none !important;
-    background: #18181c !important;
-    color: #f4f4f5 !important;
+    background: #202228 !important;
+    color: var(--text-secondary) !important;
     font-family: inherit;
     font-size: 12px !important;
-    font-weight: 500;
+    font-weight: 600;
     text-align: right;
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4) !important;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transition: background-color 0.18s ease, color 0.18s ease;
     max-width: 100%;
     box-sizing: border-box !important;
     user-select: none;
@@ -6046,20 +6048,21 @@ body.player-dock-open .do-mass-toc-panel,
 }
 
 [data-theme="light"] .do-mass-toc-item {
-    background: #ffffff !important;
-    color: #18181b !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+    background: #e8ebf2 !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 @media (hover: hover) {
     .do-mass-toc-item:hover {
-        background: #24242a !important;
-        color: #ffffff !important;
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
     }
 
     [data-theme="light"] .do-mass-toc-item:hover {
-        background: #f4f4f6 !important;
-        color: #18181b !important;
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
     }
 }
 
@@ -6071,10 +6074,11 @@ body.player-dock-open .do-mass-toc-panel,
     background: var(--primary-color) !important;
     color: #ffffff !important;
     font-weight: 700;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
-/* ── TOC Footer Action Buttons (Chant & Ordinaire Toggles — Slender 26px Design) ── */
+/* ── TOC Footer Action Buttons (Chant & Ordinaire Toggles — Identical to Sidebar Buttons) ── */
 .do-mass-toc-footer {
     display: flex;
     align-items: center;
@@ -6094,15 +6098,16 @@ body.player-dock-open .do-mass-toc-panel,
     border-radius: 6px !important;
     border: none !important;
     outline: none !important;
-    background: #18181c !important;
-    color: var(--text-secondary);
+    background: #202228 !important;
+    color: var(--text-secondary) !important;
     font-family: inherit;
     font-size: 11px !important;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
     box-sizing: border-box !important;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.18s ease, color 0.18s ease;
     user-select: none;
     touch-action: manipulation;
 }
@@ -6132,26 +6137,36 @@ body.player-dock-open .do-mass-toc-panel,
 }
 
 [data-theme="light"] .do-mass-toc-toggle-btn {
-    background: #ffffff !important;
-    color: #52525b !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06) !important;
+    background: #e8ebf2 !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 @media (hover: hover) {
     .do-mass-toc-toggle-btn:hover {
-        background: #24242a !important;
-        color: var(--text-primary);
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
+    }
+
+    [data-theme="light"] .do-mass-toc-toggle-btn:hover {
+        background: rgba(var(--primary-color-rgb), 0.08) !important;
+        color: var(--primary-color) !important;
     }
 }
 
 .do-mass-toc-toggle-btn.is-active {
     background: color-mix(in srgb, var(--primary-color) 35%, #18181c) !important;
     color: var(--primary-color) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 [data-theme="light"] .do-mass-toc-toggle-btn.is-active {
     background: color-mix(in srgb, var(--primary-color) 20%, #ffffff) !important;
     color: var(--primary-color) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
 /* Touch and Interaction Handling when TOC is open (Keep sticky header pinned without overflow lock) */
