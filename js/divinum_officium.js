@@ -9441,6 +9441,12 @@ function setupEventListeners() {
         OremusNotifications.hideBanner(true);
     });
 
+    $(document).on('click', '#btnCloseUpdateBanner', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        hideUpdateBanner();
+    });
+
     $(document).on('click', '#btnFloatingNotifAction', function(e) {
         e.preventDefault();
         var notif = OremusNotifications.getCurrentBanner() || (OremusNotifications.getActive().length ? OremusNotifications.getActive()[0] : null);
@@ -9457,7 +9463,7 @@ function setupEventListeners() {
         OremusNotifications.hideFloating(true);
     });
 
-    $(document).on('click', '#btnCloseRemoteNotifModal, #remoteNotificationModalBackdrop', function(e) {
+    $(document).on('click', '#btnCloseRemoteNotifModal, #btnDismissRemoteNotifModal, #remoteNotificationModalBackdrop', function(e) {
         e.preventDefault();
         triggerHapticFeedback('light');
         OremusNotifications.hideModal(true);
