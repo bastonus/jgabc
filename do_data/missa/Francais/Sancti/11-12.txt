@@ -1,4 +1,23 @@
+[Officium]
+S. Martin Ier, Pape et Martyr
+
+[Name]
+Martin
+
 [Rule]
 OPapaM=Martínum;
 vide C4D
 Gloria
+
+[Oratio]
+Pasteur éternel, considérez avec bonté votre troupeau, et gardez-le sous la constante protection du bienheureux Martin, votre Martyr et souverain pontife, que vous avez constitué pasteur de toute l’Église.
+$Per Dominum
+
+[Secreta]
+Après l’offrande de ces dons, Seigneur, veuillez éclairer votre Église dans votre bonté : afin que votre troupeau progresse en tout lieu, et que ses pasteurs, gouvernés par vous, soient agréables à vos yeux.
+$Per Dominum
+
+[Postcommunio]
+Gouvernez avec bienveillance, Seigneur, votre Église qui s’est nourrie à la table sainte : afin que, sous votre conduite toute-puissante, elle reçoive un accroissement de liberté et demeure ferme dans l’intégrité de sa foi.
+$Per Dominum
+

@@ -5880,11 +5880,11 @@ gregorianPropers = {
   "alExtra": "Ave Maria",
   "alExtraID": 1209,
   "alExtraRef": "Luc 1: 28",
-  "alExtraRubric": "Replaces the previous Alleluia in the diocese of Paris.",
+  "alExtraRubric": "Remplace l'Alléluia précédent dans le diocèse de Paris.",
   "trSept": "Fundamenta ejus",
   "trSeptID": 689,
   "trSeptRef": "Ps 86: 1-2, 3, 5",
-  "trSeptRubric": "Sung after Septuagesima instead of the Alleluia.",
+  "trSeptRubric": "Chanté après la Septuagésime au lieu de l'Alléluia.",
   "alPasch": [
    "Tu gloria Jerusalem",
    "Tota pulchra es"
@@ -5898,8 +5898,8 @@ gregorianPropers = {
    "Cant 4: 7"
   ],
   "alPaschRubric": [
-   "Sung in Paschal Time.",
-   "Sung in Paschal Time."
+   "Chanté au Temps Pascal.",
+   "Chanté au Temps Pascal."
   ],
   "of": "Dixit Jesus",
   "ofID": 687,

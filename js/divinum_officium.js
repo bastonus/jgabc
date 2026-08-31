@@ -1803,7 +1803,29 @@ function assembleFullMissa(propSec, ordoParts, ultEvLines, langFolder, feastTitl
     function finishAssembly() {
         if (incipit.length) cards.push({ id: 'incipit', type: 'Preces ad gradus altaris', badge: 'Ordinarium', lines: incipit });
         if (resolvedProps['Introitus']) cards.push({ id: 'introitus', type: 'Introitus', badge: 'Proprium', lines: resolvedProps['Introitus'] });
-        if (kyrie.length) cards.push({ id: 'kyrie', type: 'Kýrie & Glória in excélsis', badge: 'Ordinarium', lines: kyrie });
+        if (kyrie.length) {
+            var kyrieLines = [];
+            var gloriaLines = [];
+            var isGloriaPart = false;
+
+            kyrie.forEach(function(line) {
+                if (/^!!\s*Gloria|^!\*&GloriaM|^v\.\s*Glória in excélsis/i.test(line)) {
+                    isGloriaPart = true;
+                }
+                if (isGloriaPart) {
+                    gloriaLines.push(line);
+                } else {
+                    kyrieLines.push(line);
+                }
+            });
+
+            if (kyrieLines.length) {
+                cards.push({ id: 'kyrie', type: 'Kýrie eléison', badge: 'Ordinarium', lines: kyrieLines });
+            }
+            if (gloriaLines.length) {
+                cards.push({ id: 'gloria', type: 'Glória in excélsis Deo', badge: 'Ordinarium', lines: gloriaLines });
+            }
+        }
         if (resolvedProps['Oratio']) cards.push({ id: 'oratio', type: 'Collecta / Oratio', badge: 'Oratio', lines: resolvedProps['Oratio'] });
         if (resolvedProps['Lectio']) cards.push({ id: 'lectio', type: 'Epistola', badge: 'Lectio', lines: resolvedProps['Lectio'] });
         if (resolvedProps['Graduale']) cards.push({ id: 'graduale', type: 'Graduale', badge: 'Proprium', lines: resolvedProps['Graduale'] });
@@ -2232,7 +2254,8 @@ function renderOfficeCardHTML(cardData, vernCardData) {
         '</button>';
     }
 
-    return '<div class="do-card' + cardMod + '">' +
+    var cardIdAttr = cardData.id ? ' data-card-id="' + escHtml(cardData.id) + '"' : '';
+    return '<div class="do-card' + cardMod + '"' + cardIdAttr + '>' +
         '<div class="do-card-header">' +
             '<div>' +
                 '<span class="do-card-type' + typeMod + '">' + escHtml(badge.toUpperCase()) + '</span>' +
@@ -3347,6 +3370,7 @@ function renderHomeView() {
         // Put the feast title directly in the header
         $('#doHeaderTitle .title-text').text(feastTitle);
         $('#doSidebarFeastTitle').text(feastTitle);
+        checkHeaderTitleMarquee();
 
         var $view = $('<div class="do-home-styled">');
 
@@ -3441,11 +3465,13 @@ function renderDO() {
     $('body').toggleClass('is-bible-mode', isBible);
 
     if (isHome) {
+        hideMassToc();
         renderHomeView();
         return;
     }
 
     if (isBible) {
+        hideMassToc();
         closeDoPlayer();
         renderBibleMainView();
         return;
@@ -3837,12 +3863,10 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
     if (prop.inID) result['introitus'] = [{ id: prop.inID, name: 'Introitus', part: 'Introitus' }];
     
     if (ord) {
-        var kyrieList = [];
         var kId = getOrdId(ord.kyrie);
-        if (kId) kyrieList.push({ id: kId, name: getOrdName(ord.kyrie, 'Kyrie eleison'), part: 'Kyrie' });
+        if (kId) result['kyrie'] = [{ id: kId, name: getOrdName(ord.kyrie, 'Kyrie eleison'), part: 'Kyrie' }];
         var gId = getOrdId(ord.gloria);
-        if (gId) kyrieList.push({ id: gId, name: getOrdName(ord.gloria, 'Gloria in excelsis Deo'), part: 'Gloria' });
-        if (kyrieList.length) result['kyrie'] = kyrieList;
+        if (gId) result['gloria'] = [{ id: gId, name: getOrdName(ord.gloria, 'Gloria in excelsis Deo'), part: 'Gloria' }];
     }
 
     if (prop.grID) result['graduale'] = [{ id: prop.grID, name: 'Graduale', part: 'Graduale' }];
@@ -4275,6 +4299,8 @@ function closeDoPlayer() {
         }, 300);
     }
     $('body').removeClass('player-dock-open');
+    document.documentElement.style.setProperty('--player-drag-y', '0px');
+    document.documentElement.style.setProperty('--player-bar-offset', '0px');
 
     if (_doCurrentPlayerCard) {
         _doCurrentPlayerCard.removeClass('is-playing');
@@ -4387,26 +4413,176 @@ function initDoPlayer() {
         }
     });
 
-    // Tempo minus / plus (10 BPM increments)
-    $('#playerTempoMinus').off('click').on('click', function(e) {
+    // Speed cycle button (1.0x -> 1.25x -> 1.5x -> 2.0x -> 0.5x -> 0.75x)
+    var SPEED_CYCLE = [1.0, 1.25, 1.5, 2.0, 0.5, 0.75];
+    var BASE_TEMPO = 165;
+    $('#playerSpeedCycleBtn').off('click').on('click', function(e) {
         e.stopPropagation();
         triggerHapticFeedback('selection');
-        var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
-        var next = Math.max(60, cur - 10);
-        $('#playerTempoValue').text(next);
-        if (window.setTempo) window.setTempo(next);
+        var curSpeedText = $(this).find('.do-speed-label').text().replace('×', '').trim();
+        var curSpeed = parseFloat(curSpeedText) || 1.0;
+        var nextIdx = (SPEED_CYCLE.indexOf(curSpeed) + 1) % SPEED_CYCLE.length;
+        var nextSpeed = SPEED_CYCLE[nextIdx];
+        $(this).find('.do-speed-label').text(nextSpeed.toFixed(nextSpeed % 1 === 0 ? 1 : 2) + '×');
+        $(this).toggleClass('active', nextSpeed !== 1.0);
+        
+        var calculatedTempo = Math.round(BASE_TEMPO * nextSpeed);
+        if ($('#playerTempoValue').length) $('#playerTempoValue').text(calculatedTempo);
+        if (window.setTempo) window.setTempo(calculatedTempo);
         if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
     });
 
-    $('#playerTempoPlus').off('click').on('click', function(e) {
-        e.stopPropagation();
-        triggerHapticFeedback('selection');
-        var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
-        var next = Math.min(300, cur + 10);
-        $('#playerTempoValue').text(next);
-        if (window.setTempo) window.setTempo(next);
-        if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
-    });
+    function syncPlayerBarOffset() {
+        var playerBar = document.getElementById('modernPlayerBar');
+        if (!playerBar) return;
+        var mb = Math.abs(parseInt(window.getComputedStyle(playerBar).marginBottom, 10)) || 0;
+        var visibleH = playerBar.offsetHeight - mb;
+        if (visibleH > 50 && visibleH < 350) {
+            document.documentElement.style.setProperty('--player-bar-offset', visibleH + 'px');
+        }
+    }
+    window.syncPlayerBarOffset = syncPlayerBarOffset;
+    window.addEventListener('resize', syncPlayerBarOffset);
+
+    // Swipe down to dismiss grab handle / player bar gesture (progressive like sidebar drawer)
+    (function initSwipeToClose() {
+        var playerBar = document.getElementById('modernPlayerBar');
+        if (!playerBar) return;
+        var startY = 0, currentY = 0, startTime = 0, isDragging = false;
+
+        function onTouchStart(e) {
+            if (!e.touches || e.touches.length !== 1) return;
+            // Only start if touching the grab handle area, the player bar background or title
+            var target = e.target;
+            if (!$(target).closest('#playerDragHandleWrap, #playerDragHandle, .do-player-top-row, .do-player-name-wrapper, .do-player-part-badge').length &&
+                target !== playerBar) {
+                return;
+            }
+            startY = e.touches[0].clientY;
+            currentY = startY;
+            startTime = Date.now();
+            isDragging = true;
+            $('body').addClass('is-dragging-player');
+            playerBar.style.setProperty('transition', 'none', 'important');
+            document.documentElement.style.setProperty('--player-drag-y', '0px');
+        }
+
+        function onTouchMove(e) {
+            if (!isDragging || !e.touches || !e.touches.length) return;
+            currentY = e.touches[0].clientY;
+            var deltaY = currentY - startY;
+
+            if (deltaY > 0) {
+                if (e.cancelable) e.preventDefault();
+                // Direct 1:1 progressive follow-through
+                var barH = playerBar.offsetHeight || 140;
+                var progress = Math.min(1, Math.max(0, deltaY / barH));
+                var opacity = 1 - (progress * 0.7);
+                playerBar.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
+                playerBar.style.setProperty('opacity', opacity.toFixed(3), 'important');
+                document.documentElement.style.setProperty('--player-drag-y', deltaY + 'px');
+            } else {
+                // Elastic resistance if dragged upwards
+                var resistanceY = deltaY * 0.25;
+                playerBar.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
+                document.documentElement.style.setProperty('--player-drag-y', resistanceY + 'px');
+            }
+        }
+
+        function onTouchEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            $('body').removeClass('is-dragging-player');
+
+            var touchEndY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : currentY;
+            var deltaY = touchEndY - startY;
+            var dt = Math.max(1, Date.now() - startTime);
+            var vy = deltaY / dt; // velocity in px/ms
+            var barH = playerBar.offsetHeight || 140;
+
+            playerBar.style.removeProperty('transition');
+
+            // Dismiss if pulled down > 35% of player height OR quick downward swipe flick (vy > 0.45)
+            if (deltaY > barH * 0.35 || (deltaY > 25 && vy > 0.45)) {
+                triggerHapticFeedback('light');
+                playerBar.style.setProperty('transition', 'transform 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.2s ease', 'important');
+                playerBar.style.setProperty('transform', 'translateY(100%)', 'important');
+                playerBar.style.setProperty('opacity', '0', 'important');
+                document.documentElement.style.setProperty('--player-drag-y', (playerBar.offsetHeight || 140) + 'px');
+                setTimeout(function() {
+                    playerBar.style.removeProperty('transition');
+                    playerBar.style.removeProperty('transform');
+                    playerBar.style.removeProperty('opacity');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    closeDoPlayer();
+                }, 240);
+            } else {
+                // Smooth snap back to natural position
+                playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.22s ease', 'important');
+                playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                playerBar.style.setProperty('opacity', '1', 'important');
+                document.documentElement.style.setProperty('--player-drag-y', '0px');
+                setTimeout(function() {
+                    playerBar.style.removeProperty('transition');
+                    playerBar.style.removeProperty('transform');
+                    playerBar.style.removeProperty('opacity');
+                }, 220);
+            }
+        }
+
+        // Mouse dragging support on desktop
+        function onMouseDown(e) {
+            if (e.button !== 0) return;
+            var target = e.target;
+            if (!$(target).closest('#playerDragHandleWrap, #playerDragHandle, .do-player-top-row').length && target !== playerBar) {
+                return;
+            }
+            if ($(target).closest('button, input, select, a, .do-player-progress-section').length) return;
+
+            startY = e.clientY;
+            currentY = startY;
+            startTime = Date.now();
+            isDragging = true;
+            $('body').addClass('is-dragging-player');
+            playerBar.style.setProperty('transition', 'none', 'important');
+            document.documentElement.style.setProperty('--player-drag-y', '0px');
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                currentY = e.clientY;
+                var deltaY = currentY - startY;
+                if (deltaY > 0) {
+                    e.preventDefault();
+                    var barH = playerBar.offsetHeight || 140;
+                    var progress = Math.min(1, Math.max(0, deltaY / barH));
+                    var opacity = 1 - (progress * 0.7);
+                    playerBar.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
+                    playerBar.style.setProperty('opacity', opacity.toFixed(3), 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', deltaY + 'px');
+                } else {
+                    var resistanceY = deltaY * 0.25;
+                    playerBar.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', resistanceY + 'px');
+                }
+            }
+
+            function onMouseUp(e) {
+                if (!isDragging) return;
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                onTouchEnd({ changedTouches: [{ clientY: e.clientY }] });
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        }
+
+        playerBar.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+        window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+        playerBar.addEventListener('mousedown', onMouseDown);
+    })();
 
     // Progress bar click to seek
     $('#playerProgressBarContainer').off('click').on('click', function(e) {
@@ -4637,6 +4813,9 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     }
     document.body.classList.add('player-dock-open');
     setDoPlayerBarState(isPlaying);
+    requestAnimationFrame(function() {
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+    });
 
     $('.do-chant-card').removeClass('is-playing');
     if ($card) $card.addClass('is-playing');
@@ -4718,6 +4897,103 @@ function startSmoothMarquee(el, wrapper, maxDist) {
 
     _marqueeRaf = requestAnimationFrame(step);
 }
+
+var _headerMarqueeRaf = null;
+
+function checkHeaderTitleMarquee() {
+    var wrapper = document.querySelector('.do-header-title-wrapper');
+    var el = document.querySelector('#doHeaderTitle .title-text');
+    if (!wrapper || !el) return;
+
+    if (_headerMarqueeRaf) {
+        cancelAnimationFrame(_headerMarqueeRaf);
+        _headerMarqueeRaf = null;
+    }
+    el.style.transform = 'none';
+    wrapper.style.webkitMaskImage = 'none';
+    wrapper.style.maskImage = 'none';
+
+    setTimeout(function() {
+        var wrapperW = wrapper.getBoundingClientRect().width;
+        var textW = el.scrollWidth;
+        if (textW > wrapperW + 3 && wrapperW > 0) {
+            var maxDist = Math.ceil(textW - wrapperW + 10);
+            startHeaderSmoothMarquee(el, wrapper, maxDist, 2);
+        } else {
+            el.style.transform = 'none';
+            wrapper.style.webkitMaskImage = 'none';
+            wrapper.style.maskImage = 'none';
+        }
+    }, 70);
+}
+
+function startHeaderSmoothMarquee(el, wrapper, maxDist, maxCycles) {
+    if (_headerMarqueeRaf) cancelAnimationFrame(_headerMarqueeRaf);
+
+    maxCycles = maxCycles || 2;
+    var startPause = 2000; // ms to pause at start
+    var endPause = 1800;   // ms to pause at end
+    var speed = 28;        // px per second
+    var scrollDuration = Math.max(1200, (maxDist / speed) * 1000); // ms
+    var singleCycle = startPause + scrollDuration + endPause + scrollDuration;
+    var totalDuration = singleCycle * maxCycles;
+
+    var startTime = null;
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var totalElapsed = timestamp - startTime;
+
+        if (totalElapsed >= totalDuration) {
+            // Settle gracefully at start with soft right fade
+            el.style.transform = 'translateX(0px)';
+            var finalMask = 'linear-gradient(to right, #000 0px, #000 calc(100% - 16px), rgba(0,0,0,0) 100%)';
+            wrapper.style.webkitMaskImage = finalMask;
+            wrapper.style.maskImage = finalMask;
+            _headerMarqueeRaf = null;
+            return;
+        }
+
+        var elapsed = totalElapsed % singleCycle;
+        var currentX = 0;
+
+        if (elapsed < startPause) {
+            currentX = 0;
+        } else if (elapsed < startPause + scrollDuration) {
+            var progress = (elapsed - startPause) / scrollDuration;
+            var ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            currentX = -maxDist * ease;
+        } else if (elapsed < startPause + scrollDuration + endPause) {
+            currentX = -maxDist;
+        } else {
+            var progress = (elapsed - startPause - scrollDuration - endPause) / scrollDuration;
+            var ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            currentX = -maxDist * (1 - ease);
+        }
+
+        el.style.transform = 'translateX(' + currentX.toFixed(2) + 'px)';
+
+        var leftFade = Math.min(1, Math.max(0, Math.abs(currentX) / 8));
+        var rightFade = Math.min(1, Math.max(0, (maxDist - Math.abs(currentX)) / 8));
+        var maskStr = 'linear-gradient(to right, rgba(0,0,0,' + (1 - leftFade).toFixed(3) + ') 0px, #000 ' + (14 * leftFade).toFixed(1) + 'px, #000 calc(100% - ' + (14 * rightFade).toFixed(1) + 'px), rgba(0,0,0,' + (1 - rightFade).toFixed(3) + ') 100%)';
+
+        wrapper.style.webkitMaskImage = maskStr;
+        wrapper.style.maskImage = maskStr;
+
+        _headerMarqueeRaf = requestAnimationFrame(step);
+    }
+
+    _headerMarqueeRaf = requestAnimationFrame(step);
+}
+
+$(window).off('resize.doheadermarquee').on('resize.doheadermarquee', function() {
+    checkHeaderTitleMarquee();
+});
+
+$(document).off('pointerenter.doheadermarquee', '#doHeaderTitle')
+    .on('pointerenter.doheadermarquee', '#doHeaderTitle', function() {
+        checkHeaderTitleMarquee();
+    });
 
 function setDoPlayerBarState(isPlaying) {
     if (isPlaying) {
@@ -5233,6 +5509,7 @@ function displayResult(result, vernResult) {
     if (title) {
         $('#doSidebarFeastTitle').text(getLocalizedFeastTitle(title, getUiLang()));
         $('#doHeaderTitle .title-text').text(getLocalizedFeastTitle(title, getUiLang()));
+        checkHeaderTitleMarquee();
     }
 
     var vernMap = {};
@@ -5278,9 +5555,15 @@ function displayResult(result, vernResult) {
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 
-    // Render all chant scores in DOM when Gregorian is enabled
+    // Render all chant scores in DOM immediately when Gregorian is enabled (avoids scroll shift)
     if (isMissa && doState.includeGregorian) {
-        renderAllChantScoresInDOM($stream);
+        renderAllChantScoresInDOM($stream, true);
+    }
+
+    if (isMissa) {
+        setupMassToc(result);
+    } else {
+        hideMassToc();
     }
 
     startBilingualSwipeHint();
@@ -5344,11 +5627,18 @@ function isViewportOverBilingualText() {
     return (visibleBilingualRowCount > 0 && visibleTextCharCount >= 50);
 }
 
+function isBilingualSwipeHintAllowed() {
+    if ($('body').hasClass('mass-toc-open') || $('body').hasClass('header-dropdown-open')) return false;
+    if ($('#doMassTocPanel:not(.hidden)').length > 0 || $('#headerDropdown:not(.hidden)').length > 0) return false;
+    if ($('#settingsPanel.open, .update-modal:not(.hidden), .feedback-modal:not(.hidden)').length > 0) return false;
+    return true;
+}
+
 function startBilingualSwipeHint() {
     if ($(window).width() > 768) return;
 
     var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none' && doState.hora !== 'home');
-    if (!isBilingual || doState.mobileLang === 'vern') {
+    if (!isBilingual || doState.mobileLang === 'vern' || !isBilingualSwipeHintAllowed()) {
         stopBilingualSwipeHint();
         return;
     }
@@ -5363,20 +5653,20 @@ function startBilingualSwipeHint() {
 
     // Check on initial load after short delay
     setTimeout(function() {
-        if (doState.mobileLang === 'la' && isViewportOverBilingualText()) {
+        if (isBilingualSwipeHintAllowed() && doState.mobileLang === 'la' && isViewportOverBilingualText()) {
             playBilingualSwipeHint();
         }
     }, 1000);
 
     // Listen to scroll: trigger hint when user scrolls to a text section
     $(window).on('scroll.bilingualSwipeHint', function() {
-        if (doState.mobileLang === 'vern') {
+        if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern') {
             stopBilingualSwipeHint();
             return;
         }
         if (swipeHintScrollDebounce) clearTimeout(swipeHintScrollDebounce);
         swipeHintScrollDebounce = setTimeout(function() {
-            if (doState.mobileLang === 'la' && !isSwipeHintAnimating && isViewportOverBilingualText()) {
+            if (isBilingualSwipeHintAllowed() && doState.mobileLang === 'la' && !isSwipeHintAnimating && isViewportOverBilingualText()) {
                 playBilingualSwipeHint();
             }
         }, 350);
@@ -5384,7 +5674,7 @@ function startBilingualSwipeHint() {
 
     // Periodic repeat: only plays when currently over bilingual text
     swipeHintTimer = setInterval(function() {
-        if (doState.mobileLang === 'vern') {
+        if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern') {
             stopBilingualSwipeHint();
             return;
         }
@@ -5395,8 +5685,8 @@ function startBilingualSwipeHint() {
 }
 
 function playBilingualSwipeHint() {
-    if (doState.mobileLang === 'vern' || isSwipeHintAnimating) {
-        if (doState.mobileLang === 'vern') stopBilingualSwipeHint();
+    if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern' || isSwipeHintAnimating) {
+        if (doState.mobileLang === 'vern' || !isBilingualSwipeHintAllowed()) stopBilingualSwipeHint();
         return;
     }
     ensureBilingualGestureIndicator();
@@ -5434,7 +5724,7 @@ function stopBilingualSwipeHint() {
     }
     $(window).off('scroll.bilingualSwipeHint');
     isSwipeHintAnimating = false;
-    $('#doBilingualGestureIndicator').removeClass('active');
+    $('#doBilingualGestureIndicator').removeClass('active').remove();
     $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
 }
 
@@ -5464,6 +5754,7 @@ function updateSidebarAndHeader() {
     } else {
         $('#doHourLabel').text((horaLabel + ' • ' + dateFormatted).toUpperCase());
     }
+    checkHeaderTitleMarquee();
 
     // Rubricæ / Editio UI state
     $('#doEditionSelect').val(doState.edition || '1960');
@@ -5731,9 +6022,9 @@ var DO_UNIFIED_TITLES = {
         "Adv3ss": "Samedi des Quatre-Temps de l'Avent (forme brève)",
         "Adv4": "4e Dimanche de l'Avent",
         "Dec24": "Vigile de la Nativité",
-        "Dec25_1": "Nativitas Domini, Missa ad media noctem",
-        "Dec25_2": "Nativitas Domini, Missa ad matutinam",
-        "Dec25_3": "Nativitas Domini, Missa interdiu",
+        "Dec25_1": "Nativité de Notre Seigneur (Messe de Minuit)",
+        "Dec25_2": "Nativité de Notre Seigneur (Messe de l'Aurore)",
+        "Dec25_3": "Nativité de Notre Seigneur (Messe du Jour)",
         "Nat1": "Dimanche dans l'Octave de la Nativité",
         "Jan1": "Octava Nativitatis (Circumcisione Domini)",
         "Nat2": "Le Saint Nom de Jésus",
@@ -6046,7 +6337,6 @@ var DO_UNIFIED_TITLES = {
         "Jul8": "Ste Élisabeth, Reine du Portugal, Veuve",
         "Jul10": "Les saints Sept Frères Martys, et les saintes Rufine et Seconde, Vierges et Martyres",
         "Jul11": "S. Pie Ier, Pape et Martyr",
-        "Jul11a": "S. Pie Ier, Pape et Martyr",
         "Jul12": "S. Jean Gualbert, Abbé",
         "Jul13": "S. Anaclet, Pape et Martyr",
         "Jul14": "S. Bonaventure, Évêque, Confesseur et Docteur de l’Église",
@@ -6151,14 +6441,12 @@ var DO_UNIFIED_TITLES = {
         "Oct23": "St Antoine-Marie Claret, Évêque et Confesseur",
         "Oct24": "St Raphaël, Archange",
         "Oct25": "Sts Chrysanthe et Darie, Martyrs",
-        "Oct25a": "Sts Chrysanthe et Darie, Martyrs",
         "Oct26": "St Evariste, Pape et Martyr",
         "Oct27": "Vigile des Sts Simon et Jude, Apôtres",
         "Oct28": "Sts Simon et Jude, Apôtres",
         "Oct31": "Vigile de la fête de tous les Saints",
         "Nov1": "Tous les Saints",
         "Nov2": "Commémoration de tous les fidèles défunts",
-        "Nov2a": "Commémoration de tous les fidèles défunts",
         "Nov4": "St Charles Evêque et Confesseur",
         "Nov5": "Fête des Saintes Reliques",
         "Nov8": "Dans l'octave de la Toussaint",
@@ -6167,7 +6455,6 @@ var DO_UNIFIED_TITLES = {
         "Nov11": "St Martin, Evêque et Confesseur",
         "Nov12": "S. Martin Ier, Pape et Martyr",
         "Nov13": "S. Didace Confesseur",
-        "Nov13a": "S. Didace Confesseur",
         "Nov14": "St. Josaphat Evêque et Martyrs",
         "Nov15": "St. Albert le Grand, Evêque Confesseur et Docteur de l'Eglise",
         "Nov16": "Ste Gertrude Vierge",
@@ -6182,8 +6469,7 @@ var DO_UNIFIED_TITLES = {
         "Nov25": "Ste Catherine Vierge et Martyre",
         "Nov26": "St Silvestre Abbé",
         "Nov27": "Notre-Dame de la Médaille Miraculeuse",
-        "Nov29": "Vigile de St André Apôtre",
-        "Nov29a": "Vigile de St André Apôtre",
+        "Nov29": "Vigile de St André Apôtre (ou S. Saturnin)",
         "Nov30": "St André Apôtre",
         "Dec2": "Ste Bibiane Vierge et Martyre",
         "Dec3": "S. François Xavier Confesseur",
@@ -6549,12 +6835,11 @@ var DO_UNIFIED_TITLES = {
         "Jul8": "S. Elisabeth Reg. Portugaliæ Viduæ",
         "Jul10": "Ss. Septem Fratrum Martyrum, ac Rufinæ et Secundæ Virginum et Martyrum",
         "Jul11": "S. Pii I Papæ et Martyris",
-        "Jul11a": "S. Pii I Papæ et Martyris",
         "Jul12": "S. Joannis Gualberti Abbatis",
         "Jul13": "S. Anacleti Papæ et Martyris",
         "Jul14": "S. Bonaventuræ Episcopi Confessoris et Ecclesiæ Doctoris",
         "Jul15": "S. Henrici Imperatoris Confessoris",
-        "Jul16": "Our Lady of Mount Carmel",
+        "Jul16": "Beatæ Mariæ Virginis de Monte Carmelo",
         "Jul17": "S. Alexii Confessoris",
         "Jul18": "S. Camilli de Lellis Confessoris",
         "Jul19": "S. Vincentii a Paulo Confessoris",
@@ -6654,37 +6939,34 @@ var DO_UNIFIED_TITLES = {
         "Oct23": "St Anthony Mary Claret",
         "Oct24": "S. Raphaëlis Archangeli",
         "Oct25": "Ss. Chrysanthi et Dariæ Martyrum",
-        "Oct25a": "Ss. Chrysanthi et Dariæ Martyrum",
         "Oct26": "S. Evaristi Papæ et Martyris",
         "Oct27": "In Vigilia Ss. Simonis et Judæ Ap.",
         "Oct28": "Ss. Simonis et Judæ Apostolorum",
         "Oct31": "In Vigilia Omnium Sanctorum",
         "Nov1": "Omnium Sanctorum",
         "Nov4": "S. Caroli Episcopi et Confessoris",
-        "Nov5": "The Feast of the Holy Relics",
+        "Nov5": "In Festo Sanctarum Reliquiarum",
         "Nov8": "In Octava Omnium Sanctorum",
-        "Nov9": "The Dedication of the Lateran Basilica",
+        "Nov9": "In Dedicatione Archibasilicæ Ssmi Salvatoris",
         "Nov10": "S. Andreæ Avellini Confessoris",
         "Nov11": "S. Martini Episcopi et Confessoris",
         "Nov12": "S. Martini Papæ et Martyris",
         "Nov13": "S. Didaci Confessoris",
-        "Nov13a": "S. Didaci Confessoris",
         "Nov14": "S. Josaphat Episcopi et Martyris",
         "Nov15": "S. Alberti Magni Episcopi Confessoris et Ecclesiæ Doctoris",
         "Nov16": "S. Gertrudis Virginis",
         "Nov17": "S. Gregorii Thaumaturgi Episcopi et Confessoris",
-        "Nov18": "The Dedication of the Basilicas of Ss Peter and Paul",
+        "Nov18": "In Dedicatione Basilicarum Ss. Petri et Pauli",
         "Nov19": "S. Elisabeth Viduæ",
         "Nov20": "S. Felicis de Valois Confessoris",
-        "Nov21": "The Presentation of BVM",
+        "Nov21": "In Praesentatione B. Mariæ Virginis",
         "Nov22": "S. Cæciliæ Virginis et Martyris",
         "Nov23": "S. Clementis Papæ et Martyris",
         "Nov24": "S. Joannis a Cruce Confessoris et Ecclesiæ Doctoris",
         "Nov25": "S. Catharinæ Virginis et Martyris",
         "Nov26": "S. Silvestri Abbatis",
-        "Nov27": "Our Lady of the Miraculous Medal",
+        "Nov27": "Beatæ Mariæ Virginis a Sacro Numismate",
         "Nov29": "In Vigilia S. Andreæ Apostoli",
-        "Nov29a": "In Vigilia S. Andreæ Apostoli",
         "Nov30": "S. Andreæ Apostoli",
         "Dec2": "S. Bibianæ Virginis et Martyris",
         "Dec3": "S. Francisci Xaverii Confessoris",
@@ -7147,7 +7429,6 @@ var DO_UNIFIED_TITLES = {
         "Oct23": "St Anthony Mary Claret",
         "Oct24": "St. Raphael the Archangel;Duplex majus",
         "Oct25": "Sts. Chrysanthus and Daria, Martyrs",
-        "Oct25a": "Sts. Chrysanthus and Daria, Martyrs",
         "Oct26": "St. Evaristus, Pope and Martyr",
         "Oct27": "Vigil of Sts. Simon and Jude, Apostles",
         "Oct28": "Sts. Simon and Jude, Apostles",
@@ -7161,7 +7442,6 @@ var DO_UNIFIED_TITLES = {
         "Nov11": "St. Martin, Bishop of Tours, Confessor",
         "Nov12": "St. Martin I, Pope and Martyr",
         "Nov13": "St. Didacus, Confessor",
-        "Nov13a": "St. Didacus, Confessor",
         "Nov14": "St. Josaphat, Bishop and Martyr",
         "Nov15": "St. Albert the Great, Bishop, Confessor and Doctor of the Church",
         "Nov16": "St. Gertrude, Virgin",
@@ -7177,7 +7457,6 @@ var DO_UNIFIED_TITLES = {
         "Nov26": "St. Sylvester, Abbot",
         "Nov27": "Our Lady of the Miraculous Medal",
         "Nov29": "Vigil of St. Andrew the Apostle",
-        "Nov29a": "Vigil of St. Andrew the Apostle",
         "Nov30": "St. Andrew the Apostle",
         "Dec2": "St. Bibiana, Virgin and Martyr",
         "Dec3": "St. Francis Xavier, Confessor",
@@ -7858,6 +8137,10 @@ function updateHeaderDropdownPosition() {
 }
 
 function openHeaderDropdown() {
+    if (typeof closeMassTocPanel === 'function') {
+        closeMassTocPanel();
+    }
+    $('body').addClass('header-dropdown-open');
     if (!doState.userChangedHddMode) {
         doState.hddMode = getDefaultHddModeForDate(doState.date);
     }
@@ -7876,6 +8159,7 @@ function openHeaderDropdown() {
 }
 
 function closeHeaderDropdown() {
+    $('body').removeClass('header-dropdown-open');
     $('#headerDropdown').addClass('hidden');
     $('.dropdown-icon').css('transform', 'rotate(0deg)');
 }
@@ -10365,12 +10649,15 @@ function setupEventListeners() {
 
         // Form control & menu button exception (do not intercept inputs/selects or menu button tap)
         if ($(target).closest('input, select, textarea, .do-edition-select, .settings-select-wrapper, #btnOpenSidebarMobile').length) {
+            isTouchActive = false;
             return;
         }
 
-        // Modal / Dialog / Settings panel exception (do not intercept touch when modal or settings panel is open)
-        if ($(target).closest('.update-modal, .feedback-modal, .settings-panel, .remote-notif-card').length ||
-            $('.update-modal:not(.hidden), .feedback-modal:not(.hidden), #settingsPanel.open').length > 0) {
+        // Modal / Dialog / Settings panel / Player bar / Header dropdown / Mass TOC summary exception
+        if ($(target).closest('.update-modal, .feedback-modal, .settings-panel, .remote-notif-card, #modernPlayerBar, #headerDropdown, .do-header-dropdown, #doMassTocPanel, #doMassTocBackdrop, #doMassTocPill, .do-mass-toc-panel, .do-mass-toc-backdrop, .do-mass-toc-pill').length ||
+            $('.update-modal:not(.hidden), .feedback-modal:not(.hidden), #settingsPanel.open, #headerDropdown:not(.hidden), #doMassTocPanel:not(.hidden)').length > 0 ||
+            $('body').hasClass('header-dropdown-open') || $('body').hasClass('mass-toc-open')) {
+            isTouchActive = false;
             return;
         }
 
@@ -10634,16 +10921,538 @@ $(function() {
         window.OremusUsageTracker.init();
     }
 
-    // Recheck notifications & updates on visibility return / focus
+    // ── Android & Browser Back Button / History Navigation ──
+    function handleAppBackButton() {
+        // 1. If any modal / dropdown / sidebar / player / TOC is open, close it first
+        var hasOpenModals = $('#settingsPanel').hasClass('open') ||
+                            $('#doSidebar').hasClass('open') ||
+                            !$('#headerDropdown').hasClass('hidden') ||
+                            !$('#remoteNotificationModal').hasClass('hidden') ||
+                            !$('#feedbackModal').hasClass('hidden') ||
+                            !$('#pwaInstallModal').hasClass('hidden') ||
+                            !$('#appIconModal').hasClass('hidden') ||
+                            !$('#notificationPromptModal').hasClass('hidden') ||
+                            !$('#doHoraePicker').hasClass('hidden') ||
+                            !$('#doMassTocPanel').hasClass('hidden');
+
+        if (hasOpenModals) {
+            closeModals();
+            closeMassTocPanel();
+            $('#doHoraePicker').addClass('hidden');
+            return true;
+        }
+
+        // 2. If viewing a specific office or Bible, return to home
+        if (doState.hora !== 'home') {
+            doState.hora = 'home';
+            doState.officiumKey = null;
+            doState.testFeastKey = null;
+            localStorage.removeItem('do_officiumKey');
+            localStorage.setItem('do_hora', 'home');
+            renderDO();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return true;
+        }
+
+        return false;
+    }
+
+    // Capacitor Native Android Back Button Listener
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.addListener('backButton', function(event) {
+            var handled = handleAppBackButton();
+            if (!handled && event && typeof event.canGoBack !== 'undefined' && !event.canGoBack) {
+                window.Capacitor.Plugins.App.exitApp();
+            }
+        });
+    }
+
+    // Web / Browser History popstate fallback
+    window.addEventListener('popstate', function() {
+        handleAppBackButton();
+    });
+
+    // ── Automatic Reset to Home / Today after Inactivity (30 minutes) ──
+    var LAST_ACTIVE_TIMESTAMP_KEY = 'do_last_active_timestamp';
+    var INACTIVITY_RESET_MS = 30 * 60 * 1000; // 30 minutes
+
+    function recordActivity() {
+        try {
+            localStorage.setItem(LAST_ACTIVE_TIMESTAMP_KEY, Date.now().toString());
+        } catch (e) {}
+    }
+
+    function checkInactivityReset() {
+        try {
+            var lastActiveStr = localStorage.getItem(LAST_ACTIVE_TIMESTAMP_KEY);
+            if (lastActiveStr) {
+                var lastActive = parseInt(lastActiveStr, 10);
+                var diff = Date.now() - lastActive;
+                if (diff >= INACTIVITY_RESET_MS) {
+                    console.log('[Oremus] Inactivity reset triggered (' + Math.round(diff / 60000) + ' min elapsed). Returning to Home / Today.');
+                    doState.date = moment();
+                    doState.hora = 'home';
+                    doState.officiumKey = null;
+                    doState.testFeastKey = null;
+                    localStorage.removeItem('do_officiumKey');
+                    localStorage.setItem('do_hora', 'home');
+                    $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+                    closeModals();
+                    renderDO();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+            recordActivity();
+        } catch (e) {
+            console.warn('[Oremus] checkInactivityReset exception:', e);
+        }
+    }
+
+    // Record initial activity
+    recordActivity();
+
+    // Recheck on visibility return / focus
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
+            checkInactivityReset();
             if (window.OremusNotifications) {
                 window.OremusNotifications.check(false);
             }
             if (typeof checkForAppUpdates === 'function') {
                 checkForAppUpdates(false);
             }
+        } else {
+            recordActivity();
         }
     });
+
+    // Update activity timestamp on user interaction
+    ['touchstart', 'mousedown', 'keydown', 'scroll'].forEach(function(evt) {
+        window.addEventListener(evt, function() {
+            recordActivity();
+        }, { passive: true });
+    });
+
+    // Initialize TOC UI events
+    initMassTocEvents();
 });
+
+/* ═══════════════════════════════════════════════════════════════════
+   ── MASS TABLE OF CONTENTS / INDEX (FLOATING PILL & FLYOUT) ──
+   ═══════════════════════════════════════════════════════════════════ */
+
+var _massTocGroups = [
+    {
+        title: "1. Avant-Messe & Parole",
+        items: [
+            { label: "Prières au bas de l'autel", match: /Judica me|Confiteor|Au bas de l'autel/i, cardId: /^Prayers/i, badge: "Ordinaire" },
+            { label: "Introït", match: /^Introitus|^Introït/i, cardId: /^Introitus/i, badge: "Propre" },
+            { label: "Kyrie eleison", match: /^Kyrie/i, cardId: /^Kyrie/i, badge: "Ordinaire" },
+            { label: "Gloria in excelsis", match: /^Gloria/i, cardId: /^Gloria/i, badge: "Ordinaire" },
+            { label: "Collecte (Oraison)", match: /^Oratio|^Collecta|^Collecte/i, cardId: /^Oratio/i, badge: "Propre" },
+            { label: "Épître / Lecture", match: /^Epistola|^Lectio|^Épître|^Lecture/i, cardId: /^Epistola|^Lectio/i, badge: "Propre" },
+            { label: "Graduel", match: /^Graduale|^Graduel/i, cardId: /^Graduale/i, badge: "Propre" },
+            { label: "Alléluia", match: /^Alleluia/i, cardId: /^Alleluia/i, badge: "Propre" },
+            { label: "Trait", match: /^Tractus|^Trait/i, cardId: /^Tractus/i, badge: "Propre" },
+            { label: "Séquence", match: /^Sequentia|^Séquence/i, cardId: /^Sequentia/i, badge: "Propre" },
+            { label: "Évangile", match: /^Evangelium|^Évangile/i, cardId: /^Evangelium/i, badge: "Propre" },
+            { label: "Credo", match: /^Credo/i, cardId: /^Credo/i, badge: "Ordinaire" }
+        ]
+    },
+    {
+        title: "2. Offertoire & Préparation",
+        items: [
+            { label: "Offertoire", match: /^Offertorium|^Offertoire/i, cardId: /^Offertorium/i, badge: "Propre" },
+            { label: "Oblation du Pain & du Calice", match: /Suscipe sancte Pater|Offerimus tibi|Oblation/i, cardId: /^Oblation/i, badge: "Ordinaire" },
+            { label: "Lavabo & Suscipe Sancta Trinitas", match: /Lavabo|Suscipe sancta Trinitas/i, cardId: /^Lavabo/i, badge: "Ordinaire" },
+            { label: "Orate Fratres & Secrète", match: /^Secreta|^Secrète|Orate fratres/i, cardId: /^Secreta/i, badge: "Propre" }
+        ]
+    },
+    {
+        title: "3. Canon & Consécration",
+        items: [
+            { label: "Préface & Sanctus", match: /^Praefatio|^Préface|Sanctus/i, cardId: /^Praefatio|^Sanctus/i, badge: "Ordinaire" },
+            { label: "Canon Romain", match: /^Te igitur|^Canon/i, cardId: /^Canon/i, badge: "Ordinaire" },
+            { label: "Consécration & Élévation", match: /Qui pridie|Hoc est enim|Consécration|Élévation/i, cardId: /^Consecratio/i, badge: "Ordinaire" },
+            { label: "Pater Noster & Fraction", match: /^Pater noster|Fractio|Fraction/i, cardId: /^Pater/i, badge: "Ordinaire" }
+        ]
+    },
+    {
+        title: "4. Communion & Envoi",
+        items: [
+            { label: "Agnus Dei & Prières", match: /^Agnus Dei|Domine Jesu Christe/i, cardId: /^Agnus/i, badge: "Ordinaire" },
+            { label: "Communion", match: /^Communio|^Communion/i, cardId: /^Communio/i, badge: "Propre" },
+            { label: "Postcommunion", match: /^Postcommunio|^Postcommunion/i, cardId: /^Postcommunio/i, badge: "Propre" },
+            { label: "Ite Missa Est & Bénédiction", match: /Ite missa est|Benedicat vos|Placeat tibi/i, cardId: /^Ite|^Benedictio/i, badge: "Ordinaire" },
+            { label: "Dernier Évangile (In principio)", match: /In principio|Dernier Évangile/i, cardId: /^LastGospel|^InPrincipio/i, badge: "Ordinaire" }
+        ]
+    }
+];
+
+var _massTocSectionsMap = [];
+var _massTocScrollDebounce = null;
+
+function setupMassToc(missaResult) {
+    _massTocSectionsMap = [];
+    var $list = $('#doMassTocList').empty();
+    var $cards = $('#do-content-stream .do-card');
+
+    if (!$cards.length) {
+        hideMassToc();
+        return;
+    }
+
+    var usedCards = new Set();
+
+    _massTocGroups.forEach(function(group, gIdx) {
+        var groupItemsHtml = '';
+        var hasMatchingItems = false;
+
+        group.items.forEach(function(item) {
+            // Find corresponding card in DOM
+            var matchedCard = null;
+            $cards.each(function() {
+                if (usedCards.has(this)) return; // Don't reuse matched card
+                var $c = $(this);
+                var cardId = ($c.attr('data-card-id') || '').trim();
+                var cardTitle = ($c.find('.do-card-title').text() || '').trim();
+                var cardType = ($c.find('.do-card-type').text() || '').trim();
+
+                if ((item.cardId && item.cardId.test(cardId)) ||
+                    (item.match && (item.match.test(cardTitle) || item.match.test(cardType)))) {
+                    matchedCard = this;
+                    usedCards.add(this);
+                    return false; // break
+                }
+            });
+
+            if (matchedCard) {
+                hasMatchingItems = true;
+                var sectionId = 'mass-sec-' + gIdx + '-' + _massTocSectionsMap.length;
+                matchedCard.setAttribute('id', sectionId);
+
+                // Use the card's real display title or item label
+                var rawCardTitle = $(matchedCard).find('.do-card-title').text().trim();
+                var displayLabel = rawCardTitle || item.label;
+
+                _massTocSectionsMap.push({
+                    id: sectionId,
+                    label: displayLabel,
+                    element: matchedCard
+                });
+
+                groupItemsHtml += 
+                    '<button class="do-mass-toc-item" data-target-id="' + sectionId + '" data-label="' + escHtml(displayLabel) + '">' +
+                        '<span>' + escHtml(displayLabel) + '</span>' +
+                    '</button>';
+            }
+        });
+
+        if (hasMatchingItems) {
+            var groupHtml = 
+                '<div class="do-mass-toc-group">' +
+                    groupItemsHtml +
+                '</div>';
+            $list.append(groupHtml);
+        }
+    });
+
+    // Update bottom toggle button active states
+    updateMassTocToggleStates();
+
+    var isAlreadyOpen = $('body').hasClass('mass-toc-open') || !$('#doMassTocPanel').hasClass('hidden');
+
+    if (_massTocSectionsMap.length > 0) {
+        $('#doMassTocPill').removeClass('hidden');
+        if (isAlreadyOpen) {
+            $('#doMassTocPill').addClass('is-open');
+            $('#doMassTocPanel').removeClass('hidden');
+            $('#doMassTocBackdrop').removeClass('hidden');
+            stopBilingualSwipeHint();
+        } else {
+            $('#doMassTocCurrentLabel').text('Sommaire');
+        }
+        initMassTocScrollSpy();
+        updateMassTocActiveItem();
+        updateMassTocListScrollMask();
+    } else {
+        hideMassToc();
+    }
+}
+
+function updateMassTocToggleStates() {
+    var chantActive = (doState.includeGregorian !== false);
+    var ordinariumActive = (doState.includeOrdinarium === true);
+
+    $('#btnMassTocToggleChant').toggleClass('is-active', chantActive);
+    $('#btnMassTocToggleOrdinarium').toggleClass('is-active', ordinariumActive);
+}
+
+function hideMassToc() {
+    $('#doMassTocPill').addClass('hidden');
+    closeMassTocPanel();
+    _massTocSectionsMap = [];
+}
+
+function openMassTocPanel() {
+    triggerHapticFeedback('light');
+    
+    // Stop and hide bilingual swipe hint tutorial
+    if (typeof stopBilingualSwipeHint === 'function') {
+        stopBilingualSwipeHint();
+    }
+    $('#doBilingualGestureIndicator').remove();
+
+    $('html, body').addClass('mass-toc-open');
+    $('#doMassTocBackdrop').removeClass('hidden');
+    $('#doMassTocPanel').removeClass('hidden');
+    $('#doMassTocPill').addClass('is-open');
+    $('#doMassTocPill .do-mass-toc-pill-icon').html(
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+            '<line x1="18" y1="6" x2="6" y2="18"></line>' +
+            '<line x1="6" y1="6" x2="18" y2="18"></line>' +
+        '</svg>'
+    );
+    updateMassTocToggleStates();
+    updateMassTocActiveItem();
+    updateMassTocListScrollMask();
+}
+
+function updateMassTocListScrollMask() {
+    var el = document.getElementById('doMassTocList');
+    if (!el) return;
+    var scrollTop = el.scrollTop;
+    var scrollHeight = el.scrollHeight;
+    var clientHeight = el.clientHeight;
+    var isAtTop = (scrollTop <= 4);
+    var isAtBottom = ((scrollTop + clientHeight) >= (scrollHeight - 4));
+    var noScroll = (scrollHeight <= clientHeight + 4);
+
+    var $el = $(el);
+    $el.toggleClass('no-scroll', noScroll);
+    $el.toggleClass('at-top', isAtTop && !noScroll);
+    $el.toggleClass('at-bottom', isAtBottom && !noScroll);
+}
+
+function closeMassTocPanel() {
+    $('html, body').removeClass('mass-toc-open');
+    $('#doMassTocBackdrop').addClass('hidden');
+    $('#doMassTocPanel').addClass('hidden');
+    $('#doMassTocPill').removeClass('is-open');
+    $('#doMassTocPill .do-mass-toc-pill-icon').html(
+        '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<line x1="8" y1="6" x2="21" y2="6"></line>' +
+            '<line x1="8" y1="12" x2="21" y2="12"></line>' +
+            '<line x1="8" y1="18" x2="21" y2="18"></line>' +
+            '<circle cx="3.5" cy="6" r="1.5" fill="currentColor"></circle>' +
+            '<circle cx="3.5" cy="12" r="1.5" fill="currentColor"></circle>' +
+            '<circle cx="3.5" cy="18" r="1.5" fill="currentColor"></circle>' +
+        '</svg>'
+    );
+}
+
+function toggleMassTocPanel() {
+    if ($('#doMassTocPanel').hasClass('hidden')) {
+        openMassTocPanel();
+    } else {
+        triggerHapticFeedback('light');
+        closeMassTocPanel();
+    }
+}
+
+function updateMassTocActiveItem() {
+    if (!_massTocSectionsMap || !_massTocSectionsMap.length) return;
+
+    var $header = $('.do-top-header:visible');
+    var headerH = $header.length ? $header.outerHeight() : 60;
+    var $banner = $('.do-update-banner:visible');
+    if ($banner.length) {
+        headerH += $banner.outerHeight();
+    }
+
+    var vpTop = headerH;
+    var vpBottom = window.innerHeight;
+
+    // Adjust active reading viewport if player dock is open
+    var $player = $('#modernPlayerBar:visible');
+    if ($player.length && $('body').hasClass('player-dock-open')) {
+        var playerRect = $player[0].getBoundingClientRect();
+        if (playerRect.top > 0 && playerRect.top < vpBottom) {
+            vpBottom = playerRect.top;
+        }
+    }
+
+    var maxVisibleHeight = 0;
+    var bestVisibleSec = null;
+    var lastPassedSec = _massTocSectionsMap[0];
+
+    // Detect if reached extreme top or bottom of page
+    var scrollY = window.scrollY || window.pageYOffset || 0;
+    var isAtTop = (scrollY <= 40);
+    var isAtBottom = (window.innerHeight + scrollY >= (document.documentElement.scrollHeight - 40));
+
+    for (var i = 0; i < _massTocSectionsMap.length; i++) {
+        var sec = _massTocSectionsMap[i];
+        var el = document.getElementById(sec.id) || sec.element;
+        if (!el || !document.contains(el)) continue;
+
+        var rect = el.getBoundingClientRect();
+        
+        // Track the last section whose top has entered or passed above the reading threshold
+        if (rect.top <= (vpTop + 120)) {
+            lastPassedSec = sec;
+        }
+
+        var visibleTop = Math.max(rect.top, vpTop);
+        var visibleBottom = Math.min(rect.bottom, vpBottom);
+        var visibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+        if (visibleHeight > maxVisibleHeight) {
+            maxVisibleHeight = visibleHeight;
+            bestVisibleSec = sec;
+        }
+    }
+
+    var activeSec = null;
+    if (isAtTop) {
+        activeSec = _massTocSectionsMap[0];
+    } else if (isAtBottom && _massTocSectionsMap.length) {
+        activeSec = _massTocSectionsMap[_massTocSectionsMap.length - 1];
+    } else if (bestVisibleSec && maxVisibleHeight > 30) {
+        activeSec = bestVisibleSec;
+    } else if (lastPassedSec) {
+        activeSec = lastPassedSec;
+    } else {
+        activeSec = _massTocSectionsMap[0];
+    }
+
+    if (activeSec && activeSec.label) {
+        $('#doMassTocList .do-mass-toc-item').removeClass('is-active');
+        var $activeItem = $('#doMassTocList .do-mass-toc-item[data-target-id="' + activeSec.id + '"]');
+        $activeItem.addClass('is-active');
+        $('#doMassTocCurrentLabel').text(activeSec.label);
+    }
+}
+
+function initMassTocScrollSpy() {
+    $(window).off('scroll.domasstoc').on('scroll.domasstoc', function() {
+        if (_massTocScrollDebounce) clearTimeout(_massTocScrollDebounce);
+        _massTocScrollDebounce = setTimeout(function() {
+            updateMassTocActiveItem();
+        }, 50);
+    });
+
+    updateMassTocActiveItem();
+}
+
+function initMassTocEvents() {
+    // Toggle panel on Pill click (morphs between Open and Close)
+    $(document).off('click.domasstocpill', '#doMassTocPill').on('click.domasstocpill', '#doMassTocPill', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMassTocPanel();
+    });
+
+    // Close panel on backdrop click
+    $(document).off('click.domasstocclose', '#doMassTocBackdrop')
+        .on('click.domasstocclose', '#doMassTocBackdrop', function(e) {
+            e.preventDefault();
+            closeMassTocPanel();
+        });
+
+    // Prevent background touch scrolling when touch originates outside #doMassTocPanel
+    $('#doMassTocBackdrop').off('touchmove.domasstoc').on('touchmove.domasstoc', function(e) {
+        e.preventDefault();
+    });
+
+    // Stop propagation of wheel and touch events on TOC panel so it scrolls isolated
+    $('#doMassTocPanel').off('wheel.domasstoc touchmove.domasstoc')
+        .on('wheel.domasstoc touchmove.domasstoc', function(e) {
+            e.stopPropagation();
+        });
+
+    // Update top & bottom fading gradients on list scroll
+    $('#doMassTocList').off('scroll.domasstoclist').on('scroll.domasstoclist', function() {
+        updateMassTocListScrollMask();
+    });
+
+    // Precise scroll on item click: aligns top of section card with generous margin below header
+    $(document).off('click.domasstocitem', '.do-mass-toc-item').on('click.domasstocitem', '.do-mass-toc-item', function(e) {
+        e.preventDefault();
+        var targetId = $(this).attr('data-target-id');
+        var targetEl = document.getElementById(targetId);
+        if (targetEl) {
+            triggerHapticFeedback('selection');
+            closeMassTocPanel();
+
+            // Pre-render any pending chant scores immediately so all SVG heights are final
+            if (doState.includeGregorian) {
+                renderAllChantScoresInDOM($('#do-content-stream'), true);
+            }
+
+            function calcScrollTarget() {
+                var $header = $('.do-top-header:visible');
+                var headerH = $header.length ? $header.outerHeight() : 60;
+                var $banner = $('.do-update-banner:visible');
+                if ($banner.length) {
+                    headerH += $banner.outerHeight();
+                }
+                var rect = targetEl.getBoundingClientRect();
+                return window.scrollY + rect.top - headerH - 28;
+            }
+
+            setTimeout(function() {
+                var targetY = Math.max(0, calcScrollTarget());
+                window.scrollTo({
+                    top: targetY,
+                    behavior: 'smooth'
+                });
+
+                // Periodic check during scroll animation to compensate for any font/SVG reflow
+                [120, 280, 500, 750].forEach(function(delay) {
+                    setTimeout(function() {
+                        var currentTarget = Math.max(0, calcScrollTarget());
+                        if (Math.abs(window.scrollY - currentTarget) > 8) {
+                            window.scrollTo({
+                                top: currentTarget,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, delay);
+                });
+            }, 40);
+        }
+    });
+
+    // Bottom Toggle: Chant Grégorien
+    $(document).off('click.domasstocchant', '#btnMassTocToggleChant').on('click.domasstocchant', '#btnMassTocToggleChant', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        doState.includeGregorian = !doState.includeGregorian;
+        localStorage.setItem('do_include_gregorian', doState.includeGregorian);
+        $('#toggleGregorian').prop('checked', doState.includeGregorian);
+        updateMassTocToggleStates();
+        renderDO();
+    });
+
+    // Bottom Toggle: Ordinaire de la messe
+    $(document).off('click.domasstocord', '#btnMassTocToggleOrdinarium').on('click.domasstocord', '#btnMassTocToggleOrdinarium', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        doState.includeOrdinarium = !doState.includeOrdinarium;
+        localStorage.setItem('do_ordinarium', doState.includeOrdinarium);
+        $('#toggleOrdinarium').prop('checked', doState.includeOrdinarium);
+        updateMassTocToggleStates();
+        renderDO();
+    });
+
+    // Close on Escape key
+    $(document).off('keydown.domasstoc').on('keydown.domasstoc', function(e) {
+        if (e.key === 'Escape' && !$('#doMassTocPanel').hasClass('hidden')) {
+            e.preventDefault();
+            closeMassTocPanel();
+        }
+    });
+}
+
 

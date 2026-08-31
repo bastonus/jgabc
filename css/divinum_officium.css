@@ -489,7 +489,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     border-bottom: none !important;
     position: sticky !important;
     top: 0 !important;
-    z-index: 900 !important;
+    z-index: 965 !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -514,7 +514,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     .do-top-header {
         position: sticky !important;
         top: 0 !important;
-        z-index: 900 !important;
+        z-index: 965 !important;
         padding: max(12px, calc(12px + env(safe-area-inset-top, 0px))) 16px 12px !important;
     }
 
@@ -551,6 +551,79 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.72rem;
+}
+
+.header-title-area {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#doHeaderTitle,
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0 0 0;
+    padding: 0;
+    font-size: 1.12rem;
+    line-height: 1.3;
+    font-weight: 700;
+    font-family: var(--font-serif, Georgia, "Times New Roman", serif);
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.do-header-title-wrapper {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#doHeaderTitle .title-text {
+    white-space: nowrap !important;
+    display: inline-block;
+    will-change: transform;
+    flex-shrink: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+}
+
+.dropdown-icon {
+    flex-shrink: 0;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    border-radius: 50% !important;
+    background: var(--background-highlight);
+    color: var(--text-secondary);
+    transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background 0.2s ease, color 0.2s ease;
+    margin-left: 2px;
+}
+
+.dropdown-icon svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+}
+
+#doHeaderTitle:hover .dropdown-icon {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18);
+    color: var(--primary-color);
 }
 
 /* =============================================================
@@ -2379,7 +2452,7 @@ body.is-bible-mode .modern-player-bar {
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     box-shadow: none !important;
     border: none !important;
-    z-index: 960 !important;
+    z-index: 1020 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -2395,8 +2468,17 @@ body.is-bible-mode .modern-player-bar {
         max-height: calc(100vh - (58px + env(safe-area-inset-top, 0px)));
         max-height: calc(100dvh - (58px + env(safe-area-inset-top, 0px)));
         padding-bottom: 0 !important;
-        z-index: 960 !important;
+        z-index: 1020 !important;
     }
+}
+
+/* Hide floating TOC when header dropdown calendar/search menu is open */
+body.header-dropdown-open .do-mass-toc-pill,
+body.header-dropdown-open .do-mass-toc-panel,
+body.header-dropdown-open .do-mass-toc-backdrop {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
 }
 
 .do-header-dropdown.hidden {
@@ -2433,7 +2515,7 @@ body.is-bible-mode .modern-player-bar {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 8px 24px max(24px, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
+    padding: 8px 24px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     max-width: 900px;
     width: 100%;
     margin: 0;
@@ -2450,7 +2532,7 @@ body.is-bible-mode .modern-player-bar {
     }
     .hdd-bottom-controls,
     .hdd-header-controls {
-        padding: 8px 14px max(28px, calc(18px + env(safe-area-inset-bottom, 0px))) !important;
+        padding: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
@@ -3806,8 +3888,11 @@ body, html {
     max-width: calc(100vw - 280px) !important;
     height: auto !important;
     padding: 12px 24px 16px !important;
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
-    margin: 0 !important;
+    padding-bottom: calc(400px + max(16px, env(safe-area-inset-bottom, 0px))) !important;
+    margin-bottom: -400px !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     border-radius: 0 !important;
     overflow: hidden !important;
     border: none !important;
@@ -3818,7 +3903,7 @@ body, html {
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    z-index: 950 !important;
+    z-index: 965 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -3862,8 +3947,44 @@ body.player-dock-open #modernPlayerBar {
         width: 100% !important;
         max-width: 100% !important;
         padding: 10px 14px 14px !important;
-        padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: calc(400px + max(14px, env(safe-area-inset-bottom, 0px))) !important;
+        margin-bottom: -400px !important;
     }
+}
+
+/* ── Grab Handle for Swipe Down Dismissal ── */
+.do-player-drag-handle-wrap {
+    width: 100%;
+    padding: 6px 0 10px;
+    margin: -4px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    z-index: 10;
+}
+
+.do-player-drag-handle {
+    width: 44px;
+    height: 5px;
+    background: color-mix(in srgb, var(--text-secondary) 35%, transparent);
+    border-radius: 4px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+.do-player-drag-handle-wrap:hover .do-player-drag-handle,
+.do-player-drag-handle-wrap:active .do-player-drag-handle {
+    background: color-mix(in srgb, var(--primary-color) 80%, transparent);
+    transform: scaleX(1.15);
+}
+
+body.is-dragging-player #modernPlayerBar {
+    transition: none !important;
 }
 
 /* ── Inner Content Wrapper (Centered Max Width 760px) ── */
@@ -4223,6 +4344,18 @@ body.player-dock-open #modernPlayerBar {
 .do-player-toggle.active {
     background: rgba(var(--primary-color-rgb), 0.18) !important;
     color: var(--primary-color) !important;
+}
+
+.do-player-speed-btn {
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    min-width: 48px !important;
+    letter-spacing: 0.2px !important;
+    color: var(--primary-color) !important;
+}
+
+.do-player-speed-btn .do-speed-label {
+    user-select: none;
 }
 
 .do-solesmes-icon {
@@ -5601,6 +5734,439 @@ html.is-ios .web-download-app-wrapper,
     background: #ef4444;
     color: #ffffff;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ── MASS FLOATING TOC & QUICK ACCESS INDEX ──
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+    --toc-margin: 16px;
+    --player-bar-offset: 146px;
+    --player-drag-y: 0px;
+}
+
+@media (min-width: 600px) {
+    :root {
+        --toc-margin: 20px;
+    }
+}
+
+/* ── Floating Trigger Button (Slender & Compact 30px Design, 100% Opaque) ── */
+.do-mass-toc-pill {
+    position: fixed;
+    right: var(--toc-margin, 16px);
+    bottom: max(20px, calc(var(--toc-margin, 16px) + env(safe-area-inset-bottom, 0px)));
+    z-index: 980;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 30px !important;
+    padding: 0 11px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    outline: none !important;
+    background: #18181c !important;
+    color: #f4f4f5 !important;
+    font-family: inherit;
+    font-size: 12px !important;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(var(--player-drag-y, 0px));
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.15s ease,
+                color 0.15s ease !important;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+[data-theme="light"] .do-mass-toc-pill {
+    background: #ffffff !important;
+    color: #18181b !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 2px 5px rgba(0, 0, 0, 0.06) !important;
+}
+
+@media (hover: hover) {
+    .do-mass-toc-pill:hover {
+        background: #24242a !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="light"] .do-mass-toc-pill:hover {
+        background: #f4f4f6 !important;
+        color: #18181b !important;
+    }
+}
+
+.do-mass-toc-pill:active {
+    transform: translateY(var(--player-drag-y, 0px)) !important;
+}
+
+/* When the TOC panel is open, button morphs into active close button */
+.do-mass-toc-pill.is-open {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+.do-mass-toc-pill.is-scrolling {
+    transform: translateY(var(--player-drag-y, 0px)) !important;
+}
+
+.do-mass-toc-pill-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    transition: transform 0.25s ease;
+}
+
+.do-mass-toc-pill-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.do-mass-toc-pill.is-open .do-mass-toc-pill-icon {
+    transform: rotate(90deg);
+}
+
+.do-mass-toc-pill-text {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Dynamic Audio Player Avoidance (Strict constant clearance strictly matching right margin) ── */
+body.player-dock-open .do-mass-toc-pill,
+.has-player-open .do-mass-toc-pill {
+    bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px)) !important;
+}
+
+body.is-dragging-player .do-mass-toc-pill,
+body.is-dragging-player .do-mass-toc-panel {
+    transition: none !important;
+}
+
+/* ── Backdrop for TOC (Multi-layer True Progressive Blur & Circular Arc Gradient) ── */
+.do-mass-toc-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 960;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.do-mass-toc-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none !important;
+}
+
+.do-mass-toc-blur-layer,
+.do-mass-toc-tint-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Layer 1: Widest subtle blur at the outer perimeter */
+.do-mass-toc-blur-layer.do-blur-1 {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    -webkit-mask-image: radial-gradient(ellipse 95% 85% at 100% 85%, black 0%, black 65%, transparent 95%);
+    mask-image: radial-gradient(ellipse 95% 85% at 100% 85%, black 0%, black 65%, transparent 95%);
+}
+
+/* Layer 2: Intermediate soft blur */
+.do-mass-toc-blur-layer.do-blur-2 {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 100% 85%, black 0%, black 50%, transparent 80%);
+    mask-image: radial-gradient(ellipse 85% 75% at 100% 85%, black 0%, black 50%, transparent 80%);
+}
+
+/* Layer 3: Medium blur */
+.do-mass-toc-blur-layer.do-blur-3 {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 100% 85%, black 0%, black 38%, transparent 65%);
+    mask-image: radial-gradient(ellipse 75% 65% at 100% 85%, black 0%, black 38%, transparent 65%);
+}
+
+/* Layer 4: Strong blur approaching menu items */
+.do-mass-toc-blur-layer.do-blur-4 {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    -webkit-mask-image: radial-gradient(ellipse 62% 55% at 100% 85%, black 0%, black 28%, transparent 52%);
+    mask-image: radial-gradient(ellipse 62% 55% at 100% 85%, black 0%, black 28%, transparent 52%);
+}
+
+/* Layer 5: Heavy core blur directly under the titles */
+.do-mass-toc-blur-layer.do-blur-5 {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    -webkit-mask-image: radial-gradient(ellipse 50% 45% at 100% 85%, black 0%, black 18%, transparent 40%);
+    mask-image: radial-gradient(ellipse 50% 45% at 100% 85%, black 0%, black 18%, transparent 40%);
+}
+
+/* Progressive Dark / Light Tint layer perfectly matching blur values */
+.do-mass-toc-tint-layer {
+    background: radial-gradient(
+        ellipse 95% 85% at 100% 85%,
+        rgba(10, 10, 12, 0.78) 0%,
+        rgba(10, 10, 12, 0.65) 30%,
+        rgba(10, 10, 12, 0.40) 55%,
+        rgba(10, 10, 12, 0.15) 75%,
+        transparent 95%
+    );
+}
+
+[data-theme="light"] .do-mass-toc-tint-layer {
+    background: radial-gradient(
+        ellipse 95% 85% at 100% 85%,
+        rgba(255, 255, 255, 0.85) 0%,
+        rgba(255, 255, 255, 0.72) 30%,
+        rgba(255, 255, 255, 0.45) 55%,
+        rgba(255, 255, 255, 0.18) 75%,
+        transparent 95%
+    );
+}
+
+/* ── Flyout TOC Panel (Right-Aligned, Scrollable Container) ── */
+.do-mass-toc-panel {
+    position: fixed;
+    right: var(--toc-margin, 16px);
+    bottom: calc(max(20px, calc(var(--toc-margin, 16px) + env(safe-area-inset-bottom, 0px))) + 38px);
+    width: 280px;
+    max-width: calc(100vw - 32px);
+    height: auto;
+    max-height: min(480px, calc(100vh - 200px));
+    z-index: 970;
+    display: flex;
+    flex-direction: column;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+    transform-origin: bottom right;
+    transform: translateY(var(--player-drag-y, 0px)) scale(1);
+    opacity: 1;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s ease,
+                bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+body.player-dock-open .do-mass-toc-panel,
+.has-player-open .do-mass-toc-panel {
+    bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px) + 38px) !important;
+}
+
+.do-mass-toc-panel.hidden {
+    transform: translateY(calc(var(--player-drag-y, 0px) + 16px)) scale(0.92);
+    opacity: 0;
+    pointer-events: none !important;
+}
+
+/* ── TOC Body & Items List (Native scrolling & Right-Aligned with Dynamic End Fade) ── */
+.do-mass-toc-body {
+    flex: 1 1 auto;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding: 10px 4px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-height: 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 36px, black calc(100% - 36px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 36px, black calc(100% - 36px), transparent 100%);
+    transition: -webkit-mask-image 0.18s ease, mask-image 0.18s ease;
+}
+
+/* When at top: no top fade, bottom fades out */
+.do-mass-toc-body.at-top {
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 36px), transparent 100%) !important;
+    mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 36px), transparent 100%) !important;
+}
+
+/* When at bottom: top fades out, no bottom fade */
+.do-mass-toc-body.at-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 36px, black 100%) !important;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 36px, black 100%) !important;
+}
+
+/* When whole list fits without scroll or at both extremities: crisp without any fade */
+.do-mass-toc-body.no-scroll,
+.do-mass-toc-body.at-top.at-bottom {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+
+.do-mass-toc-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    width: 100%;
+}
+
+/* ── TOC Item Row (Slender 30px height, 8px radius, 100% Opaque) ── */
+.do-mass-toc-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 30px !important;
+    padding: 0 11px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    outline: none !important;
+    background: #18181c !important;
+    color: #f4f4f5 !important;
+    font-family: inherit;
+    font-size: 12px !important;
+    font-weight: 500;
+    text-align: right;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    max-width: 100%;
+    box-sizing: border-box !important;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+[data-theme="light"] .do-mass-toc-item {
+    background: #ffffff !important;
+    color: #18181b !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+@media (hover: hover) {
+    .do-mass-toc-item:hover {
+        background: #24242a !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="light"] .do-mass-toc-item:hover {
+        background: #f4f4f6 !important;
+        color: #18181b !important;
+    }
+}
+
+.do-mass-toc-item:active {
+    transform: none !important;
+}
+
+.do-mass-toc-item.is-active {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── TOC Footer Action Buttons (Chant & Ordinaire Toggles — Slender 26px Design) ── */
+.do-mass-toc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 6px 4px 2px;
+    flex-shrink: 0;
+}
+
+.do-mass-toc-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 26px !important;
+    padding: 0 9px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    outline: none !important;
+    background: #18181c !important;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 11px !important;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.do-mass-toc-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.do-mass-toc-toggle-btn .icon-checked {
+    display: none;
+}
+
+.do-mass-toc-toggle-btn.is-active .icon-default {
+    display: none;
+}
+
+.do-mass-toc-toggle-btn.is-active .icon-checked {
+    display: inline-block;
+}
+
+.do-mass-toc-toggle-btn svg {
+    width: 11px !important;
+    height: 11px !important;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .do-mass-toc-toggle-btn {
+    background: #ffffff !important;
+    color: #52525b !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06) !important;
+}
+
+@media (hover: hover) {
+    .do-mass-toc-toggle-btn:hover {
+        background: #24242a !important;
+        color: var(--text-primary);
+    }
+}
+
+.do-mass-toc-toggle-btn.is-active {
+    background: color-mix(in srgb, var(--primary-color) 35%, #18181c) !important;
+    color: var(--primary-color) !important;
+}
+
+[data-theme="light"] .do-mass-toc-toggle-btn.is-active {
+    background: color-mix(in srgb, var(--primary-color) 20%, #ffffff) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Touch and Interaction Handling when TOC is open (Keep sticky header pinned without overflow lock) */
+body.mass-toc-open #do-content-stream {
+    pointer-events: none !important;
+}
+
+body.mass-toc-open .do-top-header,
+body.mass-toc-open #doMassTocPanel,
+body.mass-toc-open #doMassTocPill,
+body.mass-toc-open #doMassTocBackdrop,
+body.mass-toc-open #modernPlayerBar {
+    pointer-events: auto !important;
+}
+
 
 
 

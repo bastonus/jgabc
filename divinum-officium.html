@@ -312,10 +312,12 @@
                     </button>
                     <div class="header-title-area">
                         <div id="doHourLabel" class="card-type">Vesperæ • 24 Augusti</div>
-                        <h1 id="doHeaderTitle" class="header-title dropdown-trigger" style="display:flex; align-items:center; gap:8px; cursor:pointer;" title="Choisir un jour ou une fête">
-                            <span class="title-text">Oneratur…</span>
-                            <span class="dropdown-icon" style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--background-highlight); color:var(--text-secondary); transition: transform 0.2s ease;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <h1 id="doHeaderTitle" class="header-title dropdown-trigger" title="Choisir un jour ou une fête">
+                            <div class="do-header-title-wrapper">
+                                <span class="title-text">Oneratur…</span>
+                            </div>
+                            <span class="dropdown-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </span>
                         </h1>
                     </div>
@@ -747,6 +749,9 @@
 
     <!-- App-Native Full-width Audio Player -->
     <div id="modernPlayerBar" class="modern-player-bar">
+        <div class="do-player-drag-handle-wrap" id="playerDragHandleWrap" title="Glisser vers le bas pour fermer">
+            <div class="do-player-drag-handle" id="playerDragHandle"></div>
+        </div>
         <div class="do-player-inner-container">
             <!-- Progress Section: Large, Accessible Seek Bar with Elapsed & Remaining Time -->
             <div class="do-player-progress-section">
@@ -826,29 +831,72 @@
                         <span class="do-solesmes-text">Solesmes</span>
                     </button>
 
-                    <!-- Tempo -->
-                    <div class="do-player-pill" title="Tempo (BPM)">
-                        <span class="do-player-pill-label">BPM</span>
-                        <button id="playerTempoMinus" class="do-player-pill-btn tempo-minus" title="Ralentir (-10 BPM)">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </button>
-                        <span id="playerTempoValue" class="do-player-pill-value tempo-value">165</span>
-                        <button id="playerTempoPlus" class="do-player-pill-btn tempo-plus" title="Accélérer (+10 BPM)">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                        </button>
-                    </div>
-
-                    <!-- Distinct Close Player Button -->
-                    <button id="playerBtnClose" class="do-player-close-btn" title="Fermer le lecteur (Échap)" aria-label="Fermer le lecteur">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
+                    <!-- Speed / Multiplier Cycle Button -->
+                    <button id="playerSpeedCycleBtn" class="do-player-toggle do-player-speed-btn" title="Vitesse de lecture (Cliquer pour changer : 1x, 1.25x, 1.5x, 2x, 0.5x, 0.75x)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge-icon lucide-gauge"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                        <span class="do-speed-label">1.0×</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Mass Floating Table of Contents / Index Pill & Flyout Panel -->
+    <div id="doMassTocBackdrop" class="do-mass-toc-backdrop hidden">
+        <div class="do-mass-toc-blur-layer do-blur-1"></div>
+        <div class="do-mass-toc-blur-layer do-blur-2"></div>
+        <div class="do-mass-toc-blur-layer do-blur-3"></div>
+        <div class="do-mass-toc-blur-layer do-blur-4"></div>
+        <div class="do-mass-toc-blur-layer do-blur-5"></div>
+        <div class="do-mass-toc-tint-layer"></div>
+    </div>
+    <aside id="doMassTocPanel" class="do-mass-toc-panel hidden" aria-label="Sommaire de la Messe" role="dialog" aria-modal="true">
+        <div class="do-mass-toc-body custom-scroll" id="doMassTocList">
+            <!-- Dynamically populated / styled structured list -->
+        </div>
+        <div class="do-mass-toc-footer">
+            <button id="btnMassTocToggleChant" class="do-mass-toc-toggle-btn" title="Activer / Désactiver le chant grégorien">
+                <span class="do-mass-toc-toggle-icon">
+                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span>Grégorien</span>
+            </button>
+            <button id="btnMassTocToggleOrdinarium" class="do-mass-toc-toggle-btn" title="Afficher / Masquer l'ordinaire complet">
+                <span class="do-mass-toc-toggle-icon">
+                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span>Ordinaire</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Floating TOC Trigger Pill (Dynamic position above player) -->
+    <button id="doMassTocPill" class="do-mass-toc-pill hidden" aria-label="Ouvrir le sommaire de la messe" title="Sommaire de la Messe">
+        <div class="do-mass-toc-pill-icon">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <circle cx="3.5" cy="6" r="1.5" fill="currentColor"></circle>
+                <circle cx="3.5" cy="12" r="1.5" fill="currentColor"></circle>
+                <circle cx="3.5" cy="18" r="1.5" fill="currentColor"></circle>
+            </svg>
+        </div>
+        <span class="do-mass-toc-pill-text" id="doMassTocCurrentLabel">Sommaire</span>
+    </button>
 
     <!-- Feedback / Tally In-App Modal -->
     <div id="feedbackModalBackdrop" class="update-modal-backdrop hidden"></div>

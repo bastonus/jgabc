@@ -391,12 +391,20 @@ R. Amen.
 !*D
 !In Missis Defunctorum non datur benedíctio, sed dicto Requiéscant in pace, dicit: Pláceat tibi, sancta Trinitas; deinde osculato Altari, legit Evangelium sancti Joannis. 
 
-!*&CheckUltimaEv
 !Deinde sacerdos in cornu Evangelii, junctis manibus dicit:
 V. Dóminus vobíscum.
 R. Et cum spíritu tuo.
 !Et signans signo crucis primum Altare vel librum, deinde se in fronte, ore et pectore, dicit:
-&Ultimaev
+V. Inítium + sancti Evangélii secúndum Joánnem.
+R. Glória tibi, Dómine.
+!Joann. 1, 1-14
+!Junctis manibus prosequitur:
+v. In princípio erat Verbum, et Verbum erat apud Deum, et Deus erat Verbum. Hoc erat in princípio apud Deum. Omnia per ipsum facta sunt: et sine ipso factum est nihil, quod factum est: in ipso vita erat, et vita erat lux hóminum: et lux in ténebris lucet, et ténebræ eam non comprehendérunt.
+v. Fuit homo missus a Deo, cui nomen erat Joánnes. Hic venit in testimónium, ut testimónium perhibéret de lúmine, ut omnes créderent per illum. Non erat ille lux, sed ut testimónium perhibéret de lúmine.
+v. Erat lux vera, quæ illúminat omnem hóminem veniéntem in hunc mundum. In mundo erat, et mundus per ipsum factus est, et mundus eum non cognóvit. In própria venit, et sui eum non recepérunt.
+v. Quotquot autem recepérunt eum, dedit eis potestátem fílios Dei fíeri, his, qui credunt in nómine ejus: qui non ex sanguínibus, neque ex voluntáte carnis, neque ex voluntáte viri, sed ex Deo nati sunt.
+v. (Genuflectit dicens:) Et Verbum caro factum est, (Et surgens prosequitur:) et habitávit in nobis: et vídimus glóriam ejus, glóriam quasi Unigéniti a Patre, plenum grátiæ et veritátis.
+R. Deo grátias.
 !Finito Evangelio sancti Joannis, discedens ab Altari, pro gratiarum actione dicit Ant. Trium puerórum, cum reliquis, ut habetur in principio Missalis.
 
 !*R

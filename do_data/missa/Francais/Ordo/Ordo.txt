@@ -451,12 +451,20 @@ R. Ainsi soit-il.
 !*D
 !Aux messes des défunts, on ne donne pas de bénédiction, mais après avoir dit Requiéscant in pace, le prêtre dit la prière Pláceat tibi, sancta Trinitas — Agréez, Trinité Sainte — et ensuite il lit, s’il le faut, l’Évangile selon saint Jean.
 
-!*&CheckUltimaEv
 !Le prêtre se dirige vers le coin gauche de l’autel, et dit :
 V. Le Seigneur soit avec vous.
 R. Et avec votre esprit.
-!Puis il fait un signe de croix sur l’autel avec le pouce et un sur son froont, sur ses lèvres et sur son cœur, en disant :
-&Ultimaev
+!Puis il fait un signe de croix sur l’autel avec le pouce et un sur son front, sur ses lèvres et sur son cœur, en disant :
+V. Commencement + du saint Évangile selon saint Jean.
+R. Gloire à vous, Seigneur.
+!Joann. 1, 1-14
+!Les mains jointes, il poursuit :
+v. Au commencement était le Verbe, et le Verbe était auprès de Dieu et le Verbe était Dieu. Il était au commencement auprès de Dieu. Toutes choses ont été faites par lui, et rien de ce qui a été fait n’a été fait sans lui. En lui était la vie, et la vie était la lumière des hommes ; et la lumière luit dans les ténèbres, et les ténèbres ne l’ont point comprise.
+v. Il y eut un homme, envoyé de Dieu, appelé Jean. Il vint en témoin pour rendre témoignage à la lumière, afin que tous crussent par lui. Il n’était pas lui-même la lumière, mais il vint pour rendre témoignage à la lumière.
+v. Celui-là était la vraie lumière qui éclaire tout homme venant en ce monde. Il était dans le monde, et le monde a été fait par lui, et le monde ne l’a pas reconnu. Il est venu chez lui, et les siens ne l’ont pas reçu.
+v. Mais à tous ceux qui l’ont reçu, il a donné le pouvoir de devenir enfants de Dieu, à ceux qui croient en son nom : qui ne sont point nés du sang, ni de la volonté de la chair, ni de la volonté de l’homme, mais de Dieu.
+v. (On fléchit le genou avec le prêtre, qui dit :) Et le Verbe s’est fait chair, (Et se relevant, le prêtre poursuit :) et il a habité parmi nous, et nous avons vu sa gloire, qui est la gloire du Fils unique du Père, plein de grâce et de vérité.
+R. Nous rendons grâces à Dieu.
 
 !*R
 # Prières de Léon XIII

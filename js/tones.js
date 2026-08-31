@@ -188,7 +188,11 @@
   // need to create a node in order to kick off the timer in Chrome.
   tones.context.createGain();
 
-  var wave = tones.context.createPeriodicWave(new Float32Array([0, .3, .03, .05]), new Float32Array([0, 0, 0, 0]));
+  // Rich positive organ harmonic spectrum (fundamental, octave, twelfth, superoctave, tierce)
+  // for warm Gregorian accompaniment with soft natural pipe timbre
+  var realCoeffs = new Float32Array([0, 0.45, 0.28, 0.14, 0.08, 0.04, 0.02, 0.01, 0.005]);
+  var imagCoeffs = new Float32Array(realCoeffs.length);
+  var wave = tones.context.createPeriodicWave(realCoeffs, imagCoeffs);
 
 
   if (typeof define === "function" && define.amd) {
