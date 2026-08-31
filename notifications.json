@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:36:00Z",
+  "updatedAt": "2026-08-31T14:38:00Z",
   "channel": "official",
   "notifications": [
     {
@@ -52,6 +52,69 @@
           {
             "label": "Parfait, continuer",
             "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "notif-early-beta-warning",
+      "enabled": true,
+      "priority": 40,
+      "platforms": ["all"],
+      "frequency": "always",
+      "style": "liturgical",
+      "badge": "Beta Early",
+      "icon": "alert",
+      "title": "Avertissement : Version Beta Precoce",
+      "subtitle": "Application en cours de developpement actif",
+      "message": "Oremus est actuellement en phase de test precoce. Des erreurs de traduction, de rubriques et des imperfections subsistent : vos retours et signalements de testeurs sont activement attendus.",
+      "banner": {
+        "show": true,
+        "text": "Version Beta Precoce : Application en developpement, retours attendus",
+        "tag": "Beta",
+        "actionLabel": "En savoir plus",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Avertissement : Version Beta Precoce",
+        "subtitle": "Statut de developpement et role des testeurs",
+        "icon": "alert",
+        "wrappers": [
+          {
+            "type": "callout",
+            "style": "warning",
+            "title": "Application en phase de test active",
+            "content": "Oremus est actuellement en version beta precoce (early beta). De nombreuses parties sont encore en cours d'elaboration, et des erreurs de traduction, de rubriques ou de concordance peuvent etre presentes. Il ne faut pas trop compter sur elle pour un usage liturgique critique sans verification prealable."
+          },
+          {
+            "type": "card",
+            "icon": "info",
+            "title": "Vous etes nos beta-testeurs",
+            "content": "En utilisant cette version, vous participez directement aux tests de l'application. Vos retours et signalements d'erreurs (textes, rubriques, dysfonctionnements) sont tres precieux et activement attendus pour corriger et stabiliser Oremus."
+          },
+          {
+            "type": "steps",
+            "title": "Comment nous aider",
+            "steps": [
+              "Signalez les erreurs de traduction ou de texte via le formulaire de retours.",
+              "Indiquez les eventuels blocages ou comportements inattendus rencontres.",
+              "Partagez vos suggestions d'ergonomie et d'ameliorations futures."
+            ]
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Faire un retour",
+            "type": "primary",
+            "action": "open_feedback",
+            "dismissOnClick": true
+          },
+          {
+            "label": "J'ai compris",
+            "type": "secondary",
             "action": "dismiss",
             "dismissOnClick": true
           }

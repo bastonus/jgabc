@@ -9148,6 +9148,9 @@ var OremusNotifications = (function() {
 
         if (actionType === 'open_modal') {
             showModal(notif);
+        } else if (actionType === 'open_feedback') {
+            hideModal(false);
+            openFeedbackModal();
         } else if (actionType === 'open_url') {
             if (url) {
                 window.open(url, '_blank');
