@@ -8221,15 +8221,6 @@ function isNativeAndroidApp() {
 }
 
 function checkForAppUpdates(isManual) {
-    // Ne jamais exécuter ni afficher de pop-up de mise à jour sur le site Web
-    if (!isNativeAndroidApp()) {
-        if (isManual) {
-            var $statusText = $('#updateStatusText');
-            $statusText.text('Version Web en ligne (Toujours à jour)').css('color', 'var(--text-tertiary)');
-        }
-        return;
-    }
-
     var includeBeta = (localStorage.getItem('do_include_beta') !== 'false');
     var $statusText = $('#updateStatusText');
     if (isManual) {
@@ -8279,14 +8270,18 @@ function checkForAppUpdates(isManual) {
             if (isNewer) {
                 if (isManual) {
                     $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+                }
+                var isDismissed = false;
+                try {
+                    isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
+                } catch (e) {}
+
+                if (!isDismissed || isManual) {
                     showUpdateModal(targetRelease);
-                } else {
-                    var isDismissed = false;
-                    try {
-                        isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
-                    } catch (e) {}
-                    if (!isDismissed) {
-                        showUpdateModal(targetRelease);
+
+                    // Send official system notification on Android if supported
+                    if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
+                        window.OremusSystemNotifications.send('Mise à jour disponible : ' + latestTag, 'Une nouvelle version d\'Oremus est prête au téléchargement.');
                     }
                 }
             } else {
@@ -10485,22 +10480,30 @@ $(function() {
     setupEventListeners();
     renderDO();
 
-    // Check for Remote GitHub Notifications after initial render
+    // Check for Remote GitHub Notifications and Releases after initial render
     setTimeout(function() {
         if (window.OremusNotifications && typeof window.OremusNotifications.check === 'function') {
             window.OremusNotifications.check(false);
         }
-    }, 1200);
+        if (typeof checkForAppUpdates === 'function') {
+            checkForAppUpdates(false);
+        }
+    }, 1500);
 
     // Initialize 20-minute usage tracker
     if (window.OremusUsageTracker && typeof window.OremusUsageTracker.init === 'function') {
         window.OremusUsageTracker.init();
     }
 
-    // Recheck notifications on visibility return / focus
+    // Recheck notifications & updates on visibility return / focus
     document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible' && window.OremusNotifications) {
-            window.OremusNotifications.check(false);
+        if (document.visibilityState === 'visible') {
+            if (window.OremusNotifications) {
+                window.OremusNotifications.check(false);
+            }
+            if (typeof checkForAppUpdates === 'function') {
+                checkForAppUpdates(false);
+            }
         }
     });
 });
