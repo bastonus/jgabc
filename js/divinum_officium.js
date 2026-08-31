@@ -9018,7 +9018,6 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
     // Fallback Web navigator.vibrate with patterned vibration signatures
     try {
         if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-            // Guard against Chrome [Intervention] warning when frame has not received user activation yet
             if (navigator.userActivation && !navigator.userActivation.hasBeenActive) {
                 return;
             }
@@ -9070,7 +9069,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.49';
+var CURRENT_APP_VERSION = 'beta-0.0.50';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -9101,6 +9100,10 @@ function isNativeAndroidApp() {
     } catch (e) {
         return false;
     }
+}
+
+function isAppForeground() {
+    return (typeof document !== 'undefined' && document.visibilityState === 'visible');
 }
 
 function checkForAppUpdates(isManual) {
@@ -9150,17 +9153,25 @@ function checkForAppUpdates(isManual) {
             if (isManual) {
                 $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
             }
+
             var isDismissed = false;
             try {
                 isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
             } catch (e) {}
 
             if (!isDismissed || isManual) {
-                showUpdateModal(targetRelease);
+                showUpdateBanner(targetRelease);
 
-                // Send official system notification on Android if supported
+                // Send official system notification on Android ONLY if not already pushed and ONLY in background
+                var updateKey = 'update_' + latestTag;
                 if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
-                    window.OremusSystemNotifications.send('Mise à jour disponible : ' + latestTag, 'Une nouvelle version d\'Oremus est prête au téléchargement.');
+                    window.OremusSystemNotifications.send(
+                        'Mise à jour disponible : ' + latestTag,
+                        'Une nouvelle version d\'Oremus est prête au téléchargement.',
+                        'updates',
+                        { releaseTag: latestTag },
+                        updateKey
+                    );
                 }
             }
         } else {
@@ -9173,15 +9184,20 @@ function checkForAppUpdates(isManual) {
 
     function handleFallbackVersionFile(data) {
         if (!data || !data.latestVersion) throw new Error('Invalid version file');
+        var tagName = data.tagName || data.latestVersion;
+        var directApkUrl = data.downloadUrl || ('https://github.com/bastonus/jgabc/releases/download/' + tagName + '/Oremus.apk');
+        if (directApkUrl.endsWith('app-release.apk')) {
+            directApkUrl = directApkUrl.replace(/app-release\.apk$/i, 'Oremus.apk');
+        }
         var pseudoRelease = {
-            tag_name: data.tagName || data.latestVersion,
-            html_url: data.htmlUrl || ('https://github.com/bastonus/jgabc/releases/tag/' + (data.tagName || data.latestVersion)),
-            body: data.body || ('Mise à jour ' + data.latestVersion),
+            tag_name: tagName,
+            html_url: data.htmlUrl || ('https://github.com/bastonus/jgabc/releases/tag/' + tagName),
+            body: data.body || ('Mise à jour ' + tagName),
             published_at: data.releaseDate || new Date().toISOString(),
             assets: [
                 {
-                    name: 'app-release.apk',
-                    browser_download_url: data.downloadUrl || ('https://github.com/bastonus/jgabc/releases/download/' + (data.tagName || data.latestVersion) + '/app-release.apk')
+                    name: 'Oremus.apk',
+                    browser_download_url: directApkUrl
                 }
             ]
         };
@@ -10154,10 +10170,7 @@ var OremusNotifications = (function() {
                 showModal(primary);
             }
 
-            // Schedule background system notifications for all valid notifications when the app is closed/inactive
-            if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.scheduleBackgroundNotifs === 'function') {
-                window.OremusSystemNotifications.scheduleBackgroundNotifs(valid);
-            }
+            // Remote notification is shown in-app; background system push will be handled when the app enters background
         });
     }
 
@@ -10297,8 +10310,24 @@ var OremusSystemNotifications = (function() {
         return Promise.resolve(false);
     }
 
-    function send(title, body, category, extra) {
+    function send(title, body, category, extra, dedupeKey) {
         if (!isEnabled()) return;
+
+        // Strictly do NOT send system push notification if the app is currently in foreground / open
+        if (isAppForeground()) {
+            console.log('[SystemNotifications] Skipped push notification: App is open in foreground.');
+            return;
+        }
+
+        // Strict deduplication: Never send the same notification twice
+        if (dedupeKey) {
+            var pushKey = 'do_system_pushed_' + dedupeKey;
+            if (localStorage.getItem(pushKey) === 'true') {
+                return;
+            }
+            try { localStorage.setItem(pushKey, 'true'); } catch (e) {}
+        }
+
         var cat = category || 'announcements';
         if (!isCategoryEnabled(cat)) {
             console.log('[SystemNotifications] Skipped disabled category:', cat);
@@ -10310,16 +10339,17 @@ var OremusSystemNotifications = (function() {
         // 1. Native Android Local Notifications via Capacitor
         if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
             try {
+                var notifId = dedupeKey ? (Math.abs(hashCode(dedupeKey)) % 900000 + 100000) : (Math.floor(Math.random() * 900000) + 100000);
                 window.Capacitor.Plugins.LocalNotifications.schedule({
                     notifications: [
                         {
-                            id: Math.floor(Math.random() * 900000) + 100000,
+                            id: notifId,
                             title: title || 'Oremus',
                             body: body || '',
                             channelId: channelInfo.id,
                             smallIcon: 'ic_notification',
                             iconColor: '#c96b63',
-                            schedule: { at: new Date(Date.now() + 200) },
+                            schedule: { at: new Date(Date.now() + 500) },
                             sound: undefined,
                             attachments: undefined,
                             actionTypeId: '',
@@ -10353,15 +10383,22 @@ var OremusSystemNotifications = (function() {
         if (!isEnabled() || !Array.isArray(notifsList) || !notifsList.length) return;
         if (!isNativeAndroidApp() || !window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.LocalNotifications) return;
 
+        // Never schedule while app is active / visible
+        if (isAppForeground()) return;
+
         try {
             var plugin = window.Capacitor.Plugins.LocalNotifications;
             notifsList.forEach(function(n, idx) {
+                if (!n || !n.id) return;
                 var pushedKey = 'do_system_pushed_' + n.id;
                 if (localStorage.getItem(pushedKey) === 'true') return; // Push only once per announcement
 
+                // Mark immediately in localStorage so it can never be pushed or scheduled again
+                try { localStorage.setItem(pushedKey, 'true'); } catch (e) {}
+
                 var notifTitle = n.title || (n.banner ? n.banner.text : 'Oremus');
                 var notifBody = n.message || (n.subtitle || 'Nouvelle information disponible dans votre bréviaire.');
-                var delayMs = (idx === 0) ? 15000 : (idx * 60000); // Trigger in background shortly after leaving
+                var delayMs = (idx === 0) ? 60000 : ((idx + 1) * 300000); // 1 min, 5 min, etc.
                 var channelInfo = CHANNELS['announcements'];
 
                 plugin.schedule({
@@ -10377,8 +10414,6 @@ var OremusSystemNotifications = (function() {
                             extra: { notifId: n.id }
                         }
                     ]
-                }).then(function() {
-                    try { localStorage.setItem(pushedKey, 'true'); } catch (e) {}
                 }).catch(function(err) {
                     console.warn('[SystemNotifications] Background schedule error:', err);
                 });
@@ -10395,6 +10430,20 @@ var OremusSystemNotifications = (function() {
             hash |= 0;
         }
         return hash;
+    }
+
+    // Schedule background notifications when user leaves the application
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                if (window.OremusNotifications && typeof window.OremusNotifications.getActive === 'function') {
+                    var active = window.OremusNotifications.getActive();
+                    if (active && active.length) {
+                        scheduleBackgroundNotifs(active);
+                    }
+                }
+            }
+        });
     }
 
     return {

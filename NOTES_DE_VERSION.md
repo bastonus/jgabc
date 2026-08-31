@@ -1,5 +1,20 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.50 (1 Septembre 2026)
+
+---
+
+### 🛡️ Téléchargement APK, Anti-Spam Notifications & Pipeline Unique
+* **Correction de l'Erreur 404 lors du Téléchargement de la Mise à Jour :**
+  * Alignement du nom de fichier de l'APK téléchargé sur `Oremus.apk` (nom exact du binaire généré et publié sur les releases GitHub) évitant l'erreur 404 dans l'application.
+* **Suppression du Spam de Notifications Android :**
+  * Déduplication stricte des alertes push : chaque annonce ou mise à jour n'est envoyée **qu'une seule et unique fois**. L'application mémorise de façon permanente les alertes déjà transmises.
+  * **Aucune notification système lorsque l'application est ouverte** : l'utilisateur n'est plus dérangé pendant sa prière ou sa lecture ; les notifications locales ne sont programmées qu'en arrière-plan lors de la fermeture de l'application.
+* **Optimisation de l'Intégration Continue (GitHub Actions) :**
+  * Déclenchement d'un seul build APK lors de la publication d'un tag de release (`v*`), évitant les doubles compilations redondantes.
+
+---
+
 ## 🚀 Version 0.0.49 (1 Septembre 2026)
 
 ---
