@@ -5287,6 +5287,8 @@ function displayResult(result, vernResult) {
 }
 
 var swipeHintTimer = null;
+var swipeHintScrollDebounce = null;
+var isSwipeHintAnimating = false;
 
 function ensureBilingualGestureIndicator() {
     if (!$('#doBilingualGestureIndicator').length) {
@@ -5296,6 +5298,50 @@ function ensureBilingualGestureIndicator() {
             '</div>'
         );
     }
+}
+
+function isViewportOverBilingualText() {
+    var vpH = window.innerHeight || $(window).height() || 600;
+    var vpTopMargin = vpH * 0.15;
+    var vpBottomMargin = vpH * 0.85;
+
+    // 1. Check if Gregorian chant scores dominate the active middle of the viewport
+    var isChantDominating = false;
+    $('.do-chant-card-wrapper:visible, .do-chant-card:visible, .gabc-chant-preview:visible').each(function() {
+        var rect = this.getBoundingClientRect();
+        var visibleTop = Math.max(rect.top, vpTopMargin);
+        var visibleBottom = Math.min(rect.bottom, vpBottomMargin);
+        if (visibleBottom > visibleTop) {
+            var visibleHeight = visibleBottom - visibleTop;
+            // If chant score occupies more than 30% of active viewport, consider it a chant section
+            if (visibleHeight > (vpH * 0.30)) {
+                isChantDominating = true;
+                return false; // break loop
+            }
+        }
+    });
+
+    if (isChantDominating) {
+        return false;
+    }
+
+    // 2. Check if bilingual text rows are visible in the viewport with substantial text
+    var visibleTextCharCount = 0;
+    var visibleBilingualRowCount = 0;
+
+    $('.do-bilingual-row:visible').each(function() {
+        var rect = this.getBoundingClientRect();
+        if (rect.bottom > vpTopMargin && rect.top < vpBottomMargin) {
+            visibleBilingualRowCount++;
+            var text = $(this).text() || '';
+            visibleTextCharCount += text.trim().length;
+            if (visibleTextCharCount >= 70 && visibleBilingualRowCount >= 2) {
+                return false; // found sufficient bilingual text
+            }
+        }
+    });
+
+    return (visibleBilingualRowCount > 0 && visibleTextCharCount >= 50);
 }
 
 function startBilingualSwipeHint() {
@@ -5311,29 +5357,46 @@ function startBilingualSwipeHint() {
         clearInterval(swipeHintTimer);
         swipeHintTimer = null;
     }
+    $(window).off('scroll.bilingualSwipeHint');
 
     ensureBilingualGestureIndicator();
 
-    // Initial 3-pulse hint after 1.0s
+    // Check on initial load after short delay
     setTimeout(function() {
-        if (doState.mobileLang === 'la') {
+        if (doState.mobileLang === 'la' && isViewportOverBilingualText()) {
             playBilingualSwipeHint();
         }
     }, 1000);
 
-    // Repeat single swipe hint every 8s if user has not switched to translation
+    // Listen to scroll: trigger hint when user scrolls to a text section
+    $(window).on('scroll.bilingualSwipeHint', function() {
+        if (doState.mobileLang === 'vern') {
+            stopBilingualSwipeHint();
+            return;
+        }
+        if (swipeHintScrollDebounce) clearTimeout(swipeHintScrollDebounce);
+        swipeHintScrollDebounce = setTimeout(function() {
+            if (doState.mobileLang === 'la' && !isSwipeHintAnimating && isViewportOverBilingualText()) {
+                playBilingualSwipeHint();
+            }
+        }, 350);
+    });
+
+    // Periodic repeat: only plays when currently over bilingual text
     swipeHintTimer = setInterval(function() {
         if (doState.mobileLang === 'vern') {
             stopBilingualSwipeHint();
             return;
         }
-        playBilingualSwipeHint();
-    }, 8000);
+        if (!isSwipeHintAnimating && isViewportOverBilingualText()) {
+            playBilingualSwipeHint();
+        }
+    }, 8500);
 }
 
 function playBilingualSwipeHint() {
-    if (doState.mobileLang === 'vern') {
-        stopBilingualSwipeHint();
+    if (doState.mobileLang === 'vern' || isSwipeHintAnimating) {
+        if (doState.mobileLang === 'vern') stopBilingualSwipeHint();
         return;
     }
     ensureBilingualGestureIndicator();
@@ -5341,6 +5404,7 @@ function playBilingualSwipeHint() {
     var $pill = $('#doBilingualGestureIndicator');
     var $rows = $('.do-bilingual-row');
 
+    isSwipeHintAnimating = true;
     $pill.removeClass('active');
     $rows.removeClass('do-bilingual-hint-anim');
 
@@ -5353,6 +5417,7 @@ function playBilingualSwipeHint() {
     }
 
     setTimeout(function() {
+        isSwipeHintAnimating = false;
         $pill.removeClass('active');
         $rows.removeClass('do-bilingual-hint-anim');
     }, 2200);
@@ -5363,6 +5428,12 @@ function stopBilingualSwipeHint() {
         clearInterval(swipeHintTimer);
         swipeHintTimer = null;
     }
+    if (swipeHintScrollDebounce) {
+        clearTimeout(swipeHintScrollDebounce);
+        swipeHintScrollDebounce = null;
+    }
+    $(window).off('scroll.bilingualSwipeHint');
+    isSwipeHintAnimating = false;
     $('#doBilingualGestureIndicator').removeClass('active');
     $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
 }
@@ -8116,7 +8187,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.39';
+var CURRENT_APP_VERSION = 'beta-0.0.40';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -9113,6 +9184,13 @@ var OremusNotifications = (function() {
             } else if (primary.target === 'modal' || primary.autoOpenModal) {
                 showModal(primary);
             }
+
+            // Also send official system/Android notification if enabled
+            if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
+                var notifTitle = primary.title || 'Oremus';
+                var notifMsg = primary.message || (primary.banner ? primary.banner.text : '');
+                window.OremusSystemNotifications.send(notifTitle, notifMsg, { notifId: primary.id });
+            }
         });
     }
 
@@ -9131,8 +9209,214 @@ var OremusNotifications = (function() {
     };
 })();
 
+// =============================================================
+// SYSTEM / ANDROID OFFICIAL NOTIFICATIONS & 20-MIN PROMPT ENGINE
+// =============================================================
+
+var OremusSystemNotifications = (function() {
+    function isSupported() {
+        if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+            return true;
+        }
+        return ('Notification' in window);
+    }
+
+    function isEnabled() {
+        return localStorage.getItem('do_notifications_enabled') !== 'false';
+    }
+
+    function setEnabled(enabled) {
+        localStorage.setItem('do_notifications_enabled', enabled ? 'true' : 'false');
+        $('#toggleSystemNotifications').prop('checked', enabled);
+    }
+
+    function requestPermission() {
+        if (!isSupported()) return Promise.resolve(false);
+
+        if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+            return window.Capacitor.Plugins.LocalNotifications.requestPermissions().then(function(res) {
+                var granted = res && (res.display === 'granted' || res.display === 'prompt-with-rationale');
+                setEnabled(granted);
+                if (granted) triggerHapticFeedback('success');
+                return granted;
+            }).catch(function(err) {
+                console.warn('[SystemNotifications] Native permission request error:', err);
+                return false;
+            });
+        }
+
+        if ('Notification' in window) {
+            return Notification.requestPermission().then(function(perm) {
+                var granted = (perm === 'granted');
+                setEnabled(granted);
+                if (granted) triggerHapticFeedback('success');
+                return granted;
+            }).catch(function() {
+                return false;
+            });
+        }
+
+        return Promise.resolve(false);
+    }
+
+    function send(title, body, extra) {
+        if (!isEnabled()) return;
+
+        // 1. Native Android Local Notifications via Capacitor
+        if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+            try {
+                window.Capacitor.Plugins.LocalNotifications.schedule({
+                    notifications: [
+                        {
+                            id: Math.floor(Math.random() * 900000) + 100000,
+                            title: title || 'Oremus',
+                            body: body || '',
+                            schedule: { at: new Date(Date.now() + 200) },
+                            sound: undefined,
+                            attachments: undefined,
+                            actionTypeId: '',
+                            extra: extra || {}
+                        }
+                    ]
+                }).catch(function(err) {
+                    console.warn('[SystemNotifications] Native schedule error:', err);
+                });
+            } catch (e) {
+                console.warn('[SystemNotifications] Native dispatch exception:', e);
+            }
+            return;
+        }
+
+        // 2. Web Notification API fallback
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                new Notification(title || 'Oremus', {
+                    body: body || '',
+                    icon: 'icon/android-chrome-192x192.png',
+                    badge: 'icon/favicon.svg'
+                });
+            } catch (e) {
+                console.warn('[SystemNotifications] Web notification exception:', e);
+            }
+        }
+    }
+
+    return {
+        isSupported: isSupported,
+        isEnabled: isEnabled,
+        setEnabled: setEnabled,
+        requestPermission: requestPermission,
+        send: send
+    };
+})();
+
+var OremusUsageTracker = (function() {
+    var USAGE_KEY = 'do_app_usage_seconds';
+    var PROMPT_SHOWN_KEY = 'do_notif_prompt_shown';
+    var NEVER_ASK_KEY = 'do_notif_never_ask';
+    var TARGET_SECONDS = 1200; // 20 minutes
+
+    function getUsageSeconds() {
+        try {
+            return parseInt(localStorage.getItem(USAGE_KEY) || '0', 10) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function addUsage(seconds) {
+        var current = getUsageSeconds() + seconds;
+        try {
+            localStorage.setItem(USAGE_KEY, current.toString());
+        } catch (e) {}
+        checkThreshold(current);
+    }
+
+    function checkThreshold(seconds) {
+        if (localStorage.getItem(NEVER_ASK_KEY) === 'true') return;
+        if (localStorage.getItem(PROMPT_SHOWN_KEY) === 'true') return;
+
+        // If notifications are already explicitly allowed, don't ask again
+        if (localStorage.getItem('do_notifications_enabled') === 'true') {
+            return;
+        }
+
+        if (seconds >= TARGET_SECONDS) {
+            showPrompt();
+        }
+    }
+
+    function showPrompt() {
+        $('#notificationPromptModalBackdrop, #notificationPromptModal').removeClass('hidden');
+        triggerHapticFeedback('open');
+    }
+
+    function hidePrompt() {
+        $('#notificationPromptModalBackdrop, #notificationPromptModal').addClass('hidden');
+    }
+
+    function init() {
+        // Track active usage every 15 seconds
+        setInterval(function() {
+            if (document.visibilityState === 'visible') {
+                addUsage(15);
+            }
+        }, 15000);
+    }
+
+    return {
+        init: init,
+        showPrompt: showPrompt,
+        hidePrompt: hidePrompt,
+        getUsageSeconds: getUsageSeconds
+    };
+})();
+
 // ---- Event Listeners ----
 function setupEventListeners() {
+    // 20-Minute Notification Permission Prompt Listeners
+    $(document).on('click', '#btnEnableNotifPrompt', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('selection');
+        OremusSystemNotifications.requestPermission();
+        try {
+            localStorage.setItem('do_notif_prompt_shown', 'true');
+        } catch (e) {}
+        OremusUsageTracker.hidePrompt();
+    });
+
+    $(document).on('click', '#btnLaterNotifPrompt, #btnCloseNotifPromptModal, #notificationPromptModalBackdrop', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        // Delay prompt for another 10 minutes
+        try {
+            var cur = OremusUsageTracker.getUsageSeconds();
+            localStorage.setItem('do_app_usage_seconds', Math.max(0, cur - 600).toString());
+        } catch (e) {}
+        OremusUsageTracker.hidePrompt();
+    });
+
+    $(document).on('click', '#btnNeverNotifPrompt', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('light');
+        try {
+            localStorage.setItem('do_notif_never_ask', 'true');
+            localStorage.setItem('do_notif_prompt_shown', 'true');
+        } catch (e) {}
+        OremusUsageTracker.hidePrompt();
+    });
+
+    // Settings Toggle for System Notifications
+    $('#toggleSystemNotifications').prop('checked', OremusSystemNotifications.isEnabled()).on('change', function() {
+        var isChecked = $(this).is(':checked');
+        if (isChecked) {
+            OremusSystemNotifications.requestPermission();
+        } else {
+            OremusSystemNotifications.setEnabled(false);
+            triggerHapticFeedback('light');
+        }
+    });
+
     // Remote Notification Event Listeners
     $(document).on('click', '#btnRemoteNotifAction', function(e) {
         e.preventDefault();
@@ -10197,6 +10481,11 @@ $(function() {
             window.OremusNotifications.check(false);
         }
     }, 1200);
+
+    // Initialize 20-minute usage tracker
+    if (window.OremusUsageTracker && typeof window.OremusUsageTracker.init === 'function') {
+        window.OremusUsageTracker.init();
+    }
 
     // Recheck notifications on visibility return / focus
     document.addEventListener('visibilitychange', function() {

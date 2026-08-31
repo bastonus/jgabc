@@ -1,115 +1,52 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:16:00Z",
+  "updatedAt": "2026-08-31T14:19:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-test-live-01",
-      "enabled": true,
-      "priority": 999,
-      "platforms": ["all"],
-      "frequency": "always",
-      "style": "liturgical",
-      "badge": "Test",
-      "icon": "bell",
-      "title": "Notification de Test",
-      "subtitle": "Canal distant GitHub opérationnel",
-      "message": "Ceci est une notification de test diffusée en direct via le canal GitHub. Le système de réception, le bandeau supérieur et les modaux fonctionnent correctement.",
-      "banner": {
-        "show": true,
-        "text": "Notification de test en direct depuis GitHub",
-        "tag": "Test",
-        "actionLabel": "Ouvrir",
-        "actionType": "open_modal",
-        "dismissible": true
-      },
-      "modal": {
-        "title": "Notification de Test Oremus",
-        "subtitle": "Test de diffusion en direct",
-        "icon": "bell",
-        "wrappers": [
-          {
-            "type": "card",
-            "icon": "sparkles",
-            "title": "Canal GitHub distant",
-            "content": "La notification a été récupérée avec succès depuis le dépôt GitHub sans nécessiter de mise à jour binaire."
-          },
-          {
-            "type": "callout",
-            "style": "primary",
-            "title": "Statut du système",
-            "content": "Le bandeau supérieur, les alertes et les modaux sont parfaitement opérationnels."
-          }
-        ],
-        "buttons": [
-          {
-            "label": "Fermer le test",
-            "type": "primary",
-            "action": "dismiss",
-            "dismissOnClick": true
-          }
-        ]
-      }
-    },
-    {
-      "id": "notif-release-beta-0.0.39",
+      "id": "notif-release-beta-0.0.40",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.39",
+      "minVersion": "beta-0.0.40",
       "frequency": "once",
       "style": "liturgical",
-      "badge": "Mise à jour beta-0.0.39",
+      "badge": "Mise à jour beta-0.0.40",
       "icon": "sparkles",
-      "title": "Notes de version beta-0.0.39",
+      "title": "Notes de version beta-0.0.40",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les dernières améliorations apportées à Oremus : correction du défilement dans les popups, harmonisation des boutons de fermeture et canal de notifications.",
-      "cancelsNotifications": ["notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les dernières améliorations apportées à Oremus : notifications système officielles Android, contrôle des alertes dans les paramètres et prompt intelligent après 20 minutes d'utilisation.",
+      "cancelsNotifications": ["notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus est à jour (beta-0.0.39) : Nouveautés et correctifs",
+        "text": "Oremus est à jour (beta-0.0.40) : Nouveautés et correctifs",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (beta-0.0.39)",
+        "title": "Notes de Version (beta-0.0.40)",
         "subtitle": "Nouveautés, correctifs détaillés & retours communautaires",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
-            "icon": "sparkles",
-            "title": "Nouveau Design Épuré des Popups",
-            "content": "Refonte visuelle intégrale des fenêtres d'information et dialogues : suppression des bordures dures, arrondi doux harmonisé avec les boutons de l'application, et adaptation aux thèmes Clair, Sombre et OLED."
+            "icon": "bell",
+            "title": "Notifications Officielles Android",
+            "content": "Intégration du module officiel de notifications système Android : réception des annonces liturgiques et des alertes en direct dans la barre de notifications système."
           },
           {
             "type": "card",
             "icon": "check",
-            "title": "Correctifs & Fixes de la version beta-0.0.39",
-            "content": "<ul><li><strong>Défilement dans les popups :</strong> Correction complète du scroll vertical dans les fenêtres d'information et de changelog en plein écran sur mobile.</li><li><strong>Boutons de fermeture harmonisés :</strong> Alignement du style de tous les boutons de fermeture sur celui du panneau des paramètres (dimensions, coins arrondis, couleur et icône).</li><li><strong>Isolation des gestes tactiles :</strong> Défilement fluide sans conflit avec les gestes de balayage globaux.</li><li><strong>Stabilité et détection :</strong> Amélioration de la détection d'installation et de mise à jour.</li></ul>"
-          },
-          {
-            "type": "card",
-            "icon": "bell",
-            "title": "Canal d'Alertes & Notifications en Direct",
-            "content": "Système de notifications en temps réel depuis GitHub, intégré au bandeau supérieur et sous forme d'alertes adaptées iOS et Android."
+            "title": "Contrôle & Prompt Intelligent",
+            "content": "Ajout d'une option d'activation des notifications dans les paramètres, et proposition respectueuse après 20 minutes d'utilisation avec bouton Ne plus me demander."
           },
           {
             "type": "callout",
             "style": "primary",
             "title": "Merci pour tous vos retours et suggestions",
             "content": "Un grand merci à chacun pour vos retours ! <strong>Tous les autres retours et suggestions formulés ont bien été enregistrés et sont actuellement pris en compte</strong> pour les versions à venir."
-          },
-          {
-            "type": "steps",
-            "title": "Prochaines étapes en cours de développement",
-            "steps": [
-              "Enrichissement des partitions grégoriennes interactives et du moteur audio neumatique.",
-              "Améliorations continues des traductions bilingues et repères de lectures du Missel 1962.",
-              "Intégration progressive de l'ensemble des demandes issues du formulaire de feedback."
-            ]
           }
         ],
         "buttons": [
