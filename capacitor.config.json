@@ -9,5 +9,11 @@
     "allowMixedContent": true,
     "captureInput": false,
     "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_notification",
+      "iconColor": "#c96b63"
+    }
   }
 }

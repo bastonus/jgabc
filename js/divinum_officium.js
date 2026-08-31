@@ -9742,6 +9742,8 @@ var OremusSystemNotifications = (function() {
                             title: title || 'Oremus',
                             body: body || '',
                             channelId: channelInfo.id,
+                            smallIcon: 'ic_notification',
+                            iconColor: '#c96b63',
                             schedule: { at: new Date(Date.now() + 200) },
                             sound: undefined,
                             attachments: undefined,
@@ -9763,7 +9765,7 @@ var OremusSystemNotifications = (function() {
             try {
                 new Notification(title || 'Oremus', {
                     body: body || '',
-                    icon: 'icon/android-chrome-192x192.png',
+                    icon: 'icon/icon-192.png',
                     badge: 'icon/favicon.svg'
                 });
             } catch (e) {
@@ -9794,6 +9796,8 @@ var OremusSystemNotifications = (function() {
                             title: notifTitle,
                             body: notifBody,
                             channelId: channelInfo.id,
+                            smallIcon: 'ic_notification',
+                            iconColor: '#c96b63',
                             schedule: { at: new Date(Date.now() + delayMs) },
                             extra: { notifId: n.id }
                         }

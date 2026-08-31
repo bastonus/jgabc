@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Outer 'O' Letter Shape (Liturgical Circle) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="nonZero"
+        android:pathData="M256,64 C150,64 64,150 64,256 C64,362 150,448 256,448 C362,448 448,362 448,256 C448,150 362,64 256,64 Z M256,396 C178,396 116,334 116,256 C116,178 178,116 256,116 C334,116 396,178 396,256 C396,334 334,396 256,396 Z"/>
+
+    <!-- Inner Flared Latin Cross Shape (Crux) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M236,150 L276,150 C276,150 274,180 278,214 L340,214 C340,214 344,236 340,256 L278,256 C274,290 276,362 256,362 C236,362 238,290 234,256 L172,256 C168,236 172,214 172,214 L234,214 C238,180 236,150 236,150 Z"/>
+
+</vector>
