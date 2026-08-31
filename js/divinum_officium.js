@@ -9659,6 +9659,21 @@ var OremusSystemNotifications = (function() {
                         }).catch(function() {});
                     });
                 }
+
+                // Handle click on native push notification: open the linked popup modal
+                plugin.addListener('localNotificationActionPerformed', function(notificationAction) {
+                    var extra = (notificationAction && notificationAction.notification) ? notificationAction.notification.extra : null;
+                    var notifId = extra ? extra.notifId : null;
+                    if (notifId && window.OremusNotifications) {
+                        var list = window.OremusNotifications.getActive();
+                        var target = list.find(function(n) { return n.id === notifId; });
+                        if (target) {
+                            setTimeout(function() {
+                                window.OremusNotifications.showModal(target);
+                            }, 500);
+                        }
+                    }
+                });
             } catch (e) {}
         }
     }
@@ -9950,9 +9965,24 @@ function setupEventListeners() {
         OremusSystemNotifications.openSystemSettings();
     });
 
-    // Remote Notification Event Listeners
+    // Remote Notification Event Listeners — Clicking anywhere on banner or toast opens the linked popup modal
+    $(document).on('click', '#appRemoteNotificationBanner', function(e) {
+        // If clicking on close button, let close handler handle it
+        if ($(e.target).closest('#btnCloseRemoteNotifBanner').length) return;
+        e.preventDefault();
+        var notif = OremusNotifications.getCurrentBanner();
+        if (notif) {
+            var bannerData = notif.banner || {};
+            OremusNotifications.handleAction(notif, bannerData.actionType || 'open_modal', bannerData.url, bannerData.target);
+            if (bannerData.dismissOnClick) {
+                OremusNotifications.hideBanner(true);
+            }
+        }
+    });
+
     $(document).on('click', '#btnRemoteNotifAction', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var notif = OremusNotifications.getCurrentBanner();
         if (notif) {
             var bannerData = notif.banner || {};
@@ -9965,6 +9995,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnCloseRemoteNotifBanner', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         triggerHapticFeedback('light');
         OremusNotifications.hideBanner(true);
     });
@@ -9975,7 +10006,8 @@ function setupEventListeners() {
         hideUpdateBanner();
     });
 
-    $(document).on('click', '#btnFloatingNotifAction', function(e) {
+    $(document).on('click', '#appFloatingNotification, #btnFloatingNotifAction', function(e) {
+        if ($(e.target).closest('#btnCloseFloatingNotif').length) return;
         e.preventDefault();
         var notif = OremusNotifications.getCurrentBanner() || (OremusNotifications.getActive().length ? OremusNotifications.getActive()[0] : null);
         if (notif) {
@@ -9987,6 +10019,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnCloseFloatingNotif', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         triggerHapticFeedback('light');
         OremusNotifications.hideFloating(true);
     });
