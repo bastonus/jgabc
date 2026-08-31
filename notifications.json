@@ -1,57 +1,55 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:19:00Z",
+  "updatedAt": "2026-08-31T14:20:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.40",
+      "id": "notif-official-live-test",
       "enabled": true,
-      "priority": 100,
+      "priority": 1000,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.40",
-      "frequency": "once",
+      "frequency": "always",
       "style": "liturgical",
-      "badge": "Mise à jour beta-0.0.40",
-      "icon": "sparkles",
-      "title": "Notes de version beta-0.0.40",
-      "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les dernières améliorations apportées à Oremus : notifications système officielles Android, contrôle des alertes dans les paramètres et prompt intelligent après 20 minutes d'utilisation.",
-      "cancelsNotifications": ["notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "badge": "Canal GitHub",
+      "icon": "bell",
+      "title": "Canal officiel GitHub connecte",
+      "subtitle": "Notification en direct recue avec succes",
+      "message": "Cette notification est diffusee en temps reel depuis le canal officiel GitHub de l'application Oremus sans necessiter de mise a jour binaire.",
       "banner": {
         "show": true,
-        "text": "Oremus est à jour (beta-0.0.40) : Nouveautés et correctifs",
-        "tag": "Nouveautés",
-        "actionLabel": "Voir les notes",
+        "text": "Canal officiel GitHub : Notification en direct recue avec succes",
+        "tag": "Direct",
+        "actionLabel": "Ouvrir",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (beta-0.0.40)",
-        "subtitle": "Nouveautés, correctifs détaillés & retours communautaires",
-        "icon": "sparkles",
+        "title": "Canal Officiel GitHub Connecte",
+        "subtitle": "Notification diffusee en direct",
+        "icon": "bell",
         "wrappers": [
           {
             "type": "card",
             "icon": "bell",
-            "title": "Notifications Officielles Android",
-            "content": "Intégration du module officiel de notifications système Android : réception des annonces liturgiques et des alertes en direct dans la barre de notifications système."
+            "title": "Diffusion en direct operationnelle",
+            "content": "Cette alerte provient directement du fichier notifications.json heberge sur GitHub. Elle est recue par toutes les applications et versions d'Oremus."
           },
           {
             "type": "card",
-            "icon": "check",
-            "title": "Contrôle & Prompt Intelligent",
-            "content": "Ajout d'une option d'activation des notifications dans les paramètres, et proposition respectueuse après 20 minutes d'utilisation avec bouton Ne plus me demander."
+            "icon": "sparkles",
+            "title": "Nouveau design des popups",
+            "content": "Les fenetres et boites de dialogue beneficient du design epure sans bordure avec coins arrondis et boutons harmonises."
           },
           {
             "type": "callout",
             "style": "primary",
-            "title": "Merci pour tous vos retours et suggestions",
-            "content": "Un grand merci à chacun pour vos retours ! <strong>Tous les autres retours et suggestions formulés ont bien été enregistrés et sont actuellement pris en compte</strong> pour les versions à venir."
+            "title": "Notifications systeme & bandeau",
+            "content": "Le systeme prend en charge la barre de notification superieure, les alertes flottantes et les notifications systeme Android."
           }
         ],
         "buttons": [
           {
-            "label": "Parfait, continuer",
+            "label": "J'ai bien recu",
             "type": "primary",
             "action": "dismiss",
             "dismissOnClick": true
@@ -60,52 +58,53 @@
       }
     },
     {
-      "id": "notif-github-apk-android",
+      "id": "notif-release-beta-0.0.40",
       "enabled": true,
-      "priority": 20,
-      "platforms": ["android_web"],
-      "frequency": "always",
-      "style": "android",
-      "badge": "Android",
-      "icon": "download",
-      "title": "Application Android native disponible",
-      "subtitle": "Téléchargez l'APK pour une expérience fluide et hors-ligne",
-      "message": "Installez l'application Oremus au format APK Android pour bénéficier des alertes, du mode hors-ligne complet et du moteur audio optimisé.",
+      "priority": 100,
+      "platforms": ["all"],
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise a jour",
+      "icon": "sparkles",
+      "title": "Notes de version beta-0.0.40",
+      "subtitle": "Votre application Oremus a ete mise a jour",
+      "message": "Decouvrez les dernieres ameliorations apportees a Oremus : notifications systeme officielles Android, controle des alertes dans les parametres et prompt intelligent apres 20 minutes d'utilisation.",
       "banner": {
         "show": true,
-        "text": "Application Android disponible au téléchargement (APK)",
-        "tag": "APK",
-        "actionLabel": "Télécharger",
-        "actionType": "open_url",
-        "url": "https://github.com/bastonus/jgabc/releases",
+        "text": "Oremus est a jour : Decouvrez les nouveautes et correctifs",
+        "tag": "Nouveautes",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Télécharger Oremus pour Android",
-        "subtitle": "Fichier APK autonome sans dépendance",
-        "icon": "download",
+        "title": "Notes de Version",
+        "subtitle": "Nouveautes, correctifs detailles et retours communautaires",
+        "icon": "sparkles",
         "wrappers": [
           {
-            "type": "steps",
-            "title": "Comment installer l'APK",
-            "steps": [
-              "Téléchargez le dernier fichier <code>.apk</code> depuis les releases GitHub.",
-              "Ouvrez le fichier téléchargé et autorisez l'installation depuis cette source.",
-              "Profitez de l'application avec démarrage ultra-rapide et accès hors-ligne garanti."
-            ]
+            "type": "card",
+            "icon": "bell",
+            "title": "Notifications Officielles Android",
+            "content": "Integration du module officiel de notifications systeme Android : reception des annonces liturgiques et des alertes en direct dans la barre de notifications systeme."
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Controle et Prompt Intelligent",
+            "content": "Ajout d'une option d'activation des notifications dans les parametres, et proposition respectueuse apres 20 minutes d'utilisation avec bouton Ne plus me demander."
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos retours et suggestions",
+            "content": "Un grand merci a chacun pour vos retours ! Tous les autres retours et suggestions formules ont bien ete enregistres et sont actuellement pris en compte pour les versions a venir."
           }
         ],
         "buttons": [
           {
-            "label": "Télécharger l'APK sur GitHub",
+            "label": "Parfait, continuer",
             "type": "primary",
-            "action": "open_url",
-            "url": "https://github.com/bastonus/jgabc/releases",
-            "dismissOnClick": true
-          },
-          {
-            "label": "Plus tard",
-            "type": "secondary",
             "action": "dismiss",
             "dismissOnClick": true
           }
