@@ -4,30 +4,30 @@
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.47",
+      "id": "notif-release-beta-0.0.48",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.47",
+      "minVersion": "beta-0.0.48",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise à jour",
       "icon": "sparkles",
-      "title": "Notes de version v0.0.47",
+      "title": "Notes de version v0.0.48",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les nouveautés de la v0.0.47 : Recherche universelle ultra-rapide (Offices, Messes, Bible Vulgate, Chants), rendu GABC différé avec modes Grille & Ligne, harmonisation de l'en-tête et notifications push avec icône personnalisée.",
-      "cancelsNotifications": ["notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les nouveautés de la v0.0.48 : Recherche universelle ultra-rapide (Offices, Messes, Bible Vulgate, Chants), rendu GABC différé avec modes Grille & Ligne, harmonisation de l'en-tête et correctifs Android.",
+      "cancelsNotifications": ["notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus v0.0.47 : Recherche Universelle, Grégorien & En-tête Dynamique",
+        "text": "Oremus v0.0.48 : Recherche Universelle, Grégorien & Correctifs Android",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (v0.0.47)",
-        "subtitle": "Recherche Universelle & Améliorations de l'En-tête",
+        "title": "Notes de Version (v0.0.48)",
+        "subtitle": "Recherche Universelle & Correctifs",
         "icon": "sparkles",
         "wrappers": [
           {

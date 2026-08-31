@@ -589,6 +589,21 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     font-size: 0.72rem;
 }
 
+#gregorianSearchHeaderRow,
+#gregorianFilterBar,
+.gregorian-filter-bar {
+    display: none !important;
+}
+
+body.is-search-mode #gregorianSearchHeaderRow {
+    display: flex !important;
+}
+
+body.is-search-mode #gregorianFilterBar,
+body.is-search-mode .gregorian-filter-bar {
+    display: flex !important;
+}
+
 .header-title-area {
     min-width: 0;
     flex: 1;

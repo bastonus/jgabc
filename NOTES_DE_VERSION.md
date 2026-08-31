@@ -1,5 +1,16 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.48 (1 Septembre 2026)
+
+---
+
+### 📱 Correctif Android & Embarquement des Fichiers de Recherche
+* **Correction de l'Affichage sur l'Application Android Installée (APK) :**
+  * Embarquement complet des feuilles de style (`css/gregorian_search.css`), des bibliothèques locales (`js/vendor/`), de l'index universel (`data/gregorian_index.json`) et du moteur de recherche dans les assets de l'APK Android.
+  * Masquage strict par défaut des pastilles de filtres sur la page d'accueil et les pages d'offices pour éviter tout flash ou affichage non désiré.
+
+---
+
 ## 🚀 Version 0.0.47 (1 Septembre 2026)
 
 ---
