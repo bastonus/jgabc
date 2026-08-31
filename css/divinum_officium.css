@@ -4647,7 +4647,11 @@ html.is-ios .web-download-app-wrapper,
 
 .update-modal {
     width: 90%;
-    max-width: 480px;
+    max-width: 500px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
 }
 
 .feedback-modal {
@@ -4655,6 +4659,8 @@ html.is-ios .web-download-app-wrapper,
     max-width: 640px;
     height: 84vh;
     max-height: 740px;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Glass / Clean Solid Cards */
@@ -4671,6 +4677,8 @@ html.is-ios .web-download-app-wrapper,
     overflow: hidden;
     padding: 22px 24px;
     gap: 16px;
+    max-height: 90vh;
+    max-height: 90dvh;
 }
 
 [data-theme="light"] .update-card {
@@ -4701,6 +4709,7 @@ html.is-ios .web-download-app-wrapper,
     overflow: hidden;
     padding: 16px 20px 18px;
     height: 100%;
+    max-height: 100%;
 }
 
 /* Modal Headers */
@@ -4776,44 +4785,49 @@ html.is-ios .web-download-app-wrapper,
     font-family: 'Inter', sans-serif;
 }
 
-/* Minimalist Rounded Close Button */
+/* Close Button Identical to Settings Close Button */
 .update-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--background-highlight);
     border: none !important;
     outline: none !important;
-    background: rgba(255, 255, 255, 0.07);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
 [data-theme="light"] .update-close-btn {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--background-highlight);
     border: none !important;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .update-close-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
-    transform: scale(1.06);
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.15);
 }
 
 [data-theme="light"] .update-close-btn:hover {
-    background: rgba(0, 0, 0, 0.09);
-    color: #0f172a;
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.15);
 }
 
-/* Update Modal Body & Release Notes */
+/* Update Modal Body & Scrollable Content */
 .update-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
     display: flex;
     flex-direction: column;
+    padding-right: 2px;
 }
 
 .update-notes-container {
@@ -5099,24 +5113,46 @@ html.is-ios .web-download-app-wrapper,
 @media (max-width: 649px) {
     .update-modal,
     .feedback-modal {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        border-radius: 0;
-        top: 0;
-        left: 0;
-        transform: none;
-        animation: none;
+        width: 100vw !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        max-width: 100vw !important;
+        max-height: 100% !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        animation: none !important;
+        position: fixed !important;
     }
     .update-card,
     .feedback-card {
-        border-radius: 0;
-        border: none;
-        padding: 16px;
-        padding-top: max(16px, env(safe-area-inset-top));
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
-        height: 100%;
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 16px 20px !important;
+        padding-top: max(16px, env(safe-area-inset-top, 16px)) !important;
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        max-height: 100% !important;
+        max-height: 100dvh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+    .update-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-y: contain !important;
+        padding-right: 2px !important;
+    }
+    .update-actions {
+        flex-shrink: 0 !important;
+        padding-top: 10px !important;
     }
 }
 

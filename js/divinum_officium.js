@@ -9945,6 +9945,12 @@ function setupEventListeners() {
             return;
         }
 
+        // Modal / Dialog / Settings panel exception (do not intercept touch when modal or settings panel is open)
+        if ($(target).closest('.update-modal, .feedback-modal, .settings-panel, .remote-notif-card').length ||
+            $('.update-modal:not(.hidden), .feedback-modal:not(.hidden), #settingsPanel.open').length > 0) {
+            return;
+        }
+
         if (isMobile) {
             if (isSidebarOpen) {
                 if (isTargetInsideSidebar || isTargetBackdrop) {
