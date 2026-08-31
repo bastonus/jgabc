@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:38:00Z",
+  "updatedAt": "2026-08-31T14:41:00Z",
   "channel": "official",
   "notifications": [
     {
@@ -8,6 +8,7 @@
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
+      "minVersion": "beta-0.0.41",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise a jour",
