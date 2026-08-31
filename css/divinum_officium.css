@@ -179,6 +179,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     padding: calc(18px + env(safe-area-inset-top, 0px)) 14px 10px !important;
     border-bottom: none !important;
     flex-shrink: 0;
+    gap: 8px;
 }
 
 .do-brand {
@@ -187,15 +188,50 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     cursor: pointer;
     user-select: none;
     transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
-    padding: 6px 12px;
-    width: 100%;
+    padding: 6px 8px;
+    width: auto !important;
     box-sizing: border-box;
     background: transparent !important;
     color: #ffffff;
 }
 
+.do-sidebar-search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary, #ffffff);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+}
+
+.do-sidebar-search-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--primary-color, #c96b63);
+    transform: scale(1.06);
+}
+
+.do-sidebar-search-btn:active {
+    transform: scale(0.94);
+}
+
 [data-theme="light"] .do-brand {
     color: #000000;
+}
+
+[data-theme="light"] .do-sidebar-search-btn {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111317;
+}
+
+[data-theme="light"] .do-sidebar-search-btn:hover {
+    background: rgba(0, 0, 0, 0.12);
+    color: var(--primary-color, #c96b63);
 }
 
 .do-brand:hover {
@@ -564,9 +600,11 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
 
 #doHeaderTitle,
 .header-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 6px;
     margin: 2px 0 0 0;
     padding: 0;
     font-size: 1.12rem;
@@ -581,7 +619,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
 }
 
 .do-header-title-wrapper {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
     white-space: nowrap;
@@ -600,7 +638,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
 }
 
 .dropdown-icon {
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -1304,19 +1342,49 @@ div.do-rubric-inline {
     100% { background-position: -200% 0; }
 }
 
-/* Gregorian Chant Skeleton (5 lines lazy loader) */
+/* Gregorian Chant Skeleton (4-line tetragram staves lazy loader) */
+.gregorian-score-loader,
 .do-chant-skeleton {
     width: 100%;
-    box-sizing: border-box;
-    padding: 10px 0 14px 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 36px;
+    pointer-events: none;
+    padding: 16px 0;
+    box-sizing: border-box;
 }
 
-.do-chant-skeleton .do-skel {
-    margin-bottom: 0;
-    height: 14px;
+.gregorian-skeleton-staff {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 9.5px;
+}
+
+.gregorian-staff-line {
+    width: 100%;
+    height: 1.8px;
+    border-radius: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: do-pulse 1.4s ease infinite;
+}
+
+[data-theme="light"] .gregorian-staff-line {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.05) 25%,
+        rgba(0, 0, 0, 0.18) 50%,
+        rgba(0, 0, 0, 0.05) 75%
+    );
+    background-size: 200% 100%;
 }
 
 /* Empty State */
@@ -3040,47 +3108,67 @@ body, html {
 
 .do-home-search-icon {
     position: absolute;
-    left: 14px;
-    color: var(--text-tertiary, #888);
+    left: 12px;
+    color: var(--text-secondary, #94a3b8);
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.18s ease;
+}
+
+.do-home-search-bar-wrap:focus-within .do-home-search-icon {
+    color: var(--primary-color, #c96b63);
 }
 
 .do-home-search-input {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    height: 44px;
-    background: var(--background-surface);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0 40px 0 40px;
-    font-family: 'Inter', sans-serif;
+    height: 38px;
+    background: var(--background-highlight, #141414);
+    border: none;
+    border-radius: 10px;
+    padding: 0 34px 0 36px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 0.88rem;
-    color: var(--text-primary);
+    color: var(--text-primary, #f8fafc);
     outline: none;
-    transition: all 0.2s ease;
+    box-shadow: none;
+    transition: background 0.18s ease, color 0.18s ease;
 }
 
 .do-home-search-input:focus {
-    border-color: var(--primary-color);
-    background: var(--background-highlight);
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.15);
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: var(--background-highlight, #141414);
+}
+
+.do-home-search-input::placeholder {
+    color: var(--text-secondary, #94a3b8);
+    opacity: 0.8;
 }
 
 .do-home-search-clear {
     position: absolute;
-    right: 12px;
-    background: none;
+    right: 9px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
     border: none;
-    font-size: 1.2rem;
-    line-height: 1;
-    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary, #94a3b8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 4px;
+    padding: 0;
+    transition: all 0.15s ease;
 }
 
 .do-home-search-clear:hover {
-    color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
 }
 
 .do-home-search-results {
@@ -3090,7 +3178,7 @@ body, html {
     right: 0;
     background: var(--background-surface);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 10px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     max-height: 360px;
     overflow-y: auto;
@@ -3624,13 +3712,25 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.do-chant-preview svg {
+.do-chant-preview.gregorian-skeleton {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 12px 8px;
+}
+
+.do-chant-preview svg,
+.do-chant-card svg {
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
     display: block;
+    animation: fadeIn 0.22s ease;
 }
 
 .do-chant-preview svg text {
@@ -3827,6 +3927,8 @@ body, html {
     font-size: 0.85rem;
     font-style: italic;
 }
+
+
 
 /* ── Settings Gregorian Note Keyboard ── */
 .do-note-keyboard {

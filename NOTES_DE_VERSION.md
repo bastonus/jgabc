@@ -1,5 +1,45 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.47 (1 Septembre 2026)
+
+---
+
+### 🔍 Moteur de Recherche Universelle & Grégorienne
+* **Recherche Unifiée & Instantanée (< 2 ms) :**
+  * Indexation multilingue complète couvrant les **Offices du Bréviaire**, les **566 Messes du Missel Romain** (avec propres complets : Introït, Collecte, Épître, Graduel, Évangile, Offertoire, Secrète, Communion), les **73 livres de la Sainte Bible** (Vulgate latine) et l'ensemble du **répertoire de Chants Grégoriens**.
+  * Découpage et surlignage intelligent (*highlight*) des mots-clés dans les titres et extraits textuels (*snippets*).
+  * Plafonnement conditionnel des titres en vue grille avec ellipse (`...`) uniquement lorsqu'un extrait de recherche est présent, garantissant une lisibilité optimale de l'extrait et du badge.
+  * Bannissement strict des résultats techniques et codes liturgiques bruts.
+* **Aperçus Bibliques en Latin Authentique :**
+  * Connexion directe à la Vulgate clémentine pour les 73 livres bibliques, incluant les Machabées et les Petits Prophètes avec numérotation nette des versets.
+* **Filtres Thématiques & Pastilles Fluides :**
+  * Barre de filtres scrollable horizontalement avec débordement élégant sur le bord droit de l'écran (*Offices, Messes, Bible, Chants, Introïts, Graduels, Alléluias, Traits, Séquences, Offertoires, Communions, Antiennes, Répons, Hymnes, Modes 1 à 8, Ad Libitum, Kyriale*).
+  * Arrondi harmonisé (`10px`) sur l'ensemble des pastilles et composants de recherche.
+* **Isolation Stricte par Langue :**
+  * La recherche s'exécute exclusivement dans la langue active de l'utilisateur (Français + Latin pour l'interface française), éliminant toute pollution par les traductions dans d'autres langues.
+* **Rendu Différé & Mode Grille / Ligne :**
+  * Affichage en double mode (Grille avec partitions carrées `1:1` et Mode Ligne), mémorisé automatiquement dans les préférences locales.
+  * Rendu GABC différé (*lazy rendering*) centré sur la section musicale recherchée.
+
+---
+
+### 🎨 En-tête & Ergonomie
+* **Flèche Déroulante Dynamique du Titre :**
+  * Pour les titres courts (ex. *« St Gilles Abbé »*), la flèche `⌄` est positionnée immédiatement à la suite du texte.
+  * Pour les titres longs ou en cas de débordement, la flèche reste fixée tout au bout à droite sur la même ligne (`flex-wrap: nowrap`), sans jamais passer à la ligne suivante, pendant que le texte défile fluidement (*smooth marquee*).
+* **Harmonisation de la Barre de Recherche d'Accueil :**
+  * Hauteur ajustée à `38px`, arrondi à `10px`, fond highlight et bordures supprimées pour une continuité visuelle parfaite avec l'en-tête de recherche.
+
+---
+
+### 🔔 Notifications & Système Android
+* **Notifications Push en Arrière-plan & Icône Personnalisée :**
+  * Réception des alertes même lorsque l'application est fermée ou en veille, avec icône vectorielle `ic_notification` (logo Oremus) dans la barre d'état Android.
+  * Clic sur la notification ou le bandeau ouvrant instantanément la modale associée.
+  * Correction du positionnement et suppression des chevauchements de texte dans les étapes des alertes.
+
+---
+
 ## 🚀 Version 0.0.46 (31 Août 2026)
 
 ---

@@ -96,7 +96,7 @@
 - [ ] **Affichage & Prévisualisation des résultats :**
   - Rendu des résultats en grille carrée ou en liste détaillée, incluant un aperçu des partitions grégoriennes générées automatiquement pour les chants.
 - [ ] **Répertoire Grégorien Étendu (Module Complémentaire) :**
-  - Permettre le téléchargement optionnel du répertoire complet Gregorio sous forme de module additionnel (~40 Mo) sans alourdir le paquet initial de l'application.
+  - Permettre le téléchargement optionnel du répertoire complet Gregorio sous forme de module additionnel (~1.4 Mo) sans alourdir le paquet initial de l'application.
 
 ---
 

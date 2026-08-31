@@ -9,18 +9,55 @@
 // ---- Automatic Audio Context Unlock on First User Gesture ----
 (function() {
     var unlocked = false;
+    var unlockEvents = ['click', 'touchend', 'pointerup', 'mouseup', 'keydown'];
+
+    function removeListeners() {
+        unlockEvents.forEach(function(evt) {
+            window.removeEventListener(evt, unlockAudio, { capture: true });
+        });
+    }
+
     function unlockAudio() {
         if (unlocked) return;
-        if (window.Tone && typeof Tone.start === 'function') {
-            Tone.start().then(function() {
-                unlocked = true;
-            }).catch(function() {});
+
+        var toneRawCtx = (window.Tone && window.Tone.context && (window.Tone.context.rawContext || window.Tone.context._context || window.Tone.context));
+        var tonesCtx = (window.tones && window.tones.context);
+
+        if ((!toneRawCtx || toneRawCtx.state === 'running') && (!tonesCtx || tonesCtx.state === 'running')) {
+            unlocked = true;
+            removeListeners();
+            return;
         }
-        if (window.tones && window.tones.context && window.tones.context.state === 'suspended') {
-            window.tones.context.resume().catch(function() {});
+
+        var promises = [];
+        if (window.Tone && typeof window.Tone.start === 'function') {
+            try {
+                promises.push(window.Tone.start());
+            } catch(e) {}
+        }
+        if (toneRawCtx && toneRawCtx.state === 'suspended' && typeof toneRawCtx.resume === 'function') {
+            try {
+                promises.push(toneRawCtx.resume());
+            } catch(e) {}
+        }
+        if (tonesCtx && tonesCtx !== toneRawCtx && tonesCtx.state === 'suspended' && typeof tonesCtx.resume === 'function') {
+            try {
+                promises.push(tonesCtx.resume());
+            } catch(e) {}
+        }
+
+        if (promises.length > 0) {
+            Promise.all(promises).then(function() {
+                unlocked = true;
+                removeListeners();
+            }).catch(function() {});
+        } else {
+            unlocked = true;
+            removeListeners();
         }
     }
-    ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(function(evt) {
+
+    unlockEvents.forEach(function(evt) {
         window.addEventListener(evt, unlockAudio, { capture: true, passive: true });
     });
 })();
@@ -52,7 +89,8 @@ var doState = window.doState = {
         chapter: parseInt(localStorage.getItem('do_bible_chapter'), 10) || 1,
         page: parseInt(localStorage.getItem('do_bible_page'), 10) || 1,
         pageSize: localStorage.getItem('do_bible_pageSize') || '15'
-    }
+    },
+    currentChantId: localStorage.getItem('do_chant_id') || null
 };
 
 var DO_LOCAL_CACHE = {};
@@ -484,6 +522,447 @@ function normalizeBibleBookId(input) {
 if (doState.bible && doState.bible.book) {
     doState.bible.book = normalizeBibleBookId(doState.bible.book);
 }
+
+/* =========================================================================
+   OremusRouter — URL State Synchronization & Deep Linking Engine
+   Synchronisation automatique des arguments HTML (URL query & history state)
+   sans rechargement de page (SPA replaceState / pushState / popstate).
+   ========================================================================= */
+var OremusRouter = window.OremusRouter = {
+    _isHandlingPopState: false,
+    _lastSerializedState: '',
+    _debounceSyncTimer: null,
+
+    // Normaliser une chaîne de date ISO (ex: YYYY-MM-DD) ou 'today' / 'yesterday' / 'tomorrow'
+    parseDateParam: function(val) {
+        if (!val) return null;
+        val = String(val).trim().toLowerCase();
+        if (val === 'today' || val === 'hodie') return moment();
+        if (val === 'yesterday' || val === 'heri') return moment().subtract(1, 'day');
+        if (val === 'tomorrow' || val === 'cras') return moment().add(1, 'day');
+        var m = moment(val, ['YYYY-MM-DD', 'YYYY/MM/DD', 'DD-MM-YYYY', 'DD/MM/YYYY', 'YYYYMMDD'], true);
+        if (m.isValid()) return m;
+        m = moment(val);
+        return m.isValid() ? m : null;
+    },
+
+    // Extraire et parser les paramètres depuis search (ou hash)
+    getParams: function(urlSearchOrHash) {
+        var src = (typeof urlSearchOrHash === 'string') 
+            ? urlSearchOrHash 
+            : (window.location.search || window.location.hash || '');
+        
+        if (src.indexOf('?') === 0 || src.indexOf('#') === 0) {
+            src = src.substring(1);
+        }
+
+        var params = {};
+        if (!src) return params;
+
+        var pairs = src.replace(/#/g, '&').split('&');
+        for (var i = 0; i < pairs.length; i++) {
+            var pair = pairs[i];
+            if (!pair) continue;
+            var eqIdx = pair.indexOf('=');
+            var k = '', v = '';
+            if (eqIdx >= 0) {
+                k = decodeURIComponent(pair.substring(0, eqIdx).replace(/\+/g, ' ')).trim();
+                v = decodeURIComponent(pair.substring(eqIdx + 1).replace(/\+/g, ' ')).trim();
+            } else {
+                k = decodeURIComponent(pair.replace(/\+/g, ' ')).trim();
+                v = 'true';
+            }
+            if (k) {
+                params[k] = v;
+            }
+        }
+        return params;
+    },
+
+    // Construire une URL query string propre et élégante à partir de l'état
+    buildQueryString: function(stateOverride) {
+        var st = stateOverride || window.doState;
+        if (!st) return '';
+
+        var q = new URLSearchParams();
+
+        // 1. Date (si ce n'est pas aujourd'hui ou si précisé)
+        if (st.date && moment.isMoment(st.date)) {
+            var curDateStr = st.date.format('YYYY-MM-DD');
+            var todayStr = moment().format('YYYY-MM-DD');
+            if (curDateStr !== todayStr || (st.hora && st.hora !== 'home' && st.hora !== 'bible' && st.hora !== 'gregorian_search')) {
+                q.set('date', curDateStr);
+            }
+        }
+
+        // 2. Hora / Catégorie
+        var hora = st.hora || 'home';
+        if (hora !== 'home') {
+            q.set('hora', hora);
+        }
+
+        // 3. Fête / Propre spécifique
+        if (st.officiumKey) {
+            q.set('key', st.officiumKey);
+        } else if (st.testFeastKey) {
+            q.set('test', st.testFeastKey);
+        }
+
+        // 4. Sacra Biblia
+        if (hora === 'bible' && st.bible) {
+            var bk = st.bible.book || 'Genesis';
+            var ch = st.bible.chapter || 1;
+            var pg = st.bible.page || 1;
+            var ps = st.bible.pageSize || '15';
+            
+            // Format concis : bible=Genesis:1:1
+            if (pg > 1) {
+                q.set('bible', bk + ':' + ch + ':' + pg);
+            } else if (ch > 1 || bk !== 'Genesis') {
+                q.set('bible', bk + ':' + ch);
+            } else {
+                q.set('bible', bk);
+            }
+
+            if (ps && ps !== '15') {
+                q.set('vpp', String(ps));
+            }
+        }
+
+        // 5. Recherche Grégorienne / Universelle
+        if (hora === 'gregorian_search') {
+            if (window.gregorianSearchUI && typeof window.gregorianSearchUI.getState === 'function') {
+                var searchState = window.gregorianSearchUI.getState();
+                if (searchState.query) q.set('q', searchState.query);
+                if (searchState.part) q.set('part', searchState.part);
+                if (searchState.mode) q.set('mode', String(searchState.mode));
+                if (searchState.view && searchState.view !== 'grid') q.set('view', searchState.view);
+            }
+        }
+
+        // 6. Chant Grégorien plein écran
+        if (hora === 'gregorian_chant') {
+            var chantId = st.currentChantId || localStorage.getItem('do_chant_id');
+            if (chantId) {
+                q.set('chant', chantId);
+            }
+        }
+
+        // 7. Options liturgiques & Traductions
+        if (st.edition && st.edition !== '1960') {
+            q.set('ed', st.edition);
+        }
+        if (st.vernacularLang && st.vernacularLang !== 'fr') {
+            q.set('lang', st.vernacularLang);
+        }
+        if (st.showLatin === false) {
+            q.set('latin', '0');
+        }
+        if (st.includeOrdinarium === true) {
+            q.set('ord', '1');
+        }
+        if (st.includeGregorian === false) {
+            q.set('greg', '0');
+        }
+        if (st.selectedKyriale && st.selectedKyriale !== 'auto') {
+            q.set('kyr', st.selectedKyriale);
+        }
+
+        var res = q.toString();
+        return res ? ('?' + res) : '';
+    },
+
+    // Synchroniser l'état vers l'URL (sans rechargement)
+    syncUrl: function(options) {
+        if (OremusRouter._isHandlingPopState) return;
+
+        options = options || {};
+        var isPush = !!options.push;
+        var debounceMs = (options.debounce !== undefined) ? options.debounce : 0;
+
+        if (debounceMs > 0) {
+            clearTimeout(OremusRouter._debounceSyncTimer);
+            OremusRouter._debounceSyncTimer = setTimeout(function() {
+                OremusRouter._executeSyncUrl(isPush);
+            }, debounceMs);
+        } else {
+            OremusRouter._executeSyncUrl(isPush);
+        }
+    },
+
+    _executeSyncUrl: function(isPush) {
+        var newQuery = OremusRouter.buildQueryString();
+        var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+        var targetUrl = window.location.pathname + (newQuery || '');
+
+        if (newQuery === OremusRouter._lastSerializedState && currentUrl === targetUrl) {
+            return;
+        }
+
+        OremusRouter._lastSerializedState = newQuery;
+
+        try {
+            var stateObj = {
+                oremus: true,
+                hora: doState.hora,
+                date: doState.date ? doState.date.format('YYYY-MM-DD') : null,
+                officiumKey: doState.officiumKey,
+                bible: doState.bible ? { book: doState.bible.book, chapter: doState.bible.chapter, page: doState.bible.page } : null,
+                ts: Date.now()
+            };
+
+            if (isPush) {
+                window.history.pushState(stateObj, '', targetUrl);
+            } else {
+                window.history.replaceState(stateObj, '', targetUrl);
+            }
+        } catch (e) {
+            console.warn('[OremusRouter] history state sync error:', e);
+        }
+
+        OremusRouter.updateDocumentTitle();
+    },
+
+    // Mettre à jour dynamiquement le titre de la page <title>
+    updateDocumentTitle: function() {
+        var uiLang = getUiLang();
+        var hora = doState.hora;
+        var title = 'Oremus';
+
+        if (hora === 'home') {
+            title = 'Oremus • Divinum Officium & Missale Romanum';
+        } else if (hora === 'bible') {
+            var bkId = doState.bible.book || 'Genesis';
+            var bkObj = (typeof DO_BIBLE_BOOKS !== 'undefined') ? (DO_BIBLE_BOOKS.find(function(b) { return b.id === bkId; }) || DO_BIBLE_BOOKS[0]) : { id: bkId };
+            var bkTitle = (uiLang === 'la' ? bkObj.la : (bkObj[uiLang] || bkObj.fr || bkObj.la)) || bkObj.id;
+            title = bkTitle + ' ' + (doState.bible.chapter || 1) + ' • Sacra Biblia — Oremus';
+        } else if (hora === 'gregorian_search') {
+            var q = '';
+            if (window.gregorianSearchUI && typeof window.gregorianSearchUI.getState === 'function') {
+                q = window.gregorianSearchUI.getState().query;
+            }
+            title = q ? ('« ' + q + ' » • Recherche — Oremus') : 'Recherche Grégorienne — Oremus';
+        } else if (hora === 'gregorian_chant') {
+            var chantTitle = $('#doHeaderTitle .title-text').text() || ('Chant #' + doState.currentChantId);
+            title = chantTitle + ' • Cantus Gregorianus — Oremus';
+        } else {
+            var horaMap = DO_HORA_TITLES_BY_LANG[uiLang] || DO_HORA_TITLES_BY_LANG['fr'] || DO_HORA_TITLES_BY_LANG['la'];
+            var horaLabel = horaMap[hora] || hora;
+            var dateFormatted = formatLiturgicalDate(doState.date, uiLang);
+            title = horaLabel + ' • ' + dateFormatted + ' — Oremus';
+        }
+
+        document.title = title;
+    },
+
+    // Charger l'état depuis l'URL actuelle
+    loadFromUrl: function(urlSearchOrHash, options) {
+        options = options || {};
+        var params = OremusRouter.getParams(urlSearchOrHash);
+        var hasExplicitParams = Object.keys(params).length > 0;
+
+        if (!hasExplicitParams) {
+            OremusRouter.syncUrl({ push: false });
+            return false;
+        }
+
+        // 1. Date
+        var dateVal = params.date || params.d;
+        if (dateVal) {
+            var parsedDate = OremusRouter.parseDateParam(dateVal);
+            if (parsedDate && parsedDate.isValid()) {
+                doState.date = parsedDate;
+                $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+            }
+        }
+
+        // 2. Hora / Catégorie
+        var horaVal = params.hora || params.h || params.cat || params.office;
+        if (horaVal) {
+            horaVal = String(horaVal).trim().toLowerCase();
+            var validHorae = [
+                'home', 'missa', 'missa_gregorian', 'matutinum', 'laudes', 
+                'prima', 'tertia', 'sexta', 'nona', 'vesperae', 'completorium', 
+                'bible', 'gregorian_search', 'gregorian_chant', 'search', 'chant'
+            ];
+            if (horaVal === 'search') horaVal = 'gregorian_search';
+            if (horaVal === 'chant') horaVal = 'gregorian_chant';
+            if (validHorae.indexOf(horaVal) >= 0) {
+                doState.hora = horaVal;
+                localStorage.setItem('do_hora', horaVal);
+            }
+        }
+
+        // 3. Fête / Propre
+        var keyVal = params.key || params.sancti || params.tempora || params.festum;
+        if (keyVal) {
+            doState.officiumKey = keyVal;
+            localStorage.setItem('do_officiumKey', keyVal);
+        } else if (params.hora && params.hora !== 'missa_gregorian') {
+            doState.officiumKey = null;
+            localStorage.removeItem('do_officiumKey');
+        }
+
+        var testVal = params.test || params.testFeastKey;
+        if (testVal) {
+            doState.testFeastKey = testVal;
+        }
+
+        // 4. Sacra Biblia
+        var bibleVal = params.bible || params.book || params.bk;
+        if (bibleVal || doState.hora === 'bible') {
+            if (bibleVal) {
+                var bParts = String(bibleVal).split(/[:\/\.]/);
+                var rawBk = bParts[0] || 'Genesis';
+                var normBk = (typeof normalizeBibleBookId === 'function') ? normalizeBibleBookId(rawBk) : rawBk;
+                doState.bible.book = normBk;
+                localStorage.setItem('do_bible_book', normBk);
+
+                if (bParts.length > 1) {
+                    var chNum = parseInt(bParts[1], 10);
+                    if (!isNaN(chNum) && chNum > 0) {
+                        doState.bible.chapter = chNum;
+                        localStorage.setItem('do_bible_chapter', chNum);
+                    }
+                } else if (params.chapter || params.ch || params.cap) {
+                    var chNum2 = parseInt(params.chapter || params.ch || params.cap, 10);
+                    if (!isNaN(chNum2) && chNum2 > 0) {
+                        doState.bible.chapter = chNum2;
+                        localStorage.setItem('do_bible_chapter', chNum2);
+                    }
+                }
+
+                if (bParts.length > 2) {
+                    var pgNum = parseInt(bParts[2], 10);
+                    if (!isNaN(pgNum) && pgNum > 0) {
+                        doState.bible.page = pgNum;
+                        localStorage.setItem('do_bible_page', pgNum);
+                    }
+                } else if (params.page || params.pg || params.p) {
+                    var pgNum2 = parseInt(params.page || params.pg || params.p, 10);
+                    if (!isNaN(pgNum2) && pgNum2 > 0) {
+                        doState.bible.page = pgNum2;
+                        localStorage.setItem('do_bible_page', pgNum2);
+                    }
+                }
+            }
+
+            var vppVal = params.vpp || params.pageSize || params.limit;
+            if (vppVal) {
+                doState.bible.pageSize = (vppVal === 'all') ? 'all' : (parseInt(vppVal, 10) || 15);
+                localStorage.setItem('do_bible_pageSize', vppVal);
+            }
+        }
+
+        // 5. Recherche Grégorienne
+        var queryVal = params.q || params.query || params.search;
+        var partVal = params.part || params.office_part;
+        var modeVal = params.mode;
+        var viewVal = params.view;
+
+        if (queryVal !== undefined || partVal || modeVal || viewVal) {
+            if (window.gregorianSearchUI && typeof window.gregorianSearchUI.setState === 'function') {
+                window.gregorianSearchUI.setState({
+                    query: queryVal || '',
+                    part: partVal || '',
+                    mode: modeVal || '',
+                    view: viewVal || ''
+                });
+            }
+            if (queryVal && doState.hora === 'home') {
+                doState.hora = 'gregorian_search';
+                localStorage.setItem('do_hora', 'gregorian_search');
+            }
+        }
+
+        // 6. Chant Grégorien
+        var chantVal = params.chant || params.id || params.chantId;
+        if (chantVal) {
+            doState.currentChantId = chantVal;
+            doState.hora = 'gregorian_chant';
+            localStorage.setItem('do_hora', 'gregorian_chant');
+            localStorage.setItem('do_chant_id', chantVal);
+        }
+
+        // 7. Options liturgiques & Langue
+        var langVal = params.lang || params.vernacular;
+        if (langVal) {
+            doState.vernacularLang = langVal;
+            localStorage.setItem('do_vernacular_lang', langVal);
+        }
+
+        var edVal = params.ed || params.edition || params.rubrics;
+        if (edVal) {
+            doState.edition = edVal;
+            localStorage.setItem('do_edition', edVal);
+        }
+
+        var latVal = params.latin || params.la;
+        if (latVal !== undefined) {
+            doState.showLatin = (latVal === '1' || latVal === 'true');
+            localStorage.setItem('do_show_latin', doState.showLatin);
+        }
+
+        var ordVal = params.ord || params.ordinarium;
+        if (ordVal !== undefined) {
+            doState.includeOrdinarium = (ordVal === '1' || ordVal === 'true');
+            localStorage.setItem('do_ordinarium', doState.includeOrdinarium);
+        }
+
+        var gregVal = params.greg || params.gregorian || params.cantus;
+        if (gregVal !== undefined) {
+            doState.includeGregorian = (gregVal === '1' || gregVal === 'true');
+            localStorage.setItem('do_include_gregorian', doState.includeGregorian);
+        }
+
+        var kyrVal = params.kyr || params.kyriale;
+        if (kyrVal) {
+            doState.selectedKyriale = kyrVal;
+            localStorage.setItem('do_selected_kyriale', kyrVal);
+        }
+
+        return true;
+    },
+
+    // Gestion du bouton Retour / Suivant du navigateur (popstate)
+    handlePopState: function(event) {
+        OremusRouter._isHandlingPopState = true;
+        try {
+            if (typeof closeModals === 'function') closeModals();
+            if (typeof closeMassTocPanel === 'function') closeMassTocPanel();
+            $('#doHoraePicker').addClass('hidden');
+
+            OremusRouter.loadFromUrl(window.location.search || window.location.hash);
+
+            if (typeof renderDO === 'function') {
+                renderDO();
+            }
+        } finally {
+            setTimeout(function() {
+                OremusRouter._isHandlingPopState = false;
+            }, 50);
+        }
+    },
+
+    // Initialisation au démarrage de l'application
+    init: function() {
+        OremusRouter.loadFromUrl(window.location.search || window.location.hash);
+
+        window.addEventListener('popstate', OremusRouter.handlePopState);
+
+        window.addEventListener('hashchange', function() {
+            if (window.location.hash) {
+                OremusRouter.handlePopState();
+            }
+        });
+    },
+
+    // Générer une URL de partage absolue pour l'état actuel
+    getShareableUrl: function() {
+        var base = window.location.origin + window.location.pathname;
+        return base + OremusRouter.buildQueryString();
+    }
+};
 
 var DO_UI_TRANSLATIONS = {
     fr: {
@@ -2968,15 +3447,23 @@ function renderLoading() {
     return '<div class="do-skeleton-list">' + skCard() + skCard() + skCard() + '</div>';
 }
 
-function renderChantSkeleton() {
-    return '<div class="do-chant-skeleton">' +
-        '<div class="do-skel w95"></div>' +
-        '<div class="do-skel w85"></div>' +
-        '<div class="do-skel w90"></div>' +
-        '<div class="do-skel w80"></div>' +
-        '<div class="do-skel w60"></div>' +
-    '</div>';
+function renderChantSkeleton(staffCount) {
+    var count = staffCount || 2;
+    var staffHtml = 
+        '<div class="gregorian-skeleton-staff">' +
+            '<div class="gregorian-staff-line"></div>' +
+            '<div class="gregorian-staff-line"></div>' +
+            '<div class="gregorian-staff-line"></div>' +
+            '<div class="gregorian-staff-line"></div>' +
+        '</div>';
+    var html = '<div class="do-chant-skeleton gregorian-score-loader">';
+    for (var i = 0; i < count; i++) {
+        html += staffHtml;
+    }
+    html += '</div>';
+    return html;
 }
+window.renderChantSkeleton = renderChantSkeleton;
 
 // ---- Sacra Biblia Paginated Main Reader View ----
 
@@ -3377,9 +3864,9 @@ function renderHomeView() {
         // ---- BARRE DE RECHERCHE GLOBALE ----
         var searchPlaceholder = (uiLang === 'fr') ? "Rechercher un saint, un dimanche, une fête ou un livre biblique..." : "Quære sanctum, dominicam aut librum...";
         var $searchBar = $('<div class="do-home-search-bar-wrap">')
-            .append('<svg class="do-home-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
-            .append('<input type="text" id="doHomeSearchInput" class="do-home-search-input" placeholder="' + escHtml(searchPlaceholder) + '" autocomplete="off">')
-            .append('<button id="doHomeSearchClear" class="do-home-search-clear hidden">&times;</button>')
+            .append('<span class="do-home-search-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg></span>')
+            .append('<input type="text" id="doHomeSearchInput" class="do-home-search-input" placeholder="' + escHtml(searchPlaceholder) + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">')
+            .append('<button id="doHomeSearchClear" class="do-home-search-clear hidden" aria-label="Effacer"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>')
             .append('<div id="doHomeSearchResults" class="do-home-search-results hidden"></div>');
 
         $view.append($searchBar);
@@ -3459,10 +3946,17 @@ function renderDO() {
     updateEffectiveColor();
     updateSidebarAndHeader();
     closeHeaderDropdown();
+    if (window.OremusRouter) {
+        window.OremusRouter.syncUrl({ push: false });
+    }
 
     var isHome = (doState.hora === 'home');
     var isBible = (doState.hora === 'bible');
+    var isSearch = (doState.hora === 'gregorian_search');
+    var isChant = (doState.hora === 'gregorian_chant');
     $('body').toggleClass('is-bible-mode', isBible);
+    $('body').toggleClass('is-search-mode', isSearch);
+    $('body').toggleClass('is-chant-mode', isChant);
 
     if (isHome) {
         hideMassToc();
@@ -3474,6 +3968,38 @@ function renderDO() {
         hideMassToc();
         closeDoPlayer();
         renderBibleMainView();
+        return;
+    }
+
+    if (isSearch) {
+        hideMassToc();
+        closeDoPlayer();
+        if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderMainView === 'function') {
+            window.gregorianSearchUI.renderMainView();
+        }
+        return;
+    }
+
+    if (isChant) {
+        hideMassToc();
+        var chantId = doState.currentChantId || localStorage.getItem('do_chant_id');
+        if (!chantId) {
+            doState.hora = 'gregorian_search';
+            localStorage.setItem('do_hora', 'gregorian_search');
+            if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderMainView === 'function') {
+                window.gregorianSearchUI.renderMainView();
+            }
+            return;
+        }
+        if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderChantMainView === 'function') {
+            window.gregorianSearchUI.renderChantMainView(chantId);
+        } else {
+            $(document).ready(function() {
+                if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderChantMainView === 'function') {
+                    window.gregorianSearchUI.renderChantMainView(chantId);
+                }
+            });
+        }
         return;
     }
 
@@ -3918,8 +4444,9 @@ function preprocessGabcForExsurge(gabc) {
     // Remove any remaining unclosed <eu> or </eu> tags
     gabc = gabc.replace(/<\/?eu>/gi, '');
 
-    // 2. Remove ledger line indications like [oll:1{}] or [ull:0;12mm]
-    gabc = gabc.replace(/\[[ou]ll:[01]?[{}][01]?\]/ig, '');
+    // 2. Remove ledger line indications like [ll:1], [oll:1{}], [ull:0;12mm], [cs:...], [nobar]
+    gabc = gabc.replace(/\[[ou]?ll:[^\]]*\]/ig, '');
+    gabc = gabc.replace(/\[(?:cs|alt|nobar)[^\]]*\]/ig, '');
 
     // 3. Normalize \Vbar, \Rbar, \Abar to standard bar symbols
     gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) {
@@ -3964,6 +4491,7 @@ function preprocessGabcForExsurge(gabc) {
 
     return gabc;
 }
+window.preprocessGabcForExsurge = preprocessGabcForExsurge;
 
 function formatChantTime(s) {
     if (isNaN(s) || s < 0) s = 0;
@@ -5066,6 +5594,7 @@ function updateDoPitchUI(score) {
 }
 
 function renderSingleChantScore($wrapper, force) {
+    if (!$wrapper || !$wrapper.length) return;
     if (!force && $wrapper.data('do-rendered')) return;
     var chantId = $wrapper.data('chant-id');
     var defaultName = $wrapper.data('chant-name') || ('Chant ' + chantId);
@@ -5076,171 +5605,204 @@ function renderSingleChantScore($wrapper, force) {
         return;
     }
 
-    var cachedGabc = $wrapper.data('cached-gabc');
-    if (cachedGabc) {
-        $wrapper.data('do-rendered', true);
-        processGabcData(cachedGabc);
+    if (!force && $wrapper.data('is-visible') === false) {
         return;
     }
+    if ($wrapper.data('is-rendering')) return;
 
-    $wrapper.data('do-rendered', true);
-    var gabcUrl = 'gabc/' + chantId + '.gabc';
-
-    function processGabcData(data) {
-        if (!data) {
-            $wrapper.html('<div class="do-chant-error">Partition ' + chantId + ' non disponible.</div>');
-            return;
-        }
-        $wrapper.data('cached-gabc', data);
-        var header = parseGabcHeader(data);
-        var title = header.name || defaultName;
-        var officePart = header['office-part'] || defaultPart;
-        var mode = header.mode || '';
-
-        var modeHtml = mode ? '<span class="do-chant-mode-badge">Ton ' + escHtml(mode) + '</span>' : '';
-
+    var $card = $wrapper.find('.do-chant-card');
+    if (!$card.length) {
         var cardHtml = 
             '<div class="do-chant-card">' +
-                '<div class="do-chant-preview">' + renderChantSkeleton() + '</div>' +
+                '<div class="do-chant-preview gregorian-skeleton">' + renderChantSkeleton(2) + '</div>' +
             '</div>';
-
-        var $card = $(cardHtml);
+        $card = $(cardHtml);
         $wrapper.empty().append($card);
+    }
+    $card.data('chant-part', defaultPart);
+    $card.data('chant-title', defaultName);
 
-        $card.data('chant-part', officePart);
-        $card.data('chant-title', title);
+    var $preview = $card.find('.do-chant-preview');
+    if (!$preview.hasClass('is-rendered') && !$preview.find('.gregorian-score-loader').length) {
+        $preview.addClass('gregorian-skeleton').html(renderChantSkeleton(2));
+    }
 
-        var $preview = $card.find('.do-chant-preview');
+    $wrapper.data('is-rendering', true);
 
-        // Exsurge Rendering
-        if (typeof exsurge !== 'undefined') {
-            try {
-                var ctxt = new exsurge.ChantContext();
-                var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-                var isDark = (curTheme !== 'light');
-                var accentColor = doState.settings.color || '#c96b63';
-
-                ctxt.textColor = isDark ? '#ffffff' : '#111317';
-                ctxt.noteColor = isDark ? '#ffffff' : '#111317';
-                ctxt.neumeLineColor = isDark ? '#ffffff' : '#111317';
-                ctxt.dividerLineColor = isDark ? '#ffffff' : '#111317';
-                ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)';
-
-                ctxt.setFont("'Crimson Text', 'Libre Baskerville', serif", 16);
-                ctxt.setRubricColor(accentColor);
-                ctxt.specialCharColor = accentColor;
-                ctxt.rubricColor = accentColor;
-                ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
-                ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
-                ctxt.annotationTextFont = ctxt.lyricTextFont;
-
-                if (ctxt.textStyles) {
-                    Object.keys(ctxt.textStyles).forEach(function(k) {
-                        if (ctxt.textStyles[k]) {
-                            ctxt.textStyles[k].color = isDark ? '#ffffff' : '#111317';
-                            ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
-                        }
+    async function loadGabcAndRender() {
+        try {
+            var cachedGabc = $wrapper.data('cached-gabc') || GABC_LOCAL_CACHE[chantId];
+            if (!cachedGabc && window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
+                try {
+                    cachedGabc = await window.gregorianDB.getGabc(chantId);
+                } catch(e) {}
+            }
+            if (!cachedGabc) {
+                try {
+                    cachedGabc = await $.ajax({
+                        url: 'gabc/' + chantId + '.gabc',
+                        dataType: 'text',
+                        cache: true
                     });
-                }
+                } catch(e) {}
+            }
 
-                var processedGabc = preprocessGabcForExsurge(data);
-                var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
-                var score = new exsurge.ChantScore(ctxt, mappings, true);
+            // Check if card moved out of viewport during async download
+            if (!force && $wrapper.data('is-visible') === false) {
+                $wrapper.data('is-rendering', false);
+                return;
+            }
 
-                // Setup Exsurge annotations (propers.html Solesmes style above drop cap)
-                var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
-                var partAbbrev = {
-                    verse: 'V/.',
-                    tractus: 'Tract.',
-                    offertorium: 'Offert.',
-                    introitus: 'Intr.',
-                    graduale: 'Grad.',
-                    communio: 'Comm.',
-                    sequentia: 'Seq.',
-                    hymnus: 'Hymn.',
-                    antiphona: 'Ant.',
-                    responsorium: 'Resp.',
-                    canticum: 'Cant.',
-                    alleluia: 'Allel.'
-                };
+            if (!cachedGabc) {
+                $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Partition #' + escHtml(chantId) + ' non disponible.</div>');
+                $wrapper.data('is-rendering', false);
+                return;
+            }
 
-                var topAnnotation = '';
-                var bottomAnnotation = '';
+            $wrapper.data('cached-gabc', cachedGabc);
+            GABC_LOCAL_CACHE[chantId] = cachedGabc;
 
-                if (header.annotations && header.annotations.length >= 2) {
-                    topAnnotation = header.annotations[0];
-                    bottomAnnotation = header.annotations[1];
-                } else if (header.annotations && header.annotations.length === 1) {
-                    topAnnotation = header.annotations[0];
-                    if (header.mode) {
-                        var mInt = parseInt(header.mode, 10);
-                        bottomAnnotation = (mInt >= 1 && mInt <= 8) ? romanNumeral[mInt] : header.mode;
-                    }
-                } else {
-                    var rawPart = (officePart || header['office-part'] || '').toLowerCase();
-                    var abbrev = partAbbrev[rawPart] || officePart || '';
-                    if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'Tract.' || abbrev === 'Seq.') ? abbrev : abbrev.toUpperCase();
-                    var rawMode = header.mode || mode;
-                    if (rawMode) {
-                        var modeNum = parseInt(rawMode, 10);
-                        bottomAnnotation = (modeNum >= 1 && modeNum <= 8) ? romanNumeral[modeNum] : rawMode;
-                    }
-                }
+            var header = parseGabcHeader(cachedGabc);
+            var title = header.name || defaultName;
+            var officePart = header['office-part'] || defaultPart;
+            var mode = header.mode || '';
 
-                if (topAnnotation && bottomAnnotation) {
-                    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%', '%' + bottomAnnotation + '%');
-                } else if (topAnnotation) {
-                    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%');
-                } else if (bottomAnnotation) {
-                    score.annotation = new exsurge.Annotations(ctxt, '%' + bottomAnnotation + '%');
-                }
+            $card.data('chant-part', officePart);
+            $card.data('chant-title', title);
 
-                var width = getOptimalChantWidth($card);
-                ctxt.width = width;
+            if (typeof exsurge === 'undefined') {
+                $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Moteur Exsurge non chargé.</div>');
+                $wrapper.data('is-rendering', false);
+                return;
+            }
 
-                score.performLayout(ctxt);
-                score.layoutChantLines(ctxt, width, function() {
-                    var svg = score.createSvgNode(ctxt);
-                    if (svg) {
-                        svg.setAttribute('width', '100%');
-                        svg.style.width = '100%';
-                        svg.style.maxWidth = '100%';
-                        svg.style.height = 'auto';
+            var ctxt = new exsurge.ChantContext();
+            var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            var isDark = (curTheme !== 'light');
+            var accentColor = (doState && doState.settings && doState.settings.color) ? doState.settings.color : '#c96b63';
 
-                        var noteFill = isDark ? '#ffffff' : '#111317';
-                        svg.setAttribute('fill', noteFill);
-                        svg.style.fill = noteFill;
+            ctxt.textColor = isDark ? '#ffffff' : '#111317';
+            ctxt.noteColor = isDark ? '#ffffff' : '#111317';
+            ctxt.neumeLineColor = isDark ? '#ffffff' : '#111317';
+            ctxt.dividerLineColor = isDark ? '#ffffff' : '#111317';
+            ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)';
 
-                        $preview.empty().append(svg);
-                        $card.data('chant-score', score);
-                        $card.data('chant-ctxt', ctxt);
-                        $card.data('chant-gabc', processedGabc);
+            ctxt.setFont("'Crimson Text', 'Libre Baskerville', serif", 16);
+            ctxt.setRubricColor(accentColor);
+            ctxt.specialCharColor = accentColor;
+            ctxt.rubricColor = accentColor;
+            ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
+            ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
+            ctxt.annotationTextFont = ctxt.lyricTextFont;
+
+            if (ctxt.textStyles) {
+                Object.keys(ctxt.textStyles).forEach(function(k) {
+                    if (ctxt.textStyles[k]) {
+                        ctxt.textStyles[k].color = isDark ? '#ffffff' : '#111317';
+                        ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
                     }
                 });
-            } catch(e) {
-                console.warn('Exsurge error:', e);
-                $preview.html('<div class="do-chant-error">Erreur de rendu Exsurge: ' + escHtml(e.message) + '</div>');
             }
-        } else {
-            $preview.html('<div class="do-chant-error">Moteur Exsurge non chargé.</div>');
+
+            var processedGabc = preprocessGabcForExsurge(cachedGabc);
+            var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
+            var score = new exsurge.ChantScore(ctxt, mappings, true);
+
+            // Setup Exsurge annotations (propers.html Solesmes style above drop cap)
+            var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+            var partAbbrev = {
+                verse: 'V/.',
+                tractus: 'Tract.',
+                offertorium: 'Offert.',
+                introitus: 'Intr.',
+                graduale: 'Grad.',
+                communio: 'Comm.',
+                sequentia: 'Seq.',
+                hymnus: 'Hymn.',
+                antiphona: 'Ant.',
+                responsorium: 'Resp.',
+                canticum: 'Cant.',
+                alleluia: 'Allel.'
+            };
+
+            var topAnnotation = '';
+            var bottomAnnotation = '';
+
+            if (header.annotations && header.annotations.length >= 2) {
+                topAnnotation = header.annotations[0];
+                bottomAnnotation = header.annotations[1];
+            } else if (header.annotations && header.annotations.length === 1) {
+                topAnnotation = header.annotations[0];
+                if (header.mode) {
+                    var mInt = parseInt(header.mode, 10);
+                    bottomAnnotation = (mInt >= 1 && mInt <= 8) ? romanNumeral[mInt] : header.mode;
+                }
+            } else {
+                var rawPart = (officePart || header['office-part'] || '').toLowerCase();
+                var abbrev = partAbbrev[rawPart] || officePart || '';
+                if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'Tract.' || abbrev === 'Seq.') ? abbrev : abbrev.toUpperCase();
+                var rawMode = header.mode || mode;
+                if (rawMode) {
+                    var modeNum = parseInt(rawMode, 10);
+                    bottomAnnotation = (modeNum >= 1 && modeNum <= 8) ? romanNumeral[modeNum] : rawMode;
+                }
+            }
+
+            if (topAnnotation && bottomAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%', '%' + bottomAnnotation + '%');
+            } else if (topAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%');
+            } else if (bottomAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + bottomAnnotation + '%');
+            }
+
+            var width = getOptimalChantWidth($card);
+            ctxt.width = width;
+
+            score.performLayout(ctxt);
+            score.layoutChantLines(ctxt, width, function() {
+                if (!force && $wrapper.data('is-visible') === false) {
+                    $wrapper.data('is-rendering', false);
+                    return;
+                }
+
+                var svg = score.createSvgNode(ctxt);
+                if (svg) {
+                    svg.setAttribute('width', '100%');
+                    svg.style.width = '100%';
+                    svg.style.maxWidth = '100%';
+                    svg.style.height = 'auto';
+
+                    var noteFill = isDark ? '#ffffff' : '#111317';
+                    svg.setAttribute('fill', noteFill);
+                    svg.style.fill = noteFill;
+
+                    $preview.removeClass('gregorian-skeleton').addClass('is-rendered').find('.gregorian-score-loader').remove();
+                    $preview.empty().append(svg);
+
+                    $card.data('chant-score', score);
+                    $card.data('chant-ctxt', ctxt);
+                    $card.data('chant-gabc', processedGabc);
+                    $wrapper.data('do-rendered', true);
+                    $wrapper.data('is-rendering', false);
+
+                    if (chantIntersectionObserver) {
+                        chantIntersectionObserver.unobserve($wrapper[0]);
+                    }
+                }
+            });
+        } catch(e) {
+            console.warn('[DivinumOfficium] Exsurge error chant ID ' + chantId, e);
+            $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Erreur de rendu Exsurge: ' + escHtml(e.message) + '</div>');
+            $wrapper.data('is-rendering', false);
         }
     }
 
-    if (GABC_LOCAL_CACHE[chantId]) {
-        processGabcData(GABC_LOCAL_CACHE[chantId]);
-    } else {
-        $.ajax({
-            url: gabcUrl,
-            dataType: 'text',
-            cache: true
-        }).done(function(data) {
-            GABC_LOCAL_CACHE[chantId] = data;
-            processGabcData(data);
-        }).fail(function() {
-            $wrapper.html('<div class="do-chant-error">Impossible de charger la partition ' + chantId + '.</div>');
-        });
-    }
+    loadGabcAndRender();
 }
+window.renderSingleChantScore = renderSingleChantScore;
+window.relayoutAllChantScores = relayoutAllChantScores;
+window.getOptimalChantWidth = getOptimalChantWidth;
 
 function getOptimalChantWidth($card) {
     var $preview = $card.find('.do-chant-preview');
@@ -5261,7 +5823,7 @@ function getOptimalChantWidth($card) {
 }
 
 function relayoutAllChantScores() {
-    if (!doState.includeGregorian) return;
+    if (!doState.includeGregorian && doState.hora !== 'gregorian_chant') return;
     $('.do-chant-card').each(function() {
         var $card = $(this);
         var score = $card.data('chant-score');
@@ -5315,7 +5877,7 @@ function setupChantResizeObserver() {
     chantResizeObserver = new ResizeObserver(function() {
         if (chantResizeTimer) clearTimeout(chantResizeTimer);
         chantResizeTimer = setTimeout(function() {
-            if (doState.includeGregorian) {
+            if (doState.includeGregorian || doState.hora === 'gregorian_chant') {
                 relayoutAllChantScores();
             }
         }, 50);
@@ -5329,7 +5891,7 @@ function setupChantResizeObserver() {
 }
 
 $(window).on('resize orientationchange', function() {
-    if (!doState.includeGregorian) return;
+    if (!doState.includeGregorian && doState.hora !== 'gregorian_chant') return;
     if (chantResizeTimer) clearTimeout(chantResizeTimer);
     chantResizeTimer = setTimeout(function() {
         relayoutAllChantScores();
@@ -5347,18 +5909,20 @@ function setupChantIntersectionObserver() {
 
     chantIntersectionObserver = new IntersectionObserver(function(entries, observer) {
         entries.forEach(function(entry) {
+            var el = entry.target;
+            var $wrapper = $(el);
             if (entry.isIntersecting) {
-                var el = entry.target;
-                observer.unobserve(el);
-                var $wrapper = $(el);
-                if (doState.includeGregorian) {
-                    renderSingleChantScore($wrapper);
+                $wrapper.data('is-visible', true);
+                if (doState.includeGregorian || doState.hora === 'gregorian_chant') {
+                    renderSingleChantScore($wrapper, false);
                 }
+            } else {
+                $wrapper.data('is-visible', false);
             }
         });
     }, {
         root: null,
-        rootMargin: '300px 0px 300px 0px',
+        rootMargin: '200px 0px',
         threshold: 0.01
     });
 
@@ -5369,7 +5933,7 @@ function renderAllChantScoresInDOM($root, force) {
     var $wrappers = ($root || $('#do-content-stream')).find('.do-chant-card-wrapper');
     if (!$wrappers.length) return;
 
-    if (!doState.includeGregorian) {
+    if (!doState.includeGregorian && doState.hora !== 'gregorian_chant') {
         $wrappers.hide();
         return;
     }
@@ -5541,7 +6105,7 @@ function displayResult(result, vernResult) {
                     'data-chant-name="' + escHtml(ch.name) + '" ' +
                     'data-chant-part="' + escHtml(ch.part) + '"' +
                     (doState.includeGregorian ? '' : ' style="display:none;"') + '>' +
-                    '<div class="do-chant-card"><div class="do-chant-preview">' + renderChantSkeleton() + '</div></div>' +
+                    '<div class="do-chant-card"><div class="do-chant-preview gregorian-skeleton">' + renderChantSkeleton(2) + '</div></div>' +
                     '</div>';
                 
                 $cardNode.find('.do-card-body').prepend(wrapperHtml);
@@ -5558,9 +6122,9 @@ function displayResult(result, vernResult) {
         $stream[0].style.setProperty('--bilingual-offset', offsetVal);
     }
 
-    // Render all chant scores in DOM immediately when Gregorian is enabled (avoids scroll shift)
+    // Lazy render chant scores via IntersectionObserver when Gregorian is enabled
     if (isMissa && doState.includeGregorian) {
-        renderAllChantScoresInDOM($stream, true);
+        renderAllChantScoresInDOM($stream, false);
     }
 
     if (isMissa) {
@@ -5754,6 +6318,14 @@ function updateSidebarAndHeader() {
         var bookTitle = (uiLang === 'la' ? bkObj.la : (bkObj[uiLang] || bkObj.fr || bkObj.la)) || bkObj.id;
         $('#doHourLabel').text(('SACRA BIBLIA • ' + (bkObj.cat || 'Vulgata')).toUpperCase());
         $('#doHeaderTitle .title-text').text(bookTitle + ' • ' + (uiLang === 'fr' ? 'Chapitre ' : 'Capitulum ') + doState.bible.chapter);
+    } else if (hora === 'gregorian_search') {
+        $('#doHourLabel').text((uiLang === 'fr' ? 'OREMVS • RECHERCHE VNIVERSELLE' : (uiLang === 'la' ? 'OREMVS • QVÆRERE' : 'OREMVS • SEARCH')).toUpperCase());
+        $('#doHeaderTitle .title-text').text(uiLang === 'fr' ? 'Recherche' : (uiLang === 'la' ? 'Quærere' : 'Search'));
+    } else if (hora === 'gregorian_chant') {
+        $('#doHourLabel').text('CANTUS GREGORIANUS');
+        if (!doState.currentChantId) {
+            $('#doHeaderTitle .title-text').text('Cantus Gregorianus');
+        }
     } else {
         $('#doHourLabel').text((horaLabel + ' • ' + dateFormatted).toUpperCase());
     }
@@ -5816,6 +6388,9 @@ function openBible(bookId, chapterNum, pageNum) {
         localStorage.setItem('do_bible_page', doState.bible.page);
     }
     closeModals();
+    if (window.OremusRouter) {
+        window.OremusRouter.syncUrl({ push: true });
+    }
     renderDO();
 }
 
@@ -5827,6 +6402,11 @@ function closeModals() {
     $('#pwaInstallModalBackdrop, #pwaInstallModal').addClass('hidden');
     $('#appIconModalBackdrop, #appIconModal').addClass('hidden');
     $('#notificationPromptModalBackdrop, #notificationPromptModal').addClass('hidden');
+    if (typeof window.closeGregorianSearch === 'function') {
+        window.closeGregorianSearch();
+    } else {
+        $('#gregorianSearchModal, #gregorianZoomModal').removeClass('is-open');
+    }
     $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
@@ -7695,6 +8275,7 @@ function createCalDayButton(dayNum, isOther, mDate, isToday, isSelected) {
         localStorage.removeItem('do_officiumKey');
         doState.calView = { year: mDate.year(), month: mDate.month() };
         closeHeaderDropdown();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
     return $btn;
@@ -7928,6 +8509,7 @@ function renderHeaderDropdownItems() {
                                 localStorage.setItem('do_bible_chapter', chNum);
                                 localStorage.setItem('do_bible_page', 1);
                                 closeHeaderDropdown();
+                                if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
                                 renderDO();
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             });
@@ -8108,6 +8690,7 @@ function renderHeaderDropdownItems() {
                             localStorage.removeItem('do_officiumKey');
                         }
                         closeHeaderDropdown();
+                        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
                         renderDO();
                     });
 
@@ -8428,12 +9011,20 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
                     capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
                     break;
             }
+            return;
         }
     } catch (e) {}
 
     // Fallback Web navigator.vibrate with patterned vibration signatures
     try {
-        if (navigator && navigator.vibrate) {
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            // Guard against Chrome [Intervention] warning when frame has not received user activation yet
+            if (navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+                return;
+            }
+            if (typeof document !== 'undefined' && document.hidden) {
+                return;
+            }
             var mult = (styleMode === 'light') ? 0.6 : (styleMode === 'rich') ? 1.4 : 1.0;
             switch (type) {
                 case 'selection':
@@ -8479,7 +9070,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.46';
+var CURRENT_APP_VERSION = 'beta-0.0.47';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -8597,41 +9188,25 @@ function checkForAppUpdates(isManual) {
         handleReleasesData([pseudoRelease]);
     }
 
-    // Try GitHub API first, fallback to raw static version.json on 403 / failure
-    fetch(apiUrl, {
-        headers: { 'Accept': 'application/vnd.github.v3+json' },
-        cache: 'no-cache'
-    })
-        .then(function(res) {
-            if (!res.ok) throw new Error('API HTTP ' + res.status);
-            return res.json();
+    // Check raw version.json directly (no GitHub API rate limit / 403 Forbidden)
+    fetch(rawVersionUrl, { cache: 'no-cache' })
+        .then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
         })
-        .then(function(releases) {
-            handleReleasesData(releases);
+        .then(function(vData) {
+            handleFallbackVersionFile(vData);
         })
-        .catch(function(apiErr) {
-            console.warn('[Updates] GitHub API unreachable/rate-limited, trying raw version fallback:', apiErr);
-            return fetch(rawVersionUrl, { cache: 'no-cache' })
-                .then(function(r) {
-                    if (!r.ok) throw new Error('Raw HTTP ' + r.status);
-                    return r.json();
-                })
+        .catch(function(rawErr) {
+            return fetch(localVersionUrl, { cache: 'no-cache' })
+                .then(function(r) { return r.json(); })
                 .then(function(vData) {
                     handleFallbackVersionFile(vData);
-                })
-                .catch(function(rawErr) {
-                    console.warn('[Updates] Raw version fallback failed, trying local file:', rawErr);
-                    return fetch(localVersionUrl, { cache: 'no-cache' })
-                        .then(function(r) { return r.json(); })
-                        .then(function(vData) {
-                            handleFallbackVersionFile(vData);
-                        });
                 });
         })
         .catch(function(err) {
-            console.warn('Update check failed completely:', err);
             if (isManual) {
-                $statusText.text('Impossible de vérifier les mises à jour (hors-ligne)').css('color', '#c96b63');
+                $statusText.text('Vous utilisez la dernière version locale (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
             }
         });
 }
@@ -10079,6 +10654,7 @@ function setupEventListeners() {
         localStorage.removeItem('do_officiumKey');
         localStorage.setItem('do_hora', 'home');
         closeModals();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -10091,6 +10667,13 @@ function setupEventListeners() {
             openBible();
             return;
         }
+        if (hora === 'gregorian_search') {
+            closeModals();
+            if (typeof window.openGregorianSearch === 'function') {
+                window.openGregorianSearch();
+            }
+            return;
+        }
         doState.hora = hora;
         localStorage.setItem('do_hora', hora);
         if (hora !== 'missa_gregorian') {
@@ -10099,7 +10682,25 @@ function setupEventListeners() {
             localStorage.removeItem('do_officiumKey');
         }
         closeModals();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
+    });
+
+    $(document).on('click', '#btnSidebarSearchHeader, #btnSidebarGregorianSearch', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('selection');
+        closeModals();
+        if (typeof window.openGregorianSearch === 'function') {
+            window.openGregorianSearch();
+        }
+    });
+
+    $(document).on('click focus', '#doHomeSearchInput', function(e) {
+        if (typeof window.openGregorianSearch === 'function') {
+            var initialVal = $(this).val();
+            window.openGregorianSearch(initialVal);
+            $(this).blur();
+        }
     });
 
     $(document).on('click', '.bottom-nav .nav-item', function(e) {
@@ -10118,6 +10719,7 @@ function setupEventListeners() {
             doState.testFeastKey = null;
             localStorage.removeItem('do_officiumKey');
         }
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
 
@@ -10133,6 +10735,7 @@ function setupEventListeners() {
             doState.testFeastKey = null;
             localStorage.removeItem('do_officiumKey');
         }
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
 
@@ -10155,6 +10758,7 @@ function setupEventListeners() {
         localStorage.setItem('do_bible_book', bk);
         localStorage.setItem('do_bible_chapter', 1);
         localStorage.setItem('do_bible_page', 1);
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderBibleMainView();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -10167,6 +10771,7 @@ function setupEventListeners() {
         doState.bible.page = 1;
         localStorage.setItem('do_bible_chapter', ch);
         localStorage.setItem('do_bible_page', 1);
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderBibleMainView();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -10177,6 +10782,7 @@ function setupEventListeners() {
         var pg = parseInt($(this).val(), 10) || 1;
         doState.bible.page = pg;
         localStorage.setItem('do_bible_page', pg);
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: false });
         renderBibleMainView();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -10189,6 +10795,7 @@ function setupEventListeners() {
         doState.bible.page = 1;
         localStorage.setItem('do_bible_pageSize', val);
         localStorage.setItem('do_bible_page', 1);
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: false });
         renderBibleMainView();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -10200,6 +10807,7 @@ function setupEventListeners() {
         if (doState.bible.chapter > 1) {
             doState.bible.chapter--;
             doState.bible.page = 1;
+            if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
             renderBibleMainView();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -10209,6 +10817,7 @@ function setupEventListeners() {
                 doState.bible.book = prevBk.id;
                 doState.bible.chapter = prevBk.chapters;
                 doState.bible.page = 1;
+                if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
                 renderBibleMainView();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -10222,6 +10831,7 @@ function setupEventListeners() {
         if (doState.bible.chapter < bkObj.chapters) {
             doState.bible.chapter++;
             doState.bible.page = 1;
+            if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
             renderBibleMainView();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -10231,6 +10841,7 @@ function setupEventListeners() {
                 doState.bible.book = nextBk.id;
                 doState.bible.chapter = 1;
                 doState.bible.page = 1;
+                if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
                 renderBibleMainView();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -10245,6 +10856,7 @@ function setupEventListeners() {
         doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
         if (!$('#headerDropdown').hasClass('hidden')) {
             renderHeaderDropdown();
@@ -10259,6 +10871,7 @@ function setupEventListeners() {
         doState.userChangedHddMode = false;
         localStorage.removeItem('do_officiumKey');
         $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
         if (!$('#headerDropdown').hasClass('hidden')) {
             renderHeaderDropdown();
@@ -10271,6 +10884,10 @@ function setupEventListeners() {
         e.stopPropagation();
         e.stopImmediatePropagation();
         triggerHapticFeedback('medium');
+        if (doState.hora === 'gregorian_search') {
+            $('#gregorianSearchInput').focus();
+            return;
+        }
         if ($('#headerDropdown').hasClass('hidden')) {
             openHeaderDropdown();
         } else {
@@ -10309,6 +10926,7 @@ function setupEventListeners() {
             doState.calView = { year: doState.date.year(), month: doState.date.month() };
         }
         closeHeaderDropdown();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
 
@@ -10360,6 +10978,7 @@ function setupEventListeners() {
             doState.calView = { year: doState.date.year(), month: doState.date.month() };
         }
         renderHeaderDropdown();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
 
@@ -10372,6 +10991,7 @@ function setupEventListeners() {
             doState.calView = { year: doState.date.year(), month: doState.date.month() };
         }
         renderHeaderDropdown();
+        if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
 
@@ -11049,9 +11669,15 @@ function setupEventListeners() {
 // ---- Initialization ----
 $(function() {
     console.log('Divinum Officium & Missale Initialized with Recursive Section & Variable Resolver.');
-    $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
     initTheme();
     setupEventListeners();
+
+    // Initialize Router & Deep-Linking from URL (No Page Refresh)
+    if (window.OremusRouter) {
+        window.OremusRouter.init();
+    }
+
+    $('#doDateInput').val(doState.date.format('YYYY-MM-DD'));
     renderDO();
 
     // Initialize system notification channels (Android)
@@ -11076,11 +11702,12 @@ $(function() {
         window.OremusUsageTracker.init();
     }
 
-    // ── Android & Browser Back Button / History Navigation ──
+    // ── Android Native Back Button (Capacitor) ──
     function handleAppBackButton() {
-        // 1. If any modal / dropdown / sidebar / player / TOC is open, close it first
         var hasOpenModals = $('#settingsPanel').hasClass('open') ||
                             $('#doSidebar').hasClass('open') ||
+                            $('#gregorianSearchModal').hasClass('is-open') ||
+                            $('#gregorianZoomModal').hasClass('is-open') ||
                             !$('#headerDropdown').hasClass('hidden') ||
                             !$('#remoteNotificationModal').hasClass('hidden') ||
                             !$('#feedbackModal').hasClass('hidden') ||
@@ -11097,13 +11724,18 @@ $(function() {
             return true;
         }
 
-        // 2. If viewing a specific office or Bible, return to home
+        if (window.history && window.history.length > 1 && doState.hora !== 'home') {
+            window.history.back();
+            return true;
+        }
+
         if (doState.hora !== 'home') {
             doState.hora = 'home';
             doState.officiumKey = null;
             doState.testFeastKey = null;
             localStorage.removeItem('do_officiumKey');
             localStorage.setItem('do_hora', 'home');
+            if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
             renderDO();
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return true;
@@ -11121,11 +11753,6 @@ $(function() {
             }
         });
     }
-
-    // Web / Browser History popstate fallback
-    window.addEventListener('popstate', function() {
-        handleAppBackButton();
-    });
 
     // ── Automatic Reset to Home / Today after Inactivity (30 minutes) ──
     var LAST_ACTIVE_TIMESTAMP_KEY = 'do_last_active_timestamp';
@@ -11192,6 +11819,13 @@ $(function() {
 
     // Initialize TOC UI events
     initMassTocEvents();
+
+    // Check initial hash for search or specific screens
+    if (window.location.hash === '#search' && typeof window.openGregorianSearch === 'function') {
+        setTimeout(function() {
+            window.openGregorianSearch();
+        }, 150);
+    }
 });
 
 /* ═══════════════════════════════════════════════════════════════════

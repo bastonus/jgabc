@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.46",
-  "versionCode": 46,
-  "releaseDate": "2026-08-31T19:15:00Z",
-  "tagName": "v0.0.46",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.46/app-release.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.46",
-  "body": "Release v0.0.46 — Icône vectorielle personnalisée Android, Push en arrière-plan, Clic notification ouvrant la popup liée"
+  "latestVersion": "beta-0.0.47",
+  "versionCode": 47,
+  "releaseDate": "2026-09-01T00:30:00Z",
+  "tagName": "v0.0.47",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.47/app-release.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.47",
+  "body": "Release v0.0.47 — Recherche Universelle (Offices, Messes, Bible Vulgate, Chants), Lazy rendering, En-tête dynamique et harmonisation visuelle"
 }

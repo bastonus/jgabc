@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.0.3';
+const CACHE_NAME = 'oremus-pwa-v1.3.3';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [
@@ -11,6 +11,7 @@ const PRECACHE_ASSETS = [
     './manifest.webmanifest',
     './css/modern.css',
     './css/divinum_officium.css',
+    './css/gregorian_search.css',
     './jquery.min.js',
     './moment.min.js',
     './moment.easter.js',
@@ -31,6 +32,12 @@ const PRECACHE_ASSETS = [
     './do_manifest.js',
     './js/bible_mappings.js',
     './js/divinum_officium.js',
+    './js/vendor/dexie.min.js',
+    './js/vendor/flexsearch.bundle.min.js',
+    './js/gregorian_db.js',
+    './js/gregorian_search_worker.js',
+    './js/gregorian_search_ui.js',
+    './data/gregorian_index.json',
     './Caeciliae-Staffless.ttf',
     './Caeciliae-Staffless-print.ttf',
     './icon/favicon.svg',
@@ -72,8 +79,8 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch Event - Hybrid Strategy:
-// - HTML / Navigation: Network-First with Cache Fallback
-// - Static assets, Fonts, Chants & Data files: Cache-First with Network Fallback + Dynamic Cache
+// - HTML / Navigation & Scripts / CSS: Network-First with Cache Fallback
+// - Static assets, Fonts, Chants & Data files: Cache-First (ignoreSearch: true) with Network Fallback + Dynamic Cache
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
@@ -102,23 +109,19 @@ self.addEventListener('fetch', (event) => {
                     return networkResponse;
                 })
                 .catch(async () => {
-                    const cachedResponse = await caches.match(request);
+                    const cachedResponse = await caches.match(request, { ignoreSearch: true });
                     if (cachedResponse) return cachedResponse;
-                    const fallbackDoc = await caches.match('./divinum-officium.html');
+                    const fallbackDoc = await caches.match('./divinum-officium.html', { ignoreSearch: true });
                     return fallbackDoc || Response.error();
                 })
         );
         return;
     }
 
-    // Static Assets & Data files (do_data, js, css, images, fonts): Cache-First, fallback to Network + Dynamic Caching
+    // Static Assets & Data files (do_data, js, css, images, fonts)
     event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-
-            return fetch(request).then((networkResponse) => {
+        fetch(request)
+            .then((networkResponse) => {
                 if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -126,11 +129,13 @@ self.addEventListener('fetch', (event) => {
                     });
                 }
                 return networkResponse;
-            }).catch((err) => {
-                // If offline and request not cached, fail gracefully
-                return Response.error();
-            });
-        })
+            })
+            .catch(async () => {
+                // Offline fallback with ignoreSearch: true so cache hits succeed even with query strings
+                const cached = await caches.match(request, { ignoreSearch: true });
+                if (cached) return cached;
+                return new Response('', { status: 408, statusText: 'Offline' });
+            })
     );
 });
 

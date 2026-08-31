@@ -22,7 +22,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=69.0&ts=202608311235">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=70.7&ts=202609010255">
+    <link rel="stylesheet" href="css/gregorian_search.css?v=2.55&ts=202609010240">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -78,7 +79,10 @@
     <script src="patterns/pl.js"></script>
     <script src="do_manifest.js?v=20.10&ts=202608251858"></script>
     <script src="js/bible_mappings.js?v=1.0&ts=202608252254"></script>
-    <script src="js/divinum_officium.js?v=69.6&ts=202608311249"></script>
+    <script src="js/divinum_officium.js?v=70.7&ts=202609010245"></script>
+    <script src="js/vendor/dexie.min.js"></script>
+    <script src="js/gregorian_db.js?v=2.1"></script>
+    <script src="js/gregorian_search_ui.js?v=2.57&ts=202609010255"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -101,6 +105,12 @@
                         </g>
                     </svg>
                 </div>
+                <button id="btnSidebarSearchHeader" class="do-sidebar-search-btn" title="Recherche Grégorienne &amp; Universelle" aria-label="Rechercher">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
             </div>
 
             <nav class="do-sidebar-nav">
@@ -321,7 +331,55 @@
                             </span>
                         </h1>
                     </div>
+                    <!-- Barre de recherche intégrée dans l'en-tête (Ligne 1) -->
+                    <div id="gregorianSearchHeaderRow" class="gregorian-search-header-panel">
+                        <div class="gregorian-search-input-wrapper">
+                            <span class="gregorian-search-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+                            </span>
+                            <input type="text" id="gregorianSearchInput" class="gregorian-search-input" placeholder="Rechercher" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="gregorianClearSearch" class="gregorian-clear-btn hidden" aria-label="Effacer">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                            </button>
+                        </div>
+                        <div class="gregorian-header-actions">
+                            <button id="gregorianToggleViewBtn" class="gregorian-toggle-view-btn" title="Changer de vue" aria-label="Changer de vue">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <!-- Barre de filtres de catégories dans l'en-tête (Ligne 2) -->
+                <div id="gregorianFilterBar" class="gregorian-filter-bar">
+                        <button class="gregorian-filter-chip active" data-part="">Tous</button>
+                        <button class="gregorian-filter-chip" data-part="officium">Offices</button>
+                        <button class="gregorian-filter-chip" data-part="missa">Messes</button>
+                        <button class="gregorian-filter-chip" data-part="bible">Bible</button>
+                        <button class="gregorian-filter-chip" data-part="chant">Chants Grégoriens</button>
+                        <span class="gregorian-filter-separator"></span>
+                        <button class="gregorian-filter-chip" data-part="ad_libitum">Ad Libitum</button>
+                        <button class="gregorian-filter-chip" data-part="kyriale">Kyriale</button>
+                        <button class="gregorian-filter-chip" data-part="introitus">Introïts</button>
+                        <button class="gregorian-filter-chip" data-part="graduale">Graduels</button>
+                        <button class="gregorian-filter-chip" data-part="alleluia">Alléluias</button>
+                        <button class="gregorian-filter-chip" data-part="tractus">Traits</button>
+                        <button class="gregorian-filter-chip" data-part="sequentia">Séquences</button>
+                        <button class="gregorian-filter-chip" data-part="offertorium">Offertoires</button>
+                        <button class="gregorian-filter-chip" data-part="communio">Communions</button>
+                        <button class="gregorian-filter-chip" data-part="antiphona">Antiennes</button>
+                        <button class="gregorian-filter-chip" data-part="responsorium">Répons</button>
+                        <button class="gregorian-filter-chip" data-part="hymnus">Hymnes</button>
+                        <button class="gregorian-filter-chip" data-part="litaniae">Litanies</button>
+                        <span class="gregorian-filter-separator"></span>
+                        <button class="gregorian-filter-chip" data-mode="1">Mode 1</button>
+                        <button class="gregorian-filter-chip" data-mode="2">Mode 2</button>
+                        <button class="gregorian-filter-chip" data-mode="3">Mode 3</button>
+                        <button class="gregorian-filter-chip" data-mode="4">Mode 4</button>
+                        <button class="gregorian-filter-chip" data-mode="5">Mode 5</button>
+                        <button class="gregorian-filter-chip" data-mode="6">Mode 6</button>
+                        <button class="gregorian-filter-chip" data-mode="7">Mode 7</button>
+                        <button class="gregorian-filter-chip" data-mode="8">Mode 8</button>
+                    </div>
             </header>
 
             <div id="headerDropdown" class="do-header-dropdown hidden">
@@ -1168,6 +1226,22 @@
                     <button id="btnNeverNotifPrompt" class="update-btn-dismiss" style="flex:1; opacity:0.85;">Ne plus me demander</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modale Zoom de Partition Grégorienne -->
+    <div id="gregorianZoomModal" class="gregorian-zoom-modal" aria-hidden="true" inert>
+        <div class="gregorian-zoom-card">
+            <div class="gregorian-zoom-header">
+                <div class="gregorian-zoom-title" id="gregorianZoomTitle">Partition</div>
+                <button id="btnCloseGregorianZoom" class="settings-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="gregorian-zoom-body" id="gregorianZoomBody"></div>
         </div>
     </div>
 </body>

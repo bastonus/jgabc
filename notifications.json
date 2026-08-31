@@ -4,37 +4,43 @@
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.45",
+      "id": "notif-release-beta-0.0.47",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.45",
+      "minVersion": "beta-0.0.47",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise à jour",
       "icon": "sparkles",
-      "title": "Notes de version v0.0.45",
+      "title": "Notes de version v0.0.47",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les nouveautés de la v0.0.45 : Sommaire interactif de la Messe, gestion de la navigation Retour, réinitialisation automatique après inactivité, rétablissement du Dernier Évangile et corrections liturgiques.",
-      "cancelsNotifications": ["notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les nouveautés de la v0.0.47 : Recherche universelle ultra-rapide (Offices, Messes, Bible Vulgate, Chants), rendu GABC différé avec modes Grille & Ligne, harmonisation de l'en-tête et notifications push avec icône personnalisée.",
+      "cancelsNotifications": ["notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus v0.0.45 : Sommaire de Messe, Dernier Évangile & Correctifs",
+        "text": "Oremus v0.0.47 : Recherche Universelle, Grégorien & En-tête Dynamique",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (v0.0.45)",
-        "subtitle": "Sommaire interactif & Évolutions liturgiques",
+        "title": "Notes de Version (v0.0.47)",
+        "subtitle": "Recherche Universelle & Améliorations de l'En-tête",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
             "icon": "check",
-            "title": "Nouveautés et Améliorations de la v0.0.45",
-            "content": "<ul><li><strong>Sommaire interactif de la Messe :</strong> Accès instantané aux 4 grandes étapes de la célébration avec ScrollSpy en temps réel.</li><li><strong>Dernier Évangile :</strong> Prologue de Saint Jean (1:1-14) réinséré intégralement dans la conclusion de l'Ordinaire en latin et français.</li><li><strong>Navigation & Ergonomie :</strong> Prise en charge native du bouton Retour Android/navigateur et réinitialisation automatique sur le jour courant après 30 min d'inactivité.</li><li><strong>Moteur Audio :</strong> Fermeture par glissement vers le bas (swipe down), bouton de vitesse rapide en un clic et son enrichi.</li><li><strong>Calendrier & Propres :</strong> Traductions françaises complétées (Toussaint, Saintes Reliques, St Martin Iᵉʳ, Noël) et déduplication des fêtes.</li></ul>"
+            "title": "Nouveautés de la v0.0.47",
+            "content": "<ul><li><strong>Recherche Universelle & Instantanée (< 2 ms) :</strong> Indexation complète des Offices, des 566 Messes avec leurs propres, des 73 livres de la Vulgate latine et de tous les chants grégoriens.</li><li><strong>Modes Grille & Ligne :</strong> Affichage en grille carrée (1:1) ou en liste compacte avec lazy rendering des partitions centré sur la section recherchée.</li><li><strong>Filtres & Pastilles :</strong> Filtrage par catégories liturgiques (Introïts, Graduels, Alléluias, Traits, Séquences, Offertoires, Communions, Antiennes, Répons, Hymnes, Modes 1-8, Ad Libitum, Kyriale) avec débordement fluide et arrondi 10px.</li><li><strong>Isolation par langue :</strong> Recherche stricte dans la langue de l'application sans pollution par d'autres langues.</li><li><strong>En-tête & Barre de recherche :</strong> Flèche déroulante collée au titre court et verrouillée sur la même ligne pour les titres longs, barre d'accueil harmonisée à 38px/10px.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "info",
+            "title": "Rappels des nouveautés de la v0.0.46",
+            "content": "<ul><li><strong>Sommaire interactif de la Messe :</strong> Accès instantané aux 4 grandes étapes de la célébration avec ScrollSpy en temps réel.</li><li><strong>Dernier Évangile :</strong> Prologue de Saint Jean (1:1-14) réinséré intégralement dans la conclusion de l'Ordinaire en latin et français.</li><li><strong>Notifications Push & Icône :</strong> Push en arrière-plan et icône vectorielle personnalisée (logo Oremus) dans la barre d'état Android.</li><li><strong>Navigation & Ergonomie :</strong> Prise en charge native du bouton Retour Android/navigateur et réinitialisation automatique après inactivité.</li></ul>"
           },
           {
             "type": "callout",

@@ -48,6 +48,15 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build Gregorian Search Index & Chants
+        run: |
+          python tools/extract_gregobase.py --compile-local
+
       - name: Install npm dependencies
         run: npm install
 

@@ -1,0 +1,17 @@
+services:
+  gregobase-db:
+    image: mariadb:10.11
+    container_name: oremus_gregobase_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: oremus_root_pass
+      MYSQL_DATABASE: gregobase
+      MYSQL_USER: oremus
+      MYSQL_PASSWORD: oremus_greg_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./gregobase_data:/var/lib/mysql
+      # Placez gregobase_online.sql dans tools/ pour import automatique à l'initialisation :
+      - ./gregobase_online.sql:/docker-entrypoint-initdb.d/01_gregobase_online.sql:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci

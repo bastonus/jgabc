@@ -1,0 +1,1263 @@
+/* =========================================================================
+   Oremus - gregorian_search.css
+   Vue de Recherche Universelle (Offices, Messes, Pièces Grégoriennes)
+   ========================================================================= */
+
+/* Intégration du Header Oremus en mode recherche */
+#gregorianSearchHeaderRow,
+#gregorianFilterBar {
+    display: none !important;
+}
+
+body.is-search-mode .header-title-area,
+body.is-search-mode #headerDropdownToggle,
+body.is-search-mode .header-dropdown-toggle,
+body.is-search-mode #headerDropdown {
+    display: none !important;
+}
+
+body.is-search-mode .do-top-header {
+    padding-top: max(12px, calc(12px + env(safe-area-inset-top, 0px))) !important;
+    padding-bottom: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+}
+
+@media (min-width: 900px) {
+    body.is-search-mode .do-top-header {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+    }
+}
+
+body.is-search-mode .do-top-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+body.is-search-mode .do-mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: var(--background-highlight) !important;
+    border: none !important;
+    color: var(--text-secondary) !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transition: all 0.18s ease !important;
+}
+
+body.is-search-mode .do-mobile-menu-btn:hover {
+    color: var(--primary-color) !important;
+    background: rgba(var(--primary-color-rgb), 0.15) !important;
+}
+
+body.is-search-mode #gregorianSearchHeaderRow {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+body.is-search-mode #gregorianFilterBar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: auto !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: 2px !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+@media (min-width: 900px) {
+    body.is-search-mode #gregorianFilterBar {
+        margin-left: -24px !important;
+        margin-right: -24px !important;
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+    }
+}
+
+body.is-search-mode #gregorianFilterBar::-webkit-scrollbar {
+    display: none !important;
+}
+
+.gregorian-filter-separator {
+    display: inline-block;
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 3px;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .gregorian-filter-separator {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+/* Conteneur principal de la page de recherche */
+.gregorian-search-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+    animation: fadeIn 0.22s ease;
+}
+
+/* Panneau de recherche et contrôles */
+.gregorian-search-header-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.gregorian-search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.gregorian-search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary, #94a3b8);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.18s ease;
+}
+
+.gregorian-search-input-wrapper:focus-within .gregorian-search-icon {
+    color: var(--primary-color, #c96b63);
+}
+
+.gregorian-search-input {
+    width: 100%;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: var(--background-highlight, #141414);
+    color: var(--text-primary, #f8fafc);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    padding: 0 34px 0 36px;
+    outline: none;
+    transition: background 0.18s ease, color 0.18s ease;
+    box-sizing: border-box;
+    box-shadow: none;
+}
+
+.gregorian-search-input:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: var(--background-highlight, #141414);
+}
+
+.gregorian-search-input::placeholder {
+    color: var(--text-secondary, #94a3b8);
+    opacity: 0.8;
+}
+
+.gregorian-clear-btn {
+    position: absolute;
+    right: 9px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary, #94a3b8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.gregorian-clear-btn:hover {
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+}
+
+.gregorian-clear-btn.hidden {
+    display: none;
+}
+
+/* Actions Header */
+.gregorian-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.gregorian-toggle-view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 10px;
+    border: none;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+    box-shadow: none;
+    flex-shrink: 0;
+}
+
+.gregorian-toggle-view-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15);
+    color: var(--primary-color, #c96b63);
+    border: none;
+}
+
+.gregorian-toggle-view-btn:active {
+    transform: scale(0.95);
+}
+
+[data-theme="light"] .gregorian-toggle-view-btn {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+    border: none;
+}
+
+/* Barre de filtres (Scrollable) */
+.gregorian-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 2px 2px 4px 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.gregorian-filter-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.gregorian-filter-chip {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary, #94a3b8);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.gregorian-filter-chip:hover {
+    color: var(--text-primary, #f8fafc);
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15);
+}
+
+.gregorian-filter-chip.active {
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+/* Barre de métadonnées */
+.gregorian-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-tertiary, #64748b);
+}
+
+.gregorian-meta-bar #gregorianTotalBadge {
+    background: var(--background-surface, #0a0a0a);
+    color: var(--text-secondary, #94a3b8);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Conteneur de résultats */
+.gregorian-results {
+    transition: all 0.2s ease;
+}
+
+/* =========================================================================
+   Mode Grille (is-grid) : Tuiles adaptatives (2 sur mobile, 3 à 6 sur desktop)
+   ========================================================================= */
+.gregorian-results.is-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+@media (min-width: 600px) {
+    .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (min-width: 900px) {
+    .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+        gap: 18px;
+    }
+}
+
+.gregorian-results.is-grid .gregorian-card {
+    background: var(--background-surface);
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    aspect-ratio: 1 / 1;
+    transition: all 0.18s ease;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden !important;
+    contain: layout paint;
+    cursor: pointer;
+    text-align: left;
+}
+
+.gregorian-results.is-grid .gregorian-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    border-color: transparent !important;
+    transform: none;
+    box-shadow: none;
+}
+
+.gregorian-results.is-grid .gregorian-card:active {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
+}
+
+.gregorian-results.is-grid .gregorian-card-header {
+    margin-bottom: 12px;
+    flex-shrink: 0;
+    min-height: 20px;
+}
+
+.gregorian-results.is-grid .gregorian-card-incipit {
+    font-family: 'Libre Baskerville', 'Crimson Text', serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    transition: color 0.18s ease;
+    margin-bottom: 0;
+    white-space: normal;
+    display: block;
+    overflow: visible;
+    text-overflow: unset;
+    word-break: break-word;
+    text-align: left;
+}
+
+.gregorian-results.is-grid .gregorian-card:hover .gregorian-card-incipit {
+    color: var(--primary-color);
+}
+
+.gregorian-results.is-grid .gregorian-card-source {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-top: 2px;
+    text-align: left;
+}
+
+/* Plafonnement du titre avec ... UNIQUEMENT si la carte contient un extrait de recherche */
+.gregorian-results.is-grid .gregorian-card.has-match-snippet .gregorian-card-header {
+    margin-bottom: 6px;
+}
+
+.gregorian-results.is-grid .gregorian-card.has-match-snippet .gregorian-card-incipit {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word !important;
+    max-height: 2.6em;
+}
+
+.gregorian-results.is-grid .gregorian-card.has-match-snippet .gregorian-text-preview {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.gregorian-results.is-grid .gregorian-card.has-match-snippet .gregorian-text-preview p {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin-bottom: 0;
+}
+
+/* Aperçu sur le MÊME fond que la carte (transparent, sans bordure ni encart séparé) */
+.gregorian-results.is-grid .gregorian-score-container {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 4px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden !important;
+    contain: paint;
+    position: relative;
+    cursor: pointer;
+    -webkit-mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
+}
+
+.gregorian-results.is-grid .gregorian-score-container svg {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
+    overflow: hidden !important;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.96;
+}
+
+.gregorian-results.is-grid .gregorian-skeleton {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.gregorian-score-loader {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 36px;
+    pointer-events: none;
+    padding-top: 16px;
+    box-sizing: border-box;
+}
+
+.gregorian-skeleton-staff {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 9.5px;
+}
+
+.gregorian-staff-line {
+    width: 100%;
+    height: 1.8px;
+    border-radius: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: do-pulse 1.4s ease infinite;
+}
+
+[data-theme="light"] .gregorian-staff-line {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.05) 25%,
+        rgba(0, 0, 0, 0.18) 50%,
+        rgba(0, 0, 0, 0.05) 75%
+    );
+    background-size: 200% 100%;
+}
+
+.gregorian-score-container svg {
+    animation: fadeIn 0.22s ease;
+}
+
+/* =========================================================================
+   Aperçu du texte latin liturgique pour les Offices, Messes, Bible & Chants
+   ========================================================================= */
+.gregorian-text-preview,
+.gregorian-text-preview *,
+.gregorian-text-preview p,
+.gregorian-text-preview div,
+.gregorian-text-preview span,
+.gregorian-text-preview .do-dialog-line,
+.gregorian-text-preview .do-resp-line,
+.gregorian-text-preview .do-text-block,
+.gregorian-text-preview .do-rubric-inline,
+.gregorian-text-preview .rubric {
+    text-align: left !important;
+    text-align-last: left !important;
+    text-justify: none !important;
+    -webkit-hyphens: none !important;
+    -moz-hyphens: none !important;
+    -ms-hyphens: none !important;
+    hyphens: none !important;
+    word-spacing: normal !important;
+    letter-spacing: normal !important;
+}
+
+.gregorian-text-preview {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--text-primary, #e6edf3);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    word-break: normal;
+    user-select: none;
+    text-align: left !important;
+}
+
+.gregorian-text-preview p {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    color: var(--text-primary, #e6edf3);
+    text-align: left !important;
+}
+
+.gregorian-text-preview .do-dialog-line,
+.gregorian-text-preview .do-resp-line {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    display: block;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    color: var(--text-primary, #e6edf3);
+    text-align: left !important;
+}
+
+.gregorian-text-preview .do-resp-sym,
+.gregorian-text-preview .do-resp-sym.V,
+.gregorian-text-preview .do-resp-sym.R,
+.gregorian-text-preview .do-resp-sym.S,
+.gregorian-text-preview .do-resp-sym.P,
+.gregorian-text-preview .do-resp-sym.M,
+.gregorian-text-preview .do-resp-sym.C {
+    font-size: 1.02em;
+    font-weight: normal !important;
+    font-family: 'LiturgicalSymbols', 'Crimson Text', 'Georgia', serif !important;
+    font-style: normal;
+    margin-right: 0.25em;
+    color: var(--primary-color, #c96b63) !important;
+    display: inline;
+}
+
+.gregorian-text-preview .do-cross,
+.gregorian-text-preview .do-asterisk {
+    color: var(--primary-color, #c96b63) !important;
+    font-family: 'LiturgicalSymbols', serif !important;
+}
+
+.gregorian-text-preview .do-bible-vnum,
+.gregorian-text-preview .do-verse-num {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--primary-color, #c96b63) !important;
+    vertical-align: baseline;
+    margin-right: 0.25em;
+    margin-left: 0.15em;
+}
+
+.gregorian-text-preview .do-rubric-inline,
+.gregorian-text-preview .rubric {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    color: var(--primary-color, #c96b63) !important;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin-bottom: 3px;
+    display: block;
+    text-align: left !important;
+}
+
+.gregorian-text-preview .do-source-ref {
+    color: var(--primary-color, #c96b63) !important;
+    font-style: italic;
+    font-size: 0.82rem;
+    margin-right: 4px;
+}
+
+.gregorian-text-preview .drop-cap,
+.gregorian-text-preview .do-initial {
+    font-size: 1.35em;
+    font-weight: 700;
+    line-height: 0.85;
+    color: var(--primary-color, #c96b63) !important;
+    font-family: 'Crimson Text', 'Libre Baskerville', serif !important;
+    margin-right: 1px;
+    vertical-align: baseline;
+}
+
+.gregorian-text-preview mark.search-highlight,
+.gregorian-card-incipit mark.search-highlight,
+mark.search-highlight {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.28) !important;
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+[data-theme="light"] .gregorian-text-preview mark.search-highlight,
+[data-theme="light"] .gregorian-card-incipit mark.search-highlight,
+[data-theme="light"] mark.search-highlight {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18) !important;
+    color: var(--primary-color, #a8423a) !important;
+}
+
+/* En mode Grille (tuiles carrées) */
+.gregorian-results.is-grid .gregorian-text-preview {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.92;
+    padding-top: 0;
+    -webkit-mask-image: linear-gradient(to bottom, #000 74%, rgba(0, 0, 0, 0.3) 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 74%, rgba(0, 0, 0, 0.3) 90%, transparent 100%);
+}
+
+/* En mode grille, masquer les éléments secondaires pour garder uniquement Titre + Aperçu */
+.gregorian-results.is-grid .gregorian-card-badges,
+.gregorian-results.is-grid .gregorian-card-source,
+.gregorian-results.is-grid .gregorian-card-actions {
+    display: none !important;
+}
+
+/* =========================================================================
+   Mode Liste (is-list) : Même style épuré que la liste de sélection (.hdd-item-card)
+   ========================================================================= */
+.gregorian-results.is-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+}
+
+.gregorian-results.is-list .gregorian-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 2px;
+    box-sizing: border-box;
+}
+
+.gregorian-results.is-list .gregorian-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    transform: none;
+}
+
+.gregorian-results.is-list .gregorian-card-header {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+}
+
+.gregorian-results.is-list .gregorian-card-titles {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gregorian-results.is-list .gregorian-card-incipit {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+    font-weight: 400;
+    flex: 1;
+    min-width: 0;
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.gregorian-results.is-list .gregorian-card-source {
+    display: none !important;
+}
+
+.gregorian-results.is-list .gregorian-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.gregorian-results.is-list .gregorian-badge-part,
+.gregorian-results.is-list .gregorian-badge-mode {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-secondary, #94a3b8) !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0.75;
+    margin-left: 8px;
+}
+
+/* En mode liste, masquer aperçus et actions superflus */
+.gregorian-results.is-list .gregorian-score-container,
+.gregorian-results.is-list .gregorian-text-preview,
+.gregorian-results.is-list .gregorian-card-middle,
+.gregorian-results.is-list .gregorian-card-actions {
+    display: none !important;
+}
+
+/* Éléments communs aux cartes */
+.gregorian-card-officium,
+.gregorian-card-missa,
+.gregorian-card-bible {
+    cursor: pointer;
+}
+
+
+
+.hdd-color-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    min-height: 7px;
+    max-width: 7px;
+    max-height: 7px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50% !important;
+    margin-right: 6px;
+    vertical-align: 0.12em;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    line-height: 1;
+    box-shadow: none !important;
+}
+.hdd-color-dot.green { background-color: #10b981; }
+.hdd-color-dot.white { background-color: #f1f5f9; }
+.hdd-color-dot.red { background-color: var(--primary-color, #c96b63); }
+.hdd-color-dot.violet { background-color: #a855f7; }
+.hdd-color-dot.black { background-color: #64748b; }
+
+.gregorian-card-middle {
+    flex: 1;
+    min-height: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    color: var(--text-tertiary, #64748b);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin: 6px 0;
+    line-height: 1.35;
+}
+
+.gregorian-results.is-list .gregorian-card-middle {
+    display: none !important;
+}
+
+.gregorian-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.gregorian-card-titles {
+    flex: 1;
+    min-width: 0;
+}
+
+.gregorian-card-incipit {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary, #f8fafc);
+    line-height: 1.25;
+    margin-bottom: 3px;
+    white-space: normal;
+    display: block;
+    overflow: visible;
+    text-overflow: unset;
+    word-break: break-word;
+    transition: color 0.18s ease;
+}
+
+.gregorian-card:hover .gregorian-card-incipit {
+    color: var(--primary-color, #c96b63);
+}
+
+.gregorian-card-source {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-tertiary, #64748b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gregorian-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.gregorian-badge-part {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
+    color: var(--primary-color, #c96b63);
+}
+
+.gregorian-badge-mode {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary, #94a3b8);
+}
+
+@keyframes gregorian-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Actions */
+.gregorian-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gregorian-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 8px;
+    border: none;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary, #94a3b8);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.gregorian-action-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
+    color: var(--primary-color, #c96b63);
+}
+
+.gregorian-action-btn.is-playing {
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+}
+
+/* Surlignage et rubriques dans les partitions Exsurge SVG */
+svg.Exsurge text .rubric,
+svg.Exsurge tspan.rubric,
+svg.Exsurge text.lyric tspan.rubric,
+svg.Exsurge .rubric {
+    fill: var(--primary-color, #c96b63) !important;
+    font-weight: 700;
+}
+
+[data-theme="light"] svg.Exsurge text .rubric,
+[data-theme="light"] svg.Exsurge tspan.rubric,
+[data-theme="light"] svg.Exsurge text.lyric tspan.rubric,
+[data-theme="light"] svg.Exsurge .rubric {
+    fill: var(--primary-color, #c96b63) !important;
+    font-weight: 700;
+}
+
+/* Empty State */
+.gregorian-empty-state {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 260px;
+    padding: 48px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-secondary, #94a3b8);
+    box-sizing: border-box;
+}
+
+.gregorian-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary, #64748b);
+    background: none;
+    border: none;
+    margin-bottom: 6px;
+}
+
+.gregorian-empty-state h3 {
+    font-family: 'Cinzel', 'Crimson Text', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #f1f5f9);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.gregorian-empty-state p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.88rem;
+    color: var(--text-tertiary, #94a3b8);
+    max-width: 380px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Modale Zoom de Partition */
+.gregorian-zoom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.22s ease;
+}
+
+.gregorian-zoom-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.gregorian-zoom-card {
+    background: var(--background-surface, #0a0a0a);
+    border: 1px solid var(--border-color, transparent);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.gregorian-zoom-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.gregorian-zoom-title {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary, #f8fafc);
+}
+
+.gregorian-zoom-body {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+    background: var(--background-highlight, #141414);
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+[data-theme="light"] .gregorian-zoom-body {
+    background: #ffffff;
+}
+
+.gregorian-zoom-body svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Support Thème Clair (Light Theme) */
+[data-theme="light"] .gregorian-search-input,
+[data-theme="light"] .gregorian-card,
+[data-theme="light"] .gregorian-zoom-card,
+[data-theme="light"] .gregorian-toggle-view-btn,
+[data-theme="light"] .gregorian-filter-chip {
+    background: var(--background-surface, #f0f2f6);
+    color: var(--text-primary, #111317);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .gregorian-search-input:focus {
+    background: #ffffff;
+}
+
+[data-theme="light"] .gregorian-action-btn,
+[data-theme="light"] .gregorian-meta-bar #gregorianTotalBadge,
+[data-theme="light"] .gregorian-badge-mode {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+}
+
+[data-theme="light"] .gregorian-card:hover {
+    background: var(--background-highlight, #e2e6ee);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .gregorian-filter-chip.active {
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+}
+
+/* Masquer le chevron du calendrier dans l'en-tête en mode recherche */
+body.is-search-mode #headerDropdownToggle,
+body.is-search-mode .header-dropdown-toggle {
+    display: none !important;
+}
+
+/* Sentinel & Grille Squelette de défilement infini */
+.gregorian-scroll-sentinel {
+    padding: 12px 0 24px 0;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative !important;
+    overflow: hidden !important;
+    contain: layout paint !important;
+}
+
+.gregorian-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative !important;
+    overflow: hidden !important;
+    contain: layout paint !important;
+}
+
+@media (min-width: 600px) {
+    .gregorian-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (min-width: 900px) {
+    .gregorian-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .gregorian-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .gregorian-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+        gap: 18px;
+    }
+}
+
+.gregorian-skeleton-card {
+    aspect-ratio: 1 / 1;
+    padding: 14px 16px;
+    background: var(--background-surface, #0f1013);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    pointer-events: none;
+    position: relative !important;
+    overflow: hidden !important;
+    contain: layout paint !important;
+}
+
+.gregorian-skeleton-card.is-list-skel {
+    aspect-ratio: auto;
+    min-height: 52px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+}
+
+.gregorian-title-skeleton {
+    height: 20px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.gregorian-skeleton-text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.gregorian-text-skeleton {
+    height: 11px;
+    border-radius: 3px;
+}
+
+.gregorian-text-skeleton.w95 { width: 95%; }
+.gregorian-text-skeleton.w85 { width: 85%; }
+.gregorian-text-skeleton.w80 { width: 80%; }
+.gregorian-text-skeleton.w60 { width: 60%; }
+.gregorian-text-skeleton.w50 { width: 50%; }
+
+[data-theme="light"] .gregorian-skeleton-card {
+    background: var(--background-surface, #ffffff);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.gregorian-scroll-end {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-tertiary, #64748b);
+    opacity: 0.7;
+    padding: 16px;
+    text-align: center;
+}

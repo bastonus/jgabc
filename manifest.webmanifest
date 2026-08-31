@@ -37,5 +37,21 @@
       "sizes": "180x180",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sainte Messe",
+      "short_name": "Missa",
+      "description": "Accéder directement à la Sainte Messe du jour",
+      "url": "./divinum-officium.html#missa",
+      "icons": [{ "src": "icon/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Recherche Grégorienne",
+      "short_name": "Recherche",
+      "description": "Rechercher des chants et partitions GABC",
+      "url": "./divinum-officium.html#search",
+      "icons": [{ "src": "icon/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
