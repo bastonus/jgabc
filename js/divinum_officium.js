@@ -5528,6 +5528,11 @@ function openBible(bookId, chapterNum, pageNum) {
 function closeModals() {
     $('#settingsPanel, #doSidebar').removeClass('open active anim-overshoot').css('transform', '');
     $('#settingsBackdrop, #sidebarBackdrop').removeClass('open active').css({ 'opacity': '', 'display': '' });
+    $('#remoteNotificationModalBackdrop, #remoteNotificationModal').addClass('hidden');
+    $('#feedbackModalBackdrop, #feedbackModal').addClass('hidden');
+    $('#pwaInstallModalBackdrop, #pwaInstallModal').addClass('hidden');
+    $('#appIconModalBackdrop, #appIconModal').addClass('hidden');
+    $('#notificationPromptModalBackdrop, #notificationPromptModal').addClass('hidden');
     $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
@@ -8411,6 +8416,11 @@ function showUpdateBanner(release) {
     var $banner = $('#appUpdateBanner');
     $('#updateDownloadProgressWrapper').addClass('hidden');
     $('#btnDownloadUpdate').removeClass('hidden');
+
+    // Hide competing banners (one notification at a time)
+    $('#appRemoteNotificationBanner').removeClass('is-visible');
+    $('#appInstallBanner').removeClass('is-visible');
+
     $banner.addClass('is-visible');
     setTimeout(updateHeaderDropdownPosition, 300);
 }
@@ -8424,6 +8434,13 @@ function hideUpdateBanner() {
             sessionStorage.setItem('do_dismissed_update_' + window._currentUpdateReleaseTag, 'true');
         } catch (e) {}
     }
+
+    // When update banner is closed, allow next pending remote notification to display if any
+    setTimeout(function() {
+        if (window.OremusNotifications && typeof window.OremusNotifications.check === 'function') {
+            window.OremusNotifications.check(false);
+        }
+    }, 400);
 }
 
 function showUpdateModal(release) {
@@ -8707,6 +8724,11 @@ function showInstallBanner() {
         }
     } catch (e) {}
 
+    // Strict single banner rule: if update banner or remote notification banner is active, do not display install banner
+    if ($('#appUpdateBanner').hasClass('is-visible') || $('#appRemoteNotificationBanner').hasClass('is-visible')) {
+        return;
+    }
+
     var $banner = $('#appInstallBanner');
     if (!$banner.length) return;
 
@@ -8954,6 +8976,15 @@ var OremusNotifications = (function() {
 
     function showBanner(notif) {
         if (!notif) return;
+
+        // Strict single banner rule: if update banner is currently visible, do not stack remote banner
+        if ($('#appUpdateBanner').hasClass('is-visible')) {
+            return;
+        }
+
+        // Hide lower priority install banner
+        $('#appInstallBanner').removeClass('is-visible');
+
         currentBannerNotif = notif;
         var bannerData = notif.banner || {};
         var $banner = $('#appRemoteNotificationBanner');
