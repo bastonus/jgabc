@@ -8851,15 +8851,25 @@ var OremusNotifications = (function() {
     }
 
     function fetchFeed(forceRefresh) {
-        var url = GITHUB_FEED_URL + '?_ts=' + (forceRefresh ? Date.now() : Math.floor(Date.now() / 60000));
-        
-        return fetch(url, {
+        var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/contents/notifications.json?_ts=' + Date.now();
+        var rawUrl = GITHUB_FEED_URL + '?_ts=' + Date.now();
+
+        return fetch(apiUrl, {
             cache: 'no-cache',
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Accept': 'application/vnd.github.v3.raw' }
         })
         .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (!res.ok) throw new Error('API HTTP ' + res.status);
             return res.json();
+        })
+        .catch(function(apiErr) {
+            return fetch(rawUrl, {
+                cache: 'no-cache',
+                headers: { 'Accept': 'application/json' }
+            }).then(function(res) {
+                if (!res.ok) throw new Error('Raw HTTP ' + res.status);
+                return res.json();
+            });
         })
         .catch(function(err) {
             console.warn('[RemoteNotifications] GitHub fetch failed, attempting local fallback:', err);
