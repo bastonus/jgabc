@@ -1,46 +1,40 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:41:00Z",
+  "updatedAt": "2026-08-31T14:43:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.41",
+      "id": "notif-release-beta-0.0.42",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.41",
+      "minVersion": "beta-0.0.42",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise a jour",
       "icon": "sparkles",
-      "title": "Notes de version beta-0.0.41",
+      "title": "Notes de version beta-0.0.42",
       "subtitle": "Votre application Oremus a ete mise a jour",
-      "message": "Decouvrez les dernieres ameliorations : categories de notifications Android configurables, bouton de fermeture retabli et recherche automatique des releases au demarrage.",
-      "cancelsNotifications": ["notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Decouvrez les correctifs de la beta-0.0.42 : affichage exclusif d'un seul bandeau a la fois, canaux de notifications Android et stabilite du bouton de fermeture.",
+      "cancelsNotifications": ["notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus est a jour (beta-0.0.41) : Nouveautes et categories",
+        "text": "Oremus est a jour (beta-0.0.42) : Correctifs et nouveautes",
         "tag": "Nouveautes",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (beta-0.0.41)",
-        "subtitle": "Nouveautes, correctifs detailles et retours communautaires",
+        "title": "Notes de Version (beta-0.0.42)",
+        "subtitle": "Correctifs de stabilite et ameliorations",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
-            "icon": "bell",
-            "title": "Categories de notifications Android",
-            "content": "Creation des canaux officiels Android configurables dans les parametres systeme et dans l'application : Mises a jour, Annonces & Canal officiel, Fetes liturgiques & Priere."
-          },
-          {
-            "type": "card",
             "icon": "check",
-            "title": "Correctifs de la version beta-0.0.41",
-            "content": "<ul><li><strong>Bouton de fermeture :</strong> Retablissement complet du bouton de fermeture sur le bandeau de mise a jour.</li><li><strong>Recherche automatique :</strong> Lancement instantane de la recherche de mise a jour des l'ouverture de l'application sans action manuelle.</li><li><strong>Bouton direct parametres Android :</strong> Acces rapide a la configuration des notifications du systeme Android.</li></ul>"
+            "title": "Correctifs de la version beta-0.0.42",
+            "content": "<ul><li><strong>Affichage unique :</strong> Regle stricte empechant la superposition de multiples bandeaux. Seul le bandeau le plus prioritaire est visible a l'ecran.</li><li><strong>Conditionnement des notes :</strong> Les notes de version n'apparaissent desormais qu'une fois la mise a jour reellement installee sur votre appareil.</li><li><strong>Categories Android :</strong> Gestion complete des canaux de notifications dans les parametres Android et dans l'application.</li><li><strong>Bouton de fermeture :</strong> Fonctionnement fluide et sans blocage.</li></ul>"
           },
           {
             "type": "callout",
