@@ -1,8 +1,56 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T12:58:00Z",
+  "updatedAt": "2026-08-31T14:16:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-test-live-01",
+      "enabled": true,
+      "priority": 999,
+      "platforms": ["all"],
+      "frequency": "always",
+      "style": "liturgical",
+      "badge": "Test",
+      "icon": "bell",
+      "title": "Notification de Test",
+      "subtitle": "Canal distant GitHub opérationnel",
+      "message": "Ceci est une notification de test diffusée en direct via le canal GitHub. Le système de réception, le bandeau supérieur et les modaux fonctionnent correctement.",
+      "banner": {
+        "show": true,
+        "text": "Notification de test en direct depuis GitHub",
+        "tag": "Test",
+        "actionLabel": "Ouvrir",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notification de Test Oremus",
+        "subtitle": "Test de diffusion en direct",
+        "icon": "bell",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "sparkles",
+            "title": "Canal GitHub distant",
+            "content": "La notification a été récupérée avec succès depuis le dépôt GitHub sans nécessiter de mise à jour binaire."
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Statut du système",
+            "content": "Le bandeau supérieur, les alertes et les modaux sont parfaitement opérationnels."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Fermer le test",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.39",
       "enabled": true,
