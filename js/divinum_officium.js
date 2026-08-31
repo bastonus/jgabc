@@ -8116,7 +8116,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.38';
+var CURRENT_APP_VERSION = 'beta-0.0.39';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

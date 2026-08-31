@@ -1,32 +1,32 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T12:43:00Z",
+  "updatedAt": "2026-08-31T12:58:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.38",
+      "id": "notif-release-beta-0.0.39",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.38",
+      "minVersion": "beta-0.0.39",
       "frequency": "once",
       "style": "liturgical",
-      "badge": "Mise à jour beta-0.0.38",
+      "badge": "Mise à jour beta-0.0.39",
       "icon": "sparkles",
-      "title": "Notes de version beta-0.0.38",
+      "title": "Notes de version beta-0.0.39",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Voici les nouveautés, les correctifs détaillés et les évolutions à venir suite à vos nombreux retours.",
-      "cancelsNotifications": ["notif-oremus-welcome-v1"],
+      "message": "Découvrez les dernières améliorations apportées à Oremus : correction du défilement dans les popups, harmonisation des boutons de fermeture et canal de notifications.",
+      "cancelsNotifications": ["notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus est à jour (beta-0.0.38) : Nouveautés et correctifs",
+        "text": "Oremus est à jour (beta-0.0.39) : Nouveautés et correctifs",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (beta-0.0.38)",
+        "title": "Notes de Version (beta-0.0.39)",
         "subtitle": "Nouveautés, correctifs détaillés & retours communautaires",
         "icon": "sparkles",
         "wrappers": [
@@ -38,15 +38,15 @@
           },
           {
             "type": "card",
-            "icon": "bell",
-            "title": "Canal d'Alertes & Notifications en Direct",
-            "content": "Système de notifications en temps réel depuis GitHub, intégré avec fluidité au bandeau supérieur et sous forme d'alertes iOS et Android."
+            "icon": "check",
+            "title": "Correctifs & Fixes de la version beta-0.0.39",
+            "content": "<ul><li><strong>Défilement dans les popups :</strong> Correction complète du scroll vertical dans les fenêtres d'information et de changelog en plein écran sur mobile.</li><li><strong>Boutons de fermeture harmonisés :</strong> Alignement du style de tous les boutons de fermeture sur celui du panneau des paramètres (dimensions, coins arrondis, couleur et icône).</li><li><strong>Isolation des gestes tactiles :</strong> Défilement fluide sans conflit avec les gestes de balayage globaux.</li><li><strong>Stabilité et détection :</strong> Amélioration de la détection d'installation et de mise à jour.</li></ul>"
           },
           {
             "type": "card",
-            "icon": "check",
-            "title": "Correctifs & Fixes Détaillés",
-            "content": "<ul><li><strong>Correctif du bandeau d'installation :</strong> Résolution des décalages d'affichage et meilleure détection PWA / iOS / Android.</li><li><strong>Stabilité des gestes tactiles :</strong> Optimisation du tiroir latéral (sidebar) et du glissement bilingue synchronisé.</li><li><strong>Rendu visuel :</strong> Suppression des bordures superflues et harmonisation des contrastes en mode sombre.</li><li><strong>Gestion du cache :</strong> Amélioration de la persistance hors-ligne des textes liturgiques et des hymnes.</li></ul>"
+            "icon": "bell",
+            "title": "Canal d'Alertes & Notifications en Direct",
+            "content": "Système de notifications en temps réel depuis GitHub, intégré au bandeau supérieur et sous forme d'alertes adaptées iOS et Android."
           },
           {
             "type": "callout",
