@@ -4256,6 +4256,7 @@ function initDoPlayer() {
     // Restart from beginning button
     $('#playerBtnRestart').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('medium');
         if (!_doCurrentScore) return;
         if (window.stopScore) window.stopScore();
         if (_doCurrentPlayerCard) {
@@ -4280,6 +4281,7 @@ function initDoPlayer() {
     // Play/Pause button
     $('#playerBtnPlay').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('toggle');
         if (window.Tone) {
             if (typeof Tone.start === 'function') Tone.start().catch(function(){});
             if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
@@ -4304,12 +4306,14 @@ function initDoPlayer() {
     // Close and stop player buttons
     $('#playerBtnClose, #playerBtnStop').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('light');
         closeDoPlayer();
     });
 
     // Next note button (step forward)
     $('#playerBtnNext').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('step');
         if (window.stepForward) {
             window.stepForward();
         }
@@ -4318,6 +4322,7 @@ function initDoPlayer() {
     // Transposition Pitch Down / Up (pure parameter adjustment, no auto-play)
     $('#playerPitchDown').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         if (!_doCurrentScore) return;
         var p = _doCurrentScore.defaultStartPitch;
         var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
@@ -4328,6 +4333,7 @@ function initDoPlayer() {
 
     $('#playerPitchUp').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         if (!_doCurrentScore) return;
         var p = _doCurrentScore.defaultStartPitch;
         var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
@@ -4339,6 +4345,7 @@ function initDoPlayer() {
     // Solesmes Salicus Lengthening toggle
     $('#playerBtnSolesmes').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('toggle');
         if (window.getIsUsingSolesmesLengths && window.setIsUsingSolesmesLengths) {
             var next = !window.getIsUsingSolesmesLengths();
             window.setIsUsingSolesmesLengths(next);
@@ -4349,6 +4356,7 @@ function initDoPlayer() {
     // Tempo minus / plus (10 BPM increments)
     $('#playerTempoMinus').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
         var next = Math.max(60, cur - 10);
         $('#playerTempoValue').text(next);
@@ -4358,6 +4366,7 @@ function initDoPlayer() {
 
     $('#playerTempoPlus').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         var cur = parseInt($('#playerTempoValue').text(), 10) || 150;
         var next = Math.min(300, cur + 10);
         $('#playerTempoValue').text(next);
@@ -4368,6 +4377,7 @@ function initDoPlayer() {
     // Progress bar click to seek
     $('#playerProgressBarContainer').off('click').on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('subtle');
         if (!_doCurrentPlayerCard || !_doCurrentScore) return;
         var rect = this.getBoundingClientRect();
         var clickX = e.clientX - rect.left;
@@ -4408,6 +4418,7 @@ function initDoPlayer() {
     // Delegated note + syllable click on content stream
     var NOTE_SEL = '.do-chant-card svg use[source-index], .do-chant-card svg text[source-index], .do-chant-card svg text.lyric, .do-chant-card svg text.lyric tspan, .do-chant-card svg text.dropCap, .do-chant-card svg text.dropCap tspan, .do-chant-card svg text.aboveLinesText, .do-chant-card svg text.aboveLinesText tspan';
     $('#do-content-stream').off('click', NOTE_SEL).on('click', NOTE_SEL, function(e) {
+        triggerHapticFeedback('note');
         handleChantElementClick(this, e);
     });
 
@@ -4421,10 +4432,12 @@ function initDoPlayer() {
         if (svg) {
             var nearest = findNearestChantElement(svg, e.pageX, e.pageY);
             if (nearest) {
+                triggerHapticFeedback('note');
                 handleChantElementClick(nearest, e);
                 return;
             }
         }
+        triggerHapticFeedback('light');
         switchToChantCard($card, false);
     });
 
@@ -5241,45 +5254,74 @@ function displayResult(result, vernResult) {
 
 var swipeHintTimer = null;
 
+function ensureBilingualGestureIndicator() {
+    if (!$('#doBilingualGestureIndicator').length) {
+        $('body').append(
+            '<div id="doBilingualGestureIndicator" aria-hidden="true">' +
+                '<div class="do-gesture-glow-bar"></div>' +
+            '</div>'
+        );
+    }
+}
+
 function startBilingualSwipeHint() {
     if ($(window).width() > 768) return;
-    if (localStorage.getItem('do_swipe_hint_done')) return;
 
-    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none');
-    if (!isBilingual) return;
+    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none' && doState.hora !== 'home');
+    if (!isBilingual || doState.mobileLang === 'vern') {
+        stopBilingualSwipeHint();
+        return;
+    }
 
     if (swipeHintTimer) {
         clearInterval(swipeHintTimer);
         swipeHintTimer = null;
     }
 
-    // Initial hint after 1.2s
-    setTimeout(function() {
-        playBilingualSwipeHint();
-    }, 1200);
+    ensureBilingualGestureIndicator();
 
-    // Repeat every 5.5s until user swipes
+    // Initial 3-pulse hint after 1.0s
+    setTimeout(function() {
+        if (doState.mobileLang === 'la') {
+            playBilingualSwipeHint();
+        }
+    }, 1000);
+
+    // Repeat single swipe hint every 8s if user has not switched to translation
     swipeHintTimer = setInterval(function() {
-        if (localStorage.getItem('do_swipe_hint_done') || doState.mobileLang === 'vern') {
+        if (doState.mobileLang === 'vern') {
             stopBilingualSwipeHint();
             return;
         }
         playBilingualSwipeHint();
-    }, 5500);
+    }, 8000);
 }
 
 function playBilingualSwipeHint() {
-    if (localStorage.getItem('do_swipe_hint_done') || doState.mobileLang === 'vern') {
+    if (doState.mobileLang === 'vern') {
         stopBilingualSwipeHint();
         return;
     }
+    ensureBilingualGestureIndicator();
+
+    var $pill = $('#doBilingualGestureIndicator');
     var $rows = $('.do-bilingual-row');
+
+    $pill.removeClass('active');
+    $rows.removeClass('do-bilingual-hint-anim');
+
+    // Force CSS reflow to replay single pulse animation
+    if ($pill.length && $pill[0]) void $pill[0].offsetWidth;
+
+    $pill.addClass('active');
     if ($rows.length) {
         $rows.addClass('do-bilingual-hint-anim');
-        setTimeout(function() {
-            $rows.removeClass('do-bilingual-hint-anim');
-        }, 1300);
     }
+
+    setTimeout(function() {
+        $pill.removeClass('active');
+        $rows.removeClass('do-bilingual-hint-anim');
+    }, 2200);
 }
 
 function stopBilingualSwipeHint() {
@@ -5287,7 +5329,7 @@ function stopBilingualSwipeHint() {
         clearInterval(swipeHintTimer);
         swipeHintTimer = null;
     }
-    localStorage.setItem('do_swipe_hint_done', 'true');
+    $('#doBilingualGestureIndicator').removeClass('active');
     $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
 }
 
@@ -5733,7 +5775,7 @@ var DO_UNIFIED_TITLES = {
         "SMlent": "A Purificatione usque ad Pascha",
         "SMeaster": "A Pascha usque ad Pentecosten",
         "SMpentecost": "A Pentecoste usque ad Adventum",
-        "Aug22": "Feast of the Immaculate Heart of BVM",
+        "Aug22": "Fête du Cœur Immaculé de Marie",
         "votiveECJ": "De Eucharistico Corde Jesu",
         "mass_vigil_apostle": "In Vigiliis Apostolorum (Ego autem sicut)",
         "mass_holy_pope": "Commune Summorum Pontificum (Si diligis me)",
@@ -5760,7 +5802,7 @@ var DO_UNIFIED_TITLES = {
         "mass_holy_woman_not_martyr": "Pro nec Virgine nec Martyre (Cognovi)",
         "Jan5": "S. Télesphore, Pape et Martyr",
         "Jan11": "S. Hygin, Pape et Martyr",
-        "Jan13": "Baptism of Our Lord Jesus Christ",
+        "Jan13": "Baptême de Notre-Seigneur Jésus-Christ",
         "Jan14": "S. Hilaire Evêque et Confesseur Docteur de l'Eglise",
         "Jan15": "S. Paul, Premier Ermite et Confesseur",
         "Jan16": "S. Marcel Ier, Pape et Martyr",
@@ -5780,7 +5822,7 @@ var DO_UNIFIED_TITLES = {
         "Jan30": "Sainte Martine, Vierge et Martyre",
         "Jan31": "S. Joannis Bosco Confessoris",
         "Feb1": "S. Ignatii Episcopi et Martyris",
-        "Feb2": "Purification of BVM",
+        "Feb2": "Purification de la Bse Vierge Marie (Chandeleur)",
         "Feb3": "S. Blasii Episcopi et Martyris",
         "Feb4": "S. Andreæ Corsini Episcopi et Confessoris",
         "Feb5": "S. Agathæ Virginis et Martyris",
@@ -5789,14 +5831,14 @@ var DO_UNIFIED_TITLES = {
         "Feb8": "S. Joannis de Matha Confessoris",
         "Feb9": "S. Cyrilli Episc. Alexandrini Confessoris et Ecclesiæ Doctoris",
         "Feb10": "S. Scholasticæ Virginis",
-        "Feb11": "Apparition of BVM at Lourdes",
+        "Feb11": "Apparition de la Bse Vierge Marie à Lourdes",
         "Feb12": "Ss. Septem Fundatorum Ordinis Servorum B. M. V.",
         "Feb14": "S. Valentini Presbyteri et Martyris",
         "Feb15": "SS. Faustini et Jovitæ Martyrum",
         "Feb18": "S. Simeonis Episcopi et Martyris",
         "Feb18a": "S. Simeonis Episcopi et Martyris",
         "Feb22": "In Cathedra S. Petri Apostoli Antiochiæ",
-        "Feb23": "St Peter Damian",
+        "Feb23": "S. Pierre Damien, Évêque, Confesseur et Docteur",
         "Feb23or24": "Feb 23 vel 24: In vigilia S Matthiæ",
         "Feb24or25": "S. Matthiæ Apostoli",
         "Feb27or28": "S. Gabrielis a Virgine Perdolente Confessoris",
@@ -5839,7 +5881,7 @@ var DO_UNIFIED_TITLES = {
         "May8": "In Apparitione S. Michaelis Archangeli",
         "May9": "Saint Grégoire de Nazianze, Évêque, Confesseur et Docteur de l'Église",
         "May10": "Saint Antonin Évêque et Confesseur",
-        "May11": "Ss Philip and James",
+        "May11": "Saints Philippe et Jacques, Apôtres",
         "May12": "Saints Nérée, Achille, la Vierge Domitille et Pancrace, Martyrs",
         "May13": "Saint Robert Bellarmin, Évêque, Confesseur et Docteur de l’Église",
         "May14": "Saint Boniface Martyr",
@@ -5848,18 +5890,18 @@ var DO_UNIFIED_TITLES = {
         "May17": "Saint Pascal Baylon Confesseur",
         "May18": "S. Venantii Martyris",
         "May19": "S. Pierre Celestin Pape et Confesseur",
-        "May20": "S. Bernardini Senensis Confessoris",
-        "May24": "Our Lady Help of Christians",
+        "May20": "S. Bernardin de Sienne, Confesseur",
+        "May24": "Notre-Dame Auxiliatrice",
         "May25": "S. Gregoire VII Pape et Confesseur",
-        "May26": "S. Philippe Neri Confesseur",
+        "May26": "S. Philippe Néri Confesseur",
         "May27": "S. Bède le Vénérable, Confesseur et Docteur de l’Église",
         "May28": "St Augustin de Cantorbéry, évêque et confesseur",
         "May29": "S. Marie-Madeleine de Pazzi, Vierge",
         "May30": "S. Felix Ier Pape et Martyr",
-        "May31": "Queenship of BVM",
+        "May31": "La Bienheureuse Vierge Marie Reine",
         "Jun1": "S. Angèle Mérici, Vierge",
-        "Jun2": "Ss. Marcellini, Petri, atque Erasmi Martyrum",
-        "Jun4": "S. Francisci Caracciolo Confessoris",
+        "Jun2": "Ss. Marcellin, Pierre et Erasme, Martyrs",
+        "Jun4": "S. François Caracciolo, Confesseur",
         "Jun5": "S. Boniface Évêque et Martyr",
         "Jun6": "S. Norbert Evêque et Confesseur",
         "Jun9": "Ss. Prime et Félicien Martyrs",
@@ -5868,8 +5910,8 @@ var DO_UNIFIED_TITLES = {
         "Jun12": "S. Jean de S. Facond Confesseur",
         "Jun13": "S. Antoine de Padoue Confesseur",
         "Jun14": "S. Basile le Grand, Confesseur et Docteur de l’Église",
-        "Jun15": "Ss. Vite, Modeste et Crescence, Martyrs",
-        "Jun17": "St Gregory Barbadici",
+        "Jun15": "Ss. Guy, Modeste et Crescence, Martyrs",
+        "Jun17": "S. Grégoire Barbarigo, Évêque et Confesseur",
         "Jun18": "S. Éphrem le Syrien, Confesseur et Docteur de l’Église",
         "Jun19": "S. Julienne de Falconieri, Vierge",
         "Jun19a": "S. Julienne de Falconieri, Vierge",
@@ -5884,10 +5926,10 @@ var DO_UNIFIED_TITLES = {
         "Jun29": "Les Ss. Apôtres Pierre et Paul",
         "Jun30": "En la Commémoraison de l’Apôtre S. Paul",
         "Jul1": "Le Très Précieux Sang de Notre Seigneur Jésus-Christ",
-        "Jul2": "The Visitation of BVM",
+        "Jul2": "La Visitation de la Bse Vierge Marie",
         "Jul3": "S. Léon, Pape et Confesseur",
         "Jul3a": "S. Léon, Pape et Confesseur",
-        "Jul4": "Within the octave of the Apostles Peter and Paul",
+        "Jul4": "Dans l'Octave des Saints Apôtres Pierre et Paul",
         "Jul5": "S. Antoine Marie Zaccaria, Confesseur",
         "Jul6": "Octave des Ss. Apôtres Pierre et Paul",
         "Jul7": "Ss Cyrille et Méthode, Évêques et Confesseurs",
@@ -5899,7 +5941,7 @@ var DO_UNIFIED_TITLES = {
         "Jul13": "S. Anaclet, Pape et Martyr",
         "Jul14": "S. Bonaventure, Évêque, Confesseur et Docteur de l’Église",
         "Jul15": "S. Henri, Empereur et Confesseur",
-        "Jul16": "Our Lady of Mount Carmel",
+        "Jul16": "Notre-Dame du Mont-Carmel",
         "Jul17": "S. Alexis, Confesseur",
         "Jul18": "S. Camille de Lellis, Confesseur",
         "Jul19": "S. Vincent de Paul, Confesseur",
@@ -5921,8 +5963,8 @@ var DO_UNIFIED_TITLES = {
         "Aug2": "S. Alphonse Marie de Liguori, Évêque, Confesseur et Docteur de l’Église",
         "Aug3": "Invention de S. Étienne, Premier Martyr",
         "Aug4": "S. Dominique, Confesseur",
-        "Aug5": "Dedication of the Basilica of St Mary Major",
-        "Aug6": "Transfiguration of Our Lord",
+        "Aug5": "Dédicace de la Basilique Sainte-Marie-Majeure (Notre-Dame des Neiges)",
+        "Aug6": "La Transfiguration de Notre-Seigneur",
         "Aug7": "S. Gaétan de Thiène, Confesseur",
         "Aug8": "Ss Cyriaque, Large et Smaragde, Martyrs",
         "Aug8a": "Ss Cyriaque, Large et Smaragde, Martyrs",
@@ -5931,11 +5973,11 @@ var DO_UNIFIED_TITLES = {
         "Aug11": "Ss Tiburce et Suzanne, Vierge, Martyrs",
         "Aug12": "Ste Claire, Vierge",
         "Aug13": "Ss, Hippolyte et Cassien, Martyrs",
-        "Aug14": "Vigil of Assumption of BVM",
-        "Aug15": "Assumption of BVM",
+        "Aug14": "Vigile de l'Assomption de la Bse Vierge Marie",
+        "Aug15": "L'Assomption de la Bienheureuse Vierge Marie",
         "Aug16": "St Joachim, père de la B. V. M.",
         "Aug17": "S. Hyacinthe, Confesseur",
-        "Aug18": "St Agapitus",
+        "Aug18": "S. Agapit, Martyr",
         "Aug19": "S. Jean Eudes, Confesseur",
         "Aug20": "S. Bernard, Abbé et Docteur de l’Église",
         "Aug21": "Ste Jeanne-Françoise Frémiot de Chantal, Veuve",
@@ -5952,14 +5994,14 @@ var DO_UNIFIED_TITLES = {
         "Sep2": "S. Étienne, Roi et Confesseur",
         "Sep3": "S. Pie X, Pape et Confesseur",
         "Sep5": "S. Laurent Justinien, Évêque et Confesseur",
-        "Sep8": "Nativity of BVM",
+        "Sep8": "Nativité de la Bienheureuse Vierge Marie",
         "Sep9": "S. Gorgon, Martyr",
         "Sep9a": "S. Pierre Claver, Confesseur",
         "Sep10": "S. Nicolas de Tolentino, Confesseur",
         "Sep11": "Saints Prote et Hyacinthe, Martyrs",
         "Sep12": "Le Très Saint Nom de Marie",
-        "Sep14": "The Exaltation of the Holy Cross",
-        "Sep15": "Seven Sorrows of BVM",
+        "Sep14": "L'Exaltation de la Sainte Croix",
+        "Sep15": "Les Sept Douleurs de la Bse Vierge Marie",
         "Sep16": "Ss Corneille, Pape, et Cyprien, Évêque, Martyrs",
         "Sep17": "Impression des Stigmates de Saint François",
         "Sep18": "S. Joseph de Cupertino, Confesseur",
@@ -5969,7 +6011,7 @@ var DO_UNIFIED_TITLES = {
         "Sep21": "St Matthieu, Apôtre et Evangéliste",
         "Sep22": "St Thomas de Villeneuve, Evêque et Confesseur",
         "Sep23": "St Lin, Pape et Martyr",
-        "Sep24": "Our Lady of Ransom",
+        "Sep24": "Notre-Dame de la Merci",
         "Sep26": "St Cyprien et Ste Justine, Martyrs",
         "Sep26a": "Saints Isaac Jogues, Jean de Brébeuf et leurs Compagnons",
         "Sep27": "Sts Côme et Damien, Martyrs",
@@ -5982,11 +6024,11 @@ var DO_UNIFIED_TITLES = {
         "Oct4": "St François d’Assise, Confesseur",
         "Oct5": "St Placide et ses Compagnons, Martyrs",
         "Oct6": "St Bruno, Confesseur",
-        "Oct7": "The Most Holy Rosary of BVM",
+        "Oct7": "Le Très Saint Rosaire de la Bse Vierge Marie",
         "Oct8": "Ste Brigitte, Veuve",
         "Oct9": "St Jean Léonardi, Confesseur",
         "Oct10": "St François de Borgia, Confesseur",
-        "Oct11": "Maternitatis Beatæ Mariæ Virginis",
+        "Oct11": "Maternité de la Bienheureuse Vierge Marie",
         "Oct13": "St Edouard, Roi et Confesseur",
         "Oct14": "St Calixte Ier, Pape et Martyr",
         "Oct15": "Ste Thérèse, Vierge",
@@ -5996,7 +6038,7 @@ var DO_UNIFIED_TITLES = {
         "Oct19": "St Pierre d’Alcantara, Confesseur",
         "Oct20": "St Jean de Kenty, Confesseur",
         "Oct21": "St Hilarion, Abbé",
-        "Oct23": "St Anthony Mary Claret",
+        "Oct23": "St Antoine-Marie Claret, Évêque et Confesseur",
         "Oct24": "St Raphaël, Archange",
         "Oct25": "Sts Chrysanthe et Darie, Martyrs",
         "Oct25a": "Sts Chrysanthe et Darie, Martyrs",
@@ -6005,29 +6047,31 @@ var DO_UNIFIED_TITLES = {
         "Oct28": "Sts Simon et Jude, Apôtres",
         "Oct31": "Vigile de la fête de tous les Saints",
         "Nov1": "Tous les Saints",
+        "Nov2": "Commémoration de tous les fidèles défunts",
+        "Nov2a": "Commémoration de tous les fidèles défunts",
         "Nov4": "St Charles Evêque et Confesseur",
-        "Nov5": "The Feast of the Holy Relics",
+        "Nov5": "Fête des Saintes Reliques",
         "Nov8": "Dans l'octave de la Toussaint",
-        "Nov9": "The Dedication of the Lateran Basilica",
+        "Nov9": "Dédicace de la Basilique du Latran",
         "Nov10": "St. André Avellin Confesseur",
         "Nov11": "St Martin, Evêque et Confesseur",
-        "Nov12": "S. Martini Papæ et Martyris",
+        "Nov12": "S. Martin Ier, Pape et Martyr",
         "Nov13": "S. Didace Confesseur",
         "Nov13a": "S. Didace Confesseur",
         "Nov14": "St. Josaphat Evêque et Martyrs",
         "Nov15": "St. Albert le Grand, Evêque Confesseur et Docteur de l'Eglise",
         "Nov16": "Ste Gertrude Vierge",
         "Nov17": "St. Grégoire Thaumaturge Evêque et Confesseur",
-        "Nov18": "The Dedication of the Basilicas of Ss Peter and Paul",
+        "Nov18": "Dédicace des Basiliques des Saints Pierre et Paul",
         "Nov19": "Ste. Elisabeth Veuve",
         "Nov20": "St. Félix de Valois Confesseur",
-        "Nov21": "The Presentation of BVM",
+        "Nov21": "Présentation de la Bienheureuse Vierge Marie",
         "Nov22": "Ste Cécile Vierge et Martyre",
         "Nov23": "St Clément Ier Pape et Martyr",
         "Nov24": "St. Jean de la Croix Confesseur et Docteur de l'Eglise",
         "Nov25": "Ste Catherine Vierge et Martyre",
         "Nov26": "St Silvestre Abbé",
-        "Nov27": "Our Lady of the Miraculous Medal",
+        "Nov27": "Notre-Dame de la Médaille Miraculeuse",
         "Nov29": "Vigile de St André Apôtre",
         "Nov29a": "Vigile de St André Apôtre",
         "Nov30": "St André Apôtre",
@@ -7252,6 +7296,7 @@ function createCalDayButton(dayNum, isOther, mDate, isToday, isSelected) {
     var $btn = $('<button class="' + cls + '">').text(dayNum);
     $btn.on('click', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         doState.date = mDate;
         doState.officiumKey = null;
         doState.userChangedHddMode = false;
@@ -7483,6 +7528,7 @@ function renderHeaderDropdownItems() {
                             .text(chNum)
                             .on('click', function(e) {
                                 e.stopPropagation();
+                                triggerHapticFeedback('selection');
                                 doState.bible.book = bk.id;
                                 doState.bible.chapter = chNum;
                                 doState.bible.page = 1;
@@ -7662,6 +7708,7 @@ function renderHeaderDropdownItems() {
                     .append('<span class="hdd-item-date">' + dateBadge + '</span>')
                     .on('click', function(e) {
                         e.stopPropagation();
+                        triggerHapticFeedback('selection');
                         if (itemDate && itemDate.isValid()) {
                             doState.date = itemDate;
                             doState.officiumKey = null;
@@ -7906,20 +7953,130 @@ function applyIconColor(color, isSync) {
     updateFaviconAndAppIcon();
 }
 
-// ── Haptic Feedback Engine ──
-function triggerHapticFeedback(duration) {
+// ── Haptic Feedback Engine (Intelligent, Multi-tier & Design-aware) ──
+function triggerHapticFeedback(patternOrType, fallbackDuration) {
     if (localStorage.getItem('do_haptics') === 'false') return;
-    var dur = duration || 25;
+
+    var styleMode = localStorage.getItem('do_haptic_style') || 'balanced'; // 'light' | 'balanced' | 'rich'
+    var type = 'tap';
+    var customDur = 20;
+
+    if (typeof patternOrType === 'string') {
+        type = patternOrType;
+    } else if (typeof patternOrType === 'number') {
+        customDur = patternOrType;
+        type = 'custom';
+    } else if (Array.isArray(patternOrType)) {
+        type = 'custom_array';
+    }
+
+    var capHaptics = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) ? window.Capacitor.Plugins.Haptics : null;
+
     try {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
-            window.Capacitor.Plugins.Haptics.impact({ style: 'MEDIUM' }).catch(function() {
-                try { window.Capacitor.Plugins.Haptics.vibrate({ duration: dur }); } catch (e) {}
-            });
+        if (capHaptics) {
+            switch (type) {
+                case 'selection':
+                case 'subtle':
+                    if (styleMode === 'light') {
+                        capHaptics.selectionChanged().catch(function(){});
+                    } else {
+                        capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
+                    }
+                    break;
+                case 'light':
+                case 'step':
+                case 'note':
+                    capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
+                    break;
+                case 'medium':
+                case 'swipe':
+                case 'toggle':
+                case 'tap':
+                    if (styleMode === 'light') {
+                        capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
+                    } else if (styleMode === 'rich') {
+                        capHaptics.impact({ style: 'MEDIUM' }).catch(function(){});
+                    } else {
+                        capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
+                    }
+                    break;
+                case 'heavy':
+                case 'open':
+                case 'celebrate':
+                    if (styleMode === 'light') {
+                        capHaptics.impact({ style: 'MEDIUM' }).catch(function(){});
+                    } else {
+                        capHaptics.impact({ style: 'HEAVY' }).catch(function(){});
+                    }
+                    break;
+                case 'success':
+                    capHaptics.notification({ type: 'SUCCESS' }).catch(function(){
+                        capHaptics.impact({ style: 'MEDIUM' }).catch(function(){});
+                    });
+                    break;
+                case 'warning':
+                    capHaptics.notification({ type: 'WARNING' }).catch(function(){
+                        capHaptics.impact({ style: 'HEAVY' }).catch(function(){});
+                    });
+                    break;
+                case 'error':
+                    capHaptics.notification({ type: 'ERROR' }).catch(function(){});
+                    break;
+                case 'custom':
+                    capHaptics.vibrate({ duration: customDur }).catch(function(){
+                        capHaptics.impact({ style: 'MEDIUM' }).catch(function(){});
+                    });
+                    break;
+                default:
+                    capHaptics.impact({ style: 'LIGHT' }).catch(function(){});
+                    break;
+            }
         }
     } catch (e) {}
+
+    // Fallback Web navigator.vibrate with patterned vibration signatures
     try {
         if (navigator && navigator.vibrate) {
-            navigator.vibrate(dur);
+            var mult = (styleMode === 'light') ? 0.6 : (styleMode === 'rich') ? 1.4 : 1.0;
+            switch (type) {
+                case 'selection':
+                case 'subtle':
+                    navigator.vibrate(Math.round(8 * mult));
+                    break;
+                case 'light':
+                case 'step':
+                case 'note':
+                    navigator.vibrate(Math.round(12 * mult));
+                    break;
+                case 'medium':
+                case 'swipe':
+                case 'toggle':
+                case 'tap':
+                    navigator.vibrate(Math.round(20 * mult));
+                    break;
+                case 'heavy':
+                case 'open':
+                    navigator.vibrate(Math.round(35 * mult));
+                    break;
+                case 'success':
+                    navigator.vibrate([Math.round(15 * mult), 40, Math.round(25 * mult)]);
+                    break;
+                case 'warning':
+                    navigator.vibrate([Math.round(25 * mult), 50, Math.round(35 * mult)]);
+                    break;
+                case 'error':
+                    navigator.vibrate([Math.round(35 * mult), 40, Math.round(35 * mult), 40, Math.round(50 * mult)]);
+                    break;
+                case 'custom_array':
+                    navigator.vibrate(patternOrType);
+                    break;
+                case 'custom':
+                    navigator.vibrate(Math.round(customDur * mult));
+                    break;
+                default:
+                    navigator.vibrate(Math.round((fallbackDuration || 18) * mult));
+                    break;
+            }
         }
     } catch (e) {}
 }
@@ -8509,6 +8666,7 @@ function setupEventListeners() {
     $(document).on('click', '#btnFeedbackSidebar, #btnFeedbackSettings', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        triggerHapticFeedback('open');
         closeModals();
         openFeedbackModal();
     });
@@ -8516,11 +8674,13 @@ function setupEventListeners() {
     $(document).on('click', '#btnCloseFeedbackModal, #feedbackModalBackdrop', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        triggerHapticFeedback('light');
         closeFeedbackModal();
     });
 
     $(document).on('click', '.do-brand, #btnBrandHome', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('medium');
         doState.hora = 'home';
         doState.officiumKey = null;
         doState.testFeastKey = null;
@@ -8533,6 +8693,7 @@ function setupEventListeners() {
 
     $(document).on('click', '.do-nav-item', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('selection');
         var hora = $(this).data('hora');
         if (hora === 'bible') {
             openBible();
@@ -8551,6 +8712,7 @@ function setupEventListeners() {
 
     $(document).on('click', '.bottom-nav .nav-item', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('selection');
         var hora = $(this).data('hora');
         if (hora === 'horae') {
             $('#doHoraePicker').toggleClass('hidden');
@@ -8569,6 +8731,7 @@ function setupEventListeners() {
 
     $(document).on('click', '.do-hora-sub', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('selection');
         var hora = $(this).data('hora');
         $('#doHoraePicker').addClass('hidden');
         doState.hora = hora;
@@ -8584,6 +8747,7 @@ function setupEventListeners() {
     // Open Bible directly in main view from Psalm card button
     $(document).on('click', '.do-bible-btn', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         var bk = $(this).data('book') || 'Psalmi';
         var ch = $(this).data('chapter') || 1;
         openBible(bk, ch, 1);
@@ -8591,6 +8755,7 @@ function setupEventListeners() {
 
     // Bible Main View Controls: Change Book
     $(document).on('change', '#doBibleMainBookSelect', function() {
+        triggerHapticFeedback('selection');
         var bk = $(this).val();
         doState.bible.book = bk;
         doState.bible.chapter = 1;
@@ -8604,6 +8769,7 @@ function setupEventListeners() {
 
     // Bible Main View Controls: Change Chapter
     $(document).on('change', '#doBibleMainChapterSelect', function() {
+        triggerHapticFeedback('selection');
         var ch = parseInt($(this).val(), 10);
         doState.bible.chapter = ch;
         doState.bible.page = 1;
@@ -8615,6 +8781,7 @@ function setupEventListeners() {
 
     // Bible Main View Controls: Change Page
     $(document).on('change', '#doBibleMainPageSelect', function() {
+        triggerHapticFeedback('selection');
         var pg = parseInt($(this).val(), 10) || 1;
         doState.bible.page = pg;
         localStorage.setItem('do_bible_page', pg);
@@ -8624,6 +8791,7 @@ function setupEventListeners() {
 
     // Bible Main View Controls: Change Page Size (Verses per page)
     $(document).on('change', '#doBibleMainVppSelect', function() {
+        triggerHapticFeedback('selection');
         var val = $(this).val();
         doState.bible.pageSize = (val === 'all') ? 'all' : parseInt(val, 10);
         doState.bible.page = 1;
@@ -8635,6 +8803,7 @@ function setupEventListeners() {
 
     // Bible Previous Chapter Navigation
     $(document).on('click', '#btnBiblePrev, .btnBiblePrev', function() {
+        triggerHapticFeedback('step');
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
         if (doState.bible.chapter > 1) {
             doState.bible.chapter--;
@@ -8656,6 +8825,7 @@ function setupEventListeners() {
 
     // Bible Next Chapter Navigation
     $(document).on('click', '#btnBibleNext, .btnBibleNext', function() {
+        triggerHapticFeedback('step');
         var bkObj = DO_BIBLE_BOOKS.find(function(b) { return b.id === doState.bible.book; }) || DO_BIBLE_BOOKS[0];
         if (doState.bible.chapter < bkObj.chapters) {
             doState.bible.chapter++;
@@ -8677,6 +8847,7 @@ function setupEventListeners() {
 
     $('#btnPrevDay, #btnHddPrevDay').on('click', function(e) {
         if (e) e.stopPropagation();
+        triggerHapticFeedback('step');
         doState.date.subtract(1, 'day');
         doState.officiumKey = null;
         doState.userChangedHddMode = false;
@@ -8690,6 +8861,7 @@ function setupEventListeners() {
 
     $('#btnNextDay, #btnHddNextDay').on('click', function(e) {
         if (e) e.stopPropagation();
+        triggerHapticFeedback('step');
         doState.date.add(1, 'day');
         doState.officiumKey = null;
         doState.userChangedHddMode = false;
@@ -8706,6 +8878,7 @@ function setupEventListeners() {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
+        triggerHapticFeedback('medium');
         if ($('#headerDropdown').hasClass('hidden')) {
             openHeaderDropdown();
         } else {
@@ -8721,6 +8894,7 @@ function setupEventListeners() {
     // Mode Toggle (Temporale vs Sanctorale OR Vetus vs Novum Testamentum)
     $(document).on('click', '.hdd-mode-btn', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         var bibleMode = $(this).data('bible-mode');
         if (bibleMode) {
             doState.hddBibleMode = bibleMode;
@@ -8734,6 +8908,7 @@ function setupEventListeners() {
     // Today in Dropdown
     $(document).on('click', '#btnHddToday, #btnDateToday', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('selection');
         doState.date = moment();
         doState.officiumKey = null;
         doState.userChangedHddMode = false;
@@ -8748,6 +8923,7 @@ function setupEventListeners() {
     // Toggle In-App Calendar in Dropdown
     $(document).on('click', '#btnHddCalendarToggle', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('toggle');
         doState.calOpen = !doState.calOpen;
         $('.hdd-cal-chevron').toggleClass('open', doState.calOpen);
         $('#hddCustomCalendar').toggleClass('hidden', !doState.calOpen);
@@ -8760,6 +8936,7 @@ function setupEventListeners() {
     // Prev / Next Month in Custom Calendar
     $(document).on('click', '#btnHddCalPrevMonth', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('step');
         if (!doState.calView) doState.calView = { year: doState.date.year(), month: doState.date.month() };
         doState.calView.month--;
         if (doState.calView.month < 0) {
@@ -8771,6 +8948,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnHddCalNextMonth', function(e) {
         e.stopPropagation();
+        triggerHapticFeedback('step');
         if (!doState.calView) doState.calView = { year: doState.date.year(), month: doState.date.month() };
         doState.calView.month++;
         if (doState.calView.month > 11) {
@@ -8824,21 +9002,25 @@ function setupEventListeners() {
     });
 
     $('#btnCloseSidebar, #sidebarBackdrop').on('click', function() {
+        triggerHapticFeedback('light');
         closeModals();
     });
 
     $('#btnSettings, #btnSettingsSidebar').on('click', function() {
+        triggerHapticFeedback('open');
         $('#settingsPanel').addClass('open active');
         $('#settingsBackdrop').addClass('open active');
     });
 
     $('#btnCloseSettings, #settingsBackdrop').on('click', function() {
+        triggerHapticFeedback('light');
         closeModals();
     });
 
     // Ordinarium Missæ Toggle
     $('#toggleOrdinarium').on('change', function() {
         var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
         doState.includeOrdinarium = isChecked;
         localStorage.setItem('do_ordinarium', isChecked);
         renderDO();
@@ -8847,6 +9029,7 @@ function setupEventListeners() {
     // Gregorian Chant Toggle in Settings
     $('#toggleGregorian').on('change', function() {
         var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
         doState.includeGregorian = isChecked;
         localStorage.setItem('do_include_gregorian', isChecked);
         if (!isChecked && doState.hora === 'missa_gregorian') {
@@ -8859,6 +9042,7 @@ function setupEventListeners() {
     // Note Keyboard buttons in Settings (Instant pitch playback)
     $(document).on('click', '#doNoteKeyboard .do-note-key-btn', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('note');
         var pitch = $(this).data('pitch');
         var $btn = $(this);
         $btn.addClass('playing');
@@ -8882,6 +9066,7 @@ function setupEventListeners() {
     // Floating Player Dock Toggle in Settings
     $(document).on('click', '#btnTogglePlayerDock', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('toggle');
         var $bar = $('#modernPlayerBar');
         var isNowVis = !$bar.hasClass('visible');
         $bar.toggleClass('visible', isNowVis);
@@ -8892,6 +9077,7 @@ function setupEventListeners() {
     // Open Test Page Button in Settings
     $(document).on('click', '#btnOpenTestMissa, #btnOpenTestMissaDirect', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('medium');
         doState.hora = 'missa_gregorian';
         localStorage.setItem('do_hora', 'missa_gregorian');
         closeModals();
@@ -8902,6 +9088,7 @@ function setupEventListeners() {
     // Demo Update Banner Trigger (from Settings or Test Page)
     $(document).on('click', '#btnDemoUpdateBanner, #btnDemoUpdateBannerTestPage', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('success');
         showUpdateBanner({
             tag_name: 'beta-1.0.0 (Démo)',
             prerelease: true,
@@ -8914,6 +9101,7 @@ function setupEventListeners() {
     // Test Banner Toolbar Controls
     $(document).on('click', '#btnToggleGregorianChants', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('toggle');
         doState.includeGregorian = !doState.includeGregorian;
         localStorage.setItem('do_include_gregorian', doState.includeGregorian);
         var isNowOn = doState.includeGregorian;
@@ -8924,12 +9112,14 @@ function setupEventListeners() {
     });
 
     $(document).on('change', '#doKyrialeSelect', function() {
+        triggerHapticFeedback('selection');
         doState.selectedKyriale = $(this).val();
         localStorage.setItem('do_selected_kyriale', doState.selectedKyriale);
         renderDO();
     });
 
     $(document).on('change', '#doTestProperSelect', function() {
+        triggerHapticFeedback('selection');
         var val = $(this).val();
         doState.testFeastKey = val || null;
         renderDO();
@@ -8937,6 +9127,7 @@ function setupEventListeners() {
 
     // 0. Rubricæ & Editio Select
     $('#doEditionSelect').on('change', function() {
+        triggerHapticFeedback('selection');
         var val = $(this).val();
         doState.edition = val;
         localStorage.setItem('do_edition', val);
@@ -8947,6 +9138,7 @@ function setupEventListeners() {
     // 3. Textus Latinus Toggle
     $('#toggleLatin').on('change', function() {
         var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
         if (!isChecked && (!doState.vernacularLang || doState.vernacularLang === 'none')) {
             doState.vernacularLang = 'fr';
             localStorage.setItem('do_vernacular_lang', 'fr');
@@ -8960,6 +9152,7 @@ function setupEventListeners() {
 
     // 2 Distinct Settings: Vernacular Translation Select
     $('#doVernacularOptions').on('click', '.settings-option-card, .settings-option', function() {
+        triggerHapticFeedback('selection');
         var val = $(this).data('value');
         if (val === 'none' && !doState.showLatin) {
             doState.showLatin = true;
@@ -8973,6 +9166,7 @@ function setupEventListeners() {
     });
 
     $('#doThemeOptions').on('click', '.settings-option-card, .settings-option', function() {
+        triggerHapticFeedback('selection');
         $('#doThemeOptions .settings-option-card, #doThemeOptions .settings-option').removeClass('active');
         $(this).addClass('active');
         doState.settings.theme = $(this).data('value');
@@ -8982,6 +9176,7 @@ function setupEventListeners() {
 
     $('#toggleLiturgicalColor').on('change', function() {
         var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
         doState.settings.liturgicalColorSync = isChecked;
         localStorage.setItem('do_liturgical_color_sync', isChecked);
         if (isChecked) {
@@ -8993,6 +9188,7 @@ function setupEventListeners() {
     });
 
     $('#doColorOptions').on('click', '.color-swatch-circle, .color-swatch', function() {
+        triggerHapticFeedback('selection');
         if (doState.settings.liturgicalColorSync) {
             doState.settings.liturgicalColorSync = false;
             localStorage.setItem('do_liturgical_color_sync', false);
@@ -9006,6 +9202,7 @@ function setupEventListeners() {
 
     $('#toggleSyncIconColor').on('change', function() {
         var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
         if (isChecked) {
             $('#doIconColorOptions').css('opacity', '0.45').css('pointer-events', 'none');
             $('#doIconColorOptions .color-swatch-circle').removeClass('active');
@@ -9018,6 +9215,7 @@ function setupEventListeners() {
     });
 
     $('#doIconColorOptions').on('click', '.color-swatch-circle', function() {
+        triggerHapticFeedback('selection');
         var chosenColor = $(this).data('icon-color');
         $('#doIconColorOptions .color-swatch-circle').removeClass('active');
         $(this).addClass('active');
@@ -9033,7 +9231,7 @@ function setupEventListeners() {
             applyIconColor(pendingIconConfig.color, pendingIconConfig.isSync);
             applyNativeAndroidAppIcon(pendingIconConfig.alias, true);
             closeAppIconModal();
-            triggerHapticFeedback(30);
+            triggerHapticFeedback('warning');
             setTimeout(function() {
                 if (window.AndroidAppIcon && typeof window.AndroidAppIcon.restartApp === 'function') {
                     window.AndroidAppIcon.restartApp();
@@ -9048,6 +9246,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnDismissAppIcon, #btnCloseAppIconModal, #appIconModalBackdrop', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('light');
         if (pendingIconConfig) {
             // Apply later: save locally and schedule silent apply on next launch
             applyIconColor(pendingIconConfig.color, pendingIconConfig.isSync);
@@ -9060,24 +9259,43 @@ function setupEventListeners() {
     $('#toggleHaptics').on('change', function() {
         var isChecked = $(this).is(':checked');
         localStorage.setItem('do_haptics', isChecked ? 'true' : 'false');
-        if (isChecked) triggerHapticFeedback(20);
+        if (isChecked) triggerHapticFeedback('success');
+    });
+
+    // Haptic Style Preset Selector (Subtil, Équilibré, Riche)
+    var savedHapticStyle = localStorage.getItem('do_haptic_style') || 'balanced';
+    $('#doHapticStyleOptions [data-haptic-style]').removeClass('active');
+    $('#doHapticStyleOptions [data-haptic-style="' + savedHapticStyle + '"]').addClass('active');
+
+    $('#doHapticStyleOptions').on('click', '.settings-option-card', function() {
+        var style = $(this).data('haptic-style') || 'balanced';
+        localStorage.setItem('do_haptic_style', style);
+        $('#doHapticStyleOptions .settings-option-card').removeClass('active');
+        $(this).addClass('active');
+        if (style === 'light') triggerHapticFeedback('subtle');
+        else if (style === 'balanced') triggerHapticFeedback('medium');
+        else if (style === 'rich') triggerHapticFeedback('success');
     });
 
     $('#toggleAutoUpdate').on('change', function() {
+        triggerHapticFeedback('toggle');
         localStorage.setItem('do_auto_update', $(this).is(':checked') ? 'true' : 'false');
     });
 
     $('#toggleIncludeBeta').on('change', function() {
+        triggerHapticFeedback('toggle');
         localStorage.setItem('do_include_beta', $(this).is(':checked') ? 'true' : 'false');
     });
 
     $('#btnCheckUpdatesManual').on('click', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('medium');
         checkForAppUpdates(true);
     });
 
     $(document).on('click', '#btnToggleUpdateNotes', function(e) {
         e.preventDefault();
+        triggerHapticFeedback('selection');
         var $notes = $('#updateNotesCollapsible');
         var isOpen = $notes.hasClass('is-open');
         $notes.toggleClass('is-open', !isOpen);
@@ -9218,6 +9436,8 @@ function setupEventListeners() {
                 shiftDistance = cardW + 24;
                 initialOffsetPx = (doState.mobileLang === 'vern') ? -shiftDistance : 0;
                 touchMode = 'candidate_bilingual';
+                $('#doBilingualGestureIndicator').removeClass('active');
+                $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
             }
         }
     }
@@ -9335,7 +9555,7 @@ function setupEventListeners() {
                 $backdrop.addClass('open active');
                 $('body').addClass('sidebar-open');
                 document.body.style.overflow = 'hidden';
-                triggerHapticFeedback(20);
+                triggerHapticFeedback('open');
             } else {
                 // Snap Back Closed instantly
                 $sidebar.removeClass('open active');
@@ -9354,7 +9574,7 @@ function setupEventListeners() {
             if (progress < 0.80 || (vx < -0.18 && deltaX < -15) || deltaX < -45) {
                 // Snap Closed instantly
                 closeModals();
-                triggerHapticFeedback(20);
+                triggerHapticFeedback('light');
             } else {
                 // Snap Back Open instantly
                 $sidebar.addClass('open active');
@@ -9369,7 +9589,7 @@ function setupEventListeners() {
                 if (deltaX < -50 || (vx < -0.32 && deltaX < -20)) {
                     var prevLang = doState.mobileLang;
                     doState.mobileLang = 'vern';
-                    if (prevLang !== 'vern') triggerHapticFeedback();
+                    if (prevLang !== 'vern') triggerHapticFeedback('swipe');
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', 'calc(-50% - 0.75rem)');
                     }
@@ -9384,7 +9604,7 @@ function setupEventListeners() {
                 if (deltaX > 50 || (vx > 0.32 && deltaX > 20)) {
                     var prevLang = doState.mobileLang;
                     doState.mobileLang = 'la';
-                    if (prevLang !== 'la') triggerHapticFeedback();
+                    if (prevLang !== 'la') triggerHapticFeedback('swipe');
                     if ($stream.length && $stream[0]) {
                         $stream[0].style.setProperty('--bilingual-offset', '0%');
                     }

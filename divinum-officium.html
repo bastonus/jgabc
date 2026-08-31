@@ -22,7 +22,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="css/modern.css?v=28.1&ts=202608260940">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=68.2&ts=202608260940">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=68.3&ts=202608271331">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -78,7 +78,7 @@
     <script src="patterns/pl.js"></script>
     <script src="do_manifest.js?v=20.10&ts=202608251858"></script>
     <script src="js/bible_mappings.js?v=1.0&ts=202608252254"></script>
-    <script src="js/divinum_officium.js?v=68.1&ts=202608260930"></script>
+    <script src="js/divinum_officium.js?v=68.4&ts=202608311150"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -460,11 +460,16 @@
             <div class="settings-group">
                 <label class="settings-label" id="labelHapticsText">Gestus &amp; Haptica</label>
                 <div class="settings-toggle-row">
-                    <span class="settings-toggle-label">Retour haptique lors du changement de colonne</span>
+                    <span class="settings-toggle-label">Retours haptiques tactiles</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="toggleHaptics" checked>
                         <span class="slider"></span>
                     </label>
+                </div>
+                <div class="settings-grid cols-3" id="doHapticStyleOptions" style="margin-top: 10px;">
+                    <button class="settings-option-card" data-haptic-style="light" title="Léger et discret">Subtil</button>
+                    <button class="settings-option-card active" data-haptic-style="balanced" title="Équilibré et net">Équilibré</button>
+                    <button class="settings-option-card" data-haptic-style="rich" title="Expressif et dynamique">Riche</button>
                 </div>
             </div>
 
