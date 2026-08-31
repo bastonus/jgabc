@@ -9472,7 +9472,7 @@ var OremusNotifications = (function() {
                         w.steps.forEach(function(stepText, idx) {
                             stepsHtml += '<div class="remote-notif-step-row">' +
                                 '<span class="remote-notif-step-num">' + (idx + 1) + '</span>' +
-                                '<span class="remote-notif-step-num">' + stepText + '</span>' +
+                                '<span class="remote-notif-step-desc">' + stepText + '</span>' +
                             '</div>';
                         });
                     }

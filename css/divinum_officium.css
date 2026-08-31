@@ -5677,6 +5677,14 @@ html.is-ios .web-download-app-wrapper,
     margin-top: 1px;
 }
 
+.remote-notif-step-desc {
+    flex: 1;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--text-secondary, #a1a1aa);
+    text-align: left;
+}
+
 /* Custom Action Buttons */
 .remote-notif-btn {
     display: inline-flex;
