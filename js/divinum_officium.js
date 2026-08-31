@@ -8187,7 +8187,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.40';
+var CURRENT_APP_VERSION = 'beta-0.0.41';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -9219,6 +9219,12 @@ var OremusNotifications = (function() {
 // =============================================================
 
 var OremusSystemNotifications = (function() {
+    var CHANNELS = {
+        'updates': { id: 'oremus_updates', name: 'Mises à jour de l\'application', desc: 'Notifications lors de la parution de nouvelles versions et correctifs' },
+        'announcements': { id: 'oremus_announcements', name: 'Annonces & Canal officiel', desc: 'Alertes et informations officielles diffusées en temps réel' },
+        'liturgy': { id: 'oremus_liturgy', name: 'Fêtes liturgiques & Prière', desc: 'Rappels des fêtes liturgiques et temps de prière' }
+    };
+
     function isSupported() {
         if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
             return true;
@@ -9230,9 +9236,56 @@ var OremusSystemNotifications = (function() {
         return localStorage.getItem('do_notifications_enabled') !== 'false';
     }
 
+    function isCategoryEnabled(cat) {
+        if (!cat) return true;
+        return localStorage.getItem('do_notif_cat_' + cat) !== 'false';
+    }
+
+    function setCategoryEnabled(cat, enabled) {
+        if (!cat) return;
+        localStorage.setItem('do_notif_cat_' + cat, enabled ? 'true' : 'false');
+    }
+
     function setEnabled(enabled) {
         localStorage.setItem('do_notifications_enabled', enabled ? 'true' : 'false');
         $('#toggleSystemNotifications').prop('checked', enabled);
+        if (enabled) {
+            $('#subNotificationSettings').slideDown(150);
+        } else {
+            $('#subNotificationSettings').slideUp(150);
+        }
+    }
+
+    function initChannels() {
+        if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+            try {
+                var plugin = window.Capacitor.Plugins.LocalNotifications;
+                if (typeof plugin.createChannel === 'function') {
+                    Object.keys(CHANNELS).forEach(function(key) {
+                        var ch = CHANNELS[key];
+                        plugin.createChannel({
+                            id: ch.id,
+                            name: ch.name,
+                            description: ch.desc,
+                            importance: 4,
+                            visibility: 1
+                        }).catch(function() {});
+                    });
+                }
+            } catch (e) {}
+        }
+    }
+
+    function openSystemSettings() {
+        if (window.AndroidNotification && typeof window.AndroidNotification.openSystemNotificationSettings === 'function') {
+            window.AndroidNotification.openSystemNotificationSettings();
+            return;
+        }
+        if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            try {
+                window.Capacitor.Plugins.App.openUrl({ url: 'package:' + window.location.hostname });
+            } catch (e) {}
+        }
     }
 
     function requestPermission() {
@@ -9242,7 +9295,10 @@ var OremusSystemNotifications = (function() {
             return window.Capacitor.Plugins.LocalNotifications.requestPermissions().then(function(res) {
                 var granted = res && (res.display === 'granted' || res.display === 'prompt-with-rationale');
                 setEnabled(granted);
-                if (granted) triggerHapticFeedback('success');
+                if (granted) {
+                    initChannels();
+                    triggerHapticFeedback('success');
+                }
                 return granted;
             }).catch(function(err) {
                 console.warn('[SystemNotifications] Native permission request error:', err);
@@ -9264,8 +9320,15 @@ var OremusSystemNotifications = (function() {
         return Promise.resolve(false);
     }
 
-    function send(title, body, extra) {
+    function send(title, body, category, extra) {
         if (!isEnabled()) return;
+        var cat = category || 'announcements';
+        if (!isCategoryEnabled(cat)) {
+            console.log('[SystemNotifications] Skipped disabled category:', cat);
+            return;
+        }
+
+        var channelInfo = CHANNELS[cat] || CHANNELS['announcements'];
 
         // 1. Native Android Local Notifications via Capacitor
         if (isNativeAndroidApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
@@ -9276,6 +9339,7 @@ var OremusSystemNotifications = (function() {
                             id: Math.floor(Math.random() * 900000) + 100000,
                             title: title || 'Oremus',
                             body: body || '',
+                            channelId: channelInfo.id,
                             schedule: { at: new Date(Date.now() + 200) },
                             sound: undefined,
                             attachments: undefined,
@@ -9309,7 +9373,11 @@ var OremusSystemNotifications = (function() {
     return {
         isSupported: isSupported,
         isEnabled: isEnabled,
+        isCategoryEnabled: isCategoryEnabled,
+        setCategoryEnabled: setCategoryEnabled,
         setEnabled: setEnabled,
+        initChannels: initChannels,
+        openSystemSettings: openSystemSettings,
         requestPermission: requestPermission,
         send: send
     };
@@ -9411,8 +9479,9 @@ function setupEventListeners() {
         OremusUsageTracker.hidePrompt();
     });
 
-    // Settings Toggle for System Notifications
-    $('#toggleSystemNotifications').prop('checked', OremusSystemNotifications.isEnabled()).on('change', function() {
+    // Settings Toggle for System Notifications (Master & Categories)
+    var isNotifActive = OremusSystemNotifications.isEnabled();
+    $('#toggleSystemNotifications').prop('checked', isNotifActive).on('change', function() {
         var isChecked = $(this).is(':checked');
         if (isChecked) {
             OremusSystemNotifications.requestPermission();
@@ -9420,6 +9489,31 @@ function setupEventListeners() {
             OremusSystemNotifications.setEnabled(false);
             triggerHapticFeedback('light');
         }
+    });
+
+    if (!isNotifActive) {
+        $('#subNotificationSettings').hide();
+    }
+
+    $('#toggleNotifUpdates').prop('checked', OremusSystemNotifications.isCategoryEnabled('updates')).on('change', function() {
+        OremusSystemNotifications.setCategoryEnabled('updates', $(this).is(':checked'));
+        triggerHapticFeedback('selection');
+    });
+
+    $('#toggleNotifAnnouncements').prop('checked', OremusSystemNotifications.isCategoryEnabled('announcements')).on('change', function() {
+        OremusSystemNotifications.setCategoryEnabled('announcements', $(this).is(':checked'));
+        triggerHapticFeedback('selection');
+    });
+
+    $('#toggleNotifLiturgy').prop('checked', OremusSystemNotifications.isCategoryEnabled('liturgy')).on('change', function() {
+        OremusSystemNotifications.setCategoryEnabled('liturgy', $(this).is(':checked'));
+        triggerHapticFeedback('selection');
+    });
+
+    $(document).on('click', '#btnOpenAndroidNotifSettings', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('selection');
+        OremusSystemNotifications.openSystemSettings();
     });
 
     // Remote Notification Event Listeners
@@ -10485,6 +10579,11 @@ $(function() {
     initTheme();
     setupEventListeners();
     renderDO();
+
+    // Initialize system notification channels (Android)
+    if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.initChannels === 'function') {
+        window.OremusSystemNotifications.initChannels();
+    }
 
     // Check for Remote GitHub Notifications and Releases after initial render
     setTimeout(function() {

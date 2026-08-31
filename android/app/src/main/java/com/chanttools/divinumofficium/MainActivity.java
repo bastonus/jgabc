@@ -46,7 +46,42 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        createNotificationChannels();
         registerNativeInterfaces();
+    }
+
+    private void createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            android.app.NotificationManager notificationManager = getSystemService(android.app.NotificationManager.class);
+            if (notificationManager != null) {
+                // 1. Channel: Mises à jour
+                android.app.NotificationChannel updateChannel = new android.app.NotificationChannel(
+                    "oremus_updates",
+                    "Mises à jour de l'application",
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT
+                );
+                updateChannel.setDescription("Notifications lors de la parution de nouvelles versions et correctifs d'Oremus");
+                notificationManager.createNotificationChannel(updateChannel);
+
+                // 2. Channel: Annonces & Canal officiel
+                android.app.NotificationChannel announceChannel = new android.app.NotificationChannel(
+                    "oremus_announcements",
+                    "Annonces & Canal officiel",
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT
+                );
+                announceChannel.setDescription("Alertes et informations officielles diffusées en temps réel");
+                notificationManager.createNotificationChannel(announceChannel);
+
+                // 3. Channel: Fêtes liturgiques & Prière
+                android.app.NotificationChannel liturgyChannel = new android.app.NotificationChannel(
+                    "oremus_liturgy",
+                    "Fêtes liturgiques & Prière",
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT
+                );
+                liturgyChannel.setDescription("Rappels des fêtes liturgiques de première classe et temps de prière");
+                notificationManager.createNotificationChannel(liturgyChannel);
+            }
+        }
     }
 
     @Override
@@ -73,9 +108,30 @@ public class MainActivity extends BridgeActivity {
                 WebView wv = getBridge().getWebView();
                 wv.addJavascriptInterface(new AppIconInterface(), "AndroidAppIcon");
                 wv.addJavascriptInterface(new AppUpdateInterface(), "AndroidAppUpdate");
+                wv.addJavascriptInterface(new AppNotificationInterface(), "AndroidNotification");
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public class AppNotificationInterface {
+        @JavascriptInterface
+        public void openSystemNotificationSettings() {
+            try {
+                Intent intent = new Intent();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                } else {
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

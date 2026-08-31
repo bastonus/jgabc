@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-31T14:30:00Z",
+  "updatedAt": "2026-08-31T14:36:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.40",
+      "id": "notif-release-beta-0.0.41",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
@@ -12,34 +12,34 @@
       "style": "liturgical",
       "badge": "Mise a jour",
       "icon": "sparkles",
-      "title": "Notes de version beta-0.0.40",
+      "title": "Notes de version beta-0.0.41",
       "subtitle": "Votre application Oremus a ete mise a jour",
-      "message": "Decouvrez les dernieres ameliorations apportees a Oremus : notifications systeme officielles Android, controle des alertes dans les parametres et prompt intelligent apres 20 minutes d'utilisation.",
-      "cancelsNotifications": ["notif-official-live-test", "notif-test-live-01", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Decouvrez les dernieres ameliorations : categories de notifications Android configurables, bouton de fermeture retabli et recherche automatique des releases au demarrage.",
+      "cancelsNotifications": ["notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus est a jour : Decouvrez les nouveautes et correctifs",
+        "text": "Oremus est a jour (beta-0.0.41) : Nouveautes et categories",
         "tag": "Nouveautes",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version",
+        "title": "Notes de Version (beta-0.0.41)",
         "subtitle": "Nouveautes, correctifs detailles et retours communautaires",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
             "icon": "bell",
-            "title": "Notifications Officielles Android",
-            "content": "Integration du module officiel de notifications systeme Android : reception des annonces liturgiques et des alertes en direct dans la barre de notifications systeme."
+            "title": "Categories de notifications Android",
+            "content": "Creation des canaux officiels Android configurables dans les parametres systeme et dans l'application : Mises a jour, Annonces & Canal officiel, Fetes liturgiques & Priere."
           },
           {
             "type": "card",
             "icon": "check",
-            "title": "Controle et Prompt Intelligent",
-            "content": "Ajout d'une option d'activation des notifications dans les parametres, et proposition respectueuse apres 20 minutes d'utilisation avec bouton Ne plus me demander."
+            "title": "Correctifs de la version beta-0.0.41",
+            "content": "<ul><li><strong>Bouton de fermeture :</strong> Retablissement complet du bouton de fermeture sur le bandeau de mise a jour.</li><li><strong>Recherche automatique :</strong> Lancement instantane de la recherche de mise a jour des l'ouverture de l'application sans action manuelle.</li><li><strong>Bouton direct parametres Android :</strong> Acces rapide a la configuration des notifications du systeme Android.</li></ul>"
           },
           {
             "type": "callout",

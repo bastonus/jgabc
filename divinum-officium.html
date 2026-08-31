@@ -549,11 +549,43 @@
                     </label>
                 </div>
                 <div class="settings-toggle-row" style="margin-top:4px;">
-                    <span class="settings-toggle-label">Notifications système &amp; alertes</span>
+                    <span class="settings-toggle-label">Notifications système (Général)</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="toggleSystemNotifications" checked>
                         <span class="slider"></span>
                     </label>
+                </div>
+                <div id="subNotificationSettings" style="margin-left: 8px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; border-left: 2px solid rgba(var(--primary-color-rgb), 0.25); padding-left: 10px;">
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Mises à jour de l'application</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifUpdates" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Annonces &amp; Canal officiel</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifAnnouncements" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Fêtes liturgiques &amp; Prière</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifLiturgy" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="android-only-wrapper" id="wrapperAndroidNotifSettings" style="margin-top:6px;">
+                    <button id="btnOpenAndroidNotifSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.80rem; padding: 8px 10px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>Gérer les catégories dans les paramètres Android</span>
+                    </button>
                 </div>
                 <div class="update-check-wrapper" style="margin-top:8px;">
                     <button id="btnCheckUpdatesManual" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
@@ -562,7 +594,7 @@
                         </svg>
                         <span>Vérifier les mises à jour</span>
                     </button>
-                    <div id="updateStatusText" class="update-status-text">Version actuelle : beta-0.0.40</div>
+                    <div id="updateStatusText" class="update-status-text">Version actuelle : beta-0.0.41</div>
                 </div>
                 <div class="web-download-app-wrapper web-only-btn" style="margin-top:8px;">
                     <button id="btnDownloadAppSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
