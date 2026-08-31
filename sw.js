@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.3.8';
+const CACHE_NAME = 'oremus-pwa-v1.3.9';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [
@@ -35,6 +35,8 @@ const PRECACHE_ASSETS = [
     './js/vendor/dexie.min.js',
     './js/vendor/flexsearch.bundle.min.js',
     './js/gregorian_db.js',
+    './js/gregorian_index_data.js',
+    './js/gregorian_search_engine.js',
     './js/gregorian_search_worker.js',
     './js/gregorian_search_ui.js',
     './data/gregorian_index.json',

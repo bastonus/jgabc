@@ -7,8 +7,8 @@ android {
         applicationId "com.chanttools.divinumofficium"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 51
-        versionName "beta-0.0.51"
+        versionCode 52
+        versionName "beta-0.0.52"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -90,6 +90,8 @@ task copyWebAssets(type: Copy) {
         include "js/bible_mappings.js"
         include "js/divinum_officium.js"
         include "js/gregorian_db.js"
+        include "js/gregorian_index_data.js"
+        include "js/gregorian_search_engine.js"
         include "js/gregorian_search_worker.js"
         include "js/gregorian_search_ui.js"
         include "js/vendor/**"

@@ -38,28 +38,47 @@
             .trim();
     }
 
-    // Initialisation du Web Worker et chargement robuste de l'index universel
+    // Initialisation du Moteur de Recherche (Support Direct Synchrone + Web Worker Asynchrone)
+    function initSearchEngine() {
+        var engine = window.GregorianSearchEngine;
+        if (engine && !engine.isInitialized) {
+            if (window.GREGORIAN_INDEX && Array.isArray(window.GREGORIAN_INDEX)) {
+                engine.buildIndex(window.GREGORIAN_INDEX);
+                isWorkerReady = true;
+                $('#gregorianTotalBadge').text(engine.chantsList.length + ' éléments');
+                if (window.doState && window.doState.hora === 'gregorian_search') {
+                    triggerSearch(false);
+                }
+            } else {
+                loadIndexFromMainThread();
+            }
+        } else if (engine && engine.isInitialized) {
+            isWorkerReady = true;
+            $('#gregorianTotalBadge').text(engine.chantsList.length + ' éléments');
+        }
+
+        initWorker();
+    }
+
+    // Initialisation optionnelle du Web Worker
     function initWorker() {
         if (worker) return;
         try {
-            worker = new Worker('js/gregorian_search_worker.js?v=2.58&ts=' + Date.now());
+            worker = new Worker('js/gregorian_search_worker.js?v=2.62&ts=' + Date.now());
             worker.onmessage = handleWorkerMessage;
             worker.onerror = function(err) {
-                console.error('[GregorianUI] Erreur Worker:', err);
+                console.warn('[GregorianUI] Worker désactivé ou erreur, utilisation moteur direct:', err);
             };
 
             // 1. Tenter l'initialisation interne par le Worker
             worker.postMessage({
                 type: 'INIT',
                 payload: {
-                    url: 'data/gregorian_index.json?v=3.2&ts=' + Date.now()
+                    url: 'data/gregorian_index.json?v=3.3&ts=' + Date.now()
                 }
             });
-
-            // 2. En parallèle, charger aussi l'index depuis le thread principal pour garantir le fonctionnement sous Android Capacitor
-            loadIndexFromMainThread();
         } catch (e) {
-            console.warn('[GregorianUI] Impossible d\'instancier le Web Worker:', e);
+            console.warn('[GregorianUI] Web Worker non supporté, utilisation du moteur in-memory direct:', e);
         }
     }
 
@@ -67,9 +86,9 @@
     function loadIndexFromMainThread() {
         if (isIndexLoadedFromMain) return;
         var urls = [
-            'data/gregorian_index.json?v=3.2',
-            './data/gregorian_index.json?v=3.2',
-            '../data/gregorian_index.json?v=3.2'
+            'data/gregorian_index.json?v=3.3',
+            './data/gregorian_index.json?v=3.3',
+            '../data/gregorian_index.json?v=3.3'
         ];
 
         function tryFetch(i) {
@@ -82,7 +101,14 @@
                 .then(function(jsonData) {
                     if (isIndexLoadedFromMain) return;
                     isIndexLoadedFromMain = true;
-                    console.log('[GregorianUI] Index universel chargé avec succès via thread principal (' + (Array.isArray(jsonData) ? jsonData.length : 0) + ' éléments)');
+                    if (window.GregorianSearchEngine) {
+                        window.GregorianSearchEngine.buildIndex(jsonData);
+                    }
+                    isWorkerReady = true;
+                    $('#gregorianTotalBadge').text((Array.isArray(jsonData) ? jsonData.length : 0) + ' éléments');
+                    if (window.doState && window.doState.hora === 'gregorian_search') {
+                        triggerSearch(false);
+                    }
                     if (worker) {
                         worker.postMessage({
                             type: 'LOAD_DATA',
@@ -115,7 +141,6 @@
                 break;
 
             case 'INIT_ERROR':
-                console.warn('[GregorianUI] Worker INIT_ERROR, secours via thread principal:', payload.error);
                 loadIndexFromMainThread();
                 break;
 
@@ -766,9 +791,13 @@
         }
     }
 
-    // Déclenchement de la recherche vers le Web Worker (Support du chargement continu par lots)
+    // Déclenchement de la recherche (Exécution instantanée locale ou via Web Worker)
     function triggerSearch(isAppend) {
-        if (!worker || !isWorkerReady) return;
+        var engine = window.GregorianSearchEngine;
+        if (!isWorkerReady && (!engine || !engine.isInitialized)) {
+            initSearchEngine();
+            if (!isWorkerReady && (!engine || !engine.isInitialized)) return;
+        }
 
         var query = $('#gregorianSearchInput').val();
         if (query === undefined) query = currentQuery || '';
@@ -787,22 +816,44 @@
         }
 
         var userLang = (window.doState && window.doState.vernacularLang) ? window.doState.vernacularLang : (localStorage.getItem('do_vernacular_lang') || 'fr');
-        worker.postMessage({
-            type: 'SEARCH',
-            payload: {
-                query: query,
-                filters: {
-                    part: currentFilterPart,
-                    mode: currentFilterMode,
-                    lang: userLang
-                },
-                filterPart: currentFilterPart,
-                filterMode: currentFilterMode,
-                limit: PAGE_SIZE,
-                offset: isAppend ? currentLoadedCount : 0,
-                append: isAppend || false
-            }
-        });
+        var filters = {
+            part: currentFilterPart,
+            mode: currentFilterMode,
+            lang: userLang
+        };
+        var offset = isAppend ? currentLoadedCount : 0;
+
+        // 1. Exécution locale instantanée (< 1 ms) prioritaire
+        if (engine && engine.isInitialized) {
+            var searchRes = engine.executeSearch(query, filters, PAGE_SIZE, offset);
+            renderSearchResults({
+                query: searchRes.query,
+                results: searchRes.results,
+                totalCount: searchRes.totalCount,
+                totalFound: searchRes.totalCount,
+                tookMs: searchRes.tookMs,
+                timeMs: searchRes.tookMs,
+                append: isAppend || false,
+                offset: offset
+            });
+            return;
+        }
+
+        // 2. Sinon délégation au Web Worker
+        if (worker && isWorkerReady) {
+            worker.postMessage({
+                type: 'SEARCH',
+                payload: {
+                    query: query,
+                    filters: filters,
+                    filterPart: currentFilterPart,
+                    filterMode: currentFilterMode,
+                    limit: PAGE_SIZE,
+                    offset: offset,
+                    append: isAppend || false
+                }
+            });
+        }
     }
 
     // Affichage des résultats de recherche unifiée (Offices, Messes, Bible, Chants)
@@ -1075,7 +1126,7 @@
 
     // Rendu complet de la page de recherche dans #do-content-stream
     function renderMainView() {
-        initWorker();
+        initSearchEngine();
         var $stream = $('#do-content-stream').empty();
 
         // Synchronisation des éléments dans l'en-tête
@@ -1481,7 +1532,7 @@
     window.openChantMainView = renderChantMainView;
 
     $(document).ready(function() {
-        initWorker();
+        initSearchEngine();
         initEvents();
     });
 

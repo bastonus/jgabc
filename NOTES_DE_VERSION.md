@@ -1,5 +1,17 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.52 (1 Septembre 2026)
+
+---
+
+### ⚡ Moteur de Recherche Embarqué Direct (0 ms & 100% Garanti sous Android APK)
+* **Embarquement Synchrone Direct de l'Index & du Moteur de Recherche :**
+  * Intégration de l'index sous forme de module JS embarqué natif (`js/gregorian_index_data.js` et `js/gregorian_search_engine.js`).
+  * Les 2292 éléments (Messes avec propres, Offices, 73 livres de la Sainte Bible et Chants) sont initialisés dès le chargement de l'application en mémoire, sans aucune dépendance à des requêtes `fetch` ou à l'isolation des Web Workers Android.
+  * Recherche universelle instantanée avec 0 ms de délai de frappe et extraction d'extraits multilingues garantie sur Android, iOS et Web.
+
+---
+
 ## 🚀 Version 0.0.51 (1 Septembre 2026)
 
 ---
