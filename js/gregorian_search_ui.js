@@ -808,7 +808,7 @@
 
             if (itemType === 'officium') {
                 var previewHtml = hasSnippet 
-                    ? ('<div class="do-rubric-inline">Extrait</div><p>' + item.matchSnippet + '</p>')
+                    ? ('<p>' + item.matchSnippet + '</p>')
                     : (item.latinPreview || '<p class="do-dialog-line"><span class="do-resp-sym V">℣.</span> Deus, in adjutórium meum inténde.</p>');
                 html += '<div class="gregorian-card gregorian-card-officium' + snippetClass + '" data-item-type="officium" data-hora="' + escapeHtml(item.hora || 'laudes') + '">';
                 html += '  <div class="gregorian-card-header">';
@@ -833,7 +833,7 @@
                 var colorClass = item.color || 'green';
                 var rankText = item.rank || 'Missa';
                 var previewHtml = hasSnippet 
-                    ? ('<div class="do-rubric-inline">Extrait</div><p>' + item.matchSnippet + '</p>')
+                    ? ('<p>' + item.matchSnippet + '</p>')
                     : (item.latinPreview || '<div class="do-rubric-inline">Introitus</div><p>Ad te levávi ánimam meam...</p>');
                 html += '<div class="gregorian-card gregorian-card-missa' + snippetClass + '" data-item-type="missa" data-missa-key="' + escapeHtml(item.key || '') + '">';
                 html += '  <div class="gregorian-card-header">';
@@ -856,7 +856,7 @@
 
             } else if (itemType === 'bible') {
                 var previewHtml = hasSnippet 
-                    ? ('<div class="do-rubric-inline">Extrait</div><p>' + item.matchSnippet + '</p>')
+                    ? ('<p>' + item.matchSnippet + '</p>')
                     : (item.latinPreview || '<span class="do-bible-vnum">1</span> In princípio...');
                 html += '<div class="gregorian-card gregorian-card-bible' + snippetClass + '" data-item-type="bible" data-book-id="' + escapeHtml(item.bookId || '') + '">';
                 html += '  <div class="gregorian-card-header">';

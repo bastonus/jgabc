@@ -43,15 +43,23 @@
 
 ---
 
-### 🔔 Notifications & Système Android
-* **Notifications Push en Arrière-plan & Icône Personnalisée :**
-  * Réception des alertes même lorsque l'application est fermée ou en veille, avec icône vectorielle `ic_notification` (logo Oremus) dans la barre d'état Android.
-  * Clic sur la notification ou le bandeau ouvrant instantanément la modale associée.
-  * Correction du positionnement et suppression des chevauchements de texte dans les étapes des alertes.
-
 ---
 
 ## 🚀 Version 0.0.46 (31 Août 2026)
+
+---
+
+### 🔔 Notifications Push & Système Android
+* **Notifications Push en Arrière-plan & Icône Personnalisée :**
+  * Réception des alertes et notifications push même lorsque l'application est fermée ou en veille.
+  * Intégration de l'icône vectorielle personnalisée `ic_notification` (logo Oremus) pour la barre d'état Android.
+* **Navigation & Interactions Directes :**
+  * Ouverture instantanée de la pop-up liée lors d'un clic sur le bandeau supérieur, le toast ou la notification système Android.
+  * Correction du positionnement et suppression des chevauchements de texte dans les listes d'étapes (*steps*) des pop-ups d'alerte.
+
+---
+
+## 🚀 Version 0.0.45 (31 Août 2026)
 
 ---
 
