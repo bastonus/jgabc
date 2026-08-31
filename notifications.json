@@ -27,20 +27,26 @@
       },
       "modal": {
         "title": "Notes de Version (v0.0.48)",
-        "subtitle": "Recherche Universelle & Correctifs",
+        "subtitle": "Recherche Universelle, En-tête & Historique complet",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
             "icon": "check",
-            "title": "Nouveautés de la v0.0.47",
-            "content": "<ul><li><strong>Recherche Universelle & Instantanée (< 2 ms) :</strong> Indexation complète des Offices, des 566 Messes avec leurs propres, des 73 livres de la Vulgate latine et de tous les chants grégoriens.</li><li><strong>Modes Grille & Ligne :</strong> Affichage en grille carrée (1:1) ou en liste compacte avec lazy rendering des partitions centré sur la section recherchée.</li><li><strong>Filtres & Pastilles :</strong> Filtrage par catégories liturgiques (Introïts, Graduels, Alléluias, Traits, Séquences, Offertoires, Communions, Antiennes, Répons, Hymnes, Modes 1-8, Ad Libitum, Kyriale) avec débordement fluide et arrondi 10px.</li><li><strong>Isolation par langue :</strong> Recherche stricte dans la langue de l'application sans pollution par d'autres langues.</li><li><strong>En-tête & Barre de recherche :</strong> Flèche déroulante collée au titre court et verrouillée sur la même ligne pour les titres longs, barre d'accueil harmonisée à 38px/10px.</li></ul>"
+            "title": "Nouveautés de la v0.0.47 / v0.0.48",
+            "content": "<ul><li><strong>Recherche Universelle & Instantanée (< 2 ms) :</strong> Indexation complète des Offices, des 566 Messes avec leurs propres, des 73 livres de la Vulgate latine et de tous les chants grégoriens.</li><li><strong>Modes Grille & Ligne :</strong> Affichage en grille carrée (1:1) ou en liste compacte avec lazy rendering des partitions centré sur la section recherchée.</li><li><strong>Filtres & Pastilles :</strong> Filtrage par catégories liturgiques avec débordement fluide et arrondi 10px.</li><li><strong>Isolation par langue :</strong> Recherche stricte dans la langue de l'application sans pollution par d'autres langues.</li><li><strong>En-tête & Barre de recherche :</strong> Flèche déroulante collée au titre court et verrouillée sur la même ligne pour les titres longs, barre d'accueil harmonisée à 38px/10px.</li><li><strong>Correctifs Android :</strong> Embarquement complet des feuilles de style et assets de recherche dans l'APK.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "bell",
+            "title": "Rappels des nouveautés de la v0.0.46",
+            "content": "<ul><li><strong>Notifications Push en arrière-plan :</strong> Réception des alertes même application fermée avec icône personnalisée Oremus dans la barre d'état Android.</li><li><strong>Ouverture directe :</strong> Clic sur un bandeau ou une notification ouvrant instantanément la popup liée.</li><li><strong>Affichage des étapes :</strong> Correction du chevauchement de texte dans les étapes numérotées des alertes.</li></ul>"
           },
           {
             "type": "card",
             "icon": "info",
-            "title": "Rappels des nouveautés de la v0.0.46",
-            "content": "<ul><li><strong>Sommaire interactif de la Messe :</strong> Accès instantané aux 4 grandes étapes de la célébration avec ScrollSpy en temps réel.</li><li><strong>Dernier Évangile :</strong> Prologue de Saint Jean (1:1-14) réinséré intégralement dans la conclusion de l'Ordinaire en latin et français.</li><li><strong>Notifications Push & Icône :</strong> Push en arrière-plan et icône vectorielle personnalisée (logo Oremus) dans la barre d'état Android.</li><li><strong>Navigation & Ergonomie :</strong> Prise en charge native du bouton Retour Android/navigateur et réinitialisation automatique après inactivité.</li></ul>"
+            "title": "Rappels des nouveautés de la v0.0.45",
+            "content": "<ul><li><strong>Sommaire interactif de la Messe :</strong> Accès instantané aux 4 grandes étapes de la célébration avec ScrollSpy en temps réel.</li><li><strong>Dernier Évangile :</strong> Prologue de Saint Jean (1:1-14) réinséré intégralement dans la conclusion de l'Ordinaire en latin et français.</li><li><strong>Navigation & Ergonomie :</strong> Prise en charge native du bouton Retour Android/navigateur et réinitialisation automatique sur le jour courant après 30 min d'inactivité.</li><li><strong>Moteur Audio :</strong> Fermeture par glissement vers le bas (swipe down), bouton de vitesse rapide en un clic et son enrichi.</li><li><strong>Calendrier & Propres :</strong> Traductions françaises complétées (Toussaint, Saintes Reliques, St Martin Iᵉʳ, Noël) et déduplication des fêtes.</li></ul>"
           },
           {
             "type": "callout",
