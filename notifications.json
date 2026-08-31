@@ -4,37 +4,37 @@
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.48",
+      "id": "notif-release-beta-0.0.49",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.48",
+      "minVersion": "beta-0.0.49",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise à jour",
       "icon": "sparkles",
-      "title": "Notes de version v0.0.48",
+      "title": "Notes de version v0.0.49",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les nouveautés de la v0.0.48 : Recherche universelle ultra-rapide (Offices, Messes, Bible Vulgate, Chants), rendu GABC différé avec modes Grille & Ligne, harmonisation de l'en-tête et correctifs Android.",
-      "cancelsNotifications": ["notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les nouveautés de la v0.0.49 : Recherche universelle ultra-rapide (Offices, Messes, Bible Vulgate, Chants), cartes aérées avec suppression du label 'Extrait', rendu GABC différé, en-tête dynamique et correctifs Android.",
+      "cancelsNotifications": ["notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus v0.0.48 : Recherche Universelle, Grégorien & Correctifs Android",
+        "text": "Oremus v0.0.49 : Recherche Universelle, Cartes Aérées & Correctifs Android",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (v0.0.48)",
+        "title": "Notes de Version (v0.0.49)",
         "subtitle": "Recherche Universelle, En-tête & Historique complet",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
             "icon": "check",
-            "title": "Nouveautés de la v0.0.47 / v0.0.48",
-            "content": "<ul><li><strong>Recherche Universelle & Instantanée (< 2 ms) :</strong> Indexation complète des Offices, des 566 Messes avec leurs propres, des 73 livres de la Vulgate latine et de tous les chants grégoriens.</li><li><strong>Modes Grille & Ligne :</strong> Affichage en grille carrée (1:1) ou en liste compacte avec lazy rendering des partitions centré sur la section recherchée.</li><li><strong>Filtres & Pastilles :</strong> Filtrage par catégories liturgiques avec débordement fluide et arrondi 10px.</li><li><strong>Isolation par langue :</strong> Recherche stricte dans la langue de l'application sans pollution par d'autres langues.</li><li><strong>En-tête & Barre de recherche :</strong> Flèche déroulante collée au titre court et verrouillée sur la même ligne pour les titres longs, barre d'accueil harmonisée à 38px/10px.</li><li><strong>Correctifs Android :</strong> Embarquement complet des feuilles de style et assets de recherche dans l'APK.</li></ul>"
+            "title": "Nouveautés de la v0.0.49",
+            "content": "<ul><li><strong>Recherche Universelle & Instantanée (< 2 ms) :</strong> Indexation complète des Offices, des 566 Messes avec leurs propres, des 73 livres de la Vulgate latine et de tous les chants grégoriens.</li><li><strong>Cartes de Recherche Aérées :</strong> Suppression de la mention « Extrait » superflue pour laisser un maximum d'espace au texte surligné.</li><li><strong>Modes Grille & Ligne :</strong> Affichage en grille carrée (1:1) ou en liste compacte avec lazy rendering des partitions centré sur la section recherchée.</li><li><strong>Filtres & Pastilles :</strong> Filtrage par catégories liturgiques avec débordement fluide et arrondi 10px.</li><li><strong>Isolation par langue :</strong> Recherche stricte dans la langue de l'application sans pollution par d'autres langues.</li><li><strong>En-tête & Barre de recherche :</strong> Flèche déroulante collée au titre court et verrouillée sur la même ligne pour les titres longs, barre d'accueil harmonisée à 38px/10px.</li><li><strong>Correctifs Android :</strong> Embarquement complet des feuilles de style et assets de recherche dans l'APK.</li></ul>"
           },
           {
             "type": "card",

@@ -452,11 +452,12 @@ body.is-search-mode #gregorianFilterBar::-webkit-scrollbar {
 
 .gregorian-results.is-grid .gregorian-card.has-match-snippet .gregorian-text-preview p {
     display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
+    -webkit-line-clamp: 5 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     margin-bottom: 0;
+    line-height: 1.42 !important;
 }
 
 /* Aperçu sur le MÊME fond que la carte (transparent, sans bordure ni encart séparé) */

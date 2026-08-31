@@ -247,8 +247,8 @@ function extractSmartSnippet(fullText, query) {
 
     if (bestMatchIdx === -1) return null;
 
-    var winStart = Math.max(0, bestMatchIdx - 4);
-    var winEnd = Math.min(origWords.length, bestMatchIdx + qTokens.length + 12);
+    var winStart = Math.max(0, bestMatchIdx - 10);
+    var winEnd = Math.min(origWords.length, bestMatchIdx + qTokens.length + 38);
 
     var snippetParts = [];
     if (winStart > 0) snippetParts.push('…');

@@ -42,7 +42,7 @@
     function initWorker() {
         if (worker) return;
         try {
-            worker = new Worker('js/gregorian_search_worker.js?v=2.56&ts=' + Date.now());
+            worker = new Worker('js/gregorian_search_worker.js?v=2.57&ts=' + Date.now());
             worker.onmessage = handleWorkerMessage;
             worker.onerror = function(err) {
                 console.error('[GregorianUI] Erreur Worker:', err);

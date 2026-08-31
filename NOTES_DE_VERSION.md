@@ -1,5 +1,17 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.49 (1 Septembre 2026)
+
+---
+
+### 🔍 Cartes de Recherche & Optimisation d'Espace
+* **Suppression de la Mention « Extrait » :**
+  * Retrait du libellé superflu au-dessus des extraits de recherche pour aérer les cartes et maximiser le nombre de lignes de texte affichées en mode Grille et Mode Ligne.
+* **Stabilité et Embarquement Hors-Ligne :**
+  * Validation complète des assets embarqués dans l'application mobile et chargement instantané sans connexion.
+
+---
+
 ## 🚀 Version 0.0.48 (1 Septembre 2026)
 
 ---
