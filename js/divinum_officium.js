@@ -8517,72 +8517,116 @@ function checkForAppUpdates(isManual) {
     }
 
     var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/releases?_ts=' + Date.now();
+    var rawVersionUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/version.json?_ts=' + Date.now();
+    var localVersionUrl = './version.json?_ts=' + Date.now();
+
+    function handleReleasesData(releases) {
+        if (!Array.isArray(releases) || !releases.length) {
+            if (isManual) {
+                $statusText.text('Aucune release disponible sur GitHub').css('color', 'var(--text-tertiary)');
+            }
+            return;
+        }
+
+        // Filter out drafts and prereleases if beta not requested
+        var validReleases = releases.filter(function(r) {
+            if (r.draft) return false;
+            if (!includeBeta && r.prerelease) return false;
+            return true;
+        });
+
+        // Sort descending by semantic version so the true newest release is always first
+        validReleases.sort(function(a, b) {
+            return compareVersions(b.tag_name, a.tag_name);
+        });
+
+        if (!validReleases.length) {
+            if (isManual) {
+                $statusText.text('Aucune version stable récente trouvée').css('color', 'var(--text-tertiary)');
+            }
+            return;
+        }
+
+        var targetRelease = validReleases[0];
+        var latestTag = targetRelease.tag_name;
+        var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
+
+        if (isNewer) {
+            window._hasPendingAppUpdate = true;
+            if (isManual) {
+                $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+            }
+            var isDismissed = false;
+            try {
+                isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
+            } catch (e) {}
+
+            if (!isDismissed || isManual) {
+                showUpdateModal(targetRelease);
+
+                // Send official system notification on Android if supported
+                if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
+                    window.OremusSystemNotifications.send('Mise à jour disponible : ' + latestTag, 'Une nouvelle version d\'Oremus est prête au téléchargement.');
+                }
+            }
+        } else {
+            window._hasPendingAppUpdate = false;
+            if (isManual) {
+                $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
+            }
+        }
+    }
+
+    function handleFallbackVersionFile(data) {
+        if (!data || !data.latestVersion) throw new Error('Invalid version file');
+        var pseudoRelease = {
+            tag_name: data.tagName || data.latestVersion,
+            html_url: data.htmlUrl || ('https://github.com/bastonus/jgabc/releases/tag/' + (data.tagName || data.latestVersion)),
+            body: data.body || ('Mise à jour ' + data.latestVersion),
+            published_at: data.releaseDate || new Date().toISOString(),
+            assets: [
+                {
+                    name: 'app-release.apk',
+                    browser_download_url: data.downloadUrl || ('https://github.com/bastonus/jgabc/releases/download/' + (data.tagName || data.latestVersion) + '/app-release.apk')
+                }
+            ]
+        };
+        handleReleasesData([pseudoRelease]);
+    }
+
+    // Try GitHub API first, fallback to raw static version.json on 403 / failure
     fetch(apiUrl, {
         headers: { 'Accept': 'application/vnd.github.v3+json' },
         cache: 'no-cache'
     })
         .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (!res.ok) throw new Error('API HTTP ' + res.status);
             return res.json();
         })
         .then(function(releases) {
-            if (!Array.isArray(releases) || !releases.length) {
-                if (isManual) {
-                    $statusText.text('Aucune release disponible sur GitHub').css('color', 'var(--text-tertiary)');
-                }
-                return;
-            }
-
-            // Filter out drafts and prereleases if beta not requested
-            var validReleases = releases.filter(function(r) {
-                if (r.draft) return false;
-                if (!includeBeta && r.prerelease) return false;
-                return true;
-            });
-
-            // Sort descending by semantic version so the true newest release is always first
-            validReleases.sort(function(a, b) {
-                return compareVersions(b.tag_name, a.tag_name);
-            });
-
-            if (!validReleases.length) {
-                if (isManual) {
-                    $statusText.text('Aucune version stable récente trouvée').css('color', 'var(--text-tertiary)');
-                }
-                return;
-            }
-
-            var targetRelease = validReleases[0];
-            var latestTag = targetRelease.tag_name;
-            var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
-
-            if (isNewer) {
-                window._hasPendingAppUpdate = true;
-                if (isManual) {
-                    $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
-                }
-                var isDismissed = false;
-                try {
-                    isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
-                } catch (e) {}
-
-                if (!isDismissed || isManual) {
-                    showUpdateModal(targetRelease);
-
-                    // Send official system notification on Android if supported
-                    if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
-                        window.OremusSystemNotifications.send('Mise à jour disponible : ' + latestTag, 'Une nouvelle version d\'Oremus est prête au téléchargement.');
-                    }
-                }
-            } else {
-                window._hasPendingAppUpdate = false;
-                if (isManual) {
-                    $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
-                }
-            }
+            handleReleasesData(releases);
+        })
+        .catch(function(apiErr) {
+            console.warn('[Updates] GitHub API unreachable/rate-limited, trying raw version fallback:', apiErr);
+            return fetch(rawVersionUrl, { cache: 'no-cache' })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('Raw HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(function(vData) {
+                    handleFallbackVersionFile(vData);
+                })
+                .catch(function(rawErr) {
+                    console.warn('[Updates] Raw version fallback failed, trying local file:', rawErr);
+                    return fetch(localVersionUrl, { cache: 'no-cache' })
+                        .then(function(r) { return r.json(); })
+                        .then(function(vData) {
+                            handleFallbackVersionFile(vData);
+                        });
+                });
         })
         .catch(function(err) {
-            console.warn('Update check failed:', err);
+            console.warn('Update check failed completely:', err);
             if (isManual) {
                 $statusText.text('Impossible de vérifier les mises à jour (hors-ligne)').css('color', '#c96b63');
             }
@@ -9154,23 +9198,25 @@ var OremusNotifications = (function() {
     }
 
     function fetchFeed(forceRefresh) {
-        var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/contents/notifications.json?_ts=' + Date.now();
         var rawUrl = GITHUB_FEED_URL + '?_ts=' + Date.now();
+        var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/contents/notifications.json?_ts=' + Date.now();
 
-        return fetch(apiUrl, {
+        // 1. Try direct raw GitHub file first (no GitHub API rate limit / 403 Forbidden)
+        return fetch(rawUrl, {
             cache: 'no-cache',
-            headers: { 'Accept': 'application/vnd.github.v3.raw' }
+            headers: { 'Accept': 'application/json' }
         })
         .then(function(res) {
-            if (!res.ok) throw new Error('API HTTP ' + res.status);
+            if (!res.ok) throw new Error('Raw HTTP ' + res.status);
             return res.json();
         })
-        .catch(function(apiErr) {
-            return fetch(rawUrl, {
+        .catch(function(rawErr) {
+            // 2. Fallback to API if needed
+            return fetch(apiUrl, {
                 cache: 'no-cache',
-                headers: { 'Accept': 'application/json' }
+                headers: { 'Accept': 'application/vnd.github.v3.raw' }
             }).then(function(res) {
-                if (!res.ok) throw new Error('Raw HTTP ' + res.status);
+                if (!res.ok) throw new Error('API HTTP ' + res.status);
                 return res.json();
             });
         })
