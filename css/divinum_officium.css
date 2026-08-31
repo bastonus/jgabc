@@ -3955,12 +3955,12 @@ body.player-dock-open #modernPlayerBar {
 /* ── Grab Handle for Swipe Down Dismissal ── */
 .do-player-drag-handle-wrap {
     width: 100%;
-    padding: 6px 0 10px;
-    margin: -4px 0 0;
+    padding: 10px 0 14px;
+    margin: -8px 0 -4px;
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: grab;
+    cursor: pointer;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;

@@ -4502,10 +4502,13 @@ function initDoPlayer() {
 
             playerBar.style.removeProperty('transition');
 
-            // Dismiss if pulled down > 35% of player height OR quick downward swipe flick (vy > 0.45)
-            if (deltaY > barH * 0.35 || (deltaY > 25 && vy > 0.45)) {
+            // Dismiss if pulled down > 15% of player height (approx 20-25px) OR flick down (vy > 0.25) OR simply tapped the grab handle
+            var isTap = (Math.abs(deltaY) < 6 && dt < 300);
+            var isHandleTap = isTap && $(e.target).closest('#playerDragHandleWrap, #playerDragHandle').length > 0;
+
+            if (deltaY > barH * 0.15 || deltaY > 20 || (deltaY > 10 && vy > 0.25) || isHandleTap) {
                 triggerHapticFeedback('light');
-                playerBar.style.setProperty('transition', 'transform 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.2s ease', 'important');
+                playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
                 playerBar.style.setProperty('transform', 'translateY(100%)', 'important');
                 playerBar.style.setProperty('opacity', '0', 'important');
                 document.documentElement.style.setProperty('--player-drag-y', (playerBar.offsetHeight || 140) + 'px');
@@ -4515,10 +4518,10 @@ function initDoPlayer() {
                     playerBar.style.removeProperty('opacity');
                     document.documentElement.style.setProperty('--player-drag-y', '0px');
                     closeDoPlayer();
-                }, 240);
+                }, 220);
             } else {
                 // Smooth snap back to natural position
-                playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.22s ease', 'important');
+                playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
                 playerBar.style.setProperty('transform', 'translateY(0)', 'important');
                 playerBar.style.setProperty('opacity', '1', 'important');
                 document.documentElement.style.setProperty('--player-drag-y', '0px');
@@ -4526,7 +4529,7 @@ function initDoPlayer() {
                     playerBar.style.removeProperty('transition');
                     playerBar.style.removeProperty('transform');
                     playerBar.style.removeProperty('opacity');
-                }, 220);
+                }, 200);
             }
         }
 
@@ -9360,6 +9363,13 @@ var OremusNotifications = (function() {
         if (markDismissed && currentBannerNotif) {
             markNotificationDismissed(currentBannerNotif.id, currentBannerNotif.frequency);
         }
+
+        // Sequential notification chaining: show the next pending notification after dismissing
+        setTimeout(function() {
+            if (!$('#appUpdateBanner').hasClass('is-visible') && !window._hasPendingAppUpdate) {
+                checkAndRun(false);
+            }
+        }, 400);
     }
 
     function showFloating(notif) {
@@ -9462,7 +9472,7 @@ var OremusNotifications = (function() {
                         w.steps.forEach(function(stepText, idx) {
                             stepsHtml += '<div class="remote-notif-step-row">' +
                                 '<span class="remote-notif-step-num">' + (idx + 1) + '</span>' +
-                                '<span class="remote-notif-step-desc">' + stepText + '</span>' +
+                                '<span class="remote-notif-step-num">' + stepText + '</span>' +
                             '</div>';
                         });
                     }
@@ -9504,6 +9514,13 @@ var OremusNotifications = (function() {
         if (markDismissed && currentModalNotif) {
             markNotificationDismissed(currentModalNotif.id, currentModalNotif.frequency);
         }
+
+        // Sequential notification chaining: show the next pending notification after dismissing modal
+        setTimeout(function() {
+            if (!$('#appUpdateBanner').hasClass('is-visible') && !window._hasPendingAppUpdate) {
+                checkAndRun(false);
+            }
+        }, 400);
     }
 
     function handleAction(notif, actionType, url, target) {
@@ -9512,7 +9529,7 @@ var OremusNotifications = (function() {
         if (actionType === 'open_modal') {
             showModal(notif);
         } else if (actionType === 'open_feedback') {
-            hideModal(false);
+            hideModal(true);
             openFeedbackModal();
         } else if (actionType === 'open_url') {
             if (url) {
@@ -9531,7 +9548,7 @@ var OremusNotifications = (function() {
                 triggerHapticFeedback('success');
             }
         } else if (actionType === 'dismiss') {
-            // Handled by caller
+            hideModal(true);
         }
     }
 
@@ -9553,7 +9570,7 @@ var OremusNotifications = (function() {
 
             var primary = valid[0];
 
-            // Decide presentation
+            // Decide presentation for in-app display (highest priority first)
             if (primary.banner && primary.banner.show !== false) {
                 showBanner(primary);
             } else if (primary.target === 'toast' || primary.target === 'floating') {
@@ -9562,11 +9579,9 @@ var OremusNotifications = (function() {
                 showModal(primary);
             }
 
-            // Also send official system/Android notification if enabled
-            if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
-                var notifTitle = primary.title || 'Oremus';
-                var notifMsg = primary.message || (primary.banner ? primary.banner.text : '');
-                window.OremusSystemNotifications.send(notifTitle, notifMsg, { notifId: primary.id });
+            // Schedule background system notifications for all valid notifications when the app is closed/inactive
+            if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.scheduleBackgroundNotifs === 'function') {
+                window.OremusSystemNotifications.scheduleBackgroundNotifs(valid);
             }
         });
     }
@@ -9742,6 +9757,52 @@ var OremusSystemNotifications = (function() {
         }
     }
 
+    function scheduleBackgroundNotifs(notifsList) {
+        if (!isEnabled() || !Array.isArray(notifsList) || !notifsList.length) return;
+        if (!isNativeAndroidApp() || !window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.LocalNotifications) return;
+
+        try {
+            var plugin = window.Capacitor.Plugins.LocalNotifications;
+            notifsList.forEach(function(n, idx) {
+                var pushedKey = 'do_system_pushed_' + n.id;
+                if (localStorage.getItem(pushedKey) === 'true') return; // Push only once per announcement
+
+                var notifTitle = n.title || (n.banner ? n.banner.text : 'Oremus');
+                var notifBody = n.message || (n.subtitle || 'Nouvelle information disponible dans votre bréviaire.');
+                var delayMs = (idx === 0) ? 15000 : (idx * 60000); // Trigger in background shortly after leaving
+                var channelInfo = CHANNELS['announcements'];
+
+                plugin.schedule({
+                    notifications: [
+                        {
+                            id: Math.abs(hashCode(n.id || 'oremus')) % 900000 + 100000,
+                            title: notifTitle,
+                            body: notifBody,
+                            channelId: channelInfo.id,
+                            schedule: { at: new Date(Date.now() + delayMs) },
+                            extra: { notifId: n.id }
+                        }
+                    ]
+                }).then(function() {
+                    try { localStorage.setItem(pushedKey, 'true'); } catch (e) {}
+                }).catch(function(err) {
+                    console.warn('[SystemNotifications] Background schedule error:', err);
+                });
+            });
+        } catch (e) {
+            console.warn('[SystemNotifications] Background schedule exception:', e);
+        }
+    }
+
+    function hashCode(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+        }
+        return hash;
+    }
+
     return {
         isSupported: isSupported,
         isEnabled: isEnabled,
@@ -9751,6 +9812,7 @@ var OremusSystemNotifications = (function() {
         initChannels: initChannels,
         openSystemSettings: openSystemSettings,
         requestPermission: requestPermission,
+        scheduleBackgroundNotifs: scheduleBackgroundNotifs,
         send: send
     };
 })();

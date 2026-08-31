@@ -835,9 +835,10 @@ if(typeof window=='object') (function(window) {
       } catch(e) {
         try { synth = s.toMaster(); } catch(e2) { synth = s; }
       }
-      if (Tone.Transport) Tone.Transport.bpm.value = parseInt(localStorage.getItem('do_tempo'), 10) || 165;
     }
-    // Resume AudioContext if suspended (Chrome autoplay policy)
+    if (Tone && Tone.Transport) {
+      Tone.Transport.bpm.value = parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+    }
     if (Tone && Tone.context && Tone.context.state !== 'running') {
       var p = Tone.start ? Tone.start() : (Tone.context.resume ? Tone.context.resume() : null);
       if (p && p.catch) p.catch(function(){});
@@ -846,7 +847,16 @@ if(typeof window=='object') (function(window) {
 
   if(Tone) {
     window.setTempo = function(newTempo) {
-      if (Tone.Transport) Tone.Transport.bpm.value = newTempo || 165;
+      var tempo = parseInt(newTempo, 10) || 165;
+      localStorage.setItem('do_tempo', tempo);
+      if (Tone.Transport) {
+        Tone.Transport.bpm.value = tempo;
+        // If playback is currently active, reschedule immediately so tempo applies on the fly
+        if (Tone.Transport.state === 'started' && typeof window.playNextNote === 'function' && typeof timeoutNextNote !== 'undefined') {
+          Tone.Transport.clear(timeoutNextNote);
+          timeoutNextNote = Tone.Transport.scheduleOnce(window.playNextNote, '+16n');
+        }
+      }
     }
     window.setRelativeTempo = function(delta) {
       if (!Tone.Transport) return 165;
