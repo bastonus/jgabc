@@ -1,5 +1,18 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.51 (1 Septembre 2026)
+
+---
+
+### 🔍 Correctif Moteur de Recherche Android (Chargement Universel Garanti)
+* **Résolution du Problème de Recherche sur l'Application Android (APK) :**
+  * Double canal d'initialisation de l'index de recherche universel : chargement direct par le thread principal en plus du Web Worker, évitant les blocages de résolution de chemin relatifs (`data/gregorian_index.json`) spécifiques aux WebViews Android.
+  * Les 2292 éléments (Messes, Offices, Vulgate, Chants) sont désormais garantis chargés et interrogeables instantanément sous Android comme sur le web.
+* **Icône Officielle de Notification Android :**
+  * Intégration fidèle des tracés vectoriels du logo officiel Oremus (`Oremus-logo/logo.svg`) dans la barre d'état Android (`ic_notification`).
+
+---
+
 ## 🚀 Version 0.0.50 (1 Septembre 2026)
 
 ---

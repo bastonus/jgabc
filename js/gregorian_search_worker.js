@@ -709,21 +709,37 @@ self.addEventListener('message', async function(e) {
     switch (type) {
         case 'INIT':
             try {
-                var url = payload.url || '../data/gregorian_index.json';
-                var res = await fetch(url);
-                if (res.ok) {
-                    var json = await res.json();
-                    buildIndex(json);
-                    self.postMessage({
-                        type: 'INIT_DONE',
-                        msgId: msgId,
-                        payload: { totalChants: chantsList.length }
-                    });
-                } else {
-                    throw new Error('HTTP ' + res.status);
+                var urls = [
+                    payload.url,
+                    'data/gregorian_index.json',
+                    './data/gregorian_index.json',
+                    '../data/gregorian_index.json',
+                    (self.location && self.location.origin ? (self.location.origin + '/data/gregorian_index.json') : null)
+                ].filter(Boolean);
+
+                var loaded = false;
+                for (var u = 0; u < urls.length; u++) {
+                    try {
+                        var res = await fetch(urls[u]);
+                        if (res && res.ok) {
+                            var json = await res.json();
+                            buildIndex(json);
+                            loaded = true;
+                            self.postMessage({
+                                type: 'INIT_DONE',
+                                msgId: msgId,
+                                payload: { totalChants: chantsList.length }
+                            });
+                            break;
+                        }
+                    } catch (fetchErr) {}
+                }
+
+                if (!loaded) {
+                    throw new Error('Échec fetch worker pour toutes les URLs');
                 }
             } catch (err) {
-                console.error('[Worker] Erreur init index:', err);
+                console.warn('[Worker] Erreur init index:', err);
                 self.postMessage({
                     type: 'INIT_ERROR',
                     msgId: msgId,

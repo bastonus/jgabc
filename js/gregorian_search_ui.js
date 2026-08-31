@@ -38,19 +38,64 @@
             .trim();
     }
 
-    // Initialisation du Web Worker
+    // Initialisation du Web Worker et chargement robuste de l'index universel
     function initWorker() {
         if (worker) return;
         try {
-            worker = new Worker('js/gregorian_search_worker.js?v=2.57&ts=' + Date.now());
+            worker = new Worker('js/gregorian_search_worker.js?v=2.58&ts=' + Date.now());
             worker.onmessage = handleWorkerMessage;
             worker.onerror = function(err) {
                 console.error('[GregorianUI] Erreur Worker:', err);
             };
-            worker.postMessage({ type: 'INIT', payload: { url: '../data/gregorian_index.json?v=3.1&ts=' + Date.now() } });
+
+            // 1. Tenter l'initialisation interne par le Worker
+            worker.postMessage({
+                type: 'INIT',
+                payload: {
+                    url: 'data/gregorian_index.json?v=3.2&ts=' + Date.now()
+                }
+            });
+
+            // 2. En parallèle, charger aussi l'index depuis le thread principal pour garantir le fonctionnement sous Android Capacitor
+            loadIndexFromMainThread();
         } catch (e) {
             console.warn('[GregorianUI] Impossible d\'instancier le Web Worker:', e);
         }
+    }
+
+    var isIndexLoadedFromMain = false;
+    function loadIndexFromMainThread() {
+        if (isIndexLoadedFromMain) return;
+        var urls = [
+            'data/gregorian_index.json?v=3.2',
+            './data/gregorian_index.json?v=3.2',
+            '../data/gregorian_index.json?v=3.2'
+        ];
+
+        function tryFetch(i) {
+            if (i >= urls.length) return;
+            fetch(urls[i])
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function(jsonData) {
+                    if (isIndexLoadedFromMain) return;
+                    isIndexLoadedFromMain = true;
+                    console.log('[GregorianUI] Index universel chargé avec succès via thread principal (' + (Array.isArray(jsonData) ? jsonData.length : 0) + ' éléments)');
+                    if (worker) {
+                        worker.postMessage({
+                            type: 'LOAD_DATA',
+                            payload: { data: jsonData }
+                        });
+                    }
+                })
+                .catch(function() {
+                    tryFetch(i + 1);
+                });
+        }
+
+        tryFetch(0);
     }
 
     // Réception des messages du Web Worker
@@ -61,11 +106,17 @@
 
         switch (type) {
             case 'INIT_DONE':
+            case 'LOAD_DATA_DONE':
                 isWorkerReady = true;
                 $('#gregorianTotalBadge').text(payload.totalChants + ' éléments');
                 if (window.doState && window.doState.hora === 'gregorian_search') {
                     triggerSearch(false);
                 }
+                break;
+
+            case 'INIT_ERROR':
+                console.warn('[GregorianUI] Worker INIT_ERROR, secours via thread principal:', payload.error);
+                loadIndexFromMainThread();
                 break;
 
             case 'SEARCH_RESULTS':

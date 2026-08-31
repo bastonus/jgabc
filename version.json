@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.50",
-  "versionCode": 50,
-  "releaseDate": "2026-09-01T01:00:00Z",
-  "tagName": "v0.0.50",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.50/Oremus.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.50",
-  "body": "Release v0.0.50 — Correctif téléchargement APK (404), suppression du spam de notifications Android, build unique GitHub Actions et extraits étendus"
+  "latestVersion": "beta-0.0.51",
+  "versionCode": 51,
+  "releaseDate": "2026-09-01T01:15:00Z",
+  "tagName": "v0.0.51",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.51/Oremus.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.51",
+  "body": "Release v0.0.51 — Correctif recherche universelle sur Android APK (chargement direct et synchrone de l'index), logo SVG officiel pour les notifications et pipeline de release"
 }

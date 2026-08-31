@@ -46,37 +46,37 @@
       }
     },
     {
-      "id": "notif-release-beta-0.0.50",
+      "id": "notif-release-beta-0.0.51",
       "enabled": true,
       "priority": 100,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.50",
+      "minVersion": "beta-0.0.51",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise à jour",
       "icon": "sparkles",
-      "title": "Notes de version v0.0.50",
+      "title": "Notes de version v0.0.51",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les nouveautés de la v0.0.50 : Téléchargement direct d'Oremus.apk sans 404, déduplication stricte des notifications Android (aucun dérangement quand l'app est ouverte), extraits de recherche étendus et compilations optimisées.",
-      "cancelsNotifications": ["notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les nouveautés de la v0.0.51 : Recherche universelle totalement opérationnelle sur Android APK (chargement garanti des 2292 éléments), icône officielle Oremus dans la barre d'état et téléchargement direct d'Oremus.apk.",
+      "cancelsNotifications": ["notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
-        "text": "Oremus v0.0.50 : Téléchargement APK réparé, Anti-Spam Android & Extraits étendus",
+        "text": "Oremus v0.0.51 : Recherche Universelle Android, Icône Officielle & Téléchargement APK",
         "tag": "Nouveautés",
         "actionLabel": "Voir les notes",
         "actionType": "open_modal",
         "dismissible": true
       },
       "modal": {
-        "title": "Notes de Version (v0.0.50)",
-        "subtitle": "Téléchargement APK, Notifications Silencieuses en Premier Plan & Extraits",
+        "title": "Notes de Version (v0.0.51)",
+        "subtitle": "Recherche Universelle Android, Icône Officielle & Téléchargement APK",
         "icon": "sparkles",
         "wrappers": [
           {
             "type": "card",
             "icon": "check",
-            "title": "Nouveautés de la v0.0.50",
-            "content": "<ul><li><strong>Téléchargement direct d'Oremus.apk :</strong> Résolution complète de l'erreur HTTP 404 lors de la mise à jour in-app grâce à l'alignement sur le binaire officiel des releases GitHub.</li><li><strong>Anti-Spam Notifications Android :</strong> Déduplication stricte et permanente. Chaque mise à jour et annonce n'est notifiée qu'une seule fois.</li><li><strong>Respect de la Prière (Pas de notif en premier plan) :</strong> Aucune notification système Android n'est déclenchée lorsque l'application est ouverte et en cours d'utilisation.</li><li><strong>Extraits de Recherche Étoffés :</strong> Remplissage harmonieux des cartes carrées en grille jusqu'à 5 lignes de texte sans libellé parasite.</li><li><strong>Pipeline GitHub Actions Unique :</strong> Compilation d'un unique APK par release tag.</li></ul>"
+            "title": "Nouveautés de la v0.0.51",
+            "content": "<ul><li><strong>Recherche Universelle Opérationnelle sous Android :</strong> Double chargement de l'index universel garantissant l'accès immédiat aux 2292 éléments (Offices, Messes, Bible, Chants) même avec les restrictions de Worker sous WebView Android.</li><li><strong>Icône Officielle Oremus dans la barre d'état :</strong> Tracés vectoriels authentiques de la lettre « O » et de la croix pattée pour les alertes Android.</li><li><strong>Téléchargement direct d'Oremus.apk :</strong> Résolution complète de l'erreur 404 lors des mises à jour in-app.</li><li><strong>Anti-Spam Notifications :</strong> Déduplication stricte et silence complet quand l'application est ouverte.</li></ul>"
           },
           {
             "type": "card",
