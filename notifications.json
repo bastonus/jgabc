@@ -34,7 +34,7 @@
             "type": "card",
             "icon": "check",
             "title": "Nouveautés de la v0.0.54",
-            "content": "<ul><li><strong>Enregistrements Vidéo YouTube / YouTube Music :</strong> Indexation multi-sources de 1 645 pièces grégoriennes (Marek Klein, Abbaye de Fontgombault, Abbaye de Solesmes, Ensemble Organum...) directement accessibles via le bouton « Vidéos » du lecteur audio.</li><li><strong>Carrousel Réactif :</strong> Présentation horizontale compacte (1,5 vidéo visible) avec mini-lecteurs YouTube interactifs.</li><li><strong>Correctif Mises à Jour :** Résolution des fausses notifications de mises à jour.</li></ul>"
+            "content": "<ul><li><strong>Enregistrements Vidéo YouTube / YouTube Music :</strong> Indexation multi-sources de 1 645 pièces grégoriennes (Marek Klein, Abbaye de Fontgombault, Abbaye de Solesmes, Ensemble Organum, Le Barroux...) directement accessibles via le bouton « Vidéos » du lecteur audio.</li><li><strong>Filtrage de Haute Précision :</strong> Élimination de 3 788 vidéos hors-sujet par concordance stricte de l'incipit latin.</li><li><strong>Carrousel Réactif & Lecteurs 1-Clic :** Disposition horizontale compacte (1,5 vidéo visible) avec lancement immédiat des mini-lecteurs YouTube en un tap et bouton illuminé en couleur bordeaux d'Oremus.</li><li><strong>Correctif Mises à Jour :</strong> Résolution des fausses alertes de mises à jour.</li></ul>"
           },
           {
             "type": "card",
