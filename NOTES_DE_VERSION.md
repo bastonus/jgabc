@@ -5,20 +5,24 @@
 ---
 
 ### 🎥 Enregistrements Audio & Vidéo YouTube / YouTube Music par Partition
-* **Scraping Multi-Sources & Indexation de 1 645 Pièces Grégoriennes :**
-  * Association automatique d'enregistrements audio/vidéo YouTube et YouTube Music avec validation stricte de l'incipit latin pour éliminer tout résultat hors-sujet.
-  * Interprétations variées proposées par pièce : **Marek Klein** (*Gradvale Novvm*), **Abbaye Notre-Dame de Fontgombault**, **Abbaye Saint-Pierre de Solesmes**, **Ensemble Organum** (Marcel Pérès), **Abbaye du Barroux**, **GradualeProject**, etc.
-  * Base de données optimisée embarquée hors-ligne (`js/gregorian_youtube_links.js`).
+* **Indexation Multi-Sources de 1 645 Pièces Grégoriennes :**
+  * Association automatique d'enregistrements audio et vidéo issus de YouTube / YouTube Music pour les pièces du répertoire grégorien.
+  * Interprétations d'exception intégrées : **Marek Klein** (*Gradvale Novvm* / chant soliste), **Abbaye Notre-Dame de Fontgombault**, **Abbaye Saint-Pierre de Solesmes**, **Abbaye du Barroux**, **Ensemble Organum** (Marcel Pérès), **GradualeProject**, etc.
+  * Base de données optimisée embarquée hors-ligne (`js/gregorian_youtube_links.js` et `js/gregorian_youtube_links.json`).
+* **Filtrage par Concordance Strict de l'Incipit Latin :**
+  * Algorithme d'analyse sémantique `is_strict_match` épurant les mots d'arrêt liturgiques non discriminants (`cum`, `non`, `in`, `pro`, `comm`, `all`...) et exigeant la concordance exacte des premiers mots significatifs du texte latin, éliminant **3 788 vidéos approximatives ou hors-sujet**.
 * **Intégration au Lecteur Audio Principal (`#modernPlayerBar`) :**
-  * Bouton **« Vidéos »** dans les pilules du lecteur audio qui s'illumine en couleur primaire et bascule en icône croix `✕` une fois déplié.
-  * Carrousel horizontal défilable compact (1,5 vidéo visible à l'écran sur Mobile comme sur Desktop) s'étendant d'un bord à l'autre du lecteur.
-  * Lecture interactive instantanée via des mini-lecteurs YouTube au clic.
+  * Bouton dédié **« Vidéos »** s'affichant dynamiquement dans la barre de réglages du lecteur dès qu'un chant possède des enregistrements associés.
+  * Mise en valeur visuelle : fond illuminé en couleur primaire rouge/bordeaux officielle d'Oremus au dépliement, avec bascule automatique de l'icône logo YouTube vers une **croix de fermeture `✕`**.
+  * **Carrousel Horizontal Défilable Compact :** Disposition fluide calée à **1,5 vidéo visible** à l'écran sur Mobile comme sur Desktop, sans cartes à fond gris ni encombrement en largeur.
+  * **Mini-Lecteurs YouTube en 1 Clic :** Rendu direct des lecteurs vidéo `iframe` au dépliement, permettant le lancement immédiat en un seul clic sans étape intermédiaire de chargement.
+  * Évacuation du composant hors des pages solo pour un accès centralisé et épuré depuis le lecteur principal.
 
 ---
 
-### 🛡️ Correctif de la Détection de Version
-* **Élimination des Faux Positifs de Mises à Jour :**
-  * Synchronisation stricte de la constante de version de l'application et renforcement de l'analyseur sémantique (`parseVersionString`) pour traiter de manière robuste les préfixes `v`, `beta-`, `vbeta-`.
+### 🛡️ Correctif de la Détection de Version & Faux Positifs
+* **Élimination des Notifications d'Update Erronées :**
+  * Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.54'` et consolidation de `parseVersionString()` dans `js/divinum_officium.js` pour traiter de façon robuste tous les schémas de tags distants (`v`, `beta-`, `vbeta-`).
 
 ---
 
