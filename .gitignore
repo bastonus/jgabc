@@ -39,3 +39,9 @@ scratch/
 *~lock~
 *.af~lock~
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+
