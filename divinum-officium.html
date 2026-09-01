@@ -108,69 +108,57 @@
                         </g>
                     </svg>
                 </div>
-                <button id="btnSidebarSearchHeader" class="do-sidebar-search-btn" title="Recherche Grégorienne &amp; Universelle" aria-label="Rechercher">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
             </div>
 
             <nav class="do-sidebar-nav">
-                <div class="do-nav-section-title">Liturgia Diei</div>
+                <button id="btnSidebarSearchHeader" class="do-sidebar-search-bar" title="Quaerere" aria-label="Quaerere">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span class="do-search-bar-label">Quaerere...</span>
+                </button>
 
                 <button class="do-nav-item is-missa" data-hora="missa">
-                    <span class="do-nav-label">Missa</span>
-                    <span class="do-nav-tag">Sancta Missa</span>
+                    <span class="do-nav-label">Sancta Missa</span>
+                </button>
+
+                <button class="do-nav-item is-bible" id="btnSidebarBible" data-hora="bible">
+                    <span class="do-nav-label">Sacra Biblia</span>
                 </button>
 
                 <div class="do-nav-divider"></div>
-                <div class="do-nav-section-title">Cursus Horarum</div>
 
                 <button class="do-nav-item" data-hora="matutinum">
                     <span class="do-nav-label">Matutinum</span>
-                    <span class="do-nav-tag">Vigiliae</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="laudes">
                     <span class="do-nav-label">Laudes</span>
-                    <span class="do-nav-tag">Aurora</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="prima">
                     <span class="do-nav-label">Prima</span>
-                    <span class="do-nav-tag">Hora I</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="tertia">
                     <span class="do-nav-label">Tertia</span>
-                    <span class="do-nav-tag">Hora III</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="sexta">
                     <span class="do-nav-label">Sexta</span>
-                    <span class="do-nav-tag">Meridies</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="nona">
                     <span class="do-nav-label">Nona</span>
-                    <span class="do-nav-tag">Hora IX</span>
                 </button>
 
-                <button class="do-nav-item active" data-hora="vesperae">
+                <button class="do-nav-item" data-hora="vesperae">
                     <span class="do-nav-label">Vesper&aelig;</span>
-                    <span class="do-nav-tag">Vesperum</span>
                 </button>
 
                 <button class="do-nav-item" data-hora="completorium">
                     <span class="do-nav-label">Completorium</span>
-                    <span class="do-nav-tag">Noctis</span>
-                </button>
-
-                <div class="do-nav-section-title">SACRA BIBLIA</div>
-                <button class="do-nav-item" id="btnSidebarBible" data-hora="bible">
-                    <span class="do-nav-label">Sacra Biblia</span>
-                    <span class="do-nav-tag">Vulgata & AELF</span>
                 </button>
             </nav>
 
@@ -468,6 +456,53 @@
                             <input type="checkbox" id="toggleSearchImages">
                             <span class="slider"></span>
                         </label>
+                    </div>
+            <!-- 3b. Modules External (.pack / Offline Asset Packs) -->
+            <div class="settings-group" id="settingsGroupModules">
+                <label class="settings-label">Moduli Externi &amp; Usus Absens Interreti</label>
+                <div class="do-module-cards-list">
+                    <!-- Module Partitions GABC -->
+                    <div class="do-module-card" id="moduleCardGabc">
+                        <div class="do-module-info">
+                            <div class="do-module-title-row">
+                                <span class="do-module-icon">🎼</span>
+                                <span class="do-module-title">Cantus Gregorianus &amp; GABC</span>
+                                <span class="do-module-badge" id="badgeModuleGabc">Non installé</span>
+                            </div>
+                            <div class="do-module-desc">8 350+ partitions grégoriennes complètes (8,7 Mo) pour un usage 100% hors-ligne.</div>
+                        </div>
+                        <div class="do-module-actions">
+                            <button class="do-module-btn do-module-btn-download" id="btnDownloadModuleGabc">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Télécharger (8.7 Mo)</span>
+                            </button>
+                            <button class="do-module-btn do-module-btn-delete" id="btnDeleteModuleGabc" style="display:none;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <span>Supprimer</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Module Images des Saints -->
+                    <div class="do-module-card" id="moduleCardSaints">
+                        <div class="do-module-info">
+                            <div class="do-module-title-row">
+                                <span class="do-module-icon">🖼️</span>
+                                <span class="do-module-title">Iconographia Sanctorum</span>
+                                <span class="do-module-badge" id="badgeModuleSaints">Non installé</span>
+                            </div>
+                            <div class="do-module-desc">266 portraits d'art sacré des saints (12,9 Mo) pour l'affichage hors-connexion.</div>
+                        </div>
+                        <div class="do-module-actions">
+                            <button class="do-module-btn do-module-btn-download" id="btnDownloadModuleSaints">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Télécharger (12.9 Mo)</span>
+                            </button>
+                            <button class="do-module-btn do-module-btn-delete" id="btnDeleteModuleSaints" style="display:none;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <span>Supprimer</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -904,7 +939,18 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge-icon lucide-gauge"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
                         <span class="do-speed-label">1.0×</span>
                     </button>
+
+                    <!-- YouTube Video Expand Button -->
+                    <button id="playerBtnExpandVideos" class="do-player-toggle do-player-videos-btn" title="Afficher les enregistrements vidéo YouTube pour cette pièce">
+                        <svg class="do-yt-icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <svg class="do-yt-icon-close" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <span>Vidéos</span>
+                    </button>
                 </div>
+            </div>
+            <!-- Video Recordings Drawer / Container (Expandable) -->
+            <div id="playerVideoDrawer" class="do-player-video-drawer hidden" style="display: none; padding-top: 10px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1)); margin-top: 4px;">
+                <div id="playerVideoList" class="do-youtube-audio-list"></div>
             </div>
         </div>
     </div>
@@ -1235,6 +1281,63 @@
                     <button id="btnLaterNotifPrompt" class="update-btn-dismiss" style="flex:1;">Plus tard</button>
                     <button id="btnNeverNotifPrompt" class="update-btn-dismiss" style="flex:1; opacity:0.85;">Ne plus me demander</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Pack Download Prompt Modal -->
+    <div id="modulePromptModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="modulePromptModal" class="update-modal hidden" role="dialog" aria-labelledby="modulePromptModalTitle">
+        <div class="update-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle" id="modulePromptIconCircle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="modulePromptModalTitle" class="update-title">Module Hors-Ligne</h3>
+                        <span id="modulePromptModalTag" class="update-version-tag">Téléchargement recommandé</span>
+                    </div>
+                </div>
+                <button id="btnCloseModulePromptModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body">
+                <p id="modulePromptModalMessage" style="margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.55; color: var(--text-primary);">
+                    Vous avez activé le grégorien. Par défaut, les partitions sont consultables en ligne. Souhaitez-vous télécharger le module complet (8,7 Mo) pour une utilisation 100% hors-ligne ?
+                </p>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 12px 14px; border-radius: 12px;">
+                    <div class="update-notes-header" style="color: var(--primary-color); margin-bottom: 4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span id="modulePromptModalNoteTitle">Mode En Ligne conservé</span>
+                    </div>
+                    <div id="modulePromptModalNoteText" class="update-notes-text" style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">
+                        Si vous choisissez de rester en ligne, les données seront chargées une par une sur le réseau. Vous pourrez télécharger le pack hors-ligne plus tard dans les Paramètres.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions" style="display:flex; flex-direction:column; gap:8px;">
+                <button id="btnConfirmModulePrompt" class="update-btn-download" style="width:100%;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span id="btnConfirmModulePromptText">Télécharger pour le Hors-Ligne (8.7 Mo)</span>
+                </button>
+                <button id="btnCancelModulePrompt" class="update-btn-dismiss" style="width:100%;">Rester en ligne (Sans téléchargement)</button>
             </div>
         </div>
     </div>

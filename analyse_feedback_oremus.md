@@ -42,7 +42,11 @@
 - [ ] **Résolution des Occurrences & Concurrences Liturgiques (Sélection 2026 / Temporel vs Sanctoral) :**
   - *Origine du retour :* Utilisateur `bZzJ6v0` (31/08).
   - *Problème :* Lorsqu'un jour présente deux offices en concurrence (ex. dimanche du Temporal coïncidant avec une fête du Sanctoral), l'application peut proposer ou afficher des solutions ambiguës dans la vue de l'année 2026.
-  - *Spécification / Action requise :* Appliquer strictement les tables de préséance et règles d'occurrence du calendrier 1962 pour l'année 2026, afficher la fête prioritaire dans l'accès calendrier 2026, et répercuter cette hiérarchie de manière cohérente dans les sections Temporel et Sanctoral (avec commémorations appropriées).
+  - *Spécification / Action requise :* Appliquer strictly les tables de préséance et règles d'occurrence du calendrier 1962 pour l'année 2026, afficher la fête prioritaire dans l'accès calendrier 2026, et répercuter cette hiérarchie de manière cohérente dans les sections Temporel et Sanctoral (avec commémorations appropriées).
+- [x] **Correction des Faux Positifs sur les Mises à Jour :**
+  - *Origine du retour :* Utilisateur `Z9e4QR5` (01/09).
+  - *Problème :* Une notification de mise à jour s'affichait de manière erronée alors que l'application était déjà en version 0.0.53.
+  - *Correction :* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.53'` dans `js/divinum_officium.js` et renforcement de `parseVersionString` pour décoder de façon robuste les préfixes de versions (`v`, `beta-`, `vbeta-`). *(Livré en v0.0.53)*
 
 ---
 
@@ -124,10 +128,10 @@
        - Oremus exploite directement les fichiers de base du dépôt (`do_data/horas/` et `do_data/missa/`).
        - Extraction dynamique à la volée de la `Lectio94` / `Lectio93` (notice biographique concise officielle des rubriques de 1960) et des `Lectio 4-5-6` du Bréviaire pour le jour affiché.
        - Fallback automatique vers le *Martyrologe Romain* (`do_data/horas/.../Martyrologium/`) pour les simples commémoraisons.
-    2. **Solution pour l'Iconographie (266 images WebP indexées par date) :**
-       - Stockage des portraits dans `img/saints/{MM-DD}.webp` (ex: `01-21.webp`, `03-07.webp`, `03-19.webp`, `09-01.webp`).
-       - Scraper automatisé ([tools/download_saints_images.py](file:///d:/Documents/jgabc/tools/download_saints_images.py)) générant les 266 œuvres d'art sacré du domaine public (Giotto, Fra Angelico, Memling, Le Caravage, Guido Reni, icônes byzantines) en WebP 480px. Poids total : **8,56 Mo** pour l'année entière.
-       - Chargement instantané à 0 ms, 100% hors-ligne, mis en cache persistant par le Service Worker.
+    2. **Solution pour l'Iconographie (Module `.pack` externe optionnel ou Secours en Ligne) :**
+       - **Stockage externe hors APK :** Les images des saints ne sont plus incluses par défaut dans le package d'installation APK de base afin de maintenir un binaire ultra-léger.
+       - **Module Téléchargeable (.pack) :** Un fichier pack unique (`saints_pack.zip` ou `saints.pack` d'environ 8,5 Mo à 12 Mo non compressé / ~8 Mo compressé) est proposé au téléchargement facultatif dans les paramètres de l'application pour un usage 100% hors-ligne.
+       - **Fallback en Ligne (GitHub Raw CDN) :** Si le module `.pack` n'est pas installé localement, les images sont récupérées à la volée une par une depuis les serveurs GitHub Content (`https://raw.githubusercontent.com/bastonus/jgabc/main/img/saints/{MM-DD}.webp`) et stockées dans le cache local (Service Worker / CacheStorage).
     3. **Rendu Visuel sur l'Accueil & Design System :**
        - Nouvelle carte immersive `.do-home-saint-card` positionnée sous la barre de recherche sur la page d'accueil d'Oremus.
        - Miniature portrait avec filet doré (`1px solid rgba(212, 175, 55, 0.4)`), badge de fête, titre, notice biographique avec bouton dépliable fluide *« Lire la suite »*, et accès direct à la messe du jour. *(Livré en v0.0.53)*
@@ -150,9 +154,14 @@
 - [x] **Affichage & Prévisualisation des résultats (Grille / Ligne & Partitions GABC) :**
   - *Origine du retour :* Utilisateur `M1VjpKE` (31/08).
   - *Correction :* Double mode d'affichage mémorisé (Grille carrée 1:1 avec aperçu dynamique de la partition grégorienne via rendu différé *lazy rendering*, et Mode Ligne avec extraits textuels). Barre de pastilles filtres fluides scrollables horizontalement. *(Livré en v0.0.47 & v0.0.49)*
-- [x] **Embarquement direct du Répertoire complet sans latence :**
-  - *Origine du retour :* Utilisateur `Z9ebbd0` (31/08).
-  - *Correction :* Données intégrées de manière optimisée directement dans les assets APK et JS, évitant tout module lourd externe ou requête réseau bloquante. *(Livré en v0.0.51 & v0.0.52)*
+- [x] **Architecture Modulaire Externe & Adaptation du Script de Build APK (`.pack` / CDN) :**
+  - *Origine du retour :* Optimisation du poids de l'APK de base et personnalisation du stockage par l'utilisateur.
+  - *Pipeline APK mis à jour ([package.json](file:///d:/Documents/jgabc/package.json)) :*
+    1. **Packaging Automatisé (`tools/build_modules.mjs`) :** Génération automatique de `dist_modules/saints.pack` (~8 Mo) et `dist_modules/gabc.pack` (~6,5 Mo).
+    2. **Nettoyage APK (`tools/clean_android_assets.mjs`) :** Suppression automatique des 8 350+ fichiers `.gabc` et du répertoire `img/saints/` du bundle `android/app/src/main/assets/public/` lors de `npm run cap:sync` / `cap:build`.
+  - *Comportement In-App :*
+    - **Mode En Ligne (Défaut) :** Récupération à la volée depuis GitHub Raw CDN (`https://raw.githubusercontent.com/bastonus/jgabc/main/...`) avec mise en cache progressive localement (CacheStorage).
+    - **Mode Hors-Ligne (Paramètres) :** Téléchargement des archives `.pack` optionnelles directement dans l'application. *(Livré en v0.0.54 / Pipeline prêt)*
 - [ ] **Unification du Système et Design System de toutes les Barres de Recherche :**
   - *Problème :* Dispersion de styles et de comportements entre la barre d'accueil, la barre de recherche universelle du header et d'éventuels filtres annexes (psaumes, bréviaire).
   - *Spécification / Solution :* Harmoniser l'ensemble des champs de recherche de l'application sur le même design system unifié (hauteur `38px`, `border-radius: 10px`, fond highlight sans bordure, icône loupe à gauche animée aux couleurs d'accentuation, bouton croix `x` de réinitialisation rapide, et barre de pastilles de filtres fluides).
@@ -222,6 +231,9 @@
 - [ ] **Interface des Tons Grégoriens :**
   - *Origine du retour :* Utilisateur `8NMv4MO` (26/08).
   - *Spécification :* Remplacer la longue liste déroulante des tons par un sélecteur matriciel compact ou une grille de pastilles (Modes 1 à 8, terminaisons solennelles/ordinaires).
+- [x] **Intégration Enregistrements YouTube / Audio par Pièce Grégorienne :**
+  - *Origine du retour :* Utilisateur `LDOAoxG` (01/09).
+  - *Correction :* Scraper multi-sources automatisé ([`tools/scrape_gregorian_youtube.py`](file:///d:/Documents/jgabc/tools/scrape_gregorian_youtube.py)) ayant associé **1 645 pièces grégoriennes** à leurs enregistrements YouTube / YouTube Music. Plusieurs interprétations par pièce sont proposées (Marek Klein, Abbaye de Fontgombault, Abbaye de Solesmes, Le Barroux, Ensemble Organum, etc.), embarquées hors-ligne dans [`js/gregorian_youtube_links.js`](file:///d:/Documents/jgabc/js/gregorian_youtube_links.js). *(Livré en v0.0.53)*
 - [x] **Moteur Audio & Synthèse sonore :**
   - *Origine du retour :* Utilisateur `X5QlZ7V` (26/08).
   - *Correction :* Synthèse sonore enrichie reproduisant les harmoniques chaleureuses d'un orgue liturgique à tuyaux (positif d'orgue). *(Livré en v0.0.45)*
@@ -275,4 +287,5 @@
 | **32** | *Évolution UX* | 2026-09-01 10:49 | Équipe / Retours | Recherche Desktop | *« Placer la barre plus bas avec une zone qui se rétracte au scroll pour aérer (desktop uniquement) »* | Espacement initial aéré avec rétraction fluide de l'en-tête de recherche lors du défilement. | **Planifié** | *Prochaine version* |
 | **33** | *Évolution UI* | 2026-09-01 10:47 | Équipe / Retours | Répertoire Grégorien | *« Mettre en avant les partitions GABC et faire passer la recherche pour un répertoire »* | Transformation de la vue en véritable Répertoire Grégorien / Thesaurus Cantuum avec navigation par livres et modes. | **Planifié** | *Prochaine version* |
 | **34** | *Bug Affichage* | 2026-09-01 10:53 | Équipe / Retours | En-tête / Android | *« Corriger le chargement de la barre (Oneratur...) qui n'est pas nécessaire et s'affiche mal sur Android »* | Suppression du texte statique Oneratur et affichage instantané fluide sans saut ni rognage. | **Planifié** | *Prochaine version* |
-| **35** | *Évolution UX* | 2026-09-01 10:48 | Équipe / Retours | Ergonomie Mobile | *« Analyser s'il ne serait pas plus judicieux de mettre la barre de recherche en bas sur mobile uniquement »* | Étude et conception d'une barre de recherche basse (Thumb Zone) sur mobile vs haute sur desktop. | **Planifié** | *Prochaine version* |
+| **36** | `Z9e4QR5` | 2026-09-01 14:21 | Anonyme | Bug technique / affichage | *« Faux positif sur les mises a jour »* | Détection et comparaison stricte des versions (`beta-0.0.53` vs `v0.0.53`) pour éliminer les notifications erronées. | **Résolu** | v0.0.53 |
+| **37** | `LDOAoxG` | 2026-09-01 14:22 | Anonyme | Suggestion de fonctionnalité | *« Intégrer les vidéo ou audio youtube pour chaque pièce de gregorien »* | Scraping multi-sources de 1 645 pièces (Marek Klein, Fontgombault, Solesmes, Organum) embarqué dans `js/gregorian_youtube_links.js`. | **Résolu** | v0.0.53 |

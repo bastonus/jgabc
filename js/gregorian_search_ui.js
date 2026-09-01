@@ -1362,6 +1362,37 @@
         });
     }
 
+    // Générer le bloc d'enregistrements audio YouTube multi-sources pour une pièce grégorienne
+    function renderChantYoutubeAudioBlock(chantId) {
+        var db = window.GREGORIAN_YOUTUBE_AUDIO || {};
+        var entry = db[chantId];
+        if (!entry || !Array.isArray(entry.audios) || !entry.audios.length) {
+            return '';
+        }
+
+        var html = '';
+        entry.audios.forEach(function(item, idx) {
+            var vId = item.id;
+            var title = item.title || 'Enregistrement audio';
+            var source = item.source || item.channel || 'Interprétation grégorienne';
+            var duration = item.duration ? (' (' + item.duration + ')') : '';
+            var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
+            var thumbUrl = 'https://i.ytimg.com/vi/' + vId + '/hqdefault.jpg';
+
+            html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
+            html += '  <a href="' + escapeHtml(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: rgba(0,0,0,0.05); text-decoration: none;">';
+            html += '    <img src="' + escapeHtml(thumbUrl) + '" alt="' + escapeHtml(title) + '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">';
+            html += '  </a>';
+            html += '  <a href="' + escapeHtml(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
+            html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtml(title) + duration + '</div>';
+            html += '    <div style="font-size: 0.76rem; color: var(--text-tertiary); font-weight: 500;">' + escapeHtml(source) + '</div>';
+            html += '  </a>';
+            html += '</div>';
+        });
+
+        return html;
+    }
+
     // Afficher une pièce grégorienne en grand dans le lecteur principal (#do-content-stream)
     async function renderChantMainView(chantId, isAutoPlay) {
         if (!chantId && window.doState && window.doState.currentChantId) {

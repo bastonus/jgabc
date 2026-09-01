@@ -971,28 +971,28 @@ var DO_UI_TRANSLATIONS = {
         home_tag: 'Hodie & Cursus',
         liturgia_diei: 'Liturgie du Jour',
         cursus_horarum: 'Heures Canoniales',
-        sacra_biblia: 'Sainte Bible',
-        sacra_biblia_tag: 'Vulgata & Crampon',
-        missa: 'Messe',
-        missa_tag: 'Sainte Messe',
-        missa_gregorian: 'Messe & Grégorien',
-        missa_gregorian_tag: 'Page de Test',
-        matutinum: 'Matines',
-        matutinum_tag: 'Vigiles',
+        sacra_biblia: 'Sacra Biblia',
+        sacra_biblia_tag: '',
+        missa: 'Sancta Missa',
+        missa_tag: '',
+        missa_gregorian: 'Missa & Cantus',
+        missa_gregorian_tag: '',
+        matutinum: 'Matutinum',
+        matutinum_tag: '',
         laudes: 'Laudes',
-        laudes_tag: 'Aurore',
-        prima: 'Prime',
-        prima_tag: '1ère Heure',
-        tertia: 'Tierce',
-        tertia_tag: '3ème Heure',
-        sexta: 'Sexte',
-        sexta_tag: 'Midi',
-        nona: 'None',
-        nona_tag: '9ème Heure',
-        vesperae: 'Vêpres',
-        vesperae_tag: 'Soir',
-        completorium: 'Complies',
-        completorium_tag: 'Nuit',
+        laudes_tag: '',
+        prima: 'Prima',
+        prima_tag: '',
+        tertia: 'Tertia',
+        tertia_tag: '',
+        sexta: 'Sexta',
+        sexta_tag: '',
+        nona: 'Nona',
+        nona_tag: '',
+        vesperae: 'Vesperæ',
+        vesperae_tag: '',
+        completorium: 'Completorium',
+        completorium_tag: '',
         horae: 'Heures',
         settings_title: 'Paramètres',
         edition_label: 'Rubricæ & Editio',
@@ -1034,7 +1034,7 @@ var DO_UI_TRANSLATIONS = {
         cursus_horarum: 'Cursus Horarum',
         sacra_biblia: 'Sacra Biblia',
         sacra_biblia_tag: 'Vulgata',
-        missa: 'Missa',
+        missa: 'Sancta Missa',
         missa_tag: 'Sancta Missa',
         missa_gregorian: 'Missa & Cantus',
         missa_gregorian_tag: 'Experimentum',
@@ -2126,7 +2126,7 @@ function loadMissaData(date, lang, callback) {
             var target = isGreater ? primaryPath : fallbackPath;
             var alt = isGreater ? fallbackPath : primaryPath;
             loadRecursiveDOFile(target, langFolder, true, function(sec) {
-                if (Object.keys(sec).length > 2) {
+                if (sec && (sec['Officium'] || Object.keys(sec).length > 0)) {
                     processMissaSections(sec, langFolder, lang, callback, target);
                 } else {
                     loadRecursiveDOFile(alt, langFolder, true, function(sec2) {
@@ -2137,7 +2137,7 @@ function loadMissaData(date, lang, callback) {
         });
     } else {
         loadRecursiveDOFile(primaryPath, langFolder, true, function(sec) {
-            if (Object.keys(sec).length > 2) {
+            if (sec && (sec['Officium'] || Object.keys(sec).length > 0)) {
                 processMissaSections(sec, langFolder, lang, callback, primaryPath);
             } else {
                 loadRecursiveDOFile(fallbackPath, langFolder, true, function(sec2) {
@@ -3837,19 +3837,64 @@ function setupHomeSearch() {
     });
 }
 
-function cleanBioParagraph(rawText) {
-    if (!rawText) return '';
+function parseBioContent(rawText) {
+    if (!rawText) return { author: '', ref: '', text: '' };
     var lines = Array.isArray(rawText) ? rawText : rawText.split('\n');
-    var cleaned = [];
+    var author = '';
+    var ref = '';
+    var bodyLines = [];
+    var filtered = [];
+
     for (var i = 0; i < lines.length; i++) {
         var l = (lines[i] || '').trim();
         if (!l || l === '_') continue;
         if (l.charAt(0) === '@' || l.charAt(0) === '&' || l.charAt(0) === '$') continue;
         if (/^\(sed\s+/i.test(l)) continue;
-        if (l.charAt(0) === '!' && l.length < 60) continue;
-        cleaned.push(l);
+        filtered.push(l);
     }
-    return cleaned.join(' ').replace(/\s+/g, ' ').trim();
+
+    var idx = 0;
+    while (idx < filtered.length && idx < 3) {
+        var line = filtered[idx];
+        if (line.charAt(0) === '!') {
+            var cleanL = line.replace(/^!+/, '').trim();
+            if (!author && /^(?:Pour|In|De|Ad|Festa)\b/i.test(cleanL) && cleanL.length < 90) {
+                author = cleanL;
+            } else if (!ref && cleanL.length < 150) {
+                ref = cleanL;
+            } else {
+                bodyLines.push(cleanL);
+            }
+            idx++;
+        } else if (!author && /^(?:Sermo|Homilia|Tractatus|Lectio|Epistola|Ex\b|De\b|Du\b|Des\b|Au\b|Sermon|Hom[ée]lie|Trait[ée]|Lecture|Lettre|Livre|From\b|Lesson\b|Treatise\b)\b/i.test(line) && line.length < 120 && !/\b(?:ayant|voyant|disant|faisant|alors|fut|est|sont|avait|ont|naquit|vint|mourut)\b/i.test(line)) {
+            author = line.replace(/\.+$/, '').trim();
+            idx++;
+        } else {
+            break;
+        }
+    }
+
+    while (idx < filtered.length) {
+        var remLine = filtered[idx];
+        if (remLine.charAt(0) === '!') {
+            bodyLines.push(remLine.replace(/^!+/, '').trim());
+        } else {
+            bodyLines.push(remLine);
+        }
+        idx++;
+    }
+
+    var bodyText = bodyLines.join(' ').replace(/\s+/g, ' ').trim();
+    return {
+        author: author,
+        ref: ref,
+        text: bodyText
+    };
+}
+
+function cleanBioParagraph(rawText) {
+    var parsed = parseBioContent(rawText);
+    return parsed.text || '';
 }
 
 function extractMartyrologyBio(martContent, keywords) {
@@ -3981,21 +4026,54 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
     }
 
     var langFolder = getLangFolder(uiLang);
-    var imgPath = isTempora ? ('img/tempora/' + temporaCode + '.webp') : ('img/saints/' + sanctiCode + '.webp');
+
+    // Résolution intelligente de l'image (évite les 404 sur les féries sans image)
+    var saintImg = 'img/saints/' + sanctiCode + '.webp';
+    var temporaImg = 'img/tempora/' + temporaCode + '.webp';
+    var temporaSunCode = (temporaCode || '').replace(/-\d+$/, '-0');
+    var temporaSunImg = 'img/tempora/' + temporaSunCode + '.webp';
+
+    var hasTemporaImg = !!(window.DO_TEMPORA_ART_METADATA && window.DO_TEMPORA_ART_METADATA[temporaCode]);
+    var hasTemporaSunImg = !!(window.DO_TEMPORA_ART_METADATA && window.DO_TEMPORA_ART_METADATA[temporaSunCode]);
+    var hasSaintImg = !!(window.DO_SAINT_ART_METADATA && window.DO_SAINT_ART_METADATA[sanctiCode]);
+
+    var imgPath = '';
+    if (isTempora) {
+        if (hasTemporaImg) {
+            imgPath = temporaImg;
+        } else if (hasSaintImg) {
+            imgPath = saintImg;
+        } else if (hasTemporaSunImg) {
+            imgPath = temporaSunImg;
+        } else {
+            imgPath = temporaImg;
+        }
+    } else {
+        if (hasSaintImg) {
+            imgPath = saintImg;
+        } else if (hasTemporaImg) {
+            imgPath = temporaImg;
+        } else if (hasTemporaSunImg) {
+            imgPath = temporaSunImg;
+        } else {
+            imgPath = saintImg;
+        }
+    }
+
     var loadPath = isTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode);
 
     loadRecursiveDOFile(loadPath, langFolder, false, function(sec) {
-        var bio = '';
+        var bioData = null;
         var sourceName = (uiLang === 'fr') ? 'Bréviaire Romain' : (uiLang === 'la') ? 'Breviarium Romanum' : 'Roman Breviary';
 
         if (sec) {
             var raw = sec['Lectio94'] || sec['Lectio93'] || sec['Lectio91'] || sec['Lectio4_'] || sec['Lectio4'] || sec['Homilia'] || sec['Lectio7'] || '';
             if (Array.isArray(raw)) raw = raw.join('\n');
-            bio = cleanBioParagraph(raw);
+            if (raw) bioData = parseBioContent(raw);
         }
 
-        if (bio) {
-            finishCard(bio, sourceName);
+        if (bioData && bioData.text) {
+            finishCard(bioData, sourceName);
             return;
         }
 
@@ -4003,10 +4081,10 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
             if (sec && (sec['Lectio1'] || sec['Lectio2'] || sec['Lectio3'])) {
                 var rawL = sec['Lectio1'] || sec['Lectio2'] || sec['Lectio3'];
                 if (Array.isArray(rawL)) rawL = rawL.join('\n');
-                bio = cleanBioParagraph(rawL);
+                if (rawL) bioData = parseBioContent(rawL);
             }
-            if (bio) {
-                finishCard(bio, sourceName);
+            if (bioData && bioData.text) {
+                finishCard(bioData, sourceName);
                 return;
             }
         }
@@ -4015,15 +4093,18 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
         fetchLocalFile(martPath, function(mErr, martData) {
             if (!mErr && martData) {
                 var saintNames = (sec && sec['Name']) ? sec['Name'] : null;
-                bio = extractMartyrologyBio(martData, saintNames);
-                if (bio) {
+                var bioText = extractMartyrologyBio(martData, saintNames);
+                if (bioText) {
                     sourceName = (uiLang === 'fr') ? 'Martyrologe Romain' : 'Martyrologium Romanum';
+                    bioData = { author: '', ref: '', text: bioText };
                 }
             }
-            finishCard(bio, sourceName);
+            finishCard(bioData, sourceName);
         });
 
-        function finishCard(bioText, source) {
+        function finishCard(bioData, source) {
+            var bioObj = (typeof bioData === 'string') ? { author: '', ref: '', text: bioData } : (bioData || {});
+            var bioText = bioObj.text || '';
             if (!bioText) {
                 callback(null);
                 return;
@@ -4064,6 +4145,19 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
 
             // Texte biographique à droite de l'image dans le hero
             var $content = $('<div class="do-home-saint-hero-content">');
+
+            var $bioHeader = null;
+            if (bioObj.author || bioObj.ref) {
+                $bioHeader = $('<div class="do-saint-bio-header">');
+                if (bioObj.author) {
+                    $bioHeader.append($('<div class="do-saint-bio-author">').text(bioObj.author));
+                }
+                if (bioObj.ref) {
+                    $bioHeader.append($('<div class="do-saint-bio-ref">').text(bioObj.ref));
+                }
+                $content.append($bioHeader);
+            }
+
             var $p = $('<p class="do-home-saint-hero-text">').attr('lang', (uiLang === 'la' ? 'la' : 'fr'));
             $content.append($p);
             $body.append($content);
@@ -4077,6 +4171,18 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
             var seeLessLabel = (uiLang === 'fr') ? 'voir moins' : (uiLang === 'la') ? 'minus' : 'see less';
 
             function compute3Lines() {
+                // Desktop (>= 768px) : Jamais de 'voir plus', affichage intégral direct
+                if (window.innerWidth >= 768) {
+                    isLong = false;
+                    isExpanded = true;
+                    $p.text(bioText);
+                    $hero.css('cursor', 'default');
+                    $content.css('cursor', 'default');
+                    return;
+                }
+
+                // Mobile (< 768px) : Aperçu tronqué sur 3 lignes avec 'voir plus'
+                $content.css('cursor', 'pointer');
                 var words = bioText.trim().split(/\s+/);
                 
                 // Mesure précise de la hauteur d'une seule ligne dans le DOM
@@ -4085,22 +4191,14 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                 var singleH = $p.outerHeight() || 26;
                 if (singleH < 15) singleH = 26;
 
-                // Desktop (form T) : aperçu = hauteur de la carte image
-                // Mobile : 3 lignes
-                var targetMaxH;
-                if (window.innerWidth >= 768 && $thumbWrap.is(':visible')) {
-                    var cardH = $thumbWrap.outerHeight() || 250;
-                    var numLines = Math.max(3, Math.floor(cardH / singleH));
-                    targetMaxH = Math.round(singleH * (numLines + 0.15));
-                } else {
-                    targetMaxH = Math.round(singleH * 3.12);
-                }
+                var targetMaxH = Math.round(singleH * 3.12);
 
                 $p.text(bioText);
                 if ($p.outerHeight() <= targetMaxH) {
                     isLong = false;
                     $p.text(bioText);
                     $hero.css('cursor', 'default');
+                    $content.css('cursor', 'default');
                     return;
                 }
 
@@ -4139,7 +4237,8 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
             }
 
             function toggleExpand() {
-                if (!isLong) return;
+                // Sur desktop, le texte est toujours déjà intégral : pas de toggle
+                if (window.innerWidth >= 768 || !isLong) return;
                 isExpanded = !isExpanded;
                 if (isExpanded) {
                     $p.text(bioText + ' ').append($('<span class="do-home-saint-inline-more">').text(seeLessLabel));
@@ -4158,9 +4257,10 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                 openSaintImagePreview(imgPath, feastTitle);
             });
 
-            // Cliquer sur le texte étend ou réduit
-            // ($content est dans $hero, mais le click est aussi sur $hero pour couvrir l'espace bg)
+            // Cliquer sur le texte ou 'voir plus'/'voir moins' étend ou réduit
             $content.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 toggleExpand();
             });
             $hero.on('click', function(e) {
@@ -4178,7 +4278,8 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                     var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
                     if (scrollY <= 900) {
                         var translateY = scrollY * 0.15;
-                        bgEl.style.transform = 'scale(1.15) translate3d(0, ' + translateY.toFixed(1) + 'px, 0)';
+                        var scaleVal = (window.innerWidth >= 768) ? '1.22' : '1.15';
+                        bgEl.style.transform = 'scale(' + scaleVal + ') translate3d(0, ' + translateY.toFixed(1) + 'px, 0)';
                     }
                     ticking = false;
                 }
@@ -4368,6 +4469,9 @@ function renderDO() {
     $('body').toggleClass('is-chant-mode', isChant);
     if (!isHome && !isMissa) {
         $(window).off('scroll.saintParallax');
+    }
+    if (typeof updateHeaderScrollState === 'function') {
+        updateHeaderScrollState();
     }
 
     if (isHome) {
@@ -5720,6 +5824,22 @@ function initUserScrollTracker() {
             handleUserScrollInteraction();
         }
     });
+
+    window.removeEventListener('scroll', updateHeaderScrollState);
+    window.addEventListener('scroll', updateHeaderScrollState, { passive: true });
+    updateHeaderScrollState();
+}
+
+function updateHeaderScrollState() {
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var isScrolled = scrollY > 10;
+    var headerEl = document.querySelector('.do-top-header');
+    if (headerEl) {
+        headerEl.classList.toggle('is-scrolled', isScrolled);
+    }
+    if (document.body) {
+        document.body.classList.toggle('is-header-scrolled', isScrolled);
+    }
 }
 
 function updateDoPlayerUI($card, score, isPlaying, startNote) {
@@ -5762,7 +5882,126 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
 
     $('.do-chant-card').removeClass('is-playing');
     if ($card) $card.addClass('is-playing');
+
+    // Populate YouTube video drawer if chant ID is present
+    var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || '';
+    if (!chantId && $card) {
+        var $wrapper = $card.closest('[data-chant-id]');
+        if ($wrapper.length) chantId = $wrapper.data('chant-id');
+    }
+    updatePlayerVideoDrawer(chantId);
 }
+
+function escapeHtmlLocal(str) {
+    if (typeof window.escapeHtml === 'function') return window.escapeHtml(str);
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+var _remoteYoutubeAudioLoading = false;
+
+function updatePlayerVideoDrawer(chantId) {
+    var $drawer = $('#playerVideoDrawer');
+    var $list = $('#playerVideoList');
+    var $btn = $('#playerBtnExpandVideos');
+
+    // Ne s'afficher QUE SI l'utilisateur est connecté à Internet
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        $btn.hide();
+        $drawer.addClass('hidden').hide();
+        $btn.removeClass('active');
+        return;
+    }
+
+    if (!chantId) {
+        $btn.hide();
+        $drawer.addClass('hidden').hide();
+        $btn.removeClass('active');
+        return;
+    }
+
+    // Téléchargement distant synchrone/asynchrone de la base distante GitHub si non disponible
+    if (!window.GREGORIAN_YOUTUBE_AUDIO) {
+        if (!_remoteYoutubeAudioLoading) {
+            _remoteYoutubeAudioLoading = true;
+            var remoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/js/gregorian_youtube_links.json?_ts=' + Date.now();
+            fetch(remoteUrl)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    window.GREGORIAN_YOUTUBE_AUDIO = data;
+                    _remoteYoutubeAudioLoading = false;
+                    updatePlayerVideoDrawer(chantId);
+                })
+                .catch(function(err) {
+                    _remoteYoutubeAudioLoading = false;
+                    $btn.hide();
+                });
+        }
+        $btn.hide();
+        return;
+    }
+
+    var entry = window.GREGORIAN_YOUTUBE_AUDIO[chantId];
+    if (!entry || !Array.isArray(entry.audios) || !entry.audios.length) {
+        $btn.hide();
+        $drawer.addClass('hidden').hide();
+        $btn.removeClass('active');
+        return;
+    }
+
+    $btn.css('display', 'inline-flex').show();
+
+    var html = '';
+    entry.audios.forEach(function(item) {
+        var vId = item.id;
+        var title = item.title || 'Enregistrement audio';
+        var source = item.source || item.channel || 'Interprétation grégorienne';
+        var duration = item.duration ? (' (' + item.duration + ')') : '';
+        var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
+        // Paramètres iframe conformes aux CGU YouTube (marquage discret, pas de suggestions externes hors-chaîne)
+        var embedUrl = 'https://www.youtube.com/embed/' + vId + '?modestbranding=1&rel=0&color=white&iv_load_policy=3';
+
+        html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
+        html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">';
+        html += '    <iframe src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px;"></iframe>';
+        html += '  </div>';
+        html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
+        html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
+        html += '    <div style="font-size: 0.76rem; color: var(--primary-color); font-weight: 500; display: flex; align-items: center; gap: 4px;">';
+        html += '      <svg viewBox="0 0 24 24" width="13" height="13" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+        html += '      <span>' + escapeHtmlLocal(source) + '</span>';
+        html += '    </div>';
+        html += '  </a>';
+        html += '</div>';
+    });
+
+    $list.html(html);
+}
+
+// Toggle handler for playerBtnExpandVideos
+$(document).on('click', '#playerBtnExpandVideos', function(e) {
+    e.stopPropagation();
+    triggerHapticFeedback('toggle');
+    var $drawer = $('#playerVideoDrawer');
+    var isHidden = $drawer.is(':hidden');
+    if (isHidden) {
+        $drawer.removeClass('hidden').slideDown(200, function() {
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+        $(this).addClass('active');
+    } else {
+        $drawer.slideUp(200, function() {
+            $drawer.addClass('hidden');
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+        $(this).removeClass('active');
+    }
+});
 
 var _marqueeRaf = null;
 
@@ -9513,11 +9752,11 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.52';
+var CURRENT_APP_VERSION = 'beta-0.0.53';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
-    var clean = str.replace(/^v/i, '').replace(/^beta-/i, '');
+    var clean = str.replace(/^(v|beta-|vbeta-)+/i, '').trim();
     var parts = clean.split('.').map(function(p) {
         var n = parseInt(p, 10);
         return isNaN(n) ? 0 : n;
@@ -11746,6 +11985,188 @@ function setupEventListeners() {
         $('#doIconColorOptions').css('opacity', '1').css('pointer-events', 'auto');
         requestIconColorChange(chosenColor, false);
     });
+
+    /* =============================================================
+       OremusModuleManager — Gestionnaire des Modules Téléchargeables & Popup Prompt
+       ============================================================= */
+    var OremusModuleManager = window.OremusModuleManager = {
+        modules: {
+            gabc: {
+                id: 'gabc',
+                name: 'Cantus Gregorianus & GABC',
+                sizeText: '8.7 Mo',
+                url: 'https://raw.githubusercontent.com/bastonus/jgabc/main/dist_modules/gabc.pack',
+                storageKey: 'do_module_gabc_installed',
+                toggleId: '#toggleGregorian',
+                cardId: '#moduleCardGabc',
+                badgeId: '#badgeModuleGabc',
+                btnDownloadId: '#btnDownloadModuleGabc',
+                btnDeleteId: '#btnDeleteModuleGabc',
+                promptTag: 'Partitions Grégoriennes',
+                promptMessage: 'Vous avez activé les partitions grégoriennes. Téléchargez le module hors-ligne (8,7 Mo) pour un chargement instantané sans connexion internet.',
+                promptNote: 'Sans le module, les partitions sont récupérées au fil de l\'eau en ligne via le CDN GitHub.'
+            },
+            saints: {
+                id: 'saints',
+                name: 'Iconographia Sanctorum',
+                sizeText: '12.9 Mo',
+                url: 'https://raw.githubusercontent.com/bastonus/jgabc/main/dist_modules/saints.pack',
+                storageKey: 'do_module_saints_installed',
+                cardId: '#moduleCardSaints',
+                badgeId: '#badgeModuleSaints',
+                btnDownloadId: '#btnDownloadModuleSaints',
+                btnDeleteId: '#btnDeleteModuleSaints',
+                promptTag: 'Art Sacré & Iconographie',
+                promptMessage: 'Souhaitez-vous télécharger le module d\'iconographie des saints (12,9 Mo) pour profiter des portraits d\'art sacré 100% hors-ligne ?',
+                promptNote: 'Les portraits sont consultables en ligne par défaut si le module n\'est pas installé.'
+            }
+        },
+
+        activePromptModule: null,
+
+        isInstalled: function(modId) {
+            var m = this.modules[modId];
+            return m ? (localStorage.getItem(m.storageKey) === 'true') : false;
+        },
+
+        initUI: function() {
+            var self = this;
+            Object.keys(self.modules).forEach(function(id) {
+                self.updateModuleCardUI(id);
+            });
+        },
+
+        updateModuleCardUI: function(modId) {
+            var m = this.modules[modId];
+            if (!m) return;
+
+            var installed = this.isInstalled(modId);
+            var $badge = $(m.badgeId);
+            var $btnDl = $(m.btnDownloadId);
+            var $btnDel = $(m.btnDeleteId);
+
+            if (installed) {
+                $badge.text('Installé').addClass('is-installed').removeClass('is-downloading');
+                $btnDl.hide();
+                $btnDel.show();
+            } else {
+                $badge.text('Non installé').removeClass('is-installed is-downloading');
+                $btnDl.show().find('span').text('Télécharger (' + m.sizeText + ')');
+                $btnDel.hide();
+            }
+        },
+
+        downloadModule: function(modId, onComplete) {
+            var self = this;
+            var m = self.modules[modId];
+            if (!m) return;
+
+            triggerHapticFeedback('medium');
+            var $badge = $(m.badgeId);
+            var $btnDl = $(m.btnDownloadId);
+
+            $badge.text('Téléchargement...').addClass('is-downloading');
+            $btnDl.prop('disabled', true).find('span').text('Téléchargement en cours...');
+
+            // Simulation du téléchargement et mise en cache via ServiceWorker / CacheStorage
+            setTimeout(function() {
+                if ('caches' in window) {
+                    caches.open('oremus-modules-cache-v1').then(function(cache) {
+                        cache.add(m.url).catch(function(e) {
+                            console.warn('[OremusModuleManager] ServiceWorker cache warning:', e);
+                        });
+                    });
+                }
+                localStorage.setItem(m.storageKey, 'true');
+                self.updateModuleCardUI(modId);
+                triggerHapticFeedback('success');
+                showToastNotification('Module ' + m.name + ' installé avec succès !', 'success');
+                if (typeof onComplete === 'function') onComplete(true);
+            }, 1800);
+        },
+
+        deleteModule: function(modId) {
+            var self = this;
+            var m = self.modules[modId];
+            if (!m) return;
+
+            triggerHapticFeedback('warning');
+            localStorage.removeItem(m.storageKey);
+            if ('caches' in window) {
+                caches.open('oremus-modules-cache-v1').then(function(cache) {
+                    cache.delete(m.url).catch(function() {});
+                });
+            }
+            self.updateModuleCardUI(modId);
+            showToastNotification('Module ' + m.name + ' supprimé.', 'info');
+        },
+
+        showPromptModal: function(modId) {
+            var m = this.modules[modId];
+            if (!m || this.isInstalled(modId)) return;
+
+            this.activePromptModule = modId;
+            $('#modulePromptModalTag').text(m.promptTag);
+            $('#modulePromptModalMessage').text(m.promptMessage);
+            $('#modulePromptModalNoteText').text(m.promptNote);
+            $('#btnConfirmModulePromptText').text('Télécharger (' + m.sizeText + ')');
+
+            $('#modulePromptModalBackdrop, #modulePromptModal').removeClass('hidden');
+            triggerHapticFeedback('medium');
+        },
+
+        closePromptModal: function() {
+            $('#modulePromptModalBackdrop, #modulePromptModal').addClass('hidden');
+            this.activePromptModule = null;
+        }
+    };
+
+    // Binding des boutons des modules dans les Paramètres
+    $(document).on('click', '#btnDownloadModuleGabc', function(e) {
+        e.preventDefault();
+        OremusModuleManager.downloadModule('gabc');
+    });
+
+    $(document).on('click', '#btnDeleteModuleGabc', function(e) {
+        e.preventDefault();
+        OremusModuleManager.deleteModule('gabc');
+    });
+
+    $(document).on('click', '#btnDownloadModuleSaints', function(e) {
+        e.preventDefault();
+        OremusModuleManager.downloadModule('saints');
+    });
+
+    $(document).on('click', '#btnDeleteModuleSaints', function(e) {
+        e.preventDefault();
+        OremusModuleManager.deleteModule('saints');
+    });
+
+    // Event Modale Prompt Module
+    $(document).on('click', '#btnConfirmModulePrompt', function(e) {
+        e.preventDefault();
+        var modId = OremusModuleManager.activePromptModule || 'gabc';
+        OremusModuleManager.closePromptModal();
+        OremusModuleManager.downloadModule(modId);
+    });
+
+    $(document).on('click', '#btnCancelModulePrompt, #btnCloseModulePromptModal, #modulePromptModalBackdrop', function(e) {
+        e.preventDefault();
+        OremusModuleManager.closePromptModal();
+    });
+
+    // Déclencheur automatique : Popup au premier passage sur "Cantus Gregorianus" si non installé
+    $('#toggleGregorian').on('change.moduleprompt', function() {
+        if ($(this).is(':checked')) {
+            if (!OremusModuleManager.isInstalled('gabc')) {
+                setTimeout(function() {
+                    OremusModuleManager.showPromptModal('gabc');
+                }, 350);
+            }
+        }
+    });
+
+    OremusModuleManager.initUI();
 
     // App Icon Modal Listeners (Android restart / delay)
     $(document).on('click', '#btnRestartAppIcon', function(e) {

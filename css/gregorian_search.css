@@ -29,8 +29,16 @@ body.is-search-mode .do-top-header {
 
 @media (min-width: 900px) {
     body.is-search-mode .do-top-header {
-        padding-left: 24px !important;
-        padding-right: 24px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    body.is-search-mode .gregorian-filter-bar {
+        max-width: 760px !important;
+        margin: 0 auto !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 }
 
@@ -1330,4 +1338,56 @@ body.is-search-mode .header-dropdown-toggle {
     opacity: 0.7;
     padding: 16px;
     text-align: center;
+}
+
+/* ── Carrousel horizontal compact pour les cartes YouTube (Desktop & Mobile) ── */
+.do-youtube-audio-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 6px !important;
+    box-sizing: border-box !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.do-youtube-audio-list::-webkit-scrollbar {
+    display: none !important;
+}
+
+.do-youtube-audio-list .do-yt-item {
+    flex: 0 0 calc((100% - 12px) / 1.5) !important;
+    min-width: 0 !important;
+    max-width: 280px !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+    .do-chant-audio-sources {
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow: hidden !important;
+    }
+    #playerVideoDrawer {
+        margin-left: -14px !important;
+        margin-right: -14px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow: hidden !important;
+    }
+    .do-youtube-audio-list {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+    .do-youtube-audio-list .do-yt-item {
+        flex: 0 0 calc((100vw - 32px - 12px) / 1.5) !important;
+        max-width: none !important;
+    }
 }
