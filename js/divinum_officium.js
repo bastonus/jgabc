@@ -5967,19 +5967,15 @@ function updatePlayerVideoDrawer(chantId) {
         var source = item.source || item.channel || 'Interprétation grégorienne';
         var duration = item.duration ? (' (' + item.duration + ')') : '';
         var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
-        // Paramètres iframe conformes aux CGU YouTube (marquage discret, pas de suggestions externes hors-chaîne)
         var embedUrl = 'https://www.youtube.com/embed/' + vId;
 
         html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
-        html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">';
-        html += '    <iframe src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px;"></iframe>';
+        html += '  <div class="do-yt-thumb-wrap" style="position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000;">';
+        html += '    <iframe width="100%" height="160" src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border: 0; border-radius: 12px; width: 100%; height: 160px;"></iframe>';
         html += '  </div>';
         html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
         html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
-        html += '    <div style="font-size: 0.76rem; color: var(--primary-color); font-weight: 500; display: flex; align-items: center; gap: 4px;">';
-        html += '      <svg viewBox="0 0 24 24" width="13" height="13" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
-        html += '      <span>' + escapeHtmlLocal(source) + '</span>';
-        html += '    </div>';
+        html += '    <div style="font-size: 0.76rem; color: var(--primary-color); font-weight: 500;">' + escapeHtmlLocal(source) + '</div>';
         html += '  </a>';
         html += '</div>';
     });
