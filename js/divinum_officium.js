@@ -5967,14 +5967,15 @@ function updatePlayerVideoDrawer(chantId) {
         var vId = item.id;
         var title = item.title || 'Enregistrement audio';
         var source = item.source || item.channel || 'Interprétation grégorienne';
-        var duration = item.duration ? (' (' + item.duration + ')') : '';
-        var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
-        var embedUrl = 'https://www.youtube.com/embed/' + vId;
+        var thumbUrl = 'https://i.ytimg.com/vi/' + vId + '/hqdefault.jpg';
 
         html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
-        html += '  <div class="do-yt-thumb-wrap" style="position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000; z-index: 50; pointer-events: auto !important;">';
-        html += '    <iframe width="100%" height="160" src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border: 0; border-radius: 12px; width: 100%; height: 160px; pointer-events: auto !important; position: relative; z-index: 51;"></iframe>';
-        html += '  </div>';
+        html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="position: relative; display: block; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000; z-index: 50; text-decoration: none;">';
+        html += '    <img src="' + escapeHtmlLocal(thumbUrl) + '" alt="' + escapeHtmlLocal(title) + '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">';
+        html += '    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 30px; background: rgba(255, 0, 0, 0.9); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">';
+        html += '      <svg viewBox="0 0 24 24" width="16" height="16" fill="#ffffff"><polygon points="8,5 19,12 8,19"></polygon></svg>';
+        html += '    </div>';
+        html += '  </a>';
         html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
         html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
         html += '    <div style="font-size: 0.76rem; color: var(--primary-color); font-weight: 500;">' + escapeHtmlLocal(source) + '</div>';
