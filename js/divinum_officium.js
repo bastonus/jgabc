@@ -5884,10 +5884,13 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     if ($card) $card.addClass('is-playing');
 
     // Populate YouTube video drawer if chant ID is present
-    var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || '';
+    var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || (score && (score.chantId || score.id)) || '';
     if (!chantId && $card) {
         var $wrapper = $card.closest('[data-chant-id]');
         if ($wrapper.length) chantId = $wrapper.data('chant-id');
+    }
+    if (!chantId && _doCurrentPlayerCard) {
+        chantId = _doCurrentPlayerCard.data('chant-id') || _doCurrentPlayerCard.attr('data-chant-id') || '';
     }
     updatePlayerVideoDrawer(chantId);
 }
@@ -5931,9 +5934,10 @@ function updatePlayerVideoDrawer(chantId) {
 
     // Téléchargement distant synchrone/asynchrone de la base distante GitHub si non disponible
     if (!window.GREGORIAN_YOUTUBE_AUDIO) {
+        $btn.css('display', 'inline-flex').show();
         if (!_remoteYoutubeAudioLoading) {
             _remoteYoutubeAudioLoading = true;
-            var remoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/js/gregorian_youtube_links.json?_ts=' + Date.now();
+            var remoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/js/gregorian_youtube_links.json';
             fetch(remoteUrl)
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
@@ -5943,10 +5947,8 @@ function updatePlayerVideoDrawer(chantId) {
                 })
                 .catch(function(err) {
                     _remoteYoutubeAudioLoading = false;
-                    $btn.hide();
                 });
         }
-        $btn.hide();
         return;
     }
 
