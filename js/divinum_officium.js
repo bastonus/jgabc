@@ -5990,20 +5990,19 @@ function updatePlayerVideoDrawer(chantId) {
 // Toggle handler for playerBtnExpandVideos
 $(document).on('click', '#playerBtnExpandVideos', function(e) {
     e.stopPropagation();
-    triggerHapticFeedback('toggle');
+    if (typeof triggerHapticFeedback === 'function') triggerHapticFeedback('toggle');
     var $drawer = $('#playerVideoDrawer');
-    var isHidden = $drawer.is(':hidden');
+    var $btn = $(this);
+    var isHidden = $drawer.hasClass('hidden') || $drawer.css('display') === 'none';
+
     if (isHidden) {
-        $drawer.removeClass('hidden').slideDown(200, function() {
-            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-        });
-        $(this).addClass('active');
+        $drawer.removeClass('hidden').show();
+        $btn.addClass('active');
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
     } else {
-        $drawer.slideUp(200, function() {
-            $drawer.addClass('hidden');
-            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-        });
-        $(this).removeClass('active');
+        $drawer.addClass('hidden').hide();
+        $btn.removeClass('active');
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
     }
 });
 
