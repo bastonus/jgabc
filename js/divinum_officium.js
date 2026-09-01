@@ -5972,8 +5972,8 @@ function updatePlayerVideoDrawer(chantId) {
         var embedUrl = 'https://www.youtube.com/embed/' + vId;
 
         html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
-        html += '  <div class="do-yt-thumb-wrap" style="position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000;">';
-        html += '    <iframe width="100%" height="160" src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border: 0; border-radius: 12px; width: 100%; height: 160px;"></iframe>';
+        html += '  <div class="do-yt-thumb-wrap" style="position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000; z-index: 50; pointer-events: auto !important;">';
+        html += '    <iframe width="100%" height="160" src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border: 0; border-radius: 12px; width: 100%; height: 160px; pointer-events: auto !important; position: relative; z-index: 51;"></iframe>';
         html += '  </div>';
         html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
         html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
