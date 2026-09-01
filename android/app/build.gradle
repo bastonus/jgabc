@@ -7,8 +7,8 @@ android {
         applicationId "com.chanttools.divinumofficium"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 52
-        versionName "beta-0.0.52"
+        versionCode 53
+        versionName "beta-0.0.53"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -95,8 +95,13 @@ task copyWebAssets(type: Copy) {
         include "js/gregorian_search_worker.js"
         include "js/gregorian_search_ui.js"
         include "js/vendor/**"
+        include "js/saints_art_metadata.js"
+        include "js/tempora_art_metadata.js"
 
         include "data/**"
+
+        include "img/saints/**"
+        include "img/tempora/**"
 
         include "patterns/la-hypher.js"
         include "patterns/fr-FR.js"
@@ -112,7 +117,7 @@ task copyWebAssets(type: Copy) {
         include "do_data/**/*.txt"
         include "gabc/**/*.gabc"
         include "vulgate/**/*.txt"
-        include "aelf/**/*.txt"
+        include "crampon/**/*.txt"
         include "douay-rheims/**/*.txt"
         include "matos-soares/**/*.txt"
         include "psalms/**/*.txt"

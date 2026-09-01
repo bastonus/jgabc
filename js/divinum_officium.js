@@ -972,7 +972,7 @@ var DO_UI_TRANSLATIONS = {
         liturgia_diei: 'Liturgie du Jour',
         cursus_horarum: 'Heures Canoniales',
         sacra_biblia: 'Sainte Bible',
-        sacra_biblia_tag: 'Vulgata & AELF',
+        sacra_biblia_tag: 'Vulgata & Crampon',
         missa: 'Messe',
         missa_tag: 'Sainte Messe',
         missa_gregorian: 'Messe & Grégorien',
@@ -1620,7 +1620,7 @@ function fileExistsInManifest(path) {
 }
 
 // ---- File Fetcher (100% Local Relative Path with 404 Prevention) ----
-var DO_DATA_BUILD_VERSION = '202608311249';
+var DO_DATA_BUILD_VERSION = '202609011135';
 function fetchLocalFile(path, callback) {
     if (DO_LOCAL_CACHE[path] !== undefined) {
         callback(null, DO_LOCAL_CACHE[path]);
@@ -3511,7 +3511,7 @@ function renderBibleMainView() {
 
     var vernLang = (doState.vernacularLang && doState.vernacularLang !== 'none') ? doState.vernacularLang : null;
     var laPath = 'vulgate/' + bookId + '.txt';
-    var vernFolder = (vernLang === 'fr') ? 'aelf' : (vernLang === 'en') ? 'douay-rheims' : (vernLang === 'pt') ? 'matos-soares' : null;
+    var vernFolder = (vernLang === 'fr') ? 'crampon' : (vernLang === 'en') ? 'douay-rheims' : (vernLang === 'pt') ? 'matos-soares' : null;
     var vernPath = vernFolder ? (vernFolder + '/' + bookId + '.txt') : null;
 
     fetchLocalFile(laPath, function(err, laData) {
@@ -3520,7 +3520,7 @@ function renderBibleMainView() {
         if (vernPath && vernLang) {
             fetchLocalFile(vernPath, function(err2, vernData) {
                 var vernVerses = (!err2 && vernData) ? parseBibleFileVerses(vernData, chapterNum) : {};
-                buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, vernVerses);
+                buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, (Object.keys(vernVerses).length > 0 ? vernVerses : null));
             });
         } else {
             buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, null);
@@ -3562,8 +3562,9 @@ function buildBibleMainViewHTML(bkObj, chapterNum, pageNum, pageSize, laVerses, 
 
     // Verses Body
     var bodyHtml = '';
-    var isBilingual = (doState.showLatin && vernLang && vernVerses);
-    var isVernOnly = (!doState.showLatin && vernLang && vernVerses);
+    var hasVernVerses = (vernVerses && typeof vernVerses === 'object' && Object.keys(vernVerses).length > 0);
+    var isBilingual = (doState.showLatin && vernLang && hasVernVerses);
+    var isVernOnly = (!doState.showLatin && vernLang && hasVernVerses);
 
     if (visibleRows.length) {
         if (isBilingual) {
@@ -3836,6 +3837,395 @@ function setupHomeSearch() {
     });
 }
 
+function cleanBioParagraph(rawText) {
+    if (!rawText) return '';
+    var lines = Array.isArray(rawText) ? rawText : rawText.split('\n');
+    var cleaned = [];
+    for (var i = 0; i < lines.length; i++) {
+        var l = (lines[i] || '').trim();
+        if (!l || l === '_') continue;
+        if (l.charAt(0) === '@' || l.charAt(0) === '&' || l.charAt(0) === '$') continue;
+        if (/^\(sed\s+/i.test(l)) continue;
+        if (l.charAt(0) === '!' && l.length < 60) continue;
+        cleaned.push(l);
+    }
+    return cleaned.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function extractMartyrologyBio(martContent, keywords) {
+    if (!martContent) return '';
+    var rawParas = martContent.split('\n\n');
+    if (!rawParas || rawParas.length <= 1) {
+        rawParas = martContent.split('\n');
+    }
+    var paras = [];
+    for (var i = 0; i < rawParas.length; i++) {
+        var p = (rawParas[i] || '').trim();
+        if (p && !/^Le\s+/i.test(p) && !/^Aux\s+calendes/i.test(p) && p !== '_') {
+            paras.push(p);
+        }
+    }
+    if (keywords) {
+        var kwList = [];
+        var rawKws = Array.isArray(keywords) ? keywords : (typeof keywords === 'string' ? keywords.split('\n') : []);
+        for (var k = 0; k < rawKws.length; k++) {
+            var kw = (rawKws[k] || '').trim().toLowerCase();
+            if (kw.length > 3) kwList.push(kw);
+        }
+        for (var j = 0; j < paras.length; j++) {
+            var pClean = cleanBioParagraph(paras[j]);
+            var pLower = pClean.toLowerCase();
+            for (var m = 0; m < kwList.length; m++) {
+                if (pLower.indexOf(kwList[m]) !== -1) {
+                    return pClean;
+                }
+            }
+        }
+    }
+    if (paras.length > 0) {
+        return cleanBioParagraph(paras[0]);
+    }
+    return '';
+}
+
+function openSaintImagePreview(imgSrc, title) {
+    $('#doSaintPreviewModal').remove();
+
+    var $modal = $('<div id="doSaintPreviewModal" class="do-saint-preview-backdrop">');
+    var $dialog = $('<div class="do-saint-preview-dialog">');
+    
+    var $closeBtn = $('<button type="button" class="do-saint-preview-close" aria-label="Fermer">' +
+        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>');
+    $dialog.append($closeBtn);
+
+    var $imgWrap = $('<div class="do-saint-preview-image-wrap">');
+    var $img = $('<img class="do-saint-preview-img">').attr('src', imgSrc).attr('alt', title || '');
+    $imgWrap.append($img);
+    $dialog.append($imgWrap);
+
+    var match = imgSrc ? imgSrc.match(/(?:saints|tempora)\/([A-Za-z0-9_-]+)\.webp/) : null;
+    var dateCode = match ? match[1] : null;
+    var meta = null;
+    if (window.DO_TEMPORA_ART_METADATA && dateCode && window.DO_TEMPORA_ART_METADATA[dateCode]) {
+        meta = window.DO_TEMPORA_ART_METADATA[dateCode];
+    } else if (window.DO_SAINT_ART_METADATA && dateCode && window.DO_SAINT_ART_METADATA[dateCode]) {
+        meta = window.DO_SAINT_ART_METADATA[dateCode];
+    }
+
+    if (title || meta) {
+        var $caption = $('<div class="do-saint-preview-caption">');
+        if (title) {
+            var $h2 = $('<h2 class="do-saint-preview-title">').text(title);
+            $caption.append($h2);
+        }
+        if (meta) {
+            var $meta = $('<div class="do-saint-preview-meta">');
+            var metaParts = [];
+            if (meta.artwork) metaParts.push('« ' + meta.artwork + ' »');
+            if (meta.artist) {
+                var artStr = meta.artist;
+                if (meta.year) artStr += ' (' + meta.year + ')';
+                metaParts.push(artStr);
+            }
+            if (meta.location) metaParts.push(meta.location);
+            $meta.text(metaParts.join(' — '));
+            $caption.append($meta);
+        }
+        $dialog.append($caption);
+    }
+
+    $modal.append($dialog);
+    $('body').append($modal);
+
+    function closeModal() {
+        $modal.fadeOut(150, function() {
+            $modal.remove();
+        });
+        $(document).off('keydown.saintPreview');
+    }
+
+    $closeBtn.on('click', function(e) {
+        e.stopPropagation();
+        closeModal();
+    });
+
+    $modal.on('click', function(e) {
+        if (!$(e.target).closest('.do-saint-preview-image-wrap').length) {
+            closeModal();
+        }
+    });
+
+    $(document).off('keydown.saintPreview').on('keydown.saintPreview', function(e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+            closeModal();
+        }
+    });
+}
+
+function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isMissaMode) {
+    var codes = computeLiturgicalCodes(date);
+    var sanctiCode = codes.sancti;
+    var temporaCode = codes.tempora;
+    var isTempora = false;
+
+    if (missaResult && missaResult.loadedPath) {
+        if (missaResult.loadedPath.indexOf('Tempora/') === 0) {
+            temporaCode = missaResult.loadedPath.replace('Tempora/', '');
+            isTempora = true;
+        } else if (missaResult.loadedPath.indexOf('Sancti/') === 0) {
+            sanctiCode = missaResult.loadedPath.replace('Sancti/', '');
+        }
+    } else if (codes.isSunday) {
+        isTempora = true;
+    }
+
+    var langFolder = getLangFolder(uiLang);
+    var imgPath = isTempora ? ('img/tempora/' + temporaCode + '.webp') : ('img/saints/' + sanctiCode + '.webp');
+    var loadPath = isTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode);
+
+    loadRecursiveDOFile(loadPath, langFolder, false, function(sec) {
+        var bio = '';
+        var sourceName = (uiLang === 'fr') ? 'Bréviaire Romain' : (uiLang === 'la') ? 'Breviarium Romanum' : 'Roman Breviary';
+
+        if (sec) {
+            var raw = sec['Lectio94'] || sec['Lectio93'] || sec['Lectio91'] || sec['Lectio4_'] || sec['Lectio4'] || sec['Homilia'] || sec['Lectio7'] || '';
+            if (Array.isArray(raw)) raw = raw.join('\n');
+            bio = cleanBioParagraph(raw);
+        }
+
+        if (bio) {
+            finishCard(bio, sourceName);
+            return;
+        }
+
+        if (isTempora) {
+            if (sec && (sec['Lectio1'] || sec['Lectio2'] || sec['Lectio3'])) {
+                var rawL = sec['Lectio1'] || sec['Lectio2'] || sec['Lectio3'];
+                if (Array.isArray(rawL)) rawL = rawL.join('\n');
+                bio = cleanBioParagraph(rawL);
+            }
+            if (bio) {
+                finishCard(bio, sourceName);
+                return;
+            }
+        }
+
+        var martPath = 'do_data/horas/' + langFolder + '/Martyrologium/' + sanctiCode + '.txt';
+        fetchLocalFile(martPath, function(mErr, martData) {
+            if (!mErr && martData) {
+                var saintNames = (sec && sec['Name']) ? sec['Name'] : null;
+                bio = extractMartyrologyBio(martData, saintNames);
+                if (bio) {
+                    sourceName = (uiLang === 'fr') ? 'Martyrologe Romain' : 'Martyrologium Romanum';
+                }
+            }
+            finishCard(bio, sourceName);
+        });
+
+        function finishCard(bioText, source) {
+            if (!bioText) {
+                callback(null);
+                return;
+            }
+
+            var $hero = $('<div class="do-home-saint-hero' + (isMissaMode ? ' do-missa-saint-hero' : '') + '">');
+            
+            var headerH = $('.do-top-header').outerHeight() || 64;
+            $hero[0].style.setProperty('--do-header-offset', headerH + 'px');
+
+            // Zone d'ambiance floutée pleine largeur (arrière-plan immersif)
+            // Le bgClip clippe le débordement horizontal sans affecter le parent sticky
+            var $bgClip = $('<div class="do-home-saint-hero-bg-clip">');
+            var $bgWrap = $('<div class="do-home-saint-hero-bg-wrap">');
+            var $bgImg = $('<img class="do-home-saint-hero-bg" alt="" aria-hidden="true">')
+                .attr('src', imgPath);
+            var $overlay = $('<div class="do-home-saint-hero-overlay"></div>');
+            $bgWrap.append($bgImg).append($overlay);
+            $bgClip.append($bgWrap);
+            $hero.append($bgClip);
+
+            // Conteneur de l'image nette (centré dans le hero, par-dessus le fond flouté)
+            var $body = $('<div class="do-home-saint-hero-body">');
+            var $thumbWrap = $('<div class="do-home-saint-hero-thumb-wrap">');
+            var $thumbImg = $('<img class="do-home-saint-hero-thumb">')
+                .attr('src', imgPath)
+                .attr('alt', feastTitle || '')
+                .on('error', function() {
+                    $hero.addClass('do-hero-no-image');
+                    $bgClip.hide();
+                    $thumbWrap.hide();
+                    if (typeof compute3Lines === 'function') {
+                        setTimeout(compute3Lines, 10);
+                    }
+                });
+            $thumbWrap.append($thumbImg);
+            $body.append($thumbWrap);
+
+            // Texte biographique à droite de l'image dans le hero
+            var $content = $('<div class="do-home-saint-hero-content">');
+            var $p = $('<p class="do-home-saint-hero-text">').attr('lang', (uiLang === 'la' ? 'la' : 'fr'));
+            $content.append($p);
+            $body.append($content);
+            $hero.append($body);
+
+            var isExpanded = false;
+            var isLong = false;
+            var truncatedHtml = '';
+
+            var seeMoreLabel = (uiLang === 'fr') ? 'voir plus' : (uiLang === 'la') ? 'plura' : 'see more';
+            var seeLessLabel = (uiLang === 'fr') ? 'voir moins' : (uiLang === 'la') ? 'minus' : 'see less';
+
+            function compute3Lines() {
+                var words = bioText.trim().split(/\s+/);
+                
+                // Mesure précise de la hauteur d'une seule ligne dans le DOM
+                $p.empty();
+                $p.text('A');
+                var singleH = $p.outerHeight() || 26;
+                if (singleH < 15) singleH = 26;
+
+                // Desktop (form T) : aperçu = hauteur de la carte image
+                // Mobile : 3 lignes
+                var targetMaxH;
+                if (window.innerWidth >= 768 && $thumbWrap.is(':visible')) {
+                    var cardH = $thumbWrap.outerHeight() || 250;
+                    var numLines = Math.max(3, Math.floor(cardH / singleH));
+                    targetMaxH = Math.round(singleH * (numLines + 0.15));
+                } else {
+                    targetMaxH = Math.round(singleH * 3.12);
+                }
+
+                $p.text(bioText);
+                if ($p.outerHeight() <= targetMaxH) {
+                    isLong = false;
+                    $p.text(bioText);
+                    $hero.css('cursor', 'default');
+                    return;
+                }
+
+                isLong = true;
+                $hero.css('cursor', 'pointer');
+
+                // Recherche binaire du nombre exact de mots pour que "... voir plus" tienne dans targetMaxH
+                var low = 1;
+                var high = words.length;
+                var best = 1;
+
+                while (low <= high) {
+                    var mid = Math.floor((low + high) / 2);
+                    var candidate = words.slice(0, mid).join(' ').replace(/[,;.:\s]+$/, '') + '…';
+                    $p.text(candidate + ' ').append($('<span class="do-home-saint-inline-more">').text(seeMoreLabel));
+                    
+                    if ($p.outerHeight() <= targetMaxH) {
+                        best = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+
+                // Garantie absolue : tant que la hauteur dépasse targetMaxH, on retire un mot
+                while (best > 1) {
+                    var safeCut = words.slice(0, best).join(' ').replace(/[,;.:\s]+$/, '') + '…';
+                    $p.text(safeCut + ' ').append($('<span class="do-home-saint-inline-more">').text(seeMoreLabel));
+                    if ($p.outerHeight() <= targetMaxH) {
+                        break;
+                    }
+                    best--;
+                }
+
+                truncatedHtml = $p.html();
+            }
+
+            function toggleExpand() {
+                if (!isLong) return;
+                isExpanded = !isExpanded;
+                if (isExpanded) {
+                    $p.text(bioText + ' ').append($('<span class="do-home-saint-inline-more">').text(seeLessLabel));
+                } else {
+                    if (truncatedHtml) {
+                        $p.html(truncatedHtml);
+                    } else {
+                        compute3Lines();
+                    }
+                }
+            }
+
+            // Cliquer sur l'image ouvre l'aperçu plein écran avec le nom du saint en gros
+            $thumbWrap.on('click', function(e) {
+                e.stopPropagation();
+                openSaintImagePreview(imgPath, feastTitle);
+            });
+
+            // Cliquer sur le texte étend ou réduit
+            // ($content est dans $hero, mais le click est aussi sur $hero pour couvrir l'espace bg)
+            $content.on('click', function(e) {
+                toggleExpand();
+            });
+            $hero.on('click', function(e) {
+                if (!$(e.target).closest('.do-home-saint-hero-thumb-wrap, .do-home-saint-hero-content').length) {
+                    toggleExpand();
+                }
+            });
+
+            function setupSaintParallax() {
+                var bgEl = $bgImg[0];
+                if (!bgEl) return;
+
+                var ticking = false;
+                function onScrollParallax() {
+                    var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+                    if (scrollY <= 900) {
+                        var translateY = scrollY * 0.15;
+                        bgEl.style.transform = 'scale(1.15) translate3d(0, ' + translateY.toFixed(1) + 'px, 0)';
+                    }
+                    ticking = false;
+                }
+
+                $(window).off('scroll.saintParallax').on('scroll.saintParallax', function() {
+                    if (!ticking) {
+                        window.requestAnimationFrame(onScrollParallax);
+                        ticking = true;
+                    }
+                });
+
+                onScrollParallax();
+            }
+
+            function updateSaintBgFullBleed() {
+                var wrapperEl = document.querySelector('.do-main-wrapper') || document.querySelector('.app-main') || document.body;
+                var heroEl = $hero[0];
+                var bgClipEl = $bgClip[0];
+                if (!wrapperEl || !heroEl || !bgClipEl) return;
+                var wrapperRect = wrapperEl.getBoundingClientRect();
+                var heroRect = heroEl.getBoundingClientRect();
+                var leftDelta = heroRect.left - wrapperRect.left;
+                bgClipEl.style.left = (-leftDelta) + 'px';
+                bgClipEl.style.width = wrapperRect.width + 'px';
+            }
+
+            callback($hero, function() {
+                compute3Lines();
+                setupSaintParallax();
+                updateSaintBgFullBleed();
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(function() {
+                        if (!isExpanded) compute3Lines();
+                        updateSaintBgFullBleed();
+                    });
+                }
+            });
+
+            $(window).off('resize.saintHero').on('resize.saintHero', function() {
+                updateSaintBgFullBleed();
+                if (!isExpanded && isLong) {
+                    compute3Lines();
+                }
+            });
+        }
+    });
+}
 
 function renderHomeView() {
     var $stream = $('#do-content-stream').empty();
@@ -3861,15 +4251,24 @@ function renderHomeView() {
 
         var $view = $('<div class="do-home-styled">');
 
-        // ---- BARRE DE RECHERCHE GLOBALE ----
-        var searchPlaceholder = (uiLang === 'fr') ? "Rechercher un saint, un dimanche, une fête ou un livre biblique..." : "Quære sanctum, dominicam aut librum...";
-        var $searchBar = $('<div class="do-home-search-bar-wrap">')
-            .append('<span class="do-home-search-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg></span>')
-            .append('<input type="text" id="doHomeSearchInput" class="do-home-search-input" placeholder="' + escHtml(searchPlaceholder) + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">')
-            .append('<button id="doHomeSearchClear" class="do-home-search-clear hidden" aria-label="Effacer"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>')
-            .append('<div id="doHomeSearchResults" class="do-home-search-results hidden"></div>');
+        var onSaintAttached = null;
+        var isViewInDom = false;
 
-        $view.append($searchBar);
+        // ---- HERO DU SAINT DU JOUR — placé AVANT do-home-styled dans le content-area
+        // (même max-width 760px que la messe, pas limité à 680px du do-home-styled)
+        var $saintCardWrap = $('<div id="doHomeSaintCardWrap" class="do-home-saint-card-wrap">');
+
+        buildHomeSaintCard(doState.date, uiLang, feastTitle, result, function($card, onAttached) {
+            if ($card) {
+                $saintCardWrap.append($card);
+                onSaintAttached = onAttached;
+                if (isViewInDom && typeof onSaintAttached === 'function') {
+                    requestAnimationFrame(function() {
+                        onSaintAttached();
+                    });
+                }
+            }
+        });
 
         // ---- SECTION MESSE & BIBLE (CÔTE À CÔTE SUR LA MÊME LIGNE SANS FLÈCHE) ----
         var $topCardsGrid = $('<div class="do-top-cards-scroll">');
@@ -3937,7 +4336,14 @@ function renderHomeView() {
         $timelineSection.append($timeline);
         $view.append($timelineSection);
 
+        $stream.append($saintCardWrap);
         $stream.append($view);
+        isViewInDom = true;
+        if (typeof onSaintAttached === 'function') {
+            requestAnimationFrame(function() {
+                onSaintAttached();
+            });
+        }
         setupHomeSearch();
     });
 }
@@ -3954,9 +4360,15 @@ function renderDO() {
     var isBible = (doState.hora === 'bible');
     var isSearch = (doState.hora === 'gregorian_search');
     var isChant = (doState.hora === 'gregorian_chant');
+    var isMissa = (doState.hora === 'missa' || doState.hora === 'missa_gregorian');
+    $('body').toggleClass('is-home-mode', isHome);
+    $('body').toggleClass('is-missa-mode', isMissa);
     $('body').toggleClass('is-bible-mode', isBible);
     $('body').toggleClass('is-search-mode', isSearch);
     $('body').toggleClass('is-chant-mode', isChant);
+    if (!isHome && !isMissa) {
+        $(window).off('scroll.saintParallax');
+    }
 
     if (isHome) {
         hideMassToc();
@@ -6079,6 +6491,30 @@ function displayResult(result, vernResult) {
         checkHeaderTitleMarquee();
     }
 
+    var onSaintAttached = null;
+    var isViewInDom = false;
+
+    // ---- COMPOSANT SAINT DU JOUR / FÊTE AU DÉBUT DE LA MESSE ----
+    if (isMissa) {
+        var $saintCardWrap = $('<div id="doMissaSaintCardWrap" class="do-home-saint-card-wrap do-missa-saint-card-wrap">');
+        $stream.append($saintCardWrap);
+
+        var feastTitleStr = getLocalizedFeastTitle(title, uiLang);
+        buildHomeSaintCard(doState.date, uiLang, feastTitleStr, result, function($card, onAttached) {
+            if ($card) {
+                $saintCardWrap.append($card);
+                onSaintAttached = onAttached;
+                if (isViewInDom && typeof onSaintAttached === 'function') {
+                    requestAnimationFrame(function() {
+                        onSaintAttached();
+                    });
+                }
+            } else {
+                $saintCardWrap.remove();
+            }
+        }, true);
+    }
+
     var vernMap = {};
     if (vernResult && vernResult.cards) {
         vernResult.cards.forEach(function(vc) {
@@ -6131,6 +6567,13 @@ function displayResult(result, vernResult) {
         setupMassToc(result);
     } else {
         hideMassToc();
+    }
+
+    isViewInDom = true;
+    if (typeof onSaintAttached === 'function') {
+        requestAnimationFrame(function() {
+            onSaintAttached();
+        });
     }
 
     startBilingualSwipeHint();
@@ -6407,6 +6850,7 @@ function closeModals() {
     } else {
         $('#gregorianSearchModal, #gregorianZoomModal').removeClass('is-open');
     }
+    $('#doSaintPreviewModal').remove();
     $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
@@ -11098,6 +11542,24 @@ function setupEventListeners() {
             localStorage.setItem('do_hora', 'missa');
         }
         renderDO();
+    });
+
+    // Search Image Preview Toggle in Settings (désactivé par défaut)
+    (function() {
+        var stored = localStorage.getItem('do_search_images');
+        var enabled = stored === 'true'; // false par défaut
+        $('#toggleSearchImages').prop('checked', enabled);
+        window.doSearchImagesEnabled = enabled;
+    })();
+    $('#toggleSearchImages').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
+        window.doSearchImagesEnabled = isChecked;
+        localStorage.setItem('do_search_images', isChecked ? 'true' : 'false');
+        // Re-rendre les résultats pour appliquer immédiatement
+        if (window.gregorianSearchUI && typeof window.gregorianSearchUI.triggerSearch === 'function') {
+            window.gregorianSearchUI.triggerSearch(false);
+        }
     });
 
     // Note Keyboard buttons in Settings (Instant pitch playback)

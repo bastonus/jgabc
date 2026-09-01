@@ -1,5 +1,27 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.53 (1 Septembre 2026)
+
+---
+
+### 🖼️ Biographies & Iconographie des Saints (Accueil & Messe)
+* **Carte Immersive du Saint du Jour :**
+  * Nouvelle carte `.do-home-saint-card` positionnée sous la barre de recherche sur la page d'accueil, présentant le portrait du saint du jour avec filet doré, badge de fête, titre liturgique, notice biographique dépliable (*« Lire la suite »*) et accès direct à la messe.
+  * Extraction dynamique de la `Lectio94` / `Lectio93` (notice biographique officielle des rubriques de 1960) et des `Lectio 4-5-6` du Bréviaire, avec *fallback* automatique vers le *Martyrologe Romain* pour les commémoraisons simples.
+  * Galerie de **266 portraits WebP** indexés par date (`img/saints/{MM-DD}.webp`), générés depuis le corpus des œuvres d'art sacré du domaine public (Giotto, Fra Angelico, Memling, Le Caravage, Guido Reni, icônes byzantines) en WebP 480px — poids total **8,56 Mo** pour l'année entière.
+  * Chargement instantané à 0 ms, 100 % hors-ligne, mis en cache persistant par le Service Worker.
+
+---
+
+### 📖 Bible Crampon 1923 — Remplacement Complet de l'AELF
+* **Traduction Catholique Traditionnelle Alignée sur la Vulgate :**
+  * Remplacement intégral de la traduction AELF (issue de la Néo-Vulgate post-Vatican II) par la **Bible du Chanoine Crampon** (édition révisée 1923) pour les 73 livres canoniques et 35 580 versets.
+  * Alignement parfait verset par verset (1:1 direct) avec la Vulgate clémentine sur l'ensemble du canon : Tobie (20 versets au chapitre 7), Judith, Esther et l'intégralité du Nouveau Testament.
+  * Réalignement liturgique des 150 Psaumes et typographie française soignée (espaces insécables, ponctuation traditionnelle).
+  * Dossier `crampon/` créé, synchronisé et intégré au moteur de rendu de l'application.
+
+---
+
 ## 🚀 Version 0.0.52 (1 Septembre 2026)
 
 ---

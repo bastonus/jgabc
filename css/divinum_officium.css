@@ -77,10 +77,16 @@
 }
 
 [data-theme="dark"] .do-top-header,
+[data-theme="oled"] .do-top-header {
+    background-color: rgba(0, 0, 0, 0.45) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+}
+
 [data-theme="dark"] .do-header-dropdown,
 [data-theme="dark"] .settings-panel,
 [data-theme="dark"] .modern-player-bar,
-[data-theme="oled"] .do-top-header,
 [data-theme="oled"] .do-header-dropdown,
 [data-theme="oled"] .settings-panel,
 [data-theme="oled"] .modern-player-bar {
@@ -518,10 +524,10 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
    TOP HEADER (Seamless & Borderless Frosted Glass)
    ============================================================= */
 .do-top-header {
-    background-color: color-mix(in srgb, var(--background-base) 70%, transparent) !important;
+    background-color: color-mix(in srgb, var(--background-base) 45%, transparent) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
     border-bottom: none !important;
     position: sticky !important;
     top: 0 !important;
@@ -3099,8 +3105,7 @@ body, html {
 
 .do-home-styled {
     width: 100%;
-    max-width: 680px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0 0 10px;
     box-sizing: border-box;
     display: flex;
@@ -3247,6 +3252,438 @@ body, html {
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
     color: var(--text-secondary);
+}
+
+/* =========================================================================
+   Saint & Fête du Jour - Hero Pleine Largeur sous le Header (Immersif)
+   ========================================================================= */
+.do-home-saint-card-wrap {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.do-home-saint-hero {
+    position: relative;
+    width: 100%;
+    margin-top: calc(-1 * var(--do-header-offset, 64px));
+    margin-bottom: 22px;
+    padding-top: calc(var(--do-header-offset, 64px) + 20px);
+    padding-bottom: 22px;
+    box-sizing: border-box;
+    z-index: 1;
+    overflow: visible;
+}
+
+.do-home-saint-hero.do-hero-no-image {
+    margin-top: 8px !important;
+    margin-bottom: 20px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    padding: 16px 18px !important;
+    background: var(--background-surface, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+}
+
+.do-home-saint-hero.do-hero-no-image .do-home-saint-hero-bg-clip,
+.do-home-saint-hero.do-hero-no-image .do-home-saint-hero-bg-wrap,
+.do-home-saint-hero.do-hero-no-image .do-home-saint-hero-thumb-wrap {
+    display: none !important;
+}
+
+.do-home-saint-hero.do-hero-no-image .do-home-saint-hero-content {
+    margin-top: 0 !important;
+    padding: 0 !important;
+}
+
+/* Conteneur de clip pour le fond flouté : positionné par JS en pleine largeur du wrapper, overflow: hidden pour éviter les débordements côtés sans casser le sticky header */
+.do-home-saint-hero-bg-clip {
+    position: absolute;
+    top: 0;
+    left: 0;  /* overridden by JS */
+    width: 100%; /* overridden by JS */
+    height: 380px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Image d'arrière-plan avec flou modéré - remplit le bgClip */
+.do-home-saint-hero-bg-wrap {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: 0;
+    /* Fondu doux vers le bas */
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 1) 68%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 1) 68%, rgba(0, 0, 0, 0) 100%);
+}
+
+.do-home-saint-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    filter: blur(10px) brightness(0.68) saturate(125%);
+    -webkit-filter: blur(10px) brightness(0.68) saturate(125%);
+    transform: scale(1.15);
+    will-change: transform;
+    opacity: 0.88;
+}
+
+[data-theme="light"] .do-home-saint-hero-bg {
+    filter: blur(10px) brightness(0.94) saturate(115%);
+    -webkit-filter: blur(10px) brightness(0.94) saturate(115%);
+    opacity: 0.55;
+}
+
+.do-home-saint-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(0, 0, 0, 0.12) 0%, 
+        transparent 35%, 
+        color-mix(in srgb, var(--background-base, #000) 65%, transparent) 75%, 
+        var(--background-base, #000) 98%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+[data-theme="light"] .do-home-saint-hero-overlay {
+    background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 35%, 
+        color-mix(in srgb, var(--background-base, #fff) 70%, transparent) 75%, 
+        var(--background-base, #fff) 98%);
+}
+
+/* Conteneur image + texte — block flow pour le wrap en L/T */
+.do-home-saint-hero-body {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    /* clearfix pour contenir le float */
+    display: block;
+    box-sizing: border-box;
+}
+.do-home-saint-hero-body::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+/* Image nette au premier plan dans un grand carré arrondi */
+.do-home-saint-hero-thumb-wrap {
+    position: relative;
+    z-index: 3;
+    width: 230px;
+    height: 230px;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.5), 
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.22);
+    background: var(--background-surface, #1e1e1e);
+    transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.28s ease;
+    cursor: zoom-in;
+    /* Mobile : image centrée avec marges égales */
+    display: block;
+    margin: 0 auto 16px;
+}
+
+.do-home-saint-hero-thumb-wrap:hover {
+    transform: scale(1.03);
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.6), 
+                0 6px 16px rgba(0, 0, 0, 0.35),
+                0 0 0 1.5px rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="light"] .do-home-saint-hero-thumb-wrap {
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.15), 
+                0 4px 10px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .do-home-saint-hero-thumb-wrap:hover {
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22), 
+                0 6px 14px rgba(0, 0, 0, 0.12),
+                0 0 0 1.5px rgba(0, 0, 0, 0.12);
+}
+
+.do-home-saint-hero-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Texte bio — remplit la colonne droite puis continue sous l'image (forme L) */
+.do-home-saint-hero-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.do-home-saint-hero-text {
+    margin: 0;
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    word-break: break-word;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.do-home-saint-hero,
+.do-home-saint-hero-content {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.do-home-saint-inline-more {
+    display: inline;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 5px;
+}
+
+.do-home-saint-inline-more:hover {
+    color: var(--text-primary);
+}
+
+body.is-home-mode .do-top-header,
+body.is-missa-mode .do-top-header {
+    background-color: color-mix(in srgb, var(--background-base) 38%, transparent) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+}
+
+/* ---- DESKTOP : float gauche → le texte s'enroule en forme L/T ---- */
+@media (min-width: 768px) {
+    .do-home-saint-hero {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: calc(-1 * var(--do-header-offset, 64px));
+        margin-bottom: 22px;
+        padding-top: calc(var(--do-header-offset, 64px) + 26px);
+        padding-bottom: 28px;
+        overflow: visible;
+    }
+
+    .do-home-saint-hero-bg-clip {
+        height: 440px;
+    }
+
+    /* Image flottante à gauche — le texte s'enroule naturellement */
+    .do-home-saint-hero-thumb-wrap {
+        float: left;
+        width: 250px;
+        height: 250px;
+        border-radius: 14px;
+        margin: 0 24px 12px 0;  /* annule le centrage auto du mobile */
+    }
+
+    /* Le texte remplit d'abord la droite de l'image (même hauteur),
+       puis continue en pleine largeur en dessous → forme L */
+    .do-home-saint-hero-content {
+        /* block normal : s'enroule autour du float */
+        overflow: visible;
+    }
+
+    .do-home-saint-hero-text {
+        font-size: 1.08rem;
+        line-height: 1.58;
+        margin-top: 0;
+    }
+}
+
+/* =========================================================================
+   Composant Saint & Fête au début des Messes
+   ========================================================================= */
+.do-missa-saint-card-wrap {
+    width: 100%;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.do-missa-saint-hero {
+    margin-bottom: 22px !important;
+}
+
+@media (min-width: 768px) {
+    .do-missa-saint-hero {
+        margin-bottom: 26px !important;
+    }
+}
+
+/* =========================================================================
+   Aperçu Plein Écran de l'Image du Saint avec Nom en Gros
+   ========================================================================= */
+.do-saint-preview-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    animation: doFadeIn 0.2s ease-out;
+}
+
+@keyframes doFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.do-saint-preview-dialog {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: doScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+}
+
+@keyframes doScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.do-saint-preview-close {
+    position: absolute;
+    top: -44px;
+    right: -6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    z-index: 10;
+}
+
+.do-saint-preview-close:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.do-saint-preview-image-wrap {
+    max-height: 70vh;
+    max-width: 86vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+    border: none !important;
+    outline: none !important;
+    background: transparent;
+}
+
+.do-saint-preview-img {
+    max-height: 70vh;
+    max-width: 86vw;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: 14px;
+    border: none !important;
+    outline: none !important;
+}
+
+.do-saint-preview-caption {
+    width: 100%;
+    margin-top: 16px;
+    text-align: center;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.do-saint-preview-title {
+    font-family: 'Libre Baskerville', 'Crimson Text', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.3px;
+}
+
+.do-saint-preview-meta {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.78);
+    margin-top: 6px;
+    line-height: 1.4;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+
+@media (max-width: 600px) {
+    .do-saint-preview-title {
+        font-size: 1.35rem;
+    }
+    .do-saint-preview-meta {
+        font-size: 0.78rem;
+    }
+    .do-saint-preview-image-wrap {
+        max-height: 62vh;
+    }
+    .do-saint-preview-img {
+        max-height: 62vh;
+    }
 }
 
 /* Horizontal Scrolling ONLY for the two Cards (Edge-to-edge on mobile) */

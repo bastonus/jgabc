@@ -394,6 +394,75 @@ body.is-search-mode #gregorianFilterBar::-webkit-scrollbar {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
 }
 
+/* Carte missa avec image de saint en fond */
+.gregorian-results.is-grid .gregorian-card.has-saint-img {
+    background: transparent;
+}
+
+/* Image de saint en fond de carte — remplit toute la carte, objet-fit cover */
+.gregorian-results.is-grid .gregorian-card-saint-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    filter: brightness(0.82) saturate(1.1);
+    transition: filter 0.2s ease;
+}
+
+.gregorian-results.is-grid .gregorian-card.has-saint-img:hover .gregorian-card-saint-bg {
+    filter: brightness(0.72) saturate(1.2);
+}
+
+/* Gradient du haut : fond de carte → transparent, laisse passer le titre */
+.gregorian-results.is-grid .gregorian-card-saint-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+        to bottom,
+        var(--background-surface, #1a1a1a) 0%,
+        color-mix(in srgb, var(--background-surface, #1a1a1a) 75%, transparent) 30%,
+        color-mix(in srgb, var(--background-surface, #1a1a1a) 40%, transparent) 55%,
+        transparent 75%
+    );
+}
+
+/* Header et actions au-dessus de l'image (z-index > image + gradient) */
+.gregorian-results.is-grid .gregorian-card.has-saint-img .gregorian-card-header,
+.gregorian-results.is-grid .gregorian-card.has-saint-img .gregorian-card-actions {
+    position: relative;
+    z-index: 2;
+}
+
+/* Actions en bas */
+.gregorian-results.is-grid .gregorian-card.has-saint-img .gregorian-card-actions {
+    margin-top: auto;
+}
+
+/* Texte caché quand l'image est présente — réapparaît si onerror retire has-saint-img */
+.gregorian-results.is-grid .gregorian-card.has-saint-img .gregorian-text-preview {
+    display: none !important;
+}
+
+/* Quand il y a un extrait de recherche surligné : on cache l'image et on montre le texte */
+.gregorian-results.is-grid .gregorian-card.has-saint-img.has-match-snippet .gregorian-card-saint-bg,
+.gregorian-results.is-grid .gregorian-card.has-saint-img.has-match-snippet .gregorian-card-saint-gradient {
+    display: none !important;
+}
+.gregorian-results.is-grid .gregorian-card.has-saint-img.has-match-snippet {
+    background: var(--background-surface) !important;
+}
+.gregorian-results.is-grid .gregorian-card.has-saint-img.has-match-snippet .gregorian-text-preview {
+    display: block !important;
+}
+
 .gregorian-results.is-grid .gregorian-card-header {
     margin-bottom: 12px;
     flex-shrink: 0;

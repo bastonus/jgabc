@@ -64,17 +64,17 @@
     function initWorker() {
         if (worker) return;
         try {
-            worker = new Worker('js/gregorian_search_worker.js?v=2.62&ts=' + Date.now());
+            worker = new Worker('js/gregorian_search_worker.js?v=2.63&ts=' + Date.now());
             worker.onmessage = handleWorkerMessage;
             worker.onerror = function(err) {
                 console.warn('[GregorianUI] Worker désactivé ou erreur, utilisation moteur direct:', err);
             };
 
-            // 1. Tenter l'initialisation interne par le Worker
+            // 1. Initialiser le Worker directement avec l'index en mémoire
             worker.postMessage({
                 type: 'INIT',
                 payload: {
-                    url: 'data/gregorian_index.json?v=3.3&ts=' + Date.now()
+                    rawIndex: (window.GREGORIAN_INDEX && Array.isArray(window.GREGORIAN_INDEX)) ? window.GREGORIAN_INDEX : null
                 }
             });
         } catch (e) {
@@ -85,43 +85,23 @@
     var isIndexLoadedFromMain = false;
     function loadIndexFromMainThread() {
         if (isIndexLoadedFromMain) return;
-        var urls = [
-            'data/gregorian_index.json?v=3.3',
-            './data/gregorian_index.json?v=3.3',
-            '../data/gregorian_index.json?v=3.3'
-        ];
-
-        function tryFetch(i) {
-            if (i >= urls.length) return;
-            fetch(urls[i])
-                .then(function(res) {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.json();
-                })
-                .then(function(jsonData) {
-                    if (isIndexLoadedFromMain) return;
-                    isIndexLoadedFromMain = true;
-                    if (window.GregorianSearchEngine) {
-                        window.GregorianSearchEngine.buildIndex(jsonData);
-                    }
-                    isWorkerReady = true;
-                    $('#gregorianTotalBadge').text((Array.isArray(jsonData) ? jsonData.length : 0) + ' éléments');
-                    if (window.doState && window.doState.hora === 'gregorian_search') {
-                        triggerSearch(false);
-                    }
-                    if (worker) {
-                        worker.postMessage({
-                            type: 'LOAD_DATA',
-                            payload: { data: jsonData }
-                        });
-                    }
-                })
-                .catch(function() {
-                    tryFetch(i + 1);
+        if (window.GREGORIAN_INDEX && Array.isArray(window.GREGORIAN_INDEX)) {
+            isIndexLoadedFromMain = true;
+            if (window.GregorianSearchEngine) {
+                window.GregorianSearchEngine.buildIndex(window.GREGORIAN_INDEX);
+            }
+            isWorkerReady = true;
+            $('#gregorianTotalBadge').text(window.GREGORIAN_INDEX.length + ' éléments');
+            if (window.doState && window.doState.hora === 'gregorian_search') {
+                triggerSearch(false);
+            }
+            if (worker) {
+                worker.postMessage({
+                    type: 'LOAD_DATA',
+                    payload: { data: window.GREGORIAN_INDEX }
                 });
+            }
         }
-
-        tryFetch(0);
     }
 
     // Réception des messages du Web Worker
@@ -934,10 +914,36 @@
             } else if (itemType === 'missa') {
                 var colorClass = item.color || 'green';
                 var rankText = item.rank || 'Missa';
-                var previewHtml = hasSnippet 
+
+                // Chemin de l'image du saint / tempora — uniquement si le paramètre est activé
+                // Sancti  = clé numérique type "01-01", "05-25" → img/saints/KEY.webp
+                // Tempora = clé alphabétique type "Adv1-0", "Epi1-0" → img/tempora/KEY.webp
+                // Votives = "Coronatio", "Propaganda" → pas d'image
+                var missaKey = item.key || '';
+                var saintImgSrc = '';
+                if (window.doSearchImagesEnabled) {
+                    if (/^\d/.test(missaKey)) {
+                        saintImgSrc = 'img/saints/' + missaKey + '.webp';
+                    } else if (/^(Adv|Epi|Nat|Pasc|Pent|Quad|Quadp)/i.test(missaKey)) {
+                        saintImgSrc = 'img/tempora/' + missaKey + '.webp';
+                    }
+                    // Sinon (Coronatio, Propaganda…) : pas d'image, affichage texte
+                }
+
+                var previewHtml = hasSnippet
                     ? ('<p>' + item.matchSnippet + '</p>')
                     : (item.latinPreview || '<div class="do-rubric-inline">Introitus</div><p>Ad te levávi ánimam meam...</p>');
-                html += '<div class="gregorian-card gregorian-card-missa' + snippetClass + '" data-item-type="missa" data-missa-key="' + escapeHtml(item.key || '') + '">';
+
+                html += '<div class="gregorian-card gregorian-card-missa' + snippetClass + (saintImgSrc ? ' has-saint-img' : '') + '" data-item-type="missa" data-missa-key="' + escapeHtml(missaKey) + '">';
+
+                if (saintImgSrc) {
+                    // Image de fond avec gradient au sommet pour lisibilité du titre
+                    // onerror: retire l'image + gradient + classe, laisse la carte en mode texte
+                    html += '  <img class="gregorian-card-saint-bg" src="' + escapeHtml(saintImgSrc) + '" alt="" aria-hidden="true"'
+                          + ' onerror="var c=this.parentElement;c.classList.remove(\'has-saint-img\');var g=c.querySelector(\'.gregorian-card-saint-gradient\');if(g)g.remove();this.remove();">';
+                    html += '  <div class="gregorian-card-saint-gradient"></div>';
+                }
+
                 html += '  <div class="gregorian-card-header">';
                 html += '    <div class="gregorian-card-titles">';
                 html += '      <div class="gregorian-card-incipit" title="' + rawIncipit + '"><span class="hdd-color-dot ' + colorClass + '"></span>' + incipitHtml + '</div>';
@@ -947,8 +953,12 @@
                 html += '      <span class="gregorian-badge-part">' + escapeHtml(rankText) + '</span>';
                 html += '    </div>';
                 html += '  </div>';
+
+                // Texte toujours présent : caché par CSS quand l'image est affichée,
+                // réapparaît automatiquement si onerror retire la classe has-saint-img
                 html += '  <div class="gregorian-text-preview">' + previewHtml + '</div>';
-                html += '  <div class="gregorian-card-actions" style="justify-content: flex-end;">';
+
+                html += '  <div class="gregorian-card-actions" style="justify-content: flex-end; margin-top: auto;">';
                 html += '    <button class="gregorian-action-btn btn-open-missa" style="background: var(--primary-color, #c96b63); color: #ffffff; font-weight: 600;">';
                 html += '      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
                 html += '      <span>Prier la Messe</span>';
@@ -1525,7 +1535,8 @@
         renderChantMainView: renderChantMainView,
         openSearch: openSearch,
         getState: getState,
-        setState: setState
+        setState: setState,
+        triggerSearch: triggerSearch
     };
 
     window.openGregorianSearch = openSearch;

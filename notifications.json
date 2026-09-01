@@ -1,8 +1,76 @@
 {
-  "version": "1.0.0",
-  "updatedAt": "2026-09-01T01:05:00Z",
+  "version": "1.0.1",
+  "updatedAt": "2026-09-01T14:40:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.53",
+      "enabled": true,
+      "priority": 110,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.53",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.53",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.53 : Portraits & biographies des saints du jour avec iconographie sacrée, et remplacement complet de l'AELF par la Bible Crampon 1923 alignée sur la Vulgate clémentine.",
+      "cancelsNotifications": ["notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.53 : Saints du Jour avec Portraits & Biographies · Bible Crampon 1923",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.53)",
+        "subtitle": "Portraits & Biographies des Saints · Bible Crampon 1923",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés de la v0.0.53",
+            "content": "<ul><li><strong>Portraits & Biographies des Saints du Jour :</strong> Nouvelle carte immersive sur l'accueil affichant le portrait du saint du jour (266 images WebP du domaine public — Fra Angelico, Giotto, Guido Reni…), sa notice biographique tirée des rubriques officielles de 1960, et un accès direct à la messe.</li><li><strong>Bible Crampon 1923 :</strong> Remplacement complet de l'AELF par la traduction catholique traditionnelle du Chanoine Crampon (73 livres, 35 580 versets), alignée verset par verset sur la Vulgate clémentine (Tobie, Judith, Esther, Nouveau Testament) avec les 150 Psaumes réalignés liturgiquement.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.52",
+            "content": "<ul><li><strong>Moteur de Recherche 100% Embarqué en Mémoire :</strong> Intégration synchrone native garantissant la recherche immédiate dans les 2292 éléments (Messes, Offices, Vulgate, Chants) sur l'APK Android comme sur le Web, sans dépendre de requêtes réseau ou de l'isolation de Web Workers.</li><li><strong>Latence Zéro :</strong> Résultats et extraits pertinents restitués en moins de 1 milliseconde dès la saisie.</li><li><strong>Icône Officielle Oremus :</strong> Tracé vectoriel authentique de la lettre « O » et de la croix templière dans la barre d'état Android.</li><li><strong>Téléchargement direct d'Oremus.apk :</strong> Mises à jour in-app sans erreur 404.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "bell",
+            "title": "Rappels des nouveautés de la v0.0.46",
+            "content": "<ul><li><strong>Notifications Push en arrière-plan :</strong> Réception des alertes même application fermée avec icône personnalisée Oremus dans la barre d'état Android.</li><li><strong>Ouverture directe :</strong> Clic sur un bandeau ou une notification ouvrant instantanément la popup liée.</li><li><strong>Affichage des étapes :</strong> Correction du chevauchement de texte dans les étapes numérotées des alertes.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "info",
+            "title": "Rappels des nouveautés de la v0.0.45",
+            "content": "<ul><li><strong>Sommaire interactif de la Messe :</strong> Accès instantané aux 4 grandes étapes de la célébration avec ScrollSpy en temps réel.</li><li><strong>Dernier Évangile :</strong> Prologue de Saint Jean (1:1-14) réinséré intégralement dans la conclusion de l'Ordinaire en latin et français.</li><li><strong>Navigation & Ergonomie :</strong> Prise en charge native du bouton Retour Android/navigateur et réinitialisation automatique sur le jour courant après 30 min d'inactivité.</li><li><strong>Moteur Audio :</strong> Fermeture par glissement vers le bas (swipe down), bouton de vitesse rapide en un clic et son enrichi.</li><li><strong>Calendrier & Propres :</strong> Traductions françaises complétées (Toussaint, Saintes Reliques, St Martin Iᵉʳ, Noël) et déduplication des fêtes.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos précieux retours",
+            "content": "Un grand merci à tous les testeurs ! Vos suggestions continuent de guider activement le développement d'Oremus."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-test-push-20260901",
       "enabled": true,

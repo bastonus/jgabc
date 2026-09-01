@@ -32,34 +32,43 @@ self.addEventListener('message', async function(e) {
                     });
                     return;
                 }
-                var urls = [
-                    payload.url,
-                    'data/gregorian_index.json',
-                    './data/gregorian_index.json',
-                    '../data/gregorian_index.json',
-                    (self.location && self.location.origin ? (self.location.origin + '/data/gregorian_index.json') : null)
-                ].filter(Boolean);
 
+                // 1. Initialisation directe par transfert du tableau en mémoire
+                if (payload && Array.isArray(payload.rawIndex)) {
+                    if (engine) engine.buildIndex(payload.rawIndex);
+                    self.postMessage({
+                        type: 'INIT_DONE',
+                        msgId: msgId,
+                        payload: { totalChants: engine ? engine.chantsList.length : payload.rawIndex.length }
+                    });
+                    return;
+                }
+
+                // 2. Initialisation par importScripts de gregorian_index_data.js
                 var loaded = false;
-                for (var u = 0; u < urls.length; u++) {
+                var scriptCandidates = [
+                    'gregorian_index_data.js',
+                    '../js/gregorian_index_data.js',
+                    './js/gregorian_index_data.js'
+                ];
+                for (var s = 0; s < scriptCandidates.length; s++) {
                     try {
-                        var res = await fetch(urls[u]);
-                        if (res && res.ok) {
-                            var json = await res.json();
-                            if (engine) engine.buildIndex(json);
+                        importScripts(scriptCandidates[s]);
+                        if (self.GREGORIAN_INDEX && Array.isArray(self.GREGORIAN_INDEX)) {
+                            if (engine) engine.buildIndex(self.GREGORIAN_INDEX);
                             loaded = true;
                             self.postMessage({
                                 type: 'INIT_DONE',
                                 msgId: msgId,
-                                payload: { totalChants: engine ? engine.chantsList.length : json.length }
+                                payload: { totalChants: engine ? engine.chantsList.length : self.GREGORIAN_INDEX.length }
                             });
                             break;
                         }
-                    } catch (fetchErr) {}
+                    } catch(e) {}
                 }
 
                 if (!loaded) {
-                    throw new Error('Échec fetch worker pour toutes les URLs');
+                    throw new Error('Échec chargement index grégorien dans le Worker');
                 }
             } catch (err) {
                 console.warn('[Worker] Erreur init index:', err);
