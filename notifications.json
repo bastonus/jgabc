@@ -1,22 +1,64 @@
 {
-  "version": "1.0.1",
-  "updatedAt": "2026-09-01T14:40:00Z",
+  "version": "1.0.2",
+  "updatedAt": "2026-09-01T20:05:00Z",
   "channel": "official",
   "notifications": [
     {
-      "id": "notif-release-beta-0.0.53",
+      "id": "notif-release-beta-0.0.54",
       "enabled": true,
-      "priority": 110,
+      "priority": 120,
       "platforms": ["all"],
-      "minVersion": "beta-0.0.53",
+      "minVersion": "beta-0.0.54",
       "frequency": "once",
       "style": "liturgical",
       "badge": "Mise à jour",
       "icon": "sparkles",
-      "title": "Notes de version v0.0.53",
+      "title": "Notes de version v0.0.54",
       "subtitle": "Votre application Oremus a été mise à jour",
-      "message": "Découvrez les nouveautés de la v0.0.53 : Portraits & biographies des saints du jour avec iconographie sacrée, et remplacement complet de l'AELF par la Bible Crampon 1923 alignée sur la Vulgate clémentine.",
-      "cancelsNotifications": ["notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "message": "Découvrez les nouveautés de la v0.0.54 : Enregistrements vidéo YouTube / YouTube Music multi-sources (Marek Klein, Fontgombault, Solesmes, Organum) intégrés dans le lecteur audio, et correctif des faux positifs de mise à jour.",
+      "cancelsNotifications": ["notif-release-beta-0.0.53", "notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.54 : Vidéos YouTube Multi-Sources dans le Lecteur Audio · Correctif Version",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.54)",
+        "subtitle": "Vidéos YouTube Multi-Sources · Correctif Version",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés de la v0.0.54",
+            "content": "<ul><li><strong>Enregistrements Vidéo YouTube / YouTube Music :</strong> Indexation multi-sources de 1 645 pièces grégoriennes (Marek Klein, Abbaye de Fontgombault, Abbaye de Solesmes, Ensemble Organum...) directement accessibles via le bouton « Vidéos » du lecteur audio.</li><li><strong>Carrousel Réactif :</strong> Présentation horizontale compacte (1,5 vidéo visible) avec mini-lecteurs YouTube interactifs.</li><li><strong>Correctif Mises à Jour :** Résolution des fausses notifications de mises à jour.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.53",
+            "content": "<ul><li><strong>Portraits & Biographies des Saints du Jour :</strong> Carte immersive sur l'accueil avec portraits d'art sacré (266 WebP) et notices officielles 1960.</li><li><strong>Bible Crampon 1923 :</strong> Remplacement d'AELF par Crampon 1923 (73 livres), alignée 1:1 sur la Vulgate clémentine.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos précieux retours",
+            "content": "Un grand merci à tous les testeurs ! Vos suggestions continuent de guider activement le développement d'Oremus."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
       "banner": {
         "show": true,
         "text": "Oremus v0.0.53 : Saints du Jour avec Portraits & Biographies · Bible Crampon 1923",

@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.53",
-  "versionCode": 53,
-  "releaseDate": "2026-09-01T14:40:00Z",
-  "tagName": "v0.0.53",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.53/Oremus.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.53",
-  "body": "Release v0.0.53 — Portraits & biographies des saints du jour (266 images WebP, notices officielles 1960) · Bible Crampon 1923 (73 livres, alignement 1:1 Vulgate clémentine)"
+  "latestVersion": "beta-0.0.54",
+  "versionCode": 54,
+  "releaseDate": "2026-09-01T20:05:00Z",
+  "tagName": "v0.0.54",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.54/Oremus.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.54",
+  "body": "Release v0.0.54 — Enregistrements vidéo YouTube / YouTube Music multi-sources par pièce grégorienne (1 645 pièces indexées, Marek Klein, Fontgombault, Solesmes, Organum) · Intégration dans le lecteur audio · Correctif faux positif de mise à jour"
 }

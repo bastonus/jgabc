@@ -36,6 +36,7 @@ const PRECACHE_ASSETS = [
     './js/vendor/flexsearch.bundle.min.js',
     './js/gregorian_db.js',
     './js/gregorian_index_data.js',
+    './js/gregorian_youtube_links.js',
     './js/gregorian_search_engine.js',
     './js/gregorian_search_worker.js',
     './js/gregorian_search_ui.js',

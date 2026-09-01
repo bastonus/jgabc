@@ -18,10 +18,11 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "cap:sync": "npx cap sync android",
+    "pack:modules": "node tools/build_modules.mjs",
+    "cap:clean": "node tools/clean_android_assets.mjs",
+    "cap:sync": "npm run pack:modules && npx cap sync android && npm run cap:clean",
     "cap:open": "npx cap open android",
-    "cap:build": "npx cap sync android && cd android && gradlew.bat assembleRelease"
+    "cap:build": "npm run cap:sync && cd android && gradlew.bat assembleRelease"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

@@ -5884,13 +5884,10 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     if ($card) $card.addClass('is-playing');
 
     // Populate YouTube video drawer if chant ID is present
-    var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || (score && (score.chantId || score.id)) || '';
+    var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || '';
     if (!chantId && $card) {
         var $wrapper = $card.closest('[data-chant-id]');
         if ($wrapper.length) chantId = $wrapper.data('chant-id');
-    }
-    if (!chantId && _doCurrentPlayerCard) {
-        chantId = _doCurrentPlayerCard.data('chant-id') || _doCurrentPlayerCard.attr('data-chant-id') || '';
     }
     updatePlayerVideoDrawer(chantId);
 }
@@ -5906,49 +5903,15 @@ function escapeHtmlLocal(str) {
         .replace(/'/g, '&#039;');
 }
 
-var _remoteYoutubeAudioLoading = false;
-
 function updatePlayerVideoDrawer(chantId) {
     var $drawer = $('#playerVideoDrawer');
     var $list = $('#playerVideoList');
     var $btn = $('#playerBtnExpandVideos');
 
-    if (!chantId) {
+    if (!chantId || !window.GREGORIAN_YOUTUBE_AUDIO || !window.GREGORIAN_YOUTUBE_AUDIO[chantId]) {
         $btn.hide();
         $drawer.addClass('hidden').hide();
         $btn.removeClass('active');
-        return;
-    }
-
-    // Si hors-ligne, laisser le bouton visible et afficher un message d'information dans le tiroir
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        $btn.css('display', 'inline-flex').show();
-        $list.html(
-            '<div style="width: 100%; text-align: center; padding: 12px 16px; font-family: \'Inter\', sans-serif; font-size: 0.82rem; color: var(--text-tertiary); font-style: italic; background: rgba(0,0,0,0.04); border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">' +
-            '  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>' +
-            '  <span>Connexion Internet requise pour charger et lire les vidéos YouTube.</span>' +
-            '</div>'
-        );
-        return;
-    }
-
-    // Téléchargement distant synchrone/asynchrone de la base distante GitHub si non disponible
-    if (!window.GREGORIAN_YOUTUBE_AUDIO) {
-        $btn.css('display', 'inline-flex').show();
-        if (!_remoteYoutubeAudioLoading) {
-            _remoteYoutubeAudioLoading = true;
-            var remoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/js/gregorian_youtube_links.json';
-            fetch(remoteUrl)
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    window.GREGORIAN_YOUTUBE_AUDIO = data;
-                    _remoteYoutubeAudioLoading = false;
-                    updatePlayerVideoDrawer(chantId);
-                })
-                .catch(function(err) {
-                    _remoteYoutubeAudioLoading = false;
-                });
-        }
         return;
     }
 
@@ -5967,18 +5930,17 @@ function updatePlayerVideoDrawer(chantId) {
         var vId = item.id;
         var title = item.title || 'Enregistrement audio';
         var source = item.source || item.channel || 'Interprétation grégorienne';
-        var thumbUrl = 'https://i.ytimg.com/vi/' + vId + '/hqdefault.jpg';
+        var duration = item.duration ? (' (' + item.duration + ')') : '';
+        var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
+        var embedUrl = item.embedUrl || ('https://www.youtube.com/embed/' + vId);
 
         html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
-        html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="position: relative; display: block; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; background: #000; z-index: 50; text-decoration: none;">';
-        html += '    <img src="' + escapeHtmlLocal(thumbUrl) + '" alt="' + escapeHtmlLocal(title) + '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">';
-        html += '    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 30px; background: rgba(255, 0, 0, 0.9); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">';
-        html += '      <svg viewBox="0 0 24 24" width="16" height="16" fill="#ffffff"><polygon points="8,5 19,12 8,19"></polygon></svg>';
-        html += '    </div>';
-        html += '  </a>';
+        html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000;">';
+        html += '    <iframe src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px;"></iframe>';
+        html += '  </div>';
         html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
         html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
-        html += '    <div style="font-size: 0.76rem; color: var(--primary-color); font-weight: 500;">' + escapeHtmlLocal(source) + '</div>';
+        html += '    <div style="font-size: 0.76rem; color: var(--text-tertiary); font-weight: 500;">' + escapeHtmlLocal(source) + '</div>';
         html += '  </a>';
         html += '</div>';
     });
@@ -5989,19 +5951,20 @@ function updatePlayerVideoDrawer(chantId) {
 // Toggle handler for playerBtnExpandVideos
 $(document).on('click', '#playerBtnExpandVideos', function(e) {
     e.stopPropagation();
-    if (typeof triggerHapticFeedback === 'function') triggerHapticFeedback('toggle');
+    triggerHapticFeedback('toggle');
     var $drawer = $('#playerVideoDrawer');
-    var $btn = $(this);
-    var isHidden = $drawer.hasClass('hidden') || $drawer.css('display') === 'none';
-
+    var isHidden = $drawer.is(':hidden');
     if (isHidden) {
-        $drawer.removeClass('hidden').show();
-        $btn.addClass('active');
-        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        $drawer.removeClass('hidden').slideDown(200, function() {
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+        $(this).addClass('active');
     } else {
-        $drawer.addClass('hidden').hide();
-        $btn.removeClass('active');
-        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        $drawer.slideUp(200, function() {
+            $drawer.addClass('hidden');
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+        $(this).removeClass('active');
     }
 });
 
@@ -9754,7 +9717,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.53';
+var CURRENT_APP_VERSION = 'beta-0.0.54';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

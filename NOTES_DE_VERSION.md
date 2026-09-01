@@ -1,5 +1,27 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.54 (1 Septembre 2026)
+
+---
+
+### 🎥 Enregistrements Audio & Vidéo YouTube / YouTube Music par Partition
+* **Scraping Multi-Sources & Indexation de 1 645 Pièces Grégoriennes :**
+  * Association automatique d'enregistrements audio/vidéo YouTube et YouTube Music avec validation stricte de l'incipit latin pour éliminer tout résultat hors-sujet.
+  * Interprétations variées proposées par pièce : **Marek Klein** (*Gradvale Novvm*), **Abbaye Notre-Dame de Fontgombault**, **Abbaye Saint-Pierre de Solesmes**, **Ensemble Organum** (Marcel Pérès), **Abbaye du Barroux**, **GradualeProject**, etc.
+  * Base de données optimisée embarquée hors-ligne (`js/gregorian_youtube_links.js`).
+* **Intégration au Lecteur Audio Principal (`#modernPlayerBar`) :**
+  * Bouton **« Vidéos »** dans les pilules du lecteur audio qui s'illumine en couleur primaire et bascule en icône croix `✕` une fois déplié.
+  * Carrousel horizontal défilable compact (1,5 vidéo visible à l'écran sur Mobile comme sur Desktop) s'étendant d'un bord à l'autre du lecteur.
+  * Lecture interactive instantanée via des mini-lecteurs YouTube au clic.
+
+---
+
+### 🛡️ Correctif de la Détection de Version
+* **Élimination des Faux Positifs de Mises à Jour :**
+  * Synchronisation stricte de la constante de version de l'application et renforcement de l'analyseur sémantique (`parseVersionString`) pour traiter de manière robuste les préfixes `v`, `beta-`, `vbeta-`.
+
+---
+
 ## 🚀 Version 0.0.53 (1 Septembre 2026)
 
 ---
