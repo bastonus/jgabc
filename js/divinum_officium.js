@@ -5968,7 +5968,7 @@ function updatePlayerVideoDrawer(chantId) {
         var duration = item.duration ? (' (' + item.duration + ')') : '';
         var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
         // Paramètres iframe conformes aux CGU YouTube (marquage discret, pas de suggestions externes hors-chaîne)
-        var embedUrl = 'https://www.youtube.com/embed/' + vId + '?modestbranding=1&rel=0&color=white&iv_load_policy=3';
+        var embedUrl = 'https://www.youtube.com/embed/' + vId;
 
         html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
         html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">';
