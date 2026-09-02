@@ -1,8 +1,64 @@
 {
-  "version": "1.0.2",
-  "updatedAt": "2026-09-01T20:05:00Z",
+  "version": "1.0.3",
+  "updatedAt": "2026-09-02T20:05:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.55",
+      "enabled": true,
+      "priority": 130,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.55",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.55",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.55 : Art sacré du Temporal (5 nouveaux chefs-d'œuvre Millais, Valckenborch, Jordaens, Strozzi, Fra Angelico), moteur audio grégorien à durées pondérées & synchro fidèle, tiroir de tonalité et allègement de l'APK.",
+      "cancelsNotifications": ["notif-release-beta-0.0.54", "notif-release-beta-0.0.53", "notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.55 : Art Sacré du Temporal · Moteur Audio Pondéré · Tiroir de Tonalité",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.55)",
+        "subtitle": "Art Sacré du Temporal · Moteur Audio Pondéré",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés de la v0.0.55",
+            "content": "<ul><li><strong>Art Sacré du Temporal (5 nouveaux chefs-d'œuvre) :</strong> Epi6-0 (Millais — Aberdeen), Pent14-0 (Valckenborch — Vienne), Pent17-0 (Jordaens — Lille), Pent19-0 (Strozzi — Venise) et Quad6-6 (Fra Angelico — San Marco) intégrés au catalogue raisonné de 61 dimanches & solennités avec attributions authentifiées.</li><li><strong>Carte du Jour Intelligente :</strong> Affichage prioritaire de l'œuvre du Temporal le dimanche / solennité, fallback vers le saint du jour, chargement hors-ligne ou GitHub Raw sans 404.</li><li><strong>Moteur Audio à Durées Pondérées :</strong> Tempo 150→165 bpm, prise en compte des morae (×2), quilisma/salicus/notes pointées (×1.8), episema (+0.9) et silences inter-phrases (DoubleBar 1.6, Virgula 0.7) — progression, temps restant et surlignage strictement fidèles.</li><li><strong>Synchro & Highlight Fidèles :</strong> Mapping YouTube repeat-aware pondéré, conservation du surlignage manuel 3–4 s au 1er tap, clic sur astérisque résolu vers la note suivante, auto-scroll immédiat au lancement.</li><li><strong>Tiroir de Tonalité & UI :</strong> Bubble 290 px + drawer intégré (grille 4× chips), états transposé/désactivé, verre dépoli ; allègement APK (exclusion img/saints & gabc du binaire).</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.54",
+            "content": "<ul><li><strong>Vidéos YouTube Multi-Sources :</strong> 1 645 pièces grégoriennes indexées (Marek Klein, Fontgombault, Solesmes, Organum, Le Barroux) via bouton « Vidéos » du lecteur audio.</li><li><strong>Filtrage Strict :</strong> Élimination de 3 788 vidéos hors-sujet par concordance de l'incipit latin.</li><li><strong>Carrousel 1,5 vidéo & Lecteurs 1-Clic :</strong> Lancement instantané en un tap, fond bordeaux illuminé.</li><li><strong>Correctif Version :</strong> Résolution des fausses alertes de mise à jour.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos précieux retours",
+            "content": "Un grand merci à tous les testeurs ! Vos suggestions continuent de guider activement le développement d'Oremus."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.54",
       "enabled": true,

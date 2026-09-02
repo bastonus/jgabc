@@ -1,5 +1,63 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.55 (2 Septembre 2026)
+
+---
+
+### 🎨 Art Sacré du Temporal — Catalogue Raisonné des Dimanches & Solennités
+
+* **5 Nouveaux Chefs-d'Œuvre WebP Embarqués (`img/tempora/`) :**
+  * Intégration de **Epi6-0** (*Parabole du grain de sénevé* — **John Everett Millais**, 1864, Aberdeen Art Gallery), **Pent14-0** (*Lys des champs & oiseaux du ciel* — **Marten van Valckenborch**, 1585, Kunsthistorisches Museum Vienne), **Pent17-0** (*Le Grand Commandement* — **Jacob Jordaens**, 1660, Palais des Beaux-Arts de Lille), **Pent19-0** (*Festin des noces royales* — **Bernardo Strozzi**, 1636, Gallerie dell'Accademia Venise) et **Quad6-6** (*Descente aux enfers / Veillée Pascale* — **Fra Angelico**, 1442, San Marco Florence).
+  * Catalogue raisonné complet **`js/tempora_art_metadata.js` / `img/tempora/tempora_art_metadata.json`** — **61 entrées** couvrant Avent, Épiphanie, Carême, Pâques, Pentecôte et Temps après la Pentecôte avec attributions authentifiées (artiste, année, musée).
+  * **Attributions Corrigées :** localisation Epi6-0 `Prague → Aberdeen`, Pent14-0 `Tissot → Valckenborch / New York → Vienne`, Pent17-0 `Rembrandt → Jordaens / Londres → Lille`, Pent19-0 `Cavallino → Strozzi / Naples → Venise` et mise à jour de l'outil ** `tools/download_temporale_masterpieces.py`** (10 corrections de métadonnées).
+* **Intégration à la Carte du Jour (`buildHomeSaintCard`) :**
+  * Affichage prioritaire de l'œuvre du Temporal le dimanche et aux grandes solennités ; *fallback* intelligent vers l'image du saint du jour ou l'image dominicale (`temporaSunCode`) en semaine.
+  * Chargement direct **hors-ligne embarqué** si disponible, sinon **remote GitHub Raw** (`raw.githubusercontent.com/bastonus/jgabc/master/img/tempora/…`) sans erreur 404 ; vérification d'installation via `OremusModuleManager.isInstalled('saints')`.
+* **Allègement de l'APK Android (`android/app/build.gradle` : `copyWebAssets`) :**
+  * Exclusion de `img/saints/**` et `gabc/**/*.gabc` du binaire de base — contenus servis à la volée depuis GitHub Usercontent — incluant désormais **uniquement** `img/tempora/**` pour réduire drastiquement la taille de `Oremus.apk`.
+  * Pipeline CI `.github/workflows/build-apk.yml` optimisé (6 lignes révisées).
+
+---
+
+### 🎚️ Moteur Audio Grégorien à Durées Pondérées & Synchronisation Fidèle
+
+* **Tempo de Référence Révisé :**
+  * Passage du tempo par défaut de **150 → 165 bpm** (`doState.tempo`, `Tone.Transport.bpm`) pour une pulsation plus naturelle et conforme au positif d'orgue liturgique.
+* **Calcul du Temps & de la Progression Pondérés (`js/divinum_officium.js` & `util.js`) :**
+  * Nouvelle chaîne ** `_chantIsSalicus` → `_chantNoteWeightedDuration` → `_getChantWeightedInfo` → `_fractionToChantIndex` / `_indexToFraction`** : chaque note reçoit une durée réelle tenant compte des **morae** (`durée ×2`), des **notes pointées / quilisma / salicus** (`×1.8`) et de l'**episema** horizontal (`+0.9` réparti sur le groupe).
+  * **Silences Inter-Phrases :** détection des barres divisoires dans `score.notations` — `DoubleBar/FullBar → 1.6`, `HalfBar/DominicanBar/Virgula → 0.7`, `QuarterBar → 0` — attribués à la note précédente pour une barre de progression et des temps `elapsed/remaining` strictement fidèles à la partition.
+  * `updateDoPlayerProgressAndTime()` et `getChantProgress()` réécrits en pondéré ; total/écoulé calculés en `secPerUnit = 60 / tempoBpm`.
+  * **Synchronisation YouTube :** mapping `fraction → note` repeat-aware pondéré (séquence avec reprises dépliées + durées réelles) et préservation du highlight lors d'un changement de vitesse.
+* **Highlight & Interaction au Clic :**
+  * `clearActiveNote(force)` et `highlightChantNoteAtFraction()` conservent désormais le **surlignage manuel du premier clic pendant 3–4 s** (`_manualHighlightUntil`) même en pause, sans être écrasé par la synchro YouTube.
+  * ** `findNextChantElement()` ** : résolution du clic sur ** astérisque ou texte non-note** vers l'élément chant suivant en ordre de lecture (gauche→droite, haut→bas) pour positionner correctement le `selected-start-note`.
+  * `handleChantElementClick()` forcé + auto-scroll immédiat au lancement (`_userScrollTimer` réinitialisé, scroll vers centre si note visible).
+* **Correctifs `util.js` :**
+  * `setTempo` ne reprogramme plus avec `'+16n'` (déplacement de curseur supprimé) ; `setRelativeTempo` / `playScore` utilisent désormais **`window.timeoutNextNote`** et `Tone.Transport.scheduleOnce` cohérents.
+  * `_chantNotes`, `_getChantNoteId`, `_setChantNoteId`, `_getNoteDuration` exposés pour accès cross-module ; ajout de `window._getChantPlaybackState()`.
+
+---
+
+### 💅 Correctifs UI & Ergonomie du Lecteur
+
+* **Tiroir de Tonalité (`#playerPitchDrawer`, `css/divinum_officium.css` +677 lignes) :**
+  * Nouveau composant complet **bubble `290px` + drawer intégré** : grille 4× `do-pitch-chip` (note + intervalle), états `is-active` / `is-transposed` / `is-disabled`, verre dépoli (`backdrop-filter: blur(24px)`), mode clair/sombre.
+  * En-tête allégé en v0.0.55 : suppression du titre redondant, `border-bottom: none` et `margin-bottom: 0` (`divinum-officium.html:972`).
+  * Bouton `#playerPitchPill` illuminé en primaire lorsqu'une transposition est active.
+* **Barre de Progression & Temps :**
+  * `#playerCurrentTime` aligné à gauche, `#playerChantTime` à droite, `margin-top: 14px` sur la piste ; couleur primaire corrigée vers `var(--text-primary)` sur la valeur de tempo.
+* **Recherche Grégorienne :**
+  * Retouches `js/gregorian_search_ui.js` (19 lignes), `js/gregorian_db.js` (52 lignes), `css/gregorian_search.css` (+169 lignes) et `js/mobile_propers.js` (40 lignes) — harmonisation de l'arrondi, filtrage et rendu des résultats.
+
+---
+
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.55'`, `versionCode 55` / `versionName "beta-0.0.55"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.55`, `releaseDate 2026-09-02T20:05:00Z`) et `package.json` (`0.0.55`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.14 → v1.3.15` (`sw.js`).
+
+---
+
 ## 🚀 Version 0.0.54 (1 Septembre 2026)
 
 ---

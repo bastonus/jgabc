@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.54",
-  "versionCode": 54,
-  "releaseDate": "2026-09-01T20:05:00Z",
-  "tagName": "v0.0.54",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.54/Oremus.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.54",
-  "body": "Release v0.0.54 — Enregistrements vidéo YouTube / YouTube Music multi-sources par pièce grégorienne (1 645 pièces indexées, Marek Klein, Fontgombault, Solesmes, Organum) · Intégration dans le lecteur audio · Correctif faux positif de mise à jour"
+  "latestVersion": "beta-0.0.55",
+  "versionCode": 55,
+  "releaseDate": "2026-09-02T20:05:00Z",
+  "tagName": "v0.0.55",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.55/Oremus.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.55",
+  "body": "Release v0.0.55 — Art sacré du Temporal (5 nouveaux chefs-d'œuvre, catalogue raisonné enrichi) · Moteur audio grégorien à durées pondérées & synchronisation chant fidèle · Allègement APK et optimisations UI"
 }

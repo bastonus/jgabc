@@ -75,7 +75,7 @@ var doState = window.doState = {
     includeOrdinarium: localStorage.getItem('do_ordinarium') === 'true',
     includeGregorian: (localStorage.getItem('do_include_gregorian') !== 'false'),
     selectedKyriale: localStorage.getItem('do_selected_kyriale') || 'auto',
-    tempo: parseInt(localStorage.getItem('do_tempo'), 10) || 150,
+    tempo: parseInt(localStorage.getItem('do_tempo'), 10) || 165,
     mobileLang: 'la',
     settings: {
         theme: localStorage.getItem('do_theme') || 'auto',
@@ -5046,36 +5046,132 @@ function formatChantTime(s) {
     return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
+// Helpers for weighted durations (mora / dotted notes, episema, salicus, quilisma, inter-phrase gaps)
+function _chantIsSalicus(allNotes, idx) {
+    try {
+        var note = allNotes[idx];
+        if (!note) return false;
+        var nextNote = allNotes[idx+1];
+        if (nextNote && nextNote.constructor && nextNote.constructor.name !== 'Note') nextNote = null;
+        var prevNote = allNotes[idx-1];
+        if (prevNote && prevNote.constructor && prevNote.constructor.name !== 'Note') prevNote = null;
+        if (note.ictus && prevNote && (note.pitch.toInt() - prevNote.pitch.toInt() == 7) && nextNote && (nextNote.pitch.toInt() - note.pitch.toInt() == 1)) return true;
+        var isSolesmes = (typeof window.getIsUsingSolesmesLengths === 'function' ? window.getIsUsingSolesmesLengths() : (localStorage.isUsingSolesmesLengths !== 'false'));
+        if (isSolesmes && note.ictus && note.ictus.glyphCode === 'VerticalEpisemaBelow' && note.glyphVisualizer && (note.glyphVisualizer.glyphCode === 'PodatusLower' || note.glyphVisualizer.glyphCode === 'BeginningAscLiquescent') && prevNote && nextNote && (note.pitch.toInt() - prevNote.pitch.toInt() > 0) && (nextNote.pitch.toInt() - note.pitch.toInt() > 0)) return true;
+    } catch(e) {}
+    return false;
+}
+function _chantNoteWeightedDuration(allNotes, idx) {
+    var note = allNotes[idx];
+    if (!note) return 1;
+    if (note.constructor && note.constructor.name !== 'Note' && !note.pitch) return 1;
+    var nextNote = allNotes[idx+1];
+    if (nextNote && nextNote.constructor && nextNote.constructor.name !== 'Note') nextNote = null;
+    var prevNote = allNotes[idx-1];
+    if (prevNote && prevNote.constructor && prevNote.constructor.name !== 'Note') prevNote = null;
+    var dur = 1;
+    try {
+        if (note.morae && note.morae.length) dur = 2;
+        else if (nextNote && ( (nextNote.morae && nextNote.morae.length > 1) || (window.exsurge && nextNote.shape === exsurge.NoteShape.Quilisma) || _chantIsSalicus(allNotes, idx))) dur = 1.8;
+        else if (note.episemata && note.episemata.length) {
+            var cnt = 1;
+            if (prevNote && prevNote.episemata && prevNote.episemata.length) cnt++;
+            if (nextNote && nextNote.episemata && nextNote.episemata.length) cnt++;
+            dur += 0.9 / cnt;
+        }
+    } catch(e) {}
+    return dur;
+}
+function _getChantWeightedInfo(score) {
+    if (!score || !score.notations) return null;
+    var allNotes = [].concat.apply([], score.notations.map(function(n){ return n.notes || []; })).filter(function(n){ return n && !n.isAccidental; });
+    if (!allNotes.length) return null;
+    var noteDurs = [];
+    for (var i=0;i<allNotes.length;i++) noteDurs.push(_chantNoteWeightedDuration(allNotes,i));
+    // Inter-phrase gaps: walk notations to detect bar after each note block
+    var gapAfterNote = {};
+    var notePos = 0;
+    for (var ni=0; ni<score.notations.length; ni++) {
+        var notat = score.notations[ni];
+        var isDiv = !!(notat.isDivider || /Bar$/.test(String(notat.constructor && notat.constructor.name || '')));
+        if (notat.notes && notat.notes.length) {
+            var cnt = notat.notes.filter(function(n){ return !n.isAccidental; }).length;
+            notePos += cnt;
+        } else if (isDiv) {
+            var gap = 0;
+            var cname = String(notat.constructor && notat.constructor.name || String(notat.constructor));
+            if (/DoubleBar|FullBar/.test(cname)) gap = 1.6; // longer silence between phrases
+            else if (/HalfBar|DominicanBar|Virgula/.test(cname)) gap = 0.7;
+            else gap = 0.45;
+            // attribute gap to previous note
+            var prevIdx = notePos - 1;
+            if (prevIdx >= 0) gapAfterNote[prevIdx] = Math.max(gapAfterNote[prevIdx]||0, gap);
+        }
+    }
+    var total = 0;
+    for (var k=0;k<noteDurs.length;k++) { total += noteDurs[k]; if (gapAfterNote[k]) total += gapAfterNote[k]; }
+    return { allNotes: allNotes, noteDurs: noteDurs, gapAfterNote: gapAfterNote, total: total };
+}
+function _fractionToChantIndex(info, fraction) {
+    if (!info) return 0;
+    var target = Math.max(0, Math.min(info.total, fraction * info.total));
+    var cum = 0;
+    for (var i=0;i<info.allNotes.length;i++) {
+        var nd = info.noteDurs[i];
+        if (target < cum + nd) return i;
+        cum += nd;
+        var gap = info.gapAfterNote[i] || 0;
+        if (gap) {
+            if (target < cum + gap) return i; // stay on same note during inter-phrase silence
+            cum += gap;
+        }
+    }
+    return info.allNotes.length - 1;
+}
+function _indexToFraction(info, idx) {
+    if (!info || !info.total) return 0;
+    var cum = 0;
+    for (var i=0;i<idx && i<info.allNotes.length;i++) { cum += info.noteDurs[i]; if (info.gapAfterNote[i]) cum += info.gapAfterNote[i]; }
+    return cum / info.total;
+}
+
 function updateDoPlayerProgressAndTime(score, note, progressFraction) {
     if (!score || !score.notations) return;
-    var allNotes = [].concat.apply([], score.notations.map(function(notat) { return notat.notes || []; }));
-    if (!allNotes.length) return;
-
-    var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
-    var secPerNote = 60 / tempoBpm;
-    var totalSeconds = allNotes.length * secPerNote;
+    var info = _getChantWeightedInfo(score);
+    if (!info) return;
+    var allNotes = info.allNotes;
+    var tempoBpm = parseInt(localStorage.getItem('do_tempo'), 10) || (window.Tone && window.Tone.Transport && window.Tone.Transport.bpm ? window.Tone.Transport.bpm.value : 165) || 165;
+    // fallback to #playerTempoValue if it exists (legacy)
+    var pv = $('#playerTempoValue').text();
+    if (pv) { var pvTempo = parseInt(pv,10); if (!isNaN(pvTempo) && pvTempo>30) tempoBpm = pvTempo; }
+    var secPerUnit = 60 / tempoBpm;
+    var totalSeconds = info.total * secPerUnit;
 
     var pct = 0;
-    var currentIdx = 0;
+    var elapsedUnits = 0;
 
     if (typeof progressFraction === 'number') {
         pct = Math.max(0, Math.min(100, progressFraction * 100));
-        currentIdx = Math.floor(progressFraction * allNotes.length);
+        elapsedUnits = progressFraction * info.total;
     } else if (note) {
         var idx = allNotes.indexOf(note);
         if (idx < 0) {
             for (var i = 0; i < allNotes.length; i++) {
                 if (allNotes[i] === note || (note.sourceIndex !== undefined && allNotes[i].sourceIndex === note.sourceIndex) || (note.elementIndex !== undefined && allNotes[i].elementIndex === note.elementIndex)) {
-                    idx = i;
-                    break;
+                    idx = i; break;
                 }
             }
         }
-        currentIdx = Math.max(0, idx);
-        pct = (currentIdx / allNotes.length) * 100;
+        idx = Math.max(0, idx);
+        elapsedUnits = 0;
+        for (var j=0;j<idx;j++) { elapsedUnits += info.noteDurs[j]; if (info.gapAfterNote[j]) elapsedUnits += info.gapAfterNote[j]; }
+        pct = (elapsedUnits / info.total) * 100;
+    } else {
+        // no note and no fraction -> at start
+        pct = 0; elapsedUnits = 0;
     }
 
-    var elapsedSec = currentIdx * secPerNote;
+    var elapsedSec = elapsedUnits * secPerUnit;
     var remainingSec = Math.max(0, totalSeconds - elapsedSec);
     $('#playerProgressFill').css('width', pct + '%');
     $('#playerCurrentTime').text(formatChantTime(elapsedSec));
@@ -5111,6 +5207,33 @@ function findNearestChantElement(svg, pageX, pageY) {
 
     return bestEl;
 }
+function findNextChantElement(svg, pageX, pageY) {
+    if (!svg) return null;
+    var candidates = svg.querySelectorAll('use[source-index], text.lyric, text.dropCap, text.aboveLinesText, text[source-index]');
+    if (!candidates.length) return null;
+    var bestEl = null;
+    var bestScore = Infinity;
+    for (var i = 0; i < candidates.length; i++) {
+        var el = candidates[i];
+        var rect = el.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) continue;
+        var cx = window.pageXOffset + rect.left + rect.width / 2;
+        var cy = window.pageYOffset + rect.top + rect.height / 2;
+        // Is candidate after click in reading order (left->right, top->bottom)
+        var isAfter = (cy > pageY + 8) || (Math.abs(cy - pageY) <= 20 && cx > pageX + 4);
+        if (!isAfter) continue;
+        // Score: primary by vertical distance, then horizontal
+        var dy = cy - pageY;
+        var dx = cx - pageX;
+        // For same line, prefer smallest dx; for next line, prefer smallest dy then dx
+        var score = dy * 1000 + dx;
+        if (dy < 0) score += 100000;
+        if (score < bestScore) { bestScore = score; bestEl = el; }
+    }
+    // Fallback to nearest if no after found (e.g. click at end)
+    if (!bestEl) return findNearestChantElement(svg, pageX, pageY);
+    return bestEl;
+}
 
 var _doCurrentPlayerCard = null;
 var _doCurrentScore = null;
@@ -5118,7 +5241,11 @@ var _doProgressInterval = null;
 var _doActiveNoteEl = null; // The single currently-highlighted note element
 var _doActiveLyricEl = null; // The single currently-highlighted lyric text element
 
-function clearActiveNote() {
+function clearActiveNote(force) {
+    // Keep manual first-click highlight for 4s
+    if (!force && Date.now() < _manualHighlightUntil) {
+        return;
+    }
     if (_doActiveNoteEl) {
         _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
         _doActiveNoteEl.style.removeProperty('fill');
@@ -5234,26 +5361,48 @@ function _buildChantSequenceWithRepeats(score, allNotes) {
     return seq;
 }
 
+var _manualHighlightUntil = 0;
 function highlightChantNoteAtFraction(fraction) {
+    // Keep manual click highlight for 4s (first use for a piece) — must be before sync check
+    if (Date.now() < _manualHighlightUntil) {
+        return;
+    }
     if (window.doYT && window.doYT.syncEnabled === false) {
         clearActiveNote();
         return;
     }
     if (typeof fraction !== 'number' || isNaN(fraction)) return;
     if (!_doCurrentScore || !_doCurrentScore.notations) return;
-    var allNotes = [].concat.apply([], _doCurrentScore.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
-    if (!allNotes.length) return;
+    var info = _getChantWeightedInfo(_doCurrentScore);
+    if (!info || !info.allNotes.length) return;
+    var allNotes = info.allNotes;
 
     var targetIdx;
 
-    // When a YouTube video is active and sync is on, use repeat-aware mapping
     var isYtVideo = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth' && window.doYT.syncEnabled !== false);
     if (isYtVideo) {
         var seq = _buildChantSequenceWithRepeats(_doCurrentScore, allNotes);
-        var seqPos = Math.max(0, Math.min(seq.length - 1, Math.floor(fraction * seq.length)));
-        targetIdx = seq[seqPos];
+        // Build weighted durations for seq
+        var seqDurs = [];
+        var seqTotal = 0;
+        for (var si=0; si<seq.length; si++) { var d = info.noteDurs[seq[si]] || 1; seqDurs.push(d); seqTotal += d; if (info.gapAfterNote[seq[si]]) { seqTotal += info.gapAfterNote[seq[si]]; } }
+        // For simplicity map via cumulative weighted seq (including gaps approximated after each seq element)
+        var targetUnits = fraction * seqTotal;
+        var cum = 0;
+        targetIdx = seq[0];
+        for (var s2=0; s2<seq.length; s2++) {
+            var sd = seqDurs[s2];
+            if (targetUnits < cum + sd) { targetIdx = seq[s2]; break; }
+            cum += sd;
+            var sg = info.gapAfterNote[seq[s2]] || 0;
+            if (sg) {
+                if (targetUnits < cum + sg) { targetIdx = seq[s2]; break; }
+                cum += sg;
+            }
+            if (s2 === seq.length-1) targetIdx = seq[s2];
+        }
     } else {
-        targetIdx = Math.max(0, Math.min(allNotes.length - 1, Math.floor(fraction * allNotes.length)));
+        targetIdx = _fractionToChantIndex(info, fraction);
     }
 
     var note = allNotes[targetIdx];
@@ -5362,8 +5511,9 @@ function handleChantElementClick(clickedEl, e) {
         setDoPlayerBarState(false);
     }
 
-    // Clear previous selection
-    clearActiveNote();
+    // Clear previous selection (force) and keep new highlight for 4s
+    clearActiveNote(true);
+    _manualHighlightUntil = Date.now() + 4000;
 
     var $clicked = $(clickedEl);
     var $card = $clicked.closest('.do-chant-card');
@@ -5471,35 +5621,77 @@ function handleChantElementClick(clickedEl, e) {
 
     if (note) {
         $card.data('selected-start-note', note);
+    } else if (noteEl && score && score.notations) {
+        // First click on asterisk/other non-note: try to resolve note from noteEl via next element
+        try {
+            var svgForNext = $card.find('svg')[0];
+            var nextEl = findNextChantElement(svgForNext, e ? e.pageX : (window.pageXOffset + noteEl.getBoundingClientRect().left), e ? e.pageY : (window.pageYOffset + noteEl.getBoundingClientRect().top));
+            if (nextEl && nextEl !== noteEl) {
+                var nIdx = nextEl.getAttribute('element-index') || nextEl.getAttribute('source-index');
+                for (var ii=0; ii<score.notations.length; ii++) {
+                    var nn = score.notations[ii];
+                    if (nn.notes) for (var jj=0; jj<nn.notes.length; jj++) {
+                        var n = nn.notes[jj];
+                        if ((nIdx && (n.elementIndex==nIdx || n.sourceIndex==nIdx)) || n.svgNode===nextEl) { note=n; noteEl=nextEl; break; }
+                    }
+                    if (note) break;
+                }
+                if (note) $card.data('selected-start-note', note);
+            }
+        } catch(e9){}
     }
+    // Keep manual highlight for 3s when not playing (first click)
+    if (!wasPlaying) { _manualHighlightUntil = Date.now() + 3000; }
     // Update player UI to target card and score
     updateDoPlayerUI($card, score, false); // never auto-play on note click
 
     // If YouTube video is active: seek to note position but do NOT resume playback
     if (isYtActive) {
         if (note && score && score.notations) {
-            var allNotesList = [].concat.apply([], score.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
+            var info2 = _getChantWeightedInfo(score);
+            var allNotesList = info2 ? info2.allNotes : [].concat.apply([], score.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
             var noteIndex = allNotesList.indexOf(note);
             if (noteIndex >= 0 && allNotesList.length > 0) {
-                // Convert note index → video fraction using repeat-aware sequence
+                // Convert note index → video fraction using repeat-aware sequence with weighted durations
                 var seq = _buildChantSequenceWithRepeats(score, allNotesList);
-                // Find the first occurrence of noteIndex in seq
                 var seqPos = seq.indexOf(noteIndex);
                 if (seqPos < 0) seqPos = 0;
-                var fracPos = seqPos / seq.length;
+                var fracPos = 0;
+                if (info2) {
+                    var seqDurs2 = []; var seqTot2 = 0;
+                    for (var sd2=0; sd2<seq.length; sd2++) { var dd = info2.noteDurs[seq[sd2]]||1; seqDurs2.push(dd); seqTot2+=dd; var gg = info2.gapAfterNote[seq[sd2]]||0; if(gg) seqTot2+=gg; }
+                    var cum2 = 0;
+                    for (var sp=0; sp<seqPos; sp++) { cum2 += seqDurs2[sp]; var gg2 = info2.gapAfterNote[seq[sp]]||0; if(gg2) cum2+=gg2; }
+                    fracPos = seqTot2 ? cum2/seqTot2 : seqPos/seq.length;
+                } else {
+                    fracPos = seqPos / seq.length;
+                }
 
                 var ytPlayer = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+                // Keep lastPercentage for first use when player not ready
+                try { window.doYT.lastPercentage = fracPos; } catch(e0){}
                 if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
                     var dur = ytPlayer.getDuration() || 0;
-                    if (dur > 0) ytPlayer.seekTo(fracPos * dur, true);
-                    // Always pause after seek — user must press Play
-                    if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
-                    setDoPlayerBarState(false);
-                    $('#playerProgressFill').css('width', (fracPos * 100) + '%');
-                    $('#playerCurrentTime').text(formatChantTime(fracPos * dur));
+                    if (dur > 0) {
+                        try { ytPlayer.seekTo(fracPos * dur, true); } catch(e){ }
+                        // Always pause after seek — user must press Play
+                        try { if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo(); } catch(e2){}
+                        setDoPlayerBarState(false);
+                        $('#playerProgressFill').css('width', (fracPos * 100) + '%');
+                        $('#playerCurrentTime').text(formatChantTime(fracPos * dur));
+                        try { updateDoPlayerProgressAndTime(score, note, fracPos); } catch(e3){}
+                    } else {
+                        // Duration not yet known — fallback to score-based time
+                        try { updateDoPlayerProgressAndTime(score, note, fracPos); } catch(e4){}
+                        $('#playerProgressFill').css('width', (fracPos * 100) + '%');
+                        // Store pending seek for when player becomes ready
+                        try { if (!window.doYT.pendingSeeks) window.doYT.pendingSeeks = {}; window.doYT.pendingSeeks[window.doYT.activeId] = fracPos; } catch(e6){}
+                    }
                 } else {
-                    // Player not ready yet — just update visual cursor from score position
-                    $('#playerProgressFill').css('width', (noteIndex / allNotesList.length * 100) + '%');
+                    // Player not ready yet — update visual cursor and timestamp from score position
+                    try { updateDoPlayerProgressAndTime(score, note, fracPos); } catch(e5){}
+                    $('#playerProgressFill').css('width', (fracPos * 100) + '%');
+                    try { if (!window.doYT.pendingSeeks) window.doYT.pendingSeeks = {}; window.doYT.pendingSeeks[window.doYT.activeId] = fracPos; } catch(e7){}
                 }
             }
         }
@@ -5616,6 +5808,7 @@ function closeDoPlayer() {
     }
     _doCurrentPlayerCard = null;
     _doCurrentScore = null;
+    _progressBarInitialPeekDone = false;
 }
 
 function initDoPlayer() {
@@ -5672,16 +5865,22 @@ function initDoPlayer() {
                 if (player && isReady && typeof player.playVideo === 'function') {
                     player.playVideo();
                     setDoPlayerBarState(true);
+                    _userIsScrolling = false;
+                    if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+                    setTimeout(function() { centerActiveNote(false); }, 120);
                 } else {
                     // Player not yet loaded — create the iframe and play on ready
                     var $activeItem = $('#playerVideoList .do-yt-item.is-active');
                     var videoId = $activeItem.data('video-id');
                     if (activeId && videoId && window.doYT.ensureIframeAndPlayer) {
-                        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text().replace('×', '').trim();
+                        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text() || '1.0';
                         var curSpeed = parseFloat(curSpeedText) || 1.0;
                         if (!window.doYT.pendingPlays) window.doYT.pendingPlays = {};
                         window.doYT.pendingPlays[activeId] = true;
                         window.doYT.ensureIframeAndPlayer(activeId, videoId, $activeItem, curSpeed);
+                        _userIsScrolling = false;
+                        if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+                        setTimeout(function() { centerActiveNote(false); }, 300);
                     }
                 }
             }
@@ -5696,6 +5895,11 @@ function initDoPlayer() {
             if (window.playPauseScore) {
                 var resumed = window.playPauseScore();
                 setDoPlayerBarState(resumed);
+                if (resumed) {
+                    _userIsScrolling = false;
+                    if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+                    setTimeout(function() { centerActiveNote(false); }, 100);
+                }
                 if (resumed && window.doYT && typeof window.doYT.pauseAll === 'function') {
                     window.doYT.pauseAll();
                 }
@@ -5711,6 +5915,10 @@ function initDoPlayer() {
             var startNote = _doCurrentPlayerCard ? _doCurrentPlayerCard.data('selected-start-note') : null;
             window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, startNote);
             setDoPlayerBarState(true);
+            // Scroll immediately on play start (even if note still visible) — force to visible center
+            _userIsScrolling = false;
+            if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+            setTimeout(function() { centerActiveNote(true); }, 120);
         }
     });
 
@@ -5772,32 +5980,89 @@ function initDoPlayer() {
         }
     });
 
-    // Speed cycle button (1.0x -> 1.25x -> 1.5x -> 2.0x -> 0.5x -> 0.75x)
+    // Speed cycle button (1.0x -> 1.25x -> 1.5x -> 2.0x -> 0.5x -> 0.75x) - BPM en dur (ne pas calculer depuis tempo courant)
     var SPEED_CYCLE = [1.0, 1.25, 1.5, 2.0, 0.5, 0.75];
     var BASE_TEMPO = 165;
+    var SPEED_BPM = { "0.5": 83, "0.75": 124, "1": 165, "1.0": 165, "1.25": 206, "1.5": 248, "2": 330, "2.0": 330 };
     $('#playerSpeedCycleBtn').off('click').on('click', function(e) {
         e.stopPropagation();
         triggerHapticFeedback('selection');
-        var curSpeedText = $(this).find('.do-speed-label').text().replace('×', '').trim();
+        var curSpeedText = $(this).find('.do-speed-label').text() || '1.0';
         var curSpeed = parseFloat(curSpeedText) || 1.0;
-        var nextIdx = (SPEED_CYCLE.indexOf(curSpeed) + 1) % SPEED_CYCLE.length;
+        // tolerant index lookup (floating point)
+        var curIdx = -1;
+        for (var si = 0; si < SPEED_CYCLE.length; si++) { if (Math.abs(SPEED_CYCLE[si] - curSpeed) < 0.001) { curIdx = si; break; } }
+        var nextIdx = (curIdx + 1) % SPEED_CYCLE.length;
+        if (curIdx === -1) nextIdx = 0; // fallback to 1.0x
         var nextSpeed = SPEED_CYCLE[nextIdx];
-        $(this).find('.do-speed-label').text(nextSpeed.toFixed(nextSpeed % 1 === 0 ? 1 : 2) + '×');
+        $(this).find('.do-speed-label').text(nextSpeed.toFixed(nextSpeed % 1 === 0 ? 1 : 2) + '\u00D7');
         $(this).toggleClass('active', nextSpeed !== 1.0);
         
-        var calculatedTempo = Math.round(BASE_TEMPO * nextSpeed);
+        var key = String(nextSpeed % 1 === 0 ? nextSpeed.toFixed(1) : nextSpeed.toFixed(2));
+        // BPM en dur, pas BASE*nextSpeed depuis tempo courant (qui n'est pas 1×)
+        var calculatedTempo = SPEED_BPM[key] || Math.round(BASE_TEMPO * nextSpeed);
         if ($('#playerTempoValue').length) $('#playerTempoValue').text(calculatedTempo);
-        if (window.setTempo) window.setTempo(calculatedTempo);
+        // Preserve musical position before tempo change
+        var savedFraction = 0;
+        try { savedFraction = window.getChantProgress ? window.getChantProgress() : 0; } catch(e0) { savedFraction = 0; }
+        if (typeof savedFraction !== 'number' || isNaN(savedFraction)) savedFraction = 0;
+        savedFraction = Math.max(0, Math.min(1, savedFraction));
+        // Update synth tempo WITHOUT the '+16n' jump (direct bpm change keeps cursor)
+        try {
+            localStorage.setItem('do_tempo', String(calculatedTempo));
+            if (window.Tone && window.Tone.Transport && window.Tone.Transport.bpm) window.Tone.Transport.bpm.value = calculatedTempo;
+            // Do NOT call window.setTempo which does clear+schedule '+16n' and moves cursor
+            // If playing, reschedule next note with new tempo to avoid one-note lag
+            if (window.Tone && window.Tone.Transport && window.Tone.Transport.state === 'started' && window._chantNotes && window._getChantNoteId && window._getNoteDuration && window.timeoutNextNote !== undefined) {
+                try {
+                    var nid = window._getChantNoteId();
+                    var curDur = 1;
+                    try { curDur = window._getNoteDuration(window._chantNotes, Math.max(0, nid-1)); } catch(ee) { curDur = 1; }
+                    // Clear old schedule and reschedule with new tempo's 4n * curDur
+                    // Keep musical position: next note still at same fraction, just faster/slower
+                    window.Tone.Transport.clear(window.timeoutNextNote);
+                    window.timeoutNextNote = window.Tone.Transport.scheduleOnce(window.playNextNote, '+' + (new window.Tone.Time("4n").toSeconds() * curDur));
+                } catch(e9) {}
+            }
+        } catch(e2) {}
+        // Persist speed for YT iframe creation
+        try { localStorage.setItem('do_last_speed', String(nextSpeed)); } catch(e4) {}
 
         if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
             var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
             if (player && typeof player.setPlaybackRate === 'function') {
                 try { player.setPlaybackRate(nextSpeed); } catch(e) {}
             }
-        } else if (_doCurrentScore) {
-            updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
+            // Keep YT highlight at same fraction
+            try { highlightChantNoteAtFraction(savedFraction); } catch(e6) {}
+            try { if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, savedFraction); } catch(e7) {}
+        } else {
+            // Synth: keep highlight/progress at same fraction
+            try { if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, savedFraction); } catch(e5) {}
+            try { highlightChantNoteAtFraction(savedFraction); } catch(e8) {}
         }
     });
+    // Sync initial label avec vitesse stockée en dur (pas do_tempo/BASE qui n'est pas 1×)
+    (function syncSpeedLabel(){
+        try {
+            var storedSpeed = parseFloat(localStorage.getItem('do_last_speed'));
+            var hasSpeed = !isNaN(storedSpeed);
+            var best = 1.0;
+            if (hasSpeed) {
+                // valide et trouve closest dans cycle
+                var bestDiff = Infinity;
+                for (var bi=0; bi<SPEED_CYCLE.length; bi++) { var d=Math.abs(SPEED_CYCLE[bi]-storedSpeed); if(d<bestDiff){bestDiff=d; best=SPEED_CYCLE[bi];}}
+                $('#playerSpeedCycleBtn').find('.do-speed-label').text(best.toFixed(best % 1 === 0 ? 1 : 2) + '\u00D7');
+                $('#playerSpeedCycleBtn').toggleClass('active', best !== 1.0);
+                // Assure do_tempo en dur cohérent avec vitesse
+                var k = String(best % 1 === 0 ? best.toFixed(1) : best.toFixed(2));
+                var bpm = SPEED_BPM[k];
+                if (bpm) {
+                    try { localStorage.setItem('do_tempo', String(bpm)); if (window.Tone && window.Tone.Transport && window.Tone.Transport.bpm) window.Tone.Transport.bpm.value = bpm; } catch(ee){}
+                }
+            }
+        } catch(e6){}
+    })();
 
     function syncPlayerBarOffset() {
         var playerBar = document.getElementById('modernPlayerBar');
@@ -5869,10 +6134,52 @@ function initDoPlayer() {
 
             playerBar.style.removeProperty('transition');
 
-            // Dismiss if pulled down > 15% of player height (approx 20-25px) OR flick down (vy > 0.25) OR simply tapped the grab handle
             var isTap = (Math.abs(deltaY) < 6 && dt < 300);
             var isHandleTap = isTap && $(e.target).closest('#playerDragHandleWrap, #playerDragHandle').length > 0;
 
+            // Upward drag beyond threshold → auto-press Videos button (open sources)
+            var THRESH_UP = 48;
+            var THRESH_DOWN_CLOSE = 32;
+            if (deltaY < -THRESH_UP && !isTap) {
+                var $videoBtn = $('#playerBtnExpandVideos');
+                var $videoDrawer = $('#playerVideoDrawer');
+                if ($videoDrawer.is(':hidden') && $videoBtn.is(':visible')) {
+                    triggerHapticFeedback('light');
+                    $videoBtn.trigger('click');
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 200);
+                    return;
+                }
+            }
+            // Downward drag when sources open → close sources instead of dismissing player
+            if (deltaY > THRESH_DOWN_CLOSE && !isTap) {
+                var $drawerOpen = $('#playerVideoDrawer');
+                var $pitchOpen = $('#playerPitchDrawer');
+                if ($drawerOpen.is(':visible') || $pitchOpen.is(':visible')) {
+                    triggerHapticFeedback('light');
+                    if ($drawerOpen.is(':visible')) $('#playerBtnExpandVideos').trigger('click');
+                    else if ($pitchOpen.is(':visible')) closeDoPitchBubble();
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 200);
+                    return;
+                }
+            }
+
+            // Dismiss if pulled down > 15% of player height (approx 20-25px) OR flick down (vy > 0.25) OR simply tapped the grab handle
             if (deltaY > barH * 0.15 || deltaY > 20 || (deltaY > 10 && vy > 0.25) || isHandleTap) {
                 triggerHapticFeedback('light');
                 playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
@@ -6061,7 +6368,10 @@ function initDoPlayer() {
 
         var svg = $card.find('svg')[0];
         if (svg) {
-            var nearest = findNearestChantElement(svg, e.pageX, e.pageY);
+            // For asterisk or any non-syllable/note element, go to the next element in reading order
+            var txt = (e.target.textContent || '').trim();
+            var isSpecial = /^[*†‡]+$/.test(txt) || $(e.target).is('text,tspan') && txt.length <= 2;
+            var nearest = isSpecial ? findNextChantElement(svg, e.pageX, e.pageY) : findNextChantElement(svg, e.pageX, e.pageY);
             if (nearest) {
                 triggerHapticFeedback('note');
                 handleChantElementClick(nearest, e);
@@ -6114,25 +6424,61 @@ var _userScrollTimer = null;
 var _isAutoScrolling = false;
 
 function _getViewportOffsets() {
-    // Top: fixed/sticky header
+    // Visible viewport = window minus header / notification banners (top) and player dock (bottom)
+    // Use getBoundingClientRect to get actual on-screen obstruction, fixing the 400px padding/margin hack of the player bar.
     var topH = 0;
-    var headerEl = document.querySelector('.do-top-header, header.do-header, #doHeader, nav.do-nav');
-    if (headerEl) {
-        var hStyle = window.getComputedStyle(headerEl);
-        if (hStyle.position === 'fixed' || hStyle.position === 'sticky') {
-            topH = headerEl.offsetHeight || 0;
+    try {
+        var candidates = [];
+        var headerEl = document.querySelector('.do-top-header');
+        if (headerEl) candidates.push(headerEl);
+        var bannerEls = document.querySelectorAll('#appUpdateBanner, #appRemoteNotificationBanner, #appInstallBanner, .do-update-banner, .do-remote-notif-banner, .do-install-banner');
+        for (var i = 0; i < bannerEls.length; i++) candidates.push(bannerEls[i]);
+        var maxBottom = 0;
+        for (var j = 0; j < candidates.length; j++) {
+            var el = candidates[j];
+            if (!el || !el.getBoundingClientRect) continue;
+            var cs = window.getComputedStyle(el);
+            if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+            // .is-visible gate for banners; header has no gate
+            var isBanner = el.id === 'appUpdateBanner' || el.id === 'appRemoteNotificationBanner' || el.id === 'appInstallBanner' || el.classList.contains('do-update-banner');
+            if (isBanner && !el.classList.contains('is-visible')) {
+                // also accept jQuery :visible fallback via offsetHeight
+                if (!el.offsetHeight || el.offsetHeight < 4) continue;
+                // if banner not marked is-visible but still has height, treat as hidden
+                if (el.getBoundingClientRect().height < 4) continue;
+            }
+            if (el.offsetHeight < 4 && el.getBoundingClientRect().height < 4) continue;
+            var rect = el.getBoundingClientRect();
+            // Only consider elements anchored at top of viewport (top <= 80)
+            if (rect.top > 80) continue;
+            if (rect.bottom > maxBottom) maxBottom = rect.bottom;
         }
+        if (maxBottom > 0) topH = Math.ceil(maxBottom);
+    } catch(e) {}
+    if (!topH) {
+        var h = document.querySelector('.do-top-header');
+        topH = h ? (h.offsetHeight || 56) : 56;
+        // include safe-area if header bottom not yet measured (fallback)
+        if (topH < 48) topH = 56;
     }
-    if (!topH) topH = 56;
 
-    // Bottom: full player bar height (includes any open drawer)
     var bottomH = 0;
-    var playerBar = document.getElementById('modernPlayerBar');
-    if (playerBar && playerBar.classList.contains('visible')) {
-        bottomH = playerBar.offsetHeight || 0;
-    }
-    if (!bottomH) bottomH = 80;
-
+    try {
+        var playerBar = document.getElementById('modernPlayerBar');
+        if (playerBar && playerBar.classList.contains('visible')) {
+            var cs2 = window.getComputedStyle(playerBar);
+            if (cs2.display !== 'none' && cs2.visibility !== 'hidden') {
+                var rect2 = playerBar.getBoundingClientRect();
+                // Player bar uses padding-bottom 400px + margin-bottom -400px hack; visible height = offsetHeight - |marginBottom|
+                var mb = Math.abs(parseInt(cs2.marginBottom, 10)) || 0;
+                var visibleH = (playerBar.offsetHeight || rect2.height || 0) - mb;
+                // Also clamp via rect top: innerHeight - rect.top is inflated by 400, so use visibleH
+                if (visibleH < 20) visibleH = Math.max(0, window.innerHeight - rect2.top - mb);
+                if (visibleH > 0 && visibleH < 900) bottomH = Math.ceil(visibleH);
+                else bottomH = Math.ceil(visibleH);
+            }
+        }
+    } catch(e2) {}
     return { top: topH, bottom: bottomH };
 }
 
@@ -6154,9 +6500,10 @@ function isElementInVisibleViewport(el) {
     if (!el) return false;
     var rect = _getElemRect(el);
     var off = _getViewportOffsets();
+    var margin = 12; // small safety margin inside visible area
     return (
-        rect.top >= off.top &&
-        rect.bottom <= (window.innerHeight - off.bottom) &&
+        rect.top >= (off.top + margin) &&
+        rect.bottom <= (window.innerHeight - off.bottom - margin) &&
         rect.left >= 0 &&
         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
@@ -6174,7 +6521,6 @@ function centerActiveNote(force) {
     }
 
     try {
-        // Get the note position — handle SVG <use> zero-size quirk
         var noteRect = activeElem.getBoundingClientRect();
         if (noteRect.width === 0 && noteRect.height === 0) {
             var svgEl = activeElem.ownerSVGElement;
@@ -6194,29 +6540,64 @@ function centerActiveNote(force) {
             noteRect = _getElemRect(activeElem);
         }
 
-        // Simple: put the middle of the note at the middle of the screen
-        var noteMid = window.scrollY + noteRect.top + (noteRect.height || 14) / 2;
-        var targetY = Math.max(0, noteMid - window.innerHeight / 2);
+        var off = _getViewportOffsets();
+        var visibleTop = off.top;
+        var visibleBottom = window.innerHeight - off.bottom;
+        var visibleMid = (visibleTop + visibleBottom) / 2;
+        var noteMidPage = (window.scrollY || window.pageYOffset) + noteRect.top + (noteRect.height || 14) / 2;
+        var targetY = noteMidPage - visibleMid;
+        var maxScroll = Math.max(0, (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight);
+        if (targetY < 0) targetY = 0;
+        if (targetY > maxScroll) targetY = maxScroll;
 
         _isAutoScrolling = true;
         window.scrollTo({ top: targetY, behavior: 'smooth' });
-        setTimeout(function() { _isAutoScrolling = false; }, 700);
+        setTimeout(function() { _isAutoScrolling = false; }, 750);
     } catch(e) {
-        if (activeElem.scrollIntoView) {
+        try {
+            var off2 = _getViewportOffsets();
+            var vb = window.innerHeight - off2.bottom;
+            var vt = off2.top;
+            // Fallback use native scrollIntoView then correct for header/player
             _isAutoScrolling = true;
             activeElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(function() { _isAutoScrolling = false; }, 700);
-        }
+            setTimeout(function() {
+                // Nudge to true visible center after native call
+                var r = activeElem.getBoundingClientRect();
+                var curMid = r.top + (r.height || 14)/2;
+                var visMid = (vt + vb)/2;
+                var delta = curMid - visMid;
+                if (Math.abs(delta) > 8) {
+                    window.scrollBy({ top: delta, behavior: 'smooth' });
+                }
+                setTimeout(function(){ _isAutoScrolling = false; }, 400);
+            }, 380);
+            setTimeout(function() { _isAutoScrolling = false; }, 900);
+        } catch(e2) {}
     }
 }
 
+var _lastActiveNoteTop = null;
 window.onChantNoteActive = function(el) {
     if (window.doYT && window.doYT.syncEnabled === false) return;
-    if (!window.isPlayingChant || !window.isPlayingChant()) return;
-    if (_userIsScrolling) return; // Do not interrupt manual user scrolling
-    if (el && !isElementInVisibleViewport(el)) {
+    var isSynthPlaying = window.isPlayingChant && window.isPlayingChant();
+    var isYtPlaying = window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth' && document.getElementById('playerBtnPlay') && document.getElementById('playerBtnPlay').classList.contains('playing');
+    if (!isSynthPlaying && !isYtPlaying) return;
+    if (_userIsScrolling) return;
+    if (!el) return;
+    if (!isElementInVisibleViewport(el)) {
         centerActiveNote(false);
+        try { _lastActiveNoteTop = el.getBoundingClientRect().top; } catch(e) {}
+        return;
     }
+    // Even if still visible, re-center when jumping to a new staff line (vertical gap > 60px)
+    try {
+        var curTop = el.getBoundingClientRect().top;
+        if (_lastActiveNoteTop !== null && Math.abs(curTop - _lastActiveNoteTop) > 60) {
+            centerActiveNote(false);
+        }
+        _lastActiveNoteTop = curTop;
+    } catch(e) {}
 };
 
 function initUserScrollTracker() {
@@ -6226,14 +6607,24 @@ function initUserScrollTracker() {
         if (_userScrollTimer) clearTimeout(_userScrollTimer);
         _userScrollTimer = setTimeout(function() {
             _userIsScrolling = false;
-            // After 2.5s without scroll, if chant is playing and active note is out of view, re-center!
+            // After 10s without user scroll, if chant is playing, re-center if out of view.
+            // Works whether video/tonality drawers are open or closed (viewport offsets recomputed).
             if (window.isPlayingChant && window.isPlayingChant()) {
                 var activeElem = document.querySelector('svg use.active, svg .active');
                 if (activeElem && !isElementInVisibleViewport(activeElem)) {
                     centerActiveNote(false);
                 }
+            } else if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+                // YT video playing case: use same 10s idle re-center
+                var ytPlaying = document.getElementById('playerBtnPlay') && document.getElementById('playerBtnPlay').classList.contains('playing');
+                if (ytPlaying) {
+                    var activeElem2 = document.querySelector('svg use.active, svg .active');
+                    if (activeElem2 && !isElementInVisibleViewport(activeElem2)) {
+                        centerActiveNote(false);
+                    }
+                }
             }
-        }, 2500);
+        }, 10000);
     }
 
     window.removeEventListener('wheel', handleUserScrollInteraction);
@@ -6311,9 +6702,27 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
         if ($wrapper.length) chantId = $wrapper.data('chant-id');
     }
     if (!window.doYT || window.doYT.currentChantId !== chantId) {
+        _videoDrawerHasPeeked = false;
+        _progressBarInitialPeekDone = false;
         updatePlayerVideoDrawer(chantId);
     }
     updateDoPitchButtonState();
+    // One-time subtle progress bar peek at the very beginning (animated right shift to hint next), only if not chanting
+    if (!_progressBarInitialPeekDone && !isPlaying) {
+        var prog = 0;
+        try { prog = window.getChantProgress ? window.getChantProgress() : 0; } catch(e) {}
+        if (prog === 0) {
+            _progressBarInitialPeekDone = true;
+            var $fill = $('#playerProgressFill');
+            if ($fill.length) {
+                $fill.css('transition', 'width 520ms cubic-bezier(0.2, 0.9, 0.3, 1)');
+                // small animated nudge to the right
+                setTimeout(function(){ $fill.css('width', '3.5%'); }, 180);
+                setTimeout(function(){ $fill.css('width', '0%'); }, 950);
+                setTimeout(function(){ $fill.css('transition', ''); }, 1500);
+            }
+        }
+    }
 }
 
 function escapeHtmlLocal(str) {
@@ -6489,6 +6898,9 @@ window.doYT = window.doYT || {
                             delete window.doYT.pendingPlays[elementId];
                             try { player.playVideo(); } catch(e) {}
                             setDoPlayerBarState(true);
+                            _userIsScrolling = false;
+                            if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+                            setTimeout(function() { centerActiveNote(false); }, 180);
                         }
                     },
                     onStateChange: function(event) {
@@ -6518,6 +6930,9 @@ window.doYT = window.doYT || {
                             $item.find('.do-yt-poster').addClass('is-hidden');
 
                             setDoPlayerBarState(true);
+                            _userIsScrolling = false;
+                            if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
+                            setTimeout(function() { centerActiveNote(false); }, 150);
                         } else if (event.data === 2) {
                             if (window.doYT.activeId === elementId) {
                                 setDoPlayerBarState(false);
@@ -6557,7 +6972,9 @@ window.doYT = window.doYT || {
         // Restore score times and set cursor position, but do NOT play
         if (_doCurrentScore && _doCurrentScore.notations) {
             var allNotes = [].concat.apply([], _doCurrentScore.notations.map(function(notation) { return notation.notes || notation; })).filter(function(notation) { return !notation.isAccidental; });
-            var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
+            var tempoBpm = parseInt(localStorage.getItem('do_tempo'), 10) || (window.Tone && window.Tone.Transport && window.Tone.Transport.bpm ? window.Tone.Transport.bpm.value : 165) || 165;
+            var pv2 = $('#playerTempoValue').text();
+            if (pv2) { var pvTempo2 = parseInt(pv2,10); if (!isNaN(pvTempo2) && pvTempo2>30) tempoBpm = pvTempo2; }
             var secPerNote = 60 / tempoBpm;
             var totalSeconds = allNotes.length * secPerNote;
             var elapsedSec = fraction * totalSeconds;
@@ -6599,7 +7016,7 @@ window.doYT = window.doYT || {
         updateDoPitchButtonState();
         if ($('#playerVideoDrawer').is(':visible')) { _sourceScrollInteracting = false; startSourceIdleAutoScroll(); }
 
-        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text().replace('×', '').trim();
+        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text() || '1.0';
         var curSpeed = parseFloat(curSpeedText) || 1.0;
 
         var dur = window.doYT.durations[iframeId] || parseFloat($item.data('duration-sec')) || 0;
@@ -6776,6 +7193,8 @@ function updatePlayerVideoDrawer(chantId) {
 // ── Auto-scroll: scroll active source into view after idle ──────────────
 var _sourceScrollTimer = null;
 var _sourceScrollInteracting = false;
+var _videoDrawerHasPeeked = false; // one-time peek at beginning (animated) only, not while chanting
+var _progressBarInitialPeekDone = false;
 
 function scrollActiveSourceIntoView(animate) {
     var $list = $('#playerVideoList');
@@ -6839,21 +7258,36 @@ $(document).on('click', '#playerBtnExpandVideos', function(e) {
         }
         $drawer.removeClass('hidden').slideDown(200, function() {
             if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-            // Peek: scroll slightly so user can see there is a next card
             var $list = $('#playerVideoList');
             if ($list.length) {
                 var listEl = $list[0];
                 var maxScroll = listEl.scrollWidth - listEl.clientWidth;
                 if (maxScroll > 0) {
-                    // Scroll to active source position + a small peek offset (32px)
-                    scrollActiveSourceIntoView(false); // instant snap first
-                    var peekOffset = Math.min(listEl.scrollLeft + 32, maxScroll);
-                    listEl.scrollLeft = peekOffset;
+                    var isPlaying = (window.isPlayingChant && window.isPlayingChant());
+                    // One-time animated peek at the very beginning, only if not chanting
+                    if (!_videoDrawerHasPeeked && !isPlaying && listEl.scrollLeft === 0) {
+                        scrollActiveSourceIntoView(false);
+                        var peekOffset = Math.min(listEl.scrollLeft + 36, maxScroll);
+                        _videoDrawerHasPeeked = true;
+                        // animated shift to the right to reveal next card, then gently snap back after pause
+                        $(listEl).stop(true).animate({ scrollLeft: peekOffset }, 480, 'swing', function() {
+                            setTimeout(function(){
+                                if (!_sourceScrollInteracting) $(listEl).stop(true).animate({ scrollLeft: listEl.scrollLeft - 16 }, 380, 'swing');
+                            }, 900);
+                        });
+                    } else {
+                        scrollActiveSourceIntoView(false);
+                    }
                 }
             }
-            // After peek, start the 10s idle timer to snap back to active
             _sourceScrollInteracting = false;
             startSourceIdleAutoScroll();
+            // Re-center chant after layout change (video drawer open) — on click Source, always keep active note/card visible
+            setTimeout(function(){
+                var ae=document.querySelector('svg use.active, svg .active');
+                if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
+                if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+            }, 230);
         });
         $(this).addClass('active');
     } else {
@@ -6861,6 +7295,11 @@ $(document).on('click', '#playerBtnExpandVideos', function(e) {
             $drawer.addClass('hidden');
             if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
             clearTimeout(_sourceScrollTimer);
+            setTimeout(function(){
+                var ae=document.querySelector('svg use.active, svg .active');
+                if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
+                if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+            }, 220);
         });
         $(this).removeClass('active');
         if (window.doYT && typeof window.doYT.pauseAll === 'function') {
@@ -7115,8 +7554,12 @@ function fetchSponsorBlockSegments(videoId) {
     var cats = encodeURIComponent(JSON.stringify(['music_offtopic', 'intro', 'outro', 'sponsor', 'interaction']));
     var url = 'https://sponsor.ajay.app/api/skipSegments?videoID=' + encodeURIComponent(videoId) + '&categories=' + cats;
 
-    fetch(url)
-        .then(function(r) { return r.ok ? r.json() : []; })
+    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+        .then(function(r) {
+            if (r.status === 404) return []; // 404 = no segments, normal case — not an error
+            if (!r.ok) return [];
+            return r.json();
+        })
         .then(function(data) {
             var segs = [];
             (data || []).forEach(function(seg) {
@@ -7124,15 +7567,14 @@ function fetchSponsorBlockSegments(videoId) {
                     segs.push({ start: seg.segment[0], end: seg.segment[1] });
                 }
             });
-            // Sort by start time
             segs.sort(function(a, b) { return a.start - b.start; });
             window.doYT.skipSegments[videoId] = segs;
             if (segs.length > 0) {
-                console.log('[SponsorBlock] ' + segs.length + ' segment(s) à sauter pour ' + videoId);
+                console.debug('[SponsorBlock] ' + segs.length + ' segment(s) à sauter pour ' + videoId);
             }
         })
         .catch(function() {
-            window.doYT.skipSegments[videoId] = []; // no segments on error
+            window.doYT.skipSegments[videoId] = []; // network error → treat as no segments
         });
 }
 
@@ -7195,6 +7637,10 @@ function startDoProgressTracking() {
                     $('#playerProgressFill').css('width', percent + '%');
                     $('#playerCurrentTime').text(formatChantTime(cur));
                     $('#playerChantTime').text(formatChantTime(dur)).attr('title', 'Durée vidéo : ' + formatChantTime(dur));
+                    // Ne pas écraser le highlight manuel (1er clic) quand la vidéo est en pause — même fonction que 2e/3e clic supprimée pour 1er usage
+                    var isYtPlaying = false;
+                    try { isYtPlaying = player.getPlayerState && player.getPlayerState() === 1; } catch(e){}
+                    if (!isYtPlaying) return;
                     if (window.doYT.syncEnabled !== false) {
                         highlightChantNoteAtFraction(frac);
                     }
@@ -7217,7 +7663,9 @@ function startDoProgressTracking() {
             // Update elapsed time for synth
             if (_doCurrentScore && _doCurrentScore.notations) {
                 var allN = [].concat.apply([], _doCurrentScore.notations.map(function(n) { return n.notes || []; }));
-                var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
+                var tempoBpm = parseInt(localStorage.getItem('do_tempo'), 10) || (window.Tone && window.Tone.Transport && window.Tone.Transport.bpm ? window.Tone.Transport.bpm.value : 165) || 165;
+                var pv3 = $('#playerTempoValue').text();
+                if (pv3) { var pvTempo3 = parseInt(pv3,10); if (!isNaN(pvTempo3) && pvTempo3>30) tempoBpm = pvTempo3; }
                 var secPerNote = 60 / tempoBpm;
                 var totalSec = allN.length * secPerNote;
                 $('#playerCurrentTime').text(formatChantTime(frac * totalSec));
@@ -7306,6 +7754,12 @@ function openDoPitchBubble() {
 
     $drawer.removeClass('hidden').slideDown(200, function() {
         if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        // Re-center after pitch drawer changes viewport bottom — on click source/tonality, always keep active note visible (playing or not)
+        setTimeout(function(){
+            var ae=document.querySelector('svg use.active, svg .active');
+            if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
+            if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+        }, 220);
     });
     $pill.addClass('active');
 }
@@ -7316,6 +7770,11 @@ function closeDoPitchBubble() {
         $drawer.slideUp(200, function() {
             $drawer.addClass('hidden');
             if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+            setTimeout(function(){
+                var ae=document.querySelector('svg use.active, svg .active');
+                if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
+                if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+            }, 220);
         });
     }
     $('#playerPitchPill').removeClass('active');
@@ -10888,7 +11347,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.54';
+var CURRENT_APP_VERSION = 'beta-0.0.55';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];

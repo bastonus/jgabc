@@ -851,11 +851,7 @@ if(typeof window=='object') (function(window) {
       localStorage.setItem('do_tempo', tempo);
       if (Tone.Transport) {
         Tone.Transport.bpm.value = tempo;
-        // If playback is currently active, reschedule immediately so tempo applies on the fly
-        if (Tone.Transport.state === 'started' && typeof window.playNextNote === 'function' && typeof timeoutNextNote !== 'undefined') {
-          Tone.Transport.clear(timeoutNextNote);
-          timeoutNextNote = Tone.Transport.scheduleOnce(window.playNextNote, '+16n');
-        }
+        // Do not reschedule with '+16n' here — that moves cursor. Tempo change takes effect on next scheduled note naturally.
       }
     }
     window.setRelativeTempo = function(delta) {
@@ -864,9 +860,9 @@ if(typeof window=='object') (function(window) {
       Tone.Transport.stop();
       var val = Tone.Transport.bpm.value = Math.round(Math.max(0, Tone.Transport.bpm.value + delta)) || 165;
       if(state === 'started') {
-        Tone.Transport.clear(timeoutNextNote);
+        Tone.Transport.clear(window.timeoutNextNote);
         Tone.Transport.start();
-        timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+8n');
+        window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+8n');
       }
       return val;
     }
@@ -884,7 +880,7 @@ if(typeof window=='object') (function(window) {
       ensureSynth();
       if (!synth) return; // synth failed to init, silently abort
 
-      Tone.Transport.clear(timeoutNextNote);
+      Tone.Transport.clear(window.timeoutNextNote);
       Tone.Transport.start();
       if($('#mediaControls').length == 0) {
         $(document.body).append("<div id='mediaControls'>\
@@ -925,6 +921,9 @@ if(typeof window=='object') (function(window) {
       dropCap = null;
       var noteId = 0;
       var notes = [].concat.apply([],score.notations.map(function(notation) { return notation.notes || notation; })).filter(function(notation) { return !notation.isAccidental; });
+      window._chantNotes = notes;
+      window._getChantNoteId = function(){ return noteId; };
+      window._setChantNoteId = function(v){ noteId = v; };
       if(startNote) noteId = Math.max(0, notes.indexOf(startNote));
       if(!firstPitch) firstPitch = score.defaultStartPitch;
       if(!firstPitch) {
@@ -1007,6 +1006,7 @@ if(typeof window=='object') (function(window) {
 
         return duration;
       }
+      window._getNoteDuration = getNoteDuration;
 
       function getIsApostropha (note) {
         var neume = note.neume;
@@ -1212,17 +1212,82 @@ if(typeof window=='object') (function(window) {
           $('#mediaControls').addClass('offscreen');
           return;
         }
-        timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds() * duration));
+        window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds() * duration));
       };
-      timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote);
-      window.getChantProgress = function() { return notes && notes.length ? (noteId / notes.length) : 0; };
+      window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote);
+      // Weighted progress: takes into account dotted notes, episema, salicus/quilisma and inter-phrase gaps
+      window.getChantProgress = function() {
+        if (!notes || !notes.length) return 0;
+        var totalDur = 0;
+        var playedDur = 0;
+        for (var gi=0; gi<notes.length; gi++) {
+          var d = 1;
+          try { d = getNoteDuration(notes, gi); } catch(e) { d = 1; }
+          // Add inter-phrase gap duration after notes that precede a Full/Double bar
+          // Approximate by checking neume trailing divider – reuse same heuristic as divinum_officium
+          totalDur += d;
+        }
+        // Add divider gaps: iterate score notations if available
+        if (score && score.notations) {
+          var notePos = 0;
+          for (var sni=0; sni<score.notations.length; sni++) {
+            var notat = score.notations[sni];
+            var isDiv = !!(notat.isDivider || /Bar$/.test(String(notat.constructor && notat.constructor.name || '')));
+            if (notat.notes && notat.notes.length) {
+              notePos += notat.notes.filter(function(n){ return !n.isAccidental; }).length;
+            } else if (isDiv) {
+              var cname = String(notat.constructor && notat.constructor.name || String(notat.constructor));
+              var gap = 0;
+              if (/DoubleBar|FullBar/.test(cname)) gap = 1.6;
+              else if (/HalfBar|DominicanBar|Virgula/.test(cname)) gap = 0.7;
+              else if (/QuarterBar/.test(cname)) gap = 0;
+              else gap = 0.45;
+              totalDur += gap;
+              // if gap is before played portion, add to playedDur proportionally
+              // gap belongs to previous note, so if previous note already played, count it
+              // notePos is already count of notes before this divider
+              if (notePos <= noteId) playedDur += gap;
+            }
+          }
+          // recalc playedDur as sum of note durations + gaps before noteId
+          playedDur = 0;
+          for (var pi=0; pi<noteId && pi<notes.length; pi++) {
+            var pd = 1; try { pd = getNoteDuration(notes, pi); } catch(e) {}
+            playedDur += pd;
+          }
+          // Add gaps before noteId by re-walking notations up to noteId
+          var cumNotes = 0;
+          for (var sni2=0; sni2<score.notations.length; sni2++) {
+            var notat2 = score.notations[sni2];
+            var isDiv2 = !!(notat2.isDivider || /Bar$/.test(String(notat2.constructor && notat2.constructor.name || '')));
+            if (notat2.notes && notat2.notes.length) {
+              cumNotes += notat2.notes.filter(function(n){ return !n.isAccidental; }).length;
+            } else if (isDiv2) {
+              var prevIdx = cumNotes -1;
+              if (prevIdx >=0 && prevIdx < noteId) {
+                var cname2 = String(notat2.constructor && notat2.constructor.name || String(notat2.constructor));
+                var gap2 = /DoubleBar|FullBar/.test(cname2) ? 1.6 : /HalfBar|DominicanBar|Virgula/.test(cname2) ? 0.7 : 0.45;
+                playedDur += gap2;
+              }
+            }
+            if (cumNotes >= noteId) { /* continue to account gaps at exact boundary */ }
+          }
+        } else {
+          for (var pi2=0; pi2<noteId && pi2<notes.length; pi2++) {
+            var pd2 = 1; try { pd2 = getNoteDuration(notes, pi2); } catch(e) {}
+            playedDur += pd2;
+          }
+        }
+        if (totalDur <= 0) return noteId / notes.length;
+        return Math.max(0, Math.min(1, playedDur / totalDur));
+      };
       window.playNextNote = playNextNote;
       window.stepForward = playNextNote;
       window.playPauseScore = function() {
         if(Tone.Transport.state == 'started') {
           Tone.Transport.pause();
-          Tone.Transport.clear(timeoutNextNote);
-          timeoutNextNote = null;
+          Tone.Transport.clear(window.timeoutNextNote);
+          window.timeoutNextNote = null;
         } else {
           Tone.Transport.start();
           playNextNote();
@@ -1272,12 +1337,22 @@ if(typeof window=='object') (function(window) {
     Tone = {};
     window.setTempo = window.setRelativeTempo = window.playScore = window.stopScore = function(){};
   }
-  var timeoutNextNote, transpose = 0;
+  window.timeoutNextNote = null;
+  var transpose = 0;
   var _isPlaying=false;
   var noteElem, syllable, dropCap;
   window.isPlayingChant = function() {
     return _isPlaying;
   }
+  // Expose for speed change during playback to keep cursor
+  window._getChantPlaybackState = function() {
+    try {
+      // notes and noteId are inside playScore closure, expose via window.getChantProgress internals if available
+      // Fallback: return null if not playing
+      if (typeof notes !== 'undefined' && typeof noteId !== 'undefined') return { notes: notes, noteId: noteId };
+    } catch(e) {}
+    return null;
+  };
   window.removeChantContextMenus = function() {
     $('svg.ChantScore use[source-index].active,svg.ChantScore text[source-index].active').each(function(){ this.classList.remove('active','porrectus-left','porrectus-right'); });
     $('.chant-context').remove();
