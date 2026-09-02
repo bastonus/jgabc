@@ -61,10 +61,10 @@ window.DO_TEMPORA_ART_METADATA = {
     "location": "Prague"
   },
   "Epi6-0": {
-    "artwork": "La Parabole du grain de sénevé",
+    "artwork": "La Parabole du levain et du grain de sénevé",
     "artist": "John Everett Millais",
     "year": "1864",
-    "location": "Londres"
+    "location": "Aberdeen Art Gallery"
   },
   "Nat01": {
     "artwork": "La Sainte Famille Canigiani",
@@ -229,10 +229,10 @@ window.DO_TEMPORA_ART_METADATA = {
     "location": "Paris"
   },
   "Pent14-0": {
-    "artwork": "Considérez les lys des champs et les oiseaux du ciel",
-    "artist": "James Tissot",
-    "year": "1886",
-    "location": "Brooklyn Museum, New York"
+    "artwork": "La Parabole des lys des champs et des oiseaux du ciel",
+    "artist": "Marten van Valckenborch",
+    "year": "1585",
+    "location": "Kunsthistorisches Museum, Vienne"
   },
   "Pent15-0": {
     "artwork": "La Résurrection du fils unique de la veuve de Naïn",
@@ -247,10 +247,10 @@ window.DO_TEMPORA_ART_METADATA = {
     "location": "Brooklyn Museum, New York"
   },
   "Pent17-0": {
-    "artwork": "Le Plus Grand Commandement d'Amour de Dieu et du prochain",
-    "artist": "Rembrandt",
-    "year": "1652",
-    "location": "Londres"
+    "artwork": "Le Christ parmi les pharisiens (Le Grand Commandement)",
+    "artist": "Jacob Jordaens",
+    "year": "1660",
+    "location": "Palais des Beaux-Arts de Lille"
   },
   "Pent18-0": {
     "artwork": "La Guérison du paralytique à la piscine probatique",
@@ -260,9 +260,9 @@ window.DO_TEMPORA_ART_METADATA = {
   },
   "Pent19-0": {
     "artwork": "La Parabole du festin des noces royales",
-    "artist": "Bernardo Cavallino",
-    "year": "1645",
-    "location": "Naples"
+    "artist": "Bernardo Strozzi",
+    "year": "1636",
+    "location": "Gallerie dell'Accademia, Venise"
   },
   "Pent20-0": {
     "artwork": "La Guérison du fils de l'officier du roi",

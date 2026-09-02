@@ -58,8 +58,10 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Capacitor sync
-        run: npx cap sync android
+      - name: Capacitor sync & clean external modules
+        run: |
+          npx cap sync android
+          node tools/clean_android_assets.mjs
 
       - name: Generate Release Keystore
         run: |

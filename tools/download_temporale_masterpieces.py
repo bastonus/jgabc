@@ -50,7 +50,7 @@ TEMPORA_MASTERPIECES = {
     'Epi3-0': ('Paolo Veronese Christ Healing the Centurion Servant', 'Paul Véronèse', 'Le Christ et le Centurion de Capharnaüm', '1571', 'Musée du Prado, Madrid'),
     'Epi4-0': ('Rembrandt Christ in the Storm on the Lake of Galilee', 'Rembrandt', 'Le Christ apaisant la tempête sur le lac', '1633', 'Boston'),
     'Epi5-0': ('Domenico Fetti Parable of the Weeds', 'Domenico Fetti', 'La Parabole de l\'ivraie et du bon grain', '1619', 'Prague'),
-    'Epi6-0': ('John Everett Millais Parable of the Mustard Seed', 'John Everett Millais', 'La Parabole du grain de sénevé', '1864', 'Londres'),
+    'Epi6-0': ('Parable The Leaven Millais', 'John Everett Millais', 'La Parabole du levain et du grain de sénevé', '1864', 'Aberdeen Art Gallery'),
     
     # --- SEPTUAGÉSIME ---
     'Quadp1-0': ('Domenico Fetti Parable of the Labourers in the Vineyard', 'Domenico Fetti', 'La Parabole des ouvriers de la onzième heure', '1618', 'Dresde'),
@@ -70,7 +70,7 @@ TEMPORA_MASTERPIECES = {
     'Quad6-0': ('Giotto Entry into Jerusalem Padua', 'Giotto di Bondone', 'L\'Entrée triomphale de Jésus à Jérusalem (Dimanche des Rameaux)', '1305', 'Chapelle des Scrovegni, Padoue'),
     'Quad6-4': ('Leonardo da Vinci The Last Supper', 'Léonard de Vinci', 'La Sainte Cène et Institution de l\'Eucharistie (Jeudi Saint)', '1498', 'Santa Maria delle Grazie, Milan'),
     'Quad6-5': ('Cristo crucificado Velazquez', 'Diego Vélasquez', 'La Crucifixion et Mort de Notre-Seigneur Jésus-Christ (Vendredi Saint)', '1632', 'Musée du Prado, Madrid'),
-    'Quad6-6': ('Fra Angelico Christ in Limbo Descent', 'Fra Angelico', 'La Descente aux enfers et la Veillée Pascale (Samedi Saint)', '1442', 'Couvent San Marco, Florence'),
+    'Quad6-6': ('Fra Angelico Christ in Limbo Cell 31', 'Fra Angelico', 'La Descente aux enfers et la Veillée Pascale (Samedi Saint)', '1442', 'Couvent San Marco, Florence'),
     
     # --- TEMPS PASCAL ---
     'Pasc0-0': ('Piero della Francesca Resurrection', 'Piero della Francesca', 'La Résurrection Glorieuse du Christ (Dimanche de Pâques)', '1463', 'Museo Civico de Sansepolcro'),
@@ -100,12 +100,12 @@ TEMPORA_MASTERPIECES = {
     'Pent11-0': ('Eugene Delacroix Christ healing the deaf mute', 'Eugène Delacroix', 'La Guérison du sourd-muet (Effphatha)', '1853', 'Paris'),
     'Pent12-0': ('Rembrandt - The Good Samaritan - Louvre', 'Rembrandt', 'Le Bon Samaritain pansant les plaies', '1638', 'Musée du Louvre, Paris'),
     'Pent13-0': ('Jean-Marie Melchior Doze Healing of the Ten Lepers', 'Jean-Marie Melchior Doze', 'La Guérison des dix lépreux et l\'action de grâce', '1864', 'Musée des Beaux-Arts de Nîmes'),
-    'Pent14-0': ('James Tissot Consider the Lilies', 'James Tissot', 'Considérez les lys des champs et les oiseaux du ciel', '1886', 'Brooklyn Museum, New York'),
+    'Pent14-0': ('Marten van Valckenborch Parable of the lily of the field', 'Marten van Valckenborch', 'La Parabole des lys des champs et des oiseaux du ciel', '1585', 'Kunsthistorisches Museum, Vienne'),
     'Pent15-0': ('Lucas Cranach the Younger Raising of the Son of the Widow of Nain', 'Lucas Cranach le Jeune', 'La Résurrection du fils unique de la veuve de Naïn', '1569', 'Wittenberg'),
     'Pent16-0': ('James Tissot Jesus Heals on the Sabbath', 'James Tissot', 'La Guérison d\'un hydropique le jour du sabbat', '1890', 'Brooklyn Museum, New York'),
-    'Pent17-0': ('Rembrandt Christ and the Great Commandment', 'Rembrandt', 'Le Plus Grand Commandement d\'Amour de Dieu et du prochain', '1652', 'Londres'),
+    'Pent17-0': ('Jacob Jordaens Christ among the Pharisees', 'Jacob Jordaens', 'Le Christ parmi les pharisiens (Le Grand Commandement)', '1660', 'Palais des Beaux-Arts de Lille'),
     'Pent18-0': ('Bartolome Esteban Murillo Healing of the Paralytic', 'Bartolomé Esteban Murillo', 'La Guérison du paralytique à la piscine probatique', '1670', 'National Gallery, Londres'),
-    'Pent19-0': ('Bernardo Cavallino Parable of the Wedding Banquet', 'Bernardo Cavallino', 'La Parabole du festin des noces royales', '1645', 'Naples'),
+    'Pent19-0': ('Bernardo Strozzi Parable of the Wedding Banquet Accademia', 'Bernardo Strozzi', 'La Parabole du festin des noces royales', '1636', 'Gallerie dell\'Accademia, Venise'),
     'Pent20-0': ('Sebastiano Ricci Healing of the Ruler Son', 'Sebastiano Ricci', 'La Guérison du fils de l\'officier du roi', '1724', 'Venise'),
     'Pent21-0': ('Domenico Fetti Parable of the Unforgiving Servant', 'Domenico Fetti', 'La Parabole du serviteur impitoyable', '1620', 'Dresde'),
     'Pent22-0': ('Peter Paul Rubens The Tribute Money', 'Pierre Paul Rubens', 'Rendez à César ce qui est à César et à Dieu ce qui est à Dieu', '1612', 'The Wallace Collection, Londres'),

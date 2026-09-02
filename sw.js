@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.3.12';
+const CACHE_NAME = 'oremus-pwa-v1.3.14';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [

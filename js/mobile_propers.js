@@ -423,8 +423,7 @@ function renderChantCard($container, part, id, typeLabel) {
 }
 
 function loadChantData($card, part, id) {
-    const gabcUrl = `gabc/${id}.gabc`;
-    $.get(gabcUrl, function (data) {
+    function applyChant(data) {
         $card.find('.gabc-editor').val(data).data('full-gabc', data);
 
         const header = getHeader(data);
@@ -432,8 +431,30 @@ function loadChantData($card, part, id) {
         if (header.commentary) $card.find('.commentary').text(header.commentary).show();
 
         renderChantSVG($card, data);
+    }
+
+    if (window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
+        window.gregorianDB.getGabc(id).then(function(data) {
+            if (data) {
+                applyChant(data);
+            } else {
+                $card.find('.chant-preview').text("Error loading chant.");
+            }
+        }).catch(function() {
+            $card.find('.chant-preview').text("Error loading chant.");
+        });
+        return;
+    }
+
+    const gabcUrl = `gabc/${id}.gabc`;
+    $.get(gabcUrl, function (data) {
+        applyChant(data);
     }).fail(function () {
-        $card.find('.chant-preview').text("Error loading chant.");
+        $.get(`https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/${id}.gabc`, function(data) {
+            applyChant(data);
+        }).fail(function() {
+            $card.find('.chant-preview').text("Error loading chant.");
+        });
     });
 }
 
@@ -754,22 +775,23 @@ function setupPlayerBar() {
             }
         }
         
+        var wasPlaying = (window.isPlayingChant && window.isPlayingChant());
         if (note && targetNode) {
             // Highlight manually
             $(svg).find('use[source-index].active').removeClass('active');
             targetNode.classList.add('active');
             
             var score = _currentPlayerCard.data('chant-score');
+            _currentPlayerCard.data('selected-start-note', note);
+            $('#playerProgressFill').css('width', (targetIndex / total * 100) + '%');
             
-            if (window.Tone && Tone.context && Tone.context.state !== 'running') {
-                Tone.context.resume();
-            }
-            
-            if (window.playScore && score) {
+            if (wasPlaying && window.playScore && score) {
+                if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+                    Tone.context.resume();
+                }
                 window.playScore(score, null, note);
                 setPlayerBarState(true);
                 updateCardPlayIcon(_currentPlayerCard, true);
-                $('#playerProgressFill').css('width', (targetIndex / total * 100) + '%');
             }
         }
     });

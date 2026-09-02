@@ -59,6 +59,20 @@
         ]
       }
     },
+    {
+      "id": "notif-release-beta-0.0.53",
+      "enabled": true,
+      "priority": 110,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.53",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.53",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.53 : Portraits & biographies des saints du jour avec iconographie sacrée, et remplacement complet de l'AELF par la Bible Crampon 1923 alignée sur la Vulgate clémentine.",
+      "cancelsNotifications": ["notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
       "banner": {
         "show": true,
         "text": "Oremus v0.0.53 : Saints du Jour avec Portraits & Biographies · Bible Crampon 1923",

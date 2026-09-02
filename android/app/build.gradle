@@ -101,7 +101,8 @@ task copyWebAssets(type: Copy) {
 
         include "data/**"
 
-        include "img/saints/**"
+        // Modules externes exclus de l'APK de base (chargement en direct via GitHub Usercontent)
+        // include "img/saints/**"
         include "img/tempora/**"
 
         include "patterns/la-hypher.js"
@@ -116,7 +117,7 @@ task copyWebAssets(type: Copy) {
         include "version.json"
 
         include "do_data/**/*.txt"
-        include "gabc/**/*.gabc"
+        // include "gabc/**/*.gabc" (chargé en ligne à la volée depuis GitHub Usercontent)
         include "vulgate/**/*.txt"
         include "crampon/**/*.txt"
         include "douay-rheims/**/*.txt"

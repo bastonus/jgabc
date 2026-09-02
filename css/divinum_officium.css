@@ -4735,6 +4735,14 @@ body.is-dragging-player #modernPlayerBar {
     user-select: none !important;
 }
 
+#playerCurrentTime {
+    text-align: left !important;
+}
+
+#playerChantTime {
+    text-align: right !important;
+}
+
 .do-player-progress-track {
     position: relative !important;
     flex: 1 !important;
@@ -4952,6 +4960,7 @@ body.is-dragging-player #modernPlayerBar {
     width: 100% !important;
     box-sizing: border-box !important;
     flex-wrap: nowrap !important;
+    margin-top: 14px !important;
 }
 
 .do-player-pill {
@@ -4998,7 +5007,7 @@ body.is-dragging-player #modernPlayerBar {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.78rem !important;
     font-weight: 700 !important;
-    color: var(--primary-color) !important;
+    color: var(--text-primary) !important;
     min-width: 26px !important;
     text-align: center !important;
     user-select: none !important;
@@ -5027,6 +5036,244 @@ body.is-dragging-player #modernPlayerBar {
     color: var(--primary-color) !important;
 }
 
+/* ── Pitch / Ton Button — inherits .do-player-toggle, minimal overrides ── */
+#playerPitchPill.is-disabled {
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+    filter: grayscale(1) !important;
+}
+
+/* When pitch is transposed, highlight the button like active state */
+#playerPitchPill.is-transposed {
+    background: color-mix(in srgb, var(--primary-color) 18%, transparent) !important;
+    color: var(--primary-color) !important;
+}
+
+#playerPitchPill.is-transposed svg {
+    stroke: var(--primary-color) !important;
+}
+
+
+/* ── Pitch / Ton Bubble Popover ── */
+.do-pitch-bubble {
+    position: fixed !important;
+    z-index: 99999 !important;
+    width: 290px !important;
+    max-width: calc(100vw - 20px) !important;
+    background: rgba(26, 28, 34, 0.96) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, rgba(255, 255, 255, 0.12)) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
+    padding: 12px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px) scale(0.96);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+[data-theme="light"] .do-pitch-bubble {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, rgba(0, 0, 0, 0.12)) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18) !important;
+}
+
+.do-pitch-bubble.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    pointer-events: auto !important;
+}
+
+.do-pitch-bubble-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="light"] .do-pitch-bubble-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.do-pitch-bubble-title {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-secondary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.do-pitch-bubble-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.do-pitch-bubble-reset {
+    font-size: 0.70rem !important;
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent) !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 3px 8px !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    transition: all 0.15s ease !important;
+}
+
+.do-pitch-bubble-reset:hover {
+    background: color-mix(in srgb, var(--primary-color) 22%, transparent) !important;
+}
+
+.do-pitch-bubble-close {
+    width: 22px !important;
+    height: 22px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-secondary) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    transition: all 0.15s ease !important;
+}
+
+[data-theme="light"] .do-pitch-bubble-close {
+    background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.do-pitch-bubble-close:hover {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.do-pitch-bubble-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+    max-height: 210px !important;
+    overflow-y: auto !important;
+    padding-right: 2px !important;
+}
+
+.do-pitch-chip {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 2px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-theme="light"] .do-pitch-chip {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.do-pitch-chip:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="light"] .do-pitch-chip:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.do-pitch-chip.is-active {
+    background: var(--primary-color, #c96b63) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color, #c96b63) !important;
+    font-weight: 700;
+}
+
+.do-pitch-chip.is-active .do-pitch-chip-note,
+.do-pitch-chip.is-active .do-pitch-chip-diff {
+    color: #ffffff !important;
+}
+
+.do-pitch-chip-note {
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+/* ── Pitch Chip Diff ── */
+.do-pitch-chip-diff {
+    font-size: 0.64rem !important;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    margin-top: 1px;
+}
+
+/* ── Pitch Drawer (in-player, same style as video drawer) ── */
+.do-player-pitch-drawer {
+    padding: 10px 0 4px !important;
+    box-sizing: border-box !important;
+}
+
+.do-pitch-drawer-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 4px 8px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    margin-bottom: 10px !important;
+}
+
+[data-theme="light"] .do-pitch-drawer-header {
+    border-bottom-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+.do-pitch-drawer-title {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-secondary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Adjust grid inside drawer: no max-height, full width, more columns on wider screens */
+.do-player-pitch-drawer .do-pitch-bubble-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+    gap: 5px !important;
+}
+
+@media (max-width: 480px) {
+    .do-player-pitch-drawer .do-pitch-bubble-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+
+/* Disable old floating bubble positioning (kept for CSS class reuse) */
+.do-pitch-bubble {
+    display: none !important;
+}
+
+
 .do-player-toggle {
     height: 32px !important;
     padding: 0 8px !important;
@@ -5041,10 +5288,11 @@ body.is-dragging-player #modernPlayerBar {
     justify-content: center !important;
     gap: 5px !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
-    flex: 1 1 auto !important;
-    min-width: max-content !important;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease !important;
+    flex: 1 1 0px !important;
+    min-width: 0 !important;
     white-space: nowrap !important;
+    overflow: hidden !important;
 }
 
 [data-theme="light"] .do-player-toggle {
@@ -5056,27 +5304,66 @@ body.is-dragging-player #modernPlayerBar {
     background: rgba(255, 255, 255, 0.12) !important;
 }
 
-[data-theme="light"] .do-player-toggle:hover {
+/* ── Standardized Player Toggle Buttons & Icons ── */
+.do-player-toggle,
+.do-player-speed-btn {
+    color: var(--text-secondary) !important;
+}
+
+.do-player-toggle svg,
+.do-player-speed-btn svg {
+    color: currentColor !important;
+    flex-shrink: 0 !important;
+    transition: color 0.15s ease, fill 0.15s ease, stroke 0.15s ease !important;
+}
+
+.do-player-toggle svg[stroke],
+.do-player-speed-btn svg[stroke] {
+    stroke: currentColor !important;
+}
+
+.do-player-toggle svg[fill="currentColor"],
+.do-solesmes-icon {
+    fill: currentColor !important;
+}
+
+.do-player-toggle:hover,
+.do-player-speed-btn:hover {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="light"] .do-player-toggle:hover,
+[data-theme="light"] .do-player-speed-btn:hover {
     background: rgba(0, 0, 0, 0.09) !important;
 }
 
+/* ── Standardized Active State: Uniform primary background, pure white text & icons ── */
 .do-player-toggle.active,
-button#playerBtnExpandVideos.active {
+#modernPlayerBar .do-player-toggle.active,
+button#playerBtnExpandVideos.active,
+button#playerBtnToggleSync.active,
+button#playerBtnSolesmes.active {
     background: var(--primary-color, #c96b63) !important;
     color: #ffffff !important;
+    border-color: var(--primary-color, #c96b63) !important;
 }
 
-#modernPlayerBar #playerBtnExpandVideos.active {
-    background: var(--primary-color, #c96b63) !important;
+.do-player-toggle.active svg,
+#modernPlayerBar .do-player-toggle.active svg,
+.do-player-toggle.active .do-solesmes-icon {
     color: #ffffff !important;
-    font-weight: 600 !important;
-    box-shadow: none !important;
+    opacity: 1 !important;
 }
 
-#modernPlayerBar #playerBtnExpandVideos.active svg {
-    color: #ffffff !important;
-    fill: currentColor !important;
+.do-player-toggle.active svg[stroke],
+#modernPlayerBar .do-player-toggle.active svg[stroke] {
     stroke: #ffffff !important;
+}
+
+.do-player-toggle.active svg[fill="currentColor"],
+.do-player-toggle.active .do-solesmes-icon {
+    fill: #ffffff !important;
 }
 
 .do-player-speed-btn {
@@ -5084,6 +5371,9 @@ button#playerBtnExpandVideos.active {
     font-size: 13px !important;
     min-width: 48px !important;
     letter-spacing: 0.2px !important;
+}
+
+.do-player-speed-btn.is-custom-speed {
     color: var(--primary-color) !important;
 }
 
@@ -5093,7 +5383,7 @@ button#playerBtnExpandVideos.active {
 
 .do-solesmes-icon {
     width: 10px !important;
-    height: 15px !important;
+    height: 14px !important;
     color: currentColor !important;
     fill: currentColor !important;
     opacity: 0.85 !important;
@@ -5102,18 +5392,13 @@ button#playerBtnExpandVideos.active {
     vertical-align: middle !important;
 }
 
-.do-player-toggle.active .do-solesmes-icon {
-    opacity: 1 !important;
-    color: var(--primary-color) !important;
-    fill: var(--primary-color) !important;
-}
-
 .do-player-videos-btn.active .do-yt-icon-play {
     display: none !important;
 }
 
 .do-player-videos-btn.active .do-yt-icon-close {
     display: inline-block !important;
+    stroke: #ffffff !important;
 }
 
 .do-solesmes-text {
@@ -5123,6 +5408,108 @@ button#playerBtnExpandVideos.active {
     white-space: nowrap !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
+}
+
+.do-btn-text-full {
+    display: inline;
+}
+
+.do-btn-text-short {
+    display: none;
+}
+
+.do-btn-text-extra {
+    display: inline;
+}
+
+/* ── Condensation mobile des boutons de commande du lecteur ── */
+@media (max-width: 600px) {
+    #modernPlayerBar {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 8px !important;
+    }
+
+    .do-player-settings-col {
+        gap: 5px !important;
+        justify-content: stretch !important;
+        margin-top: 16px !important;
+    }
+
+    .do-player-pill {
+        padding: 2px 3px !important;
+        height: 30px !important;
+        gap: 1px !important;
+        flex: 1 1 0px !important;
+        min-width: 0 !important;
+    }
+
+    .do-player-pill-label {
+        display: none !important;
+    }
+
+    .do-player-pill-value {
+        font-size: 0.72rem !important;
+        min-width: 20px !important;
+    }
+
+    .do-player-pill-btn {
+        width: 17px !important;
+        height: 24px !important;
+    }
+
+    .do-player-toggle {
+        height: 30px !important;
+        padding: 0 4px !important;
+        gap: 3px !important;
+        font-size: 0.74rem !important;
+        flex: 1 1 0px !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    .do-btn-text-full {
+        display: none !important;
+    }
+
+    .do-btn-text-short {
+        display: inline !important;
+    }
+
+    .do-btn-text-extra {
+        display: none !important;
+    }
+
+    .do-player-speed-btn {
+        min-width: 0 !important;
+        padding: 0 4px !important;
+    }
+
+    .do-player-speed-btn svg {
+        display: inline-block !important;
+        width: 12px !important;
+        height: 12px !important;
+        stroke: currentColor !important;
+    }
+
+    .do-player-speed-btn .do-speed-label {
+        font-size: 0.74rem !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .do-player-settings-col {
+        gap: 2px !important;
+    }
+
+    .do-player-toggle {
+        padding: 0 4px !important;
+    }
+
+    .do-solesmes-text {
+        display: none !important;
+    }
 }
 
 .do-player-close-btn {
@@ -6932,124 +7319,234 @@ body.mass-toc-open #modernPlayerBar {
 }
 
 /* =============================================================
-   OFFLINE MODULES CARDS & CONTROLS (Settings & Modals)
+   MODULES LIST (Flat, Borderless, Shadowless — Matching Settings DA)
    ============================================================= */
-.do-module-cards-list {
+.do-module-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
+    margin-top: 4px;
+}
+
+.do-module-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.do-module-row:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-bottom: 12px;
+}
+
+[data-theme="light"] .do-module-row:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.do-module-row-title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+}
+
+.do-module-row-desc {
+    font-size: 0.77rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+
+.do-module-row-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 6px;
 }
 
-.do-module-card {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-[data-theme="light"] .do-module-card {
-    background: rgba(0, 0, 0, 0.03);
-    border-color: rgba(0, 0, 0, 0.08);
-}
-
-.do-module-title-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.do-module-icon {
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.do-module-title {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    flex: 1;
-}
-
-.do-module-badge {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.do-module-badge.is-installed {
-    background: rgba(88, 156, 119, 0.18);
-    color: #589c77;
-    border: 1px solid rgba(88, 156, 119, 0.3);
-}
-
-.do-module-badge.is-downloading {
-    background: rgba(var(--primary-color-rgb), 0.18);
-    color: var(--primary-color);
-    border: 1px solid rgba(var(--primary-color-rgb), 0.3);
-}
-
-.do-module-desc {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-.do-module-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.do-module-btn {
+.do-module-tag {
+    height: 28px;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    font-family: inherit;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: none !important;
+    box-shadow: none !important;
+    white-space: nowrap;
+    text-transform: none;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1;
+}
+
+.do-module-tag.is-online {
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+}
+
+.do-module-tag.is-installed {
+    background: rgba(88, 156, 119, 0.15);
+    color: #589c77;
+}
+
+.do-module-tag.is-downloading {
+    background: rgba(var(--primary-color-rgb), 0.18);
+    color: var(--primary-color);
+}
+
+/* Boutons identiques à ceux déjà utilisés dans les paramètres (hauteur identique au statut, sans contour ni ombre) */
+.do-module-btn {
+    height: 28px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     cursor: pointer;
-    border: none;
-    outline: none;
-    transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease, opacity 0.15s ease;
+    white-space: nowrap;
     user-select: none;
+    line-height: 1;
 }
 
-.do-module-btn:active {
-    transform: scale(0.97);
+.do-module-btn-dl {
+    background: var(--background-highlight);
+    color: var(--text-primary);
 }
 
-.do-module-btn-download {
-    background: var(--primary-color);
-    color: #ffffff;
-    flex: 1;
+.do-module-btn-dl:hover {
+    background: color-mix(in srgb, var(--primary-color) 15%, var(--background-highlight));
+    color: var(--primary-color);
 }
 
-.do-module-btn-download:hover {
-    opacity: 0.9;
+.do-module-btn-dl:active {
+    opacity: 0.8;
 }
 
-.do-module-btn-delete {
-    background: rgba(220, 53, 69, 0.12);
+.do-module-btn-del {
+    background: rgba(220, 53, 69, 0.10);
     color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+.do-module-btn-del:hover {
+    background: rgba(220, 53, 69, 0.18);
+}
+
+.do-module-btn-del:active {
+    opacity: 0.8;
+}
+
+/* Barre de progression : Hauteur identique et design calqué sur la mise à jour */
+.do-module-progress-wrapper {
+    height: 28px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 6px 0 10px;
+    border-radius: 6px;
+    min-width: 170px;
+    max-width: 260px;
     flex: 1;
 }
 
-.do-module-btn-delete:hover {
-    background: rgba(220, 53, 69, 0.2);
+[data-theme="light"] .do-module-progress-wrapper {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.do-module-progress-wrapper.hidden {
+    display: none !important;
+}
+
+.do-module-progress-bar-track {
+    flex: 1;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+    min-width: 50px;
+}
+
+[data-theme="light"] .do-module-progress-bar-track {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.do-module-progress-bar-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.15s ease-out;
+}
+
+.do-module-progress-text {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text-primary);
+    min-width: 28px;
+    text-align: right;
+}
+
+/* Boutons de contrôle (Pause / Annuler) dans la barre de téléchargement */
+.do-module-ctrl-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+}
+
+.do-module-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .do-module-ctrl-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+}
+
+.do-module-ctrl-btn:active {
+    transform: scale(0.92);
+}
+
+.do-module-ctrl-btn.is-paused {
+    color: var(--primary-color);
+}
+
+.do-module-ctrl-cancel:hover {
+    background: rgba(220, 53, 69, 0.18);
+    color: #dc3545;
 }
 
 

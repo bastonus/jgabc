@@ -80,11 +80,12 @@
     <script src="do_manifest.js?v=20.12&ts=202609011145"></script>
     <script src="js/bible_mappings.js?v=1.1&ts=202609011135"></script>
     <script src="js/saints_art_metadata.js?v=1.0"></script>
-    <script src="js/tempora_art_metadata.js?v=1.0"></script>
-    <script src="js/divinum_officium.js?v=71.0&ts=202609011145"></script>
+    <script src="js/tempora_art_metadata.js?v=1.1&ts=202609021535"></script>
+    <script src="js/divinum_officium.js?v=72.0&ts=202609021545"></script>
     <script src="js/gregorian_db.js?v=2.1"></script>
     <script src="js/gregorian_index_data.js?v=3.4&ts=202609011145"></script>
     <script src="js/gregorian_youtube_links.js?v=1.0"></script>
+    <script src="https://www.youtube.com/iframe_api" async></script>
     <script src="js/gregorian_search_engine.js?v=1.0&ts=202609010350"></script>
     <script src="js/gregorian_search_ui.js?v=2.64&ts=202609011145"></script>
 </head>
@@ -458,50 +459,63 @@
                             <span class="slider"></span>
                         </label>
                     </div>
-            <!-- 3b. Modules External (.pack / Offline Asset Packs) -->
+                </div>
+            </div>
+
+            <!-- 3b. Modules External (En ligne / Hors-Ligne) -->
             <div class="settings-group" id="settingsGroupModules">
-                <label class="settings-label">Moduli Externi &amp; Usus Absens Interreti</label>
-                <div class="do-module-cards-list">
-                    <!-- Module Partitions GABC -->
-                    <div class="do-module-card" id="moduleCardGabc">
-                        <div class="do-module-info">
-                            <div class="do-module-title-row">
-                                <span class="do-module-icon">🎼</span>
-                                <span class="do-module-title">Cantus Gregorianus &amp; GABC</span>
-                                <span class="do-module-badge" id="badgeModuleGabc">Non installé</span>
+                <label class="settings-label">Moduli &amp; Memoria</label>
+                <div class="do-module-list">
+                    <!-- Module GABC -->
+                    <div class="do-module-row" id="moduleRowGabc">
+                        <div class="do-module-row-title">Cantus Gregorianus &amp; GABC</div>
+                        <div class="do-module-row-desc">8 350+ partitions chargées en ligne au fil de l'eau via GitHub.</div>
+                        <div class="do-module-row-footer">
+                            <div id="moduleProgressGabc" class="do-module-progress-wrapper hidden">
+                                <div class="do-module-progress-bar-track">
+                                    <div id="moduleProgressBarGabc" class="do-module-progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <span id="moduleProgressTextGabc" class="do-module-progress-text">0%</span>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-pause" id="btnPauseModuleGabc" title="Mettre en pause">
+                                    <svg class="do-icon-pause" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                                    <svg class="do-icon-play" viewBox="0 0 24 24" width="11" height="11" fill="currentColor" style="display:none;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                </button>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-cancel" id="btnCancelModuleGabc" title="Annuler">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
                             </div>
-                            <div class="do-module-desc">8 350+ partitions grégoriennes complètes (8,7 Mo) pour un usage 100% hors-ligne.</div>
-                        </div>
-                        <div class="do-module-actions">
-                            <button class="do-module-btn do-module-btn-download" id="btnDownloadModuleGabc">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                <span>Télécharger (8.7 Mo)</span>
+                            <button class="do-module-btn do-module-btn-dl" id="btnDownloadModuleGabc" title="Rendre disponible hors connexion">
+                                <span>Rendre disponible hors connexion (8.7 Mo)</span>
                             </button>
-                            <button class="do-module-btn do-module-btn-delete" id="btnDeleteModuleGabc" style="display:none;">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                <span>Supprimer</span>
+                            <button class="do-module-btn do-module-btn-del" id="btnDeleteModuleGabc" style="display:none;" title="Retirer du stockage hors-connexion">
+                                <span>Supprimer du stockage hors-connexion</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Module Images des Saints -->
-                    <div class="do-module-card" id="moduleCardSaints">
-                        <div class="do-module-info">
-                            <div class="do-module-title-row">
-                                <span class="do-module-icon">🖼️</span>
-                                <span class="do-module-title">Iconographia Sanctorum</span>
-                                <span class="do-module-badge" id="badgeModuleSaints">Non installé</span>
+                    <!-- Module Saints -->
+                    <div class="do-module-row" id="moduleRowSaints">
+                        <div class="do-module-row-title">Iconographia Sanctorum</div>
+                        <div class="do-module-row-desc">266 portraits d'art sacré consultables en ligne par défaut.</div>
+                        <div class="do-module-row-footer">
+                            <div id="moduleProgressSaints" class="do-module-progress-wrapper hidden">
+                                <div class="do-module-progress-bar-track">
+                                    <div id="moduleProgressBarSaints" class="do-module-progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <span id="moduleProgressTextSaints" class="do-module-progress-text">0%</span>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-pause" id="btnPauseModuleSaints" title="Mettre en pause">
+                                    <svg class="do-icon-pause" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                                    <svg class="do-icon-play" viewBox="0 0 24 24" width="11" height="11" fill="currentColor" style="display:none;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                </button>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-cancel" id="btnCancelModuleSaints" title="Annuler">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
                             </div>
-                            <div class="do-module-desc">266 portraits d'art sacré des saints (12,9 Mo) pour l'affichage hors-connexion.</div>
-                        </div>
-                        <div class="do-module-actions">
-                            <button class="do-module-btn do-module-btn-download" id="btnDownloadModuleSaints">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                <span>Télécharger (12.9 Mo)</span>
+                            <button class="do-module-btn do-module-btn-dl" id="btnDownloadModuleSaints" title="Rendre disponible hors connexion">
+                                <span>Rendre disponible hors connexion (12.9 Mo)</span>
                             </button>
-                            <button class="do-module-btn do-module-btn-delete" id="btnDeleteModuleSaints" style="display:none;">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                <span>Supprimer</span>
+                            <button class="do-module-btn do-module-btn-del" id="btnDeleteModuleSaints" style="display:none;" title="Retirer du stockage hors-connexion">
+                                <span>Supprimer du stockage hors-connexion</span>
                             </button>
                         </div>
                     </div>
@@ -909,16 +923,10 @@
                 <!-- Bottom Row: Setting Pills (Transposition, Solesmes, Tempo) & Dedicated Close Button -->
                 <div class="do-player-settings-col">
                     <!-- Pitch -->
-                    <div class="do-player-pill" title="Transposition de hauteur">
-                        <span class="do-player-pill-label">TON</span>
-                        <button id="playerPitchDown" class="do-player-pill-btn" title="Baisser (-1 demi-ton)">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </button>
-                        <span id="playerStartingPitch" class="do-player-pill-value">—</span>
-                        <button id="playerPitchUp" class="do-player-pill-btn" title="Hausser (+1 demi-ton)">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                        </button>
-                    </div>
+                    <button id="playerPitchPill" class="do-player-toggle" title="Tonalité de départ (Cliquer pour choisir le ton)">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        <span id="playerStartingPitch">—</span>
+                    </button>
 
                     <!-- Solesmes Toggle -->
                     <button id="playerBtnSolesmes" class="do-player-toggle" title="Allongement rythmique Solesmes">
@@ -932,7 +940,7 @@
                                 </g>
                             </g>
                         </svg>
-                        <span class="do-solesmes-text">Solesmes</span>
+                        <span class="do-solesmes-text"><span class="do-btn-text-full">Solesmes</span><span class="do-btn-text-short">Sol.</span></span>
                     </button>
 
                     <!-- Speed / Multiplier Cycle Button -->
@@ -941,17 +949,36 @@
                         <span class="do-speed-label">1.0×</span>
                     </button>
 
-                    <!-- YouTube Video Expand Button -->
-                    <button id="playerBtnExpandVideos" class="do-player-toggle do-player-videos-btn" title="Afficher les enregistrements vidéo YouTube pour cette pièce">
+                    <!-- Score Sync Toggle Button -->
+                    <button id="playerBtnToggleSync" class="do-player-toggle do-player-sync-btn active" title="Synchroniser les notes (Cliquer pour désactiver)">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                        <span>Sync<span class="do-btn-text-extra"> notes</span></span>
+                    </button>
+
+                    <!-- Audio Sources (Synth & YouTube) Expand Button -->
+                    <button id="playerBtnExpandVideos" class="do-player-toggle do-player-videos-btn" title="Afficher les sources pour cette pièce">
                         <svg class="do-yt-icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                         <svg class="do-yt-icon-close" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        <span>Vidéos</span>
+                        <span>Source</span>
                     </button>
                 </div>
             </div>
             <!-- Video Recordings Drawer / Container (Expandable) -->
             <div id="playerVideoDrawer" class="do-player-video-drawer hidden" style="display: none; padding-top: 10px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1)); margin-top: 4px;">
                 <div id="playerVideoList" class="do-youtube-audio-list"></div>
+            </div>
+            <!-- Pitch / Tonality Drawer (Expandable, same height as video drawer) -->
+            <div id="playerPitchDrawer" class="do-player-pitch-drawer hidden" style="display: none; padding-top: 10px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1)); margin-top: 4px;">
+                <div class="do-pitch-drawer-header">
+                    <span class="do-pitch-drawer-title">Tonalité de départ</span>
+                    <button type="button" id="btnResetPitch" class="do-pitch-bubble-reset" title="Rétablir le ton naturel">Défaut</button>
+                </div>
+                <div class="do-pitch-bubble-grid" id="playerPitchBubbleGrid">
+                    <!-- Dynamically populated chips -->
+                </div>
             </div>
         </div>
     </div>

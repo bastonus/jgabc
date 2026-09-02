@@ -4028,10 +4028,19 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
     var langFolder = getLangFolder(uiLang);
 
     // Résolution intelligente de l'image (évite les 404 sur les féries sans image)
-    var saintImg = 'img/saints/' + sanctiCode + '.webp';
+    var isSaintsInstalled = (window.OremusModuleManager && typeof window.OremusModuleManager.isInstalled === 'function')
+        ? window.OremusModuleManager.isInstalled('saints')
+        : false;
+
+    var saintRelPath = 'img/saints/' + sanctiCode + '.webp';
+    var saintRemoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/' + saintRelPath;
+    var saintImg = isSaintsInstalled ? saintRelPath : saintRemoteUrl;
+
     var temporaImg = 'img/tempora/' + temporaCode + '.webp';
     var temporaSunCode = (temporaCode || '').replace(/-\d+$/, '-0');
     var temporaSunImg = 'img/tempora/' + temporaSunCode + '.webp';
+    var temporaRemoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/' + temporaImg;
+    var temporaSunRemoteUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/' + temporaSunImg;
 
     var hasTemporaImg = !!(window.DO_TEMPORA_ART_METADATA && window.DO_TEMPORA_ART_METADATA[temporaCode]);
     var hasTemporaSunImg = !!(window.DO_TEMPORA_ART_METADATA && window.DO_TEMPORA_ART_METADATA[temporaSunCode]);
@@ -4120,7 +4129,10 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
             var $bgClip = $('<div class="do-home-saint-hero-bg-clip">');
             var $bgWrap = $('<div class="do-home-saint-hero-bg-wrap">');
             var $bgImg = $('<img class="do-home-saint-hero-bg" alt="" aria-hidden="true">')
-                .attr('src', imgPath);
+                .attr('src', imgPath)
+                .on('error', function() {
+                    $(this).css('opacity', '0');
+                });
             var $overlay = $('<div class="do-home-saint-hero-overlay"></div>');
             $bgWrap.append($bgImg).append($overlay);
             $bgClip.append($bgWrap);
@@ -4133,6 +4145,24 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                 .attr('src', imgPath)
                 .attr('alt', feastTitle || '')
                 .on('error', function() {
+                    var $img = $(this);
+                    // Fallback en ligne transparent vers GitHub Raw Usercontent si l'image locale échoue
+                    if (!$img.data('tried-remote')) {
+                        $img.data('tried-remote', true);
+                        if (isTempora && hasTemporaImg) {
+                            $img.attr('src', temporaRemoteUrl);
+                            $bgImg.attr('src', temporaRemoteUrl);
+                            return;
+                        } else if (saintRelPath && (!isTempora || hasSaintImg)) {
+                            $img.attr('src', saintRemoteUrl);
+                            $bgImg.attr('src', saintRemoteUrl);
+                            return;
+                        } else if (hasTemporaSunImg) {
+                            $img.attr('src', temporaSunRemoteUrl);
+                            $bgImg.attr('src', temporaSunRemoteUrl);
+                            return;
+                        }
+                    }
                     $hero.addClass('do-hero-no-image');
                     $bgClip.hide();
                     $thumbWrap.hide();
@@ -5114,18 +5144,223 @@ function clearActiveNote() {
     });
 }
 
+/**
+ * Build the note play sequence as a video would perform it:
+ * At each DoubleBar or FullBar, the antiphon (notes from note[0] to first DoubleBar)
+ * is repeated before continuing.
+ *
+ * Returns an array of note indices into allNotes.
+ * The cache is keyed on the score object to avoid rebuilding each frame.
+ */
+function _buildChantSequenceWithRepeats(score, allNotes) {
+    if (score._cachedRepeatSequence && score._cachedRepeatSequence.notes === allNotes) {
+        return score._cachedRepeatSequence.seq;
+    }
+
+    // Find the index (in allNotes) of the first note after the first DoubleBar/FullBar
+    var firstBreakIdx = -1; // index into allNotes of the first note in the refrain section
+    var noteCount = 0;
+
+    for (var ni = 0; ni < (score.notations || []).length; ni++) {
+        var notat = score.notations[ni];
+        var isDoubleBar = (notat.constructor && (
+            notat.constructor.name === 'DoubleBar' ||
+            notat.constructor.name === 'FullBar'
+        ));
+        // Fallback: check class string representation
+        if (!isDoubleBar && notat.constructor) {
+            var cname = String(notat.constructor);
+            isDoubleBar = /DoubleBar|FullBar/.test(cname);
+        }
+
+        if (!isDoubleBar && notat.notes) {
+            noteCount += notat.notes.filter(function(n) { return !n.isAccidental; }).length;
+        }
+
+        if (isDoubleBar && firstBreakIdx === -1 && noteCount > 0) {
+            firstBreakIdx = noteCount; // notes before the bar = antiphon
+            break;
+        }
+    }
+
+    // If no double bar found, no repeat structure → identity sequence
+    var seq;
+    if (firstBreakIdx <= 0 || firstBreakIdx >= allNotes.length) {
+        seq = allNotes.map(function(_, i) { return i; });
+    } else {
+        // Antiphon = [0 .. firstBreakIdx-1]
+        // Verse sections are separated by subsequent double bars
+        // Simplified model: A B₁ A B₂ A ...  where A=antiphon, Bₙ=each verse
+        var antiphon = [];
+        for (var a = 0; a < firstBreakIdx; a++) antiphon.push(a);
+
+        seq = antiphon.slice(); // first antiphon
+
+        // Collect verse blocks by scanning further DoubleBar positions
+        var verseStart = firstBreakIdx;
+        var prevBarNoteCount = firstBreakIdx;
+        var innerNoteCount = firstBreakIdx;
+
+        for (var ni2 = 0; ni2 < (score.notations || []).length; ni2++) {
+            var notat2 = score.notations[ni2];
+            var isBar2 = (notat2.constructor && /DoubleBar|FullBar/.test(String(notat2.constructor)));
+            var notes2 = (notat2.notes || []).filter(function(n) { return !n.isAccidental; });
+
+            if (!isBar2) {
+                innerNoteCount += notes2.length;
+            } else if (innerNoteCount > prevBarNoteCount) {
+                // We have a new verse block: [prevBarNoteCount .. innerNoteCount-1]
+                if (prevBarNoteCount === firstBreakIdx) {
+                    // Skip the first bar (already handled as antiphon end)
+                    prevBarNoteCount = innerNoteCount;
+                    continue;
+                }
+                var block = [];
+                for (var b = prevBarNoteCount; b < innerNoteCount; b++) block.push(b);
+                seq = seq.concat(block).concat(antiphon); // verse + antiphon repeat
+                prevBarNoteCount = innerNoteCount;
+            }
+        }
+
+        // Remaining notes after last bar (if any)
+        if (prevBarNoteCount < allNotes.length) {
+            var tail = [];
+            for (var t = prevBarNoteCount; t < allNotes.length; t++) tail.push(t);
+            seq = seq.concat(tail);
+        }
+    }
+
+    score._cachedRepeatSequence = { notes: allNotes, seq: seq };
+    return seq;
+}
+
+function highlightChantNoteAtFraction(fraction) {
+    if (window.doYT && window.doYT.syncEnabled === false) {
+        clearActiveNote();
+        return;
+    }
+    if (typeof fraction !== 'number' || isNaN(fraction)) return;
+    if (!_doCurrentScore || !_doCurrentScore.notations) return;
+    var allNotes = [].concat.apply([], _doCurrentScore.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
+    if (!allNotes.length) return;
+
+    var targetIdx;
+
+    // When a YouTube video is active and sync is on, use repeat-aware mapping
+    var isYtVideo = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth' && window.doYT.syncEnabled !== false);
+    if (isYtVideo) {
+        var seq = _buildChantSequenceWithRepeats(_doCurrentScore, allNotes);
+        var seqPos = Math.max(0, Math.min(seq.length - 1, Math.floor(fraction * seq.length)));
+        targetIdx = seq[seqPos];
+    } else {
+        targetIdx = Math.max(0, Math.min(allNotes.length - 1, Math.floor(fraction * allNotes.length)));
+    }
+
+    var note = allNotes[targetIdx];
+    if (!note) return;
+
+    var $card = _doCurrentPlayerCard;
+    var scoreSvg = ($card && $card.find('svg')[0]) || _doCurrentScore.svg;
+    if (!scoreSvg) return;
+
+    var noteElem = note.svgNode;
+    if (!noteElem) {
+        var elemIdx = note.elementIndex;
+        if (elemIdx !== undefined) {
+            noteElem = $(scoreSvg).find('use[element-index="' + elemIdx + '"]')[0];
+        }
+        if (!noteElem && note.sourceIndex !== undefined) {
+            noteElem = $(scoreSvg).find('use[source-index="' + note.sourceIndex + '"]')[0];
+        }
+    }
+
+    if (!noteElem) return;
+    if (noteElem === _doActiveNoteEl && noteElem.classList.contains('active')) return;
+
+    var accentColor = (window.doState && window.doState.settings && window.doState.settings.color) || localStorage.getItem('do_color') || '#c96b63';
+
+    if (_doActiveNoteEl && _doActiveNoteEl !== noteElem) {
+        _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        _doActiveNoteEl.style.removeProperty('fill');
+    }
+    $(scoreSvg).find('use.active').each(function() {
+        if (this !== noteElem) {
+            this.classList.remove('active', 'porrectus-left', 'porrectus-right');
+            this.style.removeProperty('fill');
+        }
+    });
+
+    var href = noteElem.getAttribute('href') || (noteElem.attributes && noteElem.attributes.getNamedItem && noteElem.attributes.getNamedItem('href') ? noteElem.attributes.getNamedItem('href').value : '');
+    if (href === '#None' && noteElem.previousSibling) {
+        noteElem = noteElem.previousSibling;
+        noteElem.classList.remove('porrectus-left');
+        noteElem.classList.add('porrectus-right');
+    } else if (/^#Porrectus/.test(href)) {
+        noteElem.classList.add('porrectus-left');
+    }
+
+    noteElem.classList.add('active');
+    noteElem.style.setProperty('fill', accentColor, 'important');
+    _doActiveNoteEl = noteElem;
+
+    // Find and highlight corresponding syllable
+    var lyricEl = null;
+    if (note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
+        lyricEl = note.neume.lyrics[0].svgNode;
+    }
+    if (!lyricEl) {
+        var $grp = $(noteElem).closest('g.ChantNotationElement, g[class*="ChantNotation"]');
+        if (!$grp.length) $grp = $(noteElem).parent().parent();
+        lyricEl = $grp.find('text.lyric, text.dropCap, text.aboveLinesText, text')[0];
+    }
+
+    if (lyricEl) {
+        if (_doActiveLyricEl && _doActiveLyricEl !== lyricEl) {
+            _doActiveLyricEl.classList.remove('active');
+            _doActiveLyricEl.style.removeProperty('fill');
+            $(_doActiveLyricEl).find('tspan').each(function() {
+                this.classList.remove('active');
+                this.style.removeProperty('fill');
+            });
+        }
+        $(scoreSvg).find('text.active, tspan.active').each(function() {
+            if (this !== lyricEl && !lyricEl.contains(this)) {
+                this.classList.remove('active');
+                this.style.removeProperty('fill');
+            }
+        });
+
+        lyricEl.classList.add('active');
+        lyricEl.style.setProperty('fill', accentColor, 'important');
+        $(lyricEl).find('tspan').each(function() {
+            this.classList.add('active');
+            this.style.setProperty('fill', accentColor, 'important');
+        });
+        _doActiveLyricEl = lyricEl;
+    }
+
+    if (typeof isElementInVisibleViewport === 'function' && typeof centerActiveNote === 'function') {
+        if (!isElementInVisibleViewport(noteElem) && (typeof _userIsScrolling === 'undefined' || !_userIsScrolling)) {
+            centerActiveNote(false);
+        }
+    }
+}
+
 function handleChantElementClick(clickedEl, e) {
     if (e) e.stopPropagation();
 
     // Deactivate on Bible pages
     if (window.doState && window.doState.hora === 'bible') return;
 
-    // Stop previous chant cleanly if one was playing
-    var wasPlaying = (window.isPlayingChant && window.isPlayingChant());
-    if (window.stopScore) {
-        window.stopScore();
+    var isYtActive = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth');
+    var wasPlaying = (window.isPlayingChant && window.isPlayingChant()) || (isYtActive && $('#playerBtnPlay').hasClass('playing'));
+
+    if (!isYtActive) {
+        if (window.stopScore) {
+            window.stopScore();
+        }
+        setDoPlayerBarState(false);
     }
-    setDoPlayerBarState(false);
 
     // Clear previous selection
     clearActiveNote();
@@ -5218,12 +5453,13 @@ function handleChantElementClick(clickedEl, e) {
         }
     }
 
-    if (noteEl) {
+    var syncOn = (!window.doYT || window.doYT.syncEnabled !== false);
+    if (noteEl && syncOn) {
         noteEl.classList.add('active');
         noteEl.style.setProperty('fill', accentColor, 'important');
         _doActiveNoteEl = noteEl;
     }
-    if (lyricEl) {
+    if (lyricEl && syncOn) {
         lyricEl.classList.add('active');
         lyricEl.style.setProperty('fill', accentColor, 'important');
         $(lyricEl).find('tspan').each(function() {
@@ -5237,19 +5473,42 @@ function handleChantElementClick(clickedEl, e) {
         $card.data('selected-start-note', note);
     }
     // Update player UI to target card and score
-    updateDoPlayerUI($card, score, wasPlaying);
-    updateDoPlayerProgressAndTime(score, note);
+    updateDoPlayerUI($card, score, false); // never auto-play on note click
 
-    if (wasPlaying) {
-        if (window.Tone) {
-            if (typeof Tone.start === 'function') Tone.start().catch(function(){});
-            if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
+    // If YouTube video is active: seek to note position but do NOT resume playback
+    if (isYtActive) {
+        if (note && score && score.notations) {
+            var allNotesList = [].concat.apply([], score.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
+            var noteIndex = allNotesList.indexOf(note);
+            if (noteIndex >= 0 && allNotesList.length > 0) {
+                // Convert note index → video fraction using repeat-aware sequence
+                var seq = _buildChantSequenceWithRepeats(score, allNotesList);
+                // Find the first occurrence of noteIndex in seq
+                var seqPos = seq.indexOf(noteIndex);
+                if (seqPos < 0) seqPos = 0;
+                var fracPos = seqPos / seq.length;
+
+                var ytPlayer = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+                if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
+                    var dur = ytPlayer.getDuration() || 0;
+                    if (dur > 0) ytPlayer.seekTo(fracPos * dur, true);
+                    // Always pause after seek — user must press Play
+                    if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
+                    setDoPlayerBarState(false);
+                    $('#playerProgressFill').css('width', (fracPos * 100) + '%');
+                    $('#playerCurrentTime').text(formatChantTime(fracPos * dur));
+                } else {
+                    // Player not ready yet — just update visual cursor from score position
+                    $('#playerProgressFill').css('width', (noteIndex / allNotesList.length * 100) + '%');
+                }
+            }
         }
-        if (window.playScore) {
-            window.playScore(score, score.defaultStartPitch, note);
-            setDoPlayerBarState(true);
-        }
+        return;
     }
+
+    // Synth mode: update progress bar cursor to clicked note position
+    updateDoPlayerProgressAndTime(score, note);
+    // Do NOT call playScore here — wait for the user to press Play
 }
 
 function switchToChantCard($targetCard, autoPlay) {
@@ -5320,6 +5579,9 @@ window.switchToNextChantCard = switchToNextChantCard;
 window.switchToPrevChantCard = switchToPrevChantCard;
 
 function closeDoPlayer() {
+    if (window.doYT && typeof window.doYT.pauseAll === 'function') {
+        window.doYT.pauseAll();
+    }
     if (window.stopScore) {
         window.stopScore();
     }
@@ -5361,6 +5623,17 @@ function initDoPlayer() {
     $('#playerBtnRestart').off('click').on('click', function(e) {
         e.stopPropagation();
         triggerHapticFeedback('medium');
+        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+            var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+            if (player && typeof player.seekTo === 'function') {
+                player.seekTo(0, true);
+                player.playVideo();
+                setDoPlayerBarState(true);
+                $('#playerProgressFill').css('width', '0%');
+                highlightChantNoteAtFraction(0);
+                return;
+            }
+        }
         if (!_doCurrentScore) return;
         if (window.stopScore) window.stopScore();
         if (_doCurrentPlayerCard) {
@@ -5386,6 +5659,34 @@ function initDoPlayer() {
     $('#playerBtnPlay').off('click').on('click', function(e) {
         e.stopPropagation();
         triggerHapticFeedback('toggle');
+        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+            var activeId = window.doYT.activeId;
+            var player = window.doYT.activePlayer || window.doYT.players[activeId];
+            var isReady = window.doYT.readyPlayers && window.doYT.readyPlayers[activeId];
+            var isYtPlaying = $('#playerBtnPlay').hasClass('playing');
+
+            if (isYtPlaying) {
+                if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+                setDoPlayerBarState(false);
+            } else {
+                if (player && isReady && typeof player.playVideo === 'function') {
+                    player.playVideo();
+                    setDoPlayerBarState(true);
+                } else {
+                    // Player not yet loaded — create the iframe and play on ready
+                    var $activeItem = $('#playerVideoList .do-yt-item.is-active');
+                    var videoId = $activeItem.data('video-id');
+                    if (activeId && videoId && window.doYT.ensureIframeAndPlayer) {
+                        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text().replace('×', '').trim();
+                        var curSpeed = parseFloat(curSpeedText) || 1.0;
+                        if (!window.doYT.pendingPlays) window.doYT.pendingPlays = {};
+                        window.doYT.pendingPlays[activeId] = true;
+                        window.doYT.ensureIframeAndPlayer(activeId, videoId, $activeItem, curSpeed);
+                    }
+                }
+            }
+            return;
+        }
         if (window.Tone) {
             if (typeof Tone.start === 'function') Tone.start().catch(function(){});
             if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
@@ -5395,11 +5696,17 @@ function initDoPlayer() {
             if (window.playPauseScore) {
                 var resumed = window.playPauseScore();
                 setDoPlayerBarState(resumed);
+                if (resumed && window.doYT && typeof window.doYT.pauseAll === 'function') {
+                    window.doYT.pauseAll();
+                }
             } else if (window.stopScore) {
                 window.stopScore();
                 setDoPlayerBarState(false);
             }
         } else if (_doCurrentScore && window.playScore) {
+            if (window.doYT && typeof window.doYT.pauseAll === 'function') {
+                window.doYT.pauseAll();
+            }
             // Start from selected note (if user clicked a note) or from beginning
             var startNote = _doCurrentPlayerCard ? _doCurrentPlayerCard.data('selected-start-note') : null;
             window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, startNote);
@@ -5423,26 +5730,34 @@ function initDoPlayer() {
         }
     });
 
-    // Transposition Pitch Down / Up (pure parameter adjustment, no auto-play)
-    $('#playerPitchDown').off('click').on('click', function(e) {
+    // Pitch drawer toggle (button → open/close in-player drawer)
+    $(document).off('click.dopitchpill', '#playerPitchPill').on('click.dopitchpill', '#playerPitchPill', function(e) {
         e.stopPropagation();
-        triggerHapticFeedback('selection');
-        if (!_doCurrentScore) return;
-        var p = _doCurrentScore.defaultStartPitch;
-        var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
-        var newVal = curVal - 1;
-        _doCurrentScore.defaultStartPitch = (window.exsurge && window.exsurge.Pitch) ? new exsurge.Pitch(newVal) : newVal;
-        updateDoPitchUI(_doCurrentScore);
+        if ($(this).hasClass('is-disabled')) return;
+        if ($('#playerPitchDrawer').is(':visible')) {
+            closeDoPitchBubble();
+        } else {
+            openDoPitchBubble();
+        }
     });
 
-    $('#playerPitchUp').off('click').on('click', function(e) {
+    // Pitch chip selection in drawer
+    $(document).off('click.dopitchchip', '.do-pitch-chip').on('click.dopitchchip', '.do-pitch-chip', function(e) {
         e.stopPropagation();
         triggerHapticFeedback('selection');
-        if (!_doCurrentScore) return;
-        var p = _doCurrentScore.defaultStartPitch;
-        var curVal = (p && typeof p.toInt === 'function') ? p.toInt() : (typeof p === 'number' ? p : 0);
-        var newVal = curVal + 1;
-        _doCurrentScore.defaultStartPitch = (window.exsurge && window.exsurge.Pitch) ? new exsurge.Pitch(newVal) : newVal;
+        var val = parseInt($(this).data('pitch-val'), 10);
+        if (isNaN(val) || !_doCurrentScore || !window.exsurge) return;
+        _doCurrentScore.defaultStartPitch = new exsurge.Pitch(val);
+        updateDoPitchUI(_doCurrentScore);
+        // Keep drawer open after selection so user can compare
+    });
+
+    // Reset pitch to natural default
+    $(document).off('click.doresetpitch', '#btnResetPitch').on('click.doresetpitch', '#btnResetPitch', function(e) {
+        e.stopPropagation();
+        triggerHapticFeedback('selection');
+        if (!_doCurrentScore || _doCurrentScore._naturalStartPitch == null || !window.exsurge) return;
+        _doCurrentScore.defaultStartPitch = new exsurge.Pitch(_doCurrentScore._naturalStartPitch);
         updateDoPitchUI(_doCurrentScore);
     });
 
@@ -5473,7 +5788,15 @@ function initDoPlayer() {
         var calculatedTempo = Math.round(BASE_TEMPO * nextSpeed);
         if ($('#playerTempoValue').length) $('#playerTempoValue').text(calculatedTempo);
         if (window.setTempo) window.setTempo(calculatedTempo);
-        if (_doCurrentScore) updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
+
+        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+            var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+            if (player && typeof player.setPlaybackRate === 'function') {
+                try { player.setPlaybackRate(nextSpeed); } catch(e) {}
+            }
+        } else if (_doCurrentScore) {
+            updateDoPlayerProgressAndTime(_doCurrentScore, null, window.getChantProgress ? window.getChantProgress() : 0);
+        }
     });
 
     function syncPlayerBarOffset() {
@@ -5481,7 +5804,7 @@ function initDoPlayer() {
         if (!playerBar) return;
         var mb = Math.abs(parseInt(window.getComputedStyle(playerBar).marginBottom, 10)) || 0;
         var visibleH = playerBar.offsetHeight - mb;
-        if (visibleH > 50 && visibleH < 350) {
+        if (visibleH > 50 && visibleH < 800) {
             document.documentElement.style.setProperty('--player-bar-offset', visibleH + 'px');
         }
     }
@@ -5631,14 +5954,34 @@ function initDoPlayer() {
         playerBar.addEventListener('mousedown', onMouseDown);
     })();
 
-    // Progress bar click to seek
-    $('#playerProgressBarContainer').off('click').on('click', function(e) {
-        e.stopPropagation();
-        triggerHapticFeedback('subtle');
+    // Progress bar click & drag scrubbing without forcing play
+    function seekToTimelinePercent(percent) {
+        percent = Math.max(0, Math.min(1, percent));
+        var isYtActive = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth');
+        var wasPlaying = (window.isPlayingChant && window.isPlayingChant()) || (isYtActive && $('#playerBtnPlay').hasClass('playing'));
+
+        if (isYtActive) {
+            var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+            if (player && typeof player.getDuration === 'function') {
+                var dur = player.getDuration() || (window.doYT.durations && window.doYT.durations[window.doYT.activeId]) || 0;
+                if (dur > 0) {
+                    player.seekTo(percent * dur, true);
+                    if (wasPlaying && typeof player.playVideo === 'function') {
+                        player.playVideo();
+                        setDoPlayerBarState(true);
+                    } else if (typeof player.pauseVideo === 'function') {
+                        player.pauseVideo();
+                        setDoPlayerBarState(false);
+                    }
+                    $('#playerProgressFill').css('width', (percent * 100) + '%');
+                    $('#playerCurrentTime').text(formatChantTime(percent * dur));
+                    highlightChantNoteAtFraction(percent);
+                    return;
+                }
+            }
+        }
+
         if (!_doCurrentPlayerCard || !_doCurrentScore) return;
-        var rect = this.getBoundingClientRect();
-        var clickX = e.clientX - rect.left;
-        var percent = Math.max(0, Math.min(1, clickX / rect.width));
 
         var allNotes = [].concat.apply([], (_doCurrentScore.notations || []).map(function(n) { return n.notes || []; }));
         if (!allNotes.length) return;
@@ -5658,18 +6001,49 @@ function initDoPlayer() {
         }
 
         if (note && targetNode) {
-            handleChantElementClick(targetNode, e);
-
-            if (window.Tone) {
-                if (typeof Tone.start === 'function') Tone.start().catch(function(){});
-                if (Tone.context && Tone.context.state !== 'running') Tone.context.resume().catch(function(){});
-            }
-
-            if (window.playScore) {
-                window.playScore(_doCurrentScore, _doCurrentScore.defaultStartPitch, note);
-                setDoPlayerBarState(true);
-            }
+            handleChantElementClick(targetNode, null);
+        } else {
+            $('#playerProgressFill').css('width', (percent * 100) + '%');
+            updateDoPlayerProgressAndTime(_doCurrentScore, note, percent);
+            highlightChantNoteAtFraction(percent);
         }
+    }
+
+    var $track = $('#playerProgressBarContainer');
+    var isScrubbing = false;
+
+    function getPercentFromEvent(e) {
+        var rect = $track[0].getBoundingClientRect();
+        var clientX = (e.touches && e.touches.length) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : (e.originalEvent && e.originalEvent.clientX));
+        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    }
+
+    $track.off('click mousedown touchstart').on('click', function(e) {
+        e.stopPropagation();
+        triggerHapticFeedback('subtle');
+        var pct = getPercentFromEvent(e);
+        seekToTimelinePercent(pct);
+    }).on('mousedown touchstart', function(e) {
+        isScrubbing = true;
+
+        function onMove(me) {
+            if (!isScrubbing) return;
+            var movePct = getPercentFromEvent(me);
+            seekToTimelinePercent(movePct);
+        }
+
+        function onEnd() {
+            isScrubbing = false;
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onEnd);
+            window.removeEventListener('touchmove', onMove);
+            window.removeEventListener('touchend', onEnd);
+        }
+
+        window.addEventListener('mousemove', onMove, { passive: true });
+        window.addEventListener('mouseup', onEnd, { passive: true });
+        window.addEventListener('touchmove', onMove, { passive: true });
+        window.addEventListener('touchend', onEnd, { passive: true });
     });
 
     // Delegated note + syllable click on content stream
@@ -5739,16 +6113,50 @@ var _userIsScrolling = false;
 var _userScrollTimer = null;
 var _isAutoScrolling = false;
 
+function _getViewportOffsets() {
+    // Top: fixed/sticky header
+    var topH = 0;
+    var headerEl = document.querySelector('.do-top-header, header.do-header, #doHeader, nav.do-nav');
+    if (headerEl) {
+        var hStyle = window.getComputedStyle(headerEl);
+        if (hStyle.position === 'fixed' || hStyle.position === 'sticky') {
+            topH = headerEl.offsetHeight || 0;
+        }
+    }
+    if (!topH) topH = 56;
+
+    // Bottom: full player bar height (includes any open drawer)
+    var bottomH = 0;
+    var playerBar = document.getElementById('modernPlayerBar');
+    if (playerBar && playerBar.classList.contains('visible')) {
+        bottomH = playerBar.offsetHeight || 0;
+    }
+    if (!bottomH) bottomH = 80;
+
+    return { top: topH, bottom: bottomH };
+}
+
+function _getElemRect(el) {
+    // SVG <use> elements often return zero-size rects; climb to nearest svg or card
+    var rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+        var svgEl = el.ownerSVGElement || el.closest('svg');
+        if (svgEl) rect = svgEl.getBoundingClientRect();
+    }
+    if (rect.width === 0 && rect.height === 0) {
+        var card = el.closest ? el.closest('.do-chant-card, .do-score-wrap') : null;
+        if (card) rect = card.getBoundingClientRect();
+    }
+    return rect;
+}
+
 function isElementInVisibleViewport(el) {
     if (!el) return false;
-    var rect = el.getBoundingClientRect();
-    var playerBar = document.getElementById('modernPlayerBar');
-    var bottomReserved = (playerBar && playerBar.classList.contains('visible')) ? playerBar.offsetHeight + 20 : 80;
-    var topReserved = 70; // Top header navbar
-
+    var rect = _getElemRect(el);
+    var off = _getViewportOffsets();
     return (
-        rect.top >= topReserved &&
-        rect.bottom <= (window.innerHeight - bottomReserved) &&
+        rect.top >= off.top &&
+        rect.bottom <= (window.innerHeight - off.bottom) &&
         rect.left >= 0 &&
         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
@@ -5766,31 +6174,44 @@ function centerActiveNote(force) {
     }
 
     try {
-        var rect = activeElem.getBoundingClientRect();
-        var playerBar = document.getElementById('modernPlayerBar');
-        var bottomBarH = (playerBar && playerBar.classList.contains('visible')) ? playerBar.offsetHeight : 100;
-        var topBarH = 60;
-        var visibleH = window.innerHeight - topBarH - bottomBarH;
-        var targetY = window.scrollY + rect.top - (topBarH + visibleH / 2) + (rect.height / 2);
+        // Get the note position — handle SVG <use> zero-size quirk
+        var noteRect = activeElem.getBoundingClientRect();
+        if (noteRect.width === 0 && noteRect.height === 0) {
+            var svgEl = activeElem.ownerSVGElement;
+            if (svgEl) {
+                var svgRect = svgEl.getBoundingClientRect();
+                var ex = parseFloat(activeElem.getAttribute('x') || 0);
+                var ey = parseFloat(activeElem.getAttribute('y') || 0);
+                if (svgEl.viewBox && svgEl.viewBox.baseVal.width) {
+                    var scaleY = svgRect.height / svgEl.viewBox.baseVal.height;
+                    noteRect = { top: svgRect.top + ey * scaleY, height: 14 };
+                } else {
+                    noteRect = svgRect;
+                }
+            }
+        }
+        if (!noteRect.height && noteRect.height !== 0) {
+            noteRect = _getElemRect(activeElem);
+        }
+
+        // Simple: put the middle of the note at the middle of the screen
+        var noteMid = window.scrollY + noteRect.top + (noteRect.height || 14) / 2;
+        var targetY = Math.max(0, noteMid - window.innerHeight / 2);
 
         _isAutoScrolling = true;
-        window.scrollTo({
-            top: Math.max(0, targetY),
-            behavior: 'smooth'
-        });
-        setTimeout(function() {
-            _isAutoScrolling = false;
-        }, 600);
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        setTimeout(function() { _isAutoScrolling = false; }, 700);
     } catch(e) {
         if (activeElem.scrollIntoView) {
             _isAutoScrolling = true;
             activeElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(function() { _isAutoScrolling = false; }, 600);
+            setTimeout(function() { _isAutoScrolling = false; }, 700);
         }
     }
 }
 
 window.onChantNoteActive = function(el) {
+    if (window.doYT && window.doYT.syncEnabled === false) return;
     if (!window.isPlayingChant || !window.isPlayingChant()) return;
     if (_userIsScrolling) return; // Do not interrupt manual user scrolling
     if (el && !isElementInVisibleViewport(el)) {
@@ -5883,13 +6304,16 @@ function updateDoPlayerUI($card, score, isPlaying, startNote) {
     $('.do-chant-card').removeClass('is-playing');
     if ($card) $card.addClass('is-playing');
 
-    // Populate YouTube video drawer if chant ID is present
+    // Populate YouTube video drawer if chant ID is present and changed
     var chantId = ($card && ($card.data('chant-id') || $card.attr('data-chant-id'))) || '';
     if (!chantId && $card) {
         var $wrapper = $card.closest('[data-chant-id]');
         if ($wrapper.length) chantId = $wrapper.data('chant-id');
     }
-    updatePlayerVideoDrawer(chantId);
+    if (!window.doYT || window.doYT.currentChantId !== chantId) {
+        updatePlayerVideoDrawer(chantId);
+    }
+    updateDoPitchButtonState();
 }
 
 function escapeHtmlLocal(str) {
@@ -5903,50 +6327,502 @@ function escapeHtmlLocal(str) {
         .replace(/'/g, '&#039;');
 }
 
+// YouTube IFrame API & Audio Sources Manager for GABC Player
+window.doYT = window.doYT || {
+    players: {},
+    durations: {},
+    pendingSeeks: {},
+    skipSegments: {},     // videoId → [{start, end}] from SponsorBlock
+    activeId: 'synth',
+    activePlayer: null,
+    pending: [],
+    ready: false,
+    _inited: false,
+    lastPercentage: 0,
+    syncEnabled: (localStorage.getItem('do_video_sync_enabled') !== 'false'),
+
+    init: function() {
+        if (window.doYT._inited) return;
+        window.doYT._inited = true;
+
+        var prevReady = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = function() {
+            window.doYT.ready = true;
+            if (typeof prevReady === 'function') {
+                try { prevReady(); } catch(e) {}
+            }
+            window.doYT.setupPending();
+        };
+
+        if (window.YT && window.YT.Player) {
+            window.doYT.ready = true;
+        } else if (!document.getElementById('yt-iframe-api-script')) {
+            var tag = document.createElement('script');
+            tag.id = 'yt-iframe-api-script';
+            tag.src = "https://www.youtube.com/iframe_api";
+            var first = document.getElementsByTagName('script')[0];
+            if (first && first.parentNode) {
+                first.parentNode.insertBefore(tag, first);
+            } else {
+                document.head.appendChild(tag);
+            }
+        }
+    },
+
+    setupPending: function() {
+        var list = window.doYT.pending.slice();
+        window.doYT.pending = [];
+        list.forEach(function(item) {
+            window.doYT.createPlayer(item.elementId, item.videoId, item.$item, item.curSpeed);
+        });
+    },
+
+    getCurrentFraction: function() {
+        var el = document.getElementById('playerProgressFill');
+        var fillW = parseFloat(el ? el.style.width : 0) || 0;
+        var barFrac = (fillW > 0) ? Math.max(0, Math.min(1, fillW / 100)) : 0;
+
+        if (window.doYT.activeId === 'synth') {
+            if (window.getChantProgress) {
+                var p = window.getChantProgress();
+                if (typeof p === 'number' && !isNaN(p) && p > 0) return Math.max(0, Math.min(1, p));
+            }
+            if (barFrac > 0) return barFrac;
+        } else if (window.doYT.activePlayer) {
+            try {
+                var cur = window.doYT.activePlayer.getCurrentTime() || 0;
+                var dur = window.doYT.activePlayer.getDuration() || 0;
+                if (dur > 0 && cur > 0) return Math.max(0, Math.min(1, cur / dur));
+            } catch(e) {}
+        }
+        if (barFrac > 0) return barFrac;
+        return window.doYT.lastPercentage || 0;
+    },
+
+    pauseAll: function(exceptId) {
+        Object.keys(window.doYT.players).forEach(function(id) {
+            if (id === exceptId) return;
+            var p = window.doYT.players[id];
+            try {
+                if (p && typeof p.pauseVideo === 'function' && window.doYT.readyPlayers && window.doYT.readyPlayers[id]) {
+                    p.pauseVideo();
+                }
+            } catch (e) {}
+        });
+    },
+
+    destroyAll: function() {
+        Object.keys(window.doYT.players).forEach(function(id) {
+            try {
+                var p = window.doYT.players[id];
+                if (p && typeof p.destroy === 'function') {
+                    p.destroy();
+                }
+            } catch (e) {}
+        });
+        window.doYT.players = {};
+        window.doYT.readyPlayers = {};
+        window.doYT.durations = {};
+        window.doYT.pendingSeeks = {};
+        window.doYT.pendingPlays = {};
+        window.doYT.pending = [];
+        window.doYT.activeId = 'synth';
+        window.doYT.activePlayer = null;
+        window.doYT.lastPercentage = 0;
+    },
+
+    ensureIframeAndPlayer: function(iframeId, videoId, $item, curSpeed) {
+        window.doYT.init();
+
+        var iframeEl = document.getElementById(iframeId);
+        if (!iframeEl) {
+            var originParam = (window.location.protocol === 'http:' || window.location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(window.location.origin)) : '';
+            var embedUrl = 'https://www.youtube.com/embed/' + videoId + '?enablejsapi=1&controls=1&disablekb=1&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&fs=0' + originParam;
+            var $slot = $('#' + iframeId + '_slot');
+            if (!$slot.length) $slot = $item.find('.do-yt-thumb-wrap');
+            var $iframe = $('<iframe id="' + iframeId + '" src="' + escapeHtmlLocal(embedUrl) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px;"></iframe>');
+            $slot.empty().append($iframe);
+        }
+
+        window.doYT.createPlayer(iframeId, videoId, $item, curSpeed);
+    },
+
+    createPlayer: function(elementId, videoId, $item, curSpeed) {
+        if (!window.YT || !window.YT.Player) {
+            window.doYT.pending.push({ elementId: elementId, videoId: videoId, $item: $item, curSpeed: curSpeed });
+            return;
+        }
+
+        if (window.doYT.players[elementId]) {
+            return;
+        }
+
+        try {
+            var player = new YT.Player(elementId, {
+                events: {
+                    onReady: function(event) {
+                        if (!window.doYT.readyPlayers) window.doYT.readyPlayers = {};
+                        window.doYT.readyPlayers[elementId] = true;
+                        window.doYT.players[elementId] = player;
+                        window.doYT.activePlayer = player;
+
+                        var dur = player.getDuration();
+                        if (dur) window.doYT.durations[elementId] = dur;
+
+                        // Store the active videoId for SponsorBlock lookup
+                        window.doYT._activeVideoId = videoId;
+                        fetchSponsorBlockSegments(videoId);
+
+                        if (curSpeed && typeof player.setPlaybackRate === 'function') {
+                            try { player.setPlaybackRate(curSpeed); } catch(e) {}
+                        }
+
+                        if (window.doYT.pendingSeeks && typeof window.doYT.pendingSeeks[elementId] === 'number') {
+                            var seekToSec = window.doYT.pendingSeeks[elementId];
+                            delete window.doYT.pendingSeeks[elementId];
+                            if (seekToSec > 0) {
+                                try { player.seekTo(seekToSec, true); } catch(e) {}
+                            }
+                        }
+
+                        if (window.doYT.pendingPlays && window.doYT.pendingPlays[elementId]) {
+                            delete window.doYT.pendingPlays[elementId];
+                            try { player.playVideo(); } catch(e) {}
+                            setDoPlayerBarState(true);
+                        }
+                    },
+                    onStateChange: function(event) {
+                        if (event.data === 1 || event.data === 3) {
+                            if (window.doYT && window.doYT.pendingSeeks && typeof window.doYT.pendingSeeks[elementId] === 'number') {
+                                var seekToSec = window.doYT.pendingSeeks[elementId];
+                                delete window.doYT.pendingSeeks[elementId];
+                                if (seekToSec > 0) {
+                                    try { player.seekTo(seekToSec, true); } catch(e) {}
+                                }
+                            }
+                        }
+
+                        // 1 = PLAYING, 2 = PAUSED, 0 = ENDED, 3 = BUFFERING
+                        if (event.data === 1) {
+                            window.doYT.activeId = elementId;
+                            window.doYT.activePlayer = player;
+                            window.doYT.pauseAll(elementId);
+
+                            if (window.isPlayingChant && window.isPlayingChant()) {
+                                if (window.stopScore) window.stopScore();
+                                else if (window.playPauseScore) window.playPauseScore();
+                            }
+
+                            $('.do-yt-item').removeClass('is-active');
+                            $item.addClass('is-active');
+                            $item.find('.do-yt-poster').addClass('is-hidden');
+
+                            setDoPlayerBarState(true);
+                        } else if (event.data === 2) {
+                            if (window.doYT.activeId === elementId) {
+                                setDoPlayerBarState(false);
+                            }
+                        } else if (event.data === 0) {
+                            if (window.doYT.activeId === elementId) {
+                                setDoPlayerBarState(false);
+                                $('#playerProgressFill').css('width', '100%');
+                            }
+                            $item.find('.do-yt-poster').removeClass('is-hidden');
+                        }
+                    }
+                }
+            });
+            window.doYT.players[elementId] = player;
+        } catch (err) {
+            console.warn('[doYT] YT.Player init exception:', err);
+        }
+    },
+
+    selectSynth: function(keepPercentage) {
+        var fraction = keepPercentage !== false ? window.doYT.getCurrentFraction() : 0;
+
+        // Stop everything
+        if (window.isPlayingChant && window.isPlayingChant()) {
+            if (window.stopScore) window.stopScore();
+        }
+        window.doYT.pauseAll();
+        window.doYT.activeId = 'synth';
+        window.doYT.activePlayer = null;
+
+        $('.do-yt-item').removeClass('is-active');
+        $('#doYtItem_synth').addClass('is-active');
+        updateDoPitchButtonState();
+        if ($('#playerVideoDrawer').is(':visible')) { _sourceScrollInteracting = false; startSourceIdleAutoScroll(); }
+
+        // Restore score times and set cursor position, but do NOT play
+        if (_doCurrentScore && _doCurrentScore.notations) {
+            var allNotes = [].concat.apply([], _doCurrentScore.notations.map(function(notation) { return notation.notes || notation; })).filter(function(notation) { return !notation.isAccidental; });
+            var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
+            var secPerNote = 60 / tempoBpm;
+            var totalSeconds = allNotes.length * secPerNote;
+            var elapsedSec = fraction * totalSeconds;
+            $('#playerCurrentTime').text(formatChantTime(elapsedSec));
+            $('#playerChantTime').text(formatChantTime(totalSeconds));
+
+            var targetIdx = (allNotes.length && fraction > 0) ? Math.max(0, Math.min(allNotes.length - 1, Math.floor(fraction * allNotes.length))) : 0;
+            var targetNote = allNotes[targetIdx] || null;
+            if (_doCurrentPlayerCard && targetNote) {
+                _doCurrentPlayerCard.data('selected-start-note', targetNote);
+            }
+        }
+
+        // Always paused — user must press Play
+        setDoPlayerBarState(false);
+
+        if (fraction >= 0) {
+            highlightChantNoteAtFraction(fraction);
+        }
+    },
+
+    selectVideo: function(iframeId, videoId, $item) {
+        // Save current position before switching source
+        var fraction = window.doYT.getCurrentFraction();
+
+        // Stop synth if running
+        if (window.isPlayingChant && window.isPlayingChant()) {
+            if (window.stopScore) window.stopScore();
+            else if (window.playPauseScore) window.playPauseScore();
+        }
+
+        window.doYT.pauseAll(iframeId);
+        window.doYT.activeId = iframeId;
+
+        // Visual outline on the active card
+        $('.do-yt-item').removeClass('is-active');
+        $item.addClass('is-active');
+        $item.find('.do-yt-poster').addClass('is-hidden');
+        updateDoPitchButtonState();
+        if ($('#playerVideoDrawer').is(':visible')) { _sourceScrollInteracting = false; startSourceIdleAutoScroll(); }
+
+        var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text().replace('×', '').trim();
+        var curSpeed = parseFloat(curSpeedText) || 1.0;
+
+        var dur = window.doYT.durations[iframeId] || parseFloat($item.data('duration-sec')) || 0;
+        var targetTime = (dur > 0 && fraction > 0) ? (fraction * dur) : 0;
+
+        // Update player bar time display
+        if (dur > 0) {
+            $('#playerCurrentTime').text(formatChantTime(targetTime));
+            $('#playerChantTime').text(formatChantTime(dur)).attr('title', 'Durée vidéo : ' + formatChantTime(dur));
+        }
+
+        // Save the seek position so Play can resume from there
+        if (!window.doYT.pendingSeeks) window.doYT.pendingSeeks = {};
+        if (targetTime > 0) {
+            window.doYT.pendingSeeks[iframeId] = targetTime;
+        }
+
+        // If player already loaded: seek to position and stay paused
+        var player = window.doYT.players[iframeId];
+        var isReady = window.doYT.readyPlayers && window.doYT.readyPlayers[iframeId];
+        if (player && isReady) {
+            window.doYT.activePlayer = player;
+            if (typeof player.setPlaybackRate === 'function') {
+                try { player.setPlaybackRate(curSpeed); } catch(e) {}
+            }
+            if (targetTime > 0 && typeof player.seekTo === 'function') {
+                try { player.seekTo(targetTime, true); } catch(e) {}
+            }
+            if (typeof player.pauseVideo === 'function') {
+                try { player.pauseVideo(); } catch(e) {}
+            }
+        } else {
+            // Not loaded yet: remember we want to seek when ready, but NOT play
+            window.doYT.activePlayer = null;
+        }
+
+        // Always show paused state
+        setDoPlayerBarState(false);
+
+        if (fraction >= 0) {
+            highlightChantNoteAtFraction(fraction);
+        }
+    }
+};
+
+// Delegated click on the Synth Card
+$(document).off('click', '#doYtItem_synth').on('click', '#doYtItem_synth', function(e) {
+    e.stopPropagation();
+    triggerHapticFeedback('selection');
+    window.doYT.selectSynth(true);
+});
+
+// Delegated click on a Video Card or Poster
+$(document).off('click', '.do-yt-item:not(.is-synth)').on('click', '.do-yt-item:not(.is-synth)', function(e) {
+    if ($(e.target).closest('a[href]').length) return; // let external link work
+    e.stopPropagation();
+    triggerHapticFeedback('selection');
+    var $item = $(this);
+    var iframeId = $item.data('iframe-id') || $item.find('iframe').attr('id');
+    var videoId = $item.data('video-id');
+    window.doYT.selectVideo(iframeId, videoId, $item);
+});
+
+function updateSynthCardThumbnail(chantId, gabcText) {
+    // Logo SVG officiel statique à 3 notes Exsurge (img/gabc.svg)
+}
+
 function updatePlayerVideoDrawer(chantId) {
     var $drawer = $('#playerVideoDrawer');
     var $list = $('#playerVideoList');
     var $btn = $('#playerBtnExpandVideos');
 
+    if (window.doYT) {
+        window.doYT.currentChantId = chantId;
+        window.doYT.destroyAll();
+    }
+
     if (!chantId || !window.GREGORIAN_YOUTUBE_AUDIO || !window.GREGORIAN_YOUTUBE_AUDIO[chantId]) {
         $btn.hide();
+        $('#playerBtnToggleSync').hide();
         $drawer.addClass('hidden').hide();
         $btn.removeClass('active');
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
         return;
     }
 
     var entry = window.GREGORIAN_YOUTUBE_AUDIO[chantId];
     if (!entry || !Array.isArray(entry.audios) || !entry.audios.length) {
         $btn.hide();
+        $('#playerBtnToggleSync').hide();
         $drawer.addClass('hidden').hide();
         $btn.removeClass('active');
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
         return;
     }
 
     $btn.css('display', 'inline-flex').show();
+    $('#playerBtnToggleSync').css('display', 'inline-flex').show();
+    updateDoSyncButtonState();
+    if (window.doYT) window.doYT.init();
+
+    var originParam = (window.location.protocol === 'http:' || window.location.protocol === 'https:') ? ('&origin=' + encodeURIComponent(window.location.origin)) : '';
 
     var html = '';
-    entry.audios.forEach(function(item) {
+
+    // ── 1. Première carte : Générateur de notes natif (Format carré avec logo officiel Exsurge 3 notes sans ligne) ──
+    var isSynthActive = (!window.doYT || window.doYT.activeId === 'synth');
+    html += '<div id="doYtItem_synth" class="do-yt-item is-synth ' + (isSynthActive ? 'is-active' : '') + '" title="Cliquer pour écouter la partition GABC native" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
+    html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 100%; height: 0; overflow: hidden; border-radius: 12px;">';
+    html += '    <div class="do-yt-synth-card">';
+    html += '      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width: 58%; height: 58%; pointer-events: none;">';
+    html += '        <g fill="var(--primary-color, #c96b63)">';
+    html += '          <path d="M0-60.906c33.333 0 50 9.635 50 28.906v94.53C39.062 51.595 22.396 46.126 0 46.126s-39.063 5.47-50 16.406V-32c0-19.27 16.667-28.906 50-28.906z" transform="translate(26, 68) scale(0.22)" />';
+    html += '          <path d="M0-60.906c33.333 0 50 9.635 50 28.906v94.53C39.062 51.595 22.396 46.126 0 46.126s-39.063 5.47-50 16.406V-32c0-19.27 16.667-28.906 50-28.906z" transform="translate(50, 50) scale(0.22)" />';
+    html += '          <path d="M0-60.906c33.333 0 50 9.635 50 28.906v94.53C39.062 51.595 22.396 46.126 0 46.126s-39.063 5.47-50 16.406V-32c0-19.27 16.667-28.906 50-28.906z" transform="translate(74, 32) scale(0.22)" />';
+    html += '        </g>';
+    html += '      </svg>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '  <div style="display: flex; flex-direction: column; gap: 2px;">';
+    html += '    <div class="do-yt-title">Synthétiseur d\'orgue</div>';
+    html += '    <div class="do-yt-channel"><span>Partition GABC</span></div>';
+    html += '  </div>';
+    html += '</div>';
+
+    // ── 2. Cartes suivantes : Enregistrements vidéo YouTube (chargement différé / lazy-loaded) ──
+    entry.audios.forEach(function(item, idx) {
         var vId = item.id;
         var title = item.title || 'Enregistrement audio';
         var source = item.source || item.channel || 'Interprétation grégorienne';
         var duration = item.duration ? (' (' + item.duration + ')') : '';
         var ytUrl = item.url || ('https://www.youtube.com/watch?v=' + vId);
-        var embedUrl = item.embedUrl || ('https://www.youtube.com/embed/' + vId);
+        var thumbUrl = 'https://i.ytimg.com/vi/' + vId + '/mqdefault.jpg';
+        var iframeId = 'doYtPlayer_' + chantId + '_' + idx;
 
-        html += '<div class="do-yt-item" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
+        var durSec = 0;
+        if (item.duration) {
+            var p = String(item.duration).split(':').map(Number);
+            if (p.length === 2) durSec = p[0] * 60 + p[1];
+            else if (p.length === 3) durSec = p[0] * 3600 + p[1] * 60 + p[2];
+            window.doYT.durations[iframeId] = durSec;
+        }
+
+        html += '<div id="item_' + iframeId + '" class="do-yt-item" data-iframe-id="' + iframeId + '" data-video-id="' + escapeHtmlLocal(vId) + '" data-duration-sec="' + durSec + '" data-duration="' + escapeHtmlLocal(item.duration || '') + '" title="Cliquer pour écouter cet enregistrement" style="display: flex; flex-direction: column; gap: 6px; text-decoration: none;">';
         html += '  <div class="do-yt-thumb-wrap" style="position: relative; display: block; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000;">';
-        html += '    <iframe src="' + escapeHtmlLocal(embedUrl) + '" title="' + escapeHtmlLocal(title) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px;"></iframe>';
+        html += '    <div id="' + iframeId + '_slot" class="do-yt-iframe-slot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>';
+        
+        // Poster / Couverture épurée
+        html += '    <div class="do-yt-poster" title="Écouter cet enregistrement">';
+        html += '      <img src="' + escapeHtmlLocal(thumbUrl) + '" class="do-yt-poster-img" alt="' + escapeHtmlLocal(title) + '">';
+        html += '    </div>';
         html += '  </div>';
+
+        // Titre et Source (titre tronqué à 2 lignes, chaîne à 1 ligne)
         html += '  <a href="' + escapeHtmlLocal(ytUrl) + '" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; gap: 2px;">';
-        html += '    <div style="font-weight: 600; font-size: 0.84rem; color: var(--text-primary); font-family: \'Inter\', sans-serif; line-height: 1.35;">' + escapeHtmlLocal(title) + duration + '</div>';
-        html += '    <div style="font-size: 0.76rem; color: var(--text-tertiary); font-weight: 500;">' + escapeHtmlLocal(source) + '</div>';
+        html += '    <div class="do-yt-title" title="' + escapeHtmlLocal(title) + duration + '">' + escapeHtmlLocal(title) + duration + '</div>';
+        html += '    <div class="do-yt-channel" title="' + escapeHtmlLocal(source) + '">';
+        html += '      <svg viewBox="0 0 24 24" width="12" height="12" fill="#ff0000" style="flex-shrink: 0;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+        html += '      <span>' + escapeHtmlLocal(source) + '</span>';
+        html += '    </div>';
         html += '  </a>';
         html += '</div>';
     });
 
     $list.html(html);
+
+    if (!$drawer.is(':hidden')) {
+        requestAnimationFrame(function() {
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+    }
 }
+
+// ── Auto-scroll: scroll active source into view after idle ──────────────
+var _sourceScrollTimer = null;
+var _sourceScrollInteracting = false;
+
+function scrollActiveSourceIntoView(animate) {
+    var $list = $('#playerVideoList');
+    if (!$list.length) return;
+    var listEl = $list[0];
+    var $active = $list.find('.do-yt-item.is-active').first();
+    if (!$active.length) return;
+
+    // Respect the list's own left padding so the item isn't flush against the edge
+    var paddingLeft = parseInt(window.getComputedStyle(listEl).paddingLeft, 10) || 0;
+
+    // Target scroll: item's offsetLeft minus the padding (so it appears with the same left gap as the first item)
+    var itemLeft = $active[0].offsetLeft - paddingLeft;
+    if (itemLeft < 0) itemLeft = 0;
+
+    // Don't over-scroll past the right end
+    var maxScroll = listEl.scrollWidth - listEl.clientWidth;
+    var targetScroll = Math.min(itemLeft, maxScroll);
+    if (targetScroll < 0) targetScroll = 0;
+
+    if (animate) {
+        $(listEl).stop(true).animate({ scrollLeft: targetScroll }, 400, 'swing');
+    } else {
+        listEl.scrollLeft = targetScroll;
+    }
+}
+
+function startSourceIdleAutoScroll() {
+    clearTimeout(_sourceScrollTimer);
+    _sourceScrollTimer = setTimeout(function() {
+        if (!_sourceScrollInteracting) {
+            scrollActiveSourceIntoView(true);
+        }
+    }, 10000);
+}
+
+// Track user interaction with the source list to pause auto-scroll
+$(document).on('scroll.sourceautoscroll touchstart.sourceautoscroll mousedown.sourceautoscroll', '#playerVideoList', function() {
+    _sourceScrollInteracting = true;
+    clearTimeout(_sourceScrollTimer);
+    // Resume auto-scroll eligibility after user has stopped interacting for 10s
+    clearTimeout(_sourceScrollTimer._resumeTimer);
+    _sourceScrollTimer._resumeTimer = setTimeout(function() {
+        _sourceScrollInteracting = false;
+        startSourceIdleAutoScroll();
+    }, 10000);
+});
 
 // Toggle handler for playerBtnExpandVideos
 $(document).on('click', '#playerBtnExpandVideos', function(e) {
@@ -5955,18 +6831,85 @@ $(document).on('click', '#playerBtnExpandVideos', function(e) {
     var $drawer = $('#playerVideoDrawer');
     var isHidden = $drawer.is(':hidden');
     if (isHidden) {
+        // Close pitch drawer if open (mutually exclusive)
+        var $pitchDrawer = $('#playerPitchDrawer');
+        if ($pitchDrawer.is(':visible')) {
+            $pitchDrawer.slideUp(150, function() { $pitchDrawer.addClass('hidden'); });
+            $('#playerPitchPill').removeClass('active');
+        }
         $drawer.removeClass('hidden').slideDown(200, function() {
             if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+            // Peek: scroll slightly so user can see there is a next card
+            var $list = $('#playerVideoList');
+            if ($list.length) {
+                var listEl = $list[0];
+                var maxScroll = listEl.scrollWidth - listEl.clientWidth;
+                if (maxScroll > 0) {
+                    // Scroll to active source position + a small peek offset (32px)
+                    scrollActiveSourceIntoView(false); // instant snap first
+                    var peekOffset = Math.min(listEl.scrollLeft + 32, maxScroll);
+                    listEl.scrollLeft = peekOffset;
+                }
+            }
+            // After peek, start the 10s idle timer to snap back to active
+            _sourceScrollInteracting = false;
+            startSourceIdleAutoScroll();
         });
         $(this).addClass('active');
     } else {
         $drawer.slideUp(200, function() {
             $drawer.addClass('hidden');
             if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+            clearTimeout(_sourceScrollTimer);
         });
         $(this).removeClass('active');
+        if (window.doYT && typeof window.doYT.pauseAll === 'function') {
+            window.doYT.pauseAll();
+        }
     }
 });
+
+// Toggle handler for playerBtnToggleSync
+$(document).off('click', '#playerBtnToggleSync').on('click', '#playerBtnToggleSync', function(e) {
+    e.stopPropagation();
+    triggerHapticFeedback('toggle');
+    if (!window.doYT) window.doYT = {};
+    window.doYT.syncEnabled = (window.doYT.syncEnabled === false);
+    var isEnabled = window.doYT.syncEnabled;
+    localStorage.setItem('do_video_sync_enabled', isEnabled ? 'true' : 'false');
+    updateDoSyncButtonState();
+
+    if (!isEnabled) {
+        clearActiveNote();
+    } else {
+        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+            var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+            if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
+                var cur = player.getCurrentTime() || 0;
+                var dur = player.getDuration() || 0;
+                if (dur > 0) {
+                    highlightChantNoteAtFraction(cur / dur);
+                }
+            }
+        } else if (window.getChantProgress) {
+            var frac = window.getChantProgress();
+            if (frac >= 0) {
+                highlightChantNoteAtFraction(frac);
+            }
+        }
+    }
+});
+
+function updateDoSyncButtonState() {
+    var $btn = $('#playerBtnToggleSync');
+    if (!$btn.length) return;
+    var isEnabled = (!window.doYT || window.doYT.syncEnabled !== false);
+    if (isEnabled) {
+        $btn.addClass('active').attr('title', 'Synchronisation active (Cliquer pour désactiver le suivi des notes)');
+    } else {
+        $btn.removeClass('active').attr('title', 'Synchronisation désactivée (Cliquer pour activer le suivi des notes)');
+    }
+}
 
 var _marqueeRaf = null;
 
@@ -6156,23 +7099,226 @@ function setDoPlayerBarState(isPlaying) {
     }
 }
 
+
+/**
+ * Fetch non-musical segments from SponsorBlock for a given YouTube videoId.
+ * Categories: music_offtopic (talking over music), intro, outro, sponsor, interaction.
+ * Result cached in window.doYT.skipSegments[videoId].
+ */
+function fetchSponsorBlockSegments(videoId) {
+    if (!videoId) return;
+    if (window.doYT.skipSegments.hasOwnProperty(videoId)) return; // already fetched or fetching
+
+    // Mark as fetching (null = in progress, array = done)
+    window.doYT.skipSegments[videoId] = null;
+
+    var cats = encodeURIComponent(JSON.stringify(['music_offtopic', 'intro', 'outro', 'sponsor', 'interaction']));
+    var url = 'https://sponsor.ajay.app/api/skipSegments?videoID=' + encodeURIComponent(videoId) + '&categories=' + cats;
+
+    fetch(url)
+        .then(function(r) { return r.ok ? r.json() : []; })
+        .then(function(data) {
+            var segs = [];
+            (data || []).forEach(function(seg) {
+                if (seg.segment && seg.segment.length === 2) {
+                    segs.push({ start: seg.segment[0], end: seg.segment[1] });
+                }
+            });
+            // Sort by start time
+            segs.sort(function(a, b) { return a.start - b.start; });
+            window.doYT.skipSegments[videoId] = segs;
+            if (segs.length > 0) {
+                console.log('[SponsorBlock] ' + segs.length + ' segment(s) à sauter pour ' + videoId);
+            }
+        })
+        .catch(function() {
+            window.doYT.skipSegments[videoId] = []; // no segments on error
+        });
+}
+
+/**
+ * Given raw currentTime and segments, return the "musical time" (skipping non-musical segments)
+ * and the "musical duration". Used for sync fraction calculation.
+ */
+function _sponsorBlockMusicalTime(cur, dur, segments) {
+    if (!segments || !segments.length) return { musicalCur: cur, musicalDur: dur };
+
+    var skippedBefore = 0; // total skipped seconds before cur
+    var totalSkipped = 0;  // total non-musical seconds in full video
+
+    segments.forEach(function(seg) {
+        var segLen = Math.max(0, seg.end - seg.start);
+        totalSkipped += segLen;
+        if (seg.end <= cur) {
+            skippedBefore += segLen;
+        } else if (seg.start < cur) {
+            // We're inside a skip segment — count partial
+            skippedBefore += (cur - seg.start);
+        }
+    });
+
+    return {
+        musicalCur: Math.max(0, cur - skippedBefore),
+        musicalDur: Math.max(1, dur - totalSkipped)
+    };
+}
+
 function startDoProgressTracking() {
     if (_doProgressInterval) clearInterval(_doProgressInterval);
     _doProgressInterval = setInterval(function() {
+        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+            var activeId = window.doYT.activeId;
+            var player = window.doYT.activePlayer || window.doYT.players[activeId];
+            if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
+                var cur = player.getCurrentTime() || 0;
+                var dur = player.getDuration() || 0;
+                if (dur > 0) {
+                    // ── SponsorBlock: skip non-musical segments ──
+                    var videoId = (window.doYT._activeVideoId || '');
+                    var segs = window.doYT.skipSegments[videoId] || [];
+                    for (var si = 0; si < segs.length; si++) {
+                        var seg = segs[si];
+                        if (cur >= seg.start && cur < seg.end) {
+                            // We're inside a skip segment — jump to its end
+                            try { player.seekTo(seg.end, true); } catch(e) {}
+                            return; // skip this frame's highlight update
+                        }
+                    }
+
+                    // ── Compute musical fraction (excluding skipped segments) ──
+                    var mt = _sponsorBlockMusicalTime(cur, dur, segs);
+                    var frac = mt.musicalCur / mt.musicalDur;
+                    frac = Math.max(0, Math.min(1, frac));
+
+                    window.doYT.lastPercentage = frac;
+                    var percent = frac * 100;
+                    $('#playerProgressFill').css('width', percent + '%');
+                    $('#playerCurrentTime').text(formatChantTime(cur));
+                    $('#playerChantTime').text(formatChantTime(dur)).attr('title', 'Durée vidéo : ' + formatChantTime(dur));
+                    if (window.doYT.syncEnabled !== false) {
+                        highlightChantNoteAtFraction(frac);
+                    }
+                }
+            }
+            return;
+        }
+
         if (!window.isPlayingChant || !window.isPlayingChant()) {
             if (_doProgressInterval) clearInterval(_doProgressInterval);
             setDoPlayerBarState(false);
             return;
         }
         if (window.getChantProgress) {
-            var percent = window.getChantProgress() * 100;
+            var frac = window.getChantProgress();
+            if (window.doYT) window.doYT.lastPercentage = frac;
+            var percent = frac * 100;
             if (percent > 100) percent = 100;
             $('#playerProgressFill').css('width', percent + '%');
+            // Update elapsed time for synth
+            if (_doCurrentScore && _doCurrentScore.notations) {
+                var allN = [].concat.apply([], _doCurrentScore.notations.map(function(n) { return n.notes || []; }));
+                var tempoBpm = parseInt($('#playerTempoValue').text(), 10) || 150;
+                var secPerNote = 60 / tempoBpm;
+                var totalSec = allN.length * secPerNote;
+                $('#playerCurrentTime').text(formatChantTime(frac * totalSec));
+            }
             if (percent >= 100) {
                 setDoPlayerBarState(false);
             }
         }
     }, 150);
+}
+
+function updateDoPitchButtonState() {
+    var isYtActive = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth');
+    var $pill = $('#playerPitchPill');
+    if (!$pill.length) return;
+    if (isYtActive) {
+        $pill.addClass('is-disabled');
+        $pill.attr('title', 'Tonalité désactivée en mode vidéo (disponible avec le synthétiseur GABC)');
+        closeDoPitchBubble();
+    } else {
+        $pill.removeClass('is-disabled');
+        $pill.attr('title', 'Tonalité de départ (Cliquer pour choisir le ton)');
+    }
+}
+
+function populateDoPitchBubble() {
+    if (!_doCurrentScore || !window.exsurge) return;
+    var score = _doCurrentScore;
+    var currentVal = (score.defaultStartPitch && typeof score.defaultStartPitch.toInt === 'function') 
+        ? score.defaultStartPitch.toInt() 
+        : 0;
+    var naturalVal = (score._naturalStartPitch != null) ? score._naturalStartPitch : currentVal;
+
+    var noteNames = ['Do', 'Do♯', 'Ré', 'Ré♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'];
+    var html = '';
+
+    // Offer 13 chromatic semitones from -6 to +6 around natural pitch
+    for (var offset = -6; offset <= 6; offset++) {
+        var val = naturalVal + offset;
+        var p = new exsurge.Pitch(val);
+        // JS modulo can be negative — force positive
+        var stepIdx = ((p.step % 12) + 12) % 12;
+        var sName = noteNames[stepIdx] || '';
+        var oct = (p.octave !== undefined) ? p.octave : '';
+        var fullName = sName + oct;
+
+        var diffText = (offset === 0) ? 'défaut' : (offset > 0 ? ('+' + offset) : String(offset));
+        var isActive = (val === currentVal);
+
+        html += '<div class="do-pitch-chip ' + (isActive ? 'is-active' : '') + '" data-pitch-val="' + val + '" title="' + fullName + (offset !== 0 ? (' (' + diffText + ' demi-tons)') : ' (ton naturel)') + '">';
+        html += '  <span class="do-pitch-chip-note">' + fullName + '</span>';
+        html += '  <span class="do-pitch-chip-diff">' + diffText + '</span>';
+        html += '</div>';
+    }
+
+    $('#playerPitchBubbleGrid').html(html);
+
+    // Show or hide reset button depending on whether pitch differs from natural
+    if (currentVal !== naturalVal) {
+        $('#btnResetPitch').show();
+    } else {
+        $('#btnResetPitch').hide();
+    }
+}
+
+function openDoPitchBubble() {
+    var $pill = $('#playerPitchPill');
+    if (!$pill.length || $pill.hasClass('is-disabled')) return;
+    if (!_doCurrentScore || !window.exsurge) return;
+
+    var $drawer = $('#playerPitchDrawer');
+    if (!$drawer.length) return;
+
+    // Close video drawer if open (mutually exclusive)
+    var $videoDrawer = $('#playerVideoDrawer');
+    if ($videoDrawer.is(':visible')) {
+        $videoDrawer.slideUp(150, function() {
+            $videoDrawer.addClass('hidden');
+            $('#playerBtnExpandVideos').removeClass('active');
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+    }
+
+    populateDoPitchBubble();
+    triggerHapticFeedback('light');
+
+    $drawer.removeClass('hidden').slideDown(200, function() {
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+    });
+    $pill.addClass('active');
+}
+
+function closeDoPitchBubble() {
+    var $drawer = $('#playerPitchDrawer');
+    if ($drawer.length && $drawer.is(':visible')) {
+        $drawer.slideUp(200, function() {
+            $drawer.addClass('hidden');
+            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        });
+    }
+    $('#playerPitchPill').removeClass('active');
 }
 
 function updateDoPitchUI(score) {
@@ -6199,6 +7345,12 @@ function updateDoPitchUI(score) {
         score.defaultStartPitch = window.calculateDefaultStartPitch(startPitch, lowPitch, highPitch);
     }
 
+    if (score.defaultStartPitch && score._naturalStartPitch == null) {
+        score._naturalStartPitch = (typeof score.defaultStartPitch.toInt === 'function') 
+            ? score.defaultStartPitch.toInt() 
+            : score.defaultStartPitch;
+    }
+
     var pitchObj = (score.defaultStartPitch && typeof score.defaultStartPitch.toInt === 'function') 
         ? score.defaultStartPitch 
         : new exsurge.Pitch(startPitch);
@@ -6207,6 +7359,15 @@ function updateDoPitchUI(score) {
     var stepIndex = (typeof pitchObj.step === 'number') ? (pitchObj.step % 12) : 0;
     var stepName = noteNames[stepIndex] || 'La';
     $('#playerStartingPitch').text(stepName + (pitchObj.octave !== undefined ? pitchObj.octave : ''));
+
+    // Update is-transposed indicator on the button itself
+    var isTransposed = (score._naturalStartPitch != null && pitchObj.toInt() !== score._naturalStartPitch);
+    $('#playerPitchPill').toggleClass('is-transposed', isTransposed);
+
+    // Refresh chips if pitch drawer is open
+    if ($('#playerPitchDrawer').is(':visible')) {
+        populateDoPitchBubble();
+    }
 }
 
 function renderSingleChantScore($wrapper, force) {
@@ -6262,6 +7423,15 @@ function renderSingleChantScore($wrapper, force) {
                     });
                 } catch(e) {}
             }
+            if (!cachedGabc) {
+                try {
+                    cachedGabc = await $.ajax({
+                        url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/' + encodeURIComponent(chantId) + '.gabc',
+                        dataType: 'text',
+                        cache: true
+                    });
+                } catch(e) {}
+            }
 
             // Check if card moved out of viewport during async download
             if (!force && $wrapper.data('is-visible') === false) {
@@ -6277,6 +7447,7 @@ function renderSingleChantScore($wrapper, force) {
 
             $wrapper.data('cached-gabc', cachedGabc);
             GABC_LOCAL_CACHE[chantId] = cachedGabc;
+            updateSynthCardThumbnail(chantId, cachedGabc);
 
             var header = parseGabcHeader(cachedGabc);
             var title = header.name || defaultName;
@@ -9761,7 +10932,6 @@ function checkForAppUpdates(isManual) {
         $statusText.text('Recherche en cours sur GitHub...').css('color', 'var(--text-secondary)');
     }
 
-    var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/releases?_ts=' + Date.now();
     var rawVersionUrl = 'https://raw.githubusercontent.com/bastonus/jgabc/master/version.json?_ts=' + Date.now();
     var localVersionUrl = './version.json?_ts=' + Date.now();
 
@@ -10441,51 +11611,40 @@ var OremusNotifications = (function() {
 
     function fetchFeed(forceRefresh) {
         var rawUrl = GITHUB_FEED_URL + '?_ts=' + Date.now();
-        var apiUrl = 'https://api.github.com/repos/bastonus/jgabc/contents/notifications.json?_ts=' + Date.now();
 
-        // 1. Try direct raw GitHub file first (no GitHub API rate limit / 403 Forbidden)
-        return fetch(rawUrl, {
-            cache: 'no-cache',
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(function(res) {
-            if (!res.ok) throw new Error('Raw HTTP ' + res.status);
-            return res.json();
-        })
-        .catch(function(rawErr) {
-            // 2. Fallback to API if needed
-            return fetch(apiUrl, {
-                cache: 'no-cache',
-                headers: { 'Accept': 'application/vnd.github.v3.raw' }
-            }).then(function(res) {
-                if (!res.ok) throw new Error('API HTTP ' + res.status);
+        // 1. Interrogation directe du fichier raw (sans headers personnalisés pour éviter le rejet OPTIONS CORS et sans rate-limit API)
+        return fetch(rawUrl)
+            .then(function(res) {
+                if (!res.ok) throw new Error('Raw HTTP ' + res.status);
                 return res.json();
-            });
-        })
-        .catch(function(err) {
-            console.warn('[RemoteNotifications] GitHub fetch failed, attempting local fallback:', err);
-            return fetch(LOCAL_FEED_URL + '?_ts=' + Date.now()).then(function(r) { return r.json(); });
-        })
-        .then(function(data) {
-            if (data && Array.isArray(data.notifications)) {
-                try {
-                    localStorage.setItem('do_remote_notifications_cache', JSON.stringify(data));
-                } catch (e) {}
-                return data.notifications;
-            }
-            return [];
-        })
-        .catch(function(err) {
-            console.warn('[RemoteNotifications] Unable to fetch feed:', err);
-            try {
-                var cached = localStorage.getItem('do_remote_notifications_cache');
-                if (cached) {
-                    var parsed = JSON.parse(cached);
-                    return parsed.notifications || [];
+            })
+            .catch(function(rawErr) {
+                // 2. Repli local direct (fichier embarqué ou cache localStorage) sans interroger api.github.com
+                return fetch(LOCAL_FEED_URL + '?_ts=' + Date.now())
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('Local HTTP ' + r.status);
+                        return r.json();
+                    })
+                    .catch(function() {
+                        var cached = localStorage.getItem('do_remote_notifications_cache');
+                        if (cached) {
+                            try { return JSON.parse(cached); } catch (e) {}
+                        }
+                        return { notifications: [] };
+                    });
+            })
+            .then(function(data) {
+                if (data && Array.isArray(data.notifications)) {
+                    try {
+                        localStorage.setItem('do_remote_notifications_cache', JSON.stringify(data));
+                    } catch (e) {}
+                    return data.notifications;
                 }
-            } catch (e) {}
-            return [];
-        });
+                return [];
+            })
+            .catch(function(err) {
+                return [];
+            });
     }
 
     function evaluateNotifications(list) {
@@ -11952,7 +13111,7 @@ function setupEventListeners() {
     });
 
     /* =============================================================
-       OremusModuleManager — Gestionnaire des Modules Téléchargeables & Popup Prompt
+       OremusModuleManager — Gestionnaire des Modules (En Ligne & Hors-Ligne)
        ============================================================= */
     var OremusModuleManager = window.OremusModuleManager = {
         modules: {
@@ -11960,34 +13119,43 @@ function setupEventListeners() {
                 id: 'gabc',
                 name: 'Cantus Gregorianus & GABC',
                 sizeText: '8.7 Mo',
-                url: 'https://raw.githubusercontent.com/bastonus/jgabc/main/dist_modules/gabc.pack',
+                url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/data/gregorian_chants.json',
                 storageKey: 'do_module_gabc_installed',
-                toggleId: '#toggleGregorian',
-                cardId: '#moduleCardGabc',
+                rowId: '#moduleRowGabc',
                 badgeId: '#badgeModuleGabc',
                 btnDownloadId: '#btnDownloadModuleGabc',
                 btnDeleteId: '#btnDeleteModuleGabc',
-                promptTag: 'Partitions Grégoriennes',
-                promptMessage: 'Vous avez activé les partitions grégoriennes. Téléchargez le module hors-ligne (8,7 Mo) pour un chargement instantané sans connexion internet.',
-                promptNote: 'Sans le module, les partitions sont récupérées au fil de l\'eau en ligne via le CDN GitHub.'
+                progressWrapperId: '#moduleProgressGabc',
+                progressBarId: '#moduleProgressBarGabc',
+                progressTextId: '#moduleProgressTextGabc',
+                btnPauseId: '#btnPauseModuleGabc',
+                btnCancelId: '#btnCancelModuleGabc',
+                isPaused: false,
+                isCancelled: false,
+                currentPercent: 0,
+                interval: null
             },
             saints: {
                 id: 'saints',
                 name: 'Iconographia Sanctorum',
                 sizeText: '12.9 Mo',
-                url: 'https://raw.githubusercontent.com/bastonus/jgabc/main/dist_modules/saints.pack',
+                url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/img/saints/',
                 storageKey: 'do_module_saints_installed',
-                cardId: '#moduleCardSaints',
+                rowId: '#moduleRowSaints',
                 badgeId: '#badgeModuleSaints',
                 btnDownloadId: '#btnDownloadModuleSaints',
                 btnDeleteId: '#btnDeleteModuleSaints',
-                promptTag: 'Art Sacré & Iconographie',
-                promptMessage: 'Souhaitez-vous télécharger le module d\'iconographie des saints (12,9 Mo) pour profiter des portraits d\'art sacré 100% hors-ligne ?',
-                promptNote: 'Les portraits sont consultables en ligne par défaut si le module n\'est pas installé.'
+                progressWrapperId: '#moduleProgressSaints',
+                progressBarId: '#moduleProgressBarSaints',
+                progressTextId: '#moduleProgressTextSaints',
+                btnPauseId: '#btnPauseModuleSaints',
+                btnCancelId: '#btnCancelModuleSaints',
+                isPaused: false,
+                isCancelled: false,
+                currentPercent: 0,
+                interval: null
             }
         },
-
-        activePromptModule: null,
 
         isInstalled: function(modId) {
             var m = this.modules[modId];
@@ -11996,6 +13164,13 @@ function setupEventListeners() {
 
         initUI: function() {
             var self = this;
+
+            // Visible uniquement dans l'APK Android natif (Capacitor)
+            if (!isNativeAndroidApp()) {
+                $('#settingsGroupModules').hide();
+                return;
+            }
+
             Object.keys(self.modules).forEach(function(id) {
                 self.updateModuleCardUI(id);
             });
@@ -12009,16 +13184,74 @@ function setupEventListeners() {
             var $badge = $(m.badgeId);
             var $btnDl = $(m.btnDownloadId);
             var $btnDel = $(m.btnDeleteId);
+            var $prog = $(m.progressWrapperId);
+
+            $prog.addClass('hidden');
 
             if (installed) {
-                $badge.text('Installé').addClass('is-installed').removeClass('is-downloading');
+                if ($badge.length) $badge.text('Hors-ligne actif').addClass('is-installed').removeClass('is-online is-downloading');
                 $btnDl.hide();
                 $btnDel.show();
             } else {
-                $badge.text('Non installé').removeClass('is-installed is-downloading');
-                $btnDl.show().find('span').text('Télécharger (' + m.sizeText + ')');
+                if ($badge.length) $badge.text('En ligne').addClass('is-online').removeClass('is-installed is-downloading');
+                $btnDl.show().find('span').text('Rendre disponible hors connexion (' + m.sizeText + ')');
                 $btnDel.hide();
             }
+        },
+
+        togglePauseModule: function(modId) {
+            var m = this.modules[modId];
+            if (!m) return;
+            triggerHapticFeedback('selection');
+            m.isPaused = !m.isPaused;
+            var $pauseBtn = $(m.btnPauseId);
+            var $txt = $(m.progressTextId);
+            if (m.isPaused) {
+                $pauseBtn.addClass('is-paused').attr('title', 'Reprendre le téléchargement');
+                $pauseBtn.find('.do-icon-pause').hide();
+                $pauseBtn.find('.do-icon-play').show();
+                $txt.text(m.currentPercent + '% (Pause)');
+                showToastNotification('Téléchargement mis en pause.', 'info');
+            } else {
+                $pauseBtn.removeClass('is-paused').attr('title', 'Mettre en pause');
+                $pauseBtn.find('.do-icon-pause').show();
+                $pauseBtn.find('.do-icon-play').hide();
+                $txt.text(m.currentPercent + '%');
+                showToastNotification('Reprise du téléchargement.', 'info');
+            }
+        },
+
+        cancelModuleDownload: function(modId) {
+            var m = this.modules[modId];
+            if (!m) return;
+            triggerHapticFeedback('warning');
+            m.isCancelled = true;
+            m.isPaused = false;
+            m.currentPercent = 0;
+
+            if (m.interval) {
+                clearInterval(m.interval);
+                m.interval = null;
+            }
+
+            var $prog = $(m.progressWrapperId);
+            var $bar = $(m.progressBarId);
+            var $txt = $(m.progressTextId);
+            var $btnDl = $(m.btnDownloadId);
+            var $btnDel = $(m.btnDeleteId);
+            var $pauseBtn = $(m.btnPauseId);
+
+            $pauseBtn.removeClass('is-paused').attr('title', 'Mettre en pause');
+            $pauseBtn.find('.do-icon-pause').show();
+            $pauseBtn.find('.do-icon-play').hide();
+
+            $prog.addClass('hidden');
+            $bar.css('width', '0%');
+            $txt.text('0%');
+            $btnDl.show();
+            $btnDel.hide();
+
+            showToastNotification('Téléchargement de ' + m.name + ' annulé.', 'info');
         },
 
         downloadModule: function(modId, onComplete) {
@@ -12027,27 +13260,144 @@ function setupEventListeners() {
             if (!m) return;
 
             triggerHapticFeedback('medium');
-            var $badge = $(m.badgeId);
+            m.isPaused = false;
+            m.isCancelled = false;
+            m.currentPercent = 0;
+            if (m.interval) { clearInterval(m.interval); m.interval = null; }
+
             var $btnDl = $(m.btnDownloadId);
+            var $btnDel = $(m.btnDeleteId);
+            var $prog = $(m.progressWrapperId);
+            var $bar = $(m.progressBarId);
+            var $txt = $(m.progressTextId);
+            var $pauseBtn = $(m.btnPauseId);
 
-            $badge.text('Téléchargement...').addClass('is-downloading');
-            $btnDl.prop('disabled', true).find('span').text('Téléchargement en cours...');
+            $pauseBtn.removeClass('is-paused').attr('title', 'Mettre en pause');
+            $pauseBtn.find('.do-icon-pause').show();
+            $pauseBtn.find('.do-icon-play').hide();
 
-            // Simulation du téléchargement et mise en cache via ServiceWorker / CacheStorage
-            setTimeout(function() {
-                if ('caches' in window) {
-                    caches.open('oremus-modules-cache-v1').then(function(cache) {
-                        cache.add(m.url).catch(function(e) {
-                            console.warn('[OremusModuleManager] ServiceWorker cache warning:', e);
-                        });
+            $btnDl.hide();
+            $btnDel.hide();
+            $prog.removeClass('hidden');
+            $bar.css('width', '3%');
+            $txt.text('3%');
+            m.currentPercent = 3;
+
+            function setProgress(pct) {
+                if (m.isCancelled) return;
+                m.currentPercent = pct;
+                $bar.css('width', pct + '%');
+                if (!m.isPaused) {
+                    $txt.text(pct + '%');
+                }
+            }
+
+            function waitWhilePaused() {
+                return new Promise(function(resolve) {
+                    var check = function() {
+                        if (m.isCancelled) return resolve(false);
+                        if (!m.isPaused) return resolve(true);
+                        setTimeout(check, 150);
+                    };
+                    check();
+                });
+            }
+
+            var promise;
+            if (modId === 'gabc') {
+                var currentPct = 5;
+                m.interval = setInterval(function() {
+                    if (m.isCancelled) {
+                        clearInterval(m.interval);
+                        m.interval = null;
+                        return;
+                    }
+                    if (m.isPaused) return;
+
+                    currentPct = Math.min(94, currentPct + Math.floor(Math.random() * 8) + 4);
+                    setProgress(currentPct);
+                }, 200);
+
+                promise = (window.gregorianDB && typeof window.gregorianDB._loadFullDictionary === 'function')
+                    ? window.gregorianDB._loadFullDictionary().catch(function() {})
+                    : fetch(m.url).catch(function() {});
+                
+                promise = promise.then(function() {
+                    if (m.interval) { clearInterval(m.interval); m.interval = null; }
+                    if (m.isCancelled) return Promise.reject('cancelled');
+                    setProgress(100);
+                });
+            } else if (modId === 'saints') {
+                if ('caches' in window && window.DO_SAINT_ART_METADATA) {
+                    var keys = Object.keys(window.DO_SAINT_ART_METADATA);
+                    var total = keys.length;
+                    var loaded = 0;
+                    promise = caches.open('oremus-saints-cache').then(function(cache) {
+                        var batchSize = 10;
+                        var batchPromise = Promise.resolve();
+                        for (var i = 0; i < total; i += batchSize) {
+                            (function(subKeys) {
+                                batchPromise = batchPromise.then(function() {
+                                    if (m.isCancelled) return Promise.reject('cancelled');
+                                    return waitWhilePaused().then(function(canContinue) {
+                                        if (!canContinue || m.isCancelled) return Promise.reject('cancelled');
+                                        return Promise.all(subKeys.map(function(k) {
+                                            var u = 'https://raw.githubusercontent.com/bastonus/jgabc/master/img/saints/' + k + '.webp';
+                                            return cache.add(u).catch(function() {}).then(function() {
+                                                loaded++;
+                                                var pct = Math.round((loaded / total) * 100);
+                                                setProgress(pct);
+                                            });
+                                        }));
+                                    });
+                                });
+                            })(keys.slice(i, i + batchSize));
+                        }
+                        return batchPromise;
+                    });
+                } else {
+                    var pct = 5;
+                    m.interval = setInterval(function() {
+                        if (m.isCancelled) {
+                            clearInterval(m.interval);
+                            m.interval = null;
+                            return;
+                        }
+                        if (m.isPaused) return;
+                        pct = Math.min(95, pct + 12);
+                        setProgress(pct);
+                    }, 220);
+                    promise = new Promise(function(r) { setTimeout(r, 2000); }).then(function() {
+                        if (m.interval) { clearInterval(m.interval); m.interval = null; }
+                        if (m.isCancelled) return Promise.reject('cancelled');
+                        setProgress(100);
                     });
                 }
+            } else {
+                promise = Promise.resolve();
+            }
+
+            promise.then(function() {
+                if (m.isCancelled) return;
+                setProgress(100);
+                setTimeout(function() {
+                    if (m.isCancelled) return;
+                    localStorage.setItem(m.storageKey, 'true');
+                    $prog.addClass('hidden');
+                    self.updateModuleCardUI(modId);
+                    triggerHapticFeedback('success');
+                    showToastNotification('Module ' + m.name + ' téléchargé pour usage hors-ligne !', 'success');
+                    if (typeof onComplete === 'function') onComplete(true);
+                }, 350);
+            }).catch(function(err) {
+                if (err === 'cancelled' || m.isCancelled) {
+                    return;
+                }
                 localStorage.setItem(m.storageKey, 'true');
+                $prog.addClass('hidden');
                 self.updateModuleCardUI(modId);
-                triggerHapticFeedback('success');
-                showToastNotification('Module ' + m.name + ' installé avec succès !', 'success');
                 if (typeof onComplete === 'function') onComplete(true);
-            }, 1800);
+            });
         },
 
         deleteModule: function(modId) {
@@ -12058,31 +13408,14 @@ function setupEventListeners() {
             triggerHapticFeedback('warning');
             localStorage.removeItem(m.storageKey);
             if ('caches' in window) {
-                caches.open('oremus-modules-cache-v1').then(function(cache) {
-                    cache.delete(m.url).catch(function() {});
-                });
+                if (modId === 'saints') {
+                    caches.delete('oremus-saints-cache').catch(function() {});
+                } else if (modId === 'gabc') {
+                    caches.delete('oremus-gabc-cache').catch(function() {});
+                }
             }
             self.updateModuleCardUI(modId);
-            showToastNotification('Module ' + m.name + ' supprimé.', 'info');
-        },
-
-        showPromptModal: function(modId) {
-            var m = this.modules[modId];
-            if (!m || this.isInstalled(modId)) return;
-
-            this.activePromptModule = modId;
-            $('#modulePromptModalTag').text(m.promptTag);
-            $('#modulePromptModalMessage').text(m.promptMessage);
-            $('#modulePromptModalNoteText').text(m.promptNote);
-            $('#btnConfirmModulePromptText').text('Télécharger (' + m.sizeText + ')');
-
-            $('#modulePromptModalBackdrop, #modulePromptModal').removeClass('hidden');
-            triggerHapticFeedback('medium');
-        },
-
-        closePromptModal: function() {
-            $('#modulePromptModalBackdrop, #modulePromptModal').addClass('hidden');
-            this.activePromptModule = null;
+            showToastNotification('Module ' + m.name + ' retiré du cache (disponible en ligne).', 'info');
         }
     };
 
@@ -12097,6 +13430,16 @@ function setupEventListeners() {
         OremusModuleManager.deleteModule('gabc');
     });
 
+    $(document).on('click', '#btnPauseModuleGabc', function(e) {
+        e.preventDefault();
+        OremusModuleManager.togglePauseModule('gabc');
+    });
+
+    $(document).on('click', '#btnCancelModuleGabc', function(e) {
+        e.preventDefault();
+        OremusModuleManager.cancelModuleDownload('gabc');
+    });
+
     $(document).on('click', '#btnDownloadModuleSaints', function(e) {
         e.preventDefault();
         OremusModuleManager.downloadModule('saints');
@@ -12107,28 +13450,14 @@ function setupEventListeners() {
         OremusModuleManager.deleteModule('saints');
     });
 
-    // Event Modale Prompt Module
-    $(document).on('click', '#btnConfirmModulePrompt', function(e) {
+    $(document).on('click', '#btnPauseModuleSaints', function(e) {
         e.preventDefault();
-        var modId = OremusModuleManager.activePromptModule || 'gabc';
-        OremusModuleManager.closePromptModal();
-        OremusModuleManager.downloadModule(modId);
+        OremusModuleManager.togglePauseModule('saints');
     });
 
-    $(document).on('click', '#btnCancelModulePrompt, #btnCloseModulePromptModal, #modulePromptModalBackdrop', function(e) {
+    $(document).on('click', '#btnCancelModuleSaints', function(e) {
         e.preventDefault();
-        OremusModuleManager.closePromptModal();
-    });
-
-    // Déclencheur automatique : Popup au premier passage sur "Cantus Gregorianus" si non installé
-    $('#toggleGregorian').on('change.moduleprompt', function() {
-        if ($(this).is(':checked')) {
-            if (!OremusModuleManager.isInstalled('gabc')) {
-                setTimeout(function() {
-                    OremusModuleManager.showPromptModal('gabc');
-                }, 350);
-            }
-        }
+        OremusModuleManager.cancelModuleDownload('saints');
     });
 
     OremusModuleManager.initUI();

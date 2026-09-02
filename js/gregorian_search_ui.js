@@ -921,11 +921,18 @@
                 // Votives = "Coronatio", "Propaganda" → pas d'image
                 var missaKey = item.key || '';
                 var saintImgSrc = '';
+                var relImgPath = '';
                 if (window.doSearchImagesEnabled) {
+                    var isInstalled = (window.OremusModuleManager && typeof window.OremusModuleManager.isInstalled === 'function')
+                        ? window.OremusModuleManager.isInstalled('saints')
+                        : false;
+
                     if (/^\d/.test(missaKey)) {
-                        saintImgSrc = 'img/saints/' + missaKey + '.webp';
+                        relImgPath = 'img/saints/' + missaKey + '.webp';
+                        saintImgSrc = isInstalled ? relImgPath : ('https://raw.githubusercontent.com/bastonus/jgabc/master/' + relImgPath);
                     } else if (/^(Adv|Epi|Nat|Pasc|Pent|Quad|Quadp)/i.test(missaKey)) {
-                        saintImgSrc = 'img/tempora/' + missaKey + '.webp';
+                        relImgPath = 'img/tempora/' + missaKey + '.webp';
+                        saintImgSrc = relImgPath;
                     }
                     // Sinon (Coronatio, Propaganda…) : pas d'image, affichage texte
                 }
@@ -938,10 +945,10 @@
 
                 if (saintImgSrc) {
                     // Image de fond avec gradient au sommet pour lisibilité du titre
-                    // onerror: retire l'image + gradient + classe, laisse la carte en mode texte
-                    html += '  <img class="gregorian-card-saint-bg" src="' + escapeHtml(saintImgSrc) + '" alt="" aria-hidden="true"'
-                          + ' onerror="var c=this.parentElement;c.classList.remove(\'has-saint-img\');var g=c.querySelector(\'.gregorian-card-saint-gradient\');if(g)g.remove();this.remove();">';
-                    html += '  <div class="gregorian-card-saint-gradient"></div>';
+                    // Fallback intelligent : si l'image locale échoue, basculer sur GitHub Usercontent
+                    html += '  <img class="gregorian-card-saint-bg" src="' + escapeHtml(saintImgSrc) + '" data-rel="' + escapeHtml(relImgPath) + '" alt="" aria-hidden="true"'
+                          + ' onerror="if(!this.dataset.triedRemote && this.getAttribute(\'data-rel\')){this.dataset.triedRemote=\'1\';this.src=\'https://raw.githubusercontent.com/bastonus/jgabc/master/\'+this.getAttribute(\'data-rel\');}else{var c=this.parentElement;c.classList.remove(\'has-saint-img\');var g=c.querySelector(\'.gregorian-card-saint-gradient\');if(g)g.remove();this.remove();}">'
+                          + '  <div class="gregorian-card-saint-gradient"></div>';
                 }
 
                 html += '  <div class="gregorian-card-header">';

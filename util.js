@@ -1107,7 +1107,7 @@ if(typeof window=='object') (function(window) {
           }
         }
         noteElem = note.svgNode;
-        if(noteElem) {
+        if(noteElem && (!window.doYT || window.doYT.syncEnabled !== false)) {
           var href = noteElem.attributes.getNamedItem('href').value;
           if(href == '#None') {
             noteElem = noteElem.previousSibling;
