@@ -1140,6 +1140,7 @@
             return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>';
         }
     }
+    window.getViewToggleIconHtml = getViewToggleIconHtml;
 
     // Rendu complet de la page de recherche dans #do-content-stream
     function renderMainView() {
@@ -1326,8 +1327,10 @@
         $(document).on('click', '.btn-play-main-chant', function(e) {
             e.stopPropagation();
             var $card = $(this).closest('.do-chant-main-view-card');
+            var $targetCard = $card.find('.do-chant-card');
+            if (!$targetCard.length) $targetCard = $card;
             if (window.switchToChantCard) {
-                window.switchToChantCard($card, true);
+                window.switchToChantCard($targetCard, true);
             }
         });
 
@@ -1484,7 +1487,7 @@
         $('#doHourLabel').text(subHeader.toUpperCase());
 
         var cardHtml = 
-            '<div class="do-card is-missa" data-chant-id="' + chantId + '" data-chant-part="' + escapeHtml(officePart) + '" data-chant-title="' + escapeHtml(title) + '">' +
+            '<div class="do-card is-missa do-chant-main-view-card" data-chant-id="' + chantId + '" data-chant-part="' + escapeHtml(officePart) + '" data-chant-title="' + escapeHtml(title) + '">' +
             '  <div class="do-card-body">' +
             '    <div class="do-chant-card-wrapper" data-chant-id="' + chantId + '">' +
             '      <div class="do-chant-card">' +
@@ -1514,33 +1517,53 @@
             '</div>';
 
         var $card = $(cardHtml);
+        $card.data('chant-gabc', gabc);
+        $card.data('chant-title', title);
+        $card.data('chant-part', officePart);
+        $card.data('chant-id', chantId);
         $stream.empty().append($card);
 
         var $chantWrapper = $card.find('.do-chant-card-wrapper');
         $chantWrapper.data('cached-gabc', gabc);
+        $chantWrapper.data('chant-id', chantId);
+
+        var $chantCard = $card.find('.do-chant-card');
+
+        function playThisScore() {
+            var score = $chantCard.data('chant-score');
+            if (score) {
+                if (typeof window.switchToChantCard === 'function') {
+                    window.switchToChantCard($chantCard, true);
+                }
+            } else {
+                $card.find('.btn-play-main-chant span').text('Chargement...');
+                $chantCard.one('chant:rendered', function() {
+                    $card.find('.btn-play-main-chant span').text('Écouter');
+                    if (typeof window.switchToChantCard === 'function') {
+                        window.switchToChantCard($chantCard, true);
+                    }
+                });
+            }
+        }
 
         // Utilisation directe du moteur natif de la Messe
         if (typeof window.renderSingleChantScore === 'function') {
-            window.renderSingleChantScore($chantWrapper, true);
+            window.renderSingleChantScore($chantWrapper, true, function(score) {
+                if (isAutoPlay && score) {
+                    playThisScore();
+                }
+            });
         }
-
-        var $chantCard = $card.find('.do-chant-card');
 
         // Handler pour le bouton "Écouter"
         $card.find('.btn-play-main-chant').off('click').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (typeof window.switchToChantCard === 'function') {
-                window.switchToChantCard($chantCard, true);
-            }
+            playThisScore();
         });
 
-        // Synchronisation avec le lecteur audio (fermé par défaut)
-        if (isAutoPlay) {
-            if (typeof window.switchToChantCard === 'function') {
-                window.switchToChantCard($chantCard, true);
-            }
-        } else {
+        // Synchronisation avec le lecteur audio (fermé par défaut si pas autoPlay)
+        if (!isAutoPlay) {
             if (typeof window.closeDoPlayer === 'function') {
                 window.closeDoPlayer();
             }

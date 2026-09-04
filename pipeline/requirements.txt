@@ -1,0 +1,21 @@
+﻿# Dépendances du projet Oremus — alignement automatisé note par note (GABC / YouTube)
+# Version : v3 corrigé (v3.1)
+#
+# Installation complète (CUDA 12.1) :
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+#   pip install git+https://github.com/m-bain/whisperx.git
+
+# Traitement audio
+librosa>=0.10.0
+scipy>=1.11.0
+
+# Estimation F0 (GPU)
+torchcrepe>=0.0.20
+
+# Téléchargement audio YouTube
+yt-dlp>=2024.1.0
+
+# Whisperx est installé depuis GitHub (voir ci-dessus)
+# Les dépendances transitives de whisperx (faster-whisper, transformers,
+# ctranslate2, pyannote.audio) sont installées automatiquement.

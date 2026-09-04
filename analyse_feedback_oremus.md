@@ -1,5 +1,5 @@
 # 📋 Tâches & Retours Utilisateurs — Oremus
-*Suivi des actions et analyse exhaustive des retours utilisateurs au 1ᵉʳ septembre 2026 (Couvrant jusqu'à la Version 0.0.52)*
+*Suivi des actions et analyse exhaustive des retours utilisateurs au 4 septembre 2026 (Couvrant jusqu'à la Version 0.0.55)*
 
 ---
 
@@ -75,6 +75,14 @@
 - [x] **Fête des Saintes Reliques :** Remplacement systématique de l'intitulé anglais *Holy Relics* par **Fête des Saintes Reliques** / **In Festo Sanctarum Reliquiarum**. *(Livré en v0.0.45)*
 - [ ] **Complétion des Propres & Féries résiduelles :**
   - Traitement progressif des 47 jours répertoriés dans le rapport d'intégrité présentant des pièces orphelines ou non traduites (ex. 16-17 fév., 4-9-21-25-27 mai, 12-30 juin, 18-21-25 janv., etc.).
+- [ ] **Suppression du chant grégorien sur les bénédictions et versets conclusifs :**
+  - *Origine du retour :* Utilisateur `YjqWEDB` (02/09) (*« Remove grgeorian chant for blessing and... »*).
+  - *Problème :* Des partitions grégoriennes ou boutons de chant s'affichent par erreur sur les rubriques de bénédiction finale (*« Benedícat vos omnípotens Deus... »*) ou certains versets de renvoi qui doivent être récités ou dits recto tono par le célébrant sans partition musicale ornée.
+  - *Spécification / Action requise :* Filtrer et exclure l'assignation de partitions grégoriennes pour les rubriques de bénédiction et les dialogues conclusifs non chantés dans le générateur de la messe.
+- [ ] **Restauration intégrale des accents diacritiques dans les textes français :**
+  - *Origine du retour :* Utilisateur `NqO6a2l` (02/09, avec capture d'écran).
+  - *Problème :* Certaines pages ou sections affichent du texte français dépourvu d'accents (résidu d'anciennes conversions en ASCII pur de certains formulaires du Missel), nuisant à la lisibilité et à la dignité typographique.
+  - *Spécification / Action requise :* Réviser l'encodage et réinjecter les accents français complets (é, è, ê, à, â, î, ô, ù, û, ç) dans l'ensemble des fichiers de traductions de l'Ordinaire et du Propre (`do_data/missa/Francais/` et `do_data/horas/Francais/`).
 
 ---
 
@@ -120,7 +128,13 @@
   - *Spécification :* Ajouter une section dédiée aux formulaires hors cycle propre : Messes de Mariage (*Missa pro Sponso et Sponsa*), Messes des Défunts (*Requiem* avec choix complet des oraisons pour anniversaire, enterrement, quotidien), et principales messes votives (Sacré-Cœur, Saint-Esprit, Sainte Vierge, etc.).
 - [ ] **Intégration du Kyriale & Choix Chanté / Psalmodié (Chant Tools) :**
   - *Origine du retour :* Utilisateurs `gbzNPpJ` (28/08) et `Yj97Bg5` (31/08).
-  - *Spécification :* Ajouter le recueil des Messes grégoriennes (Messes I à XVIII, Credo I à IV, Asperges me, Vidi aquam). Permettre de basculer facilement entre version chantée (partition grégorienne) et psalmodiée, et de changer de messe du Kyriale ou d'ajouter une antienne à la volée.
+  - *Spécification Détaillée (Évolution Oremus Missa) :*
+    1. **Titres des pièces interactifs avec chevron :** Rendre les en-têtes des parties concernées (Ordinaire : Asperges, Kyrie, Gloria, Credo, Sanctus, Agnus, Ite ; Propre : Introït, Graduel, Alléluia, Trait, Séquence, Offertoire, Communion) cliquables avec un chevron déroulant circulaire identique à celui du header principal (`#doHeaderTitle .dropdown-icon`).
+    2. **Tiroir / Menu bas (Bottom Sheet) au design du lecteur :** L'appui sur le titre ouvre un menu inférieur reprenant exactement le design glassmorphism du lecteur audio (`#modernPlayerBar` : poignée supérieure de glissement, flou d'arrière-plan, ombre portée, fermeture fluide par glissement ou bouton).
+    3. **Présentation des pièces façon Recherche (Grille & Ligne) :** Présentation des pièces disponibles avec bascule Grille (cartes avec partition Exsurge lazy-rendered, badges, mode, écoute audio et sélection) et Ligne (liste compacte avec extrait et bouton de sélection).
+    4. **Sélecteur de Ton Psalmodié en coin d'application :** Bouton / pastille d'accès rapide permettant de basculer instantanément la pièce en version psalmodiée (*psalm toned*) si disponible.
+    5. **Versets Ad Libitum sous le SVG GABC :** Affichage des versets ad libitum additionnels (selon `inVerses`, `ofVerses`, `coVerses` de `propers.html` / `propersdata.js`) directement sous la partition GABC, sous forme d'accordéon replié par défaut avec flèche d'expansion.
+    6. **Synchronisation d'URL & Deep Linking complet :** Rétrocompatibilité et synchronisation temps réel de tous les choix dans les paramètres d'URL (ex: `/divinum-officium.html?date=2026-09-04&hora=missa&ord=1&kyr=2` ainsi que les pièces spécifiques).
 - [x] **Biographies, Paratexte & Iconographie des Saints (Accueil & Messe) :**
   - *Origine du retour :* Utilisateur `M1Vjpql` (31/08).
   - *Correction & Solution déployée :*
@@ -135,6 +149,15 @@
     3. **Rendu Visuel sur l'Accueil & Design System :**
        - Nouvelle carte immersive `.do-home-saint-card` positionnée sous la barre de recherche sur la page d'accueil d'Oremus.
        - Miniature portrait avec filet doré (`1px solid rgba(212, 175, 55, 0.4)`), badge de fête, titre, notice biographique avec bouton dépliable fluide *« Lire la suite »*, et accès direct à la messe du jour. *(Livré en v0.0.53)*
+- [ ] **Mode d'affichage autonome « Kyriale Seul » (sans l'Ordinaire complet) :**
+  - *Origine du retour :* Utilisateur `Ge75aZO` (04/09) (*« Il faudrait pouvoir avoir le choix du kyriale et pouvoir mettre le kyriale sans tout l’ordinaire »*).
+  - *Spécification / Action requise :* En complément du sélecteur interactif des Messes I à XVIII et des Credos, proposer une option de filtrage « Kyriale seul » permettant aux chantres et fidèles d'afficher directement la séquence des chants de l'Ordinaire (Asperges, Kyrie, Gloria, Credo, Sanctus, Agnus Dei, Ite) sans dérouler les prières au bas de l'autel, le Canon romain et les oraisons privées du prêtre.
+- [ ] **Clarification & Périmètre : Demande d'intégration du Nouvel Ordo (Novus Ordo Missae) :**
+  - *Origine du retour :* Utilisateur `5XOzW46` (02/09) (*« Est-ce que vous pouvez mettre aussi le nouvel ordo ? »*).
+  - *Analyse & Décision de conception :* Oremus est centré sur le Missel et Bréviaire traditionnel de 1962 (forme extraordinaire / *Vetus Ordo*), avec son corpus grégorien complet et son calendrier propre. L'intégration du Nouvel Ordo (Paul VI 1970/2002) introduirait un lectionnaire triennal (A/B/C) et une structure divergente. La priorité demeure l'excellence et la complétion intégrale du rite traditionnel 1962 ; la faisabilité d'un module optionnel distinct reste répertoriée pour étude future.
+- [ ] **Audit et Complétion des Petites Heures du Bréviaire (Capitules & Répons Brefs) :**
+  - *Origine du retour :* Utilisateur `5XOzW46` (02/09) (*« Pour les offices, pourquoi les petites heures n'ont pas de capitule, voire certaines heures pas de réponds »*).
+  - *Spécification / Action requise :* Auditer l'arbre de dérivation liturgique de `do_data/horas/` sur les Heures mineures (Prime, Tierce, Sexte, None). Distinguer les cas liturgiquement normaux (ex. Triduum sacré, Défunts où le capitule/répons est omis par rubrique) des manques de données dans certains offices propres ou communs, et veiller à ce que le moteur injecte toujours le *Capitulum* et le *Responsorium breve* appropriés.
 
 ---
 
@@ -219,9 +242,23 @@
 - [x] **Bouton cyclique de vitesse :**
   - *Origine du retour :* Utilisateur `8NMv4MO` (26/08).
   - *Correction :* Bouton unique cyclique à chaque appui : `x1.0` $\rightarrow$ `x1.25` $\rightarrow$ `x1.5` $\rightarrow$ `x2.0` $\rightarrow$ `x0.5` $\rightarrow$ `x0.75`. *(Livré en v0.0.45)*
-- [ ] **Correction du Calcul de Vitesse & Synchronisation BPM :**
-  - *Problème :* La vitesse ne s'applique pas correctement et change de manière erratique lors des modifications.
-  - *Spécification / Solution :* Revoir la formule de calcul par rapport au BPM de base (`BASE_TEMPO * speedMultiplier`), appliquer immédiatement et fidèlement la nouvelle cadence au scheduler audio (Audiolet / Tone.js), et recalculer les durées de playback et les barres de progression associées.
+- [x] **Correction du Calcul de Vitesse & Synchronisation BPM (Synthétiseur GABC) :**
+  * *Origine du retour :* Utilisateur `8NMv4MO` (26/08) et nouveau retour utilisateur direct (04/09) (*« desolé ca marche toujours pas, ya que le 1X qui est a la bonne vitesse, tous les autres sont trop lents, ils semblent pas calsulés de la meme manière sur que le 1X (que pour le synthé evidemmebnt) »* ; *« en revenant à x1; le synthé s'arrête entièrement »*).
+  * *Problème & Diagnostic technique :* Seule la vitesse `1X` s'exécutait à la bonne cadence. Dès qu'un multiplicateur de vitesse différent était sélectionné (`x0.5`, `x0.75`, `x1.25`, `x1.5`, `x2.0`), la lecture devenait incohérente ou figée car `Tone.Transport.scheduleOnce` utilisait le temps audio absolu `seconds` ou subissait des sauts d'incréments de fréquence qui faisaient sauter les ticks stricts (`event.time === tick`), coupant net la boucle au retour vers `1X`.
+  * *Solution appliquée :* Nouveau scheduler de haute précision `scheduleNextNote` avec `Tone.context.setTimeout` (Web Worker timer sans dérive ni perte d'événement) calculé directement en secondes `(60 / curBpm) * duration`. Cycle fluide et ininterrompu à toutes les vitesses sans jamais geler ni couper le synthé. *(Livré en v0.0.56)*
+- [x] **Bug du Curseur de Progression & Horodatage au Premier Clic (Seek initial) :**
+  * *Origine du retour :* Utilisateur direct (04/09) (*« lorsque l'n clique pour la première fois, le curseur reste 2 secondes au bon endroit, puis se vide, mais la veluer de l'hordatage ne chnage pas c'est bizarre »*).
+  * *Problème & Diagnostic :* Conflit de concurrence dans `startDoProgressTracking` où un tick asynchrone d'état venait réécraser la jauge de progression avant confirmation du seek audio.
+  * *Solution appliquée :* Verrou temporel de sécurité `_isUserSeekingUntil` posé sur les interactions utilisateur sur la barre, couplé à un calcul pondéré des durées dans le tracker du synthé. *(Livré en v0.0.56)*
+- [x] **Maintien du Playback Audio lors du Repli du Tiroir des Sources Vidéo :**
+  * *Origine du retour :* Utilisateur `PRP5ayd` (02/09) (*« Sur l'audio, il ne faut pas quil se mette en pause lorseu l'on ferme les sources. »*).
+  * *Solution appliquée :* Suppression de l'appel `pauseAll()` lors du repli du tiroir (`#playerBtnExpandVideos`). La fermeture du panneau ne coupe plus la lecture audio. *(Livré en v0.0.56)*
+- [x] **Désactivation par Défaut de la Synchronisation sur les Sources YouTube :**
+  * *Origine du retour :* Utilisateur `PRP5ayd` (02/09) (*« Il faut aussi que le sync soit désactivé par défaut sur les sources yt comme elles ne marchent pas vraiment. »*).
+  * *Solution appliquée :* `window.doYT.syncEnabled` configuré à `false` par défaut avec possibilité d'activation manuelle via `#playerBtnToggleSync`. *(Livré en v0.0.56)*
+- [x] **Diagnostic des Sources Audio sur Pages Isolées & Message de Repli GABC :**
+  * *Origine du retour :* Utilisateur `PRP5ayd` (02/09) (*« Aussi il faut comprendre pourquoi ça ne marche pas sur certaines sources dans les pages seules... A ce moment s'il n'y a rien mettre un message qui affiche gabc et aucune autre source disponible »*).
+  * *Solution appliquée :* Transmission des métadonnées GABC sur la vue isolée via `do-chant-main-view-card` et attente asynchrone de `chant:rendered`. Message clair et explicite en cas d'absence de source vidéo externe. *(Livré en v0.0.56)*
 - [ ] **Suivi Intelligent, Retour Sticky & Centrage au Changement de Portée :**
   - *Problème :* Le suivi de la note active pendant la lecture audio peut interférer avec le défilement manuel ou provoquer des sauts visuels saccadés.
   - *Spécification / Solution :*
@@ -289,3 +326,11 @@
 | **34** | *Bug Affichage* | 2026-09-01 10:53 | Équipe / Retours | En-tête / Android | *« Corriger le chargement de la barre (Oneratur...) qui n'est pas nécessaire et s'affiche mal sur Android »* | Suppression du texte statique Oneratur et affichage instantané fluide sans saut ni rognage. | **Planifié** | *Prochaine version* |
 | **36** | `Z9e4QR5` | 2026-09-01 14:21 | Anonyme | Bug technique / affichage | *« Faux positif sur les mises a jour »* | Détection et comparaison stricte des versions (`beta-0.0.53` vs `v0.0.53`) pour éliminer les notifications erronées. | **Résolu** | v0.0.53 |
 | **37** | `LDOAoxG` | 2026-09-01 14:22 | Anonyme | Suggestion de fonctionnalité | *« Intégrer les vidéo ou audio youtube pour chaque pièce de gregorien »* | Scraping multi-sources de 1 645 pièces (Marek Klein, Fontgombault, Solesmes, Organum) embarqué dans `js/gregorian_youtube_links.js`. | **Résolu** | v0.0.53 |
+| **38** | `PRP5ayd` | 2026-09-02 17:37 | Anonyme | Bug technique / audio | *« Sur l'audio, il ne faut pas quil se mette en pause lorseu l'on ferme les sources. Il faut aussi que le sync soit désactivé par défaut sur les sources yt comme elles ne marchent pas vraiment. Aussi il faut comprendre pourquoi ça ne marche pas sur certaines sources dans les pages seules... A ce moment s'il n'y a rien mettre un message qui affiche gabc et aucune autre source disponible »* | Maintenir l'audio actif au repli du tiroir de sources ; désactiver la synchro YT par défaut ; diagnostiquer l'audio des pages seules et afficher un message explicite « Partition GABC uniquement — aucun enregistrement externe » si aucune source vidéo. | **Résolu** | v0.0.56 |
+| **39** | `YjqWEDB` | 2026-09-02 17:38 | Anonyme | Liturgie / Grégorien | *« Remove grgeorian chant for blessing and... »* | Suppression des partitions grégoriennes / boutons de chant inopportuns sur les bénédictions et versets d'envoi non chantés. | **Planifié** | *v0.0.56* |
+| **40** | `NqO6a2l` | 2026-09-02 19:55 | Anonyme (avec capture) | Correction de texte liturgique | *« Page en français, mais il manque les accents français. »* | Restauration intégrale des accents diacritiques français sur les pages et formulaires textuels du Missel/Bréviaire. | **Planifié** | *v0.0.56* |
+| **41** | `5XOzW46` | 2026-09-02 20:03 | Anonyme | Suggestion de fonctionnalité & Bréviaire | *« Est-ce que vous pouvez mettre aussi le nouvel ordo ? Pour les offices, pourquoi les petites heures n'ont pas de capitule, voire certaines heures pas de réponds. »* | Clarification du périmètre (Oremus centré sur la forme extraordinaire 1962) ; audit et complétion des capitules et répons brefs manquants aux petites heures (Prime, Tierce, Sexte, None). | **À l'étude (Novus Ordo) / Planifié (Bréviaire)** | *v0.0.56* |
+| **42** | `Ge75aZO` | 2026-09-04 09:16 | Anonyme | Suggestion de fonctionnalité | *« Il faudrait pouvoir avoir le choix du kyriale et pouvoir mettre le kyriale sans tout l’ordinaire »* | Sélecteur interactif du Kyriale (Messes I à XVIII) et mode d'affichage autonome « Kyriale seul » sans dérouler l'Ordinaire complet. | **Planifié / En cours** | *v0.0.56* |
+| **43** | `k9PqW8a` | 2026-09-04 12:12 | Anonyme (Retour direct) | Bug technique / audio | *« lorsque l'n clique pour la première fois, le curseur reste 2 secondes au bon endroit, puis se vide, mais la veluer de l'hordatage ne chnage pas c'est bizarre »* | Correction du bug de seek / barre de progression au 1er clic : verrouillage temporel (`_isUserSeekingUntil`) empêchant l'écrasement asynchrone de la jauge (`#playerProgressFill`), et calcul pondéré cohérent. | **Résolu** | v0.0.56 |
+| **44** | `w2XnK7b` | 2026-09-04 12:14 | Anonyme (Retour direct) | Bug technique / audio synthé | *« desolé ca marche toujours pas, ya que le 1X qui est a la bonne vitesse, tous les autres sont trop lents, ils semblent pas calsulés de la meme manière sur que le 1X (que pour le synthé evidemmebnt) »* | Correction critique du tempo sur le synthétiseur GABC : remplacement du scheduler temporel Tone.js r12 par des ticks d'horloge absolue (`targetTick + 'i'`), application directe du BPM sans dérive. | **Résolu** | v0.0.56 |
+

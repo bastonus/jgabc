@@ -801,30 +801,30 @@ mark.search-highlight {
 
 .gregorian-results.is-list .gregorian-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 9px 12px;
-    border-radius: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.15s ease;
-    border: none !important;
-    background: transparent !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+    background: var(--background-surface, rgba(255, 255, 255, 0.03)) !important;
     box-shadow: none !important;
     width: 100%;
     text-align: left;
-    margin-bottom: 2px;
+    margin-bottom: 6px;
     box-sizing: border-box;
 }
 
 .gregorian-results.is-list .gregorian-card:hover {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.3) !important;
     transform: none;
 }
 
 .gregorian-results.is-list .gregorian-card-header {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -857,7 +857,13 @@ mark.search-highlight {
 }
 
 .gregorian-results.is-list .gregorian-card-source {
-    display: none !important;
+    display: inline-block !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    color: var(--text-tertiary, #64748b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gregorian-results.is-list .gregorian-card-badges {
@@ -882,12 +888,43 @@ mark.search-highlight {
     margin-left: 8px;
 }
 
-/* En mode liste, masquer aperçus et actions superflus */
-.gregorian-results.is-list .gregorian-score-container,
-.gregorian-results.is-list .gregorian-text-preview,
-.gregorian-results.is-list .gregorian-card-middle,
-.gregorian-results.is-list .gregorian-card-actions {
+/* En mode liste : masquer uniquement la partition SVG, afficher les extraits et actions */
+.gregorian-results.is-list .gregorian-score-container {
     display: none !important;
+}
+
+.gregorian-results.is-list .gregorian-card-middle,
+.gregorian-results.is-list .gregorian-text-preview {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-family: 'Crimson Text', serif !important;
+    font-size: 0.92rem !important;
+    line-height: 1.38 !important;
+    color: var(--text-secondary, #94a3b8) !important;
+    margin: 2px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+.gregorian-results.is-list .gregorian-card-middle p,
+.gregorian-results.is-list .gregorian-text-preview p {
+    margin: 0 !important;
+    line-height: inherit !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    display: inline !important;
+}
+
+.gregorian-results.is-list .gregorian-card-actions {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Éléments communs aux cartes */

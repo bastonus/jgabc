@@ -21,13 +21,22 @@
     "part": "Introitus",
     "audios": [
       {
-        "id": "CmwbSrZHhLU",
-        "title": "Vidi civitatem",
-        "channel": "Choeur des Moines de Ligugé - Topic",
-        "duration": "3:52",
-        "url": "https://www.youtube.com/watch?v=CmwbSrZHhLU",
-        "embedUrl": "https://www.youtube.com/embed/CmwbSrZHhLU",
-        "source": "Choeur des Moines de Ligugé - Topic"
+        "id": "Bjw3a4qMphs",
+        "title": "Introitus - Vidi civitatem (Gregoriano)",
+        "channel": "Cappella Musicale Pontificia Sistina",
+        "duration": "1:52",
+        "url": "https://www.youtube.com/watch?v=Bjw3a4qMphs",
+        "embedUrl": "https://www.youtube.com/embed/Bjw3a4qMphs",
+        "source": "Cappella Musicale Pontificia Sistina - Mons. Massimo Palombella"
+      },
+      {
+        "id": "WLDLqRJ4gUs",
+        "title": "00005 - Vidi civitatem - Introitus - 8",
+        "channel": "Gregorian Karaoke",
+        "duration": "1:28",
+        "url": "https://www.youtube.com/watch?v=WLDLqRJ4gUs",
+        "embedUrl": "https://www.youtube.com/embed/WLDLqRJ4gUs",
+        "source": "Gregorian Karaoke"
       }
     ]
   },
@@ -38228,31 +38237,6 @@
       }
     ]
   },
-  "507a": {
-    "id": "507a",
-    "incipit": "Confitemini... quoniam",
-    "part": "Alleluia",
-    "audios": [
-      {
-        "id": "U9fhXjMylGE",
-        "title": "Alleluia: Confitemini Domino, quoniam bonus",
-        "channel": "Marek Klein - Topic",
-        "duration": "1:38",
-        "url": "https://www.youtube.com/watch?v=U9fhXjMylGE",
-        "embedUrl": "https://www.youtube.com/embed/U9fhXjMylGE",
-        "source": "Marek Klein"
-      },
-      {
-        "id": "WuVlF88Shps",
-        "title": "Alleluia: Confitemini Domino, quoniam bonus",
-        "channel": "GradualeProject",
-        "duration": "1:41",
-        "url": "https://www.youtube.com/watch?v=WuVlF88Shps",
-        "embedUrl": "https://www.youtube.com/embed/WuVlF88Shps",
-        "source": "GradualeProject"
-      }
-    ]
-  },
   "7366": {
     "id": "7366",
     "incipit": "Stella cæli",
@@ -39941,6 +39925,31 @@
         "duration": "3:05",
         "url": "https://www.youtube.com/watch?v=eYl4O3FL73g",
         "embedUrl": "https://www.youtube.com/embed/eYl4O3FL73g",
+        "source": "GradualeProject"
+      }
+    ]
+  },
+  "507a": {
+    "id": "507a",
+    "incipit": "Confitemini... quoniam",
+    "part": "Alleluia",
+    "audios": [
+      {
+        "id": "U9fhXjMylGE",
+        "title": "Alleluia: Confitemini Domino, quoniam bonus",
+        "channel": "Marek Klein - Topic",
+        "duration": "1:38",
+        "url": "https://www.youtube.com/watch?v=U9fhXjMylGE",
+        "embedUrl": "https://www.youtube.com/embed/U9fhXjMylGE",
+        "source": "Marek Klein"
+      },
+      {
+        "id": "WuVlF88Shps",
+        "title": "Alleluia: Confitemini Domino, quoniam bonus",
+        "channel": "GradualeProject",
+        "duration": "1:41",
+        "url": "https://www.youtube.com/watch?v=WuVlF88Shps",
+        "embedUrl": "https://www.youtube.com/embed/WuVlF88Shps",
         "source": "GradualeProject"
       }
     ]

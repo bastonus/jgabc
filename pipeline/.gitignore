@@ -1,0 +1,14 @@
+﻿# Répertoires générés automatiquement par le pipeline
+audio_corpus/
+temp_word_data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db

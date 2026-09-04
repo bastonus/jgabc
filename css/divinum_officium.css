@@ -7549,6 +7549,501 @@ body.mass-toc-open #modernPlayerBar {
     color: #dc3545;
 }
 
+/* =============================================================
+   INTERACTIVE MASS PARTS PICKER & BOTTOM SHEET DRAWER
+   (Kyriale, Credo, Propers, Psalm-Toned & Verses Ad Libitum)
+   ============================================================= */
+
+/* ── Interactive Part Titles with Header-Style Chevron ── */
+.do-card-title.do-part-picker-trigger {
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    border-radius: 8px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    user-select: none;
+}
+
+.do-card-title.do-part-picker-trigger:hover {
+    color: var(--primary-color, #c96b63);
+}
+
+.do-card-title.do-part-picker-trigger:hover .dropdown-icon {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18) !important;
+    color: var(--primary-color, #c96b63) !important;
+}
+
+.do-card-title.do-part-picker-trigger.is-open .dropdown-icon,
+.do-card-title.do-part-picker-trigger[aria-expanded="true"] .dropdown-icon {
+    transform: rotate(180deg) !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.25) !important;
+    color: var(--primary-color, #c96b63) !important;
+}
+
+/* ── Mass Part Picker Backdrop ── */
+.do-part-picker-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    z-index: 966 !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.do-part-picker-backdrop.is-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* ── Bottom Sheet Drawer (Same design system as #modernPlayerBar) ── */
+.do-part-picker-drawer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 280px !important;
+    right: 0 !important;
+    width: calc(100vw - 280px) !important;
+    max-width: calc(100vw - 280px) !important;
+    height: auto !important;
+    max-height: 82vh !important;
+    padding: 10px 24px 20px !important;
+    border-radius: 16px 16px 0 0 !important;
+    border: none !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45) !important;
+    background-color: rgba(18, 18, 20, 0.88) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    z-index: 967 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    transform: translateY(100%) !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.32s !important;
+    box-sizing: border-box !important;
+}
+
+[data-theme="dark"] .do-part-picker-drawer,
+[data-theme="oled"] .do-part-picker-drawer {
+    background-color: rgba(14, 14, 16, 0.92) !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
+}
+
+[data-theme="light"] .do-part-picker-drawer {
+    background-color: color-mix(in srgb, var(--background-base) 92%, transparent) !important;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, rgba(0,0,0,0.1)) !important;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.do-part-picker-drawer.is-visible {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+@media (max-width: 900px) {
+    .do-part-picker-drawer {
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 8px 14px 18px !important;
+        max-height: 85vh !important;
+    }
+}
+
+/* ── Header inside Part Picker Drawer ── */
+.do-part-picker-inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(82vh - 20px);
+}
+
+.do-part-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.do-part-picker-title-col {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.do-part-picker-badge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.do-part-picker-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary-color, #c96b63);
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15);
+    padding: 3px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.do-part-picker-title {
+    font-family: 'Crimson Text', 'Libre Baskerville', serif;
+    font-size: 1.22rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.do-part-picker-kyriale-select-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.do-part-picker-select {
+    background: var(--background-surface, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.do-part-picker-controls-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* ── Corner Psalm-Tone Button in Bottom Menu Header ── */
+.do-part-picker-psalm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    background: var(--background-surface, rgba(255, 255, 255, 0.05));
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.do-part-picker-psalm-btn:hover {
+    color: var(--text-primary);
+    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.4);
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08);
+}
+
+.do-part-picker-psalm-btn.is-active {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2) !important;
+    border-color: var(--primary-color, #c96b63) !important;
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 600 !important;
+}
+
+.do-part-picker-psalm-btn .do-pt-sym {
+    font-family: serif;
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: var(--primary-color, #c96b63);
+}
+
+/* ── Card Header Corner Psalm-Toned Button ── */
+.do-card-pt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--background-highlight, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.do-card-pt-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
+    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.35);
+    color: var(--primary-color, #c96b63);
+}
+
+.do-card-pt-btn.is-active {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2) !important;
+    border-color: var(--primary-color, #c96b63) !important;
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 700 !important;
+}
+
+.do-card-pt-btn .do-pt-sym {
+    font-family: serif;
+    font-weight: bold;
+    font-size: 0.88rem;
+    color: var(--primary-color, #c96b63);
+}
+
+@media (max-width: 600px) {
+    .do-card-pt-btn .do-pt-text {
+        display: none;
+    }
+    .do-card-pt-btn {
+        padding: 4px 7px;
+    }
+}
+
+/* ── Search Input inside Drawer ── */
+.do-part-picker-search-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    background: var(--background-surface, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    padding: 0 8px;
+    transition: border-color 0.2s ease, width 0.2s ease;
+}
+
+.do-part-picker-search-wrap:focus-within {
+    border-color: var(--primary-color, #c96b63);
+}
+
+.do-part-picker-search-icon {
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+}
+
+.do-part-picker-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    width: 90px;
+    transition: width 0.2s ease;
+}
+
+.do-part-picker-search-input:focus {
+    width: 140px;
+}
+
+.do-part-picker-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--background-surface, rgba(255, 255, 255, 0.06));
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.do-part-picker-close-btn:hover {
+    background: rgba(220, 53, 69, 0.18);
+    color: #dc3545;
+}
+
+/* ── Results Container in Part Picker Drawer (Uses Gregorian Search system) ── */
+.do-part-picker-drawer .gregorian-results {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: calc(82vh - 120px);
+    padding: 6px 2px 20px;
+    box-sizing: border-box;
+}
+
+/* ── Active Piece Highlight (Matches Reader Active Video & Primary Border) ── */
+.do-part-picker-drawer .gregorian-card.is-active {
+    border: 2px solid var(--primary-color, #c96b63) !important;
+    box-shadow: 0 0 16px rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
+    background: color-mix(in srgb, var(--background-surface) 92%, var(--primary-color)) !important;
+}
+
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-card-incipit {
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 700 !important;
+}
+
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-card-source {
+    color: var(--primary-color, #c96b63) !important;
+    opacity: 0.85;
+}
+
+/* Active Badge Checkmark */
+.do-active-badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+/* Active button style */
+.gregorian-action-btn.btn-select-piece.is-current {
+    background: var(--primary-color, #c96b63) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+
+
+/* ── Expandable Accordion for Verses Ad Libitum (Under GABC SVG) ── */
+.do-verses-ad-libitum-container {
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    background: var(--background-surface, rgba(255, 255, 255, 0.02));
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.do-verses-accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.2s ease, color 0.2s ease;
+    text-align: left;
+    user-select: none;
+}
+
+.do-verses-accordion-header:hover {
+    background: var(--background-highlight, rgba(255, 255, 255, 0.04));
+    color: var(--text-primary);
+}
+
+.do-verses-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.do-verses-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--primary-color, #c96b63);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.do-verses-ref {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+}
+
+.do-verses-accordion-header .dropdown-icon {
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.do-verses-accordion-header.is-expanded .dropdown-icon,
+.do-verses-ad-libitum-container.is-expanded .do-verses-accordion-header .dropdown-icon {
+    transform: rotate(180deg) !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18) !important;
+    color: var(--primary-color, #c96b63) !important;
+}
+
+.do-verses-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease;
+    padding: 0 14px;
+    border-top: 0px solid transparent;
+}
+
+.do-verses-ad-libitum-container.is-expanded .do-verses-accordion-body {
+    max-height: 4000px;
+    opacity: 1;
+    padding: 10px 14px 14px;
+    border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+}
+
+.do-verses-content .do-chant-preview {
+    width: 100%;
+    margin: 6px 0;
+}
+
+.do-verses-content .do-chant-preview svg {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.do-verses-line {
+    margin: 6px 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.do-verses-vnum {
+    font-family: serif;
+    font-weight: bold;
+    color: var(--primary-color, #c96b63);
+    margin-right: 4px;
+}
+
+
 
 
 

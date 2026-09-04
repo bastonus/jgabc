@@ -846,24 +846,41 @@ if(typeof window=='object') (function(window) {
   }
 
   if(Tone) {
+    function clearNextNoteTimeout() {
+      if (window.timeoutNextNote !== null && window.timeoutNextNote !== undefined) {
+        if (Tone && Tone.context && typeof Tone.context.clearTimeout === 'function') {
+          try { Tone.context.clearTimeout(window.timeoutNextNote); } catch(e) {}
+        }
+        try { clearTimeout(window.timeoutNextNote); } catch(e2) {}
+        try { if (Tone && Tone.Transport) Tone.Transport.clear(window.timeoutNextNote); } catch(e3) {}
+        window.timeoutNextNote = null;
+      }
+    }
+    window.clearNextNoteTimeout = clearNextNoteTimeout;
+
+    function scheduleNextNote(fn, delaySec) {
+      clearNextNoteTimeout();
+      if (Tone && Tone.context && typeof Tone.context.setTimeout === 'function') {
+        window.timeoutNextNote = Tone.context.setTimeout(fn, delaySec);
+      } else {
+        window.timeoutNextNote = setTimeout(fn, Math.max(10, Math.round(delaySec * 1000)));
+      }
+      return window.timeoutNextNote;
+    }
+    window.scheduleNextNote = scheduleNextNote;
+
     window.setTempo = function(newTempo) {
       var tempo = parseInt(newTempo, 10) || 165;
       localStorage.setItem('do_tempo', tempo);
-      if (Tone.Transport) {
+      if (Tone && Tone.Transport && Tone.Transport.bpm) {
         Tone.Transport.bpm.value = tempo;
-        // Do not reschedule with '+16n' here — that moves cursor. Tempo change takes effect on next scheduled note naturally.
       }
     }
     window.setRelativeTempo = function(delta) {
       if (!Tone.Transport) return 165;
-      var state = Tone.Transport.state;
-      Tone.Transport.stop();
-      var val = Tone.Transport.bpm.value = Math.round(Math.max(0, Tone.Transport.bpm.value + delta)) || 165;
-      if(state === 'started') {
-        Tone.Transport.clear(window.timeoutNextNote);
-        Tone.Transport.start();
-        window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+8n');
-      }
+      var val = Math.round(Math.max(30, (Tone.Transport.bpm ? Tone.Transport.bpm.value : 165) + delta)) || 165;
+      if (Tone.Transport.bpm) Tone.Transport.bpm.value = val;
+      localStorage.setItem('do_tempo', val);
       return val;
     }
     window.setIsUsingSolesmesLengths = function(val) {
@@ -880,7 +897,11 @@ if(typeof window=='object') (function(window) {
       ensureSynth();
       if (!synth) return; // synth failed to init, silently abort
 
-      Tone.Transport.clear(window.timeoutNextNote);
+      var storedTempo = parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+      if (Tone.Transport && Tone.Transport.bpm) {
+        Tone.Transport.bpm.value = storedTempo;
+      }
+      clearNextNoteTimeout();
       Tone.Transport.start();
       if($('#mediaControls').length == 0) {
         $(document.body).append("<div id='mediaControls'>\
@@ -1172,6 +1193,8 @@ if(typeof window=='object') (function(window) {
           var isApostropha = getIsApostropha(note);
           var pressus = getPressus(notes, noteId);
           var noteName = tones.getNoteName(note.pitch, transpose);
+          var curBpm = (Tone.Transport && Tone.Transport.bpm && Tone.Transport.bpm.value) || parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+          var beatSec = 60 / curBpm;
           if (isApostropha || pressus) {
             var totalDuration = 0;
             if (isApostropha && note.neume.notes[0] === note) {
@@ -1183,9 +1206,9 @@ if(typeof window=='object') (function(window) {
               totalDuration += getNoteDuration(notes, noteId+1);
             }
 
-            if(totalDuration > 0) synth.triggerAttackRelease(noteName, new Tone.Time("4n").toSeconds()*totalDuration, time);
+            if(totalDuration > 0) synth.triggerAttackRelease(noteName, beatSec * totalDuration, time);
           } else {
-            synth.triggerAttackRelease(noteName, new Tone.Time("4n").toSeconds()*duration, time);
+            synth.triggerAttackRelease(noteName, beatSec * duration, time);
           }
         }
         ++noteId;
@@ -1212,9 +1235,12 @@ if(typeof window=='object') (function(window) {
           $('#mediaControls').addClass('offscreen');
           return;
         }
-        window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote, '+' + (new Tone.Time("4n").toSeconds() * duration));
+        var curBpm = (Tone && Tone.Transport && Tone.Transport.bpm && Tone.Transport.bpm.value) || parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+        var beatSec = 60 / curBpm;
+        var noteDurationSec = Math.max(0.04, beatSec * duration);
+        scheduleNextNote(playNextNote, noteDurationSec);
       };
-      window.timeoutNextNote = Tone.Transport.scheduleOnce(playNextNote);
+      playNextNote();
       // Weighted progress: takes into account dotted notes, episema, salicus/quilisma and inter-phrase gaps
       window.getChantProgress = function() {
         if (!notes || !notes.length) return 0;
@@ -1286,9 +1312,11 @@ if(typeof window=='object') (function(window) {
       window.playPauseScore = function() {
         if(Tone.Transport.state == 'started') {
           Tone.Transport.pause();
-          Tone.Transport.clear(window.timeoutNextNote);
-          window.timeoutNextNote = null;
+          clearNextNoteTimeout();
         } else {
+          var tempo = parseInt(localStorage.getItem('do_tempo'), 10) || 165;
+          if (Tone.Transport && Tone.Transport.bpm) Tone.Transport.bpm.value = tempo;
+          clearNextNoteTimeout();
           Tone.Transport.start();
           playNextNote();
           return true;
@@ -1313,6 +1341,7 @@ if(typeof window=='object') (function(window) {
     window.stopScore = function(){
       Tone.Transport.stop();
       _isPlaying=false;
+      clearNextNoteTimeout();
       $('svg use.active, svg text.active, svg tspan.active, svg .active').each(function() {
         this.classList.remove('active', 'porrectus-left', 'porrectus-right');
         this.style.removeProperty('fill');

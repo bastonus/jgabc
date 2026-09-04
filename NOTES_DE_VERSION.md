@@ -1,5 +1,29 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.56 (4 Septembre 2026)
+
+---
+
+### 🎵 Correctifs Majeurs du Lecteur Audio & Synthétiseur GABC
+
+* **Horloge & Vitesses de Lecture du Synthétiseur GABC (`util.js` & `divinum_officium.js`) :**
+  * **Élimination définitive du gel/arrêt à la vitesse 1× :** Dans Tone.js, l'ordonnanceur `scheduleOnce` vérifiait `event.time === tick` par stricte égalité entière. Lors du retour d'un tempo lent (ex. 0.75× / 124 BPM) vers 1.0× (165 BPM), le saut d'incrément de fréquence sautait par-dessus le tick programmé, faisant mourir la chaîne d'événements et arrêtant totalement le synthé.
+  * **Nouveau Scheduler Haute Précision `scheduleNextNote` :** Utilise `Tone.context.setTimeout` (horloge haute précision Web Worker sur l'AudioContext en secondes réelles calculées `(60 / curBpm) * duration`) avec déduplication stricte via `clearNextNoteTimeout()`. Les notes ne peuvent plus jamais être sautées ni omises, garantissant un cycle infini et fluide à travers toutes les vitesses (`0.5×`, `0.75×`, `1.0×`, `1.25×`, `1.5×`, `2.0×`) sans jamais geler ni couper le synthé.
+  * **Synchronisation immédiate du BPM :** `Tone.Transport.bpm.value = calculatedTempo` et `window.setTempo(calculatedTempo)` appliquent le tempo instantanément à chaque note suivante sans perturber la note en train de résonner.
+* **Barre de Progression & Verrouillage Temporel au 1er Clic (`js/divinum_officium.js`) :**
+  * Correction du bug où la jauge `#playerProgressFill` se vidait (retombait à 0%) 2 secondes après un premier clic de seek tout en conservant le texte d'horodatage.
+  * Suppression définitive des animations parasites d'aperçu initial et mise en place d'un verrouillage temporel (`_isUserSeekingUntil`) dans `startDoProgressTracking()` pour empêcher l'écrasement asynchrone avant confirmation audio.
+  * Calcul pondéré des durées écoulées et totales (`_getChantWeightedInfo`) dans le tracker en temps réel du synthé, éliminant les sauts de temps.
+* **Tiroir des Sources & Continuité de Lecture :**
+  * **Lecture ininterrompue au repli du tiroir :** La fermeture du tiroir des sources vidéo YouTube (`#playerBtnExpandVideos`) ne coupe plus la lecture audio en arrière-plan.
+  * **Synchro Vidéo désactivée par défaut :** `window.doYT.syncEnabled` démarre à `false` par défaut (activable à la demande via `#playerBtnToggleSync`).
+  * Mise en valeur systématique du Synthétiseur GABC et message d'information explicite (*« Partition GABC interactive uniquement — aucun enregistrement externe disponible »*) lorsqu'aucun enregistrement externe n'est rattaché à la pièce.
+* **Écoute sur les Pages Isolées & Vue Complète du Chant (`js/gregorian_search_ui.js`) :**
+  * Ajout de la classe `do-chant-main-view-card` et attachement des données (`data-chant-gabc`, `data-chant-title`, `data-chant-id`) sur la carte principale.
+  * Résolution robuste de la partition `.do-chant-card` et gestion asynchrone de l'événement `chant:rendered` pour lancer la lecture même si le rendu Exsurge est en cours lors du clic sur *« Écouter »*.
+
+---
+
 ## 🚀 Version 0.0.55 (2 Septembre 2026)
 
 ---

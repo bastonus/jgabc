@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Studio d'Alignement & Révision GABC ↔ YouTube — Oremus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/modern.css">
+<link rel="stylesheet" href="../../css/divinum_officium.css">
+<script src="../../jquery.min.js"></script>
+<script src="../../exsurge.min.js"></script>
+<script src="lab_data.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<style>
+:root {
+  --primary-color: #c96b63;
+  --primary-color-rgb: 201, 107, 99;
+  --bg-app: #121214;
+  --surface-1: #1a1a1e;
+  --surface-2: #222228;
+  --surface-3: #2c2c34;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-primary: #f4f4f6;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --success: #589c77;
+  --warning: #c4984f;
+  --danger: #e05252;
+}
+[data-theme="light"] {
+  --bg-app: #f7f7f9;
+  --surface-1: #ffffff;
+  --surface-2: #f0f0f4;
+  --surface-3: #e4e4eb;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --text-primary: #18181b;
+  --text-secondary: #71717a;
+  --text-tertiary: #a1a1aa;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top Header ── */
+.lab-header {
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.lab-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.lab-logo-badge {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.lab-title-group h1 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+.lab-title-group span {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.lab-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lab-btn-secondary {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.lab-btn-secondary:hover {
+  background: var(--surface-3);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.lab-btn-accent {
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.lab-btn-accent:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* ── Main Container ── */
+.lab-main {
+  max-width: 1460px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Piece Selector Tabs ── */
+.piece-nav-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+.piece-tab-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  min-width: 175px;
+}
+.piece-tab-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.piece-tab-btn.active {
+  background: var(--surface-2);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color), 0 4px 12px rgba(var(--primary-color-rgb), 0.15);
+}
+.piece-tab-title {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: inherit;
+}
+.piece-tab-subtitle {
+  font-size: 0.70rem;
+  opacity: 0.8;
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Top Alert Banner if Modified ── */
+.review-status-banner {
+  background: rgba(var(--primary-color-rgb), 0.12);
+  border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.82rem;
+}
+
+/* ── Two Column Grid Layout ── */
+.lab-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1080px) {
+  .lab-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Left Column: Media Player & YouTube ── */
+.media-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 70px;
+}
+@media (max-width: 1080px) {
+  .media-col {
+    position: static;
+  }
+}
+.card-box {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.card-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+}
+.card-header-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Database Linked Action Buttons */
+.db-actions-row {
+  padding: 8px 18px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.db-action-btn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+.db-action-btn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.db-action-btn.flag-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.db-action-btn.propose-btn:hover {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.video-wrapper iframe, .video-wrapper div#ytPlayerSlot {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ── Native Player Bar Controls ── */
+.lab-player-controls {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.time-label {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--text-secondary);
+  min-width: 38px;
+}
+.custom-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  overflow: visible;
+}
+.custom-progress-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.05s linear;
+  position: relative;
+}
+.custom-progress-thumb {
+  position: absolute;
+  right: -5px;
+  top: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  transform: scale(0);
+  transition: transform 0.15s ease;
+}
+.custom-progress-track:hover .custom-progress-thumb {
+  transform: scale(1);
+}
+
+.playback-buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.main-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.35);
+  transition: all 0.15s ease;
+}
+.hero-play-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.1);
+}
+.hero-play-btn:active {
+  transform: scale(0.96);
+}
+.round-ctrl-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.round-ctrl-btn:hover {
+  background: var(--surface-3);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.pill-toggle-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.pill-toggle-btn.active {
+  background: rgba(var(--primary-color-rgb), 0.15);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* ── Live Note & Alignment Status HUD ── */
+.hud-card {
+  padding: 14px 18px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hud-label {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hud-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+.hud-value.highlighted {
+  color: var(--primary-color);
+}
+
+/* ── Right Column: Gregorian Partition (Exsurge SVG) ── */
+.score-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.score-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.score-toolbar {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.score-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.score-part-badge {
+  background: rgba(var(--primary-color-rgb), 0.15);
+  color: var(--primary-color);
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.score-chant-title {
+  font-size: 1.05rem;
+  font-family: 'Crimson Text', 'Libre Baskerville', serif;
+  font-weight: 700;
+}
+.score-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score-zoom-ctrls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+.zoom-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* ── Score Container & SVG Rendering ── */
+.exsurge-score-viewport {
+  padding: 24px 20px;
+  overflow-x: auto;
+  min-height: 280px;
+  background: var(--surface-1);
+  display: flex;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  transform-origin: top center;
+}
+.exsurge-score-viewport svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Note hover and active pulse */
+.exsurge-score-viewport svg use[source-index],
+.exsurge-score-viewport svg text.lyric,
+.exsurge-score-viewport svg text.dropCap,
+.exsurge-score-viewport svg text.aboveLinesText {
+  cursor: pointer;
+  transition: fill 0.12s ease, transform 0.12s ease;
+}
+.exsurge-score-viewport svg use[source-index]:hover {
+  fill: var(--warning) !important;
+}
+.exsurge-score-viewport svg text.lyric:hover {
+  fill: var(--primary-color) !important;
+}
+
+/* Active Highlight (synchronized with YouTube video) */
+.exsurge-score-viewport svg use.active,
+.exsurge-score-viewport svg use[source-index].active,
+.exsurge-score-viewport svg text.lyric.active,
+.exsurge-score-viewport svg text.lyric.active tspan,
+.exsurge-score-viewport svg text.dropCap.active,
+.exsurge-score-viewport svg text.aboveLinesText.active {
+  fill: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.exsurge-score-viewport svg use.active {
+  filter: drop-shadow(0 0 4px rgba(var(--primary-color-rgb), 0.6)) !important;
+}
+
+/* ── Advanced Human Review Studio (Drawer) ── */
+.studio-panel {
+  display: none;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+.studio-panel.open {
+  display: flex;
+  flex-direction: column;
+}
+.studio-header {
+  padding: 14px 20px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.studio-header-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+}
+.studio-quick-tools {
+  padding: 12px 20px;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+}
+.studio-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.studio-sm-btn {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.studio-sm-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+/* Note Table Container */
+.note-table-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.note-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  text-align: left;
+}
+.note-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  padding: 8px 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 10;
+}
+.note-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+.note-table tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+.note-table tr.active-row {
+  background: rgba(var(--primary-color-rgb), 0.15) !important;
+  font-weight: 600;
+}
+.note-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  padding: 3px 6px;
+  font-family: monospace;
+  font-size: 0.75rem;
+  width: 65px;
+}
+.note-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+.nudge-btn {
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.70rem;
+}
+.nudge-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* ── Modals ── */
+.lab-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lab-modal-backdrop.open {
+  display: flex;
+}
+.lab-modal {
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  padding: 16px 20px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.modal-close-btn {
+  background: none;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.modal-close-btn:hover {
+  color: var(--text-primary);
+}
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 0.82rem;
+}
+.modal-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.modal-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.modal-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+.modal-footer {
+  padding: 14px 20px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ── Breakdown & Priors Visualizer ── */
+.breakdown-card {
+  padding: 16px 18px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.breakdown-title {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.prior-bar-track {
+  width: 100%;
+  height: 14px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+.prior-segment {
+  height: 100%;
+  transition: opacity 0.1s ease;
+}
+.prior-segment.active {
+  opacity: 1 !important;
+  filter: brightness(1.6);
+  box-shadow: 0 0 6px #fff;
+}
+
+.gabc-code-details {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 6px;
+  padding-top: 10px;
+}
+.gabc-code-details summary {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.gabc-code-details summary:hover {
+  color: var(--primary-color);
+}
+.gabc-raw-box {
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #a0c8a0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ── Footer ── */
+.lab-footer {
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-1);
+}
+
+/* ── DB Status Badge & Toast Notifications ── */
+.lab-badge-offline {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: all 0.2s;
+}
+.lab-badge-online {
+  background: rgba(88, 156, 119, 0.15);
+  border: 1px solid rgba(88, 156, 119, 0.4);
+  color: var(--success);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: all 0.2s;
+}
+.lab-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+.lab-toast {
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  pointer-events: auto;
+  animation: toastFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.lab-toast.success {
+  border-color: var(--success);
+}
+.lab-toast.info {
+  border-color: var(--primary-color);
+}
+@keyframes toastFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
+</head>
+<body>
+
+<header class="lab-header">
+  <div class="lab-header-left">
+    <a href="../../divinum-officium.html" class="lab-logo-badge">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>Oremus</span>
+    </a>
+    <div class="lab-title-group">
+      <h1>Studio d'Alignement & Révision GABC ↔ YouTube</h1>
+      <span>Interface avancée de curation humaine, correction de notes & synchronisation en temps réel</span>
+    </div>
+  </div>
+  <div class="lab-header-actions">
+    <span id="dbStatusBadge" class="lab-badge-offline" title="Connexion à la base de données Oremus (save_changes.py). Cliquez pour vérifier." onclick="checkDbConnection(true)">
+      <span id="dbStatusDot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#71717a;"></span>
+      <span id="dbStatusText">DB : LocalStorage</span>
+    </span>
+    <button id="btnToggleStudio" class="lab-btn-accent" title="Ouvrir le panneau d'édition note par note">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Studio Note par Note</span>
+    </button>
+    <button id="btnToggleTheme" class="lab-btn-secondary" title="Changer le thème">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <a href="../../divinum-officium.html" class="lab-btn-secondary">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span>Retour à Oremus</span>
+    </a>
+  </div>
+</header>
+
+<main class="lab-main">
+
+  <!-- 5 Pieces Navigation Tabs -->
+  <div class="piece-nav-bar" id="pieceNavBar"></div>
+
+  <!-- Review Alert Banner (Shows when edits or flags are active) -->
+  <div class="review-status-banner" id="reviewBanner" style="display:none;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span id="reviewBannerIcon">⚡</span>
+      <span id="reviewBannerText">Modifications locales enregistrées pour cette pièce.</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="studio-sm-btn" onclick="exportPieceJson()">📥 Exporter _stamps.json</button>
+      <button class="studio-sm-btn" onclick="resetToAI()">↺ Réinitialiser IA</button>
+    </div>
+  </div>
+
+  <!-- Main Grid: Media Player on Left, Partition SVG on Right -->
+  <div class="lab-grid">
+
+    <!-- Left Column: Video + Native Oremus Player Controls -->
+    <div class="media-col">
+      <div class="card-box">
+        <div class="card-header">
+          <span class="card-header-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Enregistrement Vidéo
+          </span>
+          <span id="ytSourceBadge" style="font-size:0.72rem; color:var(--text-tertiary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">—</span>
+        </div>
+
+        <!-- Database Linked Action Buttons: Flag as Bad / Propose Another -->
+        <div class="db-actions-row">
+          <button class="db-action-btn flag-btn" onclick="openFlagModal()" title="Signaler que ce n'est pas le bon air pour ce chant">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            <span>Mauvais air (Signaler)</span>
+          </button>
+          <button class="db-action-btn propose-btn" onclick="openProposeModal()" title="Changer l'ID de la vidéo YouTube pour cette pièce">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Proposer une autre vidéo</span>
+          </button>
+        </div>
+
+        <!-- YouTube Video IFrame Container -->
+        <div class="video-wrapper">
+          <div id="ytPlayerSlot"></div>
+        </div>
+
+        <!-- Native Oremus Audio/Video Player Bar -->
+        <div class="lab-player-controls">
+          <!-- Time & Progress Bar -->
+          <div class="progress-container">
+            <span id="lblCurrentTime" class="time-label">0:00</span>
+            <div class="custom-progress-track" id="progressTrack" title="Cliquer pour naviguer">
+              <div class="custom-progress-fill" id="progressFill">
+                <span class="custom-progress-thumb"></span>
+              </div>
+            </div>
+            <span id="lblTotalTime" class="time-label">0:00</span>
+          </div>
+
+          <!-- Controls Row -->
+          <div class="playback-buttons-row">
+            <div class="main-btn-group">
+              <!-- Restart Button -->
+              <button id="btnRestart" class="round-ctrl-btn" title="Recommencer depuis le début (⏮)">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="19,20 9,12 19,4"/><line x1="5" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              </button>
+              <!-- Hero Play/Pause -->
+              <button id="btnHeroPlay" class="hero-play-btn" title="Lecture / Pause (Espace)">
+                <svg id="iconPlay" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+                <svg id="iconPause" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+              </button>
+              <!-- Step Next Note -->
+              <button id="btnNextNote" class="round-ctrl-btn" title="Note suivante (⏭)">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <!-- Setting Pills -->
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button id="btnSpeedCycle" class="pill-toggle-btn" title="Vitesse de lecture">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span id="lblSpeed">1.0×</span>
+              </button>
+              <button id="btnToggleSync" class="pill-toggle-btn active" title="Synchroniser la partition avec la vidéo">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Sync</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Note & Word HUD Status -->
+        <div class="hud-card">
+          <div class="hud-item">
+            <span class="hud-label">Note active / Total</span>
+            <span class="hud-value highlighted" id="hudNoteIndex">— / —</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Mot en cours</span>
+            <span class="hud-value" id="hudWordText">—</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Token GABC</span>
+            <span class="hud-value" id="hudTokenName">—</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Horodatage acoustique</span>
+            <span class="hud-value" id="hudDurationWeight">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Partition Grégorienne Exsurge SVG & Review Studio -->
+    <div class="score-col">
+
+      <!-- Advanced Human Review Studio (Expandable) -->
+      <div class="studio-panel" id="studioPanel">
+        <div class="studio-header">
+          <span class="studio-header-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Studio de Révision & Curation Note par Note
+          </span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="studio-sm-btn" onclick="punchCurrentTime()" title="Prendre le temps actuel de la vidéo pour le début de la note sélectionnée (Touche T)">🎯 Punch Temps Vidéo (T)</button>
+            <button class="studio-sm-btn" onclick="loopCurrentNote()" title="Écouter la note sélectionnée en boucle (Touche R)">🔁 Boucle Note (R)</button>
+            <button class="studio-sm-btn" onclick="saveUserEdits()" style="background:var(--primary-color); color:#fff;">💾 Sauvegarder</button>
+            <button class="modal-close-btn" onclick="toggleStudio()" title="Fermer le studio">✕</button>
+          </div>
+        </div>
+
+        <!-- Quick Shifting Tools -->
+        <div class="studio-quick-tools">
+          <div class="studio-tool-group">
+            <span>Décalage global :</span>
+            <button class="studio-sm-btn" onclick="shiftAllTimestamps(-0.5)">-0.5s</button>
+            <button class="studio-sm-btn" onclick="shiftAllTimestamps(-0.1)">-0.1s</button>
+            <button class="studio-sm-btn" onclick="shiftAllTimestamps(+0.1)">+0.1s</button>
+            <button class="studio-sm-btn" onclick="shiftAllTimestamps(+0.5)">+0.5s</button>
+          </div>
+          <div class="studio-tool-group" style="margin-left:auto;">
+            <span>Décaler dès la note active :</span>
+            <button class="studio-sm-btn" onclick="shiftFromCurrent(-0.2)">-0.2s</button>
+            <button class="studio-sm-btn" onclick="shiftFromCurrent(+0.2)">+0.2s</button>
+          </div>
+        </div>
+
+        <!-- Note Table -->
+        <div class="note-table-wrapper">
+          <table class="note-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mot</th>
+                <th>Token GABC</th>
+                <th>Début (s)</th>
+                <th>Fin (s)</th>
+                <th>Durée</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="noteTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gregorian Score Card -->
+      <div class="score-card">
+        <!-- Score Header Toolbar -->
+        <div class="score-toolbar">
+          <div class="score-toolbar-left">
+            <span id="scorePartBadge" class="score-part-badge">INTROITUS</span>
+            <span id="scoreChantTitle" class="score-chant-title">—</span>
+          </div>
+          <div class="score-toolbar-right">
+            <button class="db-action-btn" onclick="toggleStudio()">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span>Éditer les notes</span>
+            </button>
+            <div class="score-zoom-ctrls">
+              <button class="zoom-btn" onclick="zoomScore(-0.1)" title="Réduire">−</button>
+              <button class="zoom-btn" onclick="zoomScore(0)" title="Taille normale">1:1</button>
+              <button class="zoom-btn" onclick="zoomScore(+0.1)" title="Agrandir">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exsurge SVG Render Target Container -->
+        <div class="exsurge-score-viewport" id="scoreContainer">
+          <div style="display:flex; align-items:center; justify-content:center; height:200px; color:var(--text-tertiary);">
+            Chargement de la partition vectorielle...
+          </div>
+        </div>
+
+        <!-- Rhythmic Prior Timeline Breakdown -->
+        <div class="breakdown-card">
+          <div class="breakdown-title">
+            <span>Réglette temporelle acoustique des notes (MMS + Priors GABC)</span>
+            <span id="breakdownTotalNotes" style="font-weight:400; text-transform:none;">— notes</span>
+          </div>
+          <div class="prior-bar-track" id="priorBarTrack" title="Barre des notes proportionnelles au temps audio"></div>
+
+          <details class="gabc-code-details">
+            <summary>Voir le code source GABC officiel de la pièce</summary>
+            <pre class="gabc-raw-box" id="rawGabcBox"></pre>
+          </details>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Modal: Signaler Mauvais Air -->
+<div class="lab-modal-backdrop" id="flagModalBackdrop">
+  <div class="lab-modal">
+    <div class="modal-header">
+      <span class="modal-title">🚩 Signaler l'enregistrement YouTube</span>
+      <button class="modal-close-btn" onclick="closeFlagModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary); margin:0;">Vous signalez que la vidéo actuelle ne correspond pas à la partition de cette pièce.</p>
+      <div>
+        <label class="modal-label">Motif du signalement :</label>
+        <select id="flagReasonSelect" class="modal-input" style="margin-top:6px;">
+          <option value="air">Mauvais air / pièce différente (autre composition)</option>
+          <option value="text">Texte incomplet ou versets manquants</option>
+          <option value="mode">Mauvais mode grégorien ou transposition erronée</option>
+          <option value="quality">Qualité audio inexploitable ou trop bruitée</option>
+        </select>
+      </div>
+      <div>
+        <label class="modal-label">Remarque (optionnelle) :</label>
+        <input type="text" id="flagCommentInput" class="modal-input" placeholder="Ex: Ce n'est pas l'introït du GR 1961..." style="margin-top:6px;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="lab-btn-secondary" onclick="closeFlagModal()">Annuler</button>
+      <button class="lab-btn-accent" onclick="submitFlag()">Enregistrer le signalement</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Proposer / Remplacer Vidéo YouTube -->
+<div class="lab-modal-backdrop" id="proposeModalBackdrop">
+  <div class="lab-modal">
+    <div class="modal-header">
+      <span class="modal-title">🔄 Proposer / Remplacer la vidéo YouTube</span>
+      <button class="modal-close-btn" onclick="closeProposeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="modal-label">Lien ou ID de la vidéo YouTube :</label>
+        <input type="text" id="newYtInput" class="modal-input" placeholder="https://www.youtube.com/watch?v=... ou ID (ex: Bjw3a4qMphs)" style="margin-top:6px;">
+      </div>
+      <div>
+        <label class="modal-label">Interprète / Chœur / Source :</label>
+        <input type="text" id="newSourceInput" class="modal-input" placeholder="Ex: Cappella Musicale Pontificia Sistina" style="margin-top:6px;">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="studio-sm-btn" onclick="testNewVideoInPlayer()" style="flex:1; padding:8px;">▶ Tester la vidéo dans le lecteur</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="lab-btn-secondary" onclick="closeProposeModal()">Annuler</button>
+      <button class="lab-btn-accent" onclick="saveNewVideoToDb()">Valider & Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<footer class="lab-footer">
+  Oremus / Divinum Officium — Studio d'alignement audio-partition grégorienne v3.1 & Curation humaine
+</footer>
+
+<!-- Toast Notifications Container -->
+<div id="labToastContainer" class="lab-toast-container"></div>
+
+<script>
+const WORD_COLORS = [
+  '#c96b63', '#987dc2', '#589c77', '#c4984f', '#5c8bb8',
+  '#cc738a', '#ba8155', '#7e8590', '#9c8b5f', '#6b8caa'
+];
+
+let currentPieceIndex = 0;
+let ytPlayer = null;
+let ytReady = false;
+let isPlaying = false;
+let syncEnabled = true;
+let currentPlaybackSpeed = 1.0;
+let currentScoreScale = 1.0;
+let currentScore = null;
+let currentChantInfo = null;
+let activeNoteIndex = -1;
+let activeNoteEl = null;
+let activeLyricEl = null;
+let progressInterval = null;
+let loopInterval = null;
+let isLoopingNote = false;
+
+// ── 1. GABC Preprocessing for Exsurge ──
+function preprocessGabcForExsurge(gabc) {
+  if (!gabc || typeof gabc !== 'string') return gabc;
+  gabc = gabc.replace(/<eu>([\s\S]*?)<\/eu>/gi, function(match, inner) {
+    return inner.replace(/(^|\))([^()]+)(?=\(|$)/g, function(m, closeParen, text) {
+      var trimmed = text.trim();
+      if (!trimmed) return m;
+      var leadingSpace = text.match(/^\s*/)[0];
+      var trailingSpace = text.match(/\s*$/)[0];
+      return closeParen + leadingSpace + '<c><i>' + trimmed + '</i></c>' + trailingSpace;
+    });
+  });
+  gabc = gabc.replace(/<\/?eu>/gi, '');
+  gabc = gabc.replace(/\[[ou]?ll:[^\]]*\]/ig, '');
+  gabc = gabc.replace(/\[(?:cs|alt|nobar)[^\]]*\]/ig, '');
+  gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) { return b.toUpperCase() + '/.'; })
+             .replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) { return b.toUpperCase() + '/.'; });
+  gabc = gabc.replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1<c><i>Ps.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))(V\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))(R\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
+  gabc = gabc.replace(/(^|\s|\))<i>\s*(?:Extra\s+)?T\.?\s*P\.?\s*<\/i>/gi, '$1<c><i>T. P.</i></c>');
+  return gabc;
+}
+
+// ── 2. Weighted Durations & Inter-phrase Gaps ──
+function _chantNoteWeightedDuration(allNotes, idx) {
+  var note = allNotes[idx];
+  if (!note || (note.constructor && note.constructor.name !== 'Note' && !note.pitch)) return 1;
+  var nextNote = allNotes[idx+1];
+  if (nextNote && nextNote.constructor && nextNote.constructor.name !== 'Note') nextNote = null;
+  var dur = 1;
+  try {
+    if (note.morae && note.morae.length) dur = (note.morae.length > 1) ? 2.4 : 1.9;
+    else if (nextNote && nextNote.morae && nextNote.morae.length) dur = 1.8;
+    else if (note.episemata && note.episemata.length) dur = 1.25;
+    else if (window.exsurge && note.shape === exsurge.NoteShape.Quilisma) dur = 0.9;
+  } catch(e) {}
+  return dur;
+}
+
+function _getChantWeightedInfo(score) {
+  if (!score || !score.notations) return null;
+  var allNotes = [].concat.apply([], score.notations.map(function(n){ return n.notes || []; }))
+                          .filter(function(n){ return n && !n.isAccidental; });
+  if (!allNotes.length) return null;
+  var noteDurs = [];
+  for (var i = 0; i < allNotes.length; i++) {
+    noteDurs.push(_chantNoteWeightedDuration(allNotes, i));
+  }
+  var gapAfterNote = {};
+  var notePos = 0;
+  for (var ni = 0; ni < score.notations.length; ni++) {
+    var notat = score.notations[ni];
+    var isDiv = !!(notat.isDivider || /Bar$/.test(String(notat.constructor && notat.constructor.name || '')));
+    if (notat.notes && notat.notes.length) {
+      var cnt = notat.notes.filter(function(n){ return !n.isAccidental; }).length;
+      notePos += cnt;
+      // Fin de mot : si la notation termine un mot (EndingSyllable=3, SingleSyllable=0, ou espace),
+      // ajouter une pause agogique rattachée à la dernière note du mot
+      var isWordEnd = false;
+      if (notat.lyrics && notat.lyrics.length) {
+        isWordEnd = notat.lyrics.some(function(l) {
+          return l.lyricType === 0 || l.lyricType === 3 || l.trailingSpace || (l.text && /\s$/.test(l.text));
+        });
+      }
+      if (isWordEnd && notePos > 0) {
+        var lastNoteOfWord = notePos - 1;
+        gapAfterNote[lastNoteOfWord] = Math.max(gapAfterNote[lastNoteOfWord] || 0, 0.9);
+      }
+    } else if (isDiv) {
+      var gap = 0;
+      var cname = String(notat.constructor && notat.constructor.name || String(notat.constructor));
+      if (/DoubleBar|FullBar/.test(cname)) gap = 1.6;
+      else if (/HalfBar|DominicanBar|Virgula/.test(cname)) gap = 0.7;
+      else gap = 0.45;
+      var prevIdx = notePos - 1;
+      if (prevIdx >= 0) gapAfterNote[prevIdx] = Math.max(gapAfterNote[prevIdx] || 0, gap);
+    }
+  }
+  var total = 0;
+  for (var k = 0; k < noteDurs.length; k++) {
+    total += noteDurs[k];
+    if (gapAfterNote[k]) total += gapAfterNote[k];
+  }
+  return { allNotes: allNotes, noteDurs: noteDurs, gapAfterNote: gapAfterNote, total: total };
+}
+
+function _indexToFraction(info, idx) {
+  if (!info || !info.total) return 0;
+  var cum = 0;
+  for (var i = 0; i < idx && i < info.allNotes.length; i++) {
+    cum += info.noteDurs[i];
+    if (info.gapAfterNote[i]) cum += info.gapAfterNote[i];
+  }
+  return cum / info.total;
+}
+
+function _fractionToChantIndex(info, fraction) {
+  if (!info || !info.allNotes || !info.allNotes.length) return 0;
+  var target = Math.max(0, Math.min(info.total, fraction * info.total));
+  var cum = 0;
+  for (var i = 0; i < info.allNotes.length; i++) {
+    var nd = info.noteDurs[i];
+    if (target < cum + nd) return i;
+    cum += nd;
+    var gap = info.gapAfterNote[i] || 0;
+    if (gap) {
+      if (target < cum + gap) return i; // Reste sur la dernière note pendant la respiration / pause de fin de mot !
+      cum += gap;
+    }
+  }
+  return info.allNotes.length - 1;
+}
+
+// ── 3. Score Rendering via Exsurge ──
+function renderPieceScore(piece) {
+  const container = document.getElementById('scoreContainer');
+  container.innerHTML = '<div style="color:var(--text-tertiary); padding:40px;">Mise en page Exsurge en cours...</div>';
+
+  const ctxt = new exsurge.ChantContext();
+  const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const isDark = (curTheme !== 'light');
+  const accentColor = '#c96b63';
+
+  ctxt.textColor = isDark ? '#ffffff' : '#111317';
+  ctxt.noteColor = isDark ? '#ffffff' : '#111317';
+  ctxt.neumeLineColor = isDark ? '#ffffff' : '#111317';
+  ctxt.dividerLineColor = isDark ? '#ffffff' : '#111317';
+  ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)';
+
+  ctxt.setFont("'Crimson Text', 'Libre Baskerville', serif", 16);
+  ctxt.setRubricColor(accentColor);
+  ctxt.specialCharColor = accentColor;
+  ctxt.rubricColor = accentColor;
+  ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
+  ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
+  ctxt.annotationTextFont = ctxt.lyricTextFont;
+
+  if (ctxt.textStyles) {
+    Object.keys(ctxt.textStyles).forEach(function(k) {
+      if (ctxt.textStyles[k]) {
+        ctxt.textStyles[k].color = isDark ? '#ffffff' : '#111317';
+        ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
+      }
+    });
+  }
+
+  const processed = preprocessGabcForExsurge(piece.gabc_src);
+  const mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
+  const score = new exsurge.ChantScore(ctxt, mappings, true);
+
+  // Annotation: Office Part + Mode
+  var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+  var topAnnot = (piece.part || 'Chant').toUpperCase().slice(0, 5) + '.';
+  var mMatch = piece.gabc_src.match(/mode:\s*([1-8])/i);
+  var bottomAnnot = mMatch ? romanNumeral[parseInt(mMatch[1], 10)] : '';
+  if (topAnnot && bottomAnnot) {
+    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnot + '%', '%' + bottomAnnot + '%');
+  } else if (topAnnot) {
+    score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnot + '%');
+  }
+
+  // Layout width
+  var availWidth = container.clientWidth || 740;
+  if (availWidth < 360) availWidth = 360;
+  ctxt.width = availWidth;
+
+  score.performLayout(ctxt);
+  score.layoutChantLines(ctxt, availWidth, function() {
+    var svg = score.createSvgNode(ctxt);
+    if (!svg) {
+      container.innerHTML = '<div style="color:red;">Erreur création SVG</div>';
+      return;
+    }
+    svg.setAttribute('width', '100%');
+    svg.style.width = '100%';
+    svg.style.maxWidth = '100%';
+    svg.style.height = 'auto';
+
+    var noteFill = isDark ? '#ffffff' : '#111317';
+    svg.setAttribute('fill', noteFill);
+    svg.style.fill = noteFill;
+
+    container.innerHTML = '';
+    container.appendChild(svg);
+
+    currentScore = score;
+    score.svg = svg;
+    currentChantInfo = _getChantWeightedInfo(score);
+
+    // Build Prior Bar Segments
+    buildPriorBar(piece, currentChantInfo);
+
+    // Setup interactive note-click handlers
+    setupScoreClickHandlers(svg, currentChantInfo);
+
+    // Build Studio Note Table
+    buildStudioNoteTable();
+
+    // Reset highlight
+    highlightNote(0);
+  });
+}
+
+// ── 4. Interactive Note-Click on SVG Score ──
+function setupScoreClickHandlers(svg, info) {
+  if (!svg || !info) return;
+
+  svg.addEventListener('click', function(e) {
+    var target = e.target;
+    var noteEl = target.closest('use[source-index], use[element-index]');
+    var lyricEl = target.closest('text.lyric, text.dropCap, text.aboveLinesText, text');
+
+    var targetIndex = -1;
+
+    if (noteEl) {
+      for (var i = 0; i < info.allNotes.length; i++) {
+        if (info.allNotes[i].svgNode === noteEl ||
+            info.allNotes[i].sourceIndex == noteEl.getAttribute('source-index') ||
+            info.allNotes[i].elementIndex == noteEl.getAttribute('element-index')) {
+          targetIndex = i;
+          break;
+        }
+      }
+    } else if (lyricEl) {
+      for (var j = 0; j < info.allNotes.length; j++) {
+        var n = info.allNotes[j];
+        if (n.neume && n.neume.lyrics && n.neume.lyrics.some(l => l.svgNode === lyricEl || lyricEl.contains(l.svgNode))) {
+          targetIndex = j;
+          break;
+        }
+      }
+      if (targetIndex === -1) {
+        var grp = lyricEl.closest('g.ChantNotationElement');
+        if (grp) {
+          var firstUse = grp.querySelector('use[source-index]');
+          if (firstUse) {
+            for (var k = 0; k < info.allNotes.length; k++) {
+              if (info.allNotes[k].svgNode === firstUse || info.allNotes[k].sourceIndex == firstUse.getAttribute('source-index')) {
+                targetIndex = k;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (targetIndex >= 0) {
+      var timestamps = PIECES[currentPieceIndex].timestamps;
+      if (timestamps && timestamps[targetIndex]) {
+        var sec = timestamps[targetIndex].start;
+        if (ytPlayer && ytReady) ytPlayer.seekTo(sec, true);
+        highlightNote(targetIndex);
+      } else {
+        var frac = _indexToFraction(info, targetIndex);
+        seekToFraction(frac);
+        highlightNote(targetIndex);
+      }
+    }
+  });
+}
+
+// ── 5. Note & Syllable Highlighting ──
+function highlightNote(idx) {
+  if (!currentChantInfo || !currentChantInfo.allNotes.length) return;
+  if (idx < 0 || idx >= currentChantInfo.allNotes.length) return;
+  if (idx === activeNoteIndex && activeNoteEl && activeNoteEl.classList.contains('active')) return;
+
+  activeNoteIndex = idx;
+  const note = currentChantInfo.allNotes[idx];
+  const accentColor = '#c96b63';
+
+  // Un-highlight previous note
+  if (activeNoteEl) {
+    activeNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
+    activeNoteEl.style.removeProperty('fill');
+    activeNoteEl = null;
+  }
+  // Un-highlight previous lyric
+  if (activeLyricEl) {
+    activeLyricEl.classList.remove('active');
+    activeLyricEl.style.removeProperty('fill');
+    activeLyricEl.querySelectorAll('tspan').forEach(ts => {
+      ts.classList.remove('active');
+      ts.style.removeProperty('fill');
+    });
+    activeLyricEl = null;
+  }
+
+  // Find note SVG node
+  var noteElem = note.svgNode;
+  if (!noteElem && currentScore && currentScore.svg) {
+    if (note.elementIndex !== undefined) {
+      noteElem = currentScore.svg.querySelector('use[element-index="' + note.elementIndex + '"]');
+    }
+    if (!noteElem && note.sourceIndex !== undefined) {
+      noteElem = currentScore.svg.querySelector('use[source-index="' + note.sourceIndex + '"]');
+    }
+  }
+
+  if (noteElem) {
+    var href = noteElem.getAttribute('href') || (noteElem.attributes && noteElem.attributes['href'] ? noteElem.attributes['href'].value : '');
+    if (href === '#None' && noteElem.previousSibling) {
+      noteElem = noteElem.previousSibling;
+      noteElem.classList.add('porrectus-right');
+    } else if (/^#Porrectus/.test(href)) {
+      noteElem.classList.add('porrectus-left');
+    }
+
+    noteElem.classList.add('active');
+    noteElem.style.setProperty('fill', accentColor, 'important');
+    activeNoteEl = noteElem;
+
+    // Highlight corresponding lyric text
+    var lyricEl = null;
+    if (note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
+      lyricEl = note.neume.lyrics[0].svgNode;
+    }
+    if (!lyricEl) {
+      var grp = noteElem.closest('g.ChantNotationElement') || noteElem.parentNode.parentNode;
+      if (grp) lyricEl = grp.querySelector('text.lyric, text.dropCap, text.aboveLinesText, text');
+    }
+    if (lyricEl) {
+      lyricEl.classList.add('active');
+      lyricEl.style.setProperty('fill', accentColor, 'important');
+      lyricEl.querySelectorAll('tspan').forEach(ts => {
+        ts.classList.add('active');
+        ts.style.setProperty('fill', accentColor, 'important');
+      });
+      activeLyricEl = lyricEl;
+    }
+
+    // Auto-scroll score line smoothly
+    try {
+      var lineEl = noteElem.closest('g.ChantLine');
+      if (lineEl && lineEl.scrollIntoViewIfNeeded) {
+        lineEl.scrollIntoViewIfNeeded({ block: 'nearest', behavior: 'smooth' });
+      }
+    } catch(e) {}
+  }
+
+  // Highlight Prior Bar Segment
+  document.querySelectorAll('.prior-segment').forEach((el, i) => {
+    if (i === idx) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+
+  // Highlight Table Row in Studio
+  document.querySelectorAll('#noteTableBody tr').forEach((tr, i) => {
+    if (i === idx) {
+      tr.classList.add('active-row');
+      tr.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else {
+      tr.classList.remove('active-row');
+    }
+  });
+
+  // Update HUD
+  updateHUD(idx, note);
+}
+
+function updateHUD(idx, note) {
+  document.getElementById('hudNoteIndex').textContent = (idx + 1) + ' / ' + currentChantInfo.allNotes.length;
+  var pName = note && note.pitch ? note.pitch.toString() : '—';
+  var shape = note && note.shape !== undefined ? (note.shape === 0 ? 'Punctum' : 'Neume') : '';
+  document.getElementById('hudTokenName').textContent = pName + ' ' + (shape ? '(' + shape + ')' : '');
+
+  var timestamps = PIECES[currentPieceIndex].timestamps;
+  var txt = '—';
+  if (note && note.neume && note.neume.lyrics && note.neume.lyrics.length > 0) {
+    txt = note.neume.lyrics[0].text || '—';
+  } else if (activeLyricEl) {
+    txt = activeLyricEl.textContent || '—';
+  }
+
+  if (timestamps && timestamps[idx]) {
+    var ts = timestamps[idx];
+    document.getElementById('hudDurationWeight').textContent = ts.start.toFixed(2) + 's → ' + ts.end.toFixed(2) + 's (' + Math.round(ts.duration * 1000) + ' ms)';
+    document.getElementById('hudWordText').textContent = ts.word || txt.trim();
+  } else {
+    var durWeight = currentChantInfo.noteDurs[idx] || 1;
+    document.getElementById('hudDurationWeight').textContent = durWeight.toFixed(2) + '× (prior)';
+    document.getElementById('hudWordText').textContent = txt.trim() || '—';
+  }
+}
+
+// ── 6. Build Prior Bar Segments ──
+function buildPriorBar(piece, info) {
+  const track = document.getElementById('priorBarTrack');
+  track.innerHTML = '';
+  if (!info || !info.allNotes.length) return;
+
+  document.getElementById('breakdownTotalNotes').textContent = info.allNotes.length + ' notes';
+
+  const timestamps = piece.timestamps;
+  if (timestamps && timestamps.length > 0) {
+    const totalDuration = piece.audio_duration || timestamps[timestamps.length - 1].end || 1;
+    timestamps.forEach((ts, idx) => {
+      const seg = document.createElement('div');
+      seg.className = 'prior-segment';
+      const pct = (ts.duration / totalDuration) * 100;
+      seg.style.width = Math.max(0.2, pct) + '%';
+      const colIdx = Math.floor((idx / timestamps.length) * WORD_COLORS.length);
+      seg.style.backgroundColor = WORD_COLORS[colIdx % WORD_COLORS.length];
+      seg.style.opacity = (0.35 + (idx % 2) * 0.25).toFixed(2);
+      seg.title = '#' + (idx+1) + ' ' + ts.word + ' (' + ts.token + ') : ' + ts.start.toFixed(2) + 's -> ' + ts.end.toFixed(2) + 's';
+      seg.onclick = function() {
+        if (ytPlayer && ytReady) ytPlayer.seekTo(ts.start, true);
+        highlightNote(idx);
+      };
+      track.appendChild(seg);
+    });
+  } else {
+    const total = info.total;
+    info.allNotes.forEach((n, idx) => {
+      const seg = document.createElement('div');
+      seg.className = 'prior-segment';
+      const dur = info.noteDurs[idx] + (info.gapAfterNote[idx] || 0);
+      const pct = (dur / total) * 100;
+      seg.style.width = pct + '%';
+      const colIdx = Math.floor((idx / info.allNotes.length) * WORD_COLORS.length);
+      seg.style.backgroundColor = WORD_COLORS[colIdx % WORD_COLORS.length];
+      seg.style.opacity = (0.35 + (idx % 2) * 0.25).toFixed(2);
+      seg.title = 'Note ' + (idx+1) + ' | Poids: ' + dur.toFixed(2);
+      seg.onclick = function() {
+        var frac = _indexToFraction(info, idx);
+        seekToFraction(frac);
+        highlightNote(idx);
+      };
+      track.appendChild(seg);
+    });
+  }
+}
+
+// ── 7. Advanced Human Review Studio (Table & Note Editing) ──
+function toggleStudio() {
+  const panel = document.getElementById('studioPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    buildStudioNoteTable();
+  }
+}
+
+function buildStudioNoteTable() {
+  const tbody = document.getElementById('noteTableBody');
+  tbody.innerHTML = '';
+  const piece = PIECES[currentPieceIndex];
+  const timestamps = piece.timestamps || [];
+  if (!currentChantInfo) return;
+
+  const count = Math.max(timestamps.length, currentChantInfo.allNotes.length);
+
+  for (let i = 0; i < count; i++) {
+    const tr = document.createElement('tr');
+    tr.id = 'note-row-' + i;
+    if (i === activeNoteIndex) tr.classList.add('active-row');
+
+    const ts = timestamps[i] || { token: '—', word: '—', start: 0, end: 0, duration: 0 };
+    const durMs = Math.round(ts.duration * 1000);
+
+    tr.innerHTML = `
+      <td style="font-family:monospace; color:var(--text-tertiary); cursor:pointer;" onclick="selectNoteFromStudio(${i})">${i+1}</td>
+      <td><input type="text" class="note-input" style="width:90px;" value="${ts.word}" onchange="updateNoteWord(${i}, this.value)"></td>
+      <td><input type="text" class="note-input" style="width:45px;" value="${ts.token}" onchange="updateNoteToken(${i}, this.value)"></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:3px;">
+          <button class="nudge-btn" onclick="nudgeNote(${i}, 'start', -0.05)">-</button>
+          <input type="number" step="0.01" class="note-input" value="${ts.start.toFixed(2)}" onchange="updateNoteTime(${i}, 'start', parseFloat(this.value))">
+          <button class="nudge-btn" onclick="nudgeNote(${i}, 'start', +0.05)">+</button>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex; align-items:center; gap:3px;">
+          <button class="nudge-btn" onclick="nudgeNote(${i}, 'end', -0.05)">-</button>
+          <input type="number" step="0.01" class="note-input" value="${ts.end.toFixed(2)}" onchange="updateNoteTime(${i}, 'end', parseFloat(this.value))">
+          <button class="nudge-btn" onclick="nudgeNote(${i}, 'end', +0.05)">+</button>
+        </div>
+      </td>
+      <td style="font-family:monospace; color:var(--text-secondary);">${durMs} ms</td>
+      <td>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <button class="studio-sm-btn" onclick="playNoteLoop(${i})" title="Écouter cette note en boucle">🔁</button>
+          <button class="studio-sm-btn" onclick="punchNoteStart(${i})" title="Caler début sur tête de lecture vidéo">🎯</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function selectNoteFromStudio(i) {
+  const timestamps = PIECES[currentPieceIndex].timestamps;
+  if (timestamps && timestamps[i]) {
+    if (ytPlayer && ytReady) ytPlayer.seekTo(timestamps[i].start, true);
+  }
+  highlightNote(i);
+}
+
+function updateNoteWord(idx, val) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[idx]) {
+    ts[idx].word = val;
+    markPieceModified();
+  }
+}
+
+function updateNoteToken(idx, val) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[idx]) {
+    ts[idx].token = val;
+    markPieceModified();
+  }
+}
+
+function updateNoteTime(idx, field, val) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[idx] && !isNaN(val)) {
+    ts[idx][field] = Math.max(0, val);
+    if (ts[idx].end > ts[idx].start) {
+      ts[idx].duration = round(ts[idx].end - ts[idx].start, 3);
+    }
+    markPieceModified();
+    buildStudioNoteTable();
+  }
+}
+
+function nudgeNote(idx, field, delta) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[idx]) {
+    ts[idx][field] = Math.max(0, round(ts[idx][field] + delta, 3));
+    if (field === 'start' && idx > 0 && ts[idx-1]) {
+      ts[idx-1].end = ts[idx].start;
+      ts[idx-1].duration = round(ts[idx-1].end - ts[idx-1].start, 3);
+    }
+    ts[idx].duration = round(ts[idx].end - ts[idx].start, 3);
+    markPieceModified();
+    buildStudioNoteTable();
+  }
+}
+
+function punchNoteStart(idx) {
+  if (!ytPlayer || !ytReady) return;
+  const cur = ytPlayer.getCurrentTime() || 0;
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[idx]) {
+    ts[idx].start = round(cur, 2);
+    if (idx > 0 && ts[idx-1]) {
+      ts[idx-1].end = ts[idx].start;
+      ts[idx-1].duration = round(ts[idx-1].end - ts[idx-1].start, 3);
+    }
+    if (ts[idx].end <= ts[idx].start) {
+      ts[idx].end = round(ts[idx].start + 0.3, 2);
+    }
+    ts[idx].duration = round(ts[idx].end - ts[idx].start, 3);
+    markPieceModified();
+    buildStudioNoteTable();
+    highlightNote(idx);
+  }
+}
+
+function punchCurrentTime() {
+  if (activeNoteIndex >= 0) {
+    punchNoteStart(activeNoteIndex);
+  }
+}
+
+function shiftAllTimestamps(delta) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (!ts) return;
+  ts.forEach(n => {
+    n.start = Math.max(0, round(n.start + delta, 3));
+    n.end = Math.max(0, round(n.end + delta, 3));
+  });
+  markPieceModified();
+  buildStudioNoteTable();
+  buildPriorBar(PIECES[currentPieceIndex], currentChantInfo);
+}
+
+function shiftFromCurrent(delta) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (!ts || activeNoteIndex < 0) return;
+  for (let i = activeNoteIndex; i < ts.length; i++) {
+    ts[i].start = Math.max(0, round(ts[i].start + delta, 3));
+    ts[i].end = Math.max(0, round(ts[i].end + delta, 3));
+  }
+  markPieceModified();
+  buildStudioNoteTable();
+  buildPriorBar(PIECES[currentPieceIndex], currentChantInfo);
+}
+
+// Note loop playback
+function playNoteLoop(idx) {
+  const ts = PIECES[currentPieceIndex].timestamps;
+  if (!ts || !ts[idx] || !ytPlayer || !ytReady) return;
+  const start = ts[idx].start;
+  const end = ts[idx].end;
+
+  if (loopInterval) clearInterval(loopInterval);
+  highlightNote(idx);
+  ytPlayer.seekTo(start, true);
+  ytPlayer.playVideo();
+
+  loopInterval = setInterval(() => {
+    if (!ytPlayer || !ytReady) return;
+    const cur = ytPlayer.getCurrentTime();
+    if (cur >= end) {
+      ytPlayer.seekTo(start, true);
+    }
+  }, 25);
+}
+
+function loopCurrentNote() {
+  if (activeNoteIndex >= 0) playNoteLoop(activeNoteIndex);
+}
+
+// ── 8. Persistence, LocalStorage, DB API & Export ──
+function showToast(message, type = 'info', duration = 4500) {
+  const container = document.getElementById('labToastContainer');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'lab-toast ' + type;
+  toast.innerHTML = `
+    <div style="font-size:1.1rem;">${type === 'success' ? '✅' : (type === 'error' ? '⚠️' : 'ℹ️')}</div>
+    <div style="flex:1; line-height:1.4;">${message}</div>
+    <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer; font-size:1rem; opacity:0.6;">✕</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(12px) scale(0.95)';
+    setTimeout(() => toast.remove(), 250);
+  }, duration);
+}
+
+let isDbServerOnline = false;
+async function checkDbConnection(userClicked = false) {
+  const badge = document.getElementById('dbStatusBadge');
+  const dot = document.getElementById('dbStatusDot');
+  const text = document.getElementById('dbStatusText');
+  const probeUrls = ['/api/flag', 'http://localhost:8080/api/flag'];
+  
+  isDbServerOnline = false;
+  for (const url of probeUrls) {
+    try {
+      const res = await fetch(url, { method: 'OPTIONS', cache: 'no-store' });
+      if (res.status === 200 || res.status === 405 || res.ok) {
+        isDbServerOnline = true;
+        break;
+      }
+    } catch(e) {}
+  }
+
+  if (isDbServerOnline) {
+    badge.className = 'lab-badge-online';
+    dot.style.background = 'var(--success)';
+    text.textContent = 'DB : Connectée (Disque)';
+    if (userClicked) {
+      showToast('🟢 Connexion active au serveur API local. Les modifications sont enregistrées directement sur le disque !', 'success');
+    }
+  } else {
+    badge.className = 'lab-badge-offline';
+    dot.style.background = '#71717a';
+    text.textContent = 'DB : LocalStorage';
+    if (userClicked) {
+      showToast('⚪ Mode autonome (LocalStorage). Vos données sont conservées dans le navigateur. Pour enregistrer directement sur les fichiers JSON/JS du disque, lancez :<br><code>python pipeline/save_changes.py serve</code>', 'info', 7000);
+    }
+  }
+}
+
+async function syncWithDbApi(endpoint, payload) {
+  const urls = ['/api/' + endpoint, 'http://localhost:8080/api/' + endpoint];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        checkDbConnection();
+        return { success: true, message: data.message };
+      }
+    } catch(e) {}
+  }
+  return { success: false };
+}
+
+function markPieceModified() {
+  const piece = PIECES[currentPieceIndex];
+  piece.is_user_modified = true;
+  document.getElementById('reviewBanner').style.display = 'flex';
+  document.getElementById('reviewBannerText').textContent = 'Modifications manuelles actives pour : ' + piece.incipit;
+  localStorage.setItem('oremus_align_' + piece.id, JSON.stringify(piece.timestamps));
+}
+
+async function saveUserEdits() {
+  const piece = PIECES[currentPieceIndex];
+  localStorage.setItem('oremus_align_' + piece.id, JSON.stringify(piece.timestamps));
+
+  const dbRes = await syncWithDbApi('save_notes', { chant_id: piece.id, timestamps: piece.timestamps });
+  if (dbRes.success) {
+    showToast('💾 <b>' + piece.timestamps.length + ' horodatages</b> enregistrés directement sur le disque (<code>pipeline/final_timestamps/' + piece.id + '_stamps.json</code> & <code>lab_data.js</code>) !', 'success');
+  } else {
+    showToast('💾 Modifications sauvegardées dans votre navigateur (LocalStorage). Export JSON téléchargé.', 'info');
+    exportPieceJson();
+  }
+}
+
+function exportPieceJson() {
+  const piece = PIECES[currentPieceIndex];
+  const blob = new Blob([JSON.stringify(piece.timestamps, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = piece.id + '_stamps_reviewed.json';
+  a.click();
+}
+
+function resetToAI() {
+  if (confirm('Voulez-vous réinitialiser les horodatages aux valeurs d\'origine calculées par l\'IA ?')) {
+    localStorage.removeItem('oremus_align_' + PIECES[currentPieceIndex].id);
+    location.reload();
+  }
+}
+
+// ── 9. YouTube Player & Real-time Synchronization Loop ──
+function initYouTubePlayer(videoId) {
+  if (!window.YT || !window.YT.Player) {
+    setTimeout(() => initYouTubePlayer(videoId), 200);
+    return;
+  }
+
+  if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+    try { ytPlayer.destroy(); } catch(e) {}
+    ytPlayer = null;
+    ytReady = false;
+  }
+
+  document.getElementById('ytPlayerSlot').innerHTML = '';
+
+  if (!videoId) {
+    document.getElementById('ytPlayerSlot').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-tertiary); font-size:13px; text-align:center; padding:20px;">
+        <span style="font-size:24px; margin-bottom:8px;">🎬</span>
+        <span>Aucune vidéo liée pour cette pièce (lien retiré ou en attente d'une version certifiée).</span>
+        <button class="btn btn-sm btn-primary" style="margin-top:12px;" onclick="openProposeYtModal()">Proposer une vidéo certifiée</button>
+      </div>`;
+    ytReady = false;
+    updateTimeDisplays();
+    return;
+  }
+
+  ytPlayer = new YT.Player('ytPlayerSlot', {
+    videoId: videoId,
+    playerVars: {
+      autoplay: 0,
+      controls: 1,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1
+    },
+    events: {
+      onReady: function() {
+        ytReady = true;
+        if (currentPlaybackSpeed !== 1.0) {
+          try { ytPlayer.setPlaybackRate(currentPlaybackSpeed); } catch(e) {}
+        }
+        updateTimeDisplays();
+      },
+      onStateChange: function(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+          isPlaying = true;
+          document.getElementById('iconPlay').style.display = 'none';
+          document.getElementById('iconPause').style.display = 'block';
+          startProgressLoop();
+        } else {
+          isPlaying = false;
+          document.getElementById('iconPlay').style.display = 'block';
+          document.getElementById('iconPause').style.display = 'none';
+          if (loopInterval && event.data !== YT.PlayerState.PLAYING) {
+            clearInterval(loopInterval);
+            loopInterval = null;
+          }
+          if (event.data === YT.PlayerState.ENDED) {
+            seekToFraction(0);
+          }
+        }
+      }
+    }
+  });
+}
+
+function startProgressLoop() {
+  if (progressInterval) clearInterval(progressInterval);
+  progressInterval = setInterval(function() {
+    if (!ytPlayer || !ytReady) return;
+    try {
+      var cur = ytPlayer.getCurrentTime() || 0;
+      var dur = ytPlayer.getDuration() || 0;
+      if (dur > 0) {
+        document.getElementById('progressFill').style.width = ((cur / dur) * 100) + '%';
+        document.getElementById('lblCurrentTime').textContent = formatTime(cur);
+        document.getElementById('lblTotalTime').textContent = formatTime(dur);
+
+        // Real-time synchronization on Exsurge SVG score!
+        if (syncEnabled) {
+          var timestamps = PIECES[currentPieceIndex].timestamps;
+          if (timestamps && timestamps.length > 0) {
+            var noteIdx = -1;
+            for (var i = 0; i < timestamps.length; i++) {
+              var nxtStart = (i + 1 < timestamps.length) ? timestamps[i + 1].start : timestamps[i].end;
+              if (cur >= timestamps[i].start && cur < nxtStart) {
+                noteIdx = i;
+                break;
+              }
+            }
+            if (noteIdx === -1 && cur >= timestamps[timestamps.length - 1].end) {
+              noteIdx = timestamps.length - 1;
+            }
+            if (noteIdx >= 0) {
+              highlightNote(noteIdx);
+            }
+          } else if (currentChantInfo) {
+            var frac = cur / dur;
+            var targetIdx = _fractionToChantIndex(currentChantInfo, frac);
+            highlightNote(targetIdx);
+          }
+        }
+      }
+    } catch(e) {}
+  }, 35);
+}
+
+function updateTimeDisplays() {
+  if (!ytPlayer || !ytReady) return;
+  try {
+    var cur = ytPlayer.getCurrentTime() || 0;
+    var dur = ytPlayer.getDuration() || 0;
+    document.getElementById('lblCurrentTime').textContent = formatTime(cur);
+    document.getElementById('lblTotalTime').textContent = formatTime(dur);
+    if (dur > 0) {
+      document.getElementById('progressFill').style.width = ((cur / dur) * 100) + '%';
+    }
+  } catch(e) {}
+}
+
+function seekToFraction(frac) {
+  if (!ytPlayer || !ytReady) return;
+  try {
+    var dur = ytPlayer.getDuration() || 0;
+    if (dur > 0) {
+      var targetSec = frac * dur;
+      ytPlayer.seekTo(targetSec, true);
+      document.getElementById('progressFill').style.width = (frac * 100) + '%';
+      document.getElementById('lblCurrentTime').textContent = formatTime(targetSec);
+    }
+  } catch(e) {}
+}
+
+function formatTime(sec) {
+  if (isNaN(sec) || sec < 0) sec = 0;
+  var m = Math.floor(sec / 60);
+  var s = Math.floor(sec % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function round(val, dec) {
+  var p = Math.pow(10, dec);
+  return Math.round(val * p) / p;
+}
+
+// ── 10. Database Action Modals (Flag & Propose Video) ──
+function openFlagModal() {
+  document.getElementById('flagModalBackdrop').classList.add('open');
+}
+function closeFlagModal() {
+  document.getElementById('flagModalBackdrop').classList.remove('open');
+}
+async function submitFlag() {
+  const reason = document.getElementById('flagReasonSelect').value;
+  const comment = document.getElementById('flagCommentInput').value;
+  const piece = PIECES[currentPieceIndex];
+  piece.flagged_bad_air = { reason: reason, comment: comment, date: new Date().toISOString() };
+  localStorage.setItem('oremus_flag_' + piece.id, JSON.stringify(piece.flagged_bad_air));
+
+  closeFlagModal();
+  openProposeModal();
+
+  const dbRes = await syncWithDbApi('flag', { chant_id: piece.id, reason: reason, comment: comment });
+  if (dbRes.success) {
+    showToast('🚩 Signalement <b>enregistré dans la base de données</b> (<code>gregorian_youtube_links.json & .js</code>) !', 'success');
+  } else {
+    showToast('🚩 Signalement mémorisé dans votre navigateur (LocalStorage). Pour persister directement sur disque, lancez : <code>python pipeline/save_changes.py serve</code>', 'info', 6000);
+  }
+}
+
+function openProposeModal() {
+  document.getElementById('proposeModalBackdrop').classList.add('open');
+  document.getElementById('newYtInput').value = PIECES[currentPieceIndex].youtube_id || '';
+  document.getElementById('newSourceInput').value = PIECES[currentPieceIndex].source || '';
+}
+function closeProposeModal() {
+  document.getElementById('proposeModalBackdrop').classList.remove('open');
+}
+
+function testNewVideoInPlayer() {
+  let val = document.getElementById('newYtInput').value.trim();
+  const m = val.match(/(?:v=|\/embed\/|\.be\/|^)([a-zA-Z0-9_-]{11})/);
+  const ytId = m ? m[1] : val;
+  if (ytId.length === 11) {
+    initYouTubePlayer(ytId);
+    showToast('▶ Vidéo de test chargée dans le lecteur.', 'info');
+  } else {
+    alert('Identifiant YouTube invalide (doit comporter 11 caractères)');
+  }
+}
+
+async function saveNewVideoToDb() {
+  let val = document.getElementById('newYtInput').value.trim();
+  const m = val.match(/(?:v=|\/embed\/|\.be\/|^)([a-zA-Z0-9_-]{11})/);
+  const ytId = m ? m[1] : val;
+  const source = document.getElementById('newSourceInput').value.trim() || 'Manuel';
+
+  if (ytId.length !== 11) {
+    alert('Identifiant YouTube invalide (doit comporter 11 caractères) !');
+    return;
+  }
+
+  const piece = PIECES[currentPieceIndex];
+  piece.youtube_id = ytId;
+  piece.youtube_url = 'https://www.youtube.com/watch?v=' + ytId;
+  piece.source = source;
+  piece.verified_human = true;
+
+  // Persist in localStorage
+  localStorage.setItem('oremus_yt_' + piece.id, JSON.stringify({ id: ytId, source: source }));
+  document.getElementById('ytSourceBadge').textContent = '▶ ' + source;
+
+  initYouTubePlayer(ytId);
+  closeProposeModal();
+
+  const dbRes = await syncWithDbApi('propose_yt', { chant_id: piece.id, youtube_id: ytId, channel: source, title: piece.incipit });
+  if (dbRes.success) {
+    showToast('🔄 Nouvelle vidéo <b>' + ytId + '</b> (' + source + ') enregistrée directement dans la base de données (<code>gregorian_youtube_links.json & .js</code>) !', 'success');
+  } else {
+    showToast('🔄 Vidéo enregistrée dans votre navigateur (LocalStorage). Pour écrire directement dans les fichiers :<br><code>python pipeline/save_changes.py update_yt ' + piece.id + ' ' + ytId + ' "' + source + '"</code>', 'info', 7000);
+  }
+}
+
+// ── 11. Controls & Keyboard Shortcuts ──
+document.getElementById('btnHeroPlay').onclick = function() {
+  if (!ytPlayer || !ytReady) return;
+  if (isPlaying) {
+    ytPlayer.pauseVideo();
+  } else {
+    ytPlayer.playVideo();
+  }
+};
+
+document.getElementById('btnRestart').onclick = function() {
+  seekToFraction(0);
+  highlightNote(0);
+  if (ytPlayer && ytReady) ytPlayer.seekTo(0, true);
+};
+
+document.getElementById('btnNextNote').onclick = function() {
+  if (!currentChantInfo) return;
+  var nextIdx = Math.min(currentChantInfo.allNotes.length - 1, activeNoteIndex + 1);
+  var ts = PIECES[currentPieceIndex].timestamps;
+  if (ts && ts[nextIdx]) {
+    if (ytPlayer && ytReady) ytPlayer.seekTo(ts[nextIdx].start, true);
+  }
+  highlightNote(nextIdx);
+};
+
+const speeds = [0.75, 1.0, 1.25, 1.5];
+document.getElementById('btnSpeedCycle').onclick = function() {
+  var curIdx = speeds.indexOf(currentPlaybackSpeed);
+  currentPlaybackSpeed = speeds[(curIdx + 1) % speeds.length];
+  document.getElementById('lblSpeed').textContent = currentPlaybackSpeed.toFixed(currentPlaybackSpeed % 1 === 0 ? 1 : 2) + '×';
+  if (ytPlayer && ytReady) {
+    try { ytPlayer.setPlaybackRate(currentPlaybackSpeed); } catch(e) {}
+  }
+};
+
+document.getElementById('btnToggleSync').onclick = function() {
+  syncEnabled = !syncEnabled;
+  this.classList.toggle('active', syncEnabled);
+};
+
+document.getElementById('progressTrack').onclick = function(e) {
+  var rect = this.getBoundingClientRect();
+  var frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  seekToFraction(frac);
+};
+
+function zoomScore(delta) {
+  if (delta === 0) currentScoreScale = 1.0;
+  else currentScoreScale = Math.max(0.6, Math.min(1.8, currentScoreScale + delta));
+  const el = document.getElementById('scoreContainer');
+  el.style.transform = 'scale(' + currentScoreScale + ')';
+}
+
+document.getElementById('btnToggleTheme').onclick = function() {
+  var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  var nxt = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', nxt);
+  renderPieceScore(PIECES[currentPieceIndex]);
+};
+
+// Keyboard Shortcuts: Pro Reviewing Keys
+window.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+  if (e.code === 'Space') {
+    e.preventDefault();
+    document.getElementById('btnHeroPlay').click();
+  } else if (e.key === 't' || e.key === 'T' || e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    punchCurrentTime();
+  } else if (e.key === 'r' || e.key === 'R') {
+    e.preventDefault();
+    loopCurrentNote();
+  } else if (e.key === 'j' || e.key === 'J') {
+    e.preventDefault();
+    if (ytPlayer && ytReady) ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() - 1), true);
+  } else if (e.key === 'l' || e.key === 'L') {
+    e.preventDefault();
+    if (ytPlayer && ytReady) ytPlayer.seekTo(ytPlayer.getCurrentTime() + 1, true);
+  } else if (e.code === 'BracketRight' || e.code === 'ArrowRight') {
+    e.preventDefault();
+    document.getElementById('btnNextNote').click();
+  } else if (e.code === 'BracketLeft' || e.code === 'ArrowLeft') {
+    e.preventDefault();
+    if (activeNoteIndex > 0) {
+      selectNoteFromStudio(activeNoteIndex - 1);
+    }
+  }
+});
+
+// ── 12. Load Piece by Index ──
+function loadPiece(index) {
+  if (index < 0 || index >= PIECES.length) return;
+  currentPieceIndex = index;
+  const piece = PIECES[index];
+
+  // Restore user overrides from localStorage if any
+  const savedYt = localStorage.getItem('oremus_yt_' + piece.id);
+  if (savedYt) {
+    try {
+      const parsed = JSON.parse(savedYt);
+      piece.youtube_id = parsed.id;
+      piece.source = parsed.source;
+    } catch(e) {}
+  }
+  const savedTimestamps = localStorage.getItem('oremus_align_' + piece.id);
+  if (savedTimestamps) {
+    try {
+      piece.timestamps = JSON.parse(savedTimestamps);
+      piece.is_user_modified = true;
+    } catch(e) {}
+  }
+
+  // Update banner
+  if (piece.is_user_modified) {
+    document.getElementById('reviewBanner').style.display = 'flex';
+    document.getElementById('reviewBannerText').textContent = 'Modifications manuelles actives pour : ' + piece.incipit;
+  } else {
+    document.getElementById('reviewBanner').style.display = 'none';
+  }
+
+  // Update tabs active state
+  document.querySelectorAll('.piece-tab-btn').forEach((tab, i) => {
+    tab.classList.toggle('active', i === index);
+  });
+
+  // Metadata headers
+  document.getElementById('scorePartBadge').textContent = (piece.part || 'Chant').toUpperCase();
+  document.getElementById('scoreChantTitle').textContent = piece.incipit;
+  document.getElementById('ytSourceBadge').textContent = '▶ ' + (piece.source || 'YouTube');
+  document.getElementById('rawGabcBox').textContent = piece.gabc_src;
+
+  // Render Gregorian score via Exsurge
+  renderPieceScore(piece);
+
+  // Load YouTube video
+  initYouTubePlayer(piece.youtube_id);
+}
+
+// ── 13. Initialization ──
+function init() {
+  const navBar = document.getElementById('pieceNavBar');
+  navBar.innerHTML = '';
+
+  PIECES.forEach((piece, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'piece-tab-btn' + (idx === 0 ? ' active' : '');
+    btn.innerHTML = `
+      <span class="piece-tab-title">${piece.incipit.split('(')[0].trim()}</span>
+      <span class="piece-tab-subtitle">${piece.part} · ${piece.total_notes} notes</span>
+    `;
+    btn.onclick = () => loadPiece(idx);
+    navBar.appendChild(btn);
+  });
+
+  let resizeTimeout = null;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      if (currentPieceIndex >= 0 && PIECES[currentPieceIndex]) {
+        renderPieceScore(PIECES[currentPieceIndex]);
+      }
+    }, 250);
+  });
+
+  loadPiece(0);
+  checkDbConnection();
+  setInterval(checkDbConnection, 15000);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

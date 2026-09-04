@@ -1,0 +1,52 @@
+[
+  {
+    "id": "5",
+    "incipit": "Vidi civitatem",
+    "part": "Introitus",
+    "youtube_url": "https://www.youtube.com/watch?v=Bjw3a4qMphs",
+    "youtube_id": "Bjw3a4qMphs",
+    "source": "Cappella Musicale Pontificia Sistina",
+    "gabc_path": "d:/Documents/jgabc\\gabc\\5.gabc",
+    "gabc_incipit": "Vidi civitatem"
+  },
+  {
+    "id": "11",
+    "incipit": "Sapientiam sanctorum (Intr.)",
+    "part": "Introitus",
+    "youtube_url": "https://www.youtube.com/watch?v=Cm1E06bF9Rs",
+    "youtube_id": "Cm1E06bF9Rs",
+    "source": "GradualeProject",
+    "gabc_path": "d:/Documents/jgabc\\gabc\\11.gabc",
+    "gabc_incipit": "Sapientiam sanctorum (Intr.)"
+  },
+  {
+    "id": "13",
+    "incipit": "Omnis terra",
+    "part": "Introitus",
+    "youtube_url": "https://www.youtube.com/watch?v=tDRSxIdV2yw",
+    "youtube_id": "tDRSxIdV2yw",
+    "source": "Marek Klein",
+    "gabc_path": "d:/Documents/jgabc\\gabc\\13.gabc",
+    "gabc_incipit": "Omnis terra"
+  },
+  {
+    "id": "14",
+    "incipit": "Amavit eum Dominus (All.)",
+    "part": "Alleluia",
+    "youtube_url": "https://www.youtube.com/watch?v=z6nSN6roHRU",
+    "youtube_id": "z6nSN6roHRU",
+    "source": "GradualeProject",
+    "gabc_path": "d:/Documents/jgabc\\do_data\\horas\\Latin-gabc\\chants\\Commune\\C4\\rb--amavit_eum_dominus--solesmes_1934.gabc",
+    "gabc_incipit": "Amavit eum Dominus"
+  },
+  {
+    "id": "15",
+    "incipit": "Qui fecerit",
+    "part": "Communio",
+    "youtube_url": "https://www.youtube.com/watch?v=1j7HZYpSdfc",
+    "youtube_id": "1j7HZYpSdfc",
+    "source": "GradualeProject",
+    "gabc_path": "d:/Documents/jgabc\\gabc\\15.gabc",
+    "gabc_incipit": "Qui fecerit"
+  }
+]

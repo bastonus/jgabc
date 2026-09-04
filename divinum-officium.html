@@ -22,7 +22,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=70.8&ts=202609010300">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=74.0&ts=202609041345">
     <link rel="stylesheet" href="css/gregorian_search.css?v=2.56&ts=202609010315">
     <script>
         (function() {
@@ -69,7 +69,9 @@
     <script src="incipits.js"></script>
     <script src="js/Tone.min.js?v=orig&ts=202608252211"></script>
     <script src="js/tones.js?v=orig&ts=202608252211"></script>
+    <script src="psalmtone.js"></script>
     <script src="util.js?v=orig&ts=202608252211"></script>
+    <script src="verseRef.js"></script>
     <script src="exsurge.min.js"></script>
     <script src="jquery.hypher.js"></script>
     <script src="patterns/la-hypher.js"></script>
@@ -81,13 +83,13 @@
     <script src="js/bible_mappings.js?v=1.1&ts=202609011135"></script>
     <script src="js/saints_art_metadata.js?v=1.0"></script>
     <script src="js/tempora_art_metadata.js?v=1.1&ts=202609021535"></script>
-    <script src="js/divinum_officium.js?v=72.0&ts=202609021545"></script>
+    <script src="js/divinum_officium.js?v=74.0&ts=202609041345"></script>
     <script src="js/gregorian_db.js?v=2.1"></script>
     <script src="js/gregorian_index_data.js?v=3.4&ts=202609011145"></script>
     <script src="js/gregorian_youtube_links.js?v=1.0"></script>
     <script src="https://www.youtube.com/iframe_api" async></script>
     <script src="js/gregorian_search_engine.js?v=1.0&ts=202609010350"></script>
-    <script src="js/gregorian_search_ui.js?v=2.64&ts=202609011145"></script>
+    <script src="js/gregorian_search_ui.js?v=2.65&ts=202609041325"></script>
 </head>
 <body>
     <div class="app-layout">
@@ -860,10 +862,69 @@
                     <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     <span>🧪 Page de test (Messe &amp; Chant Grégorien)</span>
                 </button>
+                <a href="pipeline/align/alignment-lab.html" target="_blank" rel="noopener" style="background: none; border: none; padding: 6px 8px; color: var(--text-tertiary); font-size: 0.78rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; gap: 6px; opacity: 0.75; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='var(--primary-color)';" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-tertiary)';">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h6m-6 0v6m6-6h4a2 2 0 0 1 2 2v4m-6-6v6m0 0H9m6 0v6m-6 0v-6m0 6H5a2 2 0 0 1-2-2v-4m6 6h6"/></svg>
+                    <span>⚗ Laboratoire Alignement GABC (5 pièces · v3 corrigé)</span>
+                </a>
             </div>
 
         </div>
     </aside>
+
+    <!-- Mass Part Picker Backdrop & Bottom Sheet Drawer -->
+    <div id="massPartPickerBackdrop" class="do-part-picker-backdrop hidden"></div>
+    <div id="massPartPickerDrawer" class="do-part-picker-drawer">
+        <div class="do-player-drag-handle-wrap" id="partPickerDragHandleWrap" title="Glisser vers le bas pour fermer">
+            <div class="do-player-drag-handle" id="partPickerDragHandle"></div>
+        </div>
+        <div class="do-part-picker-inner">
+            <!-- Header Row -->
+            <div class="do-part-picker-header">
+                <div class="do-part-picker-title-col">
+                    <div class="do-part-picker-badge-wrap">
+                        <span id="partPickerCategoryBadge" class="do-part-picker-badge">KYRIALE</span>
+                        <h3 id="partPickerTitle" class="do-part-picker-title">Kyrie eleison</h3>
+                    </div>
+                    <div id="partPickerKyrialeSelectWrap" class="do-part-picker-kyriale-select-wrap hidden">
+                        <label for="partPickerKyrialeSelect">Messe :</label>
+                        <select id="partPickerKyrialeSelect" class="do-part-picker-select">
+                            <!-- Populated with Missa I to XVIII -->
+                        </select>
+                    </div>
+                </div>
+                <div class="do-part-picker-controls-col">
+                    <!-- Corner Psalm-Toned Selector Button -->
+                    <button type="button" id="partPickerPsalmToneBtn" class="do-part-picker-psalm-btn hidden" title="Basculer vers la formule psalmodiée">
+                        <span class="do-pt-sym">℣</span>
+                        <span class="do-pt-label">Ton psalmodié</span>
+                    </button>
+                    <!-- Search Input in Drawer -->
+                    <div class="do-part-picker-search-wrap">
+                        <span class="do-part-picker-search-icon">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+                        </span>
+                        <input type="text" id="partPickerSearchInput" class="do-part-picker-search-input" placeholder="Filtrer...">
+                    </div>
+                    <!-- View Mode Toggle (Grid vs List) -->
+                    <button type="button" id="partPickerToggleViewBtn" class="gregorian-toggle-view-btn" title="Changer de vue" aria-label="Changer de vue">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+                    </button>
+                    <!-- Close Button -->
+                    <button type="button" id="btnClosePartPicker" class="do-part-picker-close-btn" aria-label="Fermer" title="Fermer">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area: Results in Grid or List -->
+            <div id="partPickerResultsContainer" class="gregorian-results is-grid custom-scroll">
+                <!-- Dynamically populated items -->
+            </div>
+        </div>
+    </div>
 
     <!-- App-Native Full-width Audio Player -->
     <div id="modernPlayerBar" class="modern-player-bar">
@@ -950,7 +1011,7 @@
                     </button>
 
                     <!-- Score Sync Toggle Button -->
-                    <button id="playerBtnToggleSync" class="do-player-toggle do-player-sync-btn active" title="Synchroniser les notes (Cliquer pour désactiver)">
+                    <button id="playerBtnToggleSync" class="do-player-toggle do-player-sync-btn" title="Synchroniser les notes (Cliquer pour activer)">
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
