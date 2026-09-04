@@ -1,0 +1,41 @@
+{
+  "2_3pT-f4NgTB4": {
+    "piece_id": "2",
+    "youtube_id": "3pT-f4NgTB4",
+    "channel": "Sanctum Chant",
+    "title": "Gregorian Chant for Blessing & Light | Psalm 67 (Deus misereatur)",
+    "notes_count": 184,
+    "audio_span": [
+      13.37,
+      5059.08
+    ],
+    "has_reprise": true,
+    "stamp_file": "2_3pT-f4NgTB4_stamps.json"
+  },
+  "5_Bjw3a4qMphs": {
+    "piece_id": "5",
+    "youtube_id": "Bjw3a4qMphs",
+    "channel": "Cappella Musicale Pontificia Sistina",
+    "title": "Introitus - Vidi civitatem (Gregoriano)",
+    "notes_count": 161,
+    "audio_span": [
+      0.59,
+      109.98
+    ],
+    "has_reprise": true,
+    "stamp_file": "5_Bjw3a4qMphs_stamps.json"
+  },
+  "5_WLDLqRJ4gUs": {
+    "piece_id": "5",
+    "youtube_id": "WLDLqRJ4gUs",
+    "channel": "Gregorian Karaoke",
+    "title": "00005 - Vidi civitatem - Introitus - 8",
+    "notes_count": 161,
+    "audio_span": [
+      1.07,
+      79.62
+    ],
+    "has_reprise": true,
+    "stamp_file": "5_WLDLqRJ4gUs_stamps.json"
+  }
+}

@@ -1013,6 +1013,9 @@
                 if (mode) {
                     html += '      <span class="gregorian-badge-mode">' + mode + '</span>';
                 }
+                if (item.has_nabc || (item.tags || '').indexOf('NABC') !== -1 || item.nabc_lines > 0) {
+                    html += '      <span class="gregorian-badge-part do-badge-nabc" title="Notation adiastématique ancienne (neumes NABC)">NABC</span>';
+                }
                 html += '    </div>';
                 html += '  </div>';
 
@@ -1286,8 +1289,14 @@
             }
         });
 
-        // Actions sur les cartes grégoriennes (Recherche)
+        // Actions sur les cartes grégoriennes (Recherche uniquement)
         $(document).on('click', '.btn-play-chant', function(e) {
+            if (window.doState && window.doState.hora !== 'gregorian_search' && window.doState.hora !== 'gregorian_chant') {
+                return;
+            }
+            if (!document.body.contains(this) || $(this).closest('#massPartPickerDrawer, #partPickerResultsContainer').length || $(e.target).closest('#massPartPickerDrawer, #partPickerResultsContainer').length) {
+                return;
+            }
             e.stopPropagation();
             var $card = $(this).closest('.gregorian-card');
             var chantId = $card.data('chant-id');
@@ -1295,6 +1304,12 @@
         });
 
         $(document).on('click', '.btn-copy-gabc', async function(e) {
+            if (window.doState && window.doState.hora !== 'gregorian_search' && window.doState.hora !== 'gregorian_chant') {
+                return;
+            }
+            if (!document.body.contains(this) || $(this).closest('#massPartPickerDrawer, #partPickerResultsContainer').length || $(e.target).closest('#massPartPickerDrawer, #partPickerResultsContainer').length) {
+                return;
+            }
             e.stopPropagation();
             var $card = $(this).closest('.gregorian-card');
             var chantId = $card.data('chant-id');
@@ -1316,6 +1331,12 @@
         });
 
         $(document).on('click', '.btn-zoom-chant, .gregorian-score-container, .gregorian-card[data-chant-id]', function(e) {
+            if (window.doState && window.doState.hora !== 'gregorian_search' && window.doState.hora !== 'gregorian_chant') {
+                return;
+            }
+            if (!document.body.contains(this) || $(this).closest('#massPartPickerDrawer, #partPickerResultsContainer').length || $(e.target).closest('#massPartPickerDrawer, #partPickerResultsContainer').length) {
+                return;
+            }
             if ($(e.target).closest('.btn-play-chant, .btn-copy-gabc').length) return;
             e.stopPropagation();
             var $card = $(this).closest('.gregorian-card');
@@ -1481,9 +1502,12 @@
         var commentary = header.commentary || 'Tradition grégorienne';
         var transcriber = header.transcriber || 'Éditions Solesmes / GregoBase';
 
+        var hasNabc = /nabc-lines:\s*[1-9]/i.test(gabc) || /\([^)]*\|[^)]*\)/.test(gabc);
+        var showNabc = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
+
         // Mise à jour de l'en-tête principal
         $('#doHeaderTitle .title-text').text(title);
-        var subHeader = 'CANTUS GREGORIANUS • ' + (mode ? ('MODUS ' + mode) : officePart.toUpperCase());
+        var subHeader = 'CANTUS GREGORIANUS • ' + (mode ? ('MODUS ' + mode) : officePart.toUpperCase()) + (hasNabc ? ' • NABC' : '');
         $('#doHourLabel').text(subHeader.toUpperCase());
 
         var cardHtml = 
@@ -1499,6 +1523,11 @@
             '        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
             '        <span>Écouter</span>' +
             '      </button>' +
+            (hasNabc ? 
+            '      <button class="gregorian-action-btn btn-toggle-main-nabc' + (showNabc ? ' is-active' : '') + '" style="padding: 7px 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-color);">' +
+            '        <span class="do-badge-nabc">NABC</span>' +
+            '        <span>' + (showNabc ? 'Neumes actifs' : 'Neumes masqués') + '</span>' +
+            '      </button>' : '') +
             '      <button class="gregorian-action-btn btn-copy-main-gabc" style="padding: 7px 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-color);">' +
             '        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
             '        <span>Copier GABC</span>' +
@@ -1509,6 +1538,7 @@
             '      </button>' +
             '    </div>' +
             '    <div class="do-chant-meta-plain" style="margin-top: 16px; display: flex; flex-direction: column; gap: 4px; font-family: \'Inter\', sans-serif; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; text-align: left;">' +
+            (hasNabc ? ('      <div><span style="color: var(--text-tertiary); font-weight: 500;">Notation ancienne :</span> <span class="do-badge-nabc">NABC</span> (Neumes adiastématiques / St-Gall / Laon)</div>') : '') +
             (book ? ('      <div><span style="color: var(--text-tertiary); font-weight: 500;">Source &amp; Livre :</span> ' + escapeHtml(book) + '</div>') : '') +
             (commentary ? ('      <div><span style="color: var(--text-tertiary); font-weight: 500;">Référence :</span> ' + escapeHtml(commentary) + '</div>') : '') +
             '      <div><span style="color: var(--text-tertiary); font-weight: 500;">GregoBase :</span> <a href="https://gregobase.selapa.net/chant.php?id=' + encodeURIComponent(chantId) + '" target="_blank" rel="noopener noreferrer" style="color: var(--primary-color); text-decoration: underline; text-underline-offset: 2px;">https://gregobase.selapa.net/chant.php?id=' + escapeHtml(chantId) + '</a>' + (transcriber ? (' • <span style="color: var(--text-tertiary); font-weight: 500;">Transcripteur :</span> ' + escapeHtml(transcriber)) : '') + '</div>' +
@@ -1561,6 +1591,23 @@
             e.stopPropagation();
             playThisScore();
         });
+
+        // Handler pour le bouton basculer NABC
+        if (hasNabc) {
+            $card.find('.btn-toggle-main-nabc').off('click').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var cur = $chantWrapper.data('show-nabc');
+                if (cur === undefined) cur = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
+                var next = !cur;
+                $chantWrapper.data('show-nabc', next);
+                if (window.doState) window.doState.showNabc = next;
+                $(this).toggleClass('is-active', next).find('span:last-child').text(next ? 'Neumes actifs' : 'Neumes masqués');
+                if (typeof window.renderSingleChantScore === 'function') {
+                    window.renderSingleChantScore($chantWrapper, true);
+                }
+            });
+        }
 
         // Synchronisation avec le lecteur audio (fermé par défaut si pas autoPlay)
         if (!isAutoPlay) {

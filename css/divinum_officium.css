@@ -4513,9 +4513,69 @@ body.is-missa-mode .do-top-header.is-scrolled {
     cursor: pointer;
     transition: fill 0.1s ease;
 }
+.do-chant-preview svg text.aboveLinesText {
+    font-style: italic;
+    letter-spacing: 0.03em;
+    opacity: 0.88;
+}
 .do-chant-preview svg text.lyric:hover,
 .do-chant-preview svg text.aboveLinesText:hover {
     fill: color-mix(in srgb, var(--primary-color) 70%, currentColor) !important;
+}
+
+/* NABC toolbar & badges */
+.do-chant-nabc-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 2px 4px;
+}
+.do-badge-nabc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--primary-color, #c96b63) 18%, transparent);
+    color: var(--primary-color, #c96b63);
+    border: 1px solid color-mix(in srgb, var(--primary-color, #c96b63) 32%, transparent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+.do-toggle-nabc-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: var(--background-surface, #1e1e1e);
+    color: var(--text-secondary, #94a3b8);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.do-toggle-nabc-btn:hover {
+    color: var(--text-primary, #ffffff);
+    border-color: var(--primary-color, #c96b63);
+}
+.do-toggle-nabc-btn.is-active {
+    background: color-mix(in srgb, var(--primary-color, #c96b63) 14%, transparent);
+    color: var(--primary-color, #c96b63);
+    border-color: color-mix(in srgb, var(--primary-color, #c96b63) 40%, transparent);
+}
+.btn-toggle-main-nabc.is-active {
+    background: color-mix(in srgb, var(--primary-color, #c96b63) 15%, var(--background-surface)) !important;
+    border-color: color-mix(in srgb, var(--primary-color, #c96b63) 45%, transparent) !important;
+    color: var(--primary-color, #c96b63) !important;
 }
 
 .do-chant-gabc-raw {
@@ -7894,8 +7954,84 @@ body.mass-toc-open #modernPlayerBar {
     overflow-y: auto;
     min-height: 0;
     max-height: calc(82vh - 120px);
-    padding: 6px 2px 20px;
+    padding: 8px 4px 24px;
     box-sizing: border-box;
+}
+
+.do-part-picker-drawer .gregorian-results.is-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .do-part-picker-drawer .gregorian-results.is-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card {
+    background: var(--background-surface, #141416) !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+    border-radius: 14px !important;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    aspect-ratio: 1 / 1;
+    min-height: 220px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden !important;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+}
+
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.3) !important;
+}
+
+/* En mode grille dans le drawer, masquer impérativement l'extrait de texte */
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-middle,
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-text-preview {
+    display: none !important;
+}
+
+/* Masquer les badges et source en mode grille comme dans la recherche pour garder Titre + Score */
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-badges,
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-source {
+    display: none !important;
+}
+
+/* Score container dans la carte en grille */
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-score-container {
+    width: 100%;
+    flex: 1;
+    min-height: 110px;
+    margin-top: 6px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden !important;
+    -webkit-mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
+}
+
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-score-container svg {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
+    overflow: hidden !important;
+    pointer-events: none;
+    user-select: none;
 }
 
 /* ── Active Piece Highlight (Matches Reader Active Video & Primary Border) ── */
@@ -7938,93 +8074,103 @@ body.mass-toc-open #modernPlayerBar {
     font-weight: 600 !important;
 }
 
-
-
-/* ── Expandable Accordion for Verses Ad Libitum (Under GABC SVG) ── */
-.do-verses-ad-libitum-container {
-    margin-top: 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-    background: var(--background-surface, rgba(255, 255, 255, 0.02));
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-}
-
-.do-verses-accordion-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 14px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: background 0.2s ease, color 0.2s ease;
-    text-align: left;
-    user-select: none;
-}
-
-.do-verses-accordion-header:hover {
-    background: var(--background-highlight, rgba(255, 255, 255, 0.04));
-    color: var(--text-primary);
-}
-
-.do-verses-title-wrap {
+/* ── Versets Ad Libitum (Clean, Unboxed, Same Fonts & Margins as Card) ── */
+.do-verses-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
-.do-verses-badge {
-    font-size: 0.72rem;
-    font-weight: 700;
+    gap: 7px;
+    margin: 8px 0 4px 0;
+    padding: 3px 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 600;
     color: var(--primary-color, #c96b63);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    transition: opacity 0.18s ease;
+    text-align: left;
 }
 
-.do-verses-ref {
+.do-verses-toggle:hover {
+    opacity: 0.82;
+}
+
+.do-verses-toggle .do-verses-toggle-title {
+    letter-spacing: 0.02em;
+    color: var(--primary-color, #c96b63);
+}
+
+.do-verses-toggle .do-verses-toggle-ref {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
     font-size: 0.8rem;
+    color: var(--text-tertiary, #64748b);
     font-style: italic;
-    color: var(--text-tertiary);
+    margin-right: 2px;
 }
 
-.do-verses-accordion-header .dropdown-icon {
-    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+.do-verses-toggle .dropdown-icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    margin-left: 2px;
 }
 
-.do-verses-accordion-header.is-expanded .dropdown-icon,
-.do-verses-ad-libitum-container.is-expanded .do-verses-accordion-header .dropdown-icon {
-    transform: rotate(180deg) !important;
+.do-verses-toggle .dropdown-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+.do-verses-toggle:hover .dropdown-icon {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18) !important;
     color: var(--primary-color, #c96b63) !important;
 }
 
-.do-verses-accordion-body {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease;
-    padding: 0 14px;
-    border-top: 0px solid transparent;
+.do-verses-toggle.is-expanded .dropdown-icon {
+    transform: rotate(180deg) !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.25) !important;
+    color: var(--primary-color, #c96b63) !important;
 }
 
-.do-verses-ad-libitum-container.is-expanded .do-verses-accordion-body {
-    max-height: 4000px;
-    opacity: 1;
-    padding: 10px 14px 14px;
-    border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+.do-verses-score-container {
+    width: 100%;
+    margin: 4px 0 14px 0;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: none;
+}
+
+.do-verses-content {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .do-verses-content .do-chant-preview {
     width: 100%;
-    margin: 6px 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
 }
 
 .do-verses-content .do-chant-preview svg {
     display: block;
+    margin: 0 auto;
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
@@ -8032,15 +8178,18 @@ body.mass-toc-open #modernPlayerBar {
 
 .do-verses-line {
     margin: 6px 0;
-    font-size: 0.92rem;
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    font-size: 1rem;
     line-height: 1.5;
+    color: var(--text-primary);
 }
 
 .do-verses-vnum {
-    font-family: serif;
-    font-weight: bold;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
     color: var(--primary-color, #c96b63);
-    margin-right: 4px;
+    margin-right: 6px;
 }
 
 

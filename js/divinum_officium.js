@@ -79,7 +79,7 @@ var doState = window.doState = {
     partOverrides: {},
     psalmTonedParts: {},
     expandedVerses: {},
-    isGlobalPsalmTone: false,
+    isGlobalPsalmTone: localStorage.getItem('do_global_psalm_tone') === 'true',
     tempo: parseInt(localStorage.getItem('do_tempo'), 10) || 165,
     mobileLang: 'la',
     settings: {
@@ -1085,6 +1085,7 @@ var DO_UI_TRANSLATIONS = {
         content_label: 'Textus & Cantus',
         ordinarium_label: 'Ordinarium Missæ',
         gregorian_label: 'Cantus Gregorianus',
+        psalm_tone_label: 'Tons psalmodiés',
         latin_label: 'Textus Latinus',
         latin_true: 'Latin actif',
         latin_false: 'Sans Latin',
@@ -1146,6 +1147,7 @@ var DO_UI_TRANSLATIONS = {
         content_label: 'Textus & Cantus',
         ordinarium_label: 'Ordinarium Missæ',
         gregorian_label: 'Cantus Gregorianus',
+        psalm_tone_label: 'Toni Psalmorum',
         latin_label: 'Textus Latinus',
         latin_true: 'Latina activa',
         latin_false: 'Sine Latina',
@@ -1204,6 +1206,7 @@ var DO_UI_TRANSLATIONS = {
         content_label: 'Textus & Cantus',
         ordinarium_label: 'Ordinarium Missæ',
         gregorian_label: 'Cantus Gregorianus',
+        psalm_tone_label: 'Psalm Tones',
         latin_label: 'Textus Latinus',
         latin_true: 'Latin active',
         latin_false: 'Without Latin',
@@ -1263,6 +1266,7 @@ var DO_UI_TRANSLATIONS = {
         content_label: 'Textus & Cantus',
         ordinarium_label: 'Ordinarium Missæ',
         gregorian_label: 'Cantus Gregorianus',
+        psalm_tone_label: 'Tonos Salmódicos',
         latin_label: 'Textus Latinus',
         latin_true: 'Latín activo',
         latin_false: 'Sin Latín',
@@ -1344,6 +1348,7 @@ function updateUiLanguage() {
     $('#labelContentText').text(t.content_label || 'Textus & Cantus');
     $('#labelOrdinariumText').text(t.ordinarium_label || 'Ordinarium Missæ');
     $('#labelGregorianText').text(t.gregorian_label || 'Cantus Gregorianus');
+    $('#labelPsalmToneText').text(t.psalm_tone_label || 'Toni Psalmorum');
     $('#labelLatinText').text(t.latin_label || 'Textus Latinus');
     $('#labelVernacularText').text(t.vernacular_label || 'Translatio Vernacula');
     $('#doVernacularOptions .settings-option-card[data-value="none"], #doVernacularOptions .settings-option[data-value="none"]').text(t.vernacular_none);
@@ -2837,8 +2842,7 @@ function renderOfficeCardHTML(cardData, vernCardData) {
     }
 
     var ptBtnHtml = '';
-    var PROPER_PARTS = ['introitus', 'graduale', 'tractus', 'alleluia', 'sequentia', 'offertorium', 'communio'];
-    if (isMissa && doState.includeGregorian && cardData.id && PROPER_PARTS.indexOf(cardData.id) !== -1) {
+    if (isMissa && doState.includeGregorian && cardData.id && CUSTOMIZABLE_MASS_PARTS.indexOf(cardData.id) !== -1) {
         var isPtActive = !!(doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[cardData.id]));
         ptBtnHtml = '<button type="button" class="do-card-pt-btn' + (isPtActive ? ' is-active' : '') + '" data-part-key="' + escHtml(cardData.id) + '" title="Basculer vers le ton psalmodié">' +
             '<span class="do-pt-sym">℣</span>' +
@@ -5151,8 +5155,22 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
     return result;
 }
 
-function preprocessGabcForExsurge(gabc) {
+function preprocessGabcForExsurge(gabc, options) {
     if (!gabc || typeof gabc !== 'string') return gabc;
+    options = options || {};
+
+    // 0. Support stripping NABC if explicitly requested
+    if (options.stripNabc) {
+        gabc = gabc.replace(/\(([^)]*)\)/g, function(match, inner) {
+            if (inner.indexOf('|') === -1) return match;
+            var parts = inner.split('|');
+            var notes = [];
+            for (var i = 0; i < parts.length; i += 2) {
+                notes.push(parts[i]);
+            }
+            return '(' + notes.join(' ') + ')';
+        });
+    }
 
     // 1. Process <eu>...</eu> (Euouae - saeculorum Amen termination)
     // Convert each syllable inside <eu> into italic rubric colored letters: <c><i>E</i></c>(h) <c><i>u</i></c>(h)...
@@ -5172,25 +5190,30 @@ function preprocessGabcForExsurge(gabc) {
     gabc = gabc.replace(/\[[ou]?ll:[^\]]*\]/ig, '');
     gabc = gabc.replace(/\[(?:cs|alt|nobar)[^\]]*\]/ig, '');
 
-    // 3. Normalize \Vbar, \Rbar, \Abar to standard bar symbols
+    // 3. Normalize \Vbar, \Rbar, \Abar and <sp> tags directly into styled rubric indicators
     gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) {
-        return b.toUpperCase() + '/.';
+        var ch = b.toUpperCase();
+        return '<c><i>' + (ch === 'V' ? '℣.' : ch === 'R' ? '℟.' : 'A/.') + '</i></c>';
     }).replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) {
-        return b.toUpperCase() + '/.';
+        var ch = b.toUpperCase();
+        return '<c><i>' + (ch === 'V' ? '℣.' : ch === 'R' ? '℟.' : 'A/.') + '</i></c>';
     });
 
     // 4. Wrap standard rubric indicators (Ps., V., R., T.P., ij., etc.) in rubric coloring
-    // Match <i>Ps.</i>, <i>Ps</i>, <i>Psalmus</i>, Ps.
-    gabc = gabc.replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1<c><i>Ps.</i></c>');
-    gabc = gabc.replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
+    // Match <i>Ps...</i> with optional psalm number like Ps. 117. or Ps.
+    gabc = gabc.replace(/(^|[\s\)])<i>\s*(Ps\.?|Psalmus)(\s*\d+\.?)?\s*<\/i>/gi, function(m, p1, p2, p3) {
+        return p1 + '<c><i>' + p2 + (p3 ? (' ' + p3.trim()) : '') + '</i></c>';
+    });
+    // Match standalone Ps. or Ps.(
+    gabc = gabc.replace(/(^|[\s\)])(Ps\.)(?=\s*[\d\(A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
 
-    // Match <i>V.</i>, <i>℣.</i>, <i>℣</i>, <i>Versus</i>, V/.
-    gabc = gabc.replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
-    gabc = gabc.replace(/(^|\s|\))(V\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
+    // Match <i>V.</i>, <i>℣.</i>, <i>Versus</i>, V/., ℣., V.
+    gabc = gabc.replace(/(^|[\s\)])<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
+    gabc = gabc.replace(/(^|[\s\)])([V℣]\/\.?|[V℣]\.)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
 
-    // Match <i>R.</i>, <i>℟.</i>, <i>℟</i>, <i>Responsorium</i>, R/.
-    gabc = gabc.replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
-    gabc = gabc.replace(/(^|\s|\))(R\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
+    // Match <i>R.</i>, <i>℟.</i>, <i>Responsorium</i>, R/., ℟., R.
+    gabc = gabc.replace(/(^|[\s\)])<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
+    gabc = gabc.replace(/(^|[\s\)])([R℟]\/\.?|[R℟]\.)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
 
     // Match <i>T.P.</i>, <i>T. P.</i>, <i>Tp.</i>, <i>Extra T.P.</i>
     gabc = gabc.replace(/(^|\s|\))<i>\s*(?:Extra\s+)?T\.?\s*P\.?\s*<\/i>/gi, '$1<c><i>T. P.</i></c>');
@@ -5210,8 +5233,9 @@ function preprocessGabcForExsurge(gabc) {
     gabc = gabc.replace(/(v[A-Z]__[A-Z])([^_])/g, '$1_3$2');
     gabc = gabc.replace(/\\hspace{[^}]*}/g, '');
 
-    // 6. Make standalone asterisks and daggers rubric colored
-    gabc = gabc.replace(/([^)]\s+)([*†])(?=\s*\()/g, '$1<c>$2</c>');
+    // 6. Make standalone asterisks (*, **, {*}) and daggers (†) rubric colored
+    // Handles *(,), *(;), *(:), *(::), *(), {*}, †
+    gabc = gabc.replace(/(^|[\s\)])(\*+|\{\*+\}|[†\+])(?=\s*[\(\,\;\:\s]|$)/g, '$1<c>$2</c>');
 
     return gabc;
 }
@@ -8078,6 +8102,15 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             if (!cachedGabc) {
                 try {
                     cachedGabc = await $.ajax({
+                        url: 'gregobase/' + chantId + '.gabc',
+                        dataType: 'text',
+                        cache: true
+                    });
+                } catch(e) {}
+            }
+            if (!cachedGabc) {
+                try {
+                    cachedGabc = await $.ajax({
                         url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/' + encodeURIComponent(chantId) + '.gabc',
                         dataType: 'text',
                         cache: true
@@ -8154,7 +8187,19 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                         ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
                     }
                 });
+                if (ctxt.textStyles.al) {
+                    ctxt.textStyles.al.color = isDark ? 'rgba(255, 255, 255, 0.85)' : 'rgba(17, 19, 23, 0.85)';
+                    ctxt.textStyles.al.font = "'Crimson Text', 'Libre Baskerville', serif";
+                    ctxt.textStyles.al.size = 12;
+                }
             }
+
+            var hasNabc = /nabc-lines:\s*[1-9]/i.test(cachedGabc) || /\([^)]*\|[^)]*\)/.test(cachedGabc);
+            var showNabc = $wrapper.data('show-nabc');
+            if (showNabc === undefined) {
+                showNabc = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
+            }
+            ctxt.showNabc = !!(hasNabc && showNabc);
 
             var processedGabc = preprocessGabcForExsurge(cachedGabc);
             var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
@@ -8231,6 +8276,39 @@ function renderSingleChantScore($wrapper, force, onComplete) {
 
                     $preview.removeClass('gregorian-skeleton').addClass('is-rendered').find('.gregorian-score-loader').remove();
                     $preview.empty().append(svg);
+
+                    // NABC toolbar badge & interactive toggle
+                    var $nabcBar = $card.find('.do-chant-nabc-bar');
+                    if (hasNabc) {
+                        if (!$nabcBar.length) {
+                            $nabcBar = $(
+                                '<div class="do-chant-nabc-bar">' +
+                                    '<span class="do-badge-nabc" title="Notation adiastématique ancienne (neumes manuscrits)">NABC</span>' +
+                                    '<button type="button" class="do-toggle-nabc-btn' + (showNabc ? ' is-active' : '') + '" title="' + (showNabc ? 'Masquer les neumes anciens' : 'Afficher les neumes anciens') + '">' +
+                                        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
+                                        '<span>' + (showNabc ? 'Neumes actifs' : 'Neumes masqués') + '</span>' +
+                                    '</button>' +
+                                '</div>'
+                            );
+                            $preview.before($nabcBar);
+                            $nabcBar.find('.do-toggle-nabc-btn').on('click', function(e) {
+                                e.stopPropagation();
+                                var cur = $wrapper.data('show-nabc');
+                                if (cur === undefined) cur = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
+                                var next = !cur;
+                                $wrapper.data('show-nabc', next);
+                                if (window.doState) window.doState.showNabc = next;
+                                renderSingleChantScore($wrapper, true);
+                            });
+                        } else {
+                            $nabcBar.find('.do-toggle-nabc-btn')
+                                .toggleClass('is-active', !!showNabc)
+                                .attr('title', showNabc ? 'Masquer les neumes anciens' : 'Afficher les neumes anciens')
+                                .find('span').text(showNabc ? 'Neumes actifs' : 'Neumes masqués');
+                        }
+                    } else if ($nabcBar.length) {
+                        $nabcBar.remove();
+                    }
 
                     $card.data('chant-score', score);
                     $card.data('chant-ctxt', ctxt);
@@ -8764,14 +8842,9 @@ function openMassPartPicker(partKey) {
     $('#partPickerToggleViewBtn').html(getViewToggleIconHtml(_partPickerViewMode));
 
     var $ptBtn = $('#partPickerPsalmToneBtn');
-    var isProper = (partMeta.category === 'proprium');
-    if (isProper) {
-        $ptBtn.removeClass('hidden');
-        var isPtActive = !!(doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey]));
-        $ptBtn.toggleClass('is-active', isPtActive);
-    } else {
-        $ptBtn.addClass('hidden');
-    }
+    $ptBtn.removeClass('hidden');
+    var isPtActive = !!(doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey]));
+    $ptBtn.toggleClass('is-active', isPtActive);
 
     var $kyrWrap = $('#partPickerKyrialeSelectWrap');
     var isKyrialePart = ['kyrie', 'gloria', 'praefatio', 'communion_prep', 'conclusio'].indexOf(partKey) !== -1;
@@ -8790,6 +8863,19 @@ function openMassPartPicker(partKey) {
         $backdrop.addClass('is-visible');
         $drawer.addClass('is-visible');
     });
+
+    setTimeout(function() {
+        if ($drawer.hasClass('is-visible') && _activePickerPartKey === partKey) {
+            $container.find('.gregorian-card').each(function() {
+                var $c = $(this);
+                var chantId = $c.data('chant-id');
+                var $preview = $c.find('.gregorian-score-container');
+                if (!$preview.hasClass('is-rendered') && chantId) {
+                    renderDrawerItemScore($c);
+                }
+            });
+        }
+    }, 320);
 }
 
 function closeMassPartPicker() {
@@ -8898,13 +8984,16 @@ function populateMassPartPickerItems(partKey, query) {
             '<div class="gregorian-card' + (isActive ? ' is-active' : '') + '" data-chant-id="' + escHtml(item.id) + '" data-chant-name="' + escHtml(item.name) + '" data-part-key="' + escHtml(partKey) + '">' +
                 '<div class="gregorian-card-header">' +
                     '<div class="gregorian-card-titles">' +
-                        '<div class="gregorian-card-incipit" title="' + escHtml(rawIncipit) + '">' + escHtml(rawIncipit) + '</div>' +
+                        '<div class="gregorian-card-incipit" title="' + escHtml(rawIncipit) + '">' +
+                            (isActive ? '<span class="do-active-badge-tag"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Actif</span> ' : '') +
+                            escHtml(rawIncipit) +
+                        '</div>' +
                         (source ? '<div class="gregorian-card-source" title="' + escHtml(source) + '">' + escHtml(source) + '</div>' : '') +
                     '</div>' +
                     '<div class="gregorian-card-badges">' +
                         '<span class="gregorian-badge-part">' + escHtml(partText) + '</span>' +
                         (modeText ? '<span class="gregorian-badge-mode">' + escHtml(modeText) + '</span>' : '') +
-                        (isActive ? '<span class="do-active-badge-tag"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Actif</span>' : '') +
+                        ((item.has_nabc || (item.tags || '').indexOf('NABC') !== -1 || (gIndexItem && gIndexItem.has_nabc)) ? '<span class="do-badge-nabc" title="Notation ancienne NABC">NABC</span>' : '') +
                     '</div>' +
                 '</div>' +
                 '<div class="gregorian-score-container gregorian-skeleton" data-chant-id="' + escHtml(item.id) + '">' +
@@ -8913,9 +9002,10 @@ function populateMassPartPickerItems(partKey, query) {
                         '<div class="gregorian-skeleton-staff"><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div></div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="gregorian-card-middle gregorian-text-preview">' +
-                    '<p>' + escHtml(textExtract) + '</p>' +
-                '</div>' +
+                (!isGrid && textExtract ? 
+                    '<div class="gregorian-card-middle gregorian-text-preview">' +
+                        '<p>' + escHtml(textExtract) + '</p>' +
+                    '</div>' : '') +
                 '<div class="gregorian-card-actions">' +
                     '<button type="button" class="gregorian-action-btn btn-select-piece' + (isActive ? ' is-current' : '') + '">' +
                         (isActive ? 'Actuel' : 'Choisir') +
@@ -8991,7 +9081,8 @@ function renderDrawerItemScore($card) {
             var processedGabc = preprocessGabcForExsurge(cachedGabc);
             var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
             var score = new exsurge.ChantScore(ctxt, mappings, true);
-            var width = Math.max($card.width() - 20, 200);
+            var cardW = $card.width();
+            var width = Math.max(cardW > 0 ? (cardW - 24) : 220, 220);
             ctxt.width = width;
             score.performLayout(ctxt);
             score.layoutChantLines(ctxt, width, function() {
@@ -9021,7 +9112,14 @@ function selectMassPart(partKey, chantId, chantName) {
     triggerHapticFeedback('selection');
     chantId = parseInt(chantId, 10) || chantId;
 
+    if (!doState.partOverrides) doState.partOverrides = {};
     doState.partOverrides[partKey] = chantId;
+
+    if (doState.psalmTonedParts) {
+        delete doState.psalmTonedParts[partKey];
+    }
+    $('#partPickerPsalmToneBtn').removeClass('is-active');
+    $('.do-card-pt-btn[data-part-key="' + partKey + '"]').removeClass('is-active');
 
     if (partKey === 'credo') {
         if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.credo) {
@@ -9043,11 +9141,21 @@ function selectMassPart(partKey, chantId, chantName) {
                     .attr('data-chant-id', chantId)
                     .data('chant-name', chantName || '')
                     .attr('data-chant-name', chantName || '')
+                    .removeAttr('data-is-psalm-toned')
+                    .removeData('is-psalm-toned')
                     .removeData('do-rendered')
                     .removeData('cached-gabc');
             var $preview = $wrapper.find('.do-chant-preview');
             $preview.removeClass('is-rendered').addClass('gregorian-skeleton').html(renderChantSkeleton(2));
             renderSingleChantScore($wrapper, true);
+
+            var $versesContainer = $card.find('.do-verses-score-container[data-part-key="' + partKey + '"]');
+            if ($versesContainer.length) {
+                $versesContainer.find('.do-verses-content').removeData('is-loaded').removeData('verses-score');
+                if ($versesContainer.hasClass('is-open')) {
+                    loadAndRenderVersesAdLibitum($versesContainer, $versesContainer.data('verses-ref'));
+                }
+            }
         } else {
             renderDO();
         }
@@ -9058,8 +9166,6 @@ function selectMassPart(partKey, chantId, chantName) {
     if (window.OremusRouter) {
         window.OremusRouter.syncUrl({ push: true });
     }
-
-    populateMassPartPickerItems(partKey, $('#partPickerSearchInput').val());
 }
 
 function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
@@ -9072,6 +9178,10 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
         var parsed = parseInt(mode, 10);
         if (!isNaN(parsed) && parsed >= 1 && parsed <= 8) {
             modeNum = parsed;
+        } else if (typeof mode === 'string') {
+            var romanMap = { 'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8 };
+            var cleaned = mode.trim().toLowerCase().replace(/[^a-z]/g, '');
+            if (romanMap[cleaned]) modeNum = romanMap[cleaned];
         }
     }
 
@@ -9085,7 +9195,7 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
     }
     if (!tone) return null;
 
-    var clefToUse = clef || tone.clef || 'c4';
+    var clefToUse = (tone && tone.clef) ? tone.clef : (clef || 'c4');
     var mediant = tone.mediant;
     var termination = tone.termination;
     if (!termination && tone.terminations) {
@@ -9094,6 +9204,16 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
     }
     if (!termination) termination = mediant;
 
+    if (typeof shiftGabcForClefChange === 'function' && tone.clef && clefToUse !== tone.clef) {
+        try {
+            var shifted = shiftGabcForClefChange([mediant, termination], clefToUse, tone.clef);
+            if (shifted && shifted.length >= 2) {
+                mediant = shifted[0];
+                termination = shifted[1];
+            }
+        } catch(e) {}
+    }
+
     var formatObj = (typeof bi_formats !== 'undefined' && bi_formats.gabc) ? bi_formats.gabc : undefined;
 
     var gabc = "name: Verses ad libitum;\n" +
@@ -9101,6 +9221,8 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
                "mode: " + modeNum + ";\n" +
                "initial-style: 0;\n" +
                "%%\n(" + clefToUse + ") ";
+
+    var versesAdded = 0;
 
     for (var i = 0; i < lines.length; i++) {
         var rawLine = (lines[i] || '').replace(/^\d+[a-z]*\.\s*/, '').trim();
@@ -9127,11 +9249,12 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
                 clef: clefToUse,
                 format: formatObj,
                 verseNumber: i + 1,
-                prefix: '<sp>V/</sp> ',
+                prefix: false,
                 suffix: false,
                 italicizeIntonation: false,
                 favor: 'intonation',
-                flexEqualsTenor: true
+                flexEqualsTenor: true,
+                lang: 'la'
             });
 
             var rightGabc = right ? applyPsalmTone({
@@ -9141,45 +9264,66 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
                 format: formatObj,
                 verseNumber: i + 1,
                 prefix: false,
-                suffix: true,
+                suffix: false,
                 italicizeIntonation: false,
                 favor: 'termination',
-                flexEqualsTenor: true
+                flexEqualsTenor: true,
+                lang: 'la'
             }) : '';
 
-            gabc += leftGabc + (rightGabc ? (' *(:) ' + rightGabc) : '') + ' (::) <i>Ant.</i>() (z0)\n';
+            if (leftGabc || rightGabc) {
+                gabc += '<sp>V/</sp> ' + leftGabc + (rightGabc ? (' *(:) ' + rightGabc) : '') + ' (::) <i>Ant.</i>() (z0)\n';
+                versesAdded++;
+            }
         } catch(err) {
             console.warn('[DivinumOfficium] Error formatting verse line to GABC:', err);
         }
     }
 
     // Gloria Patri for Introitus
-    if (partKey === 'introitus') {
+    if (partKey === 'introitus' && versesAdded > 0) {
         try {
             var gp1 = applyPsalmTone({
                 text: "Glória Patri, et Fílio, et Spirítui Sancto.",
                 gabc: mediant,
                 clef: clefToUse,
                 format: formatObj,
-                prefix: '<sp>V/</sp> ',
-                flexEqualsTenor: true
+                prefix: false,
+                suffix: false,
+                favor: 'intonation',
+                flexEqualsTenor: true,
+                lang: 'la'
             });
             var gp2a = applyPsalmTone({
                 text: "Sicut erat in princípio, et nunc, et semper,",
                 gabc: mediant,
                 clef: clefToUse,
                 format: formatObj,
-                flexEqualsTenor: true
+                prefix: false,
+                suffix: false,
+                favor: 'intonation',
+                flexEqualsTenor: true,
+                lang: 'la'
             });
             var gp2b = applyPsalmTone({
                 text: "et in sǽcula sæculórum. Amen.",
                 gabc: termination,
                 clef: clefToUse,
                 format: formatObj,
-                flexEqualsTenor: true
+                prefix: false,
+                suffix: false,
+                favor: 'termination',
+                flexEqualsTenor: true,
+                lang: 'la'
             });
-            gabc += gp1 + ' *(:) ' + gp2a + ' (:) ' + gp2b + ' (::) <i>Ant.</i>() (z0)\n';
-        } catch(e) {}
+            gabc += '<sp>V/</sp> ' + gp1 + ' *(:) ' + gp2a + ' (:) ' + gp2b + ' (::) <i>Ant.</i>() (z0)\n';
+        } catch(e) {
+            console.warn('[DivinumOfficium] Error formatting Gloria Patri for verses:', e);
+        }
+    }
+
+    if (versesAdded === 0) {
+        return null;
     }
 
     return gabc;
@@ -9210,11 +9354,21 @@ function renderVersesAdLibitumScore($content, gabc, fallbackLines) {
         ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
         ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
 
+        if (ctxt.textStyles) {
+            Object.keys(ctxt.textStyles).forEach(function(k) {
+                if (ctxt.textStyles[k]) {
+                    ctxt.textStyles[k].color = isDark ? '#ffffff' : '#111317';
+                    ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
+                }
+            });
+        }
+
         var processedGabc = preprocessGabcForExsurge(gabc);
         var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
-        var score = new exsurge.ChantScore(ctxt, mappings, true);
+        var score = new exsurge.ChantScore(ctxt, mappings, false);
 
-        var width = Math.max($content.width() - 8, 260);
+        var cardWidth = $content.closest('.do-card-body').width() || $content.closest('.do-card').width() || $(window).width() - 32;
+        var width = Math.max(cardWidth - 8, 300);
         ctxt.width = width;
 
         score.performLayout(ctxt);
@@ -9232,6 +9386,9 @@ function renderVersesAdLibitumScore($content, gabc, fallbackLines) {
                 var $wrap = $('<div class="do-chant-preview is-rendered"></div>').append(svg);
                 $content.empty().append($wrap).data('is-loaded', true);
                 $content.data('verses-score', score);
+
+                var $container = $content.closest('.do-verses-score-container');
+                $container.css({ height: 'auto', overflow: 'visible' });
             } else {
                 renderVersesTextFallback($content, fallbackLines);
             }
@@ -9249,6 +9406,8 @@ function renderVersesTextFallback($content, lines) {
         return '<div class="do-verses-line"><span class="do-verses-vnum">' + (idx + 1) + '.</span> ' + escHtml(clean) + '</div>';
     }).join('');
     $content.html(html).data('is-loaded', true);
+    var $container = $content.closest('.do-verses-score-container');
+    $container.css({ height: 'auto', overflow: 'visible' });
 }
 
 function fetchPsalmTxtFallback(versesRef, callback) {
@@ -9317,13 +9476,13 @@ function loadAndRenderVersesAdLibitum($container, versesRef) {
     if ($content.data('is-loaded')) return;
 
     var partKey = $container.data('part-key') || 'introitus';
-    var $parentWrapper = $container.prev('.do-chant-card-wrapper');
+    var $parentWrapper = $container.prevAll('.do-chant-card-wrapper[data-part-key="' + partKey + '"]').first();
     if (!$parentWrapper.length) {
         $parentWrapper = $container.closest('.do-card-body').find('.do-chant-card-wrapper[data-part-key="' + partKey + '"]');
     }
 
     var chantId = $parentWrapper.data('chant-id');
-    var chantGabc = $parentWrapper.data('cached-gabc') || GABC_LOCAL_CACHE[chantId] || '';
+    var chantGabc = $parentWrapper.data('cached-gabc') || $parentWrapper.data('chant-gabc') || $parentWrapper.closest('.do-card').data('chant-gabc') || (chantId ? GABC_LOCAL_CACHE[chantId] : '') || '';
     var chantMode = 1;
     var chantClef = 'c4';
 
@@ -9340,6 +9499,7 @@ function loadAndRenderVersesAdLibitum($container, versesRef) {
     function onLinesReady(lines) {
         if (!lines || !lines.length) {
             $content.html('<div class="do-verses-line"><em>' + escHtml(versesRef) + '</em></div>').data('is-loaded', true);
+            $container.css({ height: 'auto', overflow: 'visible' });
             return;
         }
         var versesGabc = buildVersesAdLibitumGabc(lines, chantMode, chantClef, partKey);
@@ -9353,11 +9513,25 @@ function loadAndRenderVersesAdLibitum($container, versesRef) {
     // Try verseRef parseRef first
     if (typeof parseRef === 'function') {
         try {
-            var refs = parseRef(versesRef);
-            if (refs && refs[0] && typeof refs[0].getLinesFromLiber === 'function') {
-                refs[0].getLinesFromLiber().then(function(lines) {
-                    if (lines && lines.length) {
-                        onLinesReady(lines);
+            var parsed = parseRef(versesRef);
+            if (parsed && parsed.length) {
+                var promises = parsed.map(function(ref) {
+                    if (ref && typeof ref.getLinesFromLiber === 'function') {
+                        return ref.getLinesFromLiber().pipe(function(lines) {
+                            if (!ref.verse && lines) lines = lines.slice(0, 10);
+                            return lines || [];
+                        });
+                    }
+                    return $.Deferred().resolve([]).promise();
+                });
+
+                $.when.apply($, promises).done(function() {
+                    var allLines = [].concat.apply([], arguments).map(function(l) {
+                        return (l || '').replace(/^\d+[a-z]*\.\s*/, '').trim();
+                    }).filter(Boolean);
+
+                    if (allLines && allLines.length) {
+                        onLinesReady(allLines);
                     } else {
                         fetchPsalmTxtFallback(versesRef, onLinesReady);
                     }
@@ -9490,15 +9664,50 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    $(document).on('click', '.gregorian-card[data-part-key]', function(e) {
+    // Clic sur une pièce dans le tiroir du bas : remplace la pièce directement au sein de la messe
+    $(document).on('click', '#partPickerResultsContainer .gregorian-card, #partPickerResultsContainer .btn-select-piece', function(e) {
         if ($(e.target).closest('.btn-play-chant').length) return;
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         var $item = $(this).closest('[data-chant-id]');
         var partKey = $item.data('part-key') || _activePickerPartKey;
         var chantId = $item.data('chant-id');
         var chantName = $item.data('chant-name') || $item.find('.gregorian-card-incipit').text();
+        closeMassPartPicker();
         if (partKey && chantId) {
             selectMassPart(partKey, chantId, chantName);
+        }
+
+        var $targetCard = $('.do-card[data-card-id="' + partKey + '"]');
+        if ($targetCard.length) {
+            $targetCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    $(document).on('click', '#partPickerResultsContainer .btn-play-chant', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        var $item = $(this).closest('[data-chant-id]');
+        var partKey = $item.data('part-key') || _activePickerPartKey;
+        var chantId = $item.data('chant-id');
+        var chantName = $item.data('chant-name') || $item.find('.gregorian-card-incipit').text();
+        closeMassPartPicker();
+        if (partKey && chantId) {
+            selectMassPart(partKey, chantId, chantName);
+        }
+
+        var $card = $('.do-card[data-card-id="' + partKey + '"]');
+        if ($card.length) {
+            $card[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            var $wrapper = $card.find('.do-chant-card-wrapper[data-part-key="' + partKey + '"]');
+            setTimeout(function() {
+                var $innerCard = $wrapper.find('.do-chant-card');
+                if ($innerCard.length && window.switchToChantCard) {
+                    window.switchToChantCard($innerCard, true);
+                }
+            }, 250);
         }
     });
 
@@ -9565,24 +9774,32 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    $(document).on('click', '.do-verses-accordion-header', function(e) {
+    $(document).on('click', '.do-verses-toggle', function(e) {
         e.preventDefault();
-        var $container = $(this).closest('.do-verses-ad-libitum-container');
-        var partKey = $container.data('part-key');
-        var versesRef = $container.data('verses-ref');
-        var isCurrentlyExpanded = $container.hasClass('is-expanded');
+        var $btn = $(this);
+        var partKey = $btn.data('part-key');
+        var versesRef = $btn.data('verses-ref');
+        var $container = $btn.next('.do-verses-score-container');
+        var isCurrentlyExpanded = $btn.hasClass('is-expanded');
         var willExpand = !isCurrentlyExpanded;
 
-        $container.toggleClass('is-expanded', willExpand);
-        $(this).toggleClass('is-expanded', willExpand).attr('aria-expanded', willExpand ? 'true' : 'false');
-        var $body = $container.find('.do-verses-accordion-body');
+        $btn.toggleClass('is-expanded', willExpand).attr('aria-expanded', willExpand ? 'true' : 'false');
         if (willExpand) {
-            $body.slideDown(220);
+            $container.stop(true, false).slideDown(200, function() {
+                $container.css({ height: 'auto', overflow: 'visible' });
+                var score = $container.find('.do-verses-content').data('verses-score');
+                if (!score) {
+                    loadAndRenderVersesAdLibitum($container, versesRef);
+                }
+            });
+            if (!doState.expandedVerses) doState.expandedVerses = {};
             doState.expandedVerses[partKey] = true;
             loadAndRenderVersesAdLibitum($container, versesRef);
         } else {
-            $body.slideUp(180);
-            delete doState.expandedVerses[partKey];
+            $container.stop(true, false).slideUp(180);
+            if (doState.expandedVerses) {
+                delete doState.expandedVerses[partKey];
+            }
         }
         if (window.OremusRouter) {
             window.OremusRouter.syncUrl({ push: false });
@@ -9689,24 +9906,24 @@ function displayResult(result, vernResult) {
                 if (ch.versesRef) {
                     var isExpanded = !!(doState.expandedVerses && doState.expandedVerses[card.id]);
                     var versesHtml = 
-                        '<div class="do-verses-ad-libitum-container' + (isExpanded ? ' is-expanded' : '') + '" data-part-key="' + escHtml(card.id) + '" data-verses-ref="' + escHtml(ch.versesRef) + '">' +
-                            '<button type="button" class="do-verses-accordion-header' + (isExpanded ? ' is-expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '">' +
-                                '<div class="do-verses-title-wrap">' +
-                                    '<span class="do-verses-badge">Versets ad libitum</span>' +
-                                    '<span class="do-verses-ref">' + escHtml(ch.versesRef) + '</span>' +
-                                '</div>' +
-                                '<span class="dropdown-icon" aria-hidden="true">' +
-                                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
-                                '</span>' +
-                            '</button>' +
-                            '<div class="do-verses-accordion-body"' + (isExpanded ? '' : ' style="display:none;"') + '>' +
-                                '<div class="do-verses-content"><div class="gregorian-skeleton" style="height:24px; border-radius:6px;"></div></div>' +
-                            '</div>' +
+                        '<button type="button" class="do-verses-toggle' + (isExpanded ? ' is-expanded' : '') + '" ' +
+                        'data-part-key="' + escHtml(card.id) + '" data-verses-ref="' + escHtml(ch.versesRef) + '" ' +
+                        'aria-expanded="' + (isExpanded ? 'true' : 'false') + '">' +
+                            '<span class="do-verses-toggle-title">Versets ad libitum</span> ' +
+                            '<span class="do-verses-toggle-ref">(' + escHtml(ch.versesRef) + ')</span>' +
+                            '<span class="dropdown-icon" aria-hidden="true">' +
+                                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+                            '</span>' +
+                        '</button>' +
+                        '<div class="do-verses-score-container" ' +
+                        'data-part-key="' + escHtml(card.id) + '" data-verses-ref="' + escHtml(ch.versesRef) + '"' +
+                        (isExpanded ? '' : ' style="display:none;"') + '>' +
+                            '<div class="do-verses-content"><div class="gregorian-skeleton" style="height:28px; border-radius:4px;"></div></div>' +
                         '</div>';
                     $body.find('.do-chant-card-wrapper[data-part-key="' + card.id + '"]').after(versesHtml);
                     if (isExpanded) {
                         setTimeout(function() {
-                            var $c = $body.find('.do-verses-ad-libitum-container[data-part-key="' + card.id + '"]');
+                            var $c = $body.find('.do-verses-score-container[data-part-key="' + card.id + '"]');
                             loadAndRenderVersesAdLibitum($c, ch.versesRef);
                         }, 50);
                     }
@@ -9943,9 +10160,10 @@ function updateSidebarAndHeader() {
     // Rubricæ / Editio UI state
     $('#doEditionSelect').val(doState.edition || '1960');
 
-    // Toggles UI state (Ordinarium, Gregorian, Latin)
+    // Toggles UI state (Ordinarium, Gregorian, Psalm Tone, Latin)
     $('#toggleOrdinarium').prop('checked', doState.includeOrdinarium);
     $('#toggleGregorian').prop('checked', doState.includeGregorian);
+    $('#togglePsalmTone').prop('checked', !!doState.isGlobalPsalmTone);
     $('#toggleLatin').prop('checked', doState.showLatin);
 
     $('#doVernacularOptions .settings-option-card, #doVernacularOptions .settings-option').removeClass('active');
@@ -14698,6 +14916,15 @@ function setupEventListeners() {
             doState.hora = 'missa';
             localStorage.setItem('do_hora', 'missa');
         }
+        renderDO();
+    });
+
+    // Psalm Tone Toggle in Settings
+    $('#togglePsalmTone').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        triggerHapticFeedback('toggle');
+        doState.isGlobalPsalmTone = isChecked;
+        localStorage.setItem('do_global_psalm_tone', isChecked ? 'true' : 'false');
         renderDO();
     });
 

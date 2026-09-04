@@ -1047,6 +1047,13 @@ mark.search-highlight {
     color: var(--text-secondary, #94a3b8);
 }
 
+.gregorian-badge-part.do-badge-nabc {
+    background: color-mix(in srgb, var(--primary-color, #c96b63) 18%, transparent);
+    color: var(--primary-color, #c96b63);
+    border: 1px solid color-mix(in srgb, var(--primary-color, #c96b63) 30%, transparent);
+    font-weight: 700;
+}
+
 @keyframes gregorian-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }

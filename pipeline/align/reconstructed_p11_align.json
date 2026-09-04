@@ -1,0 +1,415 @@
+[
+  {
+    "word": "Sapientiam",
+    "start": 2.3,
+    "end": 4.82,
+    "duration": 2.52,
+    "confidence": 0.34
+  },
+  {
+    "word": "sanctorum",
+    "start": 5.08,
+    "end": 8.54,
+    "duration": 3.46,
+    "confidence": 0.12
+  },
+  {
+    "word": "narrent",
+    "start": 9.22,
+    "end": 11.86,
+    "duration": 2.64,
+    "confidence": 0.16
+  },
+  {
+    "word": "populi",
+    "start": 12.36,
+    "end": 16.5,
+    "duration": 4.14,
+    "confidence": 0.12
+  },
+  {
+    "word": "et",
+    "start": 16.5,
+    "end": 16.94,
+    "duration": 0.44,
+    "confidence": 0.36
+  },
+  {
+    "word": "laudes",
+    "start": 17.6,
+    "end": 18.5,
+    "duration": 0.9,
+    "confidence": 0.11
+  },
+  {
+    "word": "eorum",
+    "start": 18.74,
+    "end": 23.64,
+    "duration": 4.9,
+    "confidence": 0.18
+  },
+  {
+    "word": "nuntiet",
+    "start": 24.14,
+    "end": 26.7,
+    "duration": 2.56,
+    "confidence": 0.22
+  },
+  {
+    "word": "ecclesia",
+    "start": 26.98,
+    "end": 31.74,
+    "duration": 4.76,
+    "confidence": 0.11
+  },
+  {
+    "word": "nomina",
+    "start": 31.84,
+    "end": 32.9,
+    "duration": 1.06,
+    "confidence": 0.23
+  },
+  {
+    "word": "autem",
+    "start": 33.46,
+    "end": 35.16,
+    "duration": 1.7,
+    "confidence": 0.18
+  },
+  {
+    "word": "eorum",
+    "start": 35.86,
+    "end": 39.98,
+    "duration": 4.12,
+    "confidence": 0.14
+  },
+  {
+    "word": "vivent",
+    "start": 40.66,
+    "end": 43.58,
+    "duration": 2.92,
+    "confidence": 0.12
+  },
+  {
+    "word": "in",
+    "start": 43.8,
+    "end": 44.78,
+    "duration": 0.98,
+    "confidence": 0.29
+  },
+  {
+    "word": "saeculum",
+    "start": 45.26,
+    "end": 48.9,
+    "duration": 3.64,
+    "confidence": 0.1
+  },
+  {
+    "word": "saeculi",
+    "start": 50.34,
+    "end": 52.78,
+    "duration": 2.44,
+    "confidence": 0.1
+  },
+  {
+    "word": "Exsultate",
+    "start": 55.0,
+    "end": 56.72,
+    "duration": 1.72,
+    "confidence": 0.1
+  },
+  {
+    "word": "justi",
+    "start": 57.02,
+    "end": 58.08,
+    "duration": 1.06,
+    "confidence": 0.1
+  },
+  {
+    "word": "in",
+    "start": 58.38,
+    "end": 58.52,
+    "duration": 0.14,
+    "confidence": 0.15
+  },
+  {
+    "word": "Domino",
+    "start": 58.64,
+    "end": 59.82,
+    "duration": 1.18,
+    "confidence": 0.11
+  },
+  {
+    "word": "rectos",
+    "start": 61.96,
+    "end": 63.48,
+    "duration": 1.52,
+    "confidence": 0.39
+  },
+  {
+    "word": "decet",
+    "start": 63.66,
+    "end": 64.52,
+    "duration": 0.86,
+    "confidence": 0.2
+  },
+  {
+    "word": "collaudatio",
+    "start": 64.62,
+    "end": 69.4,
+    "duration": 4.78,
+    "confidence": 0.11
+  },
+  {
+    "word": "Gloria",
+    "start": 69.84,
+    "end": 71.14,
+    "duration": 1.3,
+    "confidence": 0.49
+  },
+  {
+    "word": "Patri",
+    "start": 71.3,
+    "end": 71.96,
+    "duration": 0.66,
+    "confidence": 0.27
+  },
+  {
+    "word": "et",
+    "start": 72.08,
+    "end": 72.26,
+    "duration": 0.18,
+    "confidence": 0.41
+  },
+  {
+    "word": "Filio",
+    "start": 72.32,
+    "end": 73.12,
+    "duration": 0.8,
+    "confidence": 0.12
+  },
+  {
+    "word": "et",
+    "start": 73.7,
+    "end": 73.92,
+    "duration": 0.22,
+    "confidence": 0.15
+  },
+  {
+    "word": "Spiritui",
+    "start": 73.96,
+    "end": 75.8,
+    "duration": 1.84,
+    "confidence": 0.41
+  },
+  {
+    "word": "Sancto",
+    "start": 76.0,
+    "end": 77.3,
+    "duration": 1.3,
+    "confidence": 0.15
+  },
+  {
+    "word": "Sicut",
+    "start": 79.24,
+    "end": 80.76,
+    "duration": 1.52,
+    "confidence": 0.38
+  },
+  {
+    "word": "erat",
+    "start": 80.9,
+    "end": 81.38,
+    "duration": 0.48,
+    "confidence": 0.43
+  },
+  {
+    "word": "in",
+    "start": 81.46,
+    "end": 81.54,
+    "duration": 0.08,
+    "confidence": 0.41
+  },
+  {
+    "word": "principio",
+    "start": 81.62,
+    "end": 82.78,
+    "duration": 1.16,
+    "confidence": 0.3
+  },
+  {
+    "word": "et",
+    "start": 83.46,
+    "end": 83.66,
+    "duration": 0.2,
+    "confidence": 0.38
+  },
+  {
+    "word": "nunc",
+    "start": 83.76,
+    "end": 84.82,
+    "duration": 1.06,
+    "confidence": 0.1
+  },
+  {
+    "word": "et",
+    "start": 85.02,
+    "end": 85.22,
+    "duration": 0.2,
+    "confidence": 0.27
+  },
+  {
+    "word": "semper",
+    "start": 85.28,
+    "end": 87.12,
+    "duration": 1.84,
+    "confidence": 0.12
+  },
+  {
+    "word": "et",
+    "start": 89.32,
+    "end": 89.54,
+    "duration": 0.22,
+    "confidence": 0.23
+  },
+  {
+    "word": "in",
+    "start": 90.04,
+    "end": 90.14,
+    "duration": 0.1,
+    "confidence": 0.23
+  },
+  {
+    "word": "saecula",
+    "start": 90.28,
+    "end": 91.32,
+    "duration": 1.04,
+    "confidence": 0.1
+  },
+  {
+    "word": "saeculorum",
+    "start": 91.54,
+    "end": 95.28,
+    "duration": 3.74,
+    "confidence": 0.1
+  },
+  {
+    "word": "Amen",
+    "start": 95.44,
+    "end": 96.22,
+    "duration": 0.78,
+    "confidence": 0.23
+  },
+  {
+    "word": "Sapientiam",
+    "start": 97.98,
+    "end": 100.48,
+    "duration": 2.5,
+    "confidence": 0.29
+  },
+  {
+    "word": "sanctorum",
+    "start": 100.72,
+    "end": 104.3,
+    "duration": 3.58,
+    "confidence": 0.1
+  },
+  {
+    "word": "narrent",
+    "start": 104.86,
+    "end": 107.42,
+    "duration": 2.56,
+    "confidence": 0.24
+  },
+  {
+    "word": "populi",
+    "start": 107.96,
+    "end": 110.8,
+    "duration": 2.84,
+    "confidence": 0.1
+  },
+  {
+    "word": "et",
+    "start": 112.34,
+    "end": 112.72,
+    "duration": 0.38,
+    "confidence": 0.35
+  },
+  {
+    "word": "laudes",
+    "start": 112.84,
+    "end": 114.36,
+    "duration": 1.52,
+    "confidence": 0.1
+  },
+  {
+    "word": "eorum",
+    "start": 114.64,
+    "end": 119.32,
+    "duration": 4.68,
+    "confidence": 0.17
+  },
+  {
+    "word": "nuntiet",
+    "start": 120.14,
+    "end": 122.7,
+    "duration": 2.56,
+    "confidence": 0.13
+  },
+  {
+    "word": "ecclesia",
+    "start": 122.96,
+    "end": 126.42,
+    "duration": 3.46,
+    "confidence": 0.12
+  },
+  {
+    "word": "nomina",
+    "start": 127.86,
+    "end": 128.98,
+    "duration": 1.12,
+    "confidence": 0.32
+  },
+  {
+    "word": "autem",
+    "start": 129.44,
+    "end": 131.18,
+    "duration": 1.74,
+    "confidence": 0.31
+  },
+  {
+    "word": "eorum",
+    "start": 132.1,
+    "end": 136.3,
+    "duration": 4.2,
+    "confidence": 0.11
+  },
+  {
+    "word": "vivent",
+    "start": 137.06,
+    "end": 139.96,
+    "duration": 2.9,
+    "confidence": 0.1
+  },
+  {
+    "word": "in",
+    "start": 140.2,
+    "end": 141.14,
+    "duration": 0.94,
+    "confidence": 0.37
+  },
+  {
+    "word": "saeculum",
+    "start": 141.6,
+    "end": 145.86,
+    "duration": 4.26,
+    "confidence": 0.1
+  },
+  {
+    "word": "saeculi",
+    "start": 147.14,
+    "end": 150.46,
+    "duration": 3.32,
+    "confidence": 0.1
+  }
+]

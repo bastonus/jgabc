@@ -65,6 +65,17 @@
             } catch (e) {}
 
             try {
+                var urlGb = 'gregobase/' + encodeURIComponent(strId) + '.gabc';
+                var resGb = await fetch(urlGb);
+                if (resGb.ok) {
+                    var textGb = await resGb.text();
+                    if (!window.GABC_LOCAL_CACHE) window.GABC_LOCAL_CACHE = {};
+                    window.GABC_LOCAL_CACHE[strId] = textGb;
+                    return textGb;
+                }
+            } catch (e) {}
+
+            try {
                 var urlLit = 'gabc/litanies/' + encodeURIComponent(strId) + '.gabc';
                 var resLit = await fetch(urlLit);
                 if (resLit.ok) {

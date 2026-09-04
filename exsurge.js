@@ -1638,12 +1638,12 @@
                                 (this.textColor = "#000"),
                                 this.setFont("'Palatino Linotype', 'Book Antiqua', Palatino, serif", 16),
                                 (this.rubricColor = "#d00"),
-                                (this.specialCharProperties = { "font-family": "'Exsurge Characters'", fill: this.rubricColor, class: "rubric" }),
+                                (this.specialCharProperties = { fill: this.rubricColor, class: "rubric" }),
                                 (this.textBeforeSpecialChar = ""),
                                 (this.textAfterSpecialChar = "."),
-                                (this.specialCharMap = { "℣": "v", "℟": "r", "+": "+", "*": "*" }),
-                                (this.plusProperties = {}),
-                                (this.asteriskProperties = {}),
+                                (this.specialCharMap = { "℣": "℣", "℟": "℟", "V": "V", "R": "R", "+": "+", "*": "*" }),
+                                (this.plusProperties = { fill: this.rubricColor, class: "rubric" }),
+                                (this.asteriskProperties = { fill: this.rubricColor, class: "rubric" }),
                                 (this.specialCharText = function (t) {
                                     return e.specialCharMap[t] || t;
                                 }),
@@ -1741,7 +1741,7 @@
                                 {
                                     key: "setRubricColor",
                                     value: function (t) {
-                                        (this.rubricColor = t), (this.specialCharProperties.fill = t), (this.fontStyleDictionary.c.fill = t);
+                                        (this.rubricColor = t), (this.specialCharProperties.fill = t), (this.fontStyleDictionary.c.fill = t), (this.asteriskProperties.fill = t), (this.plusProperties.fill = t);
                                     },
                                 },
                                 {
@@ -2501,7 +2501,7 @@
                                     value: function (t, e) {
                                         var i = this;
                                         if (((e = e.replace(/\s+/g, " ")), (this.text = ""), (this.spans = []), "*" === e || "+" === e || "†" === e)) {
-                                            var n = "*" === e ? t.asteriskProperties : "+" === e ? t.plusProperties : null;
+                                            var n = "*" === e ? t.asteriskProperties : ("+" === e || "†" === e) ? t.plusProperties : null;
                                             return (e = t.specialCharText(e) || e), void this.spans.push(new _(e, n));
                                         }
                                         for (
@@ -6228,6 +6228,24 @@
                                         d = [],
                                         g = [],
                                         m = f[2];
+                                    var nabc = null;
+                                    if (typeof m === "string" && m.indexOf("|") !== -1) {
+                                        var parts = m.split("|");
+                                        var notesParts = [];
+                                        var nabcParts = [];
+                                        for (var pi = 0; pi < parts.length; pi++) {
+                                            if (pi % 2 === 0) {
+                                                notesParts.push(parts[pi]);
+                                            } else {
+                                                var nStr = parts[pi].trim();
+                                                if (nStr) nabcParts.push(nStr);
+                                            }
+                                        }
+                                        m = notesParts.join(" ");
+                                        if (nabcParts.length > 0) {
+                                            nabc = nabcParts.join(" ");
+                                        }
+                                    }
                                     0 === l && /[a-z]/i.test(p) && /[a-m]/i.test(m) && t.activeClef.resetAccidentals();
                                     var b = this.parseNotations(t, m, i + f.index + f[1].length + 1, o);
                                     if (0 !== b.length) {
@@ -6238,6 +6256,10 @@
                                                 x = L;
                                                 break;
                                             }
+                                        }
+                                        if (nabc && x && (t.showNabc || t.renderNabc)) {
+                                            var nabcText = new u.AboveLinesText(t, nabc, x, i + f.index);
+                                            nabcText.alIndex = d.push(nabcText) - 1;
                                         }
                                         for (var C = v.exec(), w = 0; (C = v.exec(p)); ) {
                                             var P = C.index;
