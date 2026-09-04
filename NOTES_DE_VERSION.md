@@ -24,6 +24,14 @@
 
 ---
 
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.56'`, `versionCode 56` / `versionName "beta-0.0.56"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.56`, `releaseDate 2026-09-04T20:05:00Z`) et `package.json` (`0.0.56`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.15 → v1.3.16` (`sw.js`).
+* Pipeline d'alignement grégorien enrichi (`pipeline/align`, `gregobase` +10 000 partitions GABC, `exsurge.js` corrigé, indexation `gregobase_index.json`).
+
+---
+
 ## 🚀 Version 0.0.55 (2 Septembre 2026)
 
 ---

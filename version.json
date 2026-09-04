@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.55",
-  "versionCode": 55,
-  "releaseDate": "2026-09-02T20:05:00Z",
-  "tagName": "v0.0.55",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.55/Oremus.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.55",
-  "body": "Release v0.0.55 — Art sacré du Temporal (5 nouveaux chefs-d'œuvre, catalogue raisonné enrichi) · Moteur audio grégorien à durées pondérées & synchronisation chant fidèle · Allègement APK et optimisations UI"
+  "latestVersion": "beta-0.0.56",
+  "versionCode": 56,
+  "releaseDate": "2026-09-04T20:05:00Z",
+  "tagName": "v0.0.56",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.56/Oremus.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.56",
+  "body": "Release v0.0.56 — Correctifs majeurs du lecteur audio & synthétiseur GABC (scheduler haute précision, progression pondérée, continuité de lecture)"
 }

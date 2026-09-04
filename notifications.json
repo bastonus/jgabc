@@ -1,8 +1,64 @@
 {
-  "version": "1.0.3",
-  "updatedAt": "2026-09-02T20:05:00Z",
+  "version": "1.0.4",
+  "updatedAt": "2026-09-04T20:05:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.56",
+      "enabled": true,
+      "priority": 140,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.56",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.56",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.56 : Correctifs majeurs du lecteur audio & synthétiseur GABC — scheduler haute précision sans gel à 1×, barre de progression verrouillée, continuité de lecture et synchro vidéo optimisée.",
+      "cancelsNotifications": ["notif-release-beta-0.0.55", "notif-release-beta-0.0.54", "notif-release-beta-0.0.53", "notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.56 : Correctifs Majeurs du Lecteur Audio & Synthétiseur GABC",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.56)",
+        "subtitle": "Correctifs Majeurs du Lecteur Audio & Synthétiseur GABC",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés de la v0.0.56",
+            "content": "<ul><li><strong>Scheduler Haute Précision :</strong> Remplacement de Tone.js scheduleOnce par Tone.context.setTimeout (horloge AudioContext) avec déduplication — élimine le gel à vitesse 1×, garantit un cycle infini fluide à 0.5×–2.0×.</li><li><strong>Barre de Progression Verrouillée :</strong> Correction du reset à 0% après 1er clic, verrouillage temporel _isUserSeekingUntil et calculs pondérés en temps réel.</li><li><strong>Continuité & UX :</strong> Fermeture du tiroir sources sans couper la lecture, synchro vidéo désactivée par défaut, mise en valeur du synthétiseur GABC avec message explicatif, et écoute robuste sur les pages isolées (chant:rendered).</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.55",
+            "content": "<ul><li><strong>Art Sacré du Temporal :</strong> 5 nouveaux chefs-d'œuvre (Millais, Valckenborch, Jordaens, Strozzi, Fra Angelico) — catalogue 61 dimanches & solennités.</li><li><strong>Moteur Audio Pondéré :</strong> Tempo 150→165 bpm, durées mora/quilisma/episema + silences inter-phrases, highlight manuel 3–4 s.</li><li><strong>Tiroir de Tonalité :</strong> Bubble 290 px + drawer, verre dépoli, APK allégé.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos précieux retours",
+            "content": "Un grand merci à tous les testeurs ! Vos suggestions continuent de guider activement le développement d'Oremus."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.55",
       "enabled": true,
