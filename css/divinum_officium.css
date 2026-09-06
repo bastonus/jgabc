@@ -672,6 +672,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.72rem;
+    transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #gregorianSearchHeaderRow,
@@ -763,6 +764,227 @@ body.is-search-mode .gregorian-filter-bar {
 #doHeaderTitle:hover .dropdown-icon {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18);
     color: var(--primary-color);
+}
+
+/* =============================================================
+   LAZY HEADER LOADING ANIMATION
+   (Neutre / Non coloré — Surtitre, Titre, Chevron Mobile, Chevron Dropdown)
+   ============================================================= */
+
+/* 1. Bouton Chevron Mobile — pulsation douce et balancement neutre */
+.do-top-header.is-header-loading .do-mobile-menu-btn {
+    pointer-events: none;
+    animation: do-chevron-btn-pulse 1.35s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+.do-top-header.is-header-loading .do-mobile-menu-btn svg {
+    animation: do-chevron-icon-pulse 1.35s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+@keyframes do-chevron-btn-pulse {
+    0%, 100% {
+        background: var(--background-highlight);
+        opacity: 0.55;
+        transform: scale(0.96);
+    }
+    50% {
+        background: var(--background-surface);
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes do-chevron-icon-pulse {
+    0%, 100% {
+        opacity: 0.35;
+        transform: translateX(-1px);
+    }
+    50% {
+        opacity: 0.95;
+        transform: translateX(1.5px);
+    }
+}
+
+/* 2. Surtitre (#doHourLabel) et Titre (#doHeaderTitle .title-text)
+   Placeholder skeleton neutre + onde shimmer dynamique accélérée par le GPU */
+body .do-top-header.is-header-loading #doHourLabel,
+body.has-hero-image .do-top-header.is-header-loading #doHourLabel,
+body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHourLabel,
+.do-top-header.is-header-loading #doHourLabel,
+.do-top-header #doHourLabel:empty {
+    position: relative;
+    display: inline-block;
+    width: 115px;
+    min-width: 90px;
+    max-width: 130px;
+    height: 10px;
+    margin-bottom: 3px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+    vertical-align: middle;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    letter-spacing: 0 !important;
+    animation: do-skeleton-pulse 1.35s ease-in-out infinite;
+}
+
+[data-theme="light"] body .do-top-header.is-header-loading #doHourLabel,
+[data-theme="light"] body.has-hero-image .do-top-header.is-header-loading #doHourLabel,
+[data-theme="light"] body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHourLabel,
+[data-theme="light"] .do-top-header.is-header-loading #doHourLabel,
+[data-theme="light"] .do-top-header #doHourLabel:empty {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.do-top-header.is-header-loading .dropdown-trigger,
+.do-top-header.is-header-loading #doHeaderTitle {
+    pointer-events: none;
+}
+
+body .do-top-header.is-header-loading #doHeaderTitle .title-text,
+body.has-hero-image .do-top-header.is-header-loading #doHeaderTitle .title-text,
+body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHeaderTitle .title-text,
+.do-top-header.is-header-loading #doHeaderTitle .title-text,
+.do-top-header #doHeaderTitle .title-text:empty {
+    position: relative;
+    display: inline-block;
+    width: 210px;
+    max-width: 65vw;
+    height: 18px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+    vertical-align: middle;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    letter-spacing: 0 !important;
+    animation: do-skeleton-pulse 1.35s ease-in-out infinite;
+}
+
+[data-theme="light"] body .do-top-header.is-header-loading #doHeaderTitle .title-text,
+[data-theme="light"] body.has-hero-image .do-top-header.is-header-loading #doHeaderTitle .title-text,
+[data-theme="light"] body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHeaderTitle .title-text,
+[data-theme="light"] .do-top-header.is-header-loading #doHeaderTitle .title-text,
+[data-theme="light"] .do-top-header #doHeaderTitle .title-text:empty {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* Onde de balayage lumineuse (Shimmer Wave) GPU pure, fluide et instantanée */
+.do-top-header.is-header-loading #doHourLabel::after,
+.do-top-header #doHourLabel:empty::after,
+.do-top-header.is-header-loading #doHeaderTitle .title-text::after,
+.do-top-header #doHeaderTitle .title-text:empty::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.38) 50%,
+        rgba(255, 255, 255, 0.03) 80%,
+        transparent 100%
+    );
+    animation: do-header-shimmer-wave 1.35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform;
+    pointer-events: none;
+}
+
+[data-theme="light"] .do-top-header.is-header-loading #doHourLabel::after,
+[data-theme="light"] .do-top-header #doHourLabel:empty::after,
+[data-theme="light"] .do-top-header.is-header-loading #doHeaderTitle .title-text::after,
+[data-theme="light"] .do-top-header #doHeaderTitle .title-text:empty::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.03) 20%,
+        rgba(0, 0, 0, 0.24) 50%,
+        rgba(0, 0, 0, 0.03) 80%,
+        transparent 100%
+    );
+}
+
+@keyframes do-header-shimmer-wave {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes do-skeleton-pulse {
+    0%, 100% {
+        opacity: 0.65;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 3. Chevron du Menu Déroulant (.dropdown-icon) — respiration et pulsation animée neutre */
+.do-top-header.is-header-loading .dropdown-icon {
+    pointer-events: none;
+    animation: do-dropdown-chevron-pulse 1.35s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+@keyframes do-dropdown-chevron-pulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translateY(-1px) scale(0.92);
+        color: var(--text-tertiary);
+    }
+    50% {
+        opacity: 0.95;
+        transform: translateY(2px) scale(1.08);
+        color: var(--text-primary);
+    }
+}
+
+/* 4. Lazy Reveal — transition fluide lors de l'apparition des vrais contenus */
+.do-top-header.is-header-loaded #doHourLabel {
+    animation: do-header-lazy-reveal 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.do-top-header.is-header-loaded #doHeaderTitle .title-text {
+    animation: do-header-lazy-reveal 0.36s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+}
+
+.do-top-header.is-header-loaded .dropdown-icon {
+    animation: do-header-lazy-reveal 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.do-top-header.is-header-loaded .do-mobile-menu-btn {
+    animation: do-header-lazy-reveal 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes do-header-lazy-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* =============================================================
@@ -1348,39 +1570,27 @@ div.do-rubric-inline {
     }
 
     .do-bilingual-hint-anim {
-        animation: doBilingualSwipeHintSingle 2.0s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+        animation: none !important;
+        transform: none !important;
     }
 }
 
 /* =============================================================
-   Samsung One UI Style Gesture Gradient Indicator (Bilingual hint)
+   Samsung One UI Style Gesture Gradient Indicator (Bilingual hint) - Disabled
    ============================================================= */
 #doBilingualGestureIndicator {
-    position: fixed;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: min(45vw, 175px);
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    pointer-events: none;
-    z-index: 1050;
-    overflow: hidden;
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 .do-gesture-glow-bar {
-    width: 100%;
-    height: 100%;
-    border-radius: 9999px 0 0 9999px;
-    background: linear-gradient(to right, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 75%, transparent) 25%, color-mix(in srgb, var(--primary-color) 20%, transparent) 65%, transparent 100%);
-    box-shadow: none !important;
-    transform: translateX(100%);
+    display: none !important;
 }
 
 #doBilingualGestureIndicator.active .do-gesture-glow-bar {
-    animation: samsungGestureSwipeSingle 2.0s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation: none !important;
 }
 
 /* Loading skeleton */
@@ -3606,6 +3816,19 @@ body.is-missa-mode .do-top-header.is-scrolled {
     -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
 }
 
+/* Surtitre (heure / date) de la couleur du titre UNIQUEMENT quand le header est transparent en position haute avec une image */
+body:has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
+body:has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
+body.has-hero-image .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
+body.has-hero-image .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
+.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
+.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
+body:has(.do-home-saint-hero:not(.do-hero-no-image)):not(.is-header-scrolled) .header-title-area #doHourLabel:not(.is-header-loading),
+body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not(.is-header-loading) {
+    color: var(--text-primary) !important;
+}
+
+
 /* ---- DESKTOP : float gauche → le texte s'enroule en forme L/T ---- */
 @media (min-width: 768px) {
     .do-home-saint-hero {
@@ -4437,7 +4660,7 @@ body.is-missa-mode .do-top-header.is-scrolled {
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
 }
 
-/* Rubrics & Special Characters in Chants (Ps., V., R., asterisks, etc.): Always in Accent Color */
+/* Rubrics & Special Characters in Chants (Ps., V., R., asterisks, Eouae, etc.): Always in Accent Color */
 .do-chant-preview svg text.rubric,
 .do-chant-preview svg text.specialChar,
 .do-chant-preview svg tspan.rubric,
@@ -4446,7 +4669,19 @@ body.is-missa-mode .do-top-header.is-scrolled {
 .do-chant-preview svg [class*="rubric"],
 .do-chant-preview svg [class*="specialChar"],
 .do-chant-preview svg text[class*="rubric"],
-.do-chant-preview svg tspan[class*="rubric"] {
+.do-chant-preview svg tspan[class*="rubric"],
+.do-verses-score-container svg text.rubric,
+.do-verses-score-container svg tspan.rubric,
+.do-verses-score-container svg .rubric,
+.do-verses-score-container svg [class*="rubric"],
+.gregorian-score-container svg text.rubric,
+.gregorian-score-container svg tspan.rubric,
+.gregorian-score-container svg .rubric,
+.gregorian-score-container svg [class*="rubric"],
+.gabc-chant-preview svg text.rubric,
+.gabc-chant-preview svg tspan.rubric,
+.gabc-chant-preview svg .rubric,
+.gabc-chant-preview svg [class*="rubric"] {
     fill: var(--primary-color) !important;
 }
 
@@ -6970,7 +7205,7 @@ html.is-ios .web-download-app-wrapper,
     letter-spacing: 0.1px;
     cursor: pointer;
     box-shadow: none !important;
-    transform: translateY(var(--player-drag-y, 0px));
+    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px)));
     opacity: 1 !important;
     box-sizing: border-box !important;
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
@@ -7001,7 +7236,7 @@ html.is-ios .web-download-app-wrapper,
 }
 
 .do-mass-toc-pill:active {
-    transform: translateY(var(--player-drag-y, 0px)) !important;
+    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) !important;
 }
 
 /* When the TOC panel is open, button morphs into active close button */
@@ -7012,7 +7247,7 @@ html.is-ios .web-download-app-wrapper,
 }
 
 .do-mass-toc-pill.is-scrolling {
-    transform: translateY(var(--player-drag-y, 0px)) !important;
+    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) !important;
 }
 
 .do-mass-toc-pill-icon {
@@ -7039,14 +7274,20 @@ html.is-ios .web-download-app-wrapper,
     text-overflow: ellipsis;
 }
 
-/* ── Dynamic Audio Player Avoidance (Strict constant clearance strictly matching right margin) ── */
+/* ── Dynamic Bottom Drawer Avoidance (Strict constant clearance for Player and Mass Part Picker) ── */
 body.player-dock-open .do-mass-toc-pill,
 .has-player-open .do-mass-toc-pill {
     bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px)) !important;
 }
 
+body.picker-drawer-open .do-mass-toc-pill {
+    bottom: calc(min(var(--part-picker-offset, 70vh), calc(100vh - 56px)) + var(--toc-margin, 16px)) !important;
+}
+
 body.is-dragging-player .do-mass-toc-pill,
-body.is-dragging-player .do-mass-toc-panel {
+body.is-dragging-player .do-mass-toc-panel,
+body.is-dragging-picker .do-mass-toc-pill,
+body.is-dragging-picker .do-mass-toc-panel {
     transition: none !important;
 }
 
@@ -7155,7 +7396,7 @@ body.is-dragging-player .do-mass-toc-panel {
     box-shadow: none !important;
     pointer-events: auto !important;
     transform-origin: bottom right;
-    transform: translateY(var(--player-drag-y, 0px)) scale(1);
+    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) scale(1);
     opacity: 1;
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.25s ease,
@@ -7167,8 +7408,12 @@ body.player-dock-open .do-mass-toc-panel,
     bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px) + 38px) !important;
 }
 
+body.picker-drawer-open .do-mass-toc-panel {
+    bottom: calc(min(var(--part-picker-offset, 70vh), calc(100vh - 56px)) + var(--toc-margin, 16px) + 38px) !important;
+}
+
 .do-mass-toc-panel.hidden {
-    transform: translateY(calc(var(--player-drag-y, 0px) + 16px)) scale(0.92);
+    transform: translateY(calc(var(--picker-drag-y, var(--player-drag-y, 0px)) + 16px)) scale(0.92);
     opacity: 0;
     pointer-events: none !important;
 }
@@ -7655,12 +7900,21 @@ body.mass-toc-open #modernPlayerBar {
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.28s ease, visibility 0.28s ease;
+    touch-action: none !important;
+    overscroll-behavior: none !important;
 }
 
 .do-part-picker-backdrop.is-visible {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
+}
+
+/* ── Prevent background/underneath scrolling when part picker drawer is open ── */
+html.picker-drawer-open,
+body.picker-drawer-open {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
 }
 
 /* ── Bottom Sheet Drawer (Same design system as #modernPlayerBar) ── */
@@ -7672,11 +7926,11 @@ body.mass-toc-open #modernPlayerBar {
     width: calc(100vw - 280px) !important;
     max-width: calc(100vw - 280px) !important;
     height: auto !important;
-    max-height: 82vh !important;
-    padding: 10px 24px 20px !important;
+    max-height: 75vh !important;
+    padding: 8px 20px max(0px, env(safe-area-inset-bottom, 0px)) !important;
     border-radius: 16px 16px 0 0 !important;
     border: none !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+    border-top: none !important;
     box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45) !important;
     background-color: rgba(18, 18, 20, 0.88) !important;
     background-image: var(--noise-overlay) !important;
@@ -7692,17 +7946,18 @@ body.mass-toc-open #modernPlayerBar {
     pointer-events: none;
     transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, visibility 0.32s !important;
     box-sizing: border-box !important;
+    overscroll-behavior: contain !important;
 }
 
 [data-theme="dark"] .do-part-picker-drawer,
 [data-theme="oled"] .do-part-picker-drawer {
     background-color: rgba(14, 14, 16, 0.92) !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
+    border-top: none !important;
 }
 
 [data-theme="light"] .do-part-picker-drawer {
     background-color: color-mix(in srgb, var(--background-base) 92%, transparent) !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 20%, rgba(0,0,0,0.1)) !important;
+    border-top: none !important;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -7718,37 +7973,83 @@ body.mass-toc-open #modernPlayerBar {
         left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        padding: 8px 14px 18px !important;
-        max-height: 85vh !important;
+        padding: 6px 16px max(0px, env(safe-area-inset-bottom, 0px)) !important;
+        max-height: 75vh !important;
     }
 }
 
-/* ── Header inside Part Picker Drawer ── */
+/* ── Grabber / Drag Handle for Part Picker Drawer ── */
+#partPickerDragHandleWrap {
+    width: 100%;
+    padding: 10px 0 12px;
+    margin: -6px 0 -2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    z-index: 20;
+    flex-shrink: 0;
+}
+
+#partPickerDragHandleWrap:active,
+body.is-dragging-picker #partPickerDragHandleWrap {
+    cursor: grabbing;
+}
+
+#partPickerDragHandleWrap .do-player-drag-handle {
+    width: 44px;
+    height: 5px;
+    background: color-mix(in srgb, var(--text-secondary) 35%, transparent);
+    border-radius: 4px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+#partPickerDragHandleWrap:hover .do-player-drag-handle,
+#partPickerDragHandleWrap:active .do-player-drag-handle {
+    background: color-mix(in srgb, var(--primary-color) 80%, transparent);
+    transform: scaleX(1.15);
+}
+
+body.is-dragging-picker #massPartPickerDrawer {
+    transition: none !important;
+}
+
+/* ── Header inside Part Picker Drawer (2 Clean Structured Rows) ── */
 .do-part-picker-inner {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: calc(82vh - 20px);
+    max-height: 75vh;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding-bottom: 0 !important;
+    box-sizing: border-box;
+    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .do-part-picker-header {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    flex-shrink: 0;
+}
+
+/* Row 1: Identity & Kyriale selector */
+.do-part-picker-header-top {
+    display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding-bottom: 12px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-    flex-shrink: 0;
-    flex-wrap: wrap;
-}
-
-.do-part-picker-title-col {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    min-width: 0;
+    width: 100%;
 }
 
 .do-part-picker-badge-wrap {
@@ -7772,13 +8073,14 @@ body.mass-toc-open #modernPlayerBar {
 
 .do-part-picker-title {
     font-family: 'Crimson Text', 'Libre Baskerville', serif;
-    font-size: 1.22rem;
+    font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .do-part-picker-kyriale-select-wrap {
@@ -7787,11 +8089,12 @@ body.mass-toc-open #modernPlayerBar {
     gap: 6px;
     font-size: 0.8rem;
     color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 .do-part-picker-select {
-    background: var(--background-surface, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    background: var(--background-highlight, rgba(255, 255, 255, 0.06));
+    border: none;
     color: var(--text-primary);
     border-radius: 8px;
     padding: 4px 8px;
@@ -7800,11 +8103,12 @@ body.mass-toc-open #modernPlayerBar {
     cursor: pointer;
 }
 
-.do-part-picker-controls-col {
+/* Row 2: Controls Toolbar (Pill button + Search input + View mode toggle) */
+.do-part-picker-header-controls {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
+    width: 100%;
 }
 
 /* ── Corner Psalm-Tone Button in Bottom Menu Header ── */
@@ -7812,28 +8116,27 @@ body.mass-toc-open #modernPlayerBar {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 32px;
-    padding: 0 10px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-    background: var(--background-surface, rgba(255, 255, 255, 0.05));
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--background-highlight, rgba(255, 255, 255, 0.06));
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .do-part-picker-psalm-btn:hover {
     color: var(--text-primary);
-    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.4);
-    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08);
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
 }
 
 .do-part-picker-psalm-btn.is-active {
-    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2) !important;
-    border-color: var(--primary-color, #c96b63) !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.18) !important;
     color: var(--primary-color, #c96b63) !important;
     font-weight: 600 !important;
 }
@@ -7892,27 +8195,26 @@ body.mass-toc-open #modernPlayerBar {
     }
 }
 
-/* ── Search Input inside Drawer ── */
+/* ── Search Input inside Drawer (Matching Site Search Inputs) ── */
 .do-part-picker-search-wrap {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 32px;
-    background: var(--background-surface, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-    border-radius: 8px;
-    padding: 0 8px;
-    transition: border-color 0.2s ease, width 0.2s ease;
-}
-
-.do-part-picker-search-wrap:focus-within {
-    border-color: var(--primary-color, #c96b63);
+    gap: 8px;
+    height: 34px;
+    background: var(--background-highlight, rgba(255, 255, 255, 0.06));
+    border: none;
+    border-radius: 10px;
+    padding: 0 10px;
+    flex: 1;
+    min-width: 0;
+    transition: background 0.18s ease;
 }
 
 .do-part-picker-search-icon {
-    color: var(--text-tertiary);
+    color: var(--text-secondary, #94a3b8);
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .do-part-picker-search-input {
@@ -7920,70 +8222,120 @@ body.mass-toc-open #modernPlayerBar {
     border: none;
     outline: none;
     color: var(--text-primary);
-    font-size: 0.8rem;
-    width: 90px;
-    transition: width 0.2s ease;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.84rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.do-part-picker-search-input:focus {
-    width: 140px;
+.do-part-picker-search-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.75;
 }
 
-.do-part-picker-close-btn {
+/* Toggle view button matching site components */
+.do-part-picker-header-controls .gregorian-toggle-view-btn {
+    height: 34px;
+    width: 34px;
+    border-radius: 10px;
+    background: var(--background-highlight, rgba(255, 255, 255, 0.06));
+    border: none;
+    color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: none;
-    background: var(--background-surface, rgba(255, 255, 255, 0.06));
-    color: var(--text-secondary);
+    flex-shrink: 0;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all 0.18s ease;
 }
 
-.do-part-picker-close-btn:hover {
-    background: rgba(220, 53, 69, 0.18);
-    color: #dc3545;
+.do-part-picker-header-controls .gregorian-toggle-view-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15);
+    color: var(--primary-color, #c96b63);
 }
 
-/* ── Results Container in Part Picker Drawer (Uses Gregorian Search system) ── */
+/* ── Results Container in Part Picker Drawer (Uses Gregorian Search system & margins) ── */
 .do-part-picker-drawer .gregorian-results {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
-    max-height: calc(82vh - 120px);
-    padding: 8px 4px 24px;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y;
+    /* État initial / au début : s'arrête exactement à 1,5 cartes sans marge en bas */
+    max-height: var(--picker-results-peek-h, calc(1.5 * (100vw - 44px) / 2 + 8px));
+    padding: 6px 0 0 !important;
+    margin-bottom: 0 !important;
     box-sizing: border-box;
+    transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 600px) {
+    .do-part-picker-drawer .gregorian-results {
+        max-height: var(--picker-results-peek-h, calc(1.5 * 200px + 20px));
+    }
+}
+
+@media (min-width: 900px) {
+    .do-part-picker-drawer .gregorian-results {
+        max-height: var(--picker-results-peek-h, calc(1.5 * 215px + 24px));
+    }
+}
+
+/* Mode étendu : s'augmente jusqu'à 75% au scroll ou au glissement vers le haut */
+.do-part-picker-drawer.is-expanded .gregorian-results {
+    max-height: calc(75vh - 120px) !important;
 }
 
 .do-part-picker-drawer .gregorian-results.is-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 600px) {
     .do-part-picker-drawer .gregorian-results.is-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (min-width: 900px) {
+    .do-part-picker-drawer .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .do-part-picker-drawer .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .do-part-picker-drawer .gregorian-results.is-grid {
+        grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+        gap: 18px;
     }
 }
 
 .do-part-picker-drawer .gregorian-results.is-grid .gregorian-card {
     background: var(--background-surface, #141416) !important;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+    border: none !important;
+    box-shadow: none !important;
     border-radius: 14px !important;
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     aspect-ratio: 1 / 1;
-    min-height: 220px;
+    min-height: 0 !important;
     box-sizing: border-box;
     position: relative;
     overflow: hidden !important;
+    contain: layout paint;
     cursor: pointer;
     text-align: left;
     transition: all 0.18s ease;
@@ -7991,7 +8343,13 @@ body.mass-toc-open #modernPlayerBar {
 
 .do-part-picker-drawer .gregorian-results.is-grid .gregorian-card:hover {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
-    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.3) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    transform: none;
+}
+
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card:hover .gregorian-card-incipit {
+    color: var(--primary-color, #c96b63) !important;
 }
 
 /* En mode grille dans le drawer, masquer impérativement l'extrait de texte */
@@ -8000,9 +8358,10 @@ body.mass-toc-open #modernPlayerBar {
     display: none !important;
 }
 
-/* Masquer les badges et source en mode grille comme dans la recherche pour garder Titre + Score */
+/* Masquer les badges, source et boutons d'actions en mode grille comme dans la recherche pour garder Titre + Score */
 .do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-badges,
-.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-source {
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-source,
+.do-part-picker-drawer .gregorian-results.is-grid .gregorian-card-actions {
     display: none !important;
 }
 
@@ -8010,8 +8369,8 @@ body.mass-toc-open #modernPlayerBar {
 .do-part-picker-drawer .gregorian-results.is-grid .gregorian-score-container {
     width: 100%;
     flex: 1;
-    min-height: 110px;
-    margin-top: 6px;
+    min-height: 0;
+    margin-top: 4px;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -8019,7 +8378,11 @@ body.mass-toc-open #modernPlayerBar {
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    box-sizing: border-box;
     overflow: hidden !important;
+    contain: paint;
+    position: relative;
+    cursor: pointer;
     -webkit-mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 76%, rgba(0, 0, 0, 0.35) 92%, transparent 100%);
 }
@@ -8034,11 +8397,17 @@ body.mass-toc-open #modernPlayerBar {
     user-select: none;
 }
 
-/* ── Active Piece Highlight (Matches Reader Active Video & Primary Border) ── */
+/* ── Active Piece Highlight: Subtly tinted background, with full colored Gregorian score ── */
 .do-part-picker-drawer .gregorian-card.is-active {
-    border: 2px solid var(--primary-color, #c96b63) !important;
-    box-shadow: 0 0 16px rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
-    background: color-mix(in srgb, var(--background-surface) 92%, var(--primary-color)) !important;
+    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.28) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.1) !important;
+    background: color-mix(in srgb, var(--background-surface, #18181b) 87%, var(--primary-color, #c96b63) 13%) !important;
+}
+
+[data-theme="light"] .do-part-picker-drawer .gregorian-card.is-active {
+    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
+    box-shadow: 0 2px 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    background: color-mix(in srgb, var(--background-surface, #ffffff) 92%, var(--primary-color, #c96b63) 8%) !important;
 }
 
 .do-part-picker-drawer .gregorian-card.is-active .gregorian-card-incipit {
@@ -8048,23 +8417,78 @@ body.mass-toc-open #modernPlayerBar {
 
 .do-part-picker-drawer .gregorian-card.is-active .gregorian-card-source {
     color: var(--primary-color, #c96b63) !important;
-    opacity: 0.85;
+    opacity: 0.92;
 }
 
-/* Active Badge Checkmark */
-.do-active-badge-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: var(--primary-color, #c96b63);
-    color: #ffffff;
-    padding: 2px 7px;
-    border-radius: 9999px;
-    flex-shrink: 0;
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-badge-part,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-badge-mode {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
+    color: var(--primary-color, #c96b63) !important;
+    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.35) !important;
+}
+
+/* ── All Gregorian SVG elements in theme color for the active card ── */
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg {
+    fill: var(--primary-color, #c96b63) !important;
+    color: var(--primary-color, #c96b63) !important;
+}
+
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg use,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .glyph,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg path:not(.brace),
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg rect,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg text,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg tspan,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .neumeLine,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .dividerLine,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .horizontalEpisema,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .rubric {
+    fill: var(--primary-color, #c96b63) !important;
+}
+
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg line,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .staffLine,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .ledgerLine,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .staffLines line {
+    stroke: var(--primary-color, #c96b63) !important;
+    opacity: 0.88 !important;
+}
+
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg path.brace,
+.do-part-picker-drawer .gregorian-card.is-active .gregorian-score-container svg .accentedBrace path {
+    stroke: var(--primary-color, #c96b63) !important;
+    fill: none !important;
+}
+
+/* List view mode in drawer */
+.do-part-picker-drawer .gregorian-results.is-list .gregorian-card {
+    background: var(--background-surface) !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .gregorian-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active {
+    background: color-mix(in srgb, var(--background-surface, #18181b) 87%, var(--primary-color, #c96b63) 13%) !important;
+    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.28) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.1) !important;
+}
+
+[data-theme="light"] .do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active {
+    background: color-mix(in srgb, var(--background-surface, #ffffff) 92%, var(--primary-color, #c96b63) 8%) !important;
+    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
+    box-shadow: 0 2px 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .gregorian-card:hover .gregorian-card-incipit,
+.do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active .gregorian-card-incipit {
+    color: var(--primary-color, #c96b63) !important;
 }
 
 /* Active button style */
@@ -8074,7 +8498,7 @@ body.mass-toc-open #modernPlayerBar {
     font-weight: 600 !important;
 }
 
-/* ── Versets Ad Libitum (Clean, Unboxed, Same Fonts & Margins as Card) ── */
+/* ── Versus Ad Libitum (Clean, Unboxed, Same Fonts & Margins as Card) ── */
 .do-verses-toggle {
     display: inline-flex;
     align-items: center;
@@ -8147,6 +8571,10 @@ body.mass-toc-open #modernPlayerBar {
     display: none;
 }
 
+.do-verses-score-container.is-open {
+    display: block !important;
+}
+
 .do-verses-content {
     width: 100%;
     margin: 0 !important;
@@ -8190,6 +8618,29 @@ body.mass-toc-open #modernPlayerBar {
     font-size: 0.82rem;
     color: var(--primary-color, #c96b63);
     margin-right: 6px;
+}
+
+.do-verses-content .do-chant-card,
+.do-verses-card {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.do-verses-fallback-card {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px 6px;
+    transition: background 0.15s ease;
+}
+
+.do-verses-fallback-card:hover {
+    background: rgba(201, 107, 99, 0.08);
 }
 
 

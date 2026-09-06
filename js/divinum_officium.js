@@ -1649,49 +1649,182 @@ function getLangFolder(langKey) {
     return map[langKey] || 'Latin';
 }
 
+// ---- Liturgical Dates & Computus ----
+var Dates = {
+    Computus: {
+        getEaster: function (Y) {
+            var C = Math.floor(Y / 100);
+            var N = Y - 19 * Math.floor(Y / 19);
+            var K = Math.floor((C - 17) / 25);
+            var I = C - Math.floor(C / 4) - Math.floor((C - K) / 3) + 19 * N + 15;
+            I = I - 30 * Math.floor((I / 30));
+            I = I - Math.floor(I / 28) * (1 - Math.floor(I / 28) * Math.floor(29 / (I + 1)) * Math.floor((21 - N) / 11));
+            var J = Y + Math.floor(Y / 4) + I + 2 - C + Math.floor(C / 4);
+            J = J - 7 * Math.floor(J / 7);
+            var L = I - J;
+            var Month = 3 + Math.floor((L + 40) / 44);
+            var Day = L + 28 - 31 * Math.floor(Month / 4);
+            return new Date(Y, Month - 1, Day);
+        }
+    }
+};
+
+function getLiturgicalDates(Y) {
+    var result = { year: Y };
+    var easterDate = Dates.Computus.getEaster(Y);
+    result.pascha = moment(easterDate);
+    result.septuagesima = moment(result.pascha).subtract(63, 'days');
+    result.quad1 = moment(result.septuagesima).add(21, 'days');
+    result.ashWednesday = moment(result.pascha).subtract(46, 'days');
+    result.ascension = moment(result.pascha).add(39, 'days');
+    result.pentecost = moment(result.pascha).add(49, 'days');
+    result.corpusChristi = moment(result.pentecost).add(11, 'days');
+    result.sacredHeart = moment(result.pentecost).add(19, 'days');
+    result.nativitas = moment({ year: Y, month: 11, day: 25 });
+    var natDay = result.nativitas.day() || 7;
+    result.advent1 = moment(result.nativitas).subtract(natDay + 21, 'days');
+    result.epiphany = moment({ year: Y, month: 0, day: 6 });
+    result.holyFamily = moment(result.epiphany).add(7 - result.epiphany.day(), 'days');
+    result.ChristusRex = moment({ year: Y, month: 9, day: 31 });
+    result.ChristusRex.subtract(result.ChristusRex.day(), 'days');
+    result.sundaysAfterPentecost = result.advent1.diff(result.pentecost, 'weeks') - 1;
+    return result;
+}
+
+function getSeasonForMoment(m) {
+    if (!m || !m.isValid()) return '';
+    var dates = getLiturgicalDates(m.year());
+    if (m.isSameOrAfter(dates.septuagesima) && m.isBefore(dates.pascha)) {
+        return 'Quad';
+    } else if (m.isSameOrAfter(dates.pascha) && m.isBefore(moment(dates.pentecost).add(1, 'week'))) {
+        return 'Pasch';
+    }
+    return '';
+}
+
 // ---- Calendar Computations ----
 function computeLiturgicalCodes(mom) {
     var y = mom.year();
-    var easter = moment(moment.easter(y));
-    var ashWed = moment(easter).subtract(46, 'days');
-    var septuagesima = moment(easter).subtract(63, 'days');
-    var pentecost = moment(easter).add(49, 'days');
-
-    var christmas = moment({ year: y, month: 11, day: 25 });
-    var daysToSun = (7 - christmas.day()) % 7;
-    var advent4 = moment(christmas).subtract(daysToSun === 0 ? 0 : daysToSun, 'days');
-    var advent1 = moment(advent4).subtract(21, 'days');
-
-    var d = mom;
+    var dates = getLiturgicalDates(y);
+    var d = mom.clone().startOf('day');
     var dow = d.day(); // 0=Sun
     var mmdd = d.format('MM-DD');
 
     var tempora = '';
-    if (d.isSameOrAfter(advent1) && d.isBefore(christmas)) {
-        var wk = Math.floor(d.diff(advent1, 'days') / 7) + 1;
-        tempora = 'Adv' + wk + '-' + dow;
-    } else if (d.isSameOrAfter(christmas) || d.isBefore(moment({ year: y, month: 0, day: 6 }))) {
-        tempora = 'Nat1-' + dow;
-    } else if (d.isSameOrAfter(moment({ year: y, month: 0, day: 6 })) && d.isBefore(septuagesima)) {
-        var epi = moment({ year: y, month: 0, day: 6 });
-        var wk = Math.floor(d.diff(epi, 'days') / 7) + 1;
-        tempora = 'Epi' + wk + '-' + dow;
-    } else if (d.isSameOrAfter(septuagesima) && d.isBefore(ashWed)) {
-        var wk = Math.floor(d.diff(septuagesima, 'days') / 7) + 1;
-        tempora = 'Quadp' + wk + '-' + dow;
-    } else if (d.isSameOrAfter(ashWed) && d.isBefore(easter)) {
-        var wk = Math.floor(d.diff(ashWed, 'days') / 7) + 1;
-        tempora = 'Quad' + wk + '-' + dow;
-    } else if (d.isSameOrAfter(easter) && d.isBefore(pentecost)) {
-        var wk = Math.floor(d.diff(easter, 'days') / 7);
-        tempora = 'Pasc' + wk + '-' + dow;
-    } else {
-        var wk = Math.floor(d.diff(pentecost, 'days') / 7);
-        if (wk === 0) {
-            tempora = 'Pasc7-' + dow;
+
+    // 1. Advent (from advent1 until Christmas Eve)
+    if (d.isSameOrAfter(dates.advent1) && d.isBefore(dates.nativitas)) {
+        var wk = Math.floor(d.diff(dates.advent1, 'days') / 7) + 1;
+        if (wk === 3 && dow === 3) {
+            tempora = 'Adv3-3';
+        } else if (wk === 3 && dow === 5) {
+            tempora = 'Adv3-5';
+        } else if (wk === 3 && dow === 6) {
+            tempora = 'Adv3-6';
         } else {
-            var pStr = (wk < 10 ? '0' + wk : '' + wk);
-            tempora = 'Pent' + pStr + '-' + dow;
+            tempora = 'Adv' + wk + '-' + dow;
+        }
+    }
+    // 2. Christmas to Epiphany (Dec 25 to Jan 5)
+    else if (d.isSameOrAfter(dates.nativitas) || d.isBefore(moment({ year: y, month: 0, day: 6 }))) {
+        if (mmdd === '12-25') {
+            tempora = '12-25';
+        } else if (d.month() === 11 && d.date() > 25) {
+            if (dow === 0) {
+                tempora = 'Nat1-0';
+            } else {
+                tempora = 'Nat' + d.date();
+            }
+        } else if (mmdd === '01-01') {
+            tempora = '01-01';
+        } else {
+            var holyNameSun = moment({ year: y, month: 0, day: 6 }).subtract(1, 'days');
+            holyNameSun.subtract(holyNameSun.day(), 'days');
+            var isHolyName = (holyNameSun.month() === 0 && holyNameSun.date() > 1 && d.isSame(holyNameSun, 'day')) ||
+                             ((holyNameSun.month() !== 0 || holyNameSun.date() <= 1) && mmdd === '01-02');
+            if (isHolyName) {
+                tempora = 'Nat2-0';
+            } else if (mmdd === '01-05') {
+                tempora = '01-05';
+            } else {
+                tempora = 'Nat0' + d.date();
+            }
+        }
+    }
+    // 3. Epiphany & Sundays after Epiphany (Jan 6 until Septuagesima)
+    else if (d.isSameOrAfter(dates.epiphany) && d.isBefore(dates.septuagesima)) {
+        if (mmdd === '01-06') {
+            tempora = '01-06';
+        } else if (d.isBefore(dates.holyFamily)) {
+            tempora = 'Epi1-' + dow;
+        } else {
+            var wk = Math.floor(d.diff(dates.holyFamily, 'days') / 7) + 1;
+            tempora = 'Epi' + wk + '-' + dow;
+        }
+    }
+    // 4. Septuagesima / Pre-Lent (Septuagesima to Ash Wednesday)
+    else if (d.isSameOrAfter(dates.septuagesima) && d.isBefore(dates.ashWednesday)) {
+        var wk = Math.floor(d.diff(dates.septuagesima, 'days') / 7) + 1;
+        tempora = 'Quadp' + wk + '-' + dow;
+    }
+    // 5. Ash Wednesday & Days before Lent 1
+    else if (d.isSameOrAfter(dates.ashWednesday) && d.isBefore(dates.quad1)) {
+        tempora = 'Quadp3-' + dow;
+    }
+    // 6. Lent (from 1st Sunday of Lent until Holy Saturday)
+    else if (d.isSameOrAfter(dates.quad1) && d.isBefore(dates.pascha)) {
+        var wk = Math.floor(d.diff(dates.quad1, 'days') / 7) + 1;
+        tempora = 'Quad' + wk + '-' + dow;
+    }
+    // 7. Easter to Pentecost
+    else if (d.isSameOrAfter(dates.pascha) && d.isBefore(dates.pentecost)) {
+        var wk = Math.floor(d.diff(dates.pascha, 'days') / 7);
+        if (wk === 5 && dow === 4) {
+            tempora = 'Pasc5-4'; // Ascension
+        } else {
+            tempora = 'Pasc' + wk + '-' + dow;
+        }
+    }
+    // 8. Pentecost octave (Pasc7-0 to Pasc7-6)
+    else if (d.isSameOrAfter(dates.pentecost) && d.isBefore(moment(dates.pentecost).add(7, 'days'))) {
+        tempora = 'Pasc7-' + dow;
+    }
+    // 9. Season after Pentecost (from Trinity Sunday until Advent 1)
+    else {
+        var cross = moment({ year: y, month: 8, day: 14 });
+        var sunAfter = moment(cross).add((7 - cross.day()) % 7 || 7, 'days');
+        var embWed = moment(sunAfter).add(3, 'days');
+        var embFri = moment(sunAfter).add(5, 'days');
+        var embSat = moment(sunAfter).add(6, 'days');
+
+        if (d.isSame(embWed, 'day')) {
+            tempora = '093-3';
+        } else if (d.isSame(embFri, 'day')) {
+            tempora = '093-5';
+        } else if (d.isSame(embSat, 'day')) {
+            tempora = '093-6';
+        } else if (d.isSame(dates.ChristusRex, 'day')) {
+            tempora = '10-DU';
+        } else {
+            var diffWeeks = Math.floor(d.diff(dates.pentecost, 'days') / 7);
+            if (diffWeeks === 1 && dow === 4) {
+                tempora = 'Pent01-4'; // Corpus Christi
+            } else if (diffWeeks === 2 && dow === 5) {
+                tempora = 'Pent02-5'; // Sacred Heart
+            } else {
+                var lastPentSun = moment(dates.advent1).subtract(7, 'days');
+                var totalSundays = dates.sundaysAfterPentecost;
+                if (d.isSameOrAfter(lastPentSun)) {
+                    tempora = 'Pent24-' + dow;
+                } else if (diffWeeks <= 23) {
+                    var pStr = (diffWeeks < 10 ? '0' : '') + diffWeeks;
+                    tempora = 'Pent' + pStr + '-' + dow;
+                } else {
+                    var pentecost24 = 31 - totalSundays;
+                    var epiNum = pentecost24 + (diffWeeks - 24);
+                    tempora = 'PentEpi' + epiNum + '-' + dow;
+                }
+            }
         }
     }
 
@@ -2207,7 +2340,7 @@ function loadMissaData(date, lang, callback) {
     var sanctiCode = feastKey || codes.sancti;
     var temporaCode = feastKey || codes.tempora;
 
-    var isDirectTempora = feastKey && /^(Adv|Quad|Pasc|Pent|Epi|7a|6a|5a)/i.test(feastKey);
+    var isDirectTempora = feastKey && /^(Adv|Quad|Quadp|Pasc|Pent|PentEpi|Epi|7a|6a|5a|10-DU|093-)/i.test(feastKey);
     var primaryPath = isDirectTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode);
     var fallbackPath = isDirectTempora ? ('Sancti/' + sanctiCode) : ('Tempora/' + temporaCode);
 
@@ -2425,19 +2558,42 @@ function convertFeastKeyToCode(key) {
     // Direct season / proper mappings to Divinum Officium file codes
     var seasonMap = {
         'Adv1': 'Adv1-0', 'Adv2': 'Adv2-0', 'Adv3': 'Adv3-0', 'Adv4': 'Adv4-0',
-        'Dec25_1': '12-25', 'Dec25_2': '12-25', 'Dec25_3': '12-25',
+        'Adv3w': 'Adv3-3', 'Adv3f': 'Adv3-5', 'Adv3s': 'Adv3-6',
+        'Dec24': '12-24', 'Dec25_1': '12-25', 'Dec25_2': '12-25', 'Dec25_3': '12-25',
+        'Nat1': 'Nat1-0', 'Jan1': '01-01', 'Nat2': 'Nat2-0', 'Jan5a': '01-05',
         'Epi': '01-06', 'Epi1': 'Epi1-0', 'Epi2': 'Epi2-0', 'Epi3': 'Epi3-0', 'Epi4': 'Epi4-0', 'Epi5': 'Epi5-0', 'Epi6': 'Epi6-0',
-        '7a': 'Quadp1-0', '6a': 'Quadp2-0', '5a': 'Quadp3-0', '5aw': 'Quadp3-3',
+        '7a': 'Quadp1-0', '6a': 'Quadp2-0', '5a': 'Quadp3-0',
+        '5aw': 'Quadp3-3', '5ah': 'Quadp3-4', '5af': 'Quadp3-5', '5as': 'Quadp3-6',
         'Quad1': 'Quad1-0', 'Quad2': 'Quad2-0', 'Quad3': 'Quad3-0', 'Quad4': 'Quad4-0',
         'Quad5': 'Quad5-0', 'Quad6': 'Quad6-0', 'Quad6h': 'Quad6-4', 'Quad6f': 'Quad6-5', 'Quad6s': 'Quad6-6',
         'Pasc0': 'Pasc0-0', 'Pasc1': 'Pasc1-0', 'Pasc2': 'Pasc2-0', 'Pasc3': 'Pasc3-0', 'Pasc4': 'Pasc4-0', 'Pasc5': 'Pasc5-0',
         'Asc': 'Pasc5-4', 'Pasc6': 'Pasc6-0', 'Pent0': 'Pasc7-0',
-        'Trin': 'Pent01-0', 'Corp': 'Pent01-4', 'SH': 'Pent02-5', 'ChristRex': '10-DU',
+        'Pentm': 'Pasc7-1', 'Pentt': 'Pasc7-2', 'Pentw': 'Pasc7-3', 'Penth': 'Pasc7-4', 'Pentf': 'Pasc7-5', 'Pents': 'Pasc7-6',
+        'Trin': 'Pent01-0', 'Corp': 'Pent01-4', 'CorpusChristi': 'Pent01-4',
+        'SH': 'Pent02-5', 'SCJ': 'Pent02-5',
+        'ChristRex': '10-DU', 'ChristusRex': '10-DU',
+        'EmbWedSept': '093-3', 'EmbFriSept': '093-5', 'EmbSatSept': '093-6',
+        'PentEpi3': 'PentEpi3-0', 'PentEpi4': 'PentEpi4-0', 'PentEpi5': 'PentEpi5-0', 'PentEpi6': 'PentEpi6-0',
         'SMadvent': 'C11', 'SMchristmas': 'C11', 'SMlent': 'C11', 'SMpasch': 'C11', 'SMperannum': 'C11',
-        'requiem': 'Defunctorum', 'nuptial': 'C12', 'angels': '09-29'
+        'requiem': 'Defunctorum', 'defunctorum': 'Defunctorum', 'nuptial': 'C12', 'nuptialis': 'C12', 'angels': '09-29'
     };
 
     if (seasonMap[key]) return seasonMap[key];
+
+    // Lenten ferias: Quad1m..s to Quad1-1..6
+    var quadFeria = key.match(/^Quad([1-6])([mtwhfs])$/);
+    if (quadFeria) {
+        var qWk = quadFeria[1];
+        var qWd = ['m', 't', 'w', 'h', 'f', 's'].indexOf(quadFeria[2]) + 1;
+        return 'Quad' + qWk + '-' + qWd;
+    }
+
+    // Easter ferias: Pasc0m..s to Pasc0-1..6
+    var pascFeria = key.match(/^Pasc0([mtwhfs])$/);
+    if (pascFeria) {
+        var pWd = ['m', 't', 'w', 'h', 'f', 's'].indexOf(pascFeria[1]) + 1;
+        return 'Pasc0-' + pWd;
+    }
 
     // Pent01 - Pent24
     var pentMatch = key.match(/^Pent(\d+)$/i);
@@ -2842,12 +2998,21 @@ function renderOfficeCardHTML(cardData, vernCardData) {
     }
 
     var ptBtnHtml = '';
+    var gpBtnHtml = '';
     if (isMissa && doState.includeGregorian && cardData.id && CUSTOMIZABLE_MASS_PARTS.indexOf(cardData.id) !== -1) {
         var isPtActive = !!(doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[cardData.id]));
         ptBtnHtml = '<button type="button" class="do-card-pt-btn' + (isPtActive ? ' is-active' : '') + '" data-part-key="' + escHtml(cardData.id) + '" title="Basculer vers le ton psalmodié">' +
             '<span class="do-pt-sym">℣</span>' +
             '<span class="do-pt-text">Ton psalmodié</span>' +
         '</button>';
+
+        if (cardData.id === 'introitus' || cardData.id === 'incipit') {
+            var isGpActive = !!(doState.gloriaPatriParts && doState.gloriaPatriParts[cardData.id]);
+            gpBtnHtml = '<button type="button" class="do-card-gp-btn' + (isGpActive ? ' is-active' : '') + '" data-part-key="' + escHtml(cardData.id) + '" title="Glória Patri complet (comme propers.html)">' +
+                '<span class="do-pt-sym">℣</span>' +
+                '<span class="do-pt-text">Glória Patri</span>' +
+            '</button>';
+        }
     }
 
     var cardIdAttr = cardData.id ? ' data-card-id="' + escHtml(cardData.id) + '"' : '';
@@ -2861,8 +3026,8 @@ function renderOfficeCardHTML(cardData, vernCardData) {
           '</h3>'
         : '<h3 class="do-card-title">' + escHtml(type) + '</h3>';
 
-    var actionsHtml = (bibleBtnHtml || ptBtnHtml)
-        ? '<div class="do-card-actions">' + ptBtnHtml + bibleBtnHtml + '</div>'
+    var actionsHtml = (bibleBtnHtml || ptBtnHtml || gpBtnHtml)
+        ? '<div class="do-card-actions">' + ptBtnHtml + gpBtnHtml + bibleBtnHtml + '</div>'
         : '';
 
     return '<div class="do-card' + cardMod + '"' + cardIdAttr + '>' +
@@ -3037,7 +3202,7 @@ function formatSingleParagraph(l, langKey) {
 var VOWELS = /[aáàeéèiíìoóòuúùyýỳæœ]/i;
 var ACCENTED_VOWELS = /[áéíóúý]/i;
 
-function getSyllables(word) {
+function getTextSyllablesSimple(word) {
     if (!word) return [];
     return word.match(/[^aeiouyáéíóúæœ]*[aeiouyáéíóúæœ]+(?:[^aeiouyáéíóúæœ]+(?![aeiouyáéíóúæœ]))?/gi) || [word];
 }
@@ -3077,7 +3242,7 @@ function processHemistich(hemistich, accentsCount, prepCount) {
             return;
         }
 
-        var syls = getSyllables(cleanWord);
+        var syls = getTextSyllablesSimple(cleanWord);
         var tonicIdx = findTonicSyllableIndex(syls);
 
         syls.forEach(function(sText, sIdx) {
@@ -3179,7 +3344,7 @@ function formatPsalmodie(verset, options) {
 
 // Export for global access
 if (typeof window !== 'undefined') {
-    window.getSyllables = getSyllables;
+    window.getTextSyllablesSimple = getTextSyllablesSimple;
     window.findTonicSyllableIndex = findTonicSyllableIndex;
     window.processHemistich = processHemistich;
     window.formatPsalmodie = formatPsalmodie;
@@ -4297,6 +4462,9 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                     $hero.addClass('do-hero-no-image');
                     $bgClip.hide();
                     $thumbWrap.hide();
+                    if (typeof updateHeroImageState === 'function') {
+                        updateHeroImageState();
+                    }
                     if (typeof compute3Lines === 'function') {
                         setTimeout(compute3Lines, 10);
                     }
@@ -4510,6 +4678,7 @@ function renderHomeView() {
         $('#doHeaderTitle .title-text').text(feastTitle);
         $('#doSidebarFeastTitle').text(feastTitle);
         checkHeaderTitleMarquee();
+        setHeaderLoading(false);
 
         var $view = $('<div class="do-home-styled">');
 
@@ -4524,10 +4693,17 @@ function renderHomeView() {
             if ($card) {
                 $saintCardWrap.append($card);
                 onSaintAttached = onAttached;
+                if (typeof updateHeroImageState === 'function') {
+                    updateHeroImageState();
+                }
                 if (isViewInDom && typeof onSaintAttached === 'function') {
                     requestAnimationFrame(function() {
                         onSaintAttached();
                     });
+                }
+            } else {
+                if (typeof updateHeroImageState === 'function') {
+                    updateHeroImageState();
                 }
             }
         });
@@ -4611,6 +4787,9 @@ function renderHomeView() {
 }
 
 function renderDO() {
+    if (typeof setHeaderLoading === 'function') {
+        setHeaderLoading(true);
+    }
     updateEffectiveColor();
     updateSidebarAndHeader();
     closeHeaderDropdown();
@@ -4630,6 +4809,9 @@ function renderDO() {
     $('body').toggleClass('is-chant-mode', isChant);
     if (!isHome && !isMissa) {
         $(window).off('scroll.saintParallax');
+        if (typeof updateHeroImageState === 'function') {
+            updateHeroImageState();
+        }
     }
     if (typeof updateHeaderScrollState === 'function') {
         updateHeaderScrollState();
@@ -4645,6 +4827,7 @@ function renderDO() {
         hideMassToc();
         closeDoPlayer();
         renderBibleMainView();
+        if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
         return;
     }
 
@@ -4654,6 +4837,7 @@ function renderDO() {
         if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderMainView === 'function') {
             window.gregorianSearchUI.renderMainView();
         }
+        if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
         return;
     }
 
@@ -4666,15 +4850,18 @@ function renderDO() {
             if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderMainView === 'function') {
                 window.gregorianSearchUI.renderMainView();
             }
+            if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
             return;
         }
         if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderChantMainView === 'function') {
             window.gregorianSearchUI.renderChantMainView(chantId);
+            if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
         } else {
             $(document).ready(function() {
                 if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderChantMainView === 'function') {
                     window.gregorianSearchUI.renderChantMainView(chantId);
                 }
+                if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
             });
         }
         return;
@@ -4831,6 +5018,47 @@ function parseGabcHeader(gabc) {
     return header;
 }
 
+var DO_TEMPORA_TO_PROPRIUM = {
+    // Advent
+    'Adv1-0': 'Adv1', 'Adv2-0': 'Adv2', 'Adv3-0': 'Adv3', 'Adv4-0': 'Adv4',
+    'Adv3-3': 'Adv3w', 'Adv3-5': 'Adv3f', 'Adv3-6': 'Adv3s',
+    // Christmas / Epiphany
+    '12-24': 'Dec24', '12-25': 'Dec25_1', '12-25_1': 'Dec25_1', '12-25_2': 'Dec25_2', '12-25_3': 'Dec25_3',
+    'Nat1-0': 'Nat1', '01-01': 'Jan1', '01-02': 'Nat2', 'Nat2-0': 'Nat2',
+    '01-05': 'Jan5a', '01-06': 'Epi',
+    'Epi1-0': 'Epi1', 'Epi2-0': 'Epi2', 'Epi3-0': 'Epi3', 'Epi4-0': 'Epi4', 'Epi5-0': 'Epi5', 'Epi6-0': 'Epi6',
+    // Septuagesima / Pre-Lent
+    'Quadp1-0': '7a', 'Quadp2-0': '6a', 'Quadp3-0': '5a',
+    'Quadp3-3': '5aw', 'Quadp3-4': '5ah', 'Quadp3-5': '5af', 'Quadp3-6': '5as',
+    // Lent
+    'Quad1-0': 'Quad1', 'Quad1-1': 'Quad1m', 'Quad1-2': 'Quad1t', 'Quad1-3': 'Quad1w', 'Quad1-4': 'Quad1h', 'Quad1-5': 'Quad1f', 'Quad1-6': 'Quad1s',
+    'Quad2-0': 'Quad2', 'Quad2-1': 'Quad2m', 'Quad2-2': 'Quad2t', 'Quad2-3': 'Quad2w', 'Quad2-4': 'Quad2h', 'Quad2-5': 'Quad2f', 'Quad2-6': 'Quad2s',
+    'Quad3-0': 'Quad3', 'Quad3-1': 'Quad3m', 'Quad3-2': 'Quad3t', 'Quad3-3': 'Quad3w', 'Quad3-4': 'Quad3h', 'Quad3-5': 'Quad3f', 'Quad3-6': 'Quad3s',
+    'Quad4-0': 'Quad4', 'Quad4-1': 'Quad4m', 'Quad4-2': 'Quad4t', 'Quad4-3': 'Quad4w', 'Quad4-4': 'Quad4h', 'Quad4-5': 'Quad4f', 'Quad4-6': 'Quad4s',
+    'Quad5-0': 'Quad5', 'Quad5-1': 'Quad5m', 'Quad5-2': 'Quad5t', 'Quad5-3': 'Quad5w', 'Quad5-4': 'Quad5h', 'Quad5-5': 'Quad5f', 'Quad5-6': 'Quad5s',
+    'Quad6-0': 'Quad6', 'Quad6-1': 'Quad6m', 'Quad6-2': 'Quad6t', 'Quad6-3': 'Quad6w', 'Quad6-4': 'Quad6h', 'Quad6-5': 'Quad6f', 'Quad6-6': 'Quad6s',
+    // Easter / Paschal
+    'Pasc0-0': 'Pasc0', 'Pasc0-1': 'Pasc0m', 'Pasc0-2': 'Pasc0t', 'Pasc0-3': 'Pasc0w', 'Pasc0-4': 'Pasc0h', 'Pasc0-5': 'Pasc0f', 'Pasc0-6': 'Pasc0s',
+    'Pasc1-0': 'Pasc1', 'Pasc2-0': 'Pasc2', 'Pasc3-0': 'Pasc3', 'Pasc4-0': 'Pasc4', 'Pasc5-0': 'Pasc5',
+    'Pasc5-4': 'Asc', 'Pasc6-0': 'Pasc6',
+    // Pentecost & Solemnities
+    'Pasc7-0': 'Pent0', 'Pasc7-1': 'Pentm', 'Pasc7-2': 'Pentt', 'Pasc7-3': 'Pentw', 'Pasc7-4': 'Penth', 'Pasc7-5': 'Pentf', 'Pasc7-6': 'Pents',
+    'Pent01-0': 'Pent1', 'Pent01-4': 'CorpusChristi', 'Pent02-0': 'Pent2', 'Pent02-5': 'SCJ',
+    // September Embers & Christ the King
+    '093-3': 'EmbWedSept', '093-5': 'EmbFriSept', '093-6': 'EmbSatSept',
+    '10-DU': 'ChristusRex', '104-0': 'ChristusRex',
+    // Resumed Sundays after Epiphany
+    'PentEpi3-0': 'PentEpi3', 'PentEpi4-0': 'PentEpi4', 'PentEpi5-0': 'PentEpi5', 'PentEpi6-0': 'PentEpi6'
+};
+
+for (var p = 1; p <= 24; p++) {
+    var pStr = (p < 10 ? '0' : '') + p;
+    DO_TEMPORA_TO_PROPRIUM['Pent' + pStr + '-0'] = 'Pent' + p;
+    DO_TEMPORA_TO_PROPRIUM['Pent' + p + '-0'] = 'Pent' + p;
+    DO_TEMPORA_TO_PROPRIUM['Pent' + pStr] = 'Pent' + p;
+    DO_TEMPORA_TO_PROPRIUM['Pent' + p] = 'Pent' + p;
+}
+
 var DO_COMMUNE_TO_PROPRIUM = {
     'C1': 'mass_i_martyr_bishop',
     'C1-1': 'mass_ii_martyr_bishop',
@@ -4844,12 +5072,12 @@ var DO_COMMUNE_TO_PROPRIUM = {
     'C2A-1': 'mass_ii_martyr_not_bishop',
     'C2B': 'mass_ii_martyr_not_bishop',
     'C2B-1': 'mass_ii_martyr_not_bishop',
-    'C3': 'mass_martyrs_paschal',
+    'C3': 'mass_one_martyr',
     'C3A': 'mass_one_martyr',
     'C3A-1': 'mass_one_martyr',
-    'C3B': 'mass_i_two_or_more_martyr',
-    'C3C': 'mass_ii_two_or_more_martyr',
-    'C3D': 'mass_iii_two_or_more_martyr',
+    'C3B': 'mass_two_or_more_martyr',
+    'C3C': 'mass_two_or_more_martyr',
+    'C3D': 'mass_two_or_more_martyr',
     'C4': 'mass_i_confessor_bishop',
     'C4-1': 'mass_ii_confessor_bishop',
     'C4-1B': 'mass_ii_confessor_bishop',
@@ -4877,9 +5105,9 @@ var DO_COMMUNE_TO_PROPRIUM = {
     'C10B': 'mass_bvm',
     'C10C': 'mass_bvm',
     'C10PASC': 'mass_bvm',
-    'C11': 'SMperannum',
-    'C12': 'nuptial_mass',
-    'DEFUNCTORUM': 'requiem'
+    'C11': 'SMpentecost',
+    'C12': 'nuptialis',
+    'DEFUNCTORUM': 'defunctorum'
 };
 
 function convertDOKeyToPropriumKey(key, mom) {
@@ -4890,8 +5118,61 @@ function convertDOKeyToPropriumKey(key, mom) {
     if (!key) return null;
     var clean = key.replace(/^(Sancti|Tempora|Commune)\//i, '').replace(/\.txt$/i, '').trim();
 
+    // Pent01-0 to Pent24-0 / Pent1-0 etc.
+    var pentMatch = clean.match(/^Pent0?(\d+)(?:-(\d))?$/i);
+    if (pentMatch) {
+        var pNum = parseInt(pentMatch[1], 10);
+        var pDow = pentMatch[2];
+        if (pNum === 1 && pDow === '4') return 'CorpusChristi';
+        if (pNum === 2 && pDow === '5') return 'SCJ';
+        return 'Pent' + pNum;
+    }
+
+    if (DO_TEMPORA_TO_PROPRIUM[clean]) {
+        return DO_TEMPORA_TO_PROPRIUM[clean];
+    }
+    if (DO_COMMUNE_TO_PROPRIUM[clean]) {
+        return DO_COMMUNE_TO_PROPRIUM[clean];
+    }
+
+    var commMatch = clean.match(/^C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?/i);
+    if (commMatch) {
+        var cCode = commMatch[0].toUpperCase();
+        if (DO_COMMUNE_TO_PROPRIUM[cCode]) return DO_COMMUNE_TO_PROPRIUM[cCode];
+        var cNoTrailing = cCode.replace(/[a-z]+$/i, '');
+        if (DO_COMMUNE_TO_PROPRIUM[cNoTrailing]) return DO_COMMUNE_TO_PROPRIUM[cNoTrailing];
+        var cBase = cCode.replace(/-[0-9]+[a-z]*$/i, '').replace(/[a-z]+$/i, '');
+        if (DO_COMMUNE_TO_PROPRIUM[cBase]) return DO_COMMUNE_TO_PROPRIUM[cBase];
+    }
+
     if (typeof proprium !== 'undefined' && proprium[clean]) return clean;
 
+    var noZero = clean.replace(/-0$/, '');
+    if (DO_TEMPORA_TO_PROPRIUM[noZero]) return DO_TEMPORA_TO_PROPRIUM[noZero];
+    if (typeof proprium !== 'undefined' && proprium[noZero]) return noZero;
+
+    // Epiphany ferias (e.g. Epi2-1 to Epi2-6 take Epi2)
+    var epiFeriaMatch = clean.match(/^Epi(\d)-[1-6]$/i);
+    if (epiFeriaMatch) {
+        var eKey = 'Epi' + epiFeriaMatch[1];
+        if (typeof proprium !== 'undefined' && proprium[eKey]) return eKey;
+    }
+
+    // Paschal ferias after Low Sunday (e.g. Pasc2-1 to Pasc2-6 take Pasc2)
+    var pascFeriaMatch = clean.match(/^Pasc([1-6])-[1-6]$/i);
+    if (pascFeriaMatch) {
+        var paKey = 'Pasc' + pascFeriaMatch[1];
+        if (typeof proprium !== 'undefined' && proprium[paKey]) return paKey;
+    }
+
+    // Advent ferias (e.g. Adv1-1 to Adv1-6 take Adv1)
+    var advFeriaMatch = clean.match(/^Adv(\d)-[1-6]$/i);
+    if (advFeriaMatch) {
+        var aKey = 'Adv' + advFeriaMatch[1];
+        if (typeof proprium !== 'undefined' && proprium[aKey]) return aKey;
+    }
+
+    // Saint date MM-DD
     var m = clean.match(/^(\d{2})-(\d{2})(.*)$/);
     if (m) {
         var monInt = parseInt(m[1], 10);
@@ -4905,30 +5186,6 @@ function convertDOKeyToPropriumKey(key, mom) {
             if (typeof proprium !== 'undefined' && proprium[saintKeyBase]) return saintKeyBase;
             return saintKey;
         }
-    }
-
-    var commMatch = clean.match(/^C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?/i);
-    if (commMatch) {
-        var cCode = commMatch[0].toUpperCase();
-        if (DO_COMMUNE_TO_PROPRIUM[cCode]) return DO_COMMUNE_TO_PROPRIUM[cCode];
-        var cNoTrailing = cCode.replace(/[a-z]+$/i, '');
-        if (DO_COMMUNE_TO_PROPRIUM[cNoTrailing]) return DO_COMMUNE_TO_PROPRIUM[cNoTrailing];
-        var cBase = cCode.replace(/-[0-9]+[a-z]*$/i, '').replace(/[a-z]+$/i, '');
-        if (DO_COMMUNE_TO_PROPRIUM[cBase]) return DO_COMMUNE_TO_PROPRIUM[cBase];
-    }
-
-    var pentMatch = clean.match(/^Pent0?(\d+)/i);
-    if (pentMatch) {
-        var pNum = parseInt(pentMatch[1], 10);
-        if (typeof proprium !== 'undefined') {
-            if (proprium['Pent' + pNum]) return 'Pent' + pNum;
-            if (proprium['Pent0' + pNum]) return 'Pent0' + pNum;
-        }
-        return 'Pent' + pNum;
-    }
-    var tempMatch = clean.match(/^(Adv\d|Quad\d|Quadp\d|Pasc\d|Epi\d)/i);
-    if (tempMatch) {
-        return tempMatch[1];
     }
 
     return clean;
@@ -4976,8 +5233,7 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
         var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         var saintKey = monthNames[mom.month()] + mom.date();
         var codes = computeLiturgicalCodes(mom);
-        var tempKey = codes.tempora ? codes.tempora.replace(/-\d+$/, '') : '';
-        var normTempKey = tempKey ? tempKey.replace(/^Pent0?(\d+)$/i, 'Pent$1') : '';
+        var normTempKey = convertDOKeyToPropriumKey(codes.tempora, mom);
 
         // If not Sunday, prioritize Sanctoral if today has a saint in proprium
         if (!codes.isSunday) {
@@ -4987,18 +5243,12 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
             } else if (normTempKey && proprium[normTempKey]) {
                 prop = proprium[normTempKey];
                 matchedKey = normTempKey;
-            } else if (tempKey && proprium[tempKey]) {
-                prop = proprium[tempKey];
-                matchedKey = tempKey;
             }
         } else {
             // Sunday: prioritize Tempora unless feast is major Sanctoral
             if (normTempKey && proprium[normTempKey]) {
                 prop = proprium[normTempKey];
                 matchedKey = normTempKey;
-            } else if (tempKey && proprium[tempKey]) {
-                prop = proprium[tempKey];
-                matchedKey = tempKey;
             } else if (proprium[saintKey]) {
                 prop = proprium[saintKey];
                 matchedKey = saintKey;
@@ -5015,7 +5265,39 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
 
     // Default fallback if still null
     if (!prop) {
-        prop = proprium['Pent14'] || proprium['Pent12'] || proprium['SMperannum'] || proprium['C4'] || {};
+        prop = proprium['Pent14'] || proprium['Pent12'] || proprium['SMpentecost'] || proprium['C4'] || {};
+    }
+
+    // Apply seasonal variations (Quad / Pasch) exactly as propers.js does
+    var selTempus = (mom && mom.isValid) ? getSeasonForMoment(mom) : '';
+    prop = Object.assign({}, prop);
+
+    if (selTempus === 'Quad') {
+        if (matchedKey && proprium[matchedKey + 'Quad']) {
+            prop = Object.assign({}, proprium[matchedKey + 'Quad']);
+        } else {
+            delete prop.alID;
+            prop.trID = prop.trSeptID || prop.trQuadID || prop.trID;
+            prop.grID = prop.grSeptID || prop.grQuadID || prop.grID;
+        }
+    } else if (selTempus === 'Pasch') {
+        if (matchedKey && proprium[matchedKey + 'Pasch']) {
+            prop = Object.assign({}, proprium[matchedKey + 'Pasch']);
+        } else {
+            delete prop.trID;
+            if (prop.alPaschID) {
+                if (Array.isArray(prop.alPaschID)) {
+                    prop.grID = prop.alPaschID[0];
+                    prop.alID = prop.alPaschID[1];
+                } else {
+                    prop.grID = prop.grPaschID || prop.alID;
+                    prop.alID = prop.alPaschID;
+                }
+            } else if (Array.isArray(prop.alID) && prop.alID.length > 1) {
+                prop.grID = prop.alID[0];
+                prop.alID = prop.alID[1];
+            }
+        }
     }
 
     // 3. Resolve Kyriale Ordinary Chants
@@ -5064,6 +5346,7 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
     // Helper to resolve customizable parts with overrides, psalm tones and verses
     function resolvePartChant(partKey, defaultId, defaultName, defaultPart, versesRef) {
         var id = defaultId;
+        if (Array.isArray(id)) id = id[0];
         var name = defaultName;
         var part = defaultPart;
         if (doState.partOverrides && doState.partOverrides[partKey]) {
@@ -5155,6 +5438,31 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
     return result;
 }
 
+function sanitizeGabc(gabc) {
+    if (!gabc || typeof gabc !== 'string') return gabc;
+    // 1. Traitement <eu>...</eu>
+    gabc = gabc.replace(/<eu>([\s\S]*?)<\/eu>/gi, function(match, inner) {
+        return inner.replace(/(^|\))([^()]+)(?=\(|$)/g, function(m, closeParen, text) {
+            var trimmed = text.trim();
+            if (!trimmed) return m;
+            return closeParen + ' <c><i>' + trimmed + '</i></c> ';
+        });
+    }).replace(/<\/?eu>/gi, '');
+    // 2. Supprimer TOUTES les balises de lignes supplémentaires [ll:*] et crochets
+    gabc = gabc.replace(/\[[ou]?ll:[^\]]*\]/ig, '');
+    gabc = gabc.replace(/\[(?:cs|alt|nobar)[^\]]*\]/ig, '');
+    // 3. Normaliser \Vbar, \Rbar, <sp>...</sp>
+    gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) {
+        return b.toUpperCase() + '/.';
+    }).replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) {
+        return b.toUpperCase() + '/.';
+    });
+    // 4. Nettoyer les suffixes de numérotation .0, .1
+    gabc = gabc.replace(/\.([0-9]+)(?=\))/g, '');
+    return gabc;
+}
+window.sanitizeGabc = sanitizeGabc;
+
 function preprocessGabcForExsurge(gabc, options) {
     if (!gabc || typeof gabc !== 'string') return gabc;
     options = options || {};
@@ -5223,10 +5531,20 @@ function preprocessGabcForExsurge(gabc, options) {
         return p1 + '<c><i>' + p2 + '</i></c>';
     });
 
-    // Match section annotations like <i>Tractus</i>, <i>Graduale</i>, <i>Canticum</i>, <i>Post Septuagesimam</i>, <i>Sequentia</i>
-    gabc = gabc.replace(/(^|\s|\))<i>\s*(Tractus|Graduale|Canticum|Post Septuagesimam|Sequentia|Offertorium|Communio|Introitus)\s*<\/i>/gi, function(m, p1, p2) {
+    // Match section annotations like <i>Tractus</i>, <i>Graduale</i>, <i>Canticum</i>, <i>Post Septuagesimam</i>, <i>Sequentia</i>, <i>Ant.</i>, <i>Glória Patri</i>, etc.
+    gabc = gabc.replace(/(^|\s|\))<i>\s*(Tractus|Graduale|Canticum|Post Septuagesimam|Sequentia|Offertorium|Communio|Introitus|Ant\.?|Antiphona|Glória Patri|Gloria Patri|Et repetitur)\s*<\/i>/gi, function(m, p1, p2) {
         return p1 + '<c><i>' + p2 + '</i></c>';
     });
+
+    // Ensure line break (z) after Ant. (antiphon indication / repetition)
+    var antLineBreakRegex = /(^|[\s\);:])(<(?:c><i>|i>)(?:(?:Et\s+)?repetitur\s+)?(?:Ant\.?|Antiphona)<\/(?:i><\/c>|i>)|Ant\.)(?:\(\))?(?:\s*\((?:z[0-9]?|Z)\))?/gi;
+    gabc = gabc.replace(antLineBreakRegex, function(match, p1, p2) {
+        var sep = (p1 && !p1.endsWith(' ')) ? ' ' : '';
+        return p1 + sep + p2 + '() (z)';
+    });
+
+    // Normalize any Gregorio z0 into Exsurge line break (z)
+    gabc = gabc.replace(/\(z0\)/g, '(z)');
 
     // 5. Episemata fixes and alt text formatting
     gabc = gabc.replace(/\\emph{([^(}]+)\}/g, '<c><i>$1</i></c>');
@@ -5236,6 +5554,40 @@ function preprocessGabcForExsurge(gabc, options) {
     // 6. Make standalone asterisks (*, **, {*}) and daggers (†) rubric colored
     // Handles *(,), *(;), *(:), *(::), *(), {*}, †
     gabc = gabc.replace(/(^|[\s\)])(\*+|\{\*+\}|[†\+])(?=\s*[\(\,\;\:\s]|$)/g, '$1<c>$2</c>');
+
+    // 7. Make "E u o u a e" / "Eouae" / <eu>...</eu> rubric colored
+    // 7a. <eu>...</eu> tag
+    gabc = gabc.replace(/<eu>([\s\S]*?)<\/eu>/gi, function(match, inner) {
+        return inner.replace(/([^\s()]+)(\s*\([^)]*\))?/g, function(m, syl, notes) {
+            return '<c><i>' + syl + '</i></c>' + (notes || '');
+        });
+    });
+
+    // 7b. 6-syllable sequence: E(...) u(...) o(...) u(...) a(...) e.(...)
+    var ePattern6 = /(^|[\s\);:])(?:<i>)?([Ee])(\([^)]*\))[\s\-]+(?:<i>)?([UuVv])(\([^)]*\))[\s\-]+(?:<i>)?([Oo])(\([^)]*\))[\s\-]+(?:<i>)?([UuVv])(\([^)]*\))[\s\-]+(?:<i>)?([Aa])(\([^)]*\))[\s\-]+(?:<i>)?([Ee]\.?)(\([^)]*\))?(?:<\/i>)?(?=\s*[\(;:]|$)/g;
+    gabc = gabc.replace(ePattern6, function(m, pre, s1, n1, s2, n2, s3, n3, s4, n4, s5, n5, s6, n6) {
+        return pre + '<c><i>' + s1 + '</i></c>' + n1 + ' ' +
+               '<c><i>' + s2 + '</i></c>' + n2 + ' ' +
+               '<c><i>' + s3 + '</i></c>' + n3 + ' ' +
+               '<c><i>' + s4 + '</i></c>' + n4 + ' ' +
+               '<c><i>' + s5 + '</i></c>' + n5 + ' ' +
+               '<c><i>' + s6 + '</i></c>' + (n6 || '');
+    });
+
+    // 7c. 5-syllable sequence: E(...) o(...) u(...) a(...) e.(...) or E(...) u(...) o(...) a(...) e.(...)
+    var ePattern5 = /(^|[\s\);:])(?:<i>)?([Ee])(\([^)]*\))[\s\-]+(?:<i>)?([OoUuVv])(\([^)]*\))[\s\-]+(?:<i>)?([UuVvOo])(\([^)]*\))[\s\-]+(?:<i>)?([Aa])(\([^)]*\))[\s\-]+(?:<i>)?([Ee]\.?)(\([^)]*\))?(?:<\/i>)?(?=\s*[\(;:]|$)/g;
+    gabc = gabc.replace(ePattern5, function(m, pre, s1, n1, s2, n2, s3, n3, s4, n4, s5, n5) {
+        return pre + '<c><i>' + s1 + '</i></c>' + n1 + ' ' +
+               '<c><i>' + s2 + '</i></c>' + n2 + ' ' +
+               '<c><i>' + s3 + '</i></c>' + n3 + ' ' +
+               '<c><i>' + s4 + '</i></c>' + n4 + ' ' +
+               '<c><i>' + s5 + '</i></c>' + (n5 || '');
+    });
+
+    // 7d. Word forms: Eouae, Euouae, Evovae
+    gabc = gabc.replace(/(^|[\s\);:])(?:<i>)?(E[ouvae]{3,5}\.?)(?:<\/i>)?(?=\s*[\(;:]|$)/gi, function(m, pre, word) {
+        return pre + '<c><i>' + word + '</i></c>';
+    });
 
     return gabc;
 }
@@ -6614,6 +6966,23 @@ function initDoPlayer() {
         switchToChantCard($card, false);
     });
 
+    // Delegated click on verses fallback lines or container to open player
+    $('#do-content-stream').off('click', '.do-verses-fallback-card, .do-verses-line').on('click', '.do-verses-fallback-card, .do-verses-line', function(e) {
+        var $container = $(this).closest('.do-verses-score-container');
+        var $versesCard = $container.find('.do-chant-card');
+        if ($versesCard.length && window.switchToChantCard) {
+            triggerHapticFeedback('light');
+            switchToChantCard($versesCard, false);
+        } else {
+            var partKey = $container.data('part-key');
+            var $parentCard = $('.do-chant-card-wrapper[data-part-key="' + partKey + '"] .do-chant-card');
+            if ($parentCard.length && window.switchToChantCard) {
+                triggerHapticFeedback('light');
+                switchToChantCard($parentCard, false);
+            }
+        }
+    });
+
     // Keyboard shortcuts: Escape to close, Space for Play/Pause, PageUp/PageDown or Alt+Arrows for Partition switching
     $(document).off('keydown.doplayer').on('keydown.doplayer', function(e) {
         if ($(e.target).is('input, select, textarea, [contenteditable="true"]')) return;
@@ -6874,6 +7243,63 @@ function initUserScrollTracker() {
     updateHeaderScrollState();
 }
 
+function updateHeroImageState() {
+    var hasHeroImage = !!document.querySelector('.do-home-saint-hero:not(.do-hero-no-image)');
+    if (document.body) {
+        document.body.classList.toggle('has-hero-image', hasHeroImage);
+    }
+    var headerEl = document.querySelector('.do-top-header');
+    if (headerEl) {
+        headerEl.classList.toggle('has-hero-image', hasHeroImage);
+    }
+}
+
+var _headerLoadingStartTime = Date.now();
+var _headerLoadingTimer = null;
+var _headerLoadedTimer = null;
+var _hasCompletedFirstHeaderLoad = false;
+
+function setHeaderLoading(isLoading) {
+    var $header = $('.do-top-header');
+    if (!$header.length) return;
+
+    if (isLoading) {
+        if (_headerLoadedTimer) {
+            clearTimeout(_headerLoadedTimer);
+            _headerLoadedTimer = null;
+        }
+        if (_headerLoadingTimer) {
+            clearTimeout(_headerLoadingTimer);
+            _headerLoadingTimer = null;
+        }
+        _headerLoadingStartTime = Date.now();
+        $header.addClass('is-header-loading').removeClass('is-header-loaded');
+        $('body').addClass('header-is-loading');
+    } else {
+        var elapsed = Date.now() - _headerLoadingStartTime;
+        // Premier chargement (au démarrage ou refresh) : 750ms pour laisser l'onde shimmer se déployer nettement
+        // Navigations suivantes (changement d'heure/date) : 350ms pour une transition fluide sans clignement
+        var requiredDuration = _hasCompletedFirstHeaderLoad ? 350 : 750;
+        var minWait = Math.max(0, requiredDuration - elapsed);
+
+        if (_headerLoadingTimer) clearTimeout(_headerLoadingTimer);
+        _headerLoadingTimer = setTimeout(function() {
+            _hasCompletedFirstHeaderLoad = true;
+            $header.removeClass('is-header-loading').addClass('is-header-loaded');
+            $('body').removeClass('header-is-loading');
+
+            if (_headerLoadedTimer) clearTimeout(_headerLoadedTimer);
+            _headerLoadedTimer = setTimeout(function() {
+                $header.removeClass('is-header-loaded');
+                if (typeof checkHeaderTitleMarquee === 'function') {
+                    checkHeaderTitleMarquee();
+                }
+            }, 450);
+        }, minWait);
+    }
+}
+window.setHeaderLoading = setHeaderLoading;
+
 function updateHeaderScrollState() {
     var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
     var isScrolled = scrollY > 10;
@@ -6884,6 +7310,7 @@ function updateHeaderScrollState() {
     if (document.body) {
         document.body.classList.toggle('is-header-scrolled', isScrolled);
     }
+    updateHeroImageState();
 }
 
 function updateDoPlayerUI($card, score, isPlaying, startNote) {
@@ -8061,7 +8488,7 @@ function renderSingleChantScore($wrapper, force, onComplete) {
     if (!force && $wrapper.data('is-visible') === false) {
         return;
     }
-    if ($wrapper.data('is-rendering')) return;
+    if (!force && $wrapper.data('is-rendering')) return;
 
     var $card = $wrapper.find('.do-chant-card');
     if (!$card.length) {
@@ -8084,33 +8511,33 @@ function renderSingleChantScore($wrapper, force, onComplete) {
 
     async function loadGabcAndRender() {
         try {
-            var cachedGabc = $wrapper.data('cached-gabc') || GABC_LOCAL_CACHE[chantId];
-            if (!cachedGabc && window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
+            var rawGabc = $wrapper.data('raw-gabc') || GABC_LOCAL_CACHE[chantId];
+            if (!rawGabc && window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
                 try {
-                    cachedGabc = await window.gregorianDB.getGabc(chantId);
+                    rawGabc = await window.gregorianDB.getGabc(chantId);
                 } catch(e) {}
             }
-            if (!cachedGabc) {
+            if (!rawGabc) {
                 try {
-                    cachedGabc = await $.ajax({
+                    rawGabc = await $.ajax({
                         url: 'gabc/' + chantId + '.gabc',
                         dataType: 'text',
                         cache: true
                     });
                 } catch(e) {}
             }
-            if (!cachedGabc) {
+            if (!rawGabc) {
                 try {
-                    cachedGabc = await $.ajax({
+                    rawGabc = await $.ajax({
                         url: 'gregobase/' + chantId + '.gabc',
                         dataType: 'text',
                         cache: true
                     });
                 } catch(e) {}
             }
-            if (!cachedGabc) {
+            if (!rawGabc) {
                 try {
-                    cachedGabc = await $.ajax({
+                    rawGabc = await $.ajax({
                         url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/' + encodeURIComponent(chantId) + '.gabc',
                         dataType: 'text',
                         cache: true
@@ -8124,25 +8551,27 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                 return;
             }
 
-            if (!cachedGabc) {
+            if (!rawGabc) {
                 $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Partition #' + escHtml(chantId) + ' non disponible.</div>');
                 $wrapper.data('is-rendering', false);
                 return;
             }
 
-            $wrapper.data('cached-gabc', cachedGabc);
-            GABC_LOCAL_CACHE[chantId] = cachedGabc;
-            updateSynthCardThumbnail(chantId, cachedGabc);
+            $wrapper.data('raw-gabc', rawGabc);
+            GABC_LOCAL_CACHE[chantId] = rawGabc;
 
-            var header = parseGabcHeader(cachedGabc);
+            var cachedGabc = rawGabc;
+            var header = parseGabcHeader(rawGabc);
             var title = header.name || defaultName;
             var officePart = header['office-part'] || defaultPart;
             var mode = header.mode || '';
 
             var partKey = $wrapper.data('part-key') || '';
             var isPsalmToned = ($wrapper.data('is-psalm-toned') === true || $wrapper.attr('data-is-psalm-toned') === 'true' || !!(partKey && (doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey]))));
+            var isGloriaPatriFull = ($wrapper.data('is-full-gloria') === true || $wrapper.attr('data-is-full-gloria') === 'true' || !!(partKey && doState.gloriaPatriParts && doState.gloriaPatriParts[partKey]));
+
             if (isPsalmToned) {
-                var ptScoreGabc = buildPsalmToneGabcFromSource(cachedGabc, title, officePart, mode, partKey);
+                var ptScoreGabc = buildPsalmToneGabcFromSource(rawGabc, title, officePart, mode, partKey, isGloriaPatriFull !== false);
                 if (ptScoreGabc) {
                     cachedGabc = ptScoreGabc;
                     header = parseGabcHeader(cachedGabc);
@@ -8150,7 +8579,21 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                     officePart = header['office-part'] || officePart;
                     mode = header.mode || mode;
                 }
+            } else if (isGloriaPatriFull && (partKey === 'introitus' || partKey === 'incipit' || /introitus|asperges/i.test(officePart))) {
+                var fullGpGabc = (partKey === 'incipit' || /asperges/i.test(officePart))
+                    ? getAspergesVerseAndGloriaPatriGabc(rawGabc, mode)
+                    : getFullGloriaPatriGabc(rawGabc, mode);
+                if (fullGpGabc) {
+                    cachedGabc = fullGpGabc;
+                    header = parseGabcHeader(cachedGabc);
+                    title = header.name || title;
+                    officePart = header['office-part'] || officePart;
+                    mode = header.mode || mode;
+                }
             }
+
+            $wrapper.data('cached-gabc', cachedGabc);
+            updateSynthCardThumbnail(chantId, cachedGabc);
 
             $card.data('chant-part', officePart);
             $card.data('chant-title', title);
@@ -8176,6 +8619,10 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             ctxt.setRubricColor(accentColor);
             ctxt.specialCharColor = accentColor;
             ctxt.rubricColor = accentColor;
+            ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
+            ctxt.specialCharMap = { '℣': '℣', '℟': '℟', 'V': 'V', 'R': 'R', '+': '+', '*': '*' };
             ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
             ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
             ctxt.annotationTextFont = ctxt.lyricTextFont;
@@ -8201,25 +8648,20 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             }
             ctxt.showNabc = !!(hasNabc && showNabc);
 
-            var processedGabc = preprocessGabcForExsurge(cachedGabc);
+            var cleanGabc = sanitizeGabc(cachedGabc);
+            var processedGabc = preprocessGabcForExsurge(cleanGabc);
             var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
             var score = new exsurge.ChantScore(ctxt, mappings, true);
 
             // Setup Exsurge annotations (propers.html Solesmes style above drop cap)
             var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
             var partAbbrev = {
-                verse: 'V/.',
-                tractus: 'Tract.',
-                offertorium: 'Offert.',
-                introitus: 'Intr.',
-                graduale: 'Grad.',
-                communio: 'Comm.',
-                sequentia: 'Seq.',
-                hymnus: 'Hymn.',
-                antiphona: 'Ant.',
-                responsorium: 'Resp.',
-                canticum: 'Cant.',
-                alleluia: 'Allel.'
+                verse: 'V/.', tractus: 'TRACT.', offertorium: 'OFFERT.',
+                introitus: 'INTR.', graduale: 'GRAD.', communio: 'COMM.',
+                sequentia: 'SEQ.', hymnus: 'HYMN.', antiphona: 'ANT.',
+                responsorium: 'RESP.', canticum: 'CANT.', alleluia: 'ALLEL.',
+                kyrie: 'KYRIE', gloria: 'GLORIA', credo: 'CREDO',
+                sanctus: 'SANCTUS', agnus: 'AGNUS'
             };
 
             var topAnnotation = '';
@@ -8237,7 +8679,7 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             } else {
                 var rawPart = (officePart || header['office-part'] || '').toLowerCase();
                 var abbrev = partAbbrev[rawPart] || officePart || '';
-                if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'Tract.' || abbrev === 'Seq.') ? abbrev : abbrev.toUpperCase();
+                if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'TRACT.' || abbrev === 'SEQ.') ? abbrev : abbrev.toUpperCase();
                 var rawMode = header.mode || mode;
                 if (rawMode) {
                     var modeNum = parseInt(rawMode, 10);
@@ -8358,12 +8800,19 @@ function getOptimalChantWidth($card) {
 
 function relayoutAllChantScores() {
     if (!doState.includeGregorian && doState.hora !== 'gregorian_chant') return;
-    $('.do-chant-card').each(function() {
+    $('.do-chant-card:visible').each(function() {
         var $card = $(this);
         var score = $card.data('chant-score');
         var ctxt = $card.data('chant-ctxt');
         var data = $card.data('chant-gabc');
         if (score && ctxt && data) {
+            var accentColor = (doState && doState.settings && doState.settings.color) ? doState.settings.color : '#c96b63';
+            ctxt.setRubricColor(accentColor);
+            ctxt.specialCharColor = accentColor;
+            ctxt.rubricColor = accentColor;
+            ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
             var newWidth = getOptimalChantWidth($card);
             if (Math.abs((ctxt.width || 0) - newWidth) > 6) {
                 ctxt.width = newWidth;
@@ -8831,6 +9280,8 @@ function openMassPartPicker(partKey) {
     var $backdrop = $('#massPartPickerBackdrop');
     var $container = $('#partPickerResultsContainer');
 
+    $drawer.removeClass('is-expanded'); // S'assure que le tiroir s'ouvre toujours en mode aperçu (1,5 cartes)
+
     $('.do-card-title.do-part-picker-trigger').removeClass('is-open');
     $('.do-card-title.do-part-picker-trigger[data-part-key="' + partKey + '"]').addClass('is-open');
 
@@ -8846,6 +9297,15 @@ function openMassPartPicker(partKey) {
     var isPtActive = !!(doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey]));
     $ptBtn.toggleClass('is-active', isPtActive);
 
+    var $gpBtn = $('#partPickerGloriaPatriBtn');
+    if (partKey === 'introitus' || partKey === 'incipit') {
+        $gpBtn.removeClass('hidden');
+        var isGpActive = !!(doState.gloriaPatriParts && doState.gloriaPatriParts[partKey]);
+        $gpBtn.toggleClass('is-active', isGpActive);
+    } else {
+        $gpBtn.addClass('hidden');
+    }
+
     var $kyrWrap = $('#partPickerKyrialeSelectWrap');
     var isKyrialePart = ['kyrie', 'gloria', 'praefatio', 'communion_prep', 'conclusio'].indexOf(partKey) !== -1;
     if (isKyrialePart) {
@@ -8859,31 +9319,32 @@ function openMassPartPicker(partKey) {
     populateMassPartPickerItems(partKey, '');
 
     $backdrop.removeClass('hidden');
+    $('html, body').addClass('picker-drawer-open');
     requestAnimationFrame(function() {
         $backdrop.addClass('is-visible');
         $drawer.addClass('is-visible');
+        updatePartPickerPeekHeight();
+        syncPartPickerOffset();
     });
 
     setTimeout(function() {
-        if ($drawer.hasClass('is-visible') && _activePickerPartKey === partKey) {
-            $container.find('.gregorian-card').each(function() {
-                var $c = $(this);
-                var chantId = $c.data('chant-id');
-                var $preview = $c.find('.gregorian-score-container');
-                if (!$preview.hasClass('is-rendered') && chantId) {
-                    renderDrawerItemScore($c);
-                }
-            });
-        }
-    }, 320);
+        updatePartPickerPeekHeight();
+        syncPartPickerOffset();
+    }, 150);
 }
 
 function closeMassPartPicker() {
     var $drawer = $('#massPartPickerDrawer');
     var $backdrop = $('#massPartPickerBackdrop');
     $('.do-card-title.do-part-picker-trigger').removeClass('is-open');
-    $drawer.removeClass('is-visible');
+    $drawer.removeClass('is-visible is-expanded');
     $backdrop.removeClass('is-visible');
+    $('html, body').removeClass('picker-drawer-open');
+    document.documentElement.style.setProperty('--picker-drag-y', '0px');
+    document.documentElement.style.removeProperty('--part-picker-offset');
+    if (_partPickerObserver) {
+        _partPickerObserver.disconnect();
+    }
     setTimeout(function() {
         if (!$backdrop.hasClass('is-visible')) {
             $backdrop.addClass('hidden');
@@ -8891,6 +9352,65 @@ function closeMassPartPicker() {
     }, 280);
     _activePickerPartKey = null;
 }
+
+function updatePartPickerPeekHeight() {
+    var drawer = document.getElementById('massPartPickerDrawer');
+    var container = document.getElementById('partPickerResultsContainer');
+    if (!drawer || !container) return;
+
+    var isGrid = container.classList.contains('is-grid');
+    if (!isGrid) {
+        var firstListCard = container.querySelector('.gregorian-card');
+        var listCardH = firstListCard ? firstListCard.offsetHeight : 52;
+        var listPeekH = Math.round((listCardH * 4) + 16);
+        drawer.style.setProperty('--picker-results-peek-h', listPeekH + 'px');
+        return;
+    }
+
+    var card = container.querySelector('.gregorian-card');
+    var cardH = 0;
+    if (card) {
+        cardH = card.offsetHeight;
+    }
+
+    var winW = window.innerWidth;
+    var gap = 12;
+    if (winW >= 1600) gap = 18;
+    else if (winW >= 1280) gap = 16;
+    else if (winW >= 900) gap = 16;
+    else if (winW >= 600) gap = 14;
+
+    if (!cardH || cardH < 50) {
+        if (winW <= 600) {
+            var drawerW = drawer.clientWidth || winW;
+            cardH = (drawerW - 32 - 12) / 2;
+        } else if (winW <= 900) {
+            cardH = 200;
+        } else {
+            cardH = 215;
+        }
+    }
+
+    // Exactement 1,5 cartes visibles sans marge en bas :
+    // 1 rangée entière + gap + 50% de la 2e rangée + 6px padding-top
+    var peekH = Math.round(cardH + gap + (cardH * 0.5) + 6);
+    drawer.style.setProperty('--picker-results-peek-h', peekH + 'px');
+}
+window.updatePartPickerPeekHeight = updatePartPickerPeekHeight;
+
+function syncPartPickerOffset() {
+    var drawer = document.getElementById('massPartPickerDrawer');
+    if (!drawer || !drawer.classList.contains('is-visible')) return;
+    var visibleH = drawer.offsetHeight;
+    if (visibleH > 60) {
+        document.documentElement.style.setProperty('--part-picker-offset', visibleH + 'px');
+    }
+}
+window.syncPartPickerOffset = syncPartPickerOffset;
+window.addEventListener('resize', function() {
+    updatePartPickerPeekHeight();
+    syncPartPickerOffset();
+});
 
 function populatePickerKyrialeSelect() {
     var $sel = $('#partPickerKyrialeSelect');
@@ -8979,13 +9499,12 @@ function populateMassPartPickerItems(partKey, query) {
             textExtract = rawIncipit;
         }
 
-        // Canonical .gregorian-card structure matching Gregorian Search exactly
+        // Canonical .gregorian-card structure matching Gregorian Search exactly (no pastille actif)
         html += 
             '<div class="gregorian-card' + (isActive ? ' is-active' : '') + '" data-chant-id="' + escHtml(item.id) + '" data-chant-name="' + escHtml(item.name) + '" data-part-key="' + escHtml(partKey) + '">' +
                 '<div class="gregorian-card-header">' +
                     '<div class="gregorian-card-titles">' +
                         '<div class="gregorian-card-incipit" title="' + escHtml(rawIncipit) + '">' +
-                            (isActive ? '<span class="do-active-badge-tag"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Actif</span> ' : '') +
                             escHtml(rawIncipit) +
                         '</div>' +
                         (source ? '<div class="gregorian-card-source" title="' + escHtml(source) + '">' + escHtml(source) + '</div>' : '') +
@@ -9019,16 +9538,56 @@ function populateMassPartPickerItems(partKey, query) {
     });
 
     $container.html(html);
+    updatePartPickerPeekHeight();
+    requestAnimationFrame(function() {
+        updatePartPickerPeekHeight();
+        syncPartPickerOffset();
+    });
 
     if (isGrid) {
+        initPartPickerObserver();
         $container.find('.gregorian-card[data-chant-id]').each(function() {
-            renderDrawerItemScore($(this));
+            var $c = $(this);
+            if (!$c.find('.gregorian-score-container').hasClass('is-rendered')) {
+                if (_partPickerObserver) {
+                    _partPickerObserver.observe(this);
+                } else {
+                    renderDrawerItemScore($c);
+                }
+            }
         });
     }
 }
 
+var _partPickerObserver = null;
+function initPartPickerObserver() {
+    if (_partPickerObserver) {
+        _partPickerObserver.disconnect();
+    }
+    if (typeof IntersectionObserver === 'undefined') {
+        return;
+    }
+    var scrollContainer = document.getElementById('partPickerResultsContainer');
+    _partPickerObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            var target = entry.target;
+            var $target = $(target);
+            if (entry.isIntersecting) {
+                $target.data('is-visible', true);
+                renderDrawerItemScore($target);
+            } else {
+                $target.data('is-visible', false);
+            }
+        });
+    }, {
+        root: scrollContainer || null,
+        rootMargin: '120px 0px',
+        threshold: 0.01
+    });
+}
 
 function renderDrawerItemScore($card) {
+    if (_partPickerViewMode === 'list') return;
     var chantId = $card.data('chant-id');
     var $container = $card.find('.gregorian-score-container');
     if (!$container.length || $container.hasClass('is-rendered') || $card.data('is-rendering')) return;
@@ -9057,6 +9616,11 @@ function renderDrawerItemScore($card) {
             }
             GABC_LOCAL_CACHE[chantId] = cachedGabc;
 
+            if ($card.data('is-visible') === false) {
+                $card.data('is-rendering', false);
+                return;
+            }
+
             if (typeof exsurge === 'undefined') {
                 $container.removeClass('gregorian-skeleton');
                 $card.data('is-rendering', false);
@@ -9067,35 +9631,110 @@ function renderDrawerItemScore($card) {
             var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
             var isDark = (curTheme !== 'light');
             var accentColor = (doState && doState.settings && doState.settings.color) ? doState.settings.color : '#c96b63';
-            ctxt.textColor = isDark ? '#ffffff' : '#111317';
-            ctxt.noteColor = isDark ? '#ffffff' : '#111317';
-            ctxt.neumeLineColor = isDark ? '#ffffff' : '#111317';
-            ctxt.dividerLineColor = isDark ? '#ffffff' : '#111317';
-            ctxt.staffLineColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)';
-            ctxt.setFont("'Crimson Text', serif", 15);
+            var isCardActive = $card.hasClass('is-active');
+            var itemNoteColor = isCardActive ? accentColor : (isDark ? '#ffffff' : '#111317');
+
+            ctxt.textColor = itemNoteColor;
+            ctxt.noteColor = itemNoteColor;
+            ctxt.neumeLineColor = itemNoteColor;
+            ctxt.dividerLineColor = itemNoteColor;
+            ctxt.staffLineColor = isCardActive ? accentColor : (isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(0, 0, 0, 0.45)');
+
+            // Mode vignette identique à la recherche grégorienne : zoom accru et neumes bien grands
+            ctxt.setGlyphScaling(1 / 11);
+            ctxt.setFont("'Crimson Text', 'Libre Baskerville', serif", 17.5);
             ctxt.setRubricColor(accentColor);
             ctxt.specialCharColor = accentColor;
             ctxt.rubricColor = accentColor;
-            ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
+            ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
+            ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
+            ctxt.specialCharMap = { '℣': '℣', '℟': '℟', 'V': 'V', 'R': 'R', '+': '+', '*': '*' };
+            ctxt.lyricTextColor = itemNoteColor;
+            ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
+            ctxt.annotationTextFont = ctxt.lyricTextFont;
 
-            var processedGabc = preprocessGabcForExsurge(cachedGabc);
+            if (ctxt.textStyles) {
+                Object.keys(ctxt.textStyles).forEach(function(k) {
+                    if (ctxt.textStyles[k]) {
+                        ctxt.textStyles[k].color = itemNoteColor;
+                        ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', serif";
+                    }
+                });
+            }
+
+            var cleanGabc = sanitizeGabc(cachedGabc);
+            var processedGabc = preprocessGabcForExsurge(cleanGabc);
             var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
             var score = new exsurge.ChantScore(ctxt, mappings, true);
-            var cardW = $card.width();
-            var width = Math.max(cardW > 0 ? (cardW - 24) : 220, 220);
+
+            var header = parseGabcHeader(cachedGabc);
+            var romanNumeral = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+            var partAbbrev = {
+                verse: 'V/.', tractus: 'TRACT.', offertorium: 'OFFERT.',
+                introitus: 'INTR.', graduale: 'GRAD.', communio: 'COMM.',
+                sequentia: 'SEQ.', hymnus: 'HYMN.', antiphona: 'ANT.',
+                responsorium: 'RESP.', canticum: 'CANT.', alleluia: 'ALLEL.',
+                kyrie: 'KYRIE', gloria: 'GLORIA', credo: 'CREDO',
+                sanctus: 'SANCTUS', agnus: 'AGNUS'
+            };
+            var topAnnotation = '';
+            var bottomAnnotation = '';
+            if (header.annotations && header.annotations.length >= 2) {
+                topAnnotation = header.annotations[0];
+                bottomAnnotation = header.annotations[1];
+            } else if (header.annotations && header.annotations.length === 1) {
+                topAnnotation = header.annotations[0];
+                if (header.mode) {
+                    var mInt = parseInt(header.mode, 10);
+                    bottomAnnotation = (mInt >= 1 && mInt <= 8) ? romanNumeral[mInt] : header.mode;
+                }
+            } else {
+                var rawPart = (header['office-part'] || '').toLowerCase();
+                var abbrev = partAbbrev[rawPart] || header['office-part'] || '';
+                if (abbrev) topAnnotation = (abbrev === 'V/.' || abbrev === 'TRACT.' || abbrev === 'SEQ.') ? abbrev : abbrev.toUpperCase();
+                var rawMode = header.mode;
+                if (rawMode) {
+                    var modeNum = parseInt(rawMode, 10);
+                    bottomAnnotation = (modeNum >= 1 && modeNum <= 8) ? romanNumeral[modeNum] : rawMode;
+                }
+            }
+            if (topAnnotation && bottomAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%', '%' + bottomAnnotation + '%');
+            } else if (topAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + topAnnotation + '%');
+            } else if (bottomAnnotation) {
+                score.annotation = new exsurge.Annotations(ctxt, '%' + bottomAnnotation + '%');
+            }
+
+            var width = 260;
             ctxt.width = width;
             score.performLayout(ctxt);
             score.layoutChantLines(ctxt, width, function() {
+                if (score.lines && score.lines.length >= 2) {
+                    var line0 = score.lines[0];
+                    var line1 = score.lines[1];
+                    delete line1.custos;
+                    score.lines = [line0, line1];
+                    score.bounds.x = 0;
+                    score.bounds.y = 0;
+                    score.bounds.width = Math.max(line0.bounds.width, line1.bounds.width);
+                    score.bounds.height = line1.bounds.y + line1.bounds.height + 4;
+                }
                 var svg = score.createSvgNode(ctxt);
                 if (svg) {
                     svg.setAttribute('width', '100%');
                     svg.style.width = '100%';
                     svg.style.height = 'auto';
-                    var noteFill = isDark ? '#ffffff' : '#111317';
+                    var noteFill = isCardActive ? accentColor : (isDark ? '#ffffff' : '#111317');
                     svg.setAttribute('fill', noteFill);
                     svg.style.fill = noteFill;
-                    $container.removeClass('gregorian-skeleton').addClass('is-rendered').empty().append(svg);
+                    $container.removeClass('gregorian-skeleton').addClass('is-rendered').find('.gregorian-score-loader').remove();
+                    $container.empty().append(svg);
                     $card.data('chant-score', score);
+                    if (_partPickerObserver) {
+                        _partPickerObserver.unobserve($card[0]);
+                    }
                 }
                 $card.data('is-rendering', false);
             });
@@ -9119,7 +9758,9 @@ function selectMassPart(partKey, chantId, chantName) {
         delete doState.psalmTonedParts[partKey];
     }
     $('#partPickerPsalmToneBtn').removeClass('is-active');
+    $('#partPickerGloriaPatriBtn').removeClass('is-active');
     $('.do-card-pt-btn[data-part-key="' + partKey + '"]').removeClass('is-active');
+    $('.do-card-gp-btn[data-part-key="' + partKey + '"]').removeClass('is-active');
 
     if (partKey === 'credo') {
         if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.credo) {
@@ -9166,6 +9807,68 @@ function selectMassPart(partKey, chantId, chantName) {
     if (window.OremusRouter) {
         window.OremusRouter.syncUrl({ push: true });
     }
+}
+
+function swapDoFaClef(gabc, clef) {
+    if (!clef) return { clefShift: 0 };
+    var c1 = parseInt(clef.slice(-1), 10),
+        c = c1 * 2 + 1,
+        faTi = c + 3 + 7,
+        regexGabcTe = /x/i,
+        gabcFaTi = "",
+        charCodeForA = 'a'.charCodeAt(0);
+    while (faTi >= 0) {
+        if (faTi < 13) gabcFaTi += String.fromCharCode(charCodeForA + faTi);
+        faTi -= 7;
+    }
+    var hasTe = regexGabcTe.test(gabc),
+        regex = new RegExp("[" + gabcFaTi + "]", 'i'),
+        hasFaTi = regex.test(gabc);
+    if (hasFaTi || hasTe) {
+        if (clef[0] === 'f') {
+            c = c1 - 1.5;
+        } else {
+            c = c1 + 1.5;
+        }
+        if (c < 1) c += 3.5;
+        if (c >= 4.5) c -= 3.5;
+        var clefShift = c - c1;
+        return {
+            clefShift: clefShift,
+            removeAccidentals: hasTe && ((clef[0] === 'f') ? 0 : -0.5)
+        };
+    }
+    return { clefShift: 0 };
+}
+
+function shiftGabcForClefChange(gabc, newClef, clef) {
+    if (!clef || clef.length < 2 || !newClef || newClef.length < 2 || typeof shiftGabc !== 'function') return gabc;
+    var baseClefI = parseInt(newClef.slice(-1), 10);
+    var clefI = parseFloat(clef.slice(-1), 10);
+    var joinedGabc = gabc.join(' ');
+    if (newClef[0] === clef[0]) {
+        if (clefI === 4 && baseClefI === 2) {
+            var swap = swapDoFaClef(joinedGabc, clef);
+            if (swap.clefShift === 0) {
+                clefI = 2.5;
+            } else if (typeof swap.removeAccidentals === 'number') {
+                clefI = 2.5 + swap.removeAccidentals;
+                gabc = gabc.map(function(g) { return g.replace(/[a-m]x/g, ''); });
+            } else if (swapDoFaClef(joinedGabc, clef.slice(0, -1) + '2').clefShift === 0) {
+                clefI = 2;
+            }
+        }
+    } else {
+        clefI += swapDoFaClef(joinedGabc, clef).clefShift;
+    }
+    var diff = (baseClefI - clefI) * 2;
+    var pitches = [].concat.apply([], gabc.map(function(g) { return (g.match(/[a-m]/gi) || []); })).map(function(letter) { return parseInt(letter, 23) - 10; });
+    if (!pitches.length) return gabc;
+    var maxPitch = diff + Math.max.apply(null, pitches);
+    var minPitch = diff + Math.min.apply(null, pitches);
+    if (minPitch < 0) diff += 7;
+    if (maxPitch > 12) diff -= 7;
+    return gabc.map(function(g) { return shiftGabc(g, diff); });
 }
 
 function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
@@ -9216,8 +9919,8 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
 
     var formatObj = (typeof bi_formats !== 'undefined' && bi_formats.gabc) ? bi_formats.gabc : undefined;
 
-    var gabc = "name: Verses ad libitum;\n" +
-               "office-part: Verses;\n" +
+    var gabc = "name: Versus ad libitum;\n" +
+               "office-part: Versus;\n" +
                "mode: " + modeNum + ";\n" +
                "initial-style: 0;\n" +
                "%%\n(" + clefToUse + ") ";
@@ -9272,7 +9975,7 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
             }) : '';
 
             if (leftGabc || rightGabc) {
-                gabc += '<sp>V/</sp> ' + leftGabc + (rightGabc ? (' *(:) ' + rightGabc) : '') + ' (::) <i>Ant.</i>() (z0)\n';
+                gabc += '<sp>V/</sp> ' + leftGabc + (rightGabc ? (' *(:) ' + rightGabc) : '') + ' (::) <i>Ant.</i>() (z)\n';
                 versesAdded++;
             }
         } catch(err) {
@@ -9316,7 +10019,7 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
                 flexEqualsTenor: true,
                 lang: 'la'
             });
-            gabc += '<sp>V/</sp> ' + gp1 + ' *(:) ' + gp2a + ' (:) ' + gp2b + ' (::) <i>Ant.</i>() (z0)\n';
+            gabc += '<sp>V/</sp> ' + gp1 + ' *(:) ' + gp2a + ' (:) ' + gp2b + ' (::) <i>Ant.</i>() (z)\n';
         } catch(e) {
             console.warn('[DivinumOfficium] Error formatting Gloria Patri for verses:', e);
         }
@@ -9329,9 +10032,9 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
     return gabc;
 }
 
-function renderVersesAdLibitumScore($content, gabc, fallbackLines) {
+function renderVersesAdLibitumScore($content, gabc, fallbackLines, chantId, partKey, versesRef) {
     if (typeof exsurge === 'undefined') {
-        renderVersesTextFallback($content, fallbackLines);
+        renderVersesTextFallback($content, fallbackLines, chantId, partKey, versesRef);
         return;
     }
 
@@ -9351,6 +10054,10 @@ function renderVersesAdLibitumScore($content, gabc, fallbackLines) {
         ctxt.setRubricColor(accentColor);
         ctxt.specialCharColor = accentColor;
         ctxt.rubricColor = accentColor;
+        ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
+        ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
+        ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
+        ctxt.specialCharMap = { '℣': '℣', '℟': '℟', 'V': 'V', 'R': 'R', '+': '+', '*': '*' };
         ctxt.lyricTextColor = isDark ? '#ffffff' : '#111317';
         ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', serif";
 
@@ -9383,31 +10090,57 @@ function renderVersesAdLibitumScore($content, gabc, fallbackLines) {
                 svg.setAttribute('fill', noteFill);
                 svg.style.fill = noteFill;
 
-                var $wrap = $('<div class="do-chant-preview is-rendered"></div>').append(svg);
-                $content.empty().append($wrap).data('is-loaded', true);
+                var titleStr = versesRef ? ('Versus ad libitum (' + versesRef + ')') : 'Versus ad libitum';
+                var $card = $('<div class="do-chant-card do-verses-card is-rendered" data-part-key="' + escHtml(partKey || '') + '" data-chant-part="Versus ad libitum" data-chant-title="' + escHtml(titleStr) + '"></div>');
+                if (chantId) $card.attr('data-chant-id', chantId);
+                var $preview = $('<div class="do-chant-preview is-rendered"></div>').append(svg);
+                $card.append($preview);
+
+                $card.data('chant-score', score);
+                $card.data('chant-ctxt', ctxt);
+                $card.data('chant-gabc', processedGabc);
+                $card.data('chant-part', 'Versus ad libitum');
+                $card.data('chant-title', titleStr);
+                if (chantId) $card.data('chant-id', chantId);
+                $card.data('is-verses', true);
+
+                // Direct click on verses SVG element or surrounding score area
+                $(svg).on('click', function(e) {
+                    var nearest = findNearestChantElement(svg, e.pageX, e.pageY);
+                    if (nearest) {
+                        handleChantElementClick(nearest, e);
+                    } else {
+                        updateDoPlayerUI($card, score, false);
+                    }
+                });
+
+                $content.empty().append($card).data('is-loaded', true);
                 $content.data('verses-score', score);
 
                 var $container = $content.closest('.do-verses-score-container');
-                $container.css({ height: 'auto', overflow: 'visible' });
+                $container.addClass('is-open').css({ display: 'block', height: 'auto', overflow: 'visible' });
             } else {
-                renderVersesTextFallback($content, fallbackLines);
+                renderVersesTextFallback($content, fallbackLines, chantId, partKey, versesRef);
             }
         });
     } catch(err) {
         console.warn('[DivinumOfficium] Exsurge error rendering verses:', err);
-        renderVersesTextFallback($content, fallbackLines);
+        renderVersesTextFallback($content, fallbackLines, chantId, partKey, versesRef);
     }
 }
 
-function renderVersesTextFallback($content, lines) {
+function renderVersesTextFallback($content, lines, chantId, partKey, versesRef) {
     if (!lines || !lines.length) return;
     var html = lines.map(function(l, idx) {
         var clean = l.replace(/^\d+[a-z]*\.\s*/, '').trim();
         return '<div class="do-verses-line"><span class="do-verses-vnum">' + (idx + 1) + '.</span> ' + escHtml(clean) + '</div>';
     }).join('');
-    $content.html(html).data('is-loaded', true);
+    var titleStr = versesRef ? ('Versus ad libitum (' + versesRef + ')') : 'Versus ad libitum';
+    var $fallback = $('<div class="do-verses-fallback-card" data-part-key="' + escHtml(partKey || '') + '" data-chant-part="Versus ad libitum" data-chant-title="' + escHtml(titleStr) + '"></div>').html(html);
+    if (chantId) $fallback.attr('data-chant-id', chantId);
+    $content.empty().append($fallback).data('is-loaded', true);
     var $container = $content.closest('.do-verses-score-container');
-    $container.css({ height: 'auto', overflow: 'visible' });
+    $container.addClass('is-open').css({ display: 'block', height: 'auto', overflow: 'visible' });
 }
 
 function fetchPsalmTxtFallback(versesRef, callback) {
@@ -9504,9 +10237,9 @@ function loadAndRenderVersesAdLibitum($container, versesRef) {
         }
         var versesGabc = buildVersesAdLibitumGabc(lines, chantMode, chantClef, partKey);
         if (versesGabc) {
-            renderVersesAdLibitumScore($content, versesGabc, lines);
+            renderVersesAdLibitumScore($content, versesGabc, lines, chantId, partKey, versesRef);
         } else {
-            renderVersesTextFallback($content, lines);
+            renderVersesTextFallback($content, lines, chantId, partKey, versesRef);
         }
     }
 
@@ -9546,6 +10279,693 @@ function loadAndRenderVersesAdLibitum($container, versesRef) {
     fetchPsalmTxtFallback(versesRef, onLinesReady);
 }
 
+// =========================================================================
+// ---- High-Fidelity Psalm Tone Proper Generator (Matched to propers.html) ----
+// =========================================================================
+
+var reFullBarsWithNoPunctuation = /([^;:,.!?\s])\s*\*/g;
+var reBarsWithNoPunctuation = /([^;:,.!?\s])\s*[|*]/g;
+var reFullBars = /\s*\*\s*/g;
+var reFullBarsOrFullStops = /(?:([^\d\s])[:;.?!]?\s*\*|([^\d\s])[:;.?!]\s(?!\s*Amen))\s*/g;
+var reSplitFullBarsOrFullStops = /(?:(?:[:;.?!]\s*[*|]|\s*\*)|[:;.?!]\s*[*|]\s(?!\s*Amen))\s*/g;
+var reHalfBars = /\s*\|\s*/g;
+var reFullOrHalfBars = /\s*[*|]\s*/g;
+var reFullOrHalfBarsOrFullStops = /(?:([^\d\s][:;.?!]?)\s*[*|]|([^\d\s][:;.?!])\s(?!\s*Amen))\s*/g;
+var regexGabcClef = /\([^)]*([cf]b?[1-4])/;
+var regexGabcGloriaPatri = /Gl[oó]\([^)a-mA-M]*([a-m])[^)]*\)ri\([^)]+\)a\([^)]+\)\s+P[aá]\([^)]+\)tri\.?\([^)]+\)\s*\(::\)\s*(?:<eu>)?s?[aeæ]+\([^)]+\)\s*c?u\([^)]+\)\s*l?[oó]\([^)]+\)\s*r?um?\.?\([^)]+\)\s*[aá]\(([^)]+)\)\s*m?en?\.?(?:<\/eu>)?\(([^)]+)\)/i;
+var regexGabcGloriaPatriEtFilio = /Gl[oó]\([^)]+\)ri\([^)]+\)a\([^)]+\)\s+P[aá]\([^)]+\)tri[.,]?\([^)]+\)[^`]*\(::\)/i;
+
+function removeDiacritics(string) {
+    if (typeof string !== 'string') return '';
+    return string.replace(/á/g, 'a').replace(/é|ë/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/ý/g, 'y').replace(/æ|ǽ/g, 'ae').replace(/œ/g, 'oe').replace(/[,.;?“”‘’"':]/g, '');
+}
+
+function capitalizeForBigInitial(text) {
+    if (!text) return '';
+    var result = '';
+    var m = (typeof regexLatin !== 'undefined') ? text.match(regexLatin) : null;
+    m = m && m[0].match(/^[a-z]+/i);
+    if (m) {
+        m = m[0];
+        result = m[0].toUpperCase();
+        if (m[1]) {
+            result += m[1].toUpperCase();
+            if (m[2] && m.length === 3 && (text[3] === ' ' || text[3] === ',')) {
+                result += m[2].toUpperCase();
+            }
+        }
+    }
+    return result ? (result + text.slice(result.length)) : text;
+}
+
+function removeNotApplicableFromGabc(gabc, isPasch) {
+    if (!gabc) return '';
+    var TP = !!isPasch;
+    if (gabc.match(/[+†][^)]*\(/) && gabc.match(/<i>\s*T\.\s*P\.\s*<\/i>|<i>.*?extra\s+T\.\s+P\./i)) {
+        if ((TP && gabc.match(/<i>\s*T\.\s*P\.\s*<\/i>/i)) || ((!TP && gabc.match(/<i>.*?extra\s+T\.\s+P\./i)))) {
+            gabc = gabc.replace(/[+†](\([^)]+\)\s?)?[^+†]+?(([+†]|<\/i>)+[^\w()]*(\(:*\)\s*)*)+\s*/, '$1');
+        } else {
+            gabc = gabc.replace(/(?:\(\))?[+†](?:\(\))?\s*([^+†]+)(\(::\))[^+†]*[+†][^+†]*\(::\)/, '$1$2');
+        }
+    }
+    if (TP) {
+        gabc = gabc.replace(/(?:\(::\)\s+)?<i>\s*T\.\s*P\.\s*<\/i>(?:\(::\))?/, '(:)');
+    } else {
+        gabc = gabc.replace(/\(::\)\s+<i>\s*T\.\s*P\.\s*<\/i>[\s\S]*?(?=\(::\))/, '')
+                   .replace(/<i>\s*T\.\s*P\.\s*<\/i>\(::\)[\s\S]*?(?=[^\s(]*\(::\))/, '')
+                   .replace(/\s+<i>\s*T\.\s*P\.\s*<\/i>[\s\S]*?(?=\(::\))/, ' ');
+    }
+    return gabc;
+}
+
+function reduceStringArrayBy(array, period) {
+    if (!array || array.length < period) return array || [];
+    return array.reduce(function(result, o, i) {
+        if (!result) result = '';
+        if (!o) o = '';
+        if (typeof result === 'string') result = [result];
+        if (i % period === 0) {
+            result.push(o);
+        } else {
+            result[result.length - 1] += o;
+        }
+        return result;
+    });
+}
+
+function GabcWordDictionary(original) {
+    this.original = original || '';
+    this.wordMap = [];
+}
+GabcWordDictionary.prototype.push = function(index) {
+    this.wordMap.push(index);
+};
+GabcWordDictionary.prototype.slice = function(start, end) {
+    return this.original.slice(this.wordMap[start], this.wordMap[end]);
+};
+
+function decompile(mixed, ignoreSyllablesOnDivisiones, storeMap) {
+    if (!mixed) return '';
+    if (typeof regexOuter !== 'undefined') regexOuter.exec('');
+    var header = (typeof getHeader === 'function') ? getHeader(mixed) : null;
+    var origLen = (header && header.original) ? header.original.length : 0;
+    mixed = mixed.slice(origLen).replace(/<sp>[vra]\/<\/sp>\.?\s*/gi, '');
+    var dictionary = new GabcWordDictionary(mixed);
+    if (storeMap) storeMap.originalWords = dictionary;
+    var text = '';
+    var gabc = '';
+    var ws;
+    var tws = '';
+    var hasElisions = false;
+    var lastClef = '';
+    var verseHasClef = false;
+    var match = (typeof regexOuter !== 'undefined') ? regexOuter.exec(mixed) : null;
+    var newWord = true;
+    var gabcAfterAsterisks = {};
+    var justAppliedAsteriskCallback = false;
+
+    while (match) {
+        if (storeMap && newWord && match[rog.gabc] && !/^[,;:``]+$/.test(match[rog.gabc]) && match[rog.syl] && /[a-zœæǽáéíóúýäëïöüÿāēīōūȳăĕĭŏŭ]/i.test(match[rog.syl])) {
+            dictionary.push(match.index);
+            newWord = false;
+        }
+        ws = match[rog.whitespace] || '';
+        newWord = newWord || !!ws;
+        var m = undefined;
+        var syl = match[rog.syl];
+        if (gabc.length === 0 && typeof regexGabc !== 'undefined') {
+            regexGabc.exec('');
+            m = regexGabc.exec(match[rog.gabc]);
+            if (m && m[4]) {
+                lastClef = m[4];
+                if (gabc.length === 0) verseHasClef = true;
+            }
+        }
+        if (tws === ' ' && !syl) {
+            if (typeof regexGabc !== 'undefined') {
+                regexGabc.exec('');
+                m = regexGabc.exec(match[rog.gabc]);
+                if (!m || m[4]) text += tws;
+            } else {
+                text += tws;
+            }
+        } else {
+            text += tws;
+        }
+        if (justAppliedAsteriskCallback) {
+            justAppliedAsteriskCallback = false;
+        } else if (syl === '*' || syl === '+' || (typeof sym_flex !== 'undefined' && syl === sym_flex)) {
+            var slice = mixed.slice(match.index),
+                regexSymbol = (syl === '*') ? /\*/ : /[+†]/,
+                indexFirstSymbol = slice.search(regexSymbol),
+                indexSymbol = slice.slice(indexFirstSymbol + 1).search(regexSymbol),
+                indexDoubleBar = slice.slice(indexFirstSymbol + 2).indexOf('(::)');
+            if (indexDoubleBar >= 0 && (indexSymbol < 0 || indexDoubleBar < (indexFirstSymbol + 1 + indexSymbol))) {
+                slice = slice.slice(0, indexFirstSymbol + 2 + indexDoubleBar + 4);
+                var firstWord = slice.match(/[*+†](?:\([^)]+\))?\s+([^(]+\([^)]+\)[^(]+.*?\))(?=\s)/);
+                if (firstWord) {
+                    var firstWordComplete = firstWord[1];
+                    firstWord = firstWord[1].replace(/\s?[,;:.!?]\(/g, '(');
+                    if (firstWord in gabcAfterAsterisks) {
+                        var lastIndex = regexOuter.lastIndex,
+                            sliceText = decompile(slice, ignoreSyllablesOnDivisiones).trim(),
+                            replaceText = decompile(gabcAfterAsterisks[firstWord], ignoreSyllablesOnDivisiones).trim(),
+                            replaceTextWithoutRubrics = replaceText.replace(/^[^a-zœæǽáéíóúýäëïöüÿāēīōūȳăĕĭŏŭ]+\s+|(^\s*|\s+)<i>[^<]*<\/i>(\s+|\s*$)/, '');
+                        if (typeof sliceText.countSyllables === 'function' && sliceText.countSyllables() < 10 && sliceText !== replaceText && sliceText !== replaceTextWithoutRubrics) {
+                            if (storeMap && storeMap.responsoryCallbacks) {
+                                var temp = slice.replace(/^[^a-zœæǽáéíóúýäëïöüÿāēīōūȳăĕĭŏŭ]+|[^a-zœæǽáéíóúýäëïöüÿāēīōūȳăĕĭŏŭ()\s]+|[^a-zœæǽáéíóúýäëïöüÿāēīōūȳăĕĭŏŭ]+$/gi, '').split(/\([^)]*\)?/);
+                                if (temp.slice(-1)[0].length === 0) temp.pop();
+                                var regex = firstWordComplete.replace(/\s*[,;:.!?]\(/g, '\\s*[,;:.!?]?(').replace(/[()]/g, '\\$&');
+                                storeMap.responsoryCallbacks.push(new RegExp(regex, 'gi'));
+                            }
+                            mixed = mixed.slice(0, match.index) + gabcAfterAsterisks[firstWord] + mixed.slice(match.index + slice.length);
+                            regexOuter.lastIndex = match.index;
+                            match = regexOuter.exec(mixed);
+                            justAppliedAsteriskCallback = true;
+                            continue;
+                        } else {
+                            regexOuter.lastIndex = lastIndex;
+                        }
+                    } else {
+                        gabcAfterAsterisks[firstWord] = slice;
+                    }
+                }
+            }
+        }
+        if (ignoreSyllablesOnDivisiones) {
+            if (!match[rog.gabc].match(/[A-Ma-m](?![1-4+])/)) {
+                var barMatch = match[rog.gabc].match(/(?:^|])[^[\]:;]*(:+|;)/);
+                barMatch = barMatch && barMatch[1];
+                if (barMatch === '::') text += '~';
+                else if (barMatch === ':') text += ' % ';
+                else if (barMatch === ';') text += ' | ';
+            }
+        }
+        if (syl && (!ignoreSyllablesOnDivisiones || !match[rog.gabc].match(/^(?:(?:[cf]b?[1-4])|[:;,\s])*$/) || syl.match(/<i>(?:Ps\.?|T\.?\s*P\.?\s*|i+j?\.?)<\/i>/))) {
+            var sylR = syl.replace(/<i>([aeiouy])<\/i>/ig, '($1)');
+            hasElisions = hasElisions || (syl !== sylR);
+            if (sylR[0] === 'e' && text.slice(-1) === 'a') {
+                sylR = 'ë' + sylR.slice(1);
+            }
+            text += sylR;
+        }
+        gabc += match[rog.gabc] + (ws.replace(/[^\n]*\n[^\n]*/g, '\n') || " ");
+        var nextMatch = regexOuter.exec(mixed);
+        tws = ws;
+        match = nextMatch;
+    }
+    if (tws) text += tws;
+
+    var s = text.replace(/\s+/g, ' ').replace(/^\s+|\s+$|[*{}-]/g, '');
+    var index = s.indexOf(' ');
+    if (index > 1) {
+        s = s[0] + s.slice(1, index).toLowerCase() + s.slice(index);
+    }
+    s = s.replace(/~*(<\/?i>~?)~*/g, '$1')
+         .replace(/\s*~\s*/g, '\n')
+         .replace(/%/g, '*')
+         .replace(/\s*\|\s*\n/g, '\n')
+         .replace(/(\|\s*)*(\*\s*)+(\|\s*)*/g, '* ')
+         .replace(/(\| *)+/g, '| ')
+         .replace(/\s*[*|]?\s*$/, '');
+    return s;
+}
+
+function addPatternFromSplitLine(pattern, sLine) {
+    for (var i = 0; i < sLine.length; ++i) {
+        for (var j = sLine[i].split(/ \| /g).length; j > 1; --j) {
+            pattern.push('');
+        }
+        if (i < sLine.length - 1) pattern.push('*');
+    }
+}
+
+function makePattern(line) {
+    var result = [];
+    var sLine = splitLine(reduceStringArrayBy(line.split(reFullBarsOrFullStops), 3), 2, ' | ', 20);
+    if (sLine.length < 2 || Math.max.apply(null, sLine.mapSyllableCounts()) > 20) {
+        sLine = splitLine(reduceStringArrayBy(line.split(reFullOrHalfBarsOrFullStops), 3), 2, ' | ', 20);
+    }
+    addPatternFromSplitLine(result, sLine);
+    return result;
+}
+
+function splitIntoVerses(line) {
+    var fullbars = line.match(reSplitFullBarsOrFullStops);
+    var numSyllables = (typeof line.countSyllables === 'function') ? line.countSyllables() : 0;
+    if (numSyllables > 30 && fullbars) {
+        var split = line.split(reSplitFullBarsOrFullStops);
+        var satisfied = false;
+        var result;
+        var maxVerses = Math.ceil(numSyllables / 19);
+        for (var count = Math.ceil(numSyllables / 50); !satisfied && count < maxVerses; ++count) {
+            result = [];
+            var test = splitLine(split, count, ' * '),
+                sylCounts = test.mapSyllableCounts();
+            satisfied = Math.max.apply(null, sylCounts) < 50;
+            for (var i = 0; satisfied && i < count; ++i) {
+                var mediantTest = splitLine(test[i].split(reFullOrHalfBars), 2, ' | ', 20);
+                sylCounts = mediantTest.mapSyllableCounts();
+                satisfied = mediantTest.length >= 2 && Math.max.apply(null, sylCounts) <= 20 && Math.min.apply(null, sylCounts) >= 7;
+                if (satisfied) {
+                    addPatternFromSplitLine(result, mediantTest);
+                    if (i < count - 1) {
+                        result.push('℣');
+                    }
+                }
+            }
+        }
+        if (satisfied) return result;
+    }
+    return makePattern(line);
+}
+
+function versify(line, allowSplitting) {
+    var numSyllables = (typeof line.countSyllables === 'function') ? line.countSyllables() : 0;
+    if (allowSplitting || numSyllables >= 50) return splitIntoVerses(line);
+    return makePattern(line);
+}
+
+function deducePattern(text, lines, allowSplittingLines) {
+    return text.split('\n').map(function(t) {
+        return versify(t, allowSplittingLines);
+    });
+}
+
+function versifyByPattern(lines, pattern) {
+    return lines.reduce(function(result, segments, lineNum) {
+        var text = '',
+            pat = pattern[lineNum],
+            capitalize = true;
+        pat = [''].concat(pat);
+        segments.forEach(function(seg, segNum) {
+            switch (pat && pat[segNum]) {
+                case '@':
+                    if (text) text += '\n';
+                    text += '@ ';
+                    break;
+                case '*':
+                case '†':
+                    text += ' * ';
+                    break;
+                case '+':
+                case '^':
+                    text += ' ^ ';
+                    break;
+                case '℣':
+                    text += '\n';
+                    capitalize = true;
+                    break;
+                default:
+                    if (text) text += ' ';
+                    break;
+            }
+            if (capitalize && seg[0]) {
+                text += seg[0].toUpperCase() + seg.slice(1);
+                capitalize = false;
+            } else {
+                text += seg;
+            }
+        });
+        var ending = (lineNum === (lines.length - 1)) ? '' : (pat[segments.length] === '*' ? ' * ' : '\n');
+        return result + text + ending;
+    }, '');
+}
+
+function applyLiquescents(gabc) {
+    if (!gabc) return '';
+    return gabc.replace(/[aeiouyáéíóúýæǽœ][mn]\([^)]*([a-m])([a-l])\)(?=\S)/ig, function(m, first, second) {
+        if (first > second) return m.slice(0, -1) + '~)';
+        return m;
+    });
+}
+
+function getTertiumQuid(gMediant, gTermination) {
+    if (!gTermination || !gMediant) return gMediant || '';
+    var match = gTermination.match(/([^r]+)\s+[a-m]r\s/);
+    if (!match) return gMediant;
+    var gTertium = match[1];
+    match = gTertium.match(/^\([^)]+\)\s+'/);
+    if (match) {
+        var medMatch = gMediant.match(/\s([a-m])r\s/);
+        if (medMatch) gTertium = match[0] + medMatch[1];
+    }
+    var endMatch = gMediant.match(/(?:^|\s)([a-m]r\s+.+)$/);
+    if (endMatch) gTertium += ' ' + endMatch[1];
+    return gTertium;
+}
+
+function applyAmenTones(gabc, gAmenTones, gMediant, clef) {
+    if (gAmenTones) {
+        var originalGabc = gAmenTones.input || '',
+            originalClef = (typeof getHeaderLen === 'function') ? originalGabc.slice(getHeaderLen(originalGabc)).match(regexGabcClef) : null;
+        originalClef = originalClef ? originalClef[1] : clef;
+        if (gabc.mediant && gabc.termination) {
+            var shift = parseInt(gabc.mediant[0], 23) - parseInt(gAmenTones[1], 23);
+            if (isNaN(shift)) shift = 0;
+            gabc.termination = gabc.termination.replace(/('[a-mA-Mvw._]+(?:\s[a-mA-Mvw._]+)?r)\s+[a-mA-Mvw._]+$/, '$1 ' + gAmenTones.slice(3));
+            gabc.termination = gabc.termination.replace(/(\s[a-mA-Mvw._]+){2}$/, ' ' + gAmenTones.slice(2).join(' '));
+        } else {
+            for (var i = 3, index = gabc.length; i > 1; --i) {
+                index = 1 + gabc.lastIndexOf('(', index - 2);
+                if (index > 0) {
+                    var index2 = gabc.indexOf(')', index);
+                    if (index2 >= 0) {
+                        var shift = parseInt(gMediant[0], 23) - parseInt(gAmenTones[1], 23);
+                        if (isNaN(shift)) shift = 0;
+                        gabc = gabc.slice(0, index) + shiftGabc(gAmenTones[i], shift) + gabc.slice(index2);
+                    }
+                }
+            }
+        }
+    }
+    return gabc;
+}
+
+function psalmToneIntroitGloriaPatri(gMediant, gTermination, gAmenTones, clef) {
+    var gp = "Glória Patri, et Fílio, † et Spirítui Sancto.\nSicut erat in princípio, † et nunc, et semper, * et in sǽcula sæculórum. Amen.".split('\n');
+    var result = applyPsalmTone({
+        text: gp[0],
+        gabc: gMediant,
+        clef: clef,
+        format: bi_formats.gabc,
+        flexEqualsTenor: true
+    });
+    result = result + ' *(:) ';
+
+    var gTertium = getTertiumQuid(gMediant, gTermination);
+    gp[1] = gp[1].split('*');
+    var temp = applyPsalmTone({
+        text: gp[1][0].trim(),
+        gabc: gTertium,
+        clef: clef,
+        format: bi_formats.gabc,
+        flexEqualsTenor: true
+    });
+    result += temp + ' (:) ';
+    temp = applyPsalmTone({
+        text: gp[1][1].trim(),
+        gabc: gTermination,
+        clef: clef,
+        format: bi_formats.gabc,
+        flexEqualsTenor: true
+    });
+    temp = applyAmenTones(temp, gAmenTones, gMediant, clef);
+    return applyLiquescents(result + temp + " (::)\n");
+}
+
+function getIntroitTone(part) {
+    var gabc = part.gabc;
+    if (!gabc) return null;
+    var mode = part.mode || 1;
+    var tone = (typeof g_tones !== 'undefined') ? g_tones['Introit ' + mode] : null;
+    if (!tone && typeof g_tones !== 'undefined') tone = g_tones[mode + '.'] || g_tones['1.'];
+    if (!tone) return null;
+    var mediant = tone.mediant;
+    var termination = tone.termination || mediant;
+    var header = (typeof getHeader === 'function') ? getHeader(gabc) : null;
+    var hLen = (header && header.original) ? header.original.length : 0;
+    var clef = gabc.slice(hLen).match(regexGabcClef);
+    if (clef) {
+        clef = clef[1];
+        if (clef !== tone.clef) {
+            var shifted = shiftGabcForClefChange([mediant, termination], clef, tone.clef);
+            mediant = shifted[0];
+            termination = shifted[1];
+        }
+    } else {
+        clef = tone.clef;
+    }
+    return { clef: clef, mediant: mediant, termination: termination };
+}
+
+function getFullGloriaPatriGabc(gabc, mode) {
+    if (!gabc) return gabc;
+    var header = (typeof getHeader === 'function') ? getHeader(gabc) : null;
+    var m = mode || (header ? header.mode : 1);
+    var tone = getIntroitTone({ gabc: gabc, mode: m });
+    if (!tone) return gabc;
+    var amenTones = regexGabcGloriaPatri.exec(gabc);
+    if (amenTones) {
+        var shift = parseInt(amenTones[1], 23) - parseInt(tone.mediant[0], 23);
+        if (!isNaN(shift) && shift !== 0) {
+            tone.mediant = shiftGabc(tone.mediant, shift);
+            tone.termination = shiftGabc(tone.termination, shift);
+        }
+    } else {
+        amenTones = { index: gabc.length };
+    }
+    return gabc.slice(0, amenTones.index) + psalmToneIntroitGloriaPatri(tone.mediant, tone.termination, amenTones, tone.clef);
+}
+
+function removeGloriaPatriGabc(gabc) {
+    if (!gabc) return gabc;
+    return gabc.replace(regexGabcGloriaPatriEtFilio, '').replace(regexGabcGloriaPatri, '');
+}
+
+function getAspergesVerseAndGloriaPatriGabc(gabc, mode) {
+    if (!gabc) return gabc;
+    var parsedMode = mode;
+    if (!parsedMode) {
+        var hdr = (typeof getHeader === 'function') ? getHeader(gabc) : null;
+        parsedMode = hdr ? (hdr.mode || 7) : 7;
+    }
+    var tone = getIntroitTone({ gabc: gabc, mode: parsedMode });
+    if (!tone) return gabc;
+    var lastDoubleBar = gabc.lastIndexOf('(::)');
+    if (lastDoubleBar < 0) return gabc;
+    lastDoubleBar += 4;
+    var verse = "Miserére mei Deus,\nsecúndum magnam misericórdiam tuam.".split('\n');
+    try {
+        var v1 = applyPsalmTone({
+            text: verse[0],
+            gabc: tone.mediant,
+            clef: tone.clef,
+            format: bi_formats.gabc,
+            flexEqualsTenor: true
+        });
+        var v2 = applyPsalmTone({
+            text: verse[1],
+            gabc: tone.termination,
+            clef: tone.clef,
+            format: bi_formats.gabc,
+            flexEqualsTenor: true
+        });
+        var gp = psalmToneIntroitGloriaPatri(tone.mediant, tone.termination, null, tone.clef);
+        return gabc.slice(0, lastDoubleBar) + ' <i>Ps.~50.</i> ' + applyLiquescents(v1 + ' *(:) ' + v2 + ' (::)\n') + gp;
+    } catch(e) {
+        return gabc;
+    }
+}
+
+function isAlleluia(part, text) {
+    return part === 'alleluia' || (part && part.match(/^graduale/) && removeDiacritics(text).match(/^allelu[ij]a/i));
+}
+
+function getPsalmToneForPartInternal(partObj, tone) {
+    var text = partObj.text;
+    if (!text) return null;
+    var part = (partObj.part || 'introitus').toLowerCase();
+    var header = (typeof getHeader === 'function') ? getHeader(partObj.gabc || '') : null;
+    var mode = partObj.mode || (header ? header.mode : 1);
+    var altTone = partObj.altTone;
+    var solemn = partObj.solemn;
+    var isAl = isAlleluia(part, text);
+    var endOfVerse = partObj.endOfVerse || '(::)';
+    var startOfVerse = partObj.startOfVerse || '';
+    var introitTone = false;
+
+    if (/^(introitus|communioVerses)/.test(part) || (isAl && partObj.style !== 'psalm-tone2') || (header && header.officePart === 'Hymnus')) {
+        tone = tone || g_tones['Introit ' + mode];
+        introitTone = true;
+    } else {
+        tone = tone || g_tones[mode + '.' + (altTone ? ' alt' : '')];
+    }
+    if (!tone) tone = g_tones['1.'] || g_tones['Introit 1'];
+    if (!tone) return null;
+
+    var clef = tone.clef;
+    var gMediant = (solemn && tone.solemn) || tone.mediant;
+    var gTermination = tone.termination;
+    if (!gTermination && tone.terminations) {
+        if (partObj.termination && tone.terminations[partObj.termination]) {
+            gTermination = tone.terminations[partObj.termination];
+        } else {
+            for (var tKey in tone.terminations) { gTermination = tone.terminations[tKey]; break; }
+        }
+    }
+    if (!gTermination) gTermination = gMediant;
+
+    var noMediant = getTertiumQuid(gTermination, gMediant);
+    var fullGabc = (partObj.gabc || '').slice(typeof getHeaderLen === 'function' ? getHeaderLen(partObj.gabc || '') : 0);
+    var useOriginalClef = /Verses$/.test(part) || text.indexOf('@') >= 0;
+    var originalClefMatch = fullGabc.match(regexGabcClef);
+    var originalClef = originalClefMatch ? originalClefMatch[1] : null;
+
+    var gabc = '';
+    var lines;
+
+    if (isAl) {
+        var match = (partObj.gabc || '').match(/\([^):]*::[^)]*\)/);
+        if (match) {
+            gabc = (partObj.gabc || '').slice(0, match.index + match[0].length) + '\n';
+            useOriginalClef = true;
+            lines = text.split('\n');
+        } else {
+            lines = text.split('\n');
+            var line = lines[0];
+            gabc = (header ? header.toString() : '') + '(' + tone.clef + ') ';
+            var alMatch = line.match(/s*([^!?.;,:\s]+)/);
+            var alWord = (alMatch && alMatch[1]) ? alMatch[1] : 'Allelúia';
+            alWord = alWord.charAt(0).toUpperCase() + alWord.slice(1);
+            gabc += applyPsalmTone({
+                text: alWord + ', ' + alWord + '.',
+                gabc: gTermination,
+                clef: clef,
+                useOpenNotes: false,
+                useBoldItalic: false,
+                onlyVowel: false,
+                format: bi_formats.gabc,
+                prefix: false,
+                suffix: false,
+                italicizeIntonation: false,
+                favor: 'termination',
+                flexEqualsTenor: introitTone
+            }) + " (::)\n";
+        }
+        lines.splice(0, 1);
+    } else {
+        lines = text.split('\n');
+        gabc = (header ? header.toString() : '');
+        gabc += '(' + (useOriginalClef && originalClef ? originalClef : tone.clef) + ') ';
+    }
+
+    if (useOriginalClef && originalClef && originalClef !== tone.clef && typeof shiftGabcForClefChange === 'function') {
+        clef = originalClef;
+        var result = shiftGabcForClefChange([gMediant, gTermination], clef, tone.clef);
+        if (result && result.length >= 2) {
+            gMediant = result[0];
+            gTermination = result[1];
+        }
+    }
+
+    var gTertium = introitTone && getTertiumQuid(gMediant, gTermination);
+    var firstVerse = true;
+
+    for (var i = 0; i < lines.length; ++i) {
+        if (!lines[i] || !lines[i].trim()) continue;
+
+        var line = splitLine(lines[i], introitTone ? 3 : 2);
+        if (introitTone && line.length === 3 && Math.min.apply(null, line.slice(0, 2).mapSyllableCounts()) < 8) {
+            line = [line[0] + ' † ' + line[1], line[2]];
+        }
+
+        var italicNote = line[0].match(/^\s*<i>[^<]+<\/i>\s*/);
+        if (italicNote) {
+            italicNote = italicNote[0];
+            line[0] = line[0].slice(italicNote.length);
+        } else if (line[0].match(/^\s*(?:<sp>[vra]\/<\/sp>|[℣℟VR]\.?)\s*/i)) {
+            var vMatch = line[0].match(/^\s*(?:<sp>[vra]\/<\/sp>|[℣℟VR]\.?)\s*/i)[0];
+            italicNote = '<sp>V/</sp> ';
+            line[0] = line[0].slice(vMatch.length);
+        } else if (isAl && firstVerse) {
+            italicNote = '<sp>V/</sp> ';
+        }
+
+        // Special case for Introit Gloria Patri
+        var cleanLine0 = removeDiacritics(line[0]);
+        if (part === 'introitus' && cleanLine0.match(/^\s*gloria patri/i) &&
+            lines[i + 1] && removeDiacritics(lines[i + 1]).replace(/<eu>/, '').match(/^\s*[sa.\s]*e[c.\s]*u[l.\s]*o[r.\s]*u[m.*\s]*a[m.\s]*e/i)) {
+            var gAmenTones;
+            var originalGabc = partObj.gabc;
+            var hdr = (typeof getHeader === 'function' && originalGabc) ? getHeader(originalGabc) : null;
+            if (originalGabc && hdr && hdr.mode == mode) {
+                gAmenTones = regexGabcGloriaPatri.exec(originalGabc);
+            }
+            gabc += psalmToneIntroitGloriaPatri(gMediant, gTermination, gAmenTones, clef);
+            ++i;
+            continue;
+        }
+
+        var resultObj = { shortened: false };
+        if (introitTone && line.length === 3) {
+            var left = [line[0], line[1]];
+            line.splice(1, 1);
+            gabc += (italicNote || '') + applyPsalmTone({
+                text: left[0].trim(),
+                gabc: gMediant,
+                clef: clef,
+                useOpenNotes: false,
+                useBoldItalic: false,
+                onlyVowel: false,
+                format: bi_formats.gabc,
+                verseNumber: i + 1,
+                prefix: !firstVerse && !italicNote,
+                suffix: false,
+                italicizeIntonation: false,
+                result: resultObj,
+                favor: 'intonation',
+                flexEqualsTenor: introitTone
+            }) + bi_formats.gabc.nbsp + '(:) ' +
+            applyPsalmTone({
+                text: left[1].trim(),
+                gabc: gTertium,
+                clef: clef,
+                useOpenNotes: false,
+                useBoldItalic: false,
+                onlyVowel: false,
+                format: bi_formats.gabc,
+                verseNumber: i + 1,
+                prefix: false,
+                suffix: false,
+                italicizeIntonation: false,
+                result: resultObj,
+                favor: 'intonation',
+                flexEqualsTenor: introitTone
+            });
+        } else {
+            gabc += (italicNote || '') + startOfVerse + applyPsalmTone({
+                text: line[0].trim(),
+                gabc: line.length === 1 ? noMediant : gMediant,
+                clef: clef,
+                useOpenNotes: false,
+                useBoldItalic: false,
+                onlyVowel: false,
+                format: bi_formats.gabc,
+                verseNumber: i + 1,
+                prefix: !firstVerse && !italicNote,
+                firstPrefix: !italicNote,
+                suffix: false,
+                italicizeIntonation: false,
+                result: resultObj,
+                favor: i === 0 ? 'intonation' : '',
+                flexEqualsTenor: introitTone
+            });
+        }
+
+        gabc += (line.length === 1 ? "" : bi_formats.gabc.nbsp + "*(:) " +
+            applyPsalmTone({
+                text: line[1].trim(),
+                gabc: gTermination,
+                clef: clef,
+                useOpenNotes: false,
+                useBoldItalic: false,
+                onlyVowel: false,
+                format: bi_formats.gabc,
+                verseNumber: i + 1,
+                prefix: false,
+                suffix: true,
+                italicizeIntonation: false,
+                favor: 'termination',
+                flexEqualsTenor: true
+            })) + " " + endOfVerse + "\n";
+
+        if (!resultObj.shortened) firstVerse = false;
+    }
+
+    return gabc;
+}
+
 function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partKey) {
     if (typeof g_tones === 'undefined' || typeof applyPsalmTone === 'undefined') {
         return null;
@@ -9559,74 +10979,56 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     }
 
-    var tone = null;
-    if (partKey === 'introitus' && g_tones['Introit ' + modeNum]) {
-        tone = g_tones['Introit ' + modeNum];
-    } else if (g_tones[modeNum + '.']) {
-        tone = g_tones[modeNum + '.'];
-    } else if (g_tones['1.']) {
-        tone = g_tones['1.'];
-    }
-    if (!tone) return null;
+    var partNormalized = (partKey || (officePart || '')).toLowerCase().replace(/[^a-z]/g, '');
+    var isPasch = (typeof getSeasonForMoment === 'function' && typeof doState !== 'undefined' && doState.currentDate && getSeasonForMoment(moment(doState.currentDate)) === 'Pasch');
 
+    var cleanedSource = sourceGabc ? removeNotApplicableFromGabc(sourceGabc, isPasch) : '';
+    var selPart = {};
+    var plaintext = cleanedSource ? decompile(cleanedSource, true, selPart) : '';
+
+    if (!plaintext || !plaintext.trim()) {
+        plaintext = title || 'Laudáte Dóminum omnes gentes.';
+    }
+
+    try {
+        var lines = plaintext.split(/\n/).map(function(line) {
+            return reduceStringArrayBy(line.split(reFullOrHalfBarsOrFullStops), 3);
+        });
+        var allowSplit = !partNormalized.match(/alleluia|graduale|tractus/);
+        var pattern = deducePattern(plaintext, lines, allowSplit);
+        var versifiedText = versifyByPattern(lines, pattern);
+
+        var selObj = {
+            text: versifiedText,
+            gabc: cleanedSource || sourceGabc || '',
+            mode: modeNum,
+            part: partNormalized || 'introitus',
+            style: 'psalm-tone'
+        };
+
+        var resultGabc = getPsalmToneForPartInternal(selObj);
+        if (resultGabc) {
+            return resultGabc;
+        }
+    } catch(err) {
+        console.warn('[DivinumOfficium] buildPsalmToneGabcFromSource error:', err);
+    }
+
+    // Fallback if anything failed
+    var tone = (partNormalized === 'introitus' && g_tones['Introit ' + modeNum]) ? g_tones['Introit ' + modeNum] : (g_tones[modeNum + '.'] || g_tones['1.']);
+    if (!tone) return null;
     var clef = tone.clef || 'c4';
     var mediant = tone.mediant;
-    var termination = tone.termination;
-    if (!termination && tone.terminations) {
-        var firstTermKey = Object.keys(tone.terminations)[0];
-        termination = tone.terminations[firstTermKey];
-    }
-    if (!termination) termination = mediant;
-
-    var cleanLyrics = '';
-    if (sourceGabc) {
-        var body = sourceGabc;
-        var hdrIdx = body.indexOf('%%\n');
-        if (hdrIdx !== -1) {
-            body = body.substring(hdrIdx + 3);
-        }
-        var textOnly = body.replace(/\([^)]*\)/g, '').replace(/<[^>]*>/g, '').trim();
-        cleanLyrics = textOnly.replace(/\s+/g, ' ');
-    }
-
-    if (!cleanLyrics) {
-        cleanLyrics = title || 'Laudáte Dóminum omnes gentes.';
-    }
-
+    var termination = tone.termination || mediant;
+    var cleanLyrics = plaintext.replace(/\s+/g, ' ').trim();
     var parts = cleanLyrics.split(/[*:]/);
     var firstHalf = (parts[0] || cleanLyrics).trim();
     var secondHalf = (parts[1] || '').trim();
-
-    var formatObj = (typeof bi_formats !== 'undefined' && bi_formats.gabc) ? bi_formats.gabc : undefined;
-
     try {
-        var gabc1 = applyPsalmTone({
-            text: firstHalf,
-            gabc: mediant,
-            clef: clef,
-            format: formatObj,
-            lang: 'la'
-        });
-
-        var gabc2 = '';
-        if (secondHalf) {
-            gabc2 = applyPsalmTone({
-                text: secondHalf,
-                gabc: termination,
-                clef: clef,
-                format: formatObj,
-                lang: 'la'
-            });
-        }
-
-        var header = 'name: ' + (title ? title + ' (Ton psalmodié)' : 'Ton psalmodié') + ';\n' +
-                     'office-part: ' + (officePart || 'Ton psalmodié') + ';\n' +
-                     'mode: ' + modeNum + ';\n' +
-                     '%%\n(' + clef + ') ';
-
-        return header + gabc1 + (gabc2 ? ' *(:) ' + gabc2 : '') + ' (::)';
+        var g1 = applyPsalmTone({ text: firstHalf, gabc: mediant, clef: clef, format: bi_formats.gabc });
+        var g2 = secondHalf ? applyPsalmTone({ text: secondHalf, gabc: termination, clef: clef, format: bi_formats.gabc }) : '';
+        return 'name: ' + (title || 'Ton psalmodié') + ';\noffice-part: ' + (officePart || 'Ton psalmodié') + ';\nmode: ' + modeNum + ';\n%%\n(' + clef + ') ' + g1 + (g2 ? ' *(:) ' + g2 : '') + ' (::)';
     } catch(e) {
-        console.warn('[DivinumOfficium] applyPsalmTone error:', e);
         return null;
     }
 }
@@ -9641,10 +11043,271 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    $(document).on('click', '#btnClosePartPicker, #massPartPickerBackdrop, #partPickerDragHandleWrap', function(e) {
+    // Gestes tactiles pour ouvrir le menu déroulant : glissement vers le haut (swipe up)
+    var _pickerOpenTouchStartY = 0;
+    var _pickerOpenTouchStartX = 0;
+    var _pickerOpenStartTime = 0;
+    $(document).on('touchstart', '.do-card-title.do-part-picker-trigger, .do-card .do-chant-card-wrapper', function(e) {
+        if (!e.touches || e.touches.length !== 1) return;
+        _pickerOpenTouchStartY = e.touches[0].clientY;
+        _pickerOpenTouchStartX = e.touches[0].clientX;
+        _pickerOpenStartTime = Date.now();
+    });
+    $(document).on('touchend', '.do-card-title.do-part-picker-trigger, .do-card .do-chant-card-wrapper', function(e) {
+        if (!e.changedTouches || e.changedTouches.length !== 1) return;
+        var dy = e.changedTouches[0].clientY - _pickerOpenTouchStartY;
+        var dx = e.changedTouches[0].clientX - _pickerOpenTouchStartX;
+        var dt = Date.now() - _pickerOpenStartTime;
+        if (dy < -35 && Math.abs(dy) > Math.abs(dx) * 1.2 && dt < 600) {
+            var partKey = $(this).data('part-key') || $(this).closest('.do-card').data('card-id');
+            if (partKey && typeof CUSTOMIZABLE_MASS_PARTS !== 'undefined' && CUSTOMIZABLE_MASS_PARTS.indexOf(partKey) !== -1) {
+                triggerHapticFeedback('light');
+                openMassPartPicker(partKey);
+            }
+        }
+    });
+
+    $(document).on('click', '#massPartPickerBackdrop', function(e) {
         e.preventDefault();
         closeMassPartPicker();
     });
+
+    // Auto-agrandissement jusqu'à 75% dès que l'utilisateur fait défiler la liste des pièces
+    $(document).on('scroll', '#partPickerResultsContainer', function() {
+        var drawer = document.getElementById('massPartPickerDrawer');
+        if (!drawer || drawer.classList.contains('is-expanded')) return;
+        if (this.scrollTop > 3) {
+            drawer.classList.add('is-expanded');
+            triggerHapticFeedback('light');
+            syncPartPickerOffset();
+            setTimeout(syncPartPickerOffset, 150);
+            setTimeout(syncPartPickerOffset, 300);
+        }
+    });
+
+    $(document).on('wheel', '#partPickerResultsContainer', function(e) {
+        var drawer = document.getElementById('massPartPickerDrawer');
+        if (!drawer || drawer.classList.contains('is-expanded')) return;
+        if (e.originalEvent && e.originalEvent.deltaY > 0) {
+            drawer.classList.add('is-expanded');
+            triggerHapticFeedback('light');
+            syncPartPickerOffset();
+            setTimeout(syncPartPickerOffset, 150);
+            setTimeout(syncPartPickerOffset, 300);
+        }
+    });
+
+    // Gestes tactiles et souris pour le tiroir : arrêt à 1,5 cartes au début, glisser vers le haut pour étendre à 75%, vers le bas pour fermer/réduire
+    (function initPartPickerSwipeGestures() {
+        var drawer = document.getElementById('massPartPickerDrawer');
+        if (!drawer) return;
+        var startY = 0, currentY = 0, startTime = 0, isDragging = false;
+
+        function startDrag(clientY, target) {
+            var isHandle = $(target).closest('#partPickerDragHandleWrap, #partPickerDragHandle').length > 0;
+            var isHeader = $(target).closest('.do-part-picker-header, .do-part-picker-header-top').length > 0;
+            var $results = $(target).closest('#partPickerResultsContainer');
+            var isAtTop = $results.length > 0 && ($results[0].scrollTop <= 0);
+
+            if (!isHandle && !isHeader && !isAtTop && target !== drawer) {
+                return false;
+            }
+            if ($(target).closest('button, input, select, a').length && !isHandle) {
+                return false;
+            }
+
+            startY = clientY;
+            currentY = startY;
+            startTime = Date.now();
+            isDragging = true;
+            $('body').addClass('is-dragging-picker');
+            drawer.style.setProperty('transition', 'none', 'important');
+            document.documentElement.style.setProperty('--picker-drag-y', '0px');
+            return true;
+        }
+
+        function moveDrag(clientY, target, cancelable, preventDefaultFn) {
+            if (!isDragging) return;
+            currentY = clientY;
+            var deltaY = currentY - startY;
+            var isExpanded = drawer.classList.contains('is-expanded');
+
+            if (deltaY > 0) {
+                if (cancelable && preventDefaultFn) preventDefaultFn();
+                var drawerH = drawer.offsetHeight || 380;
+                var progress = Math.min(1, Math.max(0, deltaY / drawerH));
+                var opacity = 1 - (progress * 0.7);
+                drawer.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
+                drawer.style.setProperty('opacity', opacity.toFixed(3), 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', deltaY + 'px');
+            } else {
+                if (!isExpanded) {
+                    if (cancelable && preventDefaultFn) preventDefaultFn();
+                    var pullUp = deltaY * 0.4;
+                    drawer.style.setProperty('transform', 'translateY(' + pullUp + 'px)', 'important');
+                    document.documentElement.style.setProperty('--picker-drag-y', pullUp + 'px');
+                } else {
+                    var resistanceY = deltaY * 0.2;
+                    drawer.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
+                    document.documentElement.style.setProperty('--picker-drag-y', resistanceY + 'px');
+                }
+            }
+        }
+
+        function endDrag(clientY, target) {
+            if (!isDragging) return;
+            isDragging = false;
+            $('body').removeClass('is-dragging-picker');
+
+            var deltaY = clientY - startY;
+            var dt = Math.max(1, Date.now() - startTime);
+            var vy = deltaY / dt;
+            var drawerH = drawer.offsetHeight || 380;
+            var isExpanded = drawer.classList.contains('is-expanded');
+
+            drawer.style.removeProperty('transition');
+
+            var isTap = (Math.abs(deltaY) < 6 && dt < 350);
+            var isHandleTap = isTap && $(target).closest('#partPickerDragHandleWrap, #partPickerDragHandle').length > 0;
+
+            if (isHandleTap) {
+                triggerHapticFeedback('light');
+                if (isExpanded) {
+                    drawer.classList.remove('is-expanded');
+                } else {
+                    drawer.classList.add('is-expanded');
+                }
+                drawer.style.removeProperty('transform');
+                drawer.style.removeProperty('opacity');
+                document.documentElement.style.setProperty('--picker-drag-y', '0px');
+                setTimeout(syncPartPickerOffset, 150);
+                setTimeout(syncPartPickerOffset, 320);
+                return;
+            }
+
+            // Glissement vers le haut depuis le mode aperçu (1,5 cartes) → passe en mode étendu (75%)
+            if (deltaY < -24 && !isExpanded) {
+                triggerHapticFeedback('light');
+                drawer.classList.add('is-expanded');
+                drawer.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1)', 'important');
+                drawer.style.setProperty('transform', 'translateY(0)', 'important');
+                drawer.style.setProperty('opacity', '1', 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', '0px');
+                setTimeout(function() {
+                    drawer.style.removeProperty('transition');
+                    drawer.style.removeProperty('transform');
+                    drawer.style.removeProperty('opacity');
+                    syncPartPickerOffset();
+                }, 220);
+                setTimeout(syncPartPickerOffset, 320);
+                return;
+            }
+
+            // Glissement vers le bas depuis le mode plein écran (75%) → revient à l'aperçu 1,5 cartes
+            if (deltaY > 28 && isExpanded) {
+                triggerHapticFeedback('light');
+                drawer.classList.remove('is-expanded');
+                drawer.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1)', 'important');
+                drawer.style.setProperty('transform', 'translateY(0)', 'important');
+                drawer.style.setProperty('opacity', '1', 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', '0px');
+                setTimeout(function() {
+                    drawer.style.removeProperty('transition');
+                    drawer.style.removeProperty('transform');
+                    drawer.style.removeProperty('opacity');
+                    syncPartPickerOffset();
+                }, 220);
+                setTimeout(syncPartPickerOffset, 320);
+                return;
+            }
+
+            // Glissement vers le bas depuis le mode aperçu (1,5 cartes) → fermeture du tiroir
+            if (deltaY > drawerH * 0.15 || deltaY > 30 || (deltaY > 12 && vy > 0.22)) {
+                triggerHapticFeedback('light');
+                drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
+                drawer.style.setProperty('transform', 'translateY(100%)', 'important');
+                drawer.style.setProperty('opacity', '0', 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', drawerH + 'px');
+                setTimeout(function() {
+                    drawer.style.removeProperty('transition');
+                    drawer.style.removeProperty('transform');
+                    drawer.style.removeProperty('opacity');
+                    closeMassPartPicker();
+                }, 220);
+            } else {
+                drawer.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                drawer.style.setProperty('transform', 'translateY(0)', 'important');
+                drawer.style.setProperty('opacity', '1', 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', '0px');
+                setTimeout(function() {
+                    drawer.style.removeProperty('transition');
+                    drawer.style.removeProperty('transform');
+                    drawer.style.removeProperty('opacity');
+                }, 200);
+            }
+        }
+
+        // Écouteurs tactiles (mobile)
+        function onTouchStart(e) {
+            if (!e.touches || e.touches.length !== 1) return;
+            startDrag(e.touches[0].clientY, e.target);
+        }
+
+        function onTouchMove(e) {
+            if (!isDragging || !e.touches || !e.touches.length) return;
+            moveDrag(e.touches[0].clientY, e.target, e.cancelable, function() { e.preventDefault(); });
+        }
+
+        function onTouchEnd(e) {
+            if (!isDragging) return;
+            var clientY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : currentY;
+            endDrag(clientY, e.target);
+        }
+
+        drawer.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+        window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+        // Écouteurs souris (desktop)
+        function onMouseDown(e) {
+            if (e.button !== 0) return;
+            var target = e.target;
+            if (!startDrag(e.clientY, target)) return;
+
+            function onMouseMove(e) {
+                moveDrag(e.clientY, target, true, function() { e.preventDefault(); });
+            }
+
+            function onMouseUp(e) {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                endDrag(e.clientY, target);
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        }
+
+        drawer.addEventListener('mousedown', onMouseDown);
+
+        // Verrouillage absolu du défilement de la page principale lorsque le menu est ouvert
+        window.addEventListener('wheel', function(e) {
+            if (!$('body').hasClass('picker-drawer-open')) return;
+            var $scrollable = $(e.target).closest('#partPickerResultsContainer, #partPickerKyrialeSelect');
+            if (!$scrollable.length && e.cancelable) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchmove', function(e) {
+            if (!$('body').hasClass('picker-drawer-open')) return;
+            var $scrollable = $(e.target).closest('#partPickerResultsContainer, #partPickerKyrialeSelect');
+            if (!$scrollable.length && e.cancelable) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    })();
 
     $(document).on('click', '#partPickerToggleViewBtn', function(e) {
         e.preventDefault();
@@ -9655,6 +11318,8 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         if (_activePickerPartKey) {
             populateMassPartPickerItems(_activePickerPartKey, $('#partPickerSearchInput').val());
         }
+        updatePartPickerPeekHeight();
+        setTimeout(syncPartPickerOffset, 100);
     });
 
     $(document).on('input', '#partPickerSearchInput', function() {
@@ -9774,29 +11439,61 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    $(document).on('click', '.do-verses-toggle', function(e) {
+    $(document).off('click', '.do-verses-toggle').on('click', '.do-verses-toggle', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         var $btn = $(this);
         var partKey = $btn.data('part-key');
         var versesRef = $btn.data('verses-ref');
         var $container = $btn.next('.do-verses-score-container');
-        var isCurrentlyExpanded = $btn.hasClass('is-expanded');
-        var willExpand = !isCurrentlyExpanded;
+        if (!$container.length && partKey) {
+            $container = $btn.closest('.do-card-body').find('.do-verses-score-container[data-part-key="' + partKey + '"]');
+        }
+
+        // True physical visibility check prevents desynchronization where button had class but container was closed
+        var isCurrentlyOpen = $btn.hasClass('is-expanded') && $container.hasClass('is-open') && $container.is(':visible');
+        var willExpand = !isCurrentlyOpen;
 
         $btn.toggleClass('is-expanded', willExpand).attr('aria-expanded', willExpand ? 'true' : 'false');
+        $container.toggleClass('is-open', willExpand);
+
         if (willExpand) {
-            $container.stop(true, false).slideDown(200, function() {
-                $container.css({ height: 'auto', overflow: 'visible' });
-                var score = $container.find('.do-verses-content').data('verses-score');
-                if (!score) {
-                    loadAndRenderVersesAdLibitum($container, versesRef);
+            $container.stop(true, true).css({ display: 'block' }).slideDown(200, function() {
+                $container.addClass('is-open').css({ display: 'block', height: 'auto', overflow: 'visible' });
+                var $versesCard = $container.find('.do-chant-card');
+                if ($versesCard.length) {
+                    var vScore = $versesCard.data('chant-score');
+                    var vCtxt = $versesCard.data('chant-ctxt');
+                    if (vScore && vCtxt) {
+                        var optW = getOptimalChantWidth($versesCard);
+                        if (Math.abs((vCtxt.width || 0) - optW) > 6) {
+                            vCtxt.width = optW;
+                            vScore.performLayout(vCtxt);
+                            vScore.layoutChantLines(vCtxt, optW, function() {
+                                var newSvg = vScore.createSvgNode(vCtxt);
+                                if (newSvg) {
+                                    newSvg.setAttribute('width', '100%');
+                                    newSvg.style.width = '100%';
+                                    newSvg.style.height = 'auto';
+                                    var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                                    var noteFill = (curTheme !== 'light') ? '#ffffff' : '#111317';
+                                    newSvg.setAttribute('fill', noteFill);
+                                    newSvg.style.fill = noteFill;
+                                    $versesCard.find('.do-chant-preview').empty().append(newSvg);
+                                }
+                            });
+                        }
+                    }
                 }
             });
             if (!doState.expandedVerses) doState.expandedVerses = {};
             doState.expandedVerses[partKey] = true;
             loadAndRenderVersesAdLibitum($container, versesRef);
         } else {
-            $container.stop(true, false).slideUp(180);
+            $container.stop(true, true).slideUp(180, function() {
+                $container.removeClass('is-open').css('display', 'none');
+            });
             if (doState.expandedVerses) {
                 delete doState.expandedVerses[partKey];
             }
@@ -9821,6 +11518,7 @@ function displayResult(result, vernResult) {
         var notFoundTitle = (uiLang === 'fr') ? 'Office non trouvé' : (uiLang === 'en') ? 'Office not found' : (uiLang === 'es') ? 'Oficio no encontrado' : 'Officium non inventum';
         var notFoundDesc = (uiLang === 'fr') ? 'Les textes pour ce jour ne sont pas disponibles.' : 'Textus pro hac die non inveniuntur in repositorio locali.';
         $stream.html('<div class="do-empty"><h3>' + notFoundTitle + '</h3><p>' + notFoundDesc + '</p></div>');
+        if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
         return;
     }
 
@@ -9843,6 +11541,7 @@ function displayResult(result, vernResult) {
         $('#doHeaderTitle .title-text').text(getLocalizedFeastTitle(title, getUiLang()));
         checkHeaderTitleMarquee();
     }
+    if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
 
     var onSaintAttached = null;
     var isViewInDom = false;
@@ -9857,6 +11556,9 @@ function displayResult(result, vernResult) {
             if ($card) {
                 $saintCardWrap.append($card);
                 onSaintAttached = onAttached;
+                if (typeof updateHeroImageState === 'function') {
+                    updateHeroImageState();
+                }
                 if (isViewInDom && typeof onSaintAttached === 'function') {
                     requestAnimationFrame(function() {
                         onSaintAttached();
@@ -9864,6 +11566,9 @@ function displayResult(result, vernResult) {
                 }
             } else {
                 $saintCardWrap.remove();
+                if (typeof updateHeroImageState === 'function') {
+                    updateHeroImageState();
+                }
             }
         }, true);
     }
@@ -9909,15 +11614,15 @@ function displayResult(result, vernResult) {
                         '<button type="button" class="do-verses-toggle' + (isExpanded ? ' is-expanded' : '') + '" ' +
                         'data-part-key="' + escHtml(card.id) + '" data-verses-ref="' + escHtml(ch.versesRef) + '" ' +
                         'aria-expanded="' + (isExpanded ? 'true' : 'false') + '">' +
-                            '<span class="do-verses-toggle-title">Versets ad libitum</span> ' +
+                            '<span class="do-verses-toggle-title">Versus ad libitum</span> ' +
                             '<span class="do-verses-toggle-ref">(' + escHtml(ch.versesRef) + ')</span>' +
                             '<span class="dropdown-icon" aria-hidden="true">' +
                                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
                             '</span>' +
                         '</button>' +
-                        '<div class="do-verses-score-container" ' +
+                        '<div class="do-verses-score-container' + (isExpanded ? ' is-open' : '') + '" ' +
                         'data-part-key="' + escHtml(card.id) + '" data-verses-ref="' + escHtml(ch.versesRef) + '"' +
-                        (isExpanded ? '' : ' style="display:none;"') + '>' +
+                        (isExpanded ? ' style="display:block;"' : ' style="display:none;"') + '>' +
                             '<div class="do-verses-content"><div class="gregorian-skeleton" style="height:28px; border-radius:4px;"></div></div>' +
                         '</div>';
                     $body.find('.do-chant-card-wrapper[data-part-key="' + card.id + '"]').after(versesHtml);
@@ -9967,143 +11672,23 @@ var swipeHintScrollDebounce = null;
 var isSwipeHintAnimating = false;
 
 function ensureBilingualGestureIndicator() {
-    if (!$('#doBilingualGestureIndicator').length) {
-        $('body').append(
-            '<div id="doBilingualGestureIndicator" aria-hidden="true">' +
-                '<div class="do-gesture-glow-bar"></div>' +
-            '</div>'
-        );
-    }
+    // Désactivé à la demande de l'utilisateur (suppression du tuto de swipe vers la droite)
 }
 
 function isViewportOverBilingualText() {
-    var vpH = window.innerHeight || $(window).height() || 600;
-    var vpTopMargin = vpH * 0.15;
-    var vpBottomMargin = vpH * 0.85;
-
-    // 1. Check if Gregorian chant scores dominate the active middle of the viewport
-    var isChantDominating = false;
-    $('.do-chant-card-wrapper:visible, .do-chant-card:visible, .gabc-chant-preview:visible').each(function() {
-        var rect = this.getBoundingClientRect();
-        var visibleTop = Math.max(rect.top, vpTopMargin);
-        var visibleBottom = Math.min(rect.bottom, vpBottomMargin);
-        if (visibleBottom > visibleTop) {
-            var visibleHeight = visibleBottom - visibleTop;
-            // If chant score occupies more than 30% of active viewport, consider it a chant section
-            if (visibleHeight > (vpH * 0.30)) {
-                isChantDominating = true;
-                return false; // break loop
-            }
-        }
-    });
-
-    if (isChantDominating) {
-        return false;
-    }
-
-    // 2. Check if bilingual text rows are visible in the viewport with substantial text
-    var visibleTextCharCount = 0;
-    var visibleBilingualRowCount = 0;
-
-    $('.do-bilingual-row:visible').each(function() {
-        var rect = this.getBoundingClientRect();
-        if (rect.bottom > vpTopMargin && rect.top < vpBottomMargin) {
-            visibleBilingualRowCount++;
-            var text = $(this).text() || '';
-            visibleTextCharCount += text.trim().length;
-            if (visibleTextCharCount >= 70 && visibleBilingualRowCount >= 2) {
-                return false; // found sufficient bilingual text
-            }
-        }
-    });
-
-    return (visibleBilingualRowCount > 0 && visibleTextCharCount >= 50);
+    return false;
 }
 
 function isBilingualSwipeHintAllowed() {
-    if ($('body').hasClass('mass-toc-open') || $('body').hasClass('header-dropdown-open')) return false;
-    if ($('#doMassTocPanel:not(.hidden)').length > 0 || $('#headerDropdown:not(.hidden)').length > 0) return false;
-    if ($('#settingsPanel.open, .update-modal:not(.hidden), .feedback-modal:not(.hidden)').length > 0) return false;
-    return true;
+    return false;
 }
 
 function startBilingualSwipeHint() {
-    if ($(window).width() > 768) return;
-
-    var isBilingual = (doState.showLatin && doState.vernacularLang && doState.vernacularLang !== 'none' && doState.hora !== 'home');
-    if (!isBilingual || doState.mobileLang === 'vern' || !isBilingualSwipeHintAllowed()) {
-        stopBilingualSwipeHint();
-        return;
-    }
-
-    if (swipeHintTimer) {
-        clearInterval(swipeHintTimer);
-        swipeHintTimer = null;
-    }
-    $(window).off('scroll.bilingualSwipeHint');
-
-    ensureBilingualGestureIndicator();
-
-    // Check on initial load after short delay
-    setTimeout(function() {
-        if (isBilingualSwipeHintAllowed() && doState.mobileLang === 'la' && isViewportOverBilingualText()) {
-            playBilingualSwipeHint();
-        }
-    }, 1000);
-
-    // Listen to scroll: trigger hint when user scrolls to a text section
-    $(window).on('scroll.bilingualSwipeHint', function() {
-        if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern') {
-            stopBilingualSwipeHint();
-            return;
-        }
-        if (swipeHintScrollDebounce) clearTimeout(swipeHintScrollDebounce);
-        swipeHintScrollDebounce = setTimeout(function() {
-            if (isBilingualSwipeHintAllowed() && doState.mobileLang === 'la' && !isSwipeHintAnimating && isViewportOverBilingualText()) {
-                playBilingualSwipeHint();
-            }
-        }, 350);
-    });
-
-    // Periodic repeat: only plays when currently over bilingual text
-    swipeHintTimer = setInterval(function() {
-        if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern') {
-            stopBilingualSwipeHint();
-            return;
-        }
-        if (!isSwipeHintAnimating && isViewportOverBilingualText()) {
-            playBilingualSwipeHint();
-        }
-    }, 8500);
+    stopBilingualSwipeHint();
 }
 
 function playBilingualSwipeHint() {
-    if (!isBilingualSwipeHintAllowed() || doState.mobileLang === 'vern' || isSwipeHintAnimating) {
-        if (doState.mobileLang === 'vern' || !isBilingualSwipeHintAllowed()) stopBilingualSwipeHint();
-        return;
-    }
-    ensureBilingualGestureIndicator();
-
-    var $pill = $('#doBilingualGestureIndicator');
-    var $rows = $('.do-bilingual-row');
-
-    isSwipeHintAnimating = true;
-    $pill.removeClass('active');
-    $rows.removeClass('do-bilingual-hint-anim');
-
-    // Force CSS reflow to replay single pulse animation
-    if ($pill.length && $pill[0]) void $pill[0].offsetWidth;
-
-    $pill.addClass('active');
-    if ($rows.length) {
-        $rows.addClass('do-bilingual-hint-anim');
-    }
-
-    setTimeout(function() {
-        isSwipeHintAnimating = false;
-        $pill.removeClass('active');
-        $rows.removeClass('do-bilingual-hint-anim');
-    }, 2200);
+    // Désactivé à la demande de l'utilisateur
 }
 
 function stopBilingualSwipeHint() {
@@ -10117,7 +11702,7 @@ function stopBilingualSwipeHint() {
     }
     $(window).off('scroll.bilingualSwipeHint');
     isSwipeHintAnimating = false;
-    $('#doBilingualGestureIndicator').removeClass('active').remove();
+    $('#doBilingualGestureIndicator').remove();
     $('.do-bilingual-row').removeClass('do-bilingual-hint-anim');
 }
 
@@ -10241,48 +11826,6 @@ function closeModals() {
     $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
-}
-
-// ---- Liturgical Dates & Computus for Dropdown ----
-var Dates = {
-    Computus: {
-        getEaster: function (Y) {
-            var C = Math.floor(Y / 100);
-            var N = Y - 19 * Math.floor(Y / 19);
-            var K = Math.floor((C - 17) / 25);
-            var I = C - Math.floor(C / 4) - Math.floor((C - K) / 3) + 19 * N + 15;
-            I = I - 30 * Math.floor((I / 30));
-            I = I - Math.floor(I / 28) * (1 - Math.floor(I / 28) * Math.floor(29 / (I + 1)) * Math.floor((21 - N) / 11));
-            var J = Y + Math.floor(Y / 4) + I + 2 - C + Math.floor(C / 4);
-            J = J - 7 * Math.floor(J / 7);
-            var L = I - J;
-            var Month = 3 + Math.floor((L + 40) / 44);
-            var Day = L + 28 - 31 * Math.floor(Month / 4);
-            return new Date(Y, Month - 1, Day);
-        }
-    }
-};
-
-function getLiturgicalDates(Y) {
-    var result = { year: Y };
-    var easterDate = Dates.Computus.getEaster(Y);
-    result.pascha = moment(easterDate);
-    result.septuagesima = moment(result.pascha).subtract(63, 'days');
-    result.quad1 = moment(result.septuagesima).add(21, 'days');
-    result.ashWednesday = moment(result.pascha).subtract(46, 'days');
-    result.ascension = moment(result.pascha).add(39, 'days');
-    result.pentecost = moment(result.pascha).add(49, 'days');
-    result.corpusChristi = moment(result.pentecost).add(11, 'days');
-    result.sacredHeart = moment(result.pentecost).add(19, 'days');
-    result.nativitas = moment({ year: Y, month: 11, day: 25 });
-    var natDay = result.nativitas.day() || 7;
-    result.advent1 = moment(result.nativitas).subtract(natDay + 21, 'days');
-    result.epiphany = moment({ year: Y, month: 0, day: 6 });
-    result.holyFamily = moment(result.epiphany).add(7 - result.epiphany.day(), 'days');
-    result.ChristusRex = moment({ year: Y, month: 9, day: 31 });
-    result.ChristusRex.subtract(result.ChristusRex.day(), 'days');
-    result.sundaysAfterPentecost = result.advent1.diff(result.pentecost, 'weeks') - 1;
-    return result;
 }
 
 function getDateForLiturgicalKey(key, year) {
@@ -12900,7 +14443,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.56';
+var CURRENT_APP_VERSION = 'beta-0.0.57';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -15673,10 +17216,10 @@ function setupEventListeners() {
             return;
         }
 
-        // Modal / Dialog / Settings panel / Player bar / Header dropdown / Mass TOC summary exception
-        if ($(target).closest('.update-modal, .feedback-modal, .settings-panel, .remote-notif-card, #modernPlayerBar, #headerDropdown, .do-header-dropdown, #doMassTocPanel, #doMassTocBackdrop, #doMassTocPill, .do-mass-toc-panel, .do-mass-toc-backdrop, .do-mass-toc-pill').length ||
+        // Modal / Dialog / Settings panel / Player bar / Header dropdown / Mass TOC summary / Part picker drawer exception
+        if ($(target).closest('.update-modal, .feedback-modal, .settings-panel, .remote-notif-card, #modernPlayerBar, #headerDropdown, .do-header-dropdown, #doMassTocPanel, #doMassTocBackdrop, #doMassTocPill, .do-mass-toc-panel, .do-mass-toc-backdrop, .do-mass-toc-pill, #massPartPickerDrawer, #massPartPickerBackdrop, .do-part-picker-drawer, .do-part-picker-backdrop').length ||
             $('.update-modal:not(.hidden), .feedback-modal:not(.hidden), #settingsPanel.open, #headerDropdown:not(.hidden), #doMassTocPanel:not(.hidden)').length > 0 ||
-            $('body').hasClass('header-dropdown-open') || $('body').hasClass('mass-toc-open')) {
+            $('body').hasClass('header-dropdown-open') || $('body').hasClass('mass-toc-open') || $('body').hasClass('picker-drawer-open')) {
             isTouchActive = false;
             return;
         }
@@ -16317,6 +17860,13 @@ function updateMassTocActiveItem() {
         var playerRect = $player[0].getBoundingClientRect();
         if (playerRect.top > 0 && playerRect.top < vpBottom) {
             vpBottom = playerRect.top;
+        }
+    }
+    var $picker = $('#massPartPickerDrawer:visible');
+    if ($picker.length && $('body').hasClass('picker-drawer-open')) {
+        var pickerRect = $picker[0].getBoundingClientRect();
+        if (pickerRect.top > 0 && pickerRect.top < vpBottom) {
+            vpBottom = pickerRect.top;
         }
     }
 

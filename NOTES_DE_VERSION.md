@@ -1,5 +1,80 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.57 (6 Septembre 2026)
+
+---
+
+### 🎶 Sélecteur Interactif des Pièces de Messe & Kyriale (Chant Tools)
+
+* **Tiroir Inférieur `Bottom Sheet` (`#massPartPickerDrawer`) :**
+  * Nouveau panneau coulissant au design **glassmorphism** — poignée de glissement supérieure, flou d'arrière-plan `backdrop-filter: blur(24px) saturate(180%)`, ombre portée `0 12px 36px`, fermeture fluide par glissement ou appui hors zone, z-index superposé au lecteur.
+  * Intégré à `divinum-officium.html:29` et `css/divinum_officium.css:705` (thème clair/sombre, `color-mix` bordeaux).
+* **Titres Interactifs avec Chevrons Circulaires :**
+  * Remplacement des titres statiques de l'**Ordinaire** (*Asperges, Kyrie, Gloria, Credo, Sanctus, Agnus Dei, Ite*) et du **Propre** (*Introït, Graduel, Alléluia, Trait, Séquence, Offertoire, Communion*) par des en-têtes cliquables dotés d'un **chevron circulaire** (`#doHeaderTitle .dropdown-icon` réutilisé) ouvrant le sélecteur.
+  * Synchronisation d'état `is-active` / `is-transposed` et mise en valeur bordeaux/or de la pièce courante.
+* **Sélecteur de Messe du Kyriale (Messes I à XVIII, Credos I–IV) :**
+  * Choix instantané avec **recalcul dynamique de la partition Exsurge** (`exsurge.js`/`exsurge.min.js` corrigés) et de l'audio synthé, sans rechargement de page.
+  * Persistance immédiate dans `localStorage` + **synchronisation d'URL & deep linking** (`?date=…&hora=missa&ord=1&kyr=2` + pièces spécifiques) pour partage et rétro-compatibilité.
+* **Double Affichage Grille & Ligne :**
+  * **Mode Grille 1:1** avec rendu différé lazy via `IntersectionObserver` — partitions Exsurge vectorielles, badges de mode, bouton écoute et sélection ; **surbrillance thématique** de la pièce active (teinte bordeaux/or, neumes et portées colorés).
+  * **Mode Liste épuré** — liste compacte avec extrait textuel 2 lignes (`-webkit-line-clamp: 2`) et pastilles filtres scrollables.
+* **Bascule Ton Psalmodié (℣) & Accordéon Liturgique :**
+  * Pastille d'accès rapide **℣** en coin d'application pour basculer instantanément n'importe quelle pièce en **formule psalmodiée** (`psalm toned`).
+  * Accordéon interne GABC avec déplié/replié animé et restitution fidèle des rubriques `℣/℟/+/∗`.
+
+---
+
+### 📜 Versets Ad Libitum sous les Partitions GABC
+
+* **Accordéon Dépliable Discret :**
+  * Affichage sous la partition GABC des **versets additionnels ad libitum** (`inVerses`, `ofVerses`, `coVerses` issus de `propers.html` / `propersdata.js`) — replié par défaut avec flèche d'expansion `⌄`.
+  * **Rendu musical vectoriel direct** via Exsurge si GABC disponible, sinon **repli textuel propre** avec distinction latine (rubrique) / vernaculaire et **clic pour écouter / afficher**.
+  * Intégration `js/divinum_officium.js:2356` — génération automatique sans fichier supplémentaire, lazy et mémorisé.
+
+---
+
+### ⚡ En-tête Fluide & Élimination de l'état « Oneratur... »
+
+* **Suppression Définitive du Flash `Oneratur...` :**
+  * Retrait du libellé intermédiaire `Oneratur...` et de la date statique `Vesperæ • 24 Augusti` du HTML d'en-tête mobile/desktop.
+  * **Chargement dynamique instantané** des titres (`#doHeaderTitle`, `#doHeaderSubtitle`) avec état neutre épuré `is-header-loading` — aucune saccade, aucun faux texte.
+  * Calage des marges (`padding-top: env(safe-area-inset-top)`, `margin-top: 14px`) et correction du **rognage d'icône à gauche sur Android** (`sw.js` cache bust).
+
+---
+
+### 🎼 Correctifs Rendu Exsurge & Lettrines (Drop Caps)
+
+* **Prise en Charge sans Régression des Symboles Rubriques (`exsurge.js:4`) :**
+  * `generateDropCap()` étendu pour `℣, ℟, +, ∗` — évite les lettrines manquantes, décalées ou tronquées sur les introïts et antiennes avec verset psalmique.
+  * Tests de régression sur `gregobase` +10 000 GABC validés.
+
+---
+
+### 📅 Perfectionnement du Calendrier Liturgique & Comput 1962
+
+* **Révision Complète `computeLiturgicalCodes` / `getLiturgicalDates` (`js/divinum_officium.js`) :**
+  * Harmonisation rigoureuse des **occurrences et concurrences** selon les rubriques 1962 — préséance Temporal vs Sanctoral, commémoraisons, octave et vigiles.
+  * ** `getSeasonForMoment()` ** recalibré — détection des saisons (Avent, Noël, Épiphanie, Septuagésime, Carême, Passion, Pâques, Pentecôte) alignée sur le comput officiel.
+
+---
+
+### 🤖 Pipeline d'Alignement Grégorien & Indexation
+
+* **Automatisation Complète (`pipeline/align/`) :**
+  * `batch_align_gabc_v3.py`, `extract_exsurge_notes.js`, `run_full_alignment.py` — extraction des notes Exsurge, génération des `*_gabc_data.json` et `final_timestamps/*_stamps.json` fidèles (11,13,14,17,25…).
+  * `lab_5_pieces.json` / `lab_data.js` enrichis (+94k lignes), `pipeline/alignment-lab.html` mis à jour pour audit visuel des alignements.
+  * Indexation `gregobase_index.json` préparée pour recherche instantanée.
+
+---
+
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.57'`, `versionCode 57` / `versionName "beta-0.0.57"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.57`, `releaseDate 2026-09-06T20:25:00Z`) et `package.json` (`0.0.57`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.16 → v1.3.17` (`sw.js`).
+* Nettoyage dépôt : exclusion des temporaires `scratch_14_*.json/.wav` et `pipeline/align/final_timestamps/107…` non suivis.
+
+---
+
 ## 🚀 Version 0.0.56 (4 Septembre 2026)
 
 ---

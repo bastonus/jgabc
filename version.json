@@ -1,9 +1,9 @@
 {
-  "latestVersion": "beta-0.0.56",
-  "versionCode": 56,
-  "releaseDate": "2026-09-04T20:05:00Z",
-  "tagName": "v0.0.56",
-  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.56/Oremus.apk",
-  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.56",
-  "body": "Release v0.0.56 — Correctifs majeurs du lecteur audio & synthétiseur GABC (scheduler haute précision, progression pondérée, continuité de lecture)"
+  "latestVersion": "beta-0.0.57",
+  "versionCode": 57,
+  "releaseDate": "2026-09-06T20:25:00Z",
+  "tagName": "v0.0.57",
+  "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.57/Oremus.apk",
+  "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.57",
+  "body": "Release v0.0.57 — Sélecteur interactif du Kyriale & Chant Tools, Versets ad libitum, en-tête fluide"
 }

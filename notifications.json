@@ -1,8 +1,64 @@
 {
-  "version": "1.0.4",
-  "updatedAt": "2026-09-04T20:05:00Z",
+  "version": "1.0.5",
+  "updatedAt": "2026-09-06T20:25:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.57",
+      "enabled": true,
+      "priority": 150,
+      "platforms": ["all"],
+      "minVersion": "beta-0.0.57",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.57",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.57 : Sélecteur interactif du Kyriale & Chant Tools (Messes I–XVIII, Credos, ton psalmodié), versets ad libitum sous GABC, et en-tête fluide sans flash Oneratur.",
+      "cancelsNotifications": ["notif-release-beta-0.0.56", "notif-release-beta-0.0.55", "notif-release-beta-0.0.54", "notif-release-beta-0.0.53", "notif-release-beta-0.0.52", "notif-release-beta-0.0.51", "notif-release-beta-0.0.50", "notif-release-beta-0.0.49", "notif-release-beta-0.0.48", "notif-release-beta-0.0.47", "notif-release-beta-0.0.46", "notif-release-beta-0.0.45", "notif-release-beta-0.0.44", "notif-release-beta-0.0.43", "notif-release-beta-0.0.42", "notif-release-beta-0.0.41", "notif-release-beta-0.0.40", "notif-release-beta-0.0.39", "notif-release-beta-0.0.38", "notif-oremus-welcome-v1"],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.57 : Sélecteur Kyriale & Chant Tools · Versets Ad Libitum · En-tête Fluide",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.57)",
+        "subtitle": "Sélecteur Kyriale & Chant Tools · Versets Ad Libitum · En-tête Fluide",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés de la v0.0.57",
+            "content": "<ul><li><strong>Sélecteur Interactif des Pièces & Kyriale :</strong> Tiroir bottom sheet glassmorphism avec chevrons circulaires — Messes I à XVIII & Credos I–IV, recalcul Exsurge instantané, grille 1:1 lazy & liste, surbrillance bordeaux/or, ton psalmodié ℣ et deep linking URL.</li><li><strong>Versets Ad Libitum :</strong> Accordéon discret sous GABC (inVerses/ofVerses/coVerses) — rendu vectoriel ou texte cliquable pour écouter.</li><li><strong>En-tête Fluide :</strong> Suppression du flash Oneratur… et de la date statique, chargement neutre instantané sans rognage Android.</li><li><strong>Correctifs Exsurge :</strong> Lettrines ℣/℟/+/∗ sans régression, et calendrier 1962 harmonisé (computeLiturgicalCodes, getSeasonForMoment).</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.56",
+            "content": "<ul><li><strong>Synthétiseur GABC Haute Précision :</strong> Scheduler sans gel à 1×, barre verrouillée et continuité de lecture au repli du tiroir.</li><li><strong>Synchro Vidéo :</strong> Désactivée par défaut, message GABC seul explicite.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour tous vos précieux retours",
+            "content": "Un grand merci à tous les testeurs ! Vos suggestions continuent de guider activement le développement d'Oremus."
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.56",
       "enabled": true,

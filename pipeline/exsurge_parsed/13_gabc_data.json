@@ -1,9 +1,9 @@
 [
   {
     "word_index": 0,
-    "word": "Mnis",
+    "word": "OMnis",
     "raw_lyrics": "Mnis",
-    "clean_latin": "mnis",
+    "clean_latin": "omnis",
     "is_melisma": false,
     "total_weight": 6,
     "notes": [
@@ -1082,7 +1082,7 @@
   {
     "word_index": 27,
     "word": "E",
-    "raw_lyrics": "<eu>E",
+    "raw_lyrics": "E",
     "clean_latin": "e",
     "is_melisma": false,
     "total_weight": 1,
@@ -1174,7 +1174,7 @@
   {
     "word_index": 32,
     "word": "e",
-    "raw_lyrics": "e.</eu>",
+    "raw_lyrics": "e.",
     "clean_latin": "e",
     "is_melisma": false,
     "total_weight": 1.9,

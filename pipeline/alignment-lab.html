@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Studio d'Alignement & Révision GABC ↔ YouTube — Oremus</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +15,7 @@
 <link rel="stylesheet" href="../../css/divinum_officium.css">
 <script src="../../jquery.min.js"></script>
 <script src="../../exsurge.min.js"></script>
-<script src="lab_data.js"></script>
+<script src="lab_data.js?v=20260906_1535"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <style>
@@ -1899,11 +1902,14 @@ function buildPriorBar(piece, info) {
 
   const timestamps = getActiveTimestamps();
   if (timestamps && timestamps.length > 0) {
-    const totalDuration = piece.audio_duration || timestamps[timestamps.length - 1].end || 1;
+    const sungStamps = timestamps.filter(t => t.start !== null && t.start !== undefined);
+    const lastEnd = sungStamps.length > 0 ? sungStamps[sungStamps.length - 1].end : 1;
+    const totalDuration = piece.audio_duration || lastEnd || 1;
     timestamps.forEach((ts, idx) => {
       const seg = document.createElement('div');
       seg.className = 'prior-segment';
-      const pct = (ts.duration / totalDuration) * 100;
+      const dur = (ts.duration !== null && ts.duration !== undefined) ? ts.duration : 0;
+      const pct = (dur / totalDuration) * 100;
       seg.style.width = Math.max(0.2, pct) + '%';
       const colIdx = Math.floor((idx / timestamps.length) * WORD_COLORS.length);
       seg.style.backgroundColor = WORD_COLORS[colIdx % WORD_COLORS.length];
@@ -1911,9 +1917,11 @@ function buildPriorBar(piece, info) {
       if (ts.is_corrected && currentCorrectionMode === 'corrected') {
         seg.style.borderTop = '2px solid var(--primary-color)';
       }
-      seg.title = '#' + (idx+1) + ' ' + ts.word + (ts.is_corrected ? ' [Corrigée GABC]' : '') + ' (' + ts.token + ') : ' + ts.start.toFixed(2) + 's -> ' + ts.end.toFixed(2) + 's';
+      const stStr = (ts.start !== null && ts.start !== undefined) ? ts.start.toFixed(2) + 's' : 'omise';
+      const enStr = (ts.end !== null && ts.end !== undefined) ? ts.end.toFixed(2) + 's' : 'omise';
+      seg.title = '#' + (idx+1) + ' ' + (ts.word || '') + (ts.is_corrected ? ' [Corrigée GABC]' : '') + ' (' + (ts.token || '') + ') : ' + stStr + ' -> ' + enStr;
       seg.onclick = function() {
-        if (ytPlayer && ytReady) ytPlayer.seekTo(ts.start, true);
+        if (ts.start !== null && ts.start !== undefined && ytPlayer && ytReady) ytPlayer.seekTo(ts.start, true);
         highlightNote(idx);
       };
       track.appendChild(seg);
@@ -1964,7 +1972,9 @@ function buildStudioNoteTable() {
     if (i === activeNoteIndex) tr.classList.add('active-row');
 
     const ts = timestamps[i] || { token: '—', word: '—', start: 0, end: 0, duration: 0 };
-    const durMs = Math.round(ts.duration * 1000);
+    const durMs = (ts.duration !== null && ts.duration !== undefined) ? Math.round(ts.duration * 1000) + ' ms' : 'omise';
+    const startVal = (ts.start !== null && ts.start !== undefined) ? ts.start.toFixed(2) : '';
+    const endVal = (ts.end !== null && ts.end !== undefined) ? ts.end.toFixed(2) : '';
     const corrBadge = (ts.is_corrected && currentCorrectionMode === 'corrected')
       ? `<span class="note-corrected-badge" title="Corrigée par calcul local GABC">✨ GABC</span>`
       : '';
@@ -1973,26 +1983,26 @@ function buildStudioNoteTable() {
       <td style="font-family:monospace; color:var(--text-tertiary); cursor:pointer;" onclick="selectNoteFromStudio(${i})">${i+1}</td>
       <td>
         <div style="display:flex; align-items:center; gap:4px;">
-          <input type="text" class="note-input" style="width:85px;" value="${ts.word}" onchange="updateNoteWord(${i}, this.value)">
+          <input type="text" class="note-input" style="width:85px;" value="${ts.word || ''}" onchange="updateNoteWord(${i}, this.value)">
           ${corrBadge}
         </div>
       </td>
-      <td><input type="text" class="note-input" style="width:45px;" value="${ts.token}" onchange="updateNoteToken(${i}, this.value)"></td>
+      <td><input type="text" class="note-input" style="width:45px;" value="${ts.token || ''}" onchange="updateNoteToken(${i}, this.value)"></td>
       <td>
         <div style="display:flex; align-items:center; gap:3px;">
           <button class="nudge-btn" onclick="nudgeNote(${i}, 'start', -0.05)">-</button>
-          <input type="number" step="0.01" class="note-input" value="${ts.start.toFixed(2)}" onchange="updateNoteTime(${i}, 'start', parseFloat(this.value))">
+          <input type="number" step="0.01" class="note-input" value="${startVal}" placeholder="omise" onchange="updateNoteTime(${i}, 'start', parseFloat(this.value))">
           <button class="nudge-btn" onclick="nudgeNote(${i}, 'start', +0.05)">+</button>
         </div>
       </td>
       <td>
         <div style="display:flex; align-items:center; gap:3px;">
           <button class="nudge-btn" onclick="nudgeNote(${i}, 'end', -0.05)">-</button>
-          <input type="number" step="0.01" class="note-input" value="${ts.end.toFixed(2)}" onchange="updateNoteTime(${i}, 'end', parseFloat(this.value))">
+          <input type="number" step="0.01" class="note-input" value="${endVal}" placeholder="omise" onchange="updateNoteTime(${i}, 'end', parseFloat(this.value))">
           <button class="nudge-btn" onclick="nudgeNote(${i}, 'end', +0.05)">+</button>
         </div>
       </td>
-      <td style="font-family:monospace; color:var(--text-secondary);">${durMs} ms</td>
+      <td style="font-family:monospace; color:var(--text-secondary);">${durMs}</td>
       <td>
         <div style="display:flex; align-items:center; gap:4px;">
           <button class="studio-sm-btn" onclick="playNoteLoop(${i})" title="Écouter cette note en boucle">🔁</button>
@@ -2285,69 +2295,93 @@ function resetToAI() {
 
 // ── 9. YouTube Player & Real-time Synchronization Loop ──
 function initYouTubePlayer(videoId) {
-  if (!window.YT || !window.YT.Player) {
-    setTimeout(() => initYouTubePlayer(videoId), 200);
-    return;
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
   }
+  if (loopInterval) {
+    clearInterval(loopInterval);
+    loopInterval = null;
+  }
+  isPlaying = false;
+  ytReady = false;
+
+  const playIcon = document.getElementById('iconPlay');
+  const pauseIcon = document.getElementById('iconPause');
+  if (playIcon) playIcon.style.display = 'block';
+  if (pauseIcon) pauseIcon.style.display = 'none';
 
   if (ytPlayer && typeof ytPlayer.destroy === 'function') {
     try { ytPlayer.destroy(); } catch(e) {}
     ytPlayer = null;
-    ytReady = false;
   }
 
-  document.getElementById('ytPlayerSlot').innerHTML = '';
+  const wrapper = document.querySelector('.video-wrapper');
+  if (!wrapper) return;
 
   if (!videoId) {
-    document.getElementById('ytPlayerSlot').innerHTML = `
+    wrapper.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-tertiary); font-size:13px; text-align:center; padding:20px;">
         <span style="font-size:24px; margin-bottom:8px;">🎬</span>
         <span>Aucune vidéo liée pour cette pièce (lien retiré ou en attente d'une version certifiée).</span>
-        <button class="btn btn-sm btn-primary" style="margin-top:12px;" onclick="openProposeYtModal()">Proposer une vidéo certifiée</button>
+        <button class="btn btn-sm btn-primary" style="margin-top:12px;" onclick="openProposeModal()">Proposer une vidéo certifiée</button>
       </div>`;
-    ytReady = false;
     updateTimeDisplays();
     return;
   }
 
-  ytPlayer = new YT.Player('ytPlayerSlot', {
-    videoId: videoId,
-    playerVars: {
-      autoplay: 0,
-      controls: 1,
-      modestbranding: 1,
-      rel: 0,
-      playsinline: 1
-    },
-    events: {
-      onReady: function() {
-        ytReady = true;
-        if (currentPlaybackSpeed !== 1.0) {
-          try { ytPlayer.setPlaybackRate(currentPlaybackSpeed); } catch(e) {}
-        }
-        updateTimeDisplays();
-      },
-      onStateChange: function(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-          isPlaying = true;
-          document.getElementById('iconPlay').style.display = 'none';
-          document.getElementById('iconPause').style.display = 'block';
-          startProgressLoop();
-        } else {
-          isPlaying = false;
-          document.getElementById('iconPlay').style.display = 'block';
-          document.getElementById('iconPause').style.display = 'none';
-          if (loopInterval && event.data !== YT.PlayerState.PLAYING) {
-            clearInterval(loopInterval);
-            loopInterval = null;
-          }
-          if (event.data === YT.PlayerState.ENDED) {
-            seekToFraction(0);
-          }
-        }
-      }
+  const originParam = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+    ? ('&origin=' + encodeURIComponent(window.location.origin))
+    : '';
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1${originParam}`;
+
+  wrapper.innerHTML = `<iframe id="ytPlayerSlot" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>`;
+
+  function attachPlayer() {
+    if (!window.YT || !window.YT.Player) {
+      setTimeout(attachPlayer, 150);
+      return;
     }
-  });
+    try {
+      ytPlayer = new YT.Player('ytPlayerSlot', {
+        events: {
+          onReady: function(event) {
+            ytReady = true;
+            if (currentPlaybackSpeed !== 1.0) {
+              try { ytPlayer.setPlaybackRate(currentPlaybackSpeed); } catch(e) {}
+            }
+            updateTimeDisplays();
+          },
+          onStateChange: function(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+              isPlaying = true;
+              if (playIcon) playIcon.style.display = 'none';
+              if (pauseIcon) pauseIcon.style.display = 'block';
+              startProgressLoop();
+            } else {
+              isPlaying = false;
+              if (playIcon) playIcon.style.display = 'block';
+              if (pauseIcon) pauseIcon.style.display = 'none';
+              if (loopInterval && event.data !== YT.PlayerState.PLAYING) {
+                clearInterval(loopInterval);
+                loopInterval = null;
+              }
+              if (event.data === YT.PlayerState.ENDED) {
+                seekToFraction(0);
+              }
+            }
+          }
+        }
+      });
+    } catch(err) {
+      console.warn('YT.Player attach error:', err);
+    }
+  }
+
+  attachPlayer();
+  seekToFraction(0);
+  highlightNote(0);
+  updateTimeDisplays();
 }
 
 function startProgressLoop() {
@@ -2375,7 +2409,7 @@ function startProgressLoop() {
             // Filtrer la liste des indices de notes chantées dans la partition
             var sungIndices = [];
             for (var s = 0; s < timestamps.length; s++) {
-              if (timestamps[s].sung !== false) {
+              if (timestamps[s].sung !== false && !timestamps[s].omitted && timestamps[s].start !== null && timestamps[s].start !== undefined) {
                 sungIndices.push(s);
               }
             }
@@ -2451,10 +2485,15 @@ function startProgressLoop() {
             var hudReprise = document.getElementById('hudRepriseContainer');
             if (hudReprise) {
               hudReprise.style.display = isReprise ? 'flex' : 'none';
-              if (isReprise && pInfo && pInfo.reprise && pInfo.reprise.reprise_after_section === "verse") {
+              if (isReprise && cur >= pInfo.reprise.end) {
+                hudReprise.querySelector('.hud-value').textContent = "⏹️ Fin du Chant (Silence)";
+                hudReprise.querySelector('.hud-value').style.color = "#9ca3af";
+              } else if (isReprise && pInfo && pInfo.reprise && pInfo.reprise.reprise_after_section === "verse") {
                 hudReprise.querySelector('.hud-value').textContent = "🔁 Reprise du Refrain (après le Verset)";
+                hudReprise.querySelector('.hud-value').style.color = "#10b981";
               } else if (isReprise) {
                 hudReprise.querySelector('.hud-value').textContent = "🔁 Reprise du Refrain (après Doxologie)";
+                hudReprise.querySelector('.hud-value').style.color = "#10b981";
               }
             }
 
@@ -2878,17 +2917,29 @@ function loadPiece(index) {
   // Metadata headers
   document.getElementById('scorePartBadge').textContent = (piece.part || 'Chant').toUpperCase();
   document.getElementById('scoreChantTitle').textContent = piece.incipit;
-  document.getElementById('ytSourceBadge').textContent = '▶ ' + (piece.source || 'YouTube');
+  document.getElementById('ytSourceBadge').textContent = '▶ ' + (piece.source || 'YouTube') + ' (' + piece.youtube_id + ')';
   document.getElementById('rawGabcBox').textContent = piece.gabc_src;
 
-  // Render Gregorian score via Exsurge
-  renderPieceScore(piece);
+  // 1. Load YouTube video FIRST (instant visual switch)
+  try {
+    initYouTubePlayer(piece.youtube_id);
+  } catch(e) {
+    console.error('[AlignmentLab] initYouTubePlayer error:', e);
+  }
 
-  // Load YouTube video
-  initYouTubePlayer(piece.youtube_id);
+  // 2. Render Gregorian score via Exsurge
+  try {
+    renderPieceScore(piece);
+  } catch(e) {
+    console.error('[AlignmentLab] renderPieceScore error:', e);
+  }
 
-  // Update correction mode toggle and calculations badge
-  updateCorrectionModeUI();
+  // 3. Update correction mode toggle and calculations badge
+  try {
+    updateCorrectionModeUI();
+  } catch(e) {
+    console.error('[AlignmentLab] updateCorrectionModeUI error:', e);
+  }
 }
 
 // ── 13. Initialization ──

@@ -1,9 +1,9 @@
 [
   {
     "word_index": 0,
-    "word": "Llelúia",
+    "word": "ALlelúia",
     "raw_lyrics": "Llelúia.",
-    "clean_latin": "lleluia",
+    "clean_latin": "alleluia",
     "is_melisma": false,
     "total_weight": 17.599999999999998,
     "notes": [
@@ -478,7 +478,7 @@
   {
     "word_index": 5,
     "word": "VAmávit",
-    "raw_lyrics": "V.. Amávit",
+    "raw_lyrics": "V. Amávit",
     "clean_latin": "vamavit",
     "is_melisma": false,
     "total_weight": 7.9,

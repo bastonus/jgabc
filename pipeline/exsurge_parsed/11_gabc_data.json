@@ -1,9 +1,9 @@
 [
   {
     "word_index": 0,
-    "word": "Apiéntiam",
+    "word": "SApiéntiam",
     "raw_lyrics": "Apiéntiam",
-    "clean_latin": "apientiam",
+    "clean_latin": "sapientiam",
     "is_melisma": false,
     "total_weight": 6,
     "notes": [
@@ -996,7 +996,7 @@
   {
     "word_index": 25,
     "word": "E",
-    "raw_lyrics": "<eu>E",
+    "raw_lyrics": "E",
     "clean_latin": "e",
     "is_melisma": false,
     "total_weight": 1,
@@ -1094,7 +1094,7 @@
   {
     "word_index": 30,
     "word": "e",
-    "raw_lyrics": "e.</eu>",
+    "raw_lyrics": "e.",
     "clean_latin": "e",
     "is_melisma": false,
     "total_weight": 1.9,

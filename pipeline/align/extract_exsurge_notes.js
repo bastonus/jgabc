@@ -48,15 +48,31 @@ function cleanLatinWord(w) {
   return s;
 }
 
-const pieces = ['5', '11', '13', '14', '15'];
+function preprocessGabc(gabc) {
+  return gabc
+    .replace(/<eu>([\s\S]*?)<\/eu>/gi, (m, inner) => inner.replace(/(^|\))([^()]+)(?=\(|$)/g, (m2, cp, txt) => cp + ' ' + txt.trim() + ' '))
+    .replace(/<\/?eu>/gi, '')
+    .replace(/\[[ou]?ll:[^\]]*\]/ig, '')
+    .replace(/\[(?:cs|alt|nobar)[^\]]*\]/ig, '')
+    .replace(/<sp>([VRA])\/?<\/sp>\.?/gi, (m, b) => b.toUpperCase() + '/.')
+    .replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1Ps.')
+    .replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1Ps.')
+    .replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1V/.')
+    .replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1R/.')
+    .replace(/(^|\s|\))<i>\s*(?:Extra\s+)?T\.?\s*P\.?\s*<\/i>/gi, '$1T. P.');
+}
+
+const pieces = ['11', '13', '14', '17', '25'];
 const outDir = 'd:/Documents/jgabc/pipeline/exsurge_parsed';
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
 for (const pid of pieces) {
   let gabcPath = `d:/Documents/jgabc/gabc/${pid}.gabc`;
   let gabcSrc = fs.readFileSync(gabcPath, 'utf8');
-  let mappings = exsurge.Gabc.createMappingsFromSource(ctxt, gabcSrc);
+  let processed = preprocessGabc(gabcSrc);
+  let mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
   let score = new exsurge.ChantScore(ctxt, mappings, true);
+  let dropCap = (score.useDropCap && score.dropCap && score.dropCap.sourceGabc) ? score.dropCap.sourceGabc.trim() : '';
   
   let words = [];
   let currentWord = { word: '', raw_lyrics: '', notes: [] };
@@ -99,6 +115,10 @@ for (const pid of pieces) {
     
     if (isWordEnd || isDivider) {
       if (currentWord.notes.length > 0) {
+        if (dropCap && currentWord.word) {
+          currentWord.word = dropCap + currentWord.word;
+          dropCap = '';
+        }
         let cleanLat = cleanLatinWord(currentWord.word);
         words.push({
           word_index: words.length,
@@ -115,6 +135,10 @@ for (const pid of pieces) {
   });
   
   if (currentWord.notes.length > 0) {
+    if (dropCap && currentWord.word) {
+      currentWord.word = dropCap + currentWord.word;
+      dropCap = '';
+    }
     let cleanLat = cleanLatinWord(currentWord.word);
     words.push({
       word_index: words.length,

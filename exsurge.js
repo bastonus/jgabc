@@ -1638,7 +1638,7 @@
                                 (this.textColor = "#000"),
                                 this.setFont("'Palatino Linotype', 'Book Antiqua', Palatino, serif", 16),
                                 (this.rubricColor = "#d00"),
-                                (this.specialCharProperties = { fill: this.rubricColor, class: "rubric" }),
+                                (this.specialCharProperties = { "font-family": "'Exsurge Characters'", fill: this.rubricColor, class: "rubric" }),
                                 (this.textBeforeSpecialChar = ""),
                                 (this.textAfterSpecialChar = "."),
                                 (this.specialCharMap = { "℣": "℣", "℟": "℟", "V": "V", "R": "R", "+": "+", "*": "*" }),
@@ -3034,7 +3034,7 @@
                                     key: "generateDropCap",
                                     value: function (t) {
                                         if (this.dropCap) return this.dropCap;
-                                        if (this.spans[0].properties["font-family"] === t.specialCharProperties["font-family"]) return null;
+                                        if (this.spans[0].properties["font-family"] && this.spans[0].properties["font-family"] === t.specialCharProperties["font-family"]) return null;
                                         var e = this.spans[0].clone();
                                         e.text = e.text.slice(0, 1).toUpperCase();
                                         var i = e.text.toLowerCase();
