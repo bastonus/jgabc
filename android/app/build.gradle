@@ -79,6 +79,12 @@ task copyWebAssets(type: Copy) {
         include "util.js"
         include "exsurge.min.js"
         include "jquery.hypher.js"
+        include "psalmtone.js"
+        include "verseRef.js"
+        include "psalmMap.json"
+        include "canticumMap.json"
+        include "Caeciliae-Staffless.ttf"
+        include "Caeciliae-Staffless-print.ttf"
         include "do_manifest.js"
 
         include "css/modern.css"

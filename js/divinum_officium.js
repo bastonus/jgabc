@@ -6659,135 +6659,211 @@ function initDoPlayer() {
     window.syncPlayerBarOffset = syncPlayerBarOffset;
     window.addEventListener('resize', syncPlayerBarOffset);
 
-    // Swipe down to dismiss grab handle / player bar gesture (progressive like sidebar drawer)
+    // Swipe down to dismiss grab handle / player bar gesture & upward stretch to fluidly reveal sources
     (function initSwipeToClose() {
         var playerBar = document.getElementById('modernPlayerBar');
         if (!playerBar) return;
         var startY = 0, currentY = 0, startTime = 0, isDragging = false;
+        var isDrawerOpenAtStart = false;
+
+        function handleDragStart(clientY, target) {
+            startY = clientY;
+            currentY = startY;
+            startTime = Date.now();
+            isDragging = true;
+            isDrawerOpenAtStart = $('#playerVideoDrawer').hasClass('is-open');
+            $('body').addClass('is-dragging-player');
+            playerBar.style.setProperty('transition', 'none', 'important');
+            document.documentElement.style.setProperty('--player-drag-y', '0px');
+        }
+
+        function handleDragMove(deltaY, e) {
+            var drawerEl = document.getElementById('playerVideoDrawer');
+            if (!isDrawerOpenAtStart) {
+                // Drawer was closed at start
+                if (deltaY > 0) {
+                    if (e && e.cancelable) e.preventDefault();
+                    // Direct 1:1 progressive follow-through downward to dismiss
+                    var barH = playerBar.offsetHeight || 140;
+                    var progress = Math.min(1, Math.max(0, deltaY / barH));
+                    var opacity = 1 - (progress * 0.7);
+                    playerBar.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
+                    playerBar.style.setProperty('opacity', opacity.toFixed(3), 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', deltaY + 'px');
+                } else {
+                    if (e && e.cancelable) e.preventDefault();
+                    // Upward stretch: progressively expand the video drawer under finger
+                    var dragUp = -deltaY;
+                    var targetH = Math.min(260, dragUp * 1.15);
+                    if (drawerEl) {
+                        drawerEl.style.setProperty('display', 'block', 'important');
+                        drawerEl.style.setProperty('transition', 'none', 'important');
+                        drawerEl.style.setProperty('max-height', targetH + 'px', 'important');
+                        drawerEl.style.setProperty('height', targetH + 'px', 'important');
+                        drawerEl.style.setProperty('opacity', Math.min(1, targetH / 90).toFixed(3), 'important');
+                        drawerEl.style.setProperty('padding-top', Math.min(10, targetH / 10) + 'px', 'important');
+                        drawerEl.style.setProperty('margin-top', Math.min(4, targetH / 20) + 'px', 'important');
+                        drawerEl.style.setProperty('border-top', '1px solid var(--border-color, rgba(255,255,255,0.1))', 'important');
+                    }
+                    playerBar.style.setProperty('transform', 'translateY(0px)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+                }
+            } else {
+                // Drawer was already open at start
+                if (deltaY > 0) {
+                    if (e && e.cancelable) e.preventDefault();
+                    // Dragging DOWN -> progressively collapse video drawer
+                    var fullH = drawerEl ? (drawerEl.scrollHeight || 220) : 220;
+                    var targetH = Math.max(0, fullH - deltaY * 1.15);
+                    if (drawerEl) {
+                        drawerEl.style.setProperty('transition', 'none', 'important');
+                        drawerEl.style.setProperty('max-height', targetH + 'px', 'important');
+                        drawerEl.style.setProperty('height', targetH + 'px', 'important');
+                        drawerEl.style.setProperty('opacity', Math.max(0, targetH / fullH).toFixed(3), 'important');
+                    }
+                    playerBar.style.setProperty('transform', 'translateY(0px)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+                } else {
+                    // Dragging UP further -> gentle elastic resistance
+                    var resistanceY = deltaY * 0.15;
+                    playerBar.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', resistanceY + 'px');
+                }
+            }
+        }
+
+        function handleDragEnd(deltaY, dt, isHandleTap) {
+            isDragging = false;
+            $('body').removeClass('is-dragging-player');
+            playerBar.style.removeProperty('transition');
+            var vy = deltaY / dt; // velocity in px/ms
+            var barH = playerBar.offsetHeight || 140;
+
+            if (!isDrawerOpenAtStart) {
+                // Drawer was closed
+                if (deltaY < -36 || (deltaY < -15 && vy < -0.2)) {
+                    // User dragged upward enough -> open video drawer fluidly!
+                    if (typeof openPlayerVideoDrawer === 'function') {
+                        openPlayerVideoDrawer(true);
+                    }
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 220);
+                    return;
+                } else if (deltaY < 0) {
+                    // Upward stretch aborted -> smoothly collapse back
+                    if (typeof closePlayerVideoDrawer === 'function') {
+                        closePlayerVideoDrawer(false);
+                    }
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 220);
+                    return;
+                }
+
+                // Downward pull on compact player -> dismiss if past threshold
+                if (deltaY > barH * 0.15 || deltaY > 20 || (deltaY > 10 && vy > 0.25) || isHandleTap) {
+                    triggerHapticFeedback('light');
+                    playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(100%)', 'important');
+                    playerBar.style.setProperty('opacity', '0', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', (playerBar.offsetHeight || 140) + 'px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                        document.documentElement.style.setProperty('--player-drag-y', '0px');
+                        closeDoPlayer();
+                    }, 220);
+                } else {
+                    // Smooth snap back
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 200);
+                }
+            } else {
+                // Drawer was open
+                if (deltaY > 36 || (deltaY > 15 && vy > 0.2) || isHandleTap) {
+                    // User pulled downward -> close video drawer, keeping player docked
+                    if (typeof closePlayerVideoDrawer === 'function') {
+                        closePlayerVideoDrawer(true);
+                    }
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 220);
+                    return;
+                } else {
+                    // Restore open state
+                    if (typeof openPlayerVideoDrawer === 'function') {
+                        openPlayerVideoDrawer(false);
+                    }
+                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
+                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
+                    playerBar.style.setProperty('opacity', '1', 'important');
+                    document.documentElement.style.setProperty('--player-drag-y', '0px');
+                    setTimeout(function() {
+                        playerBar.style.removeProperty('transition');
+                        playerBar.style.removeProperty('transform');
+                        playerBar.style.removeProperty('opacity');
+                    }, 200);
+                    return;
+                }
+            }
+        }
 
         function onTouchStart(e) {
             if (!e.touches || e.touches.length !== 1) return;
-            // Only start if touching the grab handle area, the player bar background or title
             var target = e.target;
             if (!$(target).closest('#playerDragHandleWrap, #playerDragHandle, .do-player-top-row, .do-player-name-wrapper, .do-player-part-badge').length &&
                 target !== playerBar) {
                 return;
             }
-            startY = e.touches[0].clientY;
-            currentY = startY;
-            startTime = Date.now();
-            isDragging = true;
-            $('body').addClass('is-dragging-player');
-            playerBar.style.setProperty('transition', 'none', 'important');
-            document.documentElement.style.setProperty('--player-drag-y', '0px');
+            handleDragStart(e.touches[0].clientY, target);
         }
 
         function onTouchMove(e) {
             if (!isDragging || !e.touches || !e.touches.length) return;
             currentY = e.touches[0].clientY;
             var deltaY = currentY - startY;
-
-            if (deltaY > 0) {
-                if (e.cancelable) e.preventDefault();
-                // Direct 1:1 progressive follow-through
-                var barH = playerBar.offsetHeight || 140;
-                var progress = Math.min(1, Math.max(0, deltaY / barH));
-                var opacity = 1 - (progress * 0.7);
-                playerBar.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
-                playerBar.style.setProperty('opacity', opacity.toFixed(3), 'important');
-                document.documentElement.style.setProperty('--player-drag-y', deltaY + 'px');
-            } else {
-                // Elastic resistance if dragged upwards
-                var resistanceY = deltaY * 0.25;
-                playerBar.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
-                document.documentElement.style.setProperty('--player-drag-y', resistanceY + 'px');
-            }
+            handleDragMove(deltaY, e);
         }
 
         function onTouchEnd(e) {
             if (!isDragging) return;
-            isDragging = false;
-            $('body').removeClass('is-dragging-player');
-
             var touchEndY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : currentY;
             var deltaY = touchEndY - startY;
             var dt = Math.max(1, Date.now() - startTime);
-            var vy = deltaY / dt; // velocity in px/ms
-            var barH = playerBar.offsetHeight || 140;
-
-            playerBar.style.removeProperty('transition');
-
             var isTap = (Math.abs(deltaY) < 6 && dt < 300);
             var isHandleTap = isTap && $(e.target).closest('#playerDragHandleWrap, #playerDragHandle').length > 0;
-
-            // Upward drag beyond threshold → auto-press Videos button (open sources)
-            var THRESH_UP = 48;
-            var THRESH_DOWN_CLOSE = 32;
-            if (deltaY < -THRESH_UP && !isTap) {
-                var $videoBtn = $('#playerBtnExpandVideos');
-                var $videoDrawer = $('#playerVideoDrawer');
-                if ($videoDrawer.is(':hidden') && $videoBtn.is(':visible')) {
-                    triggerHapticFeedback('light');
-                    $videoBtn.trigger('click');
-                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
-                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
-                    playerBar.style.setProperty('opacity', '1', 'important');
-                    document.documentElement.style.setProperty('--player-drag-y', '0px');
-                    setTimeout(function() {
-                        playerBar.style.removeProperty('transition');
-                        playerBar.style.removeProperty('transform');
-                        playerBar.style.removeProperty('opacity');
-                    }, 200);
-                    return;
-                }
-            }
-            // Downward drag when sources open → close sources instead of dismissing player
-            if (deltaY > THRESH_DOWN_CLOSE && !isTap) {
-                var $drawerOpen = $('#playerVideoDrawer');
-                var $pitchOpen = $('#playerPitchDrawer');
-                if ($drawerOpen.is(':visible') || $pitchOpen.is(':visible')) {
-                    triggerHapticFeedback('light');
-                    if ($drawerOpen.is(':visible')) $('#playerBtnExpandVideos').trigger('click');
-                    else if ($pitchOpen.is(':visible')) closeDoPitchBubble();
-                    playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
-                    playerBar.style.setProperty('transform', 'translateY(0)', 'important');
-                    playerBar.style.setProperty('opacity', '1', 'important');
-                    document.documentElement.style.setProperty('--player-drag-y', '0px');
-                    setTimeout(function() {
-                        playerBar.style.removeProperty('transition');
-                        playerBar.style.removeProperty('transform');
-                        playerBar.style.removeProperty('opacity');
-                    }, 200);
-                    return;
-                }
-            }
-
-            // Dismiss if pulled down > 15% of player height (approx 20-25px) OR flick down (vy > 0.25) OR simply tapped the grab handle
-            if (deltaY > barH * 0.15 || deltaY > 20 || (deltaY > 10 && vy > 0.25) || isHandleTap) {
-                triggerHapticFeedback('light');
-                playerBar.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
-                playerBar.style.setProperty('transform', 'translateY(100%)', 'important');
-                playerBar.style.setProperty('opacity', '0', 'important');
-                document.documentElement.style.setProperty('--player-drag-y', (playerBar.offsetHeight || 140) + 'px');
-                setTimeout(function() {
-                    playerBar.style.removeProperty('transition');
-                    playerBar.style.removeProperty('transform');
-                    playerBar.style.removeProperty('opacity');
-                    document.documentElement.style.setProperty('--player-drag-y', '0px');
-                    closeDoPlayer();
-                }, 220);
-            } else {
-                // Smooth snap back to natural position
-                playerBar.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
-                playerBar.style.setProperty('transform', 'translateY(0)', 'important');
-                playerBar.style.setProperty('opacity', '1', 'important');
-                document.documentElement.style.setProperty('--player-drag-y', '0px');
-                setTimeout(function() {
-                    playerBar.style.removeProperty('transition');
-                    playerBar.style.removeProperty('transform');
-                    playerBar.style.removeProperty('opacity');
-                }, 200);
-            }
+            handleDragEnd(deltaY, dt, isHandleTap);
         }
 
         // Mouse dragging support on desktop
@@ -6799,38 +6875,24 @@ function initDoPlayer() {
             }
             if ($(target).closest('button, input, select, a, .do-player-progress-section').length) return;
 
-            startY = e.clientY;
-            currentY = startY;
-            startTime = Date.now();
-            isDragging = true;
-            $('body').addClass('is-dragging-player');
-            playerBar.style.setProperty('transition', 'none', 'important');
-            document.documentElement.style.setProperty('--player-drag-y', '0px');
+            handleDragStart(e.clientY, target);
 
             function onMouseMove(e) {
                 if (!isDragging) return;
                 currentY = e.clientY;
                 var deltaY = currentY - startY;
-                if (deltaY > 0) {
-                    e.preventDefault();
-                    var barH = playerBar.offsetHeight || 140;
-                    var progress = Math.min(1, Math.max(0, deltaY / barH));
-                    var opacity = 1 - (progress * 0.7);
-                    playerBar.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
-                    playerBar.style.setProperty('opacity', opacity.toFixed(3), 'important');
-                    document.documentElement.style.setProperty('--player-drag-y', deltaY + 'px');
-                } else {
-                    var resistanceY = deltaY * 0.25;
-                    playerBar.style.setProperty('transform', 'translateY(' + resistanceY + 'px)', 'important');
-                    document.documentElement.style.setProperty('--player-drag-y', resistanceY + 'px');
-                }
+                handleDragMove(deltaY, e);
             }
 
             function onMouseUp(e) {
                 if (!isDragging) return;
                 window.removeEventListener('mousemove', onMouseMove);
                 window.removeEventListener('mouseup', onMouseUp);
-                onTouchEnd({ changedTouches: [{ clientY: e.clientY }] });
+                var dt = Math.max(1, Date.now() - startTime);
+                var deltaY = e.clientY - startY;
+                var isTap = (Math.abs(deltaY) < 6 && dt < 300);
+                var isHandleTap = isTap && $(e.target).closest('#playerDragHandleWrap, #playerDragHandle').length > 0;
+                handleDragEnd(deltaY, dt, isHandleTap);
             }
 
             window.addEventListener('mousemove', onMouseMove);
@@ -7774,8 +7836,10 @@ function updatePlayerVideoDrawer(chantId) {
     html += '</div>';
 
     if (!hasAudios) {
-        html += '<div class="do-yt-empty-notice" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(0,0,0,0.03); border: 1px dashed var(--border-color, rgba(0,0,0,0.15)); border-radius: 12px; color: var(--text-color, #444); font-size: 12px; font-weight: 500; min-width: 220px; max-width: 270px; box-sizing: border-box; line-height: 1.4;">';
-        html += '  <span style="font-size: 18px; line-height: 1; flex-shrink: 0;">ℹ️</span>';
+        html += '<div class="do-yt-empty-notice">';
+        html += '  <div class="do-yt-empty-notice-icon">';
+        html += '    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        html += '  </div>';
         html += '  <span>Partition GABC interactive uniquement — aucun enregistrement externe disponible</span>';
         html += '</div>';
     } else {
@@ -7880,66 +7944,117 @@ $(document).on('scroll.sourceautoscroll touchstart.sourceautoscroll mousedown.so
     }, 10000);
 });
 
-// Toggle handler for playerBtnExpandVideos
-$(document).on('click', '#playerBtnExpandVideos', function(e) {
-    e.stopPropagation();
-    triggerHapticFeedback('toggle');
+// Modern fluid video drawer controls with GPU-accelerated CSS transitions
+function openPlayerVideoDrawer(animated) {
     var $drawer = $('#playerVideoDrawer');
-    var isHidden = $drawer.is(':hidden');
-    if (isHidden) {
-        // Close pitch drawer if open (mutually exclusive)
-        var $pitchDrawer = $('#playerPitchDrawer');
-        if ($pitchDrawer.is(':visible')) {
-            $pitchDrawer.slideUp(150, function() { $pitchDrawer.addClass('hidden'); });
-            $('#playerPitchPill').removeClass('active');
-        }
-        $drawer.removeClass('hidden').slideDown(200, function() {
-            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-            var $list = $('#playerVideoList');
-            if ($list.length) {
-                var listEl = $list[0];
-                var maxScroll = listEl.scrollWidth - listEl.clientWidth;
-                if (maxScroll > 0) {
-                    var isPlaying = (window.isPlayingChant && window.isPlayingChant());
-                    // One-time animated peek at the very beginning, only if not chanting
-                    if (!_videoDrawerHasPeeked && !isPlaying && listEl.scrollLeft === 0) {
-                        scrollActiveSourceIntoView(false);
-                        var peekOffset = Math.min(listEl.scrollLeft + 36, maxScroll);
-                        _videoDrawerHasPeeked = true;
-                        // animated shift to the right to reveal next card, then gently snap back after pause
-                        $(listEl).stop(true).animate({ scrollLeft: peekOffset }, 480, 'swing', function() {
-                            setTimeout(function(){
-                                if (!_sourceScrollInteracting) $(listEl).stop(true).animate({ scrollLeft: listEl.scrollLeft - 16 }, 380, 'swing');
-                            }, 900);
-                        });
-                    } else {
-                        scrollActiveSourceIntoView(false);
-                    }
+    var $btn = $('#playerBtnExpandVideos');
+    if (!$drawer.length) return;
+
+    // Close pitch drawer if open (mutually exclusive)
+    var $pitchDrawer = $('#playerPitchDrawer');
+    if ($pitchDrawer.is(':visible')) {
+        $pitchDrawer.slideUp(150, function() { $pitchDrawer.addClass('hidden'); });
+        $('#playerPitchPill').removeClass('active');
+    }
+
+    if (animated) triggerHapticFeedback('toggle');
+
+    $drawer.removeClass('hidden');
+    // Clear inline style overrides from touch drag
+    $drawer.css({
+        'max-height': '',
+        'height': '',
+        'opacity': '',
+        'padding-top': '',
+        'margin-top': '',
+        'border-top-color': ''
+    });
+
+    $drawer.addClass('is-open');
+    $btn.addClass('active');
+
+    if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+
+    setTimeout(function() {
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        var $list = $('#playerVideoList');
+        if ($list.length) {
+            var listEl = $list[0];
+            var maxScroll = listEl.scrollWidth - listEl.clientWidth;
+            if (maxScroll > 0) {
+                var isPlaying = (window.isPlayingChant && window.isPlayingChant());
+                if (!_videoDrawerHasPeeked && !isPlaying && listEl.scrollLeft === 0) {
+                    scrollActiveSourceIntoView(false);
+                    var peekOffset = Math.min(listEl.scrollLeft + 36, maxScroll);
+                    _videoDrawerHasPeeked = true;
+                    $(listEl).stop(true).animate({ scrollLeft: peekOffset }, 480, 'swing', function() {
+                        setTimeout(function(){
+                            if (!_sourceScrollInteracting) $(listEl).stop(true).animate({ scrollLeft: listEl.scrollLeft - 16 }, 380, 'swing');
+                        }, 900);
+                    });
+                } else {
+                    scrollActiveSourceIntoView(false);
                 }
             }
-            _sourceScrollInteracting = false;
-            startSourceIdleAutoScroll();
-            // Re-center chant after layout change (video drawer open) — on click Source, always keep active note/card visible
-            setTimeout(function(){
-                var ae=document.querySelector('svg use.active, svg .active');
-                if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
-                if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
-            }, 230);
-        });
-        $(this).addClass('active');
-    } else {
-        $drawer.slideUp(200, function() {
+        }
+        _sourceScrollInteracting = false;
+        startSourceIdleAutoScroll();
+        var ae = document.querySelector('svg use.active, svg .active');
+        if (!ae && _doCurrentPlayerCard) ae = _doCurrentPlayerCard[0];
+        if (ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+    }, 280);
+}
+
+function closePlayerVideoDrawer(animated) {
+    var $drawer = $('#playerVideoDrawer');
+    var $btn = $('#playerBtnExpandVideos');
+    if (!$drawer.length) return;
+
+    if (animated) triggerHapticFeedback('toggle');
+
+    // Clear inline style overrides from touch drag
+    $drawer.css({
+        'max-height': '',
+        'height': '',
+        'opacity': '',
+        'padding-top': '',
+        'margin-top': '',
+        'border-top-color': ''
+    });
+
+    $drawer.removeClass('is-open');
+    $btn.removeClass('active');
+
+    if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+    clearTimeout(_sourceScrollTimer);
+
+    setTimeout(function() {
+        if (!$drawer.hasClass('is-open')) {
             $drawer.addClass('hidden');
-            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-            clearTimeout(_sourceScrollTimer);
-            setTimeout(function(){
-                var ae=document.querySelector('svg use.active, svg .active');
-                if (!ae && _doCurrentPlayerCard) ae=_doCurrentPlayerCard[0];
-                if(ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
-            }, 220);
-        });
-        $(this).removeClass('active');
+        }
+        if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
+        var ae = document.querySelector('svg use.active, svg .active');
+        if (!ae && _doCurrentPlayerCard) ae = _doCurrentPlayerCard[0];
+        if (ae && !isElementInVisibleViewport(ae)) centerActiveNote(false);
+    }, 280);
+}
+
+function togglePlayerVideoDrawer() {
+    var $drawer = $('#playerVideoDrawer');
+    if ($drawer.hasClass('is-open')) {
+        closePlayerVideoDrawer(true);
+    } else {
+        openPlayerVideoDrawer(true);
     }
+}
+window.openPlayerVideoDrawer = openPlayerVideoDrawer;
+window.closePlayerVideoDrawer = closePlayerVideoDrawer;
+window.togglePlayerVideoDrawer = togglePlayerVideoDrawer;
+
+// Toggle handler for playerBtnExpandVideos
+$(document).off('click.doexpandvideos', '#playerBtnExpandVideos').on('click.doexpandvideos', '#playerBtnExpandVideos', function(e) {
+    e.stopPropagation();
+    togglePlayerVideoDrawer();
 });
 
 // Toggle handler for playerBtnToggleSync
@@ -8382,12 +8497,8 @@ function openDoPitchBubble() {
 
     // Close video drawer if open (mutually exclusive)
     var $videoDrawer = $('#playerVideoDrawer');
-    if ($videoDrawer.is(':visible')) {
-        $videoDrawer.slideUp(150, function() {
-            $videoDrawer.addClass('hidden');
-            $('#playerBtnExpandVideos').removeClass('active');
-            if (typeof syncPlayerBarOffset === 'function') syncPlayerBarOffset();
-        });
+    if ($videoDrawer.is(':visible') || $videoDrawer.hasClass('is-open')) {
+        closePlayerVideoDrawer(false);
     }
 
     populateDoPitchBubble();
@@ -11394,8 +11505,39 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
             if ($wrapper.length) {
                 $wrapper.data('is-psalm-toned', newPt)
                         .attr('data-is-psalm-toned', newPt ? 'true' : 'false')
-                        .removeData('do-rendered')
-                        .removeData('cached-gabc');
+                        .removeData('do-rendered');
+                $wrapper.data('is-rendering', false);
+                var $preview = $wrapper.find('.do-chant-preview');
+                $preview.removeClass('is-rendered').addClass('gregorian-skeleton').html(renderChantSkeleton(2));
+                renderSingleChantScore($wrapper, true);
+            }
+        }
+
+        if (window.OremusRouter) {
+            window.OremusRouter.syncUrl({ push: true });
+        }
+    }
+
+    function toggleGloriaPatriForPart(partKey) {
+        if (!partKey) return;
+        triggerHapticFeedback('selection');
+
+        var currentGp = !!(doState.gloriaPatriParts && doState.gloriaPatriParts[partKey]);
+        var newGp = !currentGp;
+        doState.gloriaPatriParts = doState.gloriaPatriParts || {};
+        doState.gloriaPatriParts[partKey] = newGp;
+
+        $('#partPickerGloriaPatriBtn').toggleClass('is-active', newGp);
+        $('.do-card-gp-btn[data-part-key="' + partKey + '"]').toggleClass('is-active', newGp);
+
+        var $card = $('.do-card[data-card-id="' + partKey + '"]');
+        if ($card.length) {
+            var $wrapper = $card.find('.do-chant-card-wrapper[data-part-key="' + partKey + '"]');
+            if ($wrapper.length) {
+                $wrapper.data('is-full-gloria', newGp)
+                        .attr('data-is-full-gloria', newGp ? 'true' : 'false')
+                        .removeData('do-rendered');
+                $wrapper.data('is-rendering', false);
                 var $preview = $wrapper.find('.do-chant-preview');
                 $preview.removeClass('is-rendered').addClass('gregorian-skeleton').html(renderChantSkeleton(2));
                 renderSingleChantScore($wrapper, true);
@@ -11419,6 +11561,21 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         var partKey = $(this).data('part-key');
         if (partKey) {
             togglePsalmToneForPart(partKey);
+        }
+    });
+
+    $(document).on('click', '#partPickerGloriaPatriBtn', function(e) {
+        e.preventDefault();
+        if (!_activePickerPartKey) return;
+        toggleGloriaPatriForPart(_activePickerPartKey);
+    });
+
+    $(document).on('click', '.do-card-gp-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var partKey = $(this).data('part-key');
+        if (partKey) {
+            toggleGloriaPatriForPart(partKey);
         }
     });
 
@@ -14481,6 +14638,15 @@ function isAppForeground() {
 }
 
 function checkForAppUpdates(isManual) {
+    // Strict platform guard: APK update checks and banners are strictly for native Android app
+    if (!isNativeAndroidApp()) {
+        if (isManual) {
+            var $statusText = $('#updateStatusText');
+            $statusText.text('Version Web en ligne (Mise à jour automatique au rechargement)').css('color', 'var(--text-tertiary)');
+        }
+        return;
+    }
+
     var includeBeta = (localStorage.getItem('do_include_beta') !== 'false');
     var $statusText = $('#updateStatusText');
     if (isManual) {
@@ -14522,30 +14688,61 @@ function checkForAppUpdates(isManual) {
         var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
 
         if (isNewer) {
-            window._hasPendingAppUpdate = true;
-            if (isManual) {
-                $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+            // Find APK URL to verify availability
+            var apkAsset = null;
+            if (targetRelease.assets && targetRelease.assets.length) {
+                apkAsset = targetRelease.assets.filter(function(a) {
+                    return a.name && a.name.toLowerCase().endsWith('.apk');
+                })[0] || targetRelease.assets[0];
+            }
+            var downloadUrl = (apkAsset && apkAsset.browser_download_url) ? apkAsset.browser_download_url : ('https://github.com/bastonus/jgabc/releases/download/' + latestTag + '/Oremus.apk');
+
+            function onApkVerified(isAvailable, statusCode) {
+                if (!isAvailable) {
+                    console.log('[Updater] Version ' + latestTag + ' détectée, mais l\'APK n\'est pas encore disponible sur GitHub Releases (HTTP ' + statusCode + '). Notification différée jusqu\'à la fin du build.');
+                    if (isManual) {
+                        $statusText.text('La version ' + latestTag + ' est en cours de compilation. L\'APK sera disponible sous peu.').css('color', 'var(--primary-color)');
+                    }
+                    return;
+                }
+
+                window._hasPendingAppUpdate = true;
+                if (isManual) {
+                    $statusText.text('Mise à jour disponible : ' + latestTag).css('color', 'var(--primary-color)');
+                }
+
+                var isDismissed = false;
+                try {
+                    isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
+                } catch (e) {}
+
+                if (!isDismissed || isManual) {
+                    showUpdateBanner(targetRelease);
+
+                    // Send official system notification on Android ONLY if not already pushed and ONLY in background
+                    var updateKey = 'update_' + latestTag;
+                    if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
+                        window.OremusSystemNotifications.send(
+                            'Mise à jour disponible : ' + latestTag,
+                            'Une nouvelle version d\'Oremus est prête au téléchargement.',
+                            'updates',
+                            { releaseTag: latestTag },
+                            updateKey
+                        );
+                    }
+                }
             }
 
-            var isDismissed = false;
-            try {
-                isDismissed = sessionStorage.getItem('do_dismissed_update_' + latestTag) === 'true';
-            } catch (e) {}
-
-            if (!isDismissed || isManual) {
-                showUpdateBanner(targetRelease);
-
-                // Send official system notification on Android ONLY if not already pushed and ONLY in background
-                var updateKey = 'update_' + latestTag;
-                if (window.OremusSystemNotifications && typeof window.OremusSystemNotifications.send === 'function') {
-                    window.OremusSystemNotifications.send(
-                        'Mise à jour disponible : ' + latestTag,
-                        'Une nouvelle version d\'Oremus est prête au téléchargement.',
-                        'updates',
-                        { releaseTag: latestTag },
-                        updateKey
-                    );
-                }
+            // Verify if APK is actually ready on GitHub before alerting user (prevents premature notifications on commit)
+            if (window.AndroidAppUpdate && typeof window.AndroidAppUpdate.checkApkAvailable === 'function') {
+                var cbName = '_oremusApkCheckCb_' + Date.now();
+                window[cbName] = function(available, code) {
+                    try { delete window[cbName]; } catch (e) {}
+                    onApkVerified(available, code);
+                };
+                window.AndroidAppUpdate.checkApkAvailable(downloadUrl, cbName);
+            } else {
+                onApkVerified(true, 200);
             }
         } else {
             window._hasPendingAppUpdate = false;
@@ -14631,6 +14828,7 @@ function parseMarkdownToHtml(md) {
 }
 
 function showUpdateBanner(release) {
+    if (!isNativeAndroidApp()) return;
     var tagName = release.tag_name || 'Nouvelle version';
     var isBeta = release.prerelease;
     var bodyNotes = release.body || 'Améliorations générales et corrections de stabilité.';
@@ -15010,9 +15208,8 @@ function registerOremusServiceWorker() {
 }
 
 function showInstallBanner() {
-    // Only show on mobile (iOS or Android web), not standalone, not native app, not desktop
-    if (isNativeAndroidApp() || isAppStandalone() || (window.innerWidth && window.innerWidth > 900)) return;
-    if (!isIosDevice() && !isAndroidDevice()) return;
+    // Only show for iOS mobile browser (Safari add to home screen instructions)
+    if (!isIosDevice() || isNativeAndroidApp() || isAppStandalone() || (window.innerWidth && window.innerWidth > 900)) return;
 
     try {
         if (sessionStorage.getItem('do_dismissed_install_banner') === 'true' ||
@@ -15029,15 +15226,9 @@ function showInstallBanner() {
     var $banner = $('#appInstallBanner');
     if (!$banner.length) return;
 
-    if (isIosDevice()) {
-        $('#installPlatformTag').text('iOS');
-        $banner.find('.do-update-banner-title').text('Installer l\'application');
-        $('#btnInstallAppBanner span').text('Installer');
-    } else if (isAndroidDevice()) {
-        $('#installPlatformTag').text('APK');
-        $banner.find('.do-update-banner-title').text('Application Android');
-        $('#btnInstallAppBanner span').text('Télécharger');
-    }
+    $('#installPlatformTag').text('iOS');
+    $banner.find('.do-update-banner-title').text('Installer l\'application');
+    $('#btnInstallAppBanner span').text('Installer');
 
     $banner.addClass('is-visible');
     setTimeout(updateHeaderDropdownPosition, 300);
@@ -17172,13 +17363,6 @@ function setupEventListeners() {
         $('#toggleIncludeBeta').closest('.settings-toggle-row').hide();
         $('.update-check-wrapper').hide();
         $('#labelUpdatesText').text('Application & Retours');
-
-        // On mobile Android browser, show the mobile top banner leading to GitHub APK
-        if (isAndroidDevice() && !isAppStandalone()) {
-            setTimeout(function() {
-                showInstallBanner();
-            }, 1800);
-        }
     }
 
     // Global Touch Gestures (Synchronized whole-page bilingual swipe & Sidebar drawer)
@@ -17475,9 +17659,9 @@ $(function() {
         window.OremusSystemNotifications.initChannels();
     }
 
-    // Check for Releases FIRST (highest priority), then Remote Notifications
+    // Check for Releases FIRST (highest priority, strictly Android Native), then Remote Notifications
     setTimeout(function() {
-        if (typeof checkForAppUpdates === 'function') {
+        if (isNativeAndroidApp() && typeof checkForAppUpdates === 'function') {
             checkForAppUpdates(false);
         }
         setTimeout(function() {
@@ -17587,7 +17771,7 @@ $(function() {
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
             checkInactivityReset();
-            if (typeof checkForAppUpdates === 'function') {
+            if (isNativeAndroidApp() && typeof checkForAppUpdates === 'function') {
                 checkForAppUpdates(false);
             }
             setTimeout(function() {

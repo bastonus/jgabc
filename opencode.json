@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "qwen-local": {
+      "type": "openai",
+      "baseURL": "http://localhost:3265/v1",
+      "apiKey": "sk-qwen-free-api"
+    }
+  },
+  "model": "qwen-local/qwen3.8-max",
+  "models": {
+    "qwen-local/qwen3.8-max": {
+      "name": "Qwen 3.8 Max (Local)",
+      "attachment": true
+    },
+    "qwen-local/qwen3-coder-plus": {
+      "name": "Qwen 3 Coder Plus (Local)",
+      "attachment": true
+    }
+  }
+}

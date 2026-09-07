@@ -1,0 +1,1875 @@
+{
+  "opencode.global.dat:prompt-history": {
+    "entries": [
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "no install it everywhere",
+            "start": 0,
+            "end": 24
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "configure https://github.com/aider-ai/aider adding the qwen 3.8 config by default using same api",
+            "start": 0,
+            "end": 96
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "convertsis les 3 conv antigravity et ajoute les aux conversatiosn de opencode",
+            "start": 0,
+            "end": 77
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "formate ces sessiosn et conforme les à opencode pour faire comme si elels eteiaten des sessiosn de opencode",
+            "start": 0,
+            "end": 107
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "nope from antigravity les id b748fab1-9fdd-454c-8c3f-bc69ed64e953 ; 2500cfa1-b73f-4ebb-9148-09ca3bc7f103 ; a052531b-0f1a-42df-a385-e29c845d8078",
+            "start": 0,
+            "end": 143
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "import the 3 asked conf to opencode histry",
+            "start": 0,
+            "end": 42
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "trouve un moyen stable et efficce d'automatiser ce reset de token",
+            "start": 0,
+            "end": 65
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "localStorage.getItem('token')'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmODZmZmJkLTYxNmQtNDc1OC1hMWI0LTQwZDZlNDExMDQxYSIsImxhc3RfcGFzc3dvcmRfY2hhbmdlIjoxNzUwNjYwODczLCJleHAiOjE3OTEzNzQwMDR9.RR1xp2OLYqpcVXUSKKKUhPA7rToz-AfZDFV9qV-CV6c'",
+            "start": 0,
+            "end": 240
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "go",
+            "start": 0,
+            "end": 2
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "toujourts pas marche pas avec le captcha, reconnecte moi mais en passant par le vrai nav principal si possible",
+            "start": 0,
+            "end": 110
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "supprime tyoyt",
+            "start": 0,
+            "end": 14
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "a oui ca marche. b jsp ou regarder c'est pas clair fais le max de ton coté et donne mpi des instrucyion claires",
+            "start": 0,
+            "end": 111
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ici cres un projet prope ç ne pas salir",
+            "start": 0,
+            "end": 39
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "installe dans un dossier different du workspace ^pour faire de la place",
+            "start": 0,
+            "end": 71
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "installe ca et ajoute le à opencode https://github.com/47thtechcorner/RayCodes_FreeToken",
+            "start": 0,
+            "end": 88
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "c'est pas blosué en thinking maus un nouevau captcha que j'ai realisé mais qui debloque pas",
+            "start": 0,
+            "end": 91
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "bloque en thinkling",
+            "start": 0,
+            "end": 19
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "importe les dans l'historyuye de opencode",
+            "start": 0,
+            "end": 41
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "en fait une fois avoir fait le captcha j'arrive sur ²https://www.taobao.com/ et c'est touyt et la discission est toujpurs en échec",
+            "start": 0,
+            "end": 130
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "le captcha est acccépte maus en suiste le robot se trouve bloqué",
+            "start": 0,
+            "end": 64
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ca retse ouvert mais ca marche tout de meme pas",
+            "start": 0,
+            "end": 47
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "importe les dans l'historyuye de opencode",
+            "start": 0,
+            "end": 41
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "les captcha de qwen ne me laissent pas le temps de les faire donc plus possible d'utiliser le modèle",
+            "start": 0,
+            "end": 100
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "contine",
+            "start": 0,
+            "end": 7
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continure",
+            "start": 0,
+            "end": 9
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "importe les dans l'historyuye de opencode",
+            "start": 0,
+            "end": 41
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "les id b748fab1-9fdd-454c-8c3f-bc69ed64e953 ; 2500cfa1-b73f-4ebb-9148-09ca3bc7f103 ; a052531b-0f1a-42df-a385-e29c845d8078",
+            "start": 0,
+            "end": 121
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "erreur avec qwen 3.8 max il prend bien en comptre les images : Je ne peux malheureusement pas lire l'image (`image.png`) que vous avez jointe, car ce modèle ne prend pas en charge les entrées visuelles.\r\r\nPour que je puisse importer ces trois discussions non lues, pourriez-vous me fournir leurs **identifiants (Cascade IDs)** ou leurs **titres exacts** ?\r\n\r\nUne fois que j'aurai ces informations, j'utiliserai la commande `aghistory export --id <ID>` pour récupérer spécifiquement ces conversations. Vous pouvez trouver les IDs dans l'URL de la discussion ou via la commande `aghistory list`.",
+            "start": 0,
+            "end": 593
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "importe ces trois discussions non lues ",
+            "start": 0,
+            "end": 39
+          },
+          {
+            "type": "image",
+            "id": "d03068dd-618d-45be-9e85-06ae902bacd0",
+            "filename": "image.png",
+            "mime": "image/png",
+            "blob": {
+              "id": "f5de6dd92fdfac3ef58be6515c5145867579b964ed989e47afa813181d8d52c1"
+            }
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "modify qwen free api to adpate",
+            "start": 0,
+            "end": 30
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "do all",
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "no i wnat you to reda and import them into opencode",
+            "start": 0,
+            "end": 51
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "how to add image upload ?",
+            "start": 0,
+            "end": 25
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "do all yourself you must recover three discussiosn the three unreda here ",
+            "start": 0,
+            "end": 73
+          },
+          {
+            "type": "image",
+            "id": "a38cfbe4-505c-4706-adf4-4b737b1e3ba9",
+            "filename": "image.png",
+            "mime": "image/png",
+            "blob": {
+              "id": "6086de64132176632cfb55d82b7edb25581695106c8af69c801815c867af39f7"
+            }
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "go on",
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "add it",
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "pip install antigravity-history",
+            "start": 0,
+            "end": 31
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ping",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "connecté à opencode ??",
+            "start": 0,
+            "end": 22
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "[09:48:37] [INFO] [SSXMOD] SSXMOD cookies generated\r[09:48:37] [INFO] [TOOLS] Workspace: ~/qwen-workspace\r\n[09:48:37] [INFO] [ACCOUNT] 1 Qwen account(s) loaded\r\n[09:48:37] [INFO] [SERVER] Qwen Free API on http://localhost:3265\r\nSyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)\r\n    at JSON.parse (<anonymous>)\r\n    at parse (C:\\Users\\Azandikka\\QwenFreeApi\\node_modules\\body-parser\\lib\\types\\json.js:96:19)\r\n    at C:\\Users\\Azandikka\\QwenFreeApi\\node_modules\\body-parser\\lib\\read.js:128:18\r\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\r\n    at invokeCallback (C:\\Users\\Azandikka\\QwenFreeApi\\node_modules\\raw-body\\index.js:238:16)\r\n    at done (C:\\Users\\Azandikka\\QwenFreeApi\\node_modules\\raw-body\\index.js:227:7)\r\n    at IncomingMessage.onEnd (C:\\Users\\Azandikka\\QwenFreeApi\\node_modules\\raw-body\\index.js:287:7)\r\n    at IncomingMessage.emit (node:events:508:28)\r\n    at endReadableNT (node:internal/streams/readable:1701:12)\r\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)\r\n\n",
+            "start": 0,
+            "end": 1063
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "lance",
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "A",
+            "start": 0,
+            "end": 1
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "oui",
+            "start": 0,
+            "end": 3
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "avce ca https://github.com/angyedz/QwenFreeApi",
+            "start": 0,
+            "end": 46
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ping",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "configure qwen pour opencode",
+            "start": 0,
+            "end": 28
+          },
+          {
+            "type": "image",
+            "id": "b50fb6b9-c06c-4648-b9b4-ebae99f4097d",
+            "filename": "Screenshot_20260907_001813_YouTube Morphe.jpg",
+            "sourcePath": "C:\\Users\\Azandikka\\AppData\\Local\\Packages\\Microsoft.YourPhone_8wekyb3d8bbwe\\TempState\\medias\\Screenshot_20260907_001813_YouTube Morphe.jpg",
+            "mime": "image/jpeg",
+            "blob": {
+              "id": "78353c0f8f2ab497e07280ca50aa7de1d16acc37ee739bdca5dc463290812f20"
+            }
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "feu vert",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "lan de Préparation de la Release v0.0.57 — Oremus\rPréparation complète de la nouvelle release v0.0.57 (beta-0.0.57, versionCode 57), intégrant les évolutions majeures développées dans la branche de travail : le sélecteur interactif des pièces et du Kyriale (Chant Tools), les versets ad libitum, l'élimination du flash de chargement « Oneratur... » dans l'en-tête, les correctifs Exsurge et le perfectionnement du calendrier liturgique 1962.\r\n\r\nConformément à votre consigne (« Attends mon go »), aucune modification de code source ni commande git de commit/tag/push ne sera exécutée sans votre validation expresse.\r\n\r\n🔍 Synthèse des Nouveautés & Corrections de la v0.0.57\r\n🎶 Sélecteur Interactif des Pièces de Messe & Kyriale (Chant Tools) :\r\n\r\nTiroir Inférieur (Bottom Sheet) : Nouveau panneau coulissant #massPartPickerDrawer au design glassmorphism (poignée de glissement, flou d'arrière-plan backdrop-filter, ombre portée, fermeture fluide par glissement ou appui en dehors).\r\nTitres Interactifs avec Chevrons : Remplacement des titres statiques de l'Ordinaire (Asperges, Kyrie, Gloria, Credo, Sanctus, Agnus Dei, Ite) et du Propre (Introït, Graduel, Alléluia, Trait, Séquence, Offertoire, Communion) par des en-têtes interactifs dotés d'un chevron circulaire ouvrant le sélecteur.\r\nSélecteur de Messe du Kyriale (Messes I à XVIII, Credos I à IV) : Choix instantané avec recalcul dynamique de la partition Exsurge et de l'audio.\r\nDouble Affichage Grille & Ligne : Mode Grille 1:1 avec rendu différé (lazy rendering via IntersectionObserver), surbrillance thématique de la pièce active (teinte bordeaux/or, neumes et portées colorés), et mode Liste épuré.\r\nBascule Ton Psalmodié (℣) : Pastille d'accès rapide pour basculer instantanément n'importe quelle pièce en formule psalmodiée.\r\nSynchronisation d'URL & Deep Linking : Persistance des choix liturgiques dans les paramètres d'URL.\r\n📜 Versets Ad Libitum sous les Partitions GABC :\r\n\r\nAccordéon dépliable discret sous la partition GABC pour afficher les versets additionnels ad libitum (inVerses, ofVerses, coVerses).\r\nRendu musical vectoriel direct ou repli textuel propre avec clic pour écouter / afficher.\r\n⚡ En-tête Fluide & Élimination de l'état « Oneratur... » :\r\n\r\nSuppression définitive du libellé intermédiaire Oneratur... et de la date statique dans l'en-tête mobile et desktop.\r\nChargement dynamique instantané des titres avec état neutre épuré (is-header-loading) et calage des marges pour éviter tout rognage d'icône sur Android.\r\n🎼 Correctifs Rendu Exsurge & Lettrines (Drop Caps) :\r\n\r\nPrise en charge sans régression des symboles rubriques et caractères spéciaux (℣, ℟, +, *) dans generateDropCap (exsurge.js), évitant les lettrines manquantes ou décalées.\r\n📅 Perfectionnement du Calendrier Liturgique & Comput 1962 :\r\n\r\nRévision complète de computeLiturgicalCodes, getLiturgicalDates et détection des saisons liturgiques (getSeasonForMoment) pour l'harmonisation rigoureuse des occurrences et concurrences.\r\n🤖 Pipeline d'Alignement Grégorien :\r\n\r\nAutomatisation de l'alignement (pipeline/align/), extraction des notes Exsurge et génération de timestamps fidèles.\r\n📁 Modifications Proposées par Fichier\r\n1. \r\nNOTES_DE_VERSION.md\r\n[MODIFY] \r\nNOTES_DE_VERSION.md\r\nAjout de la section Version 0.0.57 (6 Septembre 2026) en tête du document détaillant :\r\n\r\nSélecteur Interactif des Pièces de Messe & Kyriale (Chant Tools)\r\nVersets Ad Libitum sous les Partitions GABC\r\nEn-tête Fluide & Élimination de l'état « Oneratur... »\r\nCorrectifs Rendu Exsurge & Lettrines (Drop Caps)\r\nPerfectionnement du Calendrier Liturgique & Comput 1962\r\nPipeline d'Alignement Grégorien & Indexation\r\nVersionnage & Cache (v0.0.57, versionCode 57, PWA cache v1.3.17)\r\n2. \r\nnotifications.json\r\n[MODIFY] \r\nnotifications.json\r\nIncrément de \"version\": \"1.0.5\" et \"updatedAt\": \"2026-09-06T20:25:00Z\".\r\nInsertion de la nouvelle notification notif-release-beta-0.0.57 en tête de liste :\r\npriority: 150\r\nminVersion: \"beta-0.0.57\"\r\ncancelsNotifications: inclut notif-release-beta-0.0.56 et antérieures.\r\nBandeau d'annonce (banner) : « Oremus v0.0.57 : Sélecteur Kyriale & Chant Tools · Versets Ad Libitum · En-tête Fluide ».\r\nModale détaillée (modal) : cartes explicatives sur le sélecteur de Kyriale/pièces, le ton psalmodié, les versets ad libitum, la disparition de « Oneratur… », et rappels de la v0.0.56.\r\n3. \r\nanalyse_feedback_oremus.md\r\n[MODIFY] \r\nanalyse_feedback_oremus.md\r\nMise à jour du sous-titre : (Couvrant jusqu'à la Version 0.0.57).\r\nValidation des tâches résolues en v0.0.57 :\r\n[x] Suppression de l'état de chargement « Oneratur... » dans l'en-tête (Livré en v0.0.57)\r\n[x] Intégration du Kyriale & Choix Chanté / Psalmodié (Chant Tools) (Livré en v0.0.57)\r\nMise à jour de la matrice de traçabilité des retours :\r\nLigne 18 (gbzNPpJ - Kyriale) : Résolu en v0.0.57\r\nLigne 20 (Yj97Bg5 - Version chantée/psalmodiée & Kyriale) : Résolu en v0.0.57\r\nLigne 34 (Équipe / Retours - Oneratur...) : Résolu en v0.0.57\r\nLigne 42 (Ge75aZO - Kyriale interactif) : Résolu en v0.0.57\r\n4. Fichiers de Versionnage & Configuration\r\n[MODIFY] \r\nversion.json\r\nlatestVersion: \"beta-0.0.57\"\r\nversionCode: 57\r\nreleaseDate: \"2026-09-06T20:25:00Z\"\r\ntagName: \"v0.0.57\"\r\ndownloadUrl: \"https://github.com/bastonus/jgabc/releases/download/v0.0.57/Oremus.apk\"\r\nhtmlUrl: \"https://github.com/bastonus/jgabc/releases/tag/v0.0.57\"\r\nbody: \"Release v0.0.57 — Sélecteur interactif du Kyriale & Chant Tools, Versets ad libitum, en-tête fluide\"\r\n[MODIFY] \r\nandroid/app/build.gradle\r\nversionCode 57\r\nversionName \"beta-0.0.57\"\r\n[MODIFY] \r\npackage.json\r\n\"version\": \"0.0.57\"\r\n[MODIFY] \r\njs/divinum_officium.js\r\nvar CURRENT_APP_VERSION = 'beta-0.0.57'; (ligne 14321)\r\n5. Nettoyage & Gestion Git\r\nNOTE\r\n\r\nDes fichiers temporaires scratch sont actuellement non suivis (scratch_14_hsmm_notes.json, scratch_14_slice.wav, scratch_14_tested_notes.json, scratch_14_viterbi_notes.json). Ils seront exclus du commit ou supprimés pour garder le dépôt propre.\r\n\r\nLes commandes Git prévues lors de votre feu vert :\r\n\r\ngit add des fichiers modifiés et des fichiers de pipeline utiles.\r\ngit commit -m \"Release v0.0.57 — Sélecteur interactif du Kyriale & Chant Tools, Versets ad libitum, refonte en-tête\"\r\n(Facultatif / sur confirmation) : git tag v0.0.57\r\n🧪 Plan de Vérification\r\nValidation syntaxique JSON :\r\nExécution de tests de parsing JSON stricts sur notifications.json et version.json via Node.js pour garantir l'absence d'erreurs de virgules ou d'échappement.\r\nCohérence des Versions :\r\nContrôle croisé de concordance entre js/divinum_officium.js, android/app/build.gradle, version.json, package.json et notifications.json.\r\nStatut Git & Diff :\r\nVérification du git status et git diff final avant toute validation.",
+            "start": 0,
+            "end": 6716
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "make new relesae and upadte versionning and chnagelog",
+            "start": 0,
+            "end": 53
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ping",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ca marche pas",
+            "start": 0,
+            "end": 13
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "test",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "REMET TOUR MAIS NE FAIT PAS PLEIN DE TESTq",
+            "start": 0,
+            "end": 42
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "supprime ton installation alors",
+            "start": 0,
+            "end": 31
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "Vérifiez votre connexion Internet, puis réessayez gemni me dit ca sur les deux browser, mais pas sur l'app mobile",
+            "start": 0,
+            "end": 113
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "i think i have juste been banned from gemini",
+            "start": 0,
+            "end": 44
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "i set firfopx",
+            "start": 0,
+            "end": 13
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "Traceback (most recent call last):\r  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 596, in _decrypt\r\n    return self._decrypt_windows_chromium(value, encrypted_value)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 587, in _decrypt_windows_chromium\r\n    _, data = _crypt_unprotect_data(encrypted_value)\r\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 99, in _crypt_unprotect_data\r\n    raise RuntimeError('Failed to decrypt the cipher text with DPAPI')\r\nRuntimeError: Failed to decrypt the cipher text with DPAPI\r\n\r\nDuring handling of the above exception, another exception occurred:\r\n\r\nTraceback (most recent call last):\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 612, in _decrypt\r\n    data = aes.decrypt_and_verify(encrypted_value[12:-16], tag)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\Cryptodome\\Cipher\\_mode_gcm.py\", line 567, in decrypt_and_verify\r\n    self.verify(received_mac_tag)\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\Cryptodome\\Cipher\\_mode_gcm.py\", line 508, in verify\r\n    raise ValueError(\"MAC check failed\")\r\nValueError: MAC check failed\r\n\r\nDuring handling of the above exception, another exception occurred:\r\n\r\nTraceback (most recent call last):\r\n  File \"<string>\", line 2, in <module>\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 1320, in chrome\r\n    return Chrome(cookie_file, domain_name, key_file).load()\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 550, in load\r\n    value = self._decrypt(value, enc_value, has_integrity_check_for_cookie_domain)\r\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\Azandikka\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\browser_cookie3\\__init__.py\", line 614, in _decrypt\r\n    raise BrowserCookieError(\r\nbrowser_cookie3.BrowserCookieError: Unable to get key for cookie decryption\r\nPress Enter to continue...:\r\nAt C:\\Users\\Azandikka\\gemini-web-wrapper\\start-admin.ps1:25 char:300\r\n+ ... d)) if psid else \\\"MISSING â€” login to gemini.google.com first\\\"}')\"\r\n+                                                                       ~~~\r\nThe string is missing the terminator: '.\r\n    + CategoryInfo          : ParserError: (:) [], ParseException\r\n    + FullyQualifiedErrorId : TerminatorExpectedAtEndOfString\r\n\r\nPS C:\\Users\\Azandikka\\gemini-web-wrapper>",
+            "start": 0,
+            "end": 3052
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "can the app fetch them alone",
+            "start": 0,
+            "end": 28
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "fghjk",
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ll",
+            "start": 0,
+            "end": 2
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "the model dont stops thinking it measne it dont work ?",
+            "start": 0,
+            "end": 54
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "test",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "Bad Request: {\"detail\":\"No active chat session set. Use POST /v1/chats/active.\"}",
+            "start": 0,
+            "end": 80
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "test",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "hello",
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "cd $HOME\\gemini-web-wrapper\r.\\start.ps1",
+            "start": 0,
+            "end": 39
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "hello",
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "add the other models like3.8 falsh and 3.1 pro etc",
+            "start": 0,
+            "end": 50
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "i dont see it as a provider in the proivider settings in the opencode app",
+            "start": 0,
+            "end": 73
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "gonfigure it for opencode ",
+            "start": 0,
+            "end": 26
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "gimme the api key",
+            "start": 0,
+            "end": 17
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "g.a000BwmINS5dvLtjxwfBCTJZjkFHCWN6AxTSNS2qXcVzbTGUeTewKEOIITcmBGwSfROVbQGw9gACgYKAbESARQSFQHGX2MitLApf3rETXBBZuDOFV4VEhoVAUF8yKov1JTdo3KvnW2rGuDXFx7_0076\n\nsidts-CjcBXMw41b0A0SYvKOfbf_CsgN34yajFx4Lk13Mxh2BH3qbz0a5xaz65x33VyvGYTe8dVyXDbA8lEAA",
+            "start": 0,
+            "end": 240
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ping",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "configure it for everywhere, not this project; help me to begin also",
+            "start": 0,
+            "end": 68
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "psuh",
+            "start": 0,
+            "end": 4
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "configure https://github.com/eriksonssilva/gemini-web-wrapper",
+            "start": 0,
+            "end": 61
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "continue",
+            "start": 0,
+            "end": 8
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "file",
+            "path": "NOTES_DE_VERSION.md",
+            "content": "@NOTES_DE_VERSION.md",
+            "start": 0,
+            "end": 20
+          },
+          {
+            "type": "text",
+            "content": " ",
+            "start": 20,
+            "end": 21
+          },
+          {
+            "type": "file",
+            "path": "notifications.json",
+            "content": "@notifications.json",
+            "start": 21,
+            "end": 40
+          },
+          {
+            "type": "text",
+            "content": " ",
+            "start": 40,
+            "end": 41
+          },
+          {
+            "type": "file",
+            "path": "android/build.gradle",
+            "content": "@android/build.gradle",
+            "start": 41,
+            "end": 62
+          },
+          {
+            "type": "text",
+            "content": " make new release and adapte notificvations notes de version. use git for making proper versionning and changes and fixes",
+            "start": 62,
+            "end": 183
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "non il faut supprimer le code qui fait cette merde olutot que d'utilser la meme focntion qui chagge la note lors dun second ou d'un triosoième clic",
+            "start": 0,
+            "end": 147
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "toujours pas",
+            "start": 0,
+            "end": 12
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "toujours ce meme pb de curseur qui revient au debut (quand on utilise pour la première fois le lecteur pour une pièce en particlier)",
+            "start": 0,
+            "end": 132
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "en scrollant encore plus le grappeur du lecteurvers le haut fait que ca appuie automatqiuemet sur le bouton videos, après avoir dépassé un certaun nombre de pixel au desus de la position stable du lecteur, et de meme dans l'autre sens pour fermer les sources",
+            "start": 0,
+            "end": 258
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "lorsque l'n clique pour la première fois, le curseur reste 2 secondes au bon endroit, puis se vide, mais la veluer de l'hordatage ne chnage pas c'est bizarre",
+            "start": 0,
+            "end": 157
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ah mais en faut poyur le changement de vitesse tu dois inscritre les vbaelurs de bpm en dur pas calculer à partir du bpm actuel car sinon ca fait des calculs sur la mauvaise valeur qui n'est pas 1",
+            "start": 0,
+            "end": 196
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "quand on clqiue sur une astérrique, ou un auitre eleet qui n'est pas un syklabe ou une note, va a l'elment suivant le plus proche",
+            "start": 0,
+            "end": 129
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ok jai compirs le bug intervient quand on chnage la vitesse pendant la lecture",
+            "start": 0,
+            "end": 78
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "desolé ca marche toujours pas, ya que le 1X qui est a la bonne vitesse, tous les autres sont trop lents, ils semblent pas calsulés de la meme manière sur que le 1X (que pour le synthé evidemmebnt)",
+            "start": 0,
+            "end": 196
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "quand on chnage la vitesse ca change la place du curseur (c'est une erreur da devrtait garder la meme )",
+            "start": 0,
+            "end": 103
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "ca ajoute de plus en plus d'epace entre les notes quand on accélère, plutot que de le diminuer et de diminuer le temps que prennet les notes",
+            "start": 0,
+            "end": 140
+          }
+        ],
+        "comments": []
+      },
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "repars du code de ",
+            "start": 0,
+            "end": 18
+          },
+          {
+            "type": "file",
+            "path": "propers.html",
+            "content": "@propers.html",
+            "start": 18,
+            "end": 31
+          },
+          {
+            "type": "text",
+            "content": " car lui marche avec un bpm correct, mais il faut le remplacer pas le systeme de x",
+            "start": 31,
+            "end": 113
+          }
+        ],
+        "comments": []
+      }
+    ]
+  },
+  "opencode.draft.172dbec4-ab6.heehcy.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_fbd0a7719ffebmpEh50i9zPx03:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.2ae2b9ba-a88.1hyfz68.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.12tdiwk.dat:session:ses_fbaf26b60ffe85xEgif9OFNEid:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.3f897cc7-3f3.2110ie.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.12tdiwk.dat:session:ses_fbae9dec8ffexNGDzB8TQIMbIF:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.c6470f8a-150.1br09cw.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.12tdiwk.dat:session:ses_fbad42fa7ffeK7cADhZiJCnCzB:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.d8a5f58e-71c.cp9ohh.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.draft.02e0472f-fec.166cob3.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9d63effeffePUHwxIKnc8eP2H:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9d183f6cffez11mDhRxqmuSrg:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.438e3353-064.142siir.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9d0b50c1ffeF3Ux1OBiB2b3e3:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.82c256d2-0b3.13usnwu.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.global.dat:prompt-history-shell": {
+    "entries": [
+      {
+        "prompt": [
+          {
+            "type": "text",
+            "content": "cd $HOME\\gemini-web-wrapper\r.\\start.ps1\r\n# or: python -m uvicorn app.main:app --host 0.0.0.0 --port 8022 --reload\r\n# Health: http://localhost:8022/health  UI: http://localhost:8022/",
+            "start": 0,
+            "end": 181
+          }
+        ],
+        "comments": []
+      }
+    ]
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9d050d88ffe82EfDFJNt6sIcA:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.0a019311-cc7.10iljkv.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "google",
+      "modelID": "gemini-3.8-flash"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9d042fb0ffeYUdmyb6y1msa92:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "google",
+      "modelID": "gemini-3.8-flash"
+    }
+  },
+  "opencode.draft.6d33531b-3ca.1bwu0ud.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-2.5-exp-advanced"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9cf7d553ffes1NMD7lgkKLrGg:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-2.5-exp-advanced"
+    }
+  },
+  "opencode.draft.9ae3c0c3-4e7.7kci8l.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9cf66678ffenJVrGz4WZ0zSAx:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    }
+  },
+  "opencode.draft.907b8efb-ba8.9ygpy2.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9cf4de29ffe6sj4cq36gBVTu1:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    }
+  },
+  "opencode.draft.b1a94576-209.16sq0zx.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9cf2a0f9ffer45kLu2arashSZ:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-2.5-pro"
+    }
+  },
+  "opencode.draft.c5710156-ac7.1j9ua32.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "modelID": "gemini-3.8-flash",
+      "providerID": "gemini-web-wrapper"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f9cbcb98fffeN61btmd8r9XsPO:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    }
+  },
+  "opencode.draft.0209e5b9-aec.1lpbncw.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f989d5c9bffeViXyWznNN9SFv2:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "gemini-web-wrapper",
+      "modelID": "gemini-3.8-flash"
+    }
+  },
+  "opencode.draft.94e00d82-aa7.azj215.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.2-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f84fccbfcffeLskF85LJOnXMUH:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "qwen",
+      "modelID": "qwen3.8-max"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.draft.88996b49-58b.1rc4owm.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "empero",
+      "modelID": "Qwen/Qwen3.8-27B-FP8"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f84f9bec6ffesvL6v3ebBDSxW0:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "empero",
+      "modelID": "Qwen/Qwen3.8-27B-FP8"
+    }
+  },
+  "opencode.draft.0f5eadce-61b.1owguar.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "qwen",
+      "modelID": "qwen3.8-max"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f84b6786bffe4voRVJw1JuInug:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "qwen",
+      "modelID": "qwen3.8-max"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.draft.2f64a357-172.18zi41q.dat:draft:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.3-contributor-free"
+    },
+    "context": {
+      "items": []
+    }
+  },
+  "opencode.workspace.RDpcRG9jdW1l.1n1s0yp.dat:session:ses_f8491a810ffeE53jS7M3ZE7n0G:prompt": {
+    "prompt": [
+      {
+        "type": "text",
+        "content": "",
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "context": {
+      "items": []
+    },
+    "cursor": 0,
+    "model": {
+      "providerID": "opencode",
+      "modelID": "muse-spark-1.3-contributor-free"
+    }
+  }
+}

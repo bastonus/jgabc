@@ -1,0 +1,1092 @@
+[
+  {
+    "word_index": 0,
+    "word": "QUasi",
+    "raw_lyrics": "Uasi",
+    "clean_latin": "quasi",
+    "is_melisma": false,
+    "total_weight": 2,
+    "notes": [
+      {
+        "note_index": 0,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 1,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 1,
+    "word": "modo",
+    "raw_lyrics": "modo",
+    "clean_latin": "modo",
+    "is_melisma": false,
+    "total_weight": 2,
+    "notes": [
+      {
+        "note_index": 2,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 3,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 2,
+    "word": "géniti",
+    "raw_lyrics": "géniti",
+    "clean_latin": "geniti",
+    "is_melisma": false,
+    "total_weight": 7,
+    "notes": [
+      {
+        "note_index": 4,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 5,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 6,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 7,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 8,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 9,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 10,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 3,
+    "word": "infántes",
+    "raw_lyrics": "infántes,",
+    "clean_latin": "infantes",
+    "is_melisma": false,
+    "total_weight": 3.9,
+    "notes": [
+      {
+        "note_index": 11,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 12,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 13,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 4,
+    "word": "allelúia",
+    "raw_lyrics": "allelúia:",
+    "clean_latin": "alleluia",
+    "is_melisma": false,
+    "total_weight": 9.9,
+    "notes": [
+      {
+        "note_index": 14,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 15,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 16,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 17,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 18,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 19,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 20,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 21,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 22,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 5,
+    "word": "rationábiles",
+    "raw_lyrics": "rationábiles,",
+    "clean_latin": "rationabiles",
+    "is_melisma": false,
+    "total_weight": 10.9,
+    "notes": [
+      {
+        "note_index": 23,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 24,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 25,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 26,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 27,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 28,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 29,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 30,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 31,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 32,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 6,
+    "word": "sine",
+    "raw_lyrics": "sine",
+    "clean_latin": "sine",
+    "is_melisma": false,
+    "total_weight": 4,
+    "notes": [
+      {
+        "note_index": 33,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 34,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 35,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 36,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 7,
+    "word": "dolo",
+    "raw_lyrics": "dolo",
+    "clean_latin": "dolo",
+    "is_melisma": false,
+    "total_weight": 5,
+    "notes": [
+      {
+        "note_index": 37,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 38,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 39,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 40,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 41,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 8,
+    "word": "Melisma",
+    "raw_lyrics": "",
+    "clean_latin": "",
+    "is_melisma": true,
+    "total_weight": 5.699999999999999,
+    "notes": [
+      {
+        "note_index": 42,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 43,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 44,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1.8
+      },
+      {
+        "note_index": 45,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 9,
+    "word": "lac",
+    "raw_lyrics": "lac",
+    "clean_latin": "lac",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 46,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 10,
+    "word": "concupíscite",
+    "raw_lyrics": "concupíscite,",
+    "clean_latin": "concupiscite",
+    "is_melisma": false,
+    "total_weight": 13.700000000000001,
+    "notes": [
+      {
+        "note_index": 47,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 48,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 49,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 50,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 51,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 52,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 53,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 54,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 55,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 56,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 57,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1.8
+      },
+      {
+        "note_index": 58,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 11,
+    "word": "allelúia",
+    "raw_lyrics": "allelúia,",
+    "clean_latin": "alleluia",
+    "is_melisma": false,
+    "total_weight": 8.9,
+    "notes": [
+      {
+        "note_index": 59,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 60,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 61,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 62,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 63,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 64,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 65,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 66,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 12,
+    "word": "allelúia",
+    "raw_lyrics": "allelúia,",
+    "clean_latin": "alleluia",
+    "is_melisma": false,
+    "total_weight": 9.25,
+    "notes": [
+      {
+        "note_index": 67,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 68,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 69,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.25
+      },
+      {
+        "note_index": 70,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 71,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 72,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 73,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 74,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 75,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 13,
+    "word": "Melisma",
+    "raw_lyrics": "",
+    "clean_latin": "",
+    "is_melisma": true,
+    "total_weight": 5.699999999999999,
+    "notes": [
+      {
+        "note_index": 76,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 77,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 78,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1.8
+      },
+      {
+        "note_index": 79,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 14,
+    "word": "allelúia",
+    "raw_lyrics": "allelúia.",
+    "clean_latin": "alleluia",
+    "is_melisma": false,
+    "total_weight": 8.9,
+    "notes": [
+      {
+        "note_index": 80,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 81,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 82,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 83,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 84,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 85,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 86,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 87,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 15,
+    "word": "PsExsultáte",
+    "raw_lyrics": "Ps. Exsultáte",
+    "clean_latin": "psexsultate",
+    "is_melisma": false,
+    "total_weight": 7,
+    "notes": [
+      {
+        "note_index": 88,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 89,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 90,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 91,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 92,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 93,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 94,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 16,
+    "word": "Deo",
+    "raw_lyrics": "Deo",
+    "clean_latin": "deo",
+    "is_melisma": false,
+    "total_weight": 2,
+    "notes": [
+      {
+        "note_index": 95,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 96,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 17,
+    "word": "adjutóri",
+    "raw_lyrics": "adjutóri",
+    "clean_latin": "adjutori",
+    "is_melisma": false,
+    "total_weight": 4,
+    "notes": [
+      {
+        "note_index": 97,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 98,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 99,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 100,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 18,
+    "word": "nostro",
+    "raw_lyrics": "nostro:",
+    "clean_latin": "nostro",
+    "is_melisma": false,
+    "total_weight": 2.9,
+    "notes": [
+      {
+        "note_index": 101,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 102,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 19,
+    "word": "jubiláte",
+    "raw_lyrics": "jubiláte",
+    "clean_latin": "jubilate",
+    "is_melisma": false,
+    "total_weight": 4,
+    "notes": [
+      {
+        "note_index": 103,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 104,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 105,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 106,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 20,
+    "word": "Deo",
+    "raw_lyrics": "Deo",
+    "clean_latin": "deo",
+    "is_melisma": false,
+    "total_weight": 3,
+    "notes": [
+      {
+        "note_index": 107,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 108,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 109,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 21,
+    "word": "Jacob",
+    "raw_lyrics": "Jacob.",
+    "clean_latin": "jacob",
+    "is_melisma": false,
+    "total_weight": 2.9,
+    "notes": [
+      {
+        "note_index": 110,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 111,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  },
+  {
+    "word_index": 22,
+    "word": "Glória",
+    "raw_lyrics": "Glória",
+    "clean_latin": "gloria",
+    "is_melisma": false,
+    "total_weight": 6,
+    "notes": [
+      {
+        "note_index": 112,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 113,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 114,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 115,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 116,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 117,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 23,
+    "word": "Patri",
+    "raw_lyrics": "Patri.",
+    "clean_latin": "patri",
+    "is_melisma": false,
+    "total_weight": 2,
+    "notes": [
+      {
+        "note_index": 118,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 119,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 24,
+    "word": "E",
+    "raw_lyrics": "E",
+    "clean_latin": "e",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 120,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 25,
+    "word": "u",
+    "raw_lyrics": "u",
+    "clean_latin": "u",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 121,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 26,
+    "word": "o",
+    "raw_lyrics": "o",
+    "clean_latin": "o",
+    "is_melisma": false,
+    "total_weight": 2,
+    "notes": [
+      {
+        "note_index": 122,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 123,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 27,
+    "word": "u",
+    "raw_lyrics": "u",
+    "clean_latin": "u",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 124,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 28,
+    "word": "a",
+    "raw_lyrics": "a",
+    "clean_latin": "a",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 125,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 29,
+    "word": "e",
+    "raw_lyrics": "e.",
+    "clean_latin": "e",
+    "is_melisma": false,
+    "total_weight": 1,
+    "notes": [
+      {
+        "note_index": 126,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word_index": 30,
+    "word": "Melisma",
+    "raw_lyrics": "",
+    "clean_latin": "",
+    "is_melisma": true,
+    "total_weight": 4.699999999999999,
+    "notes": [
+      {
+        "note_index": 127,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 128,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1.8
+      },
+      {
+        "note_index": 129,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1.9
+      }
+    ]
+  }
+]

@@ -302,6 +302,46 @@ public class MainActivity extends BridgeActivity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public void checkApkAvailable(String apkUrl, String callbackName) {
+            if (apkUrl == null || apkUrl.trim().isEmpty()) {
+                notifyApkAvailable(callbackName, false, 400);
+                return;
+            }
+
+            downloadExecutor.execute(() -> {
+                HttpURLConnection conn = null;
+                try {
+                    conn = openConnectionWithRedirects(apkUrl.trim());
+                    int responseCode = conn.getResponseCode();
+                    boolean available = (responseCode == HttpURLConnection.HTTP_OK);
+                    notifyApkAvailable(callbackName, available, responseCode);
+                } catch (Exception e) {
+                    notifyApkAvailable(callbackName, false, -1);
+                } finally {
+                    if (conn != null) {
+                        try { conn.disconnect(); } catch (Exception ignored) {}
+                    }
+                }
+            });
+        }
+
+        private void notifyApkAvailable(String callbackName, boolean available, int statusCode) {
+            runOnUiThread(() -> {
+                try {
+                    if (getBridge() != null && getBridge().getWebView() != null && callbackName != null && !callbackName.trim().isEmpty()) {
+                        String safeCallback = callbackName.replaceAll("[^a-zA-Z0-9_.]", "");
+                        getBridge().getWebView().evaluateJavascript(
+                            "if (typeof window['" + safeCallback + "'] === 'function') { window['" + safeCallback + "'](" + available + ", " + statusCode + "); }",
+                            null
+                        );
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private HttpURLConnection openConnectionWithRedirects(String initialUrl) throws Exception {

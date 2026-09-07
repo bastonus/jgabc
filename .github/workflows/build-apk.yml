@@ -159,3 +159,46 @@ jobs:
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version.json on master
+        if: steps.tag_info.outputs.do_release == 'true'
+        run: |
+          TAG="${{ steps.tag_info.outputs.tag_name }}"
+          CLEAN_VER="${TAG#v}"
+          VERSION_CODE=$(grep 'versionCode' android/app/build.gradle | head -n 1 | grep -o '[0-9]\+')
+          if [ -z "$VERSION_CODE" ]; then VERSION_CODE=1; fi
+          RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin master
+          git checkout master
+
+          python3 -c "
+          import json
+          try:
+              with open('version.json', 'r', encoding='utf-8') as f:
+                  data = json.load(f)
+          except Exception:
+              data = {}
+
+          data['latestVersion'] = 'beta-${CLEAN_VER}'
+          data['versionCode'] = int('${VERSION_CODE}')
+          data['releaseDate'] = '${RELEASE_DATE}'
+          data['tagName'] = '${TAG}'
+          data['downloadUrl'] = 'https://github.com/bastonus/jgabc/releases/download/${TAG}/Oremus.apk'
+          data['htmlUrl'] = 'https://github.com/bastonus/jgabc/releases/tag/${TAG}'
+          data['body'] = 'Release ${TAG} — Oremus APK'
+
+          with open('version.json', 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+              f.write('\n')
+          "
+
+          if git status --porcelain | grep -q "version.json"; then
+            git add version.json
+            git commit -m "chore(release): update version.json for ${TAG} after APK release [skip ci]"
+            git push origin master
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

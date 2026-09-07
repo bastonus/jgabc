@@ -99,10 +99,8 @@
 [data-theme="oled"] .do-header-dropdown,
 [data-theme="oled"] .settings-panel,
 [data-theme="oled"] .modern-player-bar {
-    background-color: rgba(0, 0, 0, 0.78) !important;
+    background-color: rgba(0, 0, 0, 0.92) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
 }
 
 /* ---- App Layout ---- */
@@ -4907,16 +4905,16 @@ body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not
     margin-top: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
     overflow: hidden !important;
     border: none !important;
-    border-top: 1px solid color-mix(in srgb, var(--primary-color) 12%, transparent) !important;
+    border-top: none !important;
     outline: none !important;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06) !important;
-    background-color: color-mix(in srgb, var(--background-base) 70%, transparent) !important;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45) !important;
+    background-color: var(--background-base) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     z-index: 965 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -4931,19 +4929,21 @@ body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not
 
 [data-theme="dark"] #modernPlayerBar,
 [data-theme="oled"] #modernPlayerBar {
-    background-color: rgba(0, 0, 0, 0.78) !important;
+    background-color: var(--background-base, #121212) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-top: 1px solid color-mix(in srgb, #ffffff 8%, transparent) !important;
+    /* Backdrop blur removed for performance and sticky header compatibility */
+    border: none !important;
+    border-top: 1px solid color-mix(in srgb, var(--text-secondary) 15%, transparent) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 [data-theme="light"] #modernPlayerBar {
-    background-color: color-mix(in srgb, var(--background-base) 70%, transparent) !important;
+    background-color: var(--background-base, #ffffff) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border-top: 1px solid color-mix(in srgb, #000000 6%, transparent) !important;
+    /* Backdrop blur removed for performance and sticky header compatibility */
+    border: none !important;
+    border-top: 1px solid color-mix(in srgb, var(--text-secondary) 15%, transparent) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 #modernPlayerBar.visible,
@@ -4963,14 +4963,17 @@ body.player-dock-open #modernPlayerBar {
         padding: 10px 14px 14px !important;
         padding-bottom: calc(400px + max(14px, env(safe-area-inset-bottom, 0px))) !important;
         margin-bottom: -400px !important;
+        border-radius: 16px 16px 0 0 !important;
+        border: none !important;
+        border-top: none !important;
     }
 }
 
 /* ── Grab Handle for Swipe Down Dismissal ── */
 .do-player-drag-handle-wrap {
     width: 100%;
-    padding: 10px 0 14px;
-    margin: -8px 0 -4px;
+    padding: 16px 0 20px;
+    margin: -10px 0 -6px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -4979,16 +4982,20 @@ body.player-dock-open #modernPlayerBar {
     user-select: none;
     -webkit-user-select: none;
     z-index: 10;
+    /* Ensure minimum 44px touch target height */
+    min-height: 44px;
+    box-sizing: border-box;
 }
 
 .do-player-drag-handle {
-    width: 44px;
-    height: 5px;
-    background: color-mix(in srgb, var(--text-secondary) 35%, transparent);
-    border-radius: 4px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    width: 48px;
+    height: 6px;
+    background: color-mix(in srgb, var(--text-secondary) 50%, transparent);
+    border-radius: 6px;
+    transition: background-color 0.2s ease, transform 0.2s ease, width 0.2s ease;
     flex-shrink: 0;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: grab;
 }
 
 .do-player-drag-handle-wrap:hover .do-player-drag-handle,
@@ -5694,6 +5701,77 @@ button#playerBtnSolesmes.active {
 .do-player-videos-btn.active .do-yt-icon-close {
     display: inline-block !important;
     stroke: #ffffff !important;
+}
+
+/* ── Video & Sources Drawer in Modern Player Bar (Fluid hardware-accelerated expand) ── */
+#playerVideoDrawer,
+.do-player-video-drawer {
+    overflow: hidden;
+    height: 0;
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    border-top: 1px solid transparent !important;
+    display: none;
+    box-sizing: border-box;
+    will-change: max-height, opacity;
+    transition: max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s ease,
+                padding 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                margin 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease;
+}
+
+#playerVideoDrawer.is-open,
+.do-player-video-drawer.is-open {
+    display: block !important;
+    height: auto;
+    max-height: 320px;
+    opacity: 1;
+    padding-top: 10px !important;
+    margin-top: 4px !important;
+    border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1)) !important;
+}
+
+[data-theme="light"] #playerVideoDrawer.is-open,
+[data-theme="light"] .do-player-video-drawer.is-open {
+    border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+/* Notice quand aucune vidéo externe n'est disponible */
+.do-yt-empty-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: var(--text-secondary, #94a3b8);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 220px;
+    max-width: 280px;
+    box-sizing: border-box;
+    line-height: 1.4;
+    user-select: none;
+}
+
+[data-theme="light"] .do-yt-empty-notice {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    color: var(--text-secondary, #64748b);
+}
+
+.do-yt-empty-notice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--primary-color, #c96b63);
+    opacity: 0.85;
 }
 
 .do-solesmes-text {
@@ -7174,6 +7252,7 @@ html.is-ios .web-download-app-wrapper,
     --toc-margin: 16px;
     --player-bar-offset: 146px;
     --player-drag-y: 0px;
+    --toc-pill-height: 40px;
 }
 
 @media (min-width: 600px) {
@@ -7182,7 +7261,7 @@ html.is-ios .web-download-app-wrapper,
     }
 }
 
-/* ── Floating Trigger Button (Slender 30px Design, 100% Solid Opaque Grey, Flat No-Shadow) ── */
+/* ── Floating Table of Contents Pill (Elevated Glassmorphism Pill, High-Visibility) ── */
 .do-mass-toc-pill {
     position: fixed;
     right: var(--toc-margin, 16px);
@@ -7191,59 +7270,72 @@ html.is-ios .web-download-app-wrapper,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    height: 30px !important;
-    padding: 0 11px !important;
-    border-radius: 8px !important;
-    border: none !important;
+    gap: 8px;
+    height: var(--toc-pill-height, 40px) !important;
+    min-height: var(--toc-pill-height, 40px) !important;
+    padding: 0 16px 0 13px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
     outline: none !important;
-    background: #202228 !important;
-    color: var(--text-secondary) !important;
-    font-family: inherit;
-    font-size: 12px !important;
-    font-weight: 600;
-    letter-spacing: 0.1px;
+    background: rgba(24, 25, 30, 0.88) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    color: var(--text-primary, #f8fafc) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.15px;
     cursor: pointer;
-    box-shadow: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
     transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px)));
     opacity: 1 !important;
     box-sizing: border-box !important;
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 0.18s ease,
-                color 0.18s ease !important;
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                color 0.2s ease !important;
     user-select: none;
     touch-action: manipulation;
 }
 
 [data-theme="light"] .do-mass-toc-pill {
-    background: #e8ebf2 !important;
-    color: var(--text-secondary) !important;
-    box-shadow: none !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    background-image: var(--noise-overlay) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-primary, #111317) !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
     opacity: 1 !important;
 }
 
 @media (hover: hover) {
     .do-mass-toc-pill:hover {
-        background: rgba(var(--primary-color-rgb), 0.08) !important;
-        color: var(--primary-color) !important;
+        background: rgba(34, 36, 44, 0.96) !important;
+        border-color: rgba(var(--primary-color-rgb), 0.5) !important;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 14px rgba(var(--primary-color-rgb), 0.22) !important;
+        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) translateY(-2px) !important;
     }
 
     [data-theme="light"] .do-mass-toc-pill:hover {
-        background: rgba(var(--primary-color-rgb), 0.08) !important;
-        color: var(--primary-color) !important;
+        background: #ffffff !important;
+        border-color: rgba(var(--primary-color-rgb), 0.45) !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14), 0 0 12px rgba(var(--primary-color-rgb), 0.16) !important;
+        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) translateY(-2px) !important;
     }
 }
 
 .do-mass-toc-pill:active {
-    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) !important;
+    transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) scale(0.96) !important;
 }
 
 /* When the TOC panel is open, button morphs into active close button */
 .do-mass-toc-pill.is-open {
     background: var(--primary-color) !important;
     color: #ffffff !important;
-    box-shadow: none !important;
+    border-color: transparent !important;
+    box-shadow: 0 8px 26px rgba(var(--primary-color-rgb), 0.5), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
 }
 
 .do-mass-toc-pill.is-scrolling {
@@ -7254,24 +7346,27 @@ html.is-ios .web-download-app-wrapper,
     display: flex;
     align-items: center;
     justify-content: center;
-    color: currentColor;
-    transition: transform 0.25s ease;
+    color: var(--primary-color) !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .do-mass-toc-pill-icon svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 17px !important;
+    height: 17px !important;
 }
 
 .do-mass-toc-pill.is-open .do-mass-toc-pill-icon {
     transform: rotate(90deg);
+    color: #ffffff !important;
 }
 
 .do-mass-toc-pill-text {
-    max-width: 140px;
+    max-width: 180px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1;
 }
 
 /* ── Dynamic Bottom Drawer Avoidance (Strict constant clearance for Player and Mass Part Picker) ── */
@@ -7383,7 +7478,7 @@ body.is-dragging-picker .do-mass-toc-panel {
 .do-mass-toc-panel {
     position: fixed;
     right: var(--toc-margin, 16px);
-    bottom: calc(max(20px, calc(var(--toc-margin, 16px) + env(safe-area-inset-bottom, 0px))) + 38px);
+    bottom: calc(max(20px, calc(var(--toc-margin, 16px) + env(safe-area-inset-bottom, 0px))) + var(--toc-pill-height, 40px) + 10px);
     width: 280px;
     max-width: calc(100vw - 32px);
     height: auto;
@@ -7405,11 +7500,11 @@ body.is-dragging-picker .do-mass-toc-panel {
 
 body.player-dock-open .do-mass-toc-panel,
 .has-player-open .do-mass-toc-panel {
-    bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px) + 38px) !important;
+    bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px) + var(--toc-pill-height, 40px) + 10px) !important;
 }
 
 body.picker-drawer-open .do-mass-toc-panel {
-    bottom: calc(min(var(--part-picker-offset, 70vh), calc(100vh - 56px)) + var(--toc-margin, 16px) + 38px) !important;
+    bottom: calc(min(var(--part-picker-offset, 70vh), calc(100vh - 56px)) + var(--toc-margin, 16px) + var(--toc-pill-height, 40px) + 10px) !important;
 }
 
 .do-mass-toc-panel.hidden {
@@ -7891,11 +7986,14 @@ body.mass-toc-open #modernPlayerBar {
 /* ── Mass Part Picker Backdrop ── */
 .do-part-picker-backdrop {
     position: fixed !important;
-    inset: 0 !important;
-    background: rgba(0, 0, 0, 0.55) !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    z-index: 966 !important;
+    top: var(--do-header-offset, 58px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.38) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    z-index: 960 !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -7910,11 +8008,18 @@ body.mass-toc-open #modernPlayerBar {
     pointer-events: auto !important;
 }
 
-/* ── Prevent background/underneath scrolling when part picker drawer is open ── */
-html.picker-drawer-open,
-body.picker-drawer-open {
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
+/* ── When part picker is open: block background interaction, keep header & player clickable ── */
+body.picker-drawer-open #do-content-stream {
+    pointer-events: none !important;
+}
+
+body.picker-drawer-open .do-top-header {
+    z-index: 970 !important;
+    pointer-events: auto !important;
+}
+
+body.picker-drawer-open #modernPlayerBar {
+    pointer-events: none !important;
 }
 
 /* ── Bottom Sheet Drawer (Same design system as #modernPlayerBar) ── */
@@ -8148,8 +8253,9 @@ body.is-dragging-picker #massPartPickerDrawer {
     color: var(--primary-color, #c96b63);
 }
 
-/* ── Card Header Corner Psalm-Toned Button ── */
-.do-card-pt-btn {
+/* ── Card Header Corner Psalm-Toned & Gloria Patri Buttons ── */
+.do-card-pt-btn,
+.do-card-gp-btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -8166,20 +8272,23 @@ body.is-dragging-picker #massPartPickerDrawer {
     white-space: nowrap;
 }
 
-.do-card-pt-btn:hover {
+.do-card-pt-btn:hover,
+.do-card-gp-btn:hover {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
     border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.35);
     color: var(--primary-color, #c96b63);
 }
 
-.do-card-pt-btn.is-active {
+.do-card-pt-btn.is-active,
+.do-card-gp-btn.is-active {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2) !important;
     border-color: var(--primary-color, #c96b63) !important;
     color: var(--primary-color, #c96b63) !important;
     font-weight: 700 !important;
 }
 
-.do-card-pt-btn .do-pt-sym {
+.do-card-pt-btn .do-pt-sym,
+.do-card-gp-btn .do-pt-sym {
     font-family: serif;
     font-weight: bold;
     font-size: 0.88rem;
@@ -8187,10 +8296,12 @@ body.is-dragging-picker #massPartPickerDrawer {
 }
 
 @media (max-width: 600px) {
-    .do-card-pt-btn .do-pt-text {
+    .do-card-pt-btn .do-pt-text,
+    .do-card-gp-btn .do-pt-text {
         display: none;
     }
-    .do-card-pt-btn {
+    .do-card-pt-btn,
+    .do-card-gp-btn {
         padding: 4px 7px;
     }
 }

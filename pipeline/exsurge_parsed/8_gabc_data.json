@@ -1,0 +1,980 @@
+[
+  {
+    "word": "Mnes",
+    "raw_lyrics": "Mnes",
+    "notes": [
+      {
+        "note_index": 0,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 1,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 2,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 3,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "gentes",
+    "raw_lyrics": "gentes",
+    "notes": [
+      {
+        "note_index": 4,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 5,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 6,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "quascúmque",
+    "raw_lyrics": "quascúmque",
+    "notes": [
+      {
+        "note_index": 7,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 8,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 9,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 10,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "fecísti",
+    "raw_lyrics": "fecísti,",
+    "notes": [
+      {
+        "note_index": 11,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 12,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 13,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 14,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 15,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 16,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "vénient",
+    "raw_lyrics": "vénient,",
+    "notes": [
+      {
+        "note_index": 17,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 18,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 19,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 20,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 21,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 22,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 23,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 24,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 25,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "et",
+    "raw_lyrics": "et",
+    "notes": [
+      {
+        "note_index": 26,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 27,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 28,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "adorábunt",
+    "raw_lyrics": "adorábunt",
+    "notes": [
+      {
+        "note_index": 29,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 30,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 31,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 32,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 33,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 34,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 35,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 36,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 37,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 38,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 39,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 40,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "coram",
+    "raw_lyrics": "coram",
+    "notes": [
+      {
+        "note_index": 41,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 42,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 43,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 44,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "te",
+    "raw_lyrics": "te",
+    "notes": [
+      {
+        "note_index": 45,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 46,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "Dómine",
+    "raw_lyrics": "Dómine,",
+    "notes": [
+      {
+        "note_index": 47,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 48,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 49,
+        "pitch": 8,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 50,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 51,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 52,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "et",
+    "raw_lyrics": "et",
+    "notes": [
+      {
+        "note_index": 53,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "glorificábunt",
+    "raw_lyrics": "glorificábunt",
+    "notes": [
+      {
+        "note_index": 54,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 55,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 56,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 57,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 58,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 59,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 60,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 61,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 62,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 63,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "nomen",
+    "raw_lyrics": "nomen",
+    "notes": [
+      {
+        "note_index": 64,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 65,
+        "pitch": 8,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 66,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 67,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 68,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "tuum",
+    "raw_lyrics": "tuum:",
+    "notes": [
+      {
+        "note_index": 69,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 70,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 71,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 72,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 73,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 74,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "quóniam",
+    "raw_lyrics": "quóniam",
+    "notes": [
+      {
+        "note_index": 75,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 76,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 77,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 78,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "magnus",
+    "raw_lyrics": "magnus",
+    "notes": [
+      {
+        "note_index": 79,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      },
+      {
+        "note_index": 80,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 81,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 82,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 83,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 84,
+        "pitch": 8,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 85,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "es",
+    "raw_lyrics": "es",
+    "notes": [
+      {
+        "note_index": 86,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 87,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "tu",
+    "raw_lyrics": "tu,",
+    "notes": [
+      {
+        "note_index": 88,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "et",
+    "raw_lyrics": "et",
+    "notes": [
+      {
+        "note_index": 89,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 90,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "fáciens",
+    "raw_lyrics": "fáciens",
+    "notes": [
+      {
+        "note_index": 91,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 92,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 93,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 94,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 95,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 96,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "mirabília",
+    "raw_lyrics": "mirabília:",
+    "notes": [
+      {
+        "note_index": 97,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 98,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 99,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 100,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 101,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 102,
+        "pitch": 2,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 103,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 104,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 105,
+        "pitch": 0,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 106,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 107,
+        "pitch": 1,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "tu",
+    "raw_lyrics": "tu",
+    "notes": [
+      {
+        "note_index": 108,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 109,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 110,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "es",
+    "raw_lyrics": "es",
+    "notes": [
+      {
+        "note_index": 111,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 112,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 113,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "Deus",
+    "raw_lyrics": "Deus",
+    "notes": [
+      {
+        "note_index": 114,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 115,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 2
+      },
+      {
+        "note_index": 116,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 117,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 118,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 119,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 120,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 121,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      }
+    ]
+  },
+  {
+    "word": "solus",
+    "raw_lyrics": "solus,",
+    "notes": [
+      {
+        "note_index": 122,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 123,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 124,
+        "pitch": 7,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 125,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 126,
+        "pitch": 6,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 127,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 128,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  },
+  {
+    "word": "allelúia",
+    "raw_lyrics": "allelúia.",
+    "notes": [
+      {
+        "note_index": 129,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 130,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 131,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      },
+      {
+        "note_index": 132,
+        "pitch": 3,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 133,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 134,
+        "pitch": 5,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 135,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 1
+      },
+      {
+        "note_index": 136,
+        "pitch": 4,
+        "shape": "e",
+        "duration_weight": 2
+      }
+    ]
+  }
+]
