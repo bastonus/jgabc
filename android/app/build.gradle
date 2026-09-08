@@ -86,6 +86,8 @@ task copyWebAssets(type: Copy) {
         include "Caeciliae-Staffless.ttf"
         include "Caeciliae-Staffless-print.ttf"
         include "do_manifest.js"
+        include "psalmtone.js"
+        include "verseRef.js"
 
         include "css/modern.css"
         include "css/divinum_officium.css"

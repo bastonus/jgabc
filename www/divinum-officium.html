@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="la" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Oremus</title>
+    <link rel="icon" id="dynamicFavicon" href="icon/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Oremus">
+    <meta name="application-name" content="Oremus">
+    <meta name="theme-color" content="#121214" id="metaThemeColor">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=78.0&ts=202609071040">
+    <link rel="stylesheet" href="css/gregorian_search.css?v=2.56&ts=202609010315">
+    <script>
+        (function() {
+            var t = localStorage.getItem('do_theme') || 'auto';
+            if (t === 'auto') {
+                t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+            var c = localStorage.getItem('do_color') || '#c96b63';
+            document.documentElement.style.setProperty('--primary-color', c);
+
+            // iOS & Android Platform detection for early UI optimization
+            var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (isIos) {
+                document.documentElement.classList.add('is-ios');
+            }
+            var isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                document.documentElement.classList.add('is-android');
+            }
+
+            // Icon & Favicon color initialization (O + Cross)
+            var sync = localStorage.getItem('do_icon_sync') === 'true';
+            var iconColor = localStorage.getItem('do_icon_color') || 'default';
+            var effColor = sync ? c : (iconColor === 'default' ? '#e4e4e7' : iconColor);
+            var svgData = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">' +
+                '<rect width="512" height="512" rx="115" fill="#121214"/>' +
+                '<g transform="translate(256, 256) scale(1.7) translate(-163.926, -590.396)">' +
+                '<g transform="matrix(5.069816,0,0,5.069816,-1181.3253,-599.436706)">' +
+                '<path d="M265.345,214.945C268.352,214.945 271.145,215.453 273.725,216.47C276.305,217.487 278.57,218.903 280.52,220.72C282.47,222.537 283.987,224.662 285.07,227.095C286.154,229.528 286.695,232.162 286.695,234.995C286.695,237.695 286.148,240.228 285.054,242.595C283.96,244.962 282.438,247.028 280.488,248.795C278.539,250.562 276.273,251.945 273.691,252.945C271.108,253.945 268.329,254.445 265.354,254.445C262.378,254.445 259.599,253.945 257.017,252.945C254.435,251.945 252.169,250.562 250.219,248.795C248.27,247.028 246.745,244.962 245.645,242.595C244.545,240.228 243.995,237.695 243.995,234.995C243.995,232.162 244.537,229.528 245.62,227.095C246.704,224.662 248.22,222.537 250.17,220.72C252.12,218.903 254.385,217.487 256.965,216.47C259.545,215.453 262.338,214.945 265.345,214.945ZM265.351,251.195C267.947,251.195 270.187,250.545 272.07,249.245C273.954,247.945 275.412,246.088 276.445,243.675C277.479,241.261 277.995,238.418 277.995,235.145C277.995,231.678 277.487,228.678 276.47,226.145C275.454,223.612 273.998,221.653 272.103,220.27C270.208,218.887 267.958,218.195 265.353,218.195C262.748,218.195 260.503,218.883 258.617,220.259C256.732,221.635 255.273,223.593 254.242,226.134C253.211,228.675 252.695,231.678 252.695,235.141C252.695,238.411 253.212,241.253 254.245,243.67C255.279,246.087 256.739,247.945 258.626,249.245C260.515,250.545 262.756,251.195 265.351,251.195Z" fill="' + effColor + '" style="fill-rule:nonzero;"/>' +
+                '</g>' +
+                '<path d="M146.046,524.564L182.114,524.564C182.114,524.564 182.805,526.506 182.281,527.223C174.967,537.224 176.131,571.602 176.131,571.602C176.131,571.602 204.276,572.294 214.858,566.283C215.39,565.981 216.687,566.449 216.687,566.449L216.853,599.359C216.853,599.359 215.237,600.405 214.526,600.024C201.866,593.237 175.798,594.539 175.798,594.539C176.325,627.366 172.945,671.274 194.747,666.343C187.793,678.365 141.254,678.642 134.079,666.675C158.651,671.495 148.595,614.457 151.698,594.539C151.698,594.539 121.225,594.401 112.804,600.024C112.308,600.356 111.142,599.359 111.142,599.359L111.308,566.283C111.308,566.283 112.506,565.44 112.97,565.784C121.973,572.461 151.365,571.436 151.365,571.436C151.365,571.436 151.753,539.191 145.382,526.891C145.011,526.175 146.046,524.564 146.046,524.564Z" fill="' + effColor + '"/>' +
+                '</g></svg>';
+            var fav = document.getElementById('dynamicFavicon');
+            if (fav) fav.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
+        })();
+    </script>
+    <script src="jquery.min.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="moment.easter.js"></script>
+    <script src="propersdata.js"></script>
+    <script src="ordinarydata.js"></script>
+    <script src="miscChants.js"></script>
+    <script src="incipits.js"></script>
+    <script src="js/Tone.min.js?v=orig&ts=202608252211"></script>
+    <script src="js/tones.js?v=orig&ts=202608252211"></script>
+    <script src="psalmtone.js"></script>
+    <script src="util.js?v=orig&ts=202608252211"></script>
+    <script src="verseRef.js"></script>
+    <script src="exsurge.min.js?v=orig3&ts=202609061535"></script>
+    <script src="jquery.hypher.js"></script>
+    <script src="patterns/la-hypher.js"></script>
+    <script src="patterns/fr-FR.js"></script>
+    <script src="patterns/en-us.js"></script>
+    <script src="patterns/it.js"></script>
+    <script src="patterns/pl.js"></script>
+    <script src="do_manifest.js?v=20.12&ts=202609011145"></script>
+    <script src="js/bible_mappings.js?v=1.1&ts=202609011135"></script>
+    <script src="js/saints_art_metadata.js?v=1.0"></script>
+    <script src="js/tempora_art_metadata.js?v=1.1&ts=202609021535"></script>
+    <script src="js/divinum_officium.js?v=78.0&ts=202609071035"></script>
+    <script src="js/gregorian_db.js?v=2.1"></script>
+    <script src="js/gregorian_index_data.js?v=3.4&ts=202609011145"></script>
+    <script src="js/gregorian_youtube_links.js?v=1.0"></script>
+    <script src="https://www.youtube.com/iframe_api" async></script>
+    <script src="js/gregorian_search_engine.js?v=1.0&ts=202609010350"></script>
+    <script src="js/gregorian_search_ui.js?v=2.67&ts=202609041445"></script>
+</head>
+<body class="header-is-loading">
+    <div class="app-layout">
+        <div id="sidebarBackdrop" class="do-sidebar-backdrop"></div>
+
+        <aside id="doSidebar" class="do-sidebar">
+            <div class="do-sidebar-header">
+                <div class="do-brand" id="btnBrandHome" style="cursor: pointer;" title="Accueil">
+                    <svg class="do-brand-logo-full" viewBox="0 0 1070 201" height="32" fill="currentColor">
+                        <g transform="matrix(1,0,0,1,-55.685614,-490.295574)">
+                            <g transform="matrix(5.069816,0,0,5.069816,-1181.3253,-599.436706)">
+                                <path d="M265.345,214.945C268.352,214.945 271.145,215.453 273.725,216.47C276.305,217.487 278.57,218.903 280.52,220.72C282.47,222.537 283.987,224.662 285.07,227.095C286.154,229.528 286.695,232.162 286.695,234.995C286.695,237.695 286.148,240.228 285.054,242.595C283.96,244.962 282.438,247.028 280.488,248.795C278.539,250.562 276.273,251.945 273.691,252.945C271.108,253.945 268.329,254.445 265.354,254.445C262.378,254.445 259.599,253.945 257.017,252.945C254.435,251.945 252.169,250.562 250.219,248.795C248.27,247.028 246.745,244.962 245.645,242.595C244.545,240.228 243.995,237.695 243.995,234.995C243.995,232.162 244.537,229.528 245.62,227.095C246.704,224.662 248.22,222.537 250.17,220.72C252.12,218.903 254.385,217.487 256.965,216.47C259.545,215.453 262.338,214.945 265.345,214.945ZM265.351,251.195C267.947,251.195 270.187,250.545 272.07,249.245C273.954,247.945 275.412,246.088 276.445,243.675C277.479,241.261 277.995,238.418 277.995,235.145C277.995,231.678 277.487,228.678 276.47,226.145C275.454,223.612 273.998,221.653 272.103,220.27C270.208,218.887 267.958,218.195 265.353,218.195C262.748,218.195 260.503,218.883 258.617,220.259C256.732,221.635 255.273,223.593 254.242,226.134C253.211,228.675 252.695,231.678 252.695,235.141C252.695,238.411 253.212,241.253 254.245,243.67C255.279,246.087 256.739,247.945 258.626,249.245C260.515,250.545 262.756,251.195 265.351,251.195Z" style="fill-rule:nonzero;"/>
+                                <path d="M301.795,243.795L301.795,246.195C301.795,247.895 301.912,249.153 302.145,249.97C302.379,250.787 302.879,251.312 303.645,251.545C304.412,251.778 305.562,251.912 307.095,251.945L307.095,253.945L290.395,253.945L290.395,251.945C291.762,251.845 292.754,251.662 293.37,251.395C293.987,251.128 294.387,250.595 294.57,249.795C294.754,248.995 294.845,247.762 294.845,246.095L294.845,239.995C294.845,237.928 294.787,236.27 294.67,235.02C294.554,233.77 294.337,232.82 294.02,232.17C293.704,231.52 293.237,231.087 292.62,230.87C292.004,230.653 291.195,230.545 290.195,230.545L290.195,228.795L300.195,226.945L300.995,232.695L301.195,232.695C302.095,230.928 303.279,229.528 304.745,228.495C306.212,227.462 307.762,226.945 309.395,226.945C310.662,226.945 311.695,227.262 312.495,227.895C313.295,228.528 313.695,229.328 313.695,230.295C313.695,231.362 313.387,232.262 312.77,232.995C312.154,233.728 311.312,234.095 310.245,234.095C309.579,234.095 309.004,233.928 308.52,233.595C308.037,233.262 307.595,232.928 307.195,232.595C306.795,232.262 306.362,232.095 305.895,232.095C305.262,232.095 304.662,232.512 304.095,233.345C303.529,234.178 303.062,235.295 302.695,236.695C302.429,237.695 302.212,238.82 302.045,240.07C301.879,241.32 301.795,242.562 301.795,243.795Z" style="fill-rule:nonzero;"/>
+                                <path d="M339.095,247.545L340.495,249.295C337.462,252.728 333.679,254.445 329.145,254.445C326.412,254.445 324.012,253.878 321.945,252.745C319.879,251.612 318.27,250.037 317.12,248.02C315.97,246.003 315.395,243.678 315.395,241.045C315.395,238.278 316.004,235.837 317.22,233.72C318.437,231.603 320.129,229.945 322.295,228.745C324.462,227.545 326.945,226.945 329.745,226.945C333.279,226.945 336.029,227.903 337.995,229.82C339.962,231.737 340.945,234.395 340.945,237.795C340.945,238.328 340.862,238.653 340.695,238.77C340.529,238.887 340.062,238.945 339.295,238.945L323.195,238.945C323.129,239.112 323.079,239.328 323.045,239.595C323.012,239.862 322.995,240.195 322.995,240.595C322.995,242.762 323.32,244.637 323.97,246.22C324.62,247.803 325.537,249.028 326.72,249.895C327.904,250.762 329.295,251.195 330.895,251.195C332.295,251.195 333.687,250.878 335.07,250.245C336.454,249.612 337.795,248.712 339.095,247.545ZM323.545,236.145L330.795,236.145C332.162,236.145 333.029,236.07 333.395,235.92C333.762,235.77 333.945,235.412 333.945,234.845C333.945,233.378 333.529,232.178 332.695,231.245C331.862,230.312 330.812,229.845 329.545,229.845C328.112,229.845 326.837,230.437 325.72,231.62C324.604,232.803 323.879,234.312 323.545,236.145Z" style="fill-rule:nonzero;"/>
+                                <path d="M355.645,239.095L355.645,245.695C355.645,247.528 355.729,248.878 355.895,249.745C356.062,250.612 356.445,251.17 357.045,251.42C357.645,251.67 358.612,251.845 359.945,251.945L359.945,253.945L344.145,253.945L344.145,251.945C345.479,251.845 346.462,251.662 347.095,251.395C347.729,251.128 348.145,250.595 348.345,249.795C348.545,248.995 348.645,247.762 348.645,246.095L348.645,239.895C348.645,237.995 348.62,236.403 348.57,235.12C348.52,233.837 348.429,232.978 348.295,232.545C348.095,231.678 347.737,231.128 347.22,230.895C346.704,230.662 345.645,230.545 344.045,230.545L344.045,228.845L353.695,226.945L354.295,231.295L354.595,231.295C355.995,229.728 357.412,228.612 358.845,227.945C360.279,227.278 361.912,226.945 363.745,226.945C365.945,226.945 367.762,227.328 369.195,228.095C370.629,228.862 371.712,229.962 372.445,231.395L372.645,231.395C373.845,229.995 375.287,228.903 376.97,228.12C378.654,227.337 380.429,226.945 382.295,226.945C384.262,226.945 385.995,227.195 387.495,227.695C388.995,228.195 390.162,228.912 390.995,229.845C391.662,230.578 392.154,231.578 392.47,232.845C392.787,234.112 392.945,235.828 392.945,237.995L392.945,245.695C392.945,247.528 393.037,248.87 393.22,249.72C393.404,250.57 393.804,251.128 394.42,251.395C395.037,251.662 395.995,251.845 397.295,251.945L397.295,253.945L381.495,253.945L381.495,251.945C382.829,251.878 383.812,251.712 384.445,251.445C385.079,251.178 385.487,250.637 385.67,249.82C385.854,249.003 385.945,247.762 385.945,246.095L385.945,239.545C385.945,236.078 385.529,233.653 384.695,232.27C383.862,230.887 382.412,230.195 380.345,230.195C379.179,230.195 378.22,230.478 377.47,231.045C376.72,231.612 376.095,232.345 375.595,233.245C375.329,233.745 375.095,234.312 374.895,234.945C374.695,235.578 374.545,236.237 374.445,236.92C374.345,237.603 374.295,238.328 374.295,239.095L374.295,245.695C374.295,247.528 374.379,248.87 374.545,249.72C374.712,250.57 375.104,251.128 375.72,251.395C376.337,251.662 377.329,251.845 378.695,251.945L378.695,253.945L362.845,253.945L362.845,251.945C364.179,251.845 365.162,251.662 365.795,251.395C366.429,251.128 366.837,250.595 367.02,249.795C367.204,248.995 367.295,247.762 367.295,246.095L367.295,239.545C367.295,237.212 367.112,235.362 366.745,233.995C366.379,232.628 365.779,231.653 364.945,231.07C364.112,230.487 362.962,230.195 361.495,230.195C360.395,230.195 359.487,230.462 358.77,230.995C358.054,231.528 357.462,232.245 356.995,233.145C356.729,233.678 356.487,234.262 356.27,234.895C356.054,235.528 355.895,236.203 355.795,236.92C355.695,237.637 355.645,238.362 355.645,239.095Z" style="fill-rule:nonzero;"/>
+                                <path d="M421.295,240.845L421.295,235.645C421.295,233.845 421.212,232.528 421.045,231.695C420.879,230.862 420.495,230.312 419.895,230.045C419.295,229.778 418.312,229.578 416.945,229.445L416.945,227.445L428.245,227.445L428.245,242.595C428.245,244.628 428.27,246.22 428.32,247.37C428.37,248.52 428.462,249.378 428.595,249.945C428.762,250.778 429.104,251.32 429.62,251.57C430.137,251.82 431.212,251.945 432.845,251.945L432.845,253.895L422.895,254.495L422.345,250.045L422.145,250.045C421.312,251.412 420.104,252.487 418.52,253.27C416.937,254.053 415.179,254.445 413.245,254.445C411.512,254.445 409.954,254.12 408.57,253.47C407.187,252.82 406.029,251.878 405.095,250.645C403.662,248.712 402.945,245.962 402.945,242.395L402.945,235.645C402.945,234.278 402.912,233.203 402.845,232.42C402.779,231.637 402.604,231.053 402.32,230.67C402.037,230.287 401.612,230.012 401.045,229.845C400.479,229.678 399.695,229.545 398.695,229.445L398.695,227.445L409.895,227.445L409.895,241.595C409.895,244.928 410.312,247.362 411.145,248.895C411.979,250.428 413.312,251.195 415.145,251.195C417.145,251.195 418.662,250.295 419.695,248.495C420.262,247.595 420.67,246.528 420.92,245.295C421.17,244.062 421.295,242.578 421.295,240.845Z" style="fill-rule:nonzero;"/>
+                                <path d="M438.845,252.195L437.745,253.945L436.195,253.945L436.195,244.845L438.295,244.845C438.862,247.212 439.679,248.953 440.745,250.07C441.812,251.187 443.195,251.745 444.895,251.745C446.129,251.745 447.087,251.487 447.77,250.97C448.454,250.453 448.795,249.745 448.795,248.845C448.795,248.212 448.612,247.603 448.245,247.02C447.879,246.437 447.304,245.837 446.52,245.22C445.737,244.603 444.729,243.962 443.495,243.295C441.829,242.362 440.47,241.453 439.42,240.57C438.37,239.687 437.604,238.762 437.12,237.795C436.637,236.828 436.395,235.778 436.395,234.645C436.395,233.145 436.754,231.812 437.47,230.645C438.187,229.478 439.162,228.562 440.395,227.895C441.629,227.228 443.012,226.895 444.545,226.895C445.579,226.895 446.612,227.045 447.645,227.345C448.679,227.645 449.562,228.062 450.295,228.595L451.195,227.395L452.495,227.395L452.495,234.945L450.545,234.945C449.779,233.045 448.987,231.678 448.17,230.845C447.354,230.012 446.362,229.595 445.195,229.595C444.262,229.595 443.52,229.845 442.97,230.345C442.42,230.845 442.145,231.512 442.145,232.345C442.145,233.278 442.562,234.162 443.395,234.995C444.229,235.828 445.579,236.745 447.445,237.745C449.245,238.712 450.704,239.662 451.82,240.595C452.937,241.528 453.745,242.495 454.245,243.495C454.745,244.495 454.995,245.595 454.995,246.795C454.995,249.095 454.17,250.945 452.52,252.345C450.87,253.745 448.662,254.445 445.895,254.445C444.462,254.445 443.129,254.253 441.895,253.87C440.662,253.487 439.645,252.928 438.845,252.195Z" style="fill-rule:nonzero;"/>
+                            </g>
+                            <path d="M146.046,524.564L182.114,524.564C182.114,524.564 182.805,526.506 182.281,527.223C174.967,537.224 176.131,571.602 176.131,571.602C176.131,571.602 204.276,572.294 214.858,566.283C215.39,565.981 216.687,566.449 216.687,566.449L216.853,599.359C216.853,599.359 215.237,600.405 214.526,600.024C201.866,593.237 175.798,594.539 175.798,594.539C176.325,627.366 172.945,671.274 194.747,666.343C187.793,678.365 141.254,678.642 134.079,666.675C158.651,671.495 148.595,614.457 151.698,594.539C151.698,594.539 121.225,594.401 112.804,600.024C112.308,600.356 111.142,599.359 111.142,599.359L111.308,566.283C111.308,566.283 112.506,565.44 112.97,565.784C121.973,572.461 151.365,571.436 151.365,571.436C151.365,571.436 151.753,539.191 145.382,526.891C145.011,526.175 146.046,524.564 146.046,524.564Z"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <nav class="do-sidebar-nav">
+                <button id="btnSidebarSearchHeader" class="do-sidebar-search-bar" title="Quaerere" aria-label="Quaerere">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span class="do-search-bar-label">Quaerere...</span>
+                </button>
+
+                <button class="do-nav-item is-missa" data-hora="missa">
+                    <span class="do-nav-label">Sancta Missa</span>
+                </button>
+
+                <button class="do-nav-item is-bible" id="btnSidebarBible" data-hora="bible">
+                    <span class="do-nav-label">Sacra Biblia</span>
+                </button>
+
+                <div class="do-nav-divider"></div>
+
+                <button class="do-nav-item" data-hora="matutinum">
+                    <span class="do-nav-label">Matutinum</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="laudes">
+                    <span class="do-nav-label">Laudes</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="prima">
+                    <span class="do-nav-label">Prima</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="tertia">
+                    <span class="do-nav-label">Tertia</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="sexta">
+                    <span class="do-nav-label">Sexta</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="nona">
+                    <span class="do-nav-label">Nona</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="vesperae">
+                    <span class="do-nav-label">Vesper&aelig;</span>
+                </button>
+
+                <button class="do-nav-item" data-hora="completorium">
+                    <span class="do-nav-label">Completorium</span>
+                </button>
+            </nav>
+
+            <div class="do-sidebar-footer">
+                <button id="btnDownloadAppWebSidebar" class="do-footer-btn web-only-btn" title="Télécharger l'application">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Télécharger l'application</span>
+                </button>
+                <button id="btnFeedbackSidebar" class="do-footer-btn" title="Retours & Suggestions">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Retours &amp; Suggestions</span>
+                </button>
+                <button id="btnSettingsSidebar" class="do-footer-btn" title="Paramètres">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Paramètres</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="do-main-wrapper">
+            <!-- Remote GitHub Notification Top Banner (Integrated in Download/Notification Bar) -->
+            <aside id="appRemoteNotificationBanner" class="do-update-banner do-remote-notif-banner" aria-label="Notification">
+                <div class="do-update-banner-inner">
+                    <div class="do-update-banner-left">
+                        <span id="remoteNotifBannerIcon" class="do-update-banner-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                        </span>
+                        <span id="remoteNotifBannerTitle" class="do-update-banner-title">Notification</span>
+                        <span id="remoteNotifBannerTag" class="do-update-banner-tag">Info</span>
+                    </div>
+                    <div class="do-update-banner-actions" id="remoteNotifBannerActions">
+                        <button id="btnRemoteNotifAction" class="do-update-btn-action">
+                            <span>Voir</span>
+                        </button>
+                        <button id="btnCloseRemoteNotifBanner" class="do-update-btn-close" aria-label="Fermer" title="Fermer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Floating iOS / Android Style Notification Pill / Bar -->
+            <aside id="appFloatingNotification" class="do-floating-notif hidden" aria-live="polite">
+                <div class="do-floating-notif-inner">
+                    <div class="do-floating-notif-icon-circle" id="floatingNotifIconCircle">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="do-floating-notif-content" id="floatingNotifContent">
+                        <div class="do-floating-notif-header">
+                            <span class="do-floating-notif-title" id="floatingNotifTitle">Oremus</span>
+                            <span class="do-floating-notif-badge" id="floatingNotifBadge">Nouveau</span>
+                            <span class="do-floating-notif-time">maintenant</span>
+                        </div>
+                        <div class="do-floating-notif-body" id="floatingNotifBody">Message</div>
+                    </div>
+                    <div class="do-floating-notif-actions">
+                        <button id="btnFloatingNotifAction" class="do-floating-btn-action" title="Action">
+                            <span>Voir</span>
+                        </button>
+                        <button id="btnCloseFloatingNotif" class="do-floating-btn-close" aria-label="Fermer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Top Install Banner (PWA / iOS / Android) -->
+            <aside id="appInstallBanner" class="do-update-banner do-install-banner" aria-label="Installation de l'application">
+                <div class="do-update-banner-inner">
+                    <div class="do-update-banner-left">
+                        <svg class="do-update-banner-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="do-update-banner-title">Installer l'application</span>
+                        <span class="do-update-banner-tag" id="installPlatformTag">iOS / PWA</span>
+                    </div>
+                    <div class="do-update-banner-actions">
+                        <button id="btnInstallAppBanner" class="do-update-btn-action" title="Installer sur l'écran d'accueil">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Installer</span>
+                        </button>
+                        <button id="btnCloseInstallBanner" class="do-update-btn-close" aria-label="Fermer" title="Fermer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Top Update Banner (Clean 1-line, solid flat colors, borderless, sticky) -->
+            <aside id="appUpdateBanner" class="do-update-banner" aria-label="Mise à jour">
+                <div class="do-update-banner-inner">
+                    <div class="do-update-banner-left">
+                        <span class="do-update-banner-title">Nova versio</span>
+                        <span class="do-update-banner-tag" id="updateVersionTag">beta</span>
+                    </div>
+                    <div class="do-update-banner-actions">
+                        <div id="updateDownloadProgressWrapper" class="do-update-progress-wrapper hidden">
+                            <div class="do-update-progress-bar-track">
+                                <div id="updateDownloadProgressBar" class="do-update-progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                            <span id="updateDownloadProgressText" class="do-update-progress-text">0%</span>
+                        </div>
+                        <button id="btnDownloadUpdate" class="do-update-btn-action" title="Télécharger et installer">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Mettre à jour</span>
+                        </button>
+                        <button id="btnCloseUpdateBanner" class="do-update-btn-close" aria-label="Fermer" title="Fermer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <header class="app-header do-top-header is-header-loading">
+                <div class="do-top-left">
+                    <button id="btnOpenSidebarMobile" class="do-mobile-menu-btn" aria-label="Menu" title="Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <div class="header-title-area">
+                        <div id="doHourLabel" class="card-type"></div>
+                        <h1 id="doHeaderTitle" class="header-title dropdown-trigger" title="Choisir un jour ou une fête">
+                            <div class="do-header-title-wrapper">
+                                <span class="title-text"></span>
+                            </div>
+                            <span class="dropdown-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </h1>
+                    </div>
+                    <!-- Barre de recherche intégrée dans l'en-tête (Ligne 1) -->
+                    <div id="gregorianSearchHeaderRow" class="gregorian-search-header-panel">
+                        <div class="gregorian-search-input-wrapper">
+                            <span class="gregorian-search-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+                            </span>
+                            <input type="text" id="gregorianSearchInput" class="gregorian-search-input" placeholder="Rechercher" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="gregorianClearSearch" class="gregorian-clear-btn hidden" aria-label="Effacer">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                            </button>
+                        </div>
+                        <div class="gregorian-header-actions">
+                            <button id="gregorianToggleViewBtn" class="gregorian-toggle-view-btn" title="Changer de vue" aria-label="Changer de vue">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Barre de filtres de catégories dans l'en-tête (Ligne 2) -->
+                <div id="gregorianFilterBar" class="gregorian-filter-bar">
+                        <button class="gregorian-filter-chip active" data-part="">Tous</button>
+                        <button class="gregorian-filter-chip" data-part="officium">Offices</button>
+                        <button class="gregorian-filter-chip" data-part="missa">Messes</button>
+                        <button class="gregorian-filter-chip" data-part="bible">Bible</button>
+                        <button class="gregorian-filter-chip" data-part="chant">Chants Grégoriens</button>
+                        <span class="gregorian-filter-separator"></span>
+                        <button class="gregorian-filter-chip" data-part="ad_libitum">Ad Libitum</button>
+                        <button class="gregorian-filter-chip" data-part="kyriale">Kyriale</button>
+                        <button class="gregorian-filter-chip" data-part="introitus">Introïts</button>
+                        <button class="gregorian-filter-chip" data-part="graduale">Graduels</button>
+                        <button class="gregorian-filter-chip" data-part="alleluia">Alléluias</button>
+                        <button class="gregorian-filter-chip" data-part="tractus">Traits</button>
+                        <button class="gregorian-filter-chip" data-part="sequentia">Séquences</button>
+                        <button class="gregorian-filter-chip" data-part="offertorium">Offertoires</button>
+                        <button class="gregorian-filter-chip" data-part="communio">Communions</button>
+                        <button class="gregorian-filter-chip" data-part="antiphona">Antiennes</button>
+                        <button class="gregorian-filter-chip" data-part="responsorium">Répons</button>
+                        <button class="gregorian-filter-chip" data-part="hymnus">Hymnes</button>
+                        <button class="gregorian-filter-chip" data-part="litaniae">Litanies</button>
+                        <span class="gregorian-filter-separator"></span>
+                        <button class="gregorian-filter-chip" data-mode="1">Mode 1</button>
+                        <button class="gregorian-filter-chip" data-mode="2">Mode 2</button>
+                        <button class="gregorian-filter-chip" data-mode="3">Mode 3</button>
+                        <button class="gregorian-filter-chip" data-mode="4">Mode 4</button>
+                        <button class="gregorian-filter-chip" data-mode="5">Mode 5</button>
+                        <button class="gregorian-filter-chip" data-mode="6">Mode 6</button>
+                        <button class="gregorian-filter-chip" data-mode="7">Mode 7</button>
+                        <button class="gregorian-filter-chip" data-mode="8">Mode 8</button>
+                    </div>
+            </header>
+
+            <div id="headerDropdown" class="do-header-dropdown hidden">
+                <div id="hddItemsList" class="hdd-items-list"></div>
+                <div class="hdd-bottom-controls" id="hddControlsContainer"></div>
+            </div>
+
+            <main class="app-main">
+                <div id="do-content-stream" class="content-area">
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="settingsBackdrop" class="settings-backdrop"></div>
+    <aside id="settingsPanel" class="settings-panel">
+        <div class="settings-header">
+            <h2>Optiones</h2>
+            <button id="btnCloseSettings" class="settings-close-btn" aria-label="Fermer">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="settings-body">
+
+            <!-- 0. Rubricæ / Editio Liturgica -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelEditionText">Rubricæ &amp; Editio</label>
+                <div class="settings-select-wrapper do-edition-wrapper">
+                    <select id="doEditionSelect" class="do-edition-select">
+                        <option value="1960" selected>Rubrics 1960 - 1960 (Défaut)</option>
+                        <option value="1960_usa">Rubrics 1960 - 2020 USA</option>
+                        <option value="1955">Reduced - 1955</option>
+                        <option value="1954">Divino Afflatu - 1954</option>
+                        <option value="1939">Divino Afflatu - 1939</option>
+                        <option value="1570">Tridentine - 1570</option>
+                        <option value="1888">Tridentine - 1888</option>
+                        <option value="1906">Tridentine - 1906</option>
+                        <option value="monastic_1963">Monastic - 1963</option>
+                        <option value="monastic_barroux">Monastic - 1963 - Barroux</option>
+                        <option value="monastic_1930">Monastic - 1930</option>
+                        <option value="monastic_1617">Monastic - 1617</option>
+                        <option value="cistercian_1951">Ordo Cisterciensis - 1951</option>
+                        <option value="cistercian_altovado">Ordo Cisterciensis - Altovado</option>
+                        <option value="dominican_1962">Ordo Praedicatorum - 1962</option>
+                    </select>
+                    <span class="do-edition-chevron">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Options de Liturgie & Textes (Ordinaire, Grégorien, Latin) -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelContentText">Textus &amp; Cantus</label>
+                <div class="settings-toggle-list">
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" id="labelOrdinariumText">Ordinarium Missæ</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleOrdinarium">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" id="labelGregorianText">Cantus Gregorianus</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleGregorian" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" id="labelPsalmToneText">Toni Psalmorum</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="togglePsalmTone">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" id="labelLatinText">Textus Latinus</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleLatin" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label">Imagines in Inquisitione</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleSearchImages">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3b. Modules External (En ligne / Hors-Ligne) -->
+            <div class="settings-group" id="settingsGroupModules">
+                <label class="settings-label">Moduli &amp; Memoria</label>
+                <div class="do-module-list">
+                    <!-- Module GABC -->
+                    <div class="do-module-row" id="moduleRowGabc">
+                        <div class="do-module-row-title">Cantus Gregorianus &amp; GABC</div>
+                        <div class="do-module-row-desc">8 350+ partitions chargées en ligne au fil de l'eau via GitHub.</div>
+                        <div class="do-module-row-footer">
+                            <div id="moduleProgressGabc" class="do-module-progress-wrapper hidden">
+                                <div class="do-module-progress-bar-track">
+                                    <div id="moduleProgressBarGabc" class="do-module-progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <span id="moduleProgressTextGabc" class="do-module-progress-text">0%</span>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-pause" id="btnPauseModuleGabc" title="Mettre en pause">
+                                    <svg class="do-icon-pause" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                                    <svg class="do-icon-play" viewBox="0 0 24 24" width="11" height="11" fill="currentColor" style="display:none;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                </button>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-cancel" id="btnCancelModuleGabc" title="Annuler">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <button class="do-module-btn do-module-btn-dl" id="btnDownloadModuleGabc" title="Rendre disponible hors connexion">
+                                <span>Rendre disponible hors connexion (8.7 Mo)</span>
+                            </button>
+                            <button class="do-module-btn do-module-btn-del" id="btnDeleteModuleGabc" style="display:none;" title="Retirer du stockage hors-connexion">
+                                <span>Supprimer du stockage hors-connexion</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Module Saints -->
+                    <div class="do-module-row" id="moduleRowSaints">
+                        <div class="do-module-row-title">Iconographia Sanctorum</div>
+                        <div class="do-module-row-desc">266 portraits d'art sacré consultables en ligne par défaut.</div>
+                        <div class="do-module-row-footer">
+                            <div id="moduleProgressSaints" class="do-module-progress-wrapper hidden">
+                                <div class="do-module-progress-bar-track">
+                                    <div id="moduleProgressBarSaints" class="do-module-progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                                <span id="moduleProgressTextSaints" class="do-module-progress-text">0%</span>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-pause" id="btnPauseModuleSaints" title="Mettre en pause">
+                                    <svg class="do-icon-pause" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                                    <svg class="do-icon-play" viewBox="0 0 24 24" width="11" height="11" fill="currentColor" style="display:none;"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                </button>
+                                <button type="button" class="do-module-ctrl-btn do-module-ctrl-cancel" id="btnCancelModuleSaints" title="Annuler">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <button class="do-module-btn do-module-btn-dl" id="btnDownloadModuleSaints" title="Rendre disponible hors connexion">
+                                <span>Rendre disponible hors connexion (12.9 Mo)</span>
+                            </button>
+                            <button class="do-module-btn do-module-btn-del" id="btnDeleteModuleSaints" style="display:none;" title="Retirer du stockage hors-connexion">
+                                <span>Supprimer du stockage hors-connexion</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Vernacular Translation -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelVernacularText">Translatio Vernacula</label>
+                <div class="settings-grid cols-2" id="doVernacularOptions">
+                    <button class="settings-option-card" data-value="none">Aucune</button>
+                    <button class="settings-option-card active" data-value="fr">Français</button>
+                    <button class="settings-option-card" data-value="en">English</button>
+                    <button class="settings-option-card" data-value="es">Español</button>
+                    <button class="settings-option-card" data-value="it">Italiano</button>
+                    <button class="settings-option-card" data-value="de">Deutsch</button>
+                    <button class="settings-option-card" data-value="pt">Português</button>
+                    <button class="settings-option-card" data-value="nl">Nederlands</button>
+                    <button class="settings-option-card" data-value="pl">Polski</button>
+                    <button class="settings-option-card" data-value="hu">Magyar</button>
+                    <button class="settings-option-card" data-value="cs">Česky</button>
+                    <button class="settings-option-card" data-value="da">Dansk</button>
+                    <button class="settings-option-card" data-value="uk">Українська</button>
+                    <button class="settings-option-card" data-value="vi">Tiếng Việt</button>
+                </div>
+            </div>
+
+            <!-- 5. Theme -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelThemeText">Thema</label>
+                <div class="settings-grid cols-2" id="doThemeOptions">
+                    <button class="settings-option-card active" data-value="auto">
+                        <span class="theme-dot theme-dot-auto"></span>
+                        <span class="theme-name">Automaticum</span>
+                    </button>
+                    <button class="settings-option-card" data-value="light">
+                        <span class="theme-dot theme-dot-light"></span>
+                        <span class="theme-name">Diurnum</span>
+                    </button>
+                    <button class="settings-option-card" data-value="dark">
+                        <span class="theme-dot theme-dot-dark"></span>
+                        <span class="theme-name">Nocturnum</span>
+                    </button>
+                    <button class="settings-option-card" data-value="oled">
+                        <span class="theme-dot theme-dot-oled"></span>
+                        <span class="theme-name">OLED</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 6. Accent Color -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelColorText">Color</label>
+                
+                <div class="settings-toggle-row">
+                    <span class="settings-toggle-label" id="labelLiturgicalColorText">Couleur selon la journée liturgique</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleLiturgicalColor">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-colors-grid" id="doColorOptions">
+                    <button class="color-swatch-circle active" data-color="#c96b63" style="background:#c96b63" title="Rouge pastel (Rubrique)"></button>
+                    <button class="color-swatch-circle" data-color="#987dc2" style="background:#987dc2" title="Violet pastel (Avent &amp; Carême)"></button>
+                    <button class="color-swatch-circle" data-color="#589c77" style="background:#589c77" title="Vert pastel (Temps ordinaire)"></button>
+                    <button class="color-swatch-circle" data-color="#c4984f" style="background:#c4984f" title="Or pastel (Fêtes &amp; Solennités)"></button>
+                    <button class="color-swatch-circle" data-color="#5c8bb8" style="background:#5c8bb8" title="Bleu pastel (Marial)"></button>
+                    <button class="color-swatch-circle" data-color="#cc738a" style="background:#cc738a" title="Rose pastel (Gaudete &amp; Lætare)"></button>
+                    <button class="color-swatch-circle" data-color="#ba8155" style="background:#ba8155" title="Ambre pastel"></button>
+                    <button class="color-swatch-circle" data-color="#7e8590" style="background:#7e8590" title="Gris minéral"></button>
+                </div>
+            </div>
+
+            <!-- 6b. App Icon & Favicon -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelIconText">Imago applicationis</label>
+                
+                <div class="settings-toggle-row">
+                    <span class="settings-toggle-label">Synchroniser avec la couleur de l'application</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleSyncIconColor">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-colors-grid" id="doIconColorOptions">
+                    <button class="color-swatch-circle is-neutral active" data-icon-color="default" title="Sans couleur (Neutre / Blanc)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"></line></svg>
+                    </button>
+                    <button class="color-swatch-circle" data-icon-color="#c96b63" style="background:#c96b63" title="Rouge pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#987dc2" style="background:#987dc2" title="Violet pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#589c77" style="background:#589c77" title="Vert pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#c4984f" style="background:#c4984f" title="Or pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#5c8bb8" style="background:#5c8bb8" title="Bleu pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#cc738a" style="background:#cc738a" title="Rose pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#ba8155" style="background:#ba8155" title="Ambre pastel"></button>
+                    <button class="color-swatch-circle" data-icon-color="#7e8590" style="background:#7e8590" title="Gris minéral"></button>
+                </div>
+
+                <div class="icon-preview-box">
+                    <div id="iconPreviewContainer" class="icon-preview-square">
+                        <svg viewBox="0 0 217 201" width="24" height="24" id="iconPreviewSvg" fill="#e4e4e7">
+                            <g transform="matrix(1,0,0,1,-55.685614,-490.295574)">
+                                <g transform="matrix(5.069816,0,0,5.069816,-1181.3253,-599.436706)">
+                                    <path d="M265.345,214.945C268.352,214.945 271.145,215.453 273.725,216.47C276.305,217.487 278.57,218.903 280.52,220.72C282.47,222.537 283.987,224.662 285.07,227.095C286.154,229.528 286.695,232.162 286.695,234.995C286.695,237.695 286.148,240.228 285.054,242.595C283.96,244.962 282.438,247.028 280.488,248.795C278.539,250.562 276.273,251.945 273.691,252.945C271.108,253.945 268.329,254.445 265.354,254.445C262.378,254.445 259.599,253.945 257.017,252.945C254.435,251.945 252.169,250.562 250.219,248.795C248.27,247.028 246.745,244.962 245.645,242.595C244.545,240.228 243.995,237.695 243.995,234.995C243.995,232.162 244.537,229.528 245.62,227.095C246.704,224.662 248.22,222.537 250.17,220.72C252.12,218.903 254.385,217.487 256.965,216.47C259.545,215.453 262.338,214.945 265.345,214.945ZM265.351,251.195C267.947,251.195 270.187,250.545 272.07,249.245C273.954,247.945 275.412,246.088 276.445,243.675C277.479,241.261 277.995,238.418 277.995,235.145C277.995,231.678 277.487,228.678 276.47,226.145C275.454,223.612 273.998,221.653 272.103,220.27C270.208,218.887 267.958,218.195 265.353,218.195C262.748,218.195 260.503,218.883 258.617,220.259C256.732,221.635 255.273,223.593 254.242,226.134C253.211,228.675 252.695,231.678 252.695,235.141C252.695,238.411 253.212,241.253 254.245,243.67C255.279,246.087 256.739,247.945 258.626,249.245C260.515,250.545 262.756,251.195 265.351,251.195Z" style="fill-rule:nonzero;"/>
+                                </g>
+                                <path d="M146.046,524.564L182.114,524.564C182.114,524.564 182.805,526.506 182.281,527.223C174.967,537.224 176.131,571.602 176.131,571.602C176.131,571.602 204.276,572.294 214.858,566.283C215.39,565.981 216.687,566.449 216.687,566.449L216.853,599.359C216.853,599.359 215.237,600.405 214.526,600.024C201.866,593.237 175.798,594.539 175.798,594.539C176.325,627.366 172.945,671.274 194.747,666.343C187.793,678.365 141.254,678.642 134.079,666.675C158.651,671.495 148.595,614.457 151.698,594.539C151.698,594.539 121.225,594.401 112.804,600.024C112.308,600.356 111.142,599.359 111.142,599.359L111.308,566.283C111.308,566.283 112.506,565.44 112.97,565.784C121.973,572.461 151.365,571.436 151.365,571.436C151.365,571.436 151.753,539.191 145.382,526.891C145.011,526.175 146.046,524.564 146.046,524.564Z"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="icon-preview-text">
+                        <span class="icon-preview-title">Aperçu du Favicon &amp; Icône Mobile</span>
+                        <span class="icon-preview-subtitle" id="iconPreviewDesc">Sans couleur (Neutre / Blanc)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Gestes & Retour Haptique -->
+            <div class="settings-group">
+                <label class="settings-label" id="labelHapticsText">Gestus &amp; Haptica</label>
+                <div class="settings-toggle-row">
+                    <span class="settings-toggle-label">Retours haptiques tactiles</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleHaptics" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-grid cols-3" id="doHapticStyleOptions" style="margin-top: 10px;">
+                    <button class="settings-option-card" data-haptic-style="light" title="Léger et discret">Subtil</button>
+                    <button class="settings-option-card active" data-haptic-style="balanced" title="Équilibré et net">Équilibré</button>
+                    <button class="settings-option-card" data-haptic-style="rich" title="Expressif et dynamique">Riche</button>
+                </div>
+            </div>
+
+            <!-- 8. Mises à jour de l'application (GitHub - Android uniquement) -->
+            <div class="settings-group" id="settingsGroupUpdates">
+                <label class="settings-label" id="labelUpdatesText">Renovatio Applicationis</label>
+                <div class="settings-toggle-row">
+                    <span class="settings-toggle-label">Recherche automatique au démarrage</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleAutoUpdate" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-toggle-row" style="margin-top:4px;">
+                    <span class="settings-toggle-label">Inclure les versions Bêta / Pré-versions</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleIncludeBeta" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-toggle-row" style="margin-top:4px;">
+                    <span class="settings-toggle-label">Notifications système (Général)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleSystemNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="subNotificationSettings" style="margin-left: 8px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; border-left: 2px solid rgba(var(--primary-color-rgb), 0.25); padding-left: 10px;">
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Mises à jour de l'application</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifUpdates" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Annonces &amp; Canal officiel</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifAnnouncements" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-row">
+                        <span class="settings-toggle-label" style="font-size:0.83rem;">Fêtes liturgiques &amp; Prière</span>
+                        <label class="toggle-switch" style="transform: scale(0.88); transform-origin: right center;">
+                            <input type="checkbox" id="toggleNotifLiturgy" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="android-only-wrapper" id="wrapperAndroidNotifSettings" style="margin-top:6px;">
+                    <button id="btnOpenAndroidNotifSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.80rem; padding: 8px 10px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>Gérer les catégories dans les paramètres Android</span>
+                    </button>
+                </div>
+                <div class="update-check-wrapper" style="margin-top:8px;">
+                    <button id="btnCheckUpdatesManual" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                        <span>Vérifier les mises à jour</span>
+                    </button>
+                    <div id="updateStatusText" class="update-status-text">Version actuelle : beta-0.0.42</div>
+                </div>
+                <div class="web-download-app-wrapper web-only-btn" style="margin-top:8px;">
+                    <button id="btnDownloadAppSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Télécharger l'application</span>
+                    </button>
+                </div>
+                <div class="feedback-settings-wrapper" style="margin-top:8px;">
+                    <button id="btnFeedbackSettings" class="settings-option-card" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>Retours &amp; Suggestions</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 7. De hoc opere (About, Missals, Translations & Credits) -->
+            <div class="settings-group settings-about-group">
+                <label class="settings-label" id="labelAboutText">De hoc opere (À propos &amp; Sources)</label>
+                <div class="settings-about-card">
+                    <div class="settings-about-title">Oremus - Divinum Officium &amp; Missale Romanum</div>
+                    <div class="settings-about-desc">
+                        Application moderne de prière liturgique traditionnelle, bréviaire et missel bilingue avec partitions grégoriennes interactives et audio.
+                    </div>
+
+                    <!-- Missals & Liturgical Editions -->
+                    <div class="settings-about-section">
+                        <div class="settings-about-section-title">Missels &amp; Éditions Liturgiques</div>
+                        <div class="settings-about-list">
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Missale Romanum (1962) &amp; Breviarium Romanum (1960)</span>
+                                <span class="settings-about-item-detail">Édition typique vaticane sous Saint Jean XXIII (Codex Rubricarum 1960). Textes et ordinaires canoniques issus du projet Divinum Officium.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vernacular Translations & Missals -->
+                    <div class="settings-about-section">
+                        <div class="settings-about-section-title">Traductions &amp; Missels Vernaculaires</div>
+                        <div class="settings-about-list">
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇫🇷 Français (Gallica)</span>
+                                <span class="settings-about-item-detail"><em>Missel quotidien et vespéral</em> de Dom Gaspar Lefebvre O.S.B. (Abbaye de Saint-André) &amp; <em>Missel romain de Dom Gérard Calvet</em> (Abbaye Sainte-Madeleine du Barroux).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇬🇧 English (Anglica)</span>
+                                <span class="settings-about-item-detail"><em>The Saint Andrew Daily Missal</em> (Dom Gaspar Lefebvre O.S.B.) &amp; <em>The New Roman Missal</em> (Father F.X. Lasance).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇪🇸 Español (Hispana)</span>
+                                <span class="settings-about-item-detail"><em>Misal Diario y Vesperal</em> por Dom Gaspar Lefebvre O.S.B. (Traducción española tradicional).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇮🇹 Italiano (Italica)</span>
+                                <span class="settings-about-item-detail"><em>Messale Romano Festivo e Feriale</em> (Traduzione tradizionale italiana).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇩🇪 Deutsch (Germanica)</span>
+                                <span class="settings-about-item-detail"><em>Schott-Messbuch</em> (P. Anselm Schott O.S.B., Erzabtei Beuron).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">🇵🇹 Português (Lusitana)</span>
+                                <span class="settings-about-item-detail"><em>Missal Romano Quotidiano</em> (Dom Gaspar Lefebvre / Mosteiro de São Bento).</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sacred Scriptures -->
+                    <div class="settings-about-section">
+                        <div class="settings-about-section-title">Textes Bibliques (Sacra Biblia)</div>
+                        <div class="settings-about-list">
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Biblia Sacra Vulgata</span>
+                                <span class="settings-about-item-detail">Édition Sixto-Clémentine (1592/1598) selon le texte traditionnel de Saint Jérôme.</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Douay-Rheims Bible</span>
+                                <span class="settings-about-item-detail">Traduction anglaise historique de la Vulgate (Challoner Revision).</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Bible Chanoine Crampon (1923)</span>
+                                <span class="settings-about-item-detail">Traduction catholique française fidèle aux textes traditionnels.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gregorian Chant Sources -->
+                    <div class="settings-about-section">
+                        <div class="settings-about-section-title">Livres de Chant Grégorien</div>
+                        <div class="settings-about-list">
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Liber Usualis (N° 780 / 801, Desclée &amp; Solesmes)</span>
+                                <span class="settings-about-item-detail">Messes et Offices avec notation musicale traditionnelle.</span>
+                            </div>
+                            <div class="settings-about-item">
+                                <span class="settings-about-item-title">Graduale Romanum (1961) &amp; Antiphonale Romanum (1912)</span>
+                                <span class="settings-about-item-detail">Partitions GABC complètes reliées à la base de données GregoBase.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Links -->
+                    <div class="settings-about-section">
+                        <div class="settings-about-section-title">Liens &amp; Dépôts Open Source</div>
+                        <div class="settings-about-links">
+                            <a href="https://github.com/bastonus/jgabc" target="_blank" rel="noopener" class="settings-about-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                <span>Dépôt officiel GitHub (jgabc)</span>
+                            </a>
+                            <a href="https://github.com/DivinumOfficium/divinum-officium" target="_blank" rel="noopener" class="settings-about-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                <span>Projet Divinum Officium</span>
+                            </a>
+                            <a href="https://gregobase.selapa.net" target="_blank" rel="noopener" class="settings-about-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                                <span>Base de données GregoBase</span>
+                            </a>
+                            <a href="https://github.com/marnold-us/exsurge" target="_blank" rel="noopener" class="settings-about-link">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>Moteur de notation Exsurge</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discreet Test Page Link & Banner Demo -->
+            <div class="settings-group" style="padding-top: 14px; margin-top: 10px; border-top: 1px solid rgba(var(--primary-color-rgb), 0.15); text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                <button id="btnDemoUpdateBanner" style="background: color-mix(in srgb, var(--primary-color) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent); border-radius: 10px; padding: 7px 14px; color: var(--primary-color); font-size: 0.8rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" onmouseover="this.style.background='color-mix(in srgb, var(--primary-color) 20%, transparent)';" onmouseout="this.style.background='color-mix(in srgb, var(--primary-color) 12%, transparent)';">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>🚀 Tester la bannière de mise à jour (Démo)</span>
+                </button>
+                <button id="btnOpenTestMissa" style="background: none; border: none; padding: 6px 8px; color: var(--text-tertiary); font-size: 0.78rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; gap: 6px; opacity: 0.75; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='var(--primary-color)';" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-tertiary)';">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>🧪 Page de test (Messe &amp; Chant Grégorien)</span>
+                </button>
+                <a href="pipeline/align/alignment-lab.html" target="_blank" rel="noopener" style="background: none; border: none; padding: 6px 8px; color: var(--text-tertiary); font-size: 0.78rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; gap: 6px; opacity: 0.75; transition: opacity 0.2s, color 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='var(--primary-color)';" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-tertiary)';">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h6m-6 0v6m6-6h4a2 2 0 0 1 2 2v4m-6-6v6m0 0H9m6 0v6m-6 0v-6m0 6H5a2 2 0 0 1-2-2v-4m6 6h6"/></svg>
+                    <span>⚗ Laboratoire Alignement GABC (5 pièces · v3 corrigé)</span>
+                </a>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Mass Part Picker Backdrop & Bottom Sheet Drawer -->
+    <div id="massPartPickerBackdrop" class="do-part-picker-backdrop hidden"></div>
+    <div id="massPartPickerDrawer" class="do-part-picker-drawer">
+        <div class="do-player-drag-handle-wrap" id="partPickerDragHandleWrap" title="Glisser vers le bas pour fermer">
+            <div class="do-player-drag-handle" id="partPickerDragHandle"></div>
+        </div>
+        <div class="do-part-picker-inner">
+            <!-- Header: 2 Structured Rows -->
+            <div class="do-part-picker-header">
+                <!-- Row 1: Identity / Title & Kyriale Selector -->
+                <div class="do-part-picker-header-top">
+                    <div class="do-part-picker-badge-wrap">
+                        <h3 id="partPickerTitle" class="do-part-picker-title">Kyrie eleison</h3>
+                        <span id="partPickerCategoryBadge" class="do-part-picker-badge">KYRIALE</span>
+                    </div>
+                    <div id="partPickerKyrialeSelectWrap" class="do-part-picker-kyriale-select-wrap hidden">
+                        <label for="partPickerKyrialeSelect">Messe :</label>
+                        <select id="partPickerKyrialeSelect" class="do-part-picker-select">
+                            <!-- Populated with Missa I to XVIII -->
+                        </select>
+                    </div>
+                </div>
+                <!-- Row 2: Controls Toolbar (Psalm-Tone Pill, Search Input, View Toggle) -->
+                <div class="do-part-picker-header-controls">
+                    <!-- Psalm-Toned Selector Button -->
+                    <button type="button" id="partPickerPsalmToneBtn" class="do-part-picker-psalm-btn hidden" title="Basculer vers la formule psalmodiée">
+                        <span class="do-pt-sym">℣</span>
+                        <span class="do-pt-label">Ton psalmodié</span>
+                    </button>
+                    <!-- Gloria Patri Selector Button (propers.html parity) -->
+                    <button type="button" id="partPickerGloriaPatriBtn" class="do-part-picker-psalm-btn hidden" title="Inclure le Glória Patri complet">
+                        <span class="do-pt-sym">℣</span>
+                        <span class="do-pt-label">Glória Patri</span>
+                    </button>
+                    <!-- Search Input in Drawer -->
+                    <div class="do-part-picker-search-wrap">
+                        <span class="do-part-picker-search-icon">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.38a1 1 0 0 1-1.42 1.42l-5.38-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+                        </span>
+                        <input type="text" id="partPickerSearchInput" class="do-part-picker-search-input" placeholder="Filtrer...">
+                    </div>
+                    <!-- View Mode Toggle (Grid vs List) -->
+                    <button type="button" id="partPickerToggleViewBtn" class="gregorian-toggle-view-btn" title="Changer de vue" aria-label="Changer de vue">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area: Results in Grid or List -->
+            <div id="partPickerResultsContainer" class="gregorian-results is-grid custom-scroll">
+                <!-- Dynamically populated items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- App-Native Full-width Audio Player -->
+    <div id="modernPlayerBar" class="modern-player-bar">
+        <div class="do-player-drag-handle-wrap" id="playerDragHandleWrap" title="Glisser vers le bas pour fermer">
+            <div class="do-player-drag-handle" id="playerDragHandle"></div>
+        </div>
+        <div class="do-player-inner-container">
+            <!-- Progress Section: Large, Accessible Seek Bar with Elapsed & Remaining Time -->
+            <div class="do-player-progress-section">
+                <span id="playerCurrentTime" class="do-player-time-label">0:00</span>
+                <div id="playerProgressBarContainer" class="do-player-progress-track" title="Cliquer pour naviguer dans le chant">
+                    <div class="do-player-progress-bar">
+                        <div id="playerProgressFill" class="do-player-progress-fill">
+                            <span class="do-player-progress-thumb"></span>
+                        </div>
+                    </div>
+                </div>
+                <span id="playerChantTime" class="do-player-time-label">0:00</span>
+            </div>
+
+            <!-- Controls & Metadata Main Row -->
+            <div class="do-player-main-row">
+                <!-- Top Row: Title (Auto-scroll) + Badge + Playback Controls -->
+                <div class="do-player-top-row">
+                    <div class="do-player-info-col" title="Cliquer pour centrer la vue sur la partition">
+                        <div class="do-player-name-wrapper">
+                            <span id="playerChantName" class="do-player-name">—</span>
+                        </div>
+                        <span id="playerChantPart" class="do-player-part-badge">CHANT</span>
+                    </div>
+
+                    <!-- Hero Playback Controls (Restart, Big Play/Pause, Step Forward) -->
+                    <div class="do-player-controls-col">
+                        <!-- Restart to Beginning -->
+                        <button id="playerBtnRestart" class="do-player-ctrl-btn" title="Recommencer depuis le début">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <polygon points="19,20 9,12 19,4"/>
+                                <line x1="5" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <!-- Play/Pause Hero Button -->
+                        <button id="playerBtnPlay" class="do-player-play-btn is-hero" title="Lecture / Pause (Espace)">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <polygon points="6,4 20,12 6,20"/>
+                            </svg>
+                        </button>
+                        <!-- Next Note -->
+                        <button id="playerBtnNext" class="do-player-ctrl-btn" title="Note suivante (Pas à pas)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <polygon points="5,4 15,12 5,20"/>
+                                <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Setting Pills (Transposition, Solesmes, Tempo) & Dedicated Close Button -->
+                <div class="do-player-settings-col">
+                    <!-- Pitch -->
+                    <button id="playerPitchPill" class="do-player-toggle" title="Tonalité de départ (Cliquer pour choisir le ton)">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        <span id="playerStartingPitch">—</span>
+                    </button>
+
+                    <!-- Solesmes Toggle -->
+                    <button id="playerBtnSolesmes" class="do-player-toggle" title="Allongement rythmique Solesmes">
+                        <svg viewBox="0 0 12.5 20.4" width="10" height="15" fill="currentColor" class="do-solesmes-icon" aria-hidden="true">
+                            <g transform="translate(0,-59.443)">
+                                <g transform="translate(0,50.93)">
+                                    <path d="m 0,-60.906 c 33.333,0 50,9.635 50,28.906 V 62.53 C 39.062,51.595 22.396,46.126 0,46.126 c -22.396,0 -39.063,5.47 -50,16.406 V -32 c 0,-19.27 16.667,-28.906 50,-28.906 z" transform="translate(3.125,25) scale(0.0625)"/>
+                                    <path d="m -4.688,-30.28 c 22.396,0 34.636,-0.262 36.72,-0.782 5.728,-1.563 8.593,-5.21 8.593,-10.938 H 50 v 97.656 c 0,2.604 -1.302,4.167 -3.906,4.688 -5.21,0.52 -21.355,0.78 -48.438,0.78 -23.958,0 -38.54,-0.26 -43.75,-0.78 -2.604,0 -3.906,-1.302 -3.906,-3.906 v -82.032 c 0,-3.646 1.302,-5.468 3.906,-5.468 h 2.344 c 2.604,0.52 15.625,0.78 39.063,0.78 z" transform="translate(9.375,18.75) scale(0.0625)"/>
+                                    <path d="m -46.094,-63.78 c 13.542,0 24.61,2.473 33.203,7.42 C -4.298,-51.41 0,-43.99 0,-34.093 V 62 h -9.375 c 0,-10.938 -2.604,-19.14 -7.812,-24.61 -5.21,-5.468 -14.844,-8.203 -28.907,-8.202 -18.23,0 -33.333,4.166 -45.312,12.5 v -75.782 c 0,-19.79 15.104,-29.687 45.312,-29.687 z" transform="translate(12.5,12.5) scale(0.0625)"/>
+                                    <path d="m -8,56 c 2,3 6,4 8,4 2,0 6,-1 8,-4 V 4 C 6,1 2,0 0,0 -2,0 -6,1 -8,4 Z" transform="translate(9.375,23.75) scale(0.0625)"/>
+                                </g>
+                            </g>
+                        </svg>
+                        <span class="do-solesmes-text"><span class="do-btn-text-full">Solesmes</span><span class="do-btn-text-short">Sol.</span></span>
+                    </button>
+
+                    <!-- Speed / Multiplier Cycle Button -->
+                    <button id="playerSpeedCycleBtn" class="do-player-toggle do-player-speed-btn" title="Vitesse de lecture (Cliquer pour changer : 1x, 1.25x, 1.5x, 2x, 0.5x, 0.75x)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge-icon lucide-gauge"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                        <span class="do-speed-label">1.0×</span>
+                    </button>
+
+                    <!-- Score Sync Toggle Button -->
+                    <button id="playerBtnToggleSync" class="do-player-toggle do-player-sync-btn" title="Synchroniser les notes (Cliquer pour activer)">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                        <span>Sync<span class="do-btn-text-extra"> notes</span></span>
+                    </button>
+
+                    <!-- Audio Sources (Synth & YouTube) Expand Button -->
+                    <button id="playerBtnExpandVideos" class="do-player-toggle do-player-videos-btn" title="Afficher les sources pour cette pièce">
+                        <svg class="do-yt-icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <svg class="do-yt-icon-close" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <span>Source</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Video Recordings Drawer / Container (Expandable) -->
+            <div id="playerVideoDrawer" class="do-player-video-drawer hidden">
+                <div id="playerVideoList" class="do-youtube-audio-list"></div>
+            </div>
+            <!-- Pitch / Tonality Drawer (Expandable, same height as video drawer) -->
+            <div id="playerPitchDrawer" class="do-player-pitch-drawer hidden" style="display: none; padding-top: 10px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1)); margin-top: 4px;">
+                <div class="do-pitch-drawer-header" style="border-bottom:none !important; margin-bottom:0 !important; padding-bottom:0 !important;">
+                    <button type="button" id="btnResetPitch" class="do-pitch-bubble-reset" title="Rétablir le ton naturel">Défaut</button>
+                </div>
+                <div class="do-pitch-bubble-grid" id="playerPitchBubbleGrid">
+                    <!-- Dynamically populated chips -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mass Floating Table of Contents / Index Pill & Flyout Panel -->
+    <div id="doMassTocBackdrop" class="do-mass-toc-backdrop hidden">
+        <div class="do-mass-toc-blur-layer do-blur-1"></div>
+        <div class="do-mass-toc-blur-layer do-blur-2"></div>
+        <div class="do-mass-toc-blur-layer do-blur-3"></div>
+        <div class="do-mass-toc-blur-layer do-blur-4"></div>
+        <div class="do-mass-toc-blur-layer do-blur-5"></div>
+        <div class="do-mass-toc-tint-layer"></div>
+    </div>
+    <aside id="doMassTocPanel" class="do-mass-toc-panel hidden" aria-label="Sommaire de la Messe" role="dialog" aria-modal="true">
+        <div class="do-mass-toc-body custom-scroll" id="doMassTocList">
+            <!-- Dynamically populated / styled structured list -->
+        </div>
+        <div class="do-mass-toc-footer">
+            <button id="btnMassTocToggleChant" class="do-mass-toc-toggle-btn" title="Activer / Désactiver le chant grégorien">
+                <span class="do-mass-toc-toggle-icon">
+                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span>Grégorien</span>
+            </button>
+            <button id="btnMassTocToggleOrdinarium" class="do-mass-toc-toggle-btn" title="Afficher / Masquer l'ordinaire complet">
+                <span class="do-mass-toc-toggle-icon">
+                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span>Ordinaire</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Floating TOC Trigger Pill (Dynamic position above player) -->
+    <button id="doMassTocPill" class="do-mass-toc-pill hidden" aria-label="Ouvrir le sommaire de la messe" title="Sommaire de la Messe">
+        <div class="do-mass-toc-pill-icon">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <circle cx="3.5" cy="6" r="1.5" fill="currentColor"></circle>
+                <circle cx="3.5" cy="12" r="1.5" fill="currentColor"></circle>
+                <circle cx="3.5" cy="18" r="1.5" fill="currentColor"></circle>
+            </svg>
+        </div>
+        <span class="do-mass-toc-pill-text" id="doMassTocCurrentLabel">Sommaire</span>
+    </button>
+
+    <!-- Feedback / Tally In-App Modal -->
+    <div id="feedbackModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="feedbackModal" class="feedback-modal hidden" role="dialog" aria-labelledby="feedbackModalTitle">
+        <div class="feedback-card">
+            <div class="feedback-header">
+                <div class="feedback-header-left">
+                    <div class="update-icon-circle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="feedback-header-text">
+                        <h3 id="feedbackModalTitle" class="update-title">Retours &amp; Suggestions</h3>
+                        <span class="feedback-subtitle">Votre avis pour perfectionner Oremus</span>
+                    </div>
+                </div>
+                <div class="feedback-header-actions" style="display:flex; align-items:center; gap:8px;">
+                    <button id="btnReloadFeedback" class="feedback-reload-btn" title="Faire un autre retour" aria-label="Faire un autre retour">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                        <span>Faire un autre retour</span>
+                    </button>
+                    <button id="btnOpenFeedbackExternal" class="update-close-btn" title="Ouvrir dans le navigateur" aria-label="Ouvrir dans le navigateur">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </button>
+                    <button id="btnCloseFeedbackModal" class="update-close-btn" aria-label="Fermer" title="Fermer">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="feedback-body">
+                <div id="feedbackLoading" class="feedback-loading">
+                    <div class="do-spinner"></div>
+                    <span>Chargement du formulaire…</span>
+                    <a id="feedbackFallbackLink" href="https://tally.so/r/b5QOV2" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color); font-size:0.8rem; margin-top:6px; text-decoration:underline;">Ouvrir directement dans le navigateur</a>
+                </div>
+                <iframe id="tallyFeedbackIframe" class="tally-iframe" src="" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" title="Retours Oremus"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA / iOS Install Instruction Modal -->
+    <div id="pwaInstallModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="pwaInstallModal" class="update-modal hidden" role="dialog" aria-labelledby="pwaInstallModalTitle">
+        <div class="update-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="pwaInstallModalTitle" class="update-title" style="font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 1.02rem; font-weight: 600;">Ajouter à l'écran d'accueil</h3>
+                        <span class="update-version-tag" id="pwaInstallModalPlatformTag">iOS Safari</span>
+                    </div>
+                </div>
+                <button id="btnClosePwaInstallModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+                <div id="pwaIosInstructions">
+                    <p style="margin: 0 0 12px 0; font-size: 0.86rem; line-height: 1.5; color: var(--text-primary);">
+                        Pour installer Oremus en plein écran sur votre appareil iOS :
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                        <div class="pwa-install-step" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05); padding: 10px 12px; border-radius: 12px;">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                    <polyline points="16 6 12 2 8 6"></polyline>
+                                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div style="font-size: 0.84rem; line-height: 1.4; color: var(--text-primary);">
+                                <strong>1.</strong> Touchez l'icône <strong>Partager</strong> en bas de Safari.
+                            </div>
+                        </div>
+                        <div class="pwa-install-step" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05); padding: 10px 12px; border-radius: 12px;">
+                            <div style="width: 34px; height: 34px; border-radius: 9px; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                                </svg>
+                            </div>
+                            <div style="font-size: 0.84rem; line-height: 1.4; color: var(--text-primary);">
+                                <strong>2.</strong> Choisissez <strong>« Sur l'écran d'accueil »</strong>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 10px 12px; border-radius: 10px;">
+                    <div class="update-notes-text" style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
+                        <strong>Accès hors-ligne</strong> : l'application reste accessible même sans connexion Internet.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions" style="justify-content: flex-end;">
+                <button id="btnActionPwaInstallModal" class="update-btn-download" style="width: 100%; justify-content: center; padding: 10px 16px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>J'ai compris</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Icon Change / Restart Dialog (Android) -->
+    <div id="appIconModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="appIconModal" class="update-modal hidden" role="dialog" aria-labelledby="appIconModalTitle">
+        <div class="update-card">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle" id="appIconModalIconCircle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                            <circle cx="12" cy="12" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="appIconModalTitle" class="update-title">Icône de l'application</h3>
+                        <span class="update-version-tag" id="appIconModalTag">Android</span>
+                    </div>
+                </div>
+                <button id="btnCloseAppIconModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body">
+                <p style="margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.5; color: var(--text-primary);">
+                    Sur Android, la modification de l'icône sur votre écran d'accueil nécessite le redémarrage de l'application.
+                </p>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 12px 14px; border-radius: 12px;">
+                    <div class="update-notes-header" style="color: var(--primary-color); margin-bottom: 4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Comportement</span>
+                    </div>
+                    <div class="update-notes-text" style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">
+                        Vous pouvez redémarrer immédiatement pour appliquer la nouvelle icône, ou choisir <strong>Plus tard</strong> pour que le changement s'applique lors de votre prochaine ouverture.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions">
+                <button id="btnDismissAppIcon" class="update-btn-dismiss">Plus tard</button>
+                <button id="btnRestartAppIcon" class="update-btn-download">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <polyline points="23 20 23 14 17 14"></polyline>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                    </svg>
+                    <span>Redémarrer maintenant</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rich Remote Notification Popup Modal -->
+    <div id="remoteNotificationModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="remoteNotificationModal" class="update-modal hidden" role="dialog" aria-labelledby="remoteNotifModalTitle">
+        <div class="update-card remote-notif-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle" id="remoteNotifModalIconCircle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="remoteNotifModalTitle" class="update-title">Annonce</h3>
+                        <span class="update-version-tag" id="remoteNotifModalTag">Oremus</span>
+                    </div>
+                </div>
+                <button id="btnCloseRemoteNotifModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body" id="remoteNotifModalBody" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+                <!-- Subtitle / Main message -->
+                <div id="remoteNotifModalSubtitle" class="remote-notif-subtitle hidden"></div>
+                <div id="remoteNotifModalMessage" class="remote-notif-message"></div>
+
+                <!-- Structured Dynamic Wrappers (cards, callouts, steps, note boxes) -->
+                <div id="remoteNotifModalWrappers" class="remote-notif-wrappers-container"></div>
+            </div>
+            <div class="update-actions" id="remoteNotifModalActions">
+                <!-- Action buttons rendered dynamically based on JSON -->
+                <button id="btnDismissRemoteNotifModal" class="update-btn-dismiss">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 20-Minute Usage Notification Permission Prompt Modal -->
+    <div id="notificationPromptModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="notificationPromptModal" class="update-modal hidden" role="dialog" aria-labelledby="notificationPromptModalTitle">
+        <div class="update-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="notificationPromptModalTitle" class="update-title">Notifications Oremus</h3>
+                        <span class="update-version-tag">Système &amp; Liturgie</span>
+                    </div>
+                </div>
+                <button id="btnCloseNotifPromptModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body">
+                <p style="margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.55; color: var(--text-primary);">
+                    Vous utilisez Oremus depuis plus de 20 minutes. Souhaitez-vous autoriser les notifications système pour rester informé des fêtes liturgiques importantes et des annonces ?
+                </p>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 12px 14px; border-radius: 12px;">
+                    <div class="update-notes-header" style="color: var(--primary-color); margin-bottom: 4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Contrôle total &amp; respect</span>
+                    </div>
+                    <div class="update-notes-text" style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">
+                        Vous pouvez à tout moment modifier ce choix ou désactiver les notifications directement dans les paramètres de l'application.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions" style="display:flex; flex-direction:column; gap:8px;">
+                <button id="btnEnableNotifPrompt" class="update-btn-download" style="width:100%;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Activer les notifications</span>
+                </button>
+                <div style="display:flex; gap:8px; width:100%;">
+                    <button id="btnLaterNotifPrompt" class="update-btn-dismiss" style="flex:1;">Plus tard</button>
+                    <button id="btnNeverNotifPrompt" class="update-btn-dismiss" style="flex:1; opacity:0.85;">Ne plus me demander</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Pack Download Prompt Modal -->
+    <div id="modulePromptModalBackdrop" class="update-modal-backdrop hidden"></div>
+    <div id="modulePromptModal" class="update-modal hidden" role="dialog" aria-labelledby="modulePromptModalTitle">
+        <div class="update-card" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div class="update-header">
+                <div class="update-header-left">
+                    <div class="update-icon-circle" id="modulePromptIconCircle">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <div class="update-header-text">
+                        <h3 id="modulePromptModalTitle" class="update-title">Module Hors-Ligne</h3>
+                        <span id="modulePromptModalTag" class="update-version-tag">Téléchargement recommandé</span>
+                    </div>
+                </div>
+                <button id="btnCloseModulePromptModal" class="update-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="update-body">
+                <p id="modulePromptModalMessage" style="margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.55; color: var(--text-primary);">
+                    Vous avez activé le grégorien. Par défaut, les partitions sont consultables en ligne. Souhaitez-vous télécharger le module complet (8,7 Mo) pour une utilisation 100% hors-ligne ?
+                </p>
+                <div class="update-notes-container" style="background: rgba(var(--primary-color-rgb), 0.08); border-color: rgba(var(--primary-color-rgb), 0.2); padding: 12px 14px; border-radius: 12px;">
+                    <div class="update-notes-header" style="color: var(--primary-color); margin-bottom: 4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span id="modulePromptModalNoteTitle">Mode En Ligne conservé</span>
+                    </div>
+                    <div id="modulePromptModalNoteText" class="update-notes-text" style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">
+                        Si vous choisissez de rester en ligne, les données seront chargées une par une sur le réseau. Vous pourrez télécharger le pack hors-ligne plus tard dans les Paramètres.
+                    </div>
+                </div>
+            </div>
+            <div class="update-actions" style="display:flex; flex-direction:column; gap:8px;">
+                <button id="btnConfirmModulePrompt" class="update-btn-download" style="width:100%;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span id="btnConfirmModulePromptText">Télécharger pour le Hors-Ligne (8.7 Mo)</span>
+                </button>
+                <button id="btnCancelModulePrompt" class="update-btn-dismiss" style="width:100%;">Rester en ligne (Sans téléchargement)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Zoom de Partition Grégorienne -->
+    <div id="gregorianZoomModal" class="gregorian-zoom-modal" aria-hidden="true" inert>
+        <div class="gregorian-zoom-card">
+            <div class="gregorian-zoom-header">
+                <div class="gregorian-zoom-title" id="gregorianZoomTitle">Partition</div>
+                <button id="btnCloseGregorianZoom" class="settings-close-btn" aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="gregorian-zoom-body" id="gregorianZoomBody"></div>
+        </div>
+    </div>
+</body>
+</html>
