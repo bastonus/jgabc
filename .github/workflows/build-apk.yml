@@ -38,8 +38,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Verify Android SDK
+        run: |
+          echo "Using pre-installed Android SDK at: $ANDROID_HOME"
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
