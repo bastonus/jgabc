@@ -232,3 +232,7 @@ Dès la détection d'un tag `v*` :
 4. Génère le keystore de signature si absent et compile avec `./gradlew :app:assembleRelease`.
 5. Vérifie l'alignement (`zipalign`) et la signature cryptographique (`apksigner`).
 6. Publie automatiquement la **Release GitHub officielle**, attache `Oremus.apk` et met à jour [`version.json`](file:///d:/Documents/jgabc/version.json) sur master avec le commit `[skip ci]`.
+
+> [!NOTE]
+> **Android SDK dans GitHub Actions** : Les runners `ubuntu-latest` de GitHub Actions intègrent déjà nativement le SDK Android complet (`$ANDROID_HOME = /usr/local/lib/android/sdk`) avec les build-tools et plateformes nécessaires. L'action tierce `android-actions/setup-android@v3` ne doit **pas** être utilisée car elle tente de télécharger le paquet obsolète `tools` supprimé par Google de son référentiel SDK, ce qui provoque une erreur `Failed to find package 'tools'`.
+
