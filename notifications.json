@@ -1,8 +1,90 @@
 {
-  "version": "1.0.6",
-  "updatedAt": "2026-09-15T21:40:00Z",
+  "version": "1.0.7",
+  "updatedAt": "2026-09-15T22:20:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.60",
+      "enabled": true,
+      "priority": 180,
+      "platforms": [
+        "all"
+      ],
+      "minVersion": "beta-0.0.60",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.60",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.60 : Prise en charge native des timestamps compacts (tuples) et fiabilisation du suivi temps réel du chant grégorien.",
+      "cancelsNotifications": [
+        "notif-release-beta-0.0.59",
+        "notif-release-beta-0.0.58",
+        "notif-release-beta-0.0.57",
+        "notif-release-beta-0.0.56",
+        "notif-release-beta-0.0.55",
+        "notif-release-beta-0.0.54",
+        "notif-release-beta-0.0.53",
+        "notif-release-beta-0.0.52",
+        "notif-release-beta-0.0.51",
+        "notif-release-beta-0.0.50",
+        "notif-release-beta-0.0.49",
+        "notif-release-beta-0.0.48",
+        "notif-release-beta-0.0.47",
+        "notif-release-beta-0.0.46",
+        "notif-release-beta-0.0.45",
+        "notif-release-beta-0.0.44",
+        "notif-release-beta-0.0.43",
+        "notif-release-beta-0.0.42",
+        "notif-release-beta-0.0.41",
+        "notif-release-beta-0.0.40",
+        "notif-release-beta-0.0.39",
+        "notif-release-beta-0.0.38",
+        "notif-oremus-welcome-v1"
+      ],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.60 : Timestamps Compacts & Suivi Musical Optimisé",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.60)",
+        "subtitle": "Timestamps Compacts · Décodage Tuples · Suivi Musical Optimisé",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Correctifs & Améliorations de la v0.0.60",
+            "content": "<ul><li><strong>Décodage Universel des Timestamps Compacts :</strong> Prise en charge transparente des formats compressés en tuples <code>[start, end]</code> et <code>[start, end, noteIndex]</code> ainsi que des propriétés compactes (<code>ts</code> / <code>rep</code>) dans le moteur de lecture en temps réel.</li><li><strong>Fiabilisation du Suivi des Reprises :</strong> Prise en compte exacte des reprises de chants grégoriens avec gestion des notes ré-exécutées.</li><li><strong>Détection Dynamique du Bouton Sync :</strong> Affichage et synchronisation automatique du bouton de calage vidéo dès la détection de données d'alignement prétraitées.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.59",
+            "content": "<ul><li><strong>30 Pièces Grégoriennes Alignées :</strong> 4 800+ notes synchronisées en haute précision.</li><li><strong>Alignment Lab Intégré :</strong> Outil complet accessible en barre latérale et réglages.</li><li><strong>File de Révision Collaborative :</strong> Staging et modération automatique via GitHub Actions.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour vos retours",
+            "content": "Merci à toute la communauté pour vos retours rapides permettant de perfectionner le suivi musical !"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.59",
       "enabled": true,

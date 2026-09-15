@@ -1,5 +1,29 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.60 (16 Septembre 2026)
+
+---
+
+### 🎵 Moteur Audio & Suivi Temps Réel (Timestamps Compacts & Reprises)
+
+* **Décodage Universel des Tuples de Timestamps :**
+  * Prise en charge native dans `js/divinum_officium.js` des structures compactes issues de `compile_alignments.py` : formats tableaux `[start, end]` et `[start, end, noteIndex]`.
+  * Support rétro-compatible des clés abrégées `alignment.ts` et `alignment.rep` garantissant un défilement et une surbrillance fluide pour toutes les pièces prétraitées.
+* **Gestion Robuste des Reprises Grégoriennes :**
+  * Correction du calcul d'index pour les reprises liturgiques avec détection fine de l'intervalle temporel et préservation du cycle complet.
+* **Affichage Dynamique du Bouton de Synchronisation :**
+  * Le bouton de synchronisation vidéo s'active et s'affiche automatiquement en présence de données d'alignement (`alignment.timestamps || alignment.ts`).
+
+---
+
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.60'`, `versionCode 60` / `versionName "beta-0.0.60"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.60`), `package.json` (`0.0.60`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.28 → v1.3.29` (`sw.js` et `www/sw.js`).
+* Synchronisation intégrale du bundle `www/` via `tools/sync_apk_assets.mjs`.
+
+---
+
 ## 🚀 Version 0.0.59 (16 Septembre 2026)
 
 ---

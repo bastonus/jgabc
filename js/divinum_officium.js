@@ -5943,15 +5943,22 @@ function _buildChantSequenceWithRepeats(score, allNotes) {
 function getPreprocessedChantAlignment(videoId, chantId) {
     if (!window.GREGORIAN_PREPROCESSED_TIMESTAMPS) return null;
     var data = window.GREGORIAN_PREPROCESSED_TIMESTAMPS;
+    var piece = null;
     if (videoId && data.byVideo && data.byVideo[videoId]) {
         var pid = data.byVideo[videoId];
-        if (data.pieces && data.pieces[pid]) return data.pieces[pid];
+        if (data.pieces && data.pieces[pid]) piece = data.pieces[pid];
     }
-    if (chantId && data.pieces && data.pieces[chantId]) {
-        return data.pieces[chantId];
+    if (!piece && chantId && data.pieces && data.pieces[chantId]) {
+        piece = data.pieces[chantId];
     }
-    if (videoId && data.pieces && data.pieces[videoId]) {
-        return data.pieces[videoId];
+    if (!piece && videoId && data.pieces && data.pieces[videoId]) {
+        piece = data.pieces[videoId];
+    }
+    if (piece) {
+        if (!piece.timestamps && piece.ts) {
+            piece.timestamps = piece.ts;
+        }
+        return piece;
     }
     return null;
 }
@@ -6075,17 +6082,40 @@ function highlightChantNoteByIndex(targetIdx) {
 window.highlightChantNoteByIndex = highlightChantNoteByIndex;
 
 function syncChantNoteWithModelTimestamps(alignment, cur) {
-    if (!alignment || !alignment.timestamps || !alignment.timestamps.length) {
+    if (!alignment) {
         clearActiveNote();
         return;
     }
-    var stamps = alignment.timestamps;
-    var noteIdx = -1;
+    var rawStamps = alignment.timestamps || alignment.ts;
+    if (!rawStamps || !rawStamps.length) {
+        clearActiveNote();
+        return;
+    }
 
-    var hasReprise = alignment.has_reprise && alignment.reprise;
+    function parseStampItem(s, idx) {
+        if (Array.isArray(s)) {
+            var nIdx = (s.length > 2 && s[2] !== undefined) ? s[2] : idx;
+            var isSung = (s[0] > 0 || s[1] > 0);
+            return { start: s[0], end: s[1], note_index: nIdx, sung: isSung };
+        }
+        return {
+            start: (s && s.start !== undefined && s.start !== null) ? s.start : 0,
+            end: (s && s.end !== undefined && s.end !== null) ? s.end : 0,
+            note_index: (s && s.note_index !== undefined) ? s.note_index : idx,
+            sung: (s && s.sung !== false && !s.omitted)
+        };
+    }
+
+    var noteIdx = -1;
+    var repObj = alignment.reprise || alignment.rep;
+    var hasReprise = !!repObj;
+
     var sungIndices = [];
-    for (var s = 0; s < stamps.length; s++) {
-        if (stamps[s].sung !== false && !stamps[s].omitted && stamps[s].start !== null && stamps[s].start !== undefined) {
+    var parsedStamps = [];
+    for (var s = 0; s < rawStamps.length; s++) {
+        var p = parseStampItem(rawStamps[s], s);
+        parsedStamps.push(p);
+        if (p.sung && p.start !== null && p.start !== undefined) {
             sungIndices.push(s);
         }
     }
@@ -6098,33 +6128,35 @@ function syncChantNoteWithModelTimestamps(alignment, cur) {
     var firstIdx = sungIndices[0];
     var lastIdx = sungIndices[sungIndices.length - 1];
 
-    if (hasReprise && cur >= alignment.reprise.start) {
-        if (alignment.reprise.notes && alignment.reprise.notes.length > 0) {
-            var rNotes = alignment.reprise.notes;
-            if (cur >= rNotes[rNotes.length - 1].start) {
-                noteIdx = (rNotes[rNotes.length - 1].note_index !== undefined) ? rNotes[rNotes.length - 1].note_index : (rNotes.length - 1);
+    if (hasReprise && repObj && cur >= repObj.start) {
+        var rNotes = repObj.notes || [];
+        if (rNotes.length > 0) {
+            var lastR = parseStampItem(rNotes[rNotes.length - 1], rNotes.length - 1);
+            if (cur >= lastR.start) {
+                noteIdx = lastR.note_index;
             } else {
                 for (var r = 0; r < rNotes.length; r++) {
-                    var rNext = (r + 1 < rNotes.length) ? rNotes[r + 1].start : rNotes[r].end;
-                    if (cur >= rNotes[r].start && cur < rNext) {
-                        noteIdx = (rNotes[r].note_index !== undefined) ? rNotes[r].note_index : r;
+                    var curR = parseStampItem(rNotes[r], r);
+                    var nextRStart = (r + 1 < rNotes.length) ? (Array.isArray(rNotes[r + 1]) ? rNotes[r + 1][0] : rNotes[r + 1].start) : curR.end;
+                    if (cur >= curR.start && cur < nextRStart) {
+                        noteIdx = curR.note_index;
                         break;
                     }
                 }
             }
         }
     } else {
-        if (cur < stamps[firstIdx].start) {
+        if (cur < parsedStamps[firstIdx].start) {
             noteIdx = -1; // Before singing starts
-        } else if (!hasReprise && stamps[lastIdx].end && cur >= stamps[lastIdx].end) {
+        } else if (!hasReprise && parsedStamps[lastIdx].end && cur >= parsedStamps[lastIdx].end) {
             noteIdx = -1; // After singing ends
         } else {
             for (var k = 0; k < sungIndices.length; k++) {
                 var sIdx = sungIndices[k];
-                var curNote = stamps[sIdx];
-                var nxtTime = (k + 1 < sungIndices.length) ? stamps[sungIndices[k + 1]].start : (hasReprise ? alignment.reprise.start : (curNote.end || curNote.start + 1));
+                var curNote = parsedStamps[sIdx];
+                var nxtTime = (k + 1 < sungIndices.length) ? parsedStamps[sungIndices[k + 1]].start : (hasReprise ? repObj.start : (curNote.end || curNote.start + 1));
                 if (cur >= curNote.start && cur < nxtTime) {
-                    noteIdx = (curNote.note_index !== undefined) ? curNote.note_index : sIdx;
+                    noteIdx = curNote.note_index;
                     break;
                 }
             }
@@ -8323,8 +8355,9 @@ function updateDoSyncButtonState() {
     var videoId = window.doYT.activeId;
     var chantId = window.doYT.currentChantId;
     var alignment = getPreprocessedChantAlignment(videoId, chantId);
+    var stamps = alignment ? (alignment.timestamps || alignment.ts) : null;
 
-    if (alignment && alignment.timestamps && alignment.timestamps.length > 0) {
+    if (alignment && stamps && stamps.length > 0) {
         $btn.css('display', 'inline-flex').show();
         var isEnabled = !!(window.doYT && window.doYT.syncEnabled === true);
         if (isEnabled) {
@@ -14837,7 +14870,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.59';
+var CURRENT_APP_VERSION = 'beta-0.0.60';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
