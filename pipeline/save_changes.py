@@ -166,6 +166,37 @@ def save_note_timestamps(chant_id: str, timestamps_list: list):
 
     return True, f"{len(timestamps_list)} horodatages sauvegardés pour le chant {chant_id}"
 
+REVIEWS_FILE = os.path.join(PIPELINE_DIR, "lab_reviews.json")
+
+def save_review(piece_id: str, status: str, comment: str = "", reviewed_at: str = None, extra: dict = None):
+    """Enregistre un vote/revue humaine (approved / rejected) et commentaire pour une pièce."""
+    piece_id = str(piece_id)
+    reviews = {}
+    if os.path.exists(REVIEWS_FILE):
+        try:
+            with open(REVIEWS_FILE, "r", encoding="utf-8") as f:
+                reviews = json.load(f)
+        except Exception:
+            reviews = {}
+
+    if piece_id not in reviews:
+        reviews[piece_id] = {}
+
+    reviews[piece_id]["status"] = status
+    if comment is not None:
+        reviews[piece_id]["comment"] = comment
+    reviews[piece_id]["reviewedAt"] = reviewed_at or datetime.datetime.now().isoformat()
+    if extra:
+        for k, v in extra.items():
+            if k not in ["piece_id", "chant_id"]:
+                reviews[piece_id][k] = v
+
+    with open(REVIEWS_FILE, "w", encoding="utf-8") as f:
+        json.dump(reviews, f, ensure_ascii=False, indent=2)
+
+    print(f"[OK] Revue enregistrée pour le chant {piece_id} : {status} - {comment[:50]}")
+    return True, f"Revue enregistrée pour {piece_id}"
+
 class LabApiHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=ROOT_DIR, **kwargs)
@@ -183,6 +214,17 @@ class LabApiHandler(SimpleHTTPRequestHandler):
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"ok": True, "status": "online", "mode": "disk"}).encode('utf-8'))
+            return
+        elif parsed.path == "/api/reviews":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self._set_cors_headers()
+            self.end_headers()
+            if os.path.exists(REVIEWS_FILE):
+                with open(REVIEWS_FILE, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.wfile.write(b"{}")
             return
         elif parsed.path == "/favicon.ico":
             ico_path = os.path.join(ROOT_DIR, "favicon.ico")
@@ -211,7 +253,15 @@ class LabApiHandler(SimpleHTTPRequestHandler):
 
         response_data = {"ok": False, "error": "Endpoint inconnu"}
 
-        if parsed.path == "/api/flag":
+        if parsed.path == "/api/review":
+            pid = data.get("piece_id") or data.get("chant_id")
+            status = data.get("status")
+            comment = data.get("comment", "")
+            rat = data.get("reviewedAt")
+            ok, msg = save_review(pid, status, comment, rat, extra=data)
+            response_data = {"ok": ok, "message": msg}
+
+        elif parsed.path == "/api/flag":
             cid = data.get("chant_id")
             reason = data.get("reason", "air")
             comment = data.get("comment", "")

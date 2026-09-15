@@ -22,8 +22,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=78.0&ts=202609071040">
-    <link rel="stylesheet" href="css/gregorian_search.css?v=2.56&ts=202609010315">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=78.5&ts=202609141350">
+    <link rel="stylesheet" href="css/gregorian_search.css?v=2.57&ts=202609141315">
     <script>
         (function() {
             var t = localStorage.getItem('do_theme') || 'auto';
@@ -69,9 +69,9 @@
     <script src="incipits.js"></script>
     <script src="js/Tone.min.js?v=orig&ts=202608252211"></script>
     <script src="js/tones.js?v=orig&ts=202608252211"></script>
-    <script src="psalmtone.js"></script>
+    <script src="psalmtone.js?v=orig&ts=202609091020"></script>
     <script src="util.js?v=orig&ts=202608252211"></script>
-    <script src="verseRef.js"></script>
+    <script src="verseRef.js?v=orig&ts=202609091020"></script>
     <script src="exsurge.min.js?v=orig3&ts=202609061535"></script>
     <script src="jquery.hypher.js"></script>
     <script src="patterns/la-hypher.js"></script>
@@ -83,7 +83,7 @@
     <script src="js/bible_mappings.js?v=1.1&ts=202609011135"></script>
     <script src="js/saints_art_metadata.js?v=1.0"></script>
     <script src="js/tempora_art_metadata.js?v=1.1&ts=202609021535"></script>
-    <script src="js/divinum_officium.js?v=78.0&ts=202609071035"></script>
+    <script src="js/divinum_officium.js?v=78.5&ts=202609141350"></script>
     <script src="js/gregorian_db.js?v=2.1"></script>
     <script src="js/gregorian_index_data.js?v=3.4&ts=202609011145"></script>
     <script src="js/gregorian_youtube_links.js?v=1.0"></script>
@@ -383,6 +383,38 @@
             </div>
 
             <main class="app-main">
+                <aside id="doMassTocPanel" class="do-mass-toc-panel hidden" aria-label="Sommaire de la Messe" role="dialog" aria-modal="true">
+                    <div class="do-mass-toc-body custom-scroll" id="doMassTocList">
+                        <!-- Dynamically populated / styled structured list -->
+                    </div>
+                    <div class="do-mass-toc-footer">
+                        <button id="btnMassTocToggleChant" class="do-mass-toc-toggle-btn" title="Activer / Désactiver le chant grégorien">
+                            <span class="do-mass-toc-toggle-icon">
+                                <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18V5l12-2v13"></path>
+                                    <circle cx="6" cy="18" r="3"></circle>
+                                    <circle cx="18" cy="16" r="3"></circle>
+                                </svg>
+                                <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Grégorien</span>
+                        </button>
+                        <button id="btnMassTocToggleOrdinarium" class="do-mass-toc-toggle-btn" title="Afficher / Masquer l'ordinaire complet">
+                            <span class="do-mass-toc-toggle-icon">
+                                <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                                <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Ordinaire</span>
+                        </button>
+                    </div>
+                </aside>
                 <div id="do-content-stream" class="content-area">
                 </div>
             </main>
@@ -1059,38 +1091,6 @@
         <div class="do-mass-toc-blur-layer do-blur-5"></div>
         <div class="do-mass-toc-tint-layer"></div>
     </div>
-    <aside id="doMassTocPanel" class="do-mass-toc-panel hidden" aria-label="Sommaire de la Messe" role="dialog" aria-modal="true">
-        <div class="do-mass-toc-body custom-scroll" id="doMassTocList">
-            <!-- Dynamically populated / styled structured list -->
-        </div>
-        <div class="do-mass-toc-footer">
-            <button id="btnMassTocToggleChant" class="do-mass-toc-toggle-btn" title="Activer / Désactiver le chant grégorien">
-                <span class="do-mass-toc-toggle-icon">
-                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 18V5l12-2v13"></path>
-                        <circle cx="6" cy="18" r="3"></circle>
-                        <circle cx="18" cy="16" r="3"></circle>
-                    </svg>
-                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </span>
-                <span>Grégorien</span>
-            </button>
-            <button id="btnMassTocToggleOrdinarium" class="do-mass-toc-toggle-btn" title="Afficher / Masquer l'ordinaire complet">
-                <span class="do-mass-toc-toggle-icon">
-                    <svg class="icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                    <svg class="icon-checked" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </span>
-                <span>Ordinaire</span>
-            </button>
-        </div>
-    </aside>
 
     <!-- Floating TOC Trigger Pill (Dynamic position above player) -->
     <button id="doMassTocPill" class="do-mass-toc-pill hidden" aria-label="Ouvrir le sommaire de la messe" title="Sommaire de la Messe">

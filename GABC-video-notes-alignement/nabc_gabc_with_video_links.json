@@ -1,0 +1,3222 @@
+{
+  "summary": {
+    "nabc_pieces_total": 193,
+    "with_video_by_incipit": 99,
+    "without_video": 94,
+    "method": "Match NABC GABC (has_nabc / nabc-lines) to GradualeProject videos by office + incipit (not only ID)",
+    "note": "IDs differ between Gregobase NABC transcriptions (often Marek Klein) and the Andrew Hinkley transcriptions matched earlier; same chant can have multiple GABC IDs."
+  },
+  "nabc_with_video": [
+    {
+      "id": "14737",
+      "file": "14737.gabc",
+      "incipit": "Dextera Domini",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale monasticum I, 2005, p. 139 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 151",
+      "transcriber": "Jakub Jelínek",
+      "videos": [
+        {
+          "youtube_id": "DTUEQtqvm-0",
+          "youtube_url": "https://www.youtube.com/watch?v=DTUEQtqvm-0",
+          "title": "Offertorium: Dextera Domini",
+          "playlist": "Dominica III et sequenti post Epiphaniam",
+          "matched_gabc_id_from_title": "47"
+        },
+        {
+          "youtube_id": "3lHW0OAHBCk",
+          "youtube_url": "https://www.youtube.com/watch?v=3lHW0OAHBCk",
+          "title": "Offertorium: Dextera Domini (cum alleluia)",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "47"
+        },
+        {
+          "youtube_id": "y3pzu4Wx8Ao",
+          "youtube_url": "https://www.youtube.com/watch?v=y3pzu4Wx8Ao",
+          "title": "Graduale: Haec dies ℣. Dextera Domini",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "416"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "14738",
+      "file": "14738.gabc",
+      "incipit": "Factus est adiutor",
+      "office_part": "Antiphona",
+      "mode": "1",
+      "book": "Antiphonale monasticum I, 2005, p. 139 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 151",
+      "transcriber": "Jakub Jelínek",
+      "videos": [
+        {
+          "youtube_id": "OgruO7kgk10",
+          "youtube_url": "https://www.youtube.com/watch?v=OgruO7kgk10",
+          "title": "Graduale: Christus factus est",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "873"
+        },
+        {
+          "youtube_id": "uoR8vqSHdOY",
+          "youtube_url": "https://www.youtube.com/watch?v=uoR8vqSHdOY",
+          "title": "Communio: Factus est repente",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "7482"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "15042",
+      "file": "15042.gabc",
+      "incipit": "Bonum est sperare",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale monasticum I, 2005, p. 160 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 162",
+      "transcriber": "Jakub Jelínek",
+      "videos": [
+        {
+          "youtube_id": "088KUEH1Hiw",
+          "youtube_url": "https://www.youtube.com/watch?v=088KUEH1Hiw",
+          "title": "Offertorium: Bonum est confiteri",
+          "playlist": "Dominica in Septuagesima",
+          "matched_gabc_id_from_title": "1194"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "15064",
+      "file": "15064.gabc",
+      "incipit": "Ego sum qui testimonium",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale Monasticum, 1934, p. 388 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 164",
+      "transcriber": "Jakub Jelínek",
+      "videos": [
+        {
+          "youtube_id": "2uWkzyylLFQ",
+          "youtube_url": "https://www.youtube.com/watch?v=2uWkzyylLFQ",
+          "title": "Alleluia: Ego sum pastor bonus",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "2247"
+        },
+        {
+          "youtube_id": "LlRQqPdDKf8",
+          "youtube_url": "https://www.youtube.com/watch?v=LlRQqPdDKf8",
+          "title": "Communio: Ego sum pastor bonus",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "2247"
+        },
+        {
+          "youtube_id": "3iqCGv9vzUg",
+          "youtube_url": "https://www.youtube.com/watch?v=3iqCGv9vzUg",
+          "title": "Communio: Ego sum vitis vera",
+          "playlist": "Hebdomada V Paschae",
+          "matched_gabc_id_from_title": "10038"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "15174",
+      "file": "15174.gabc",
+      "incipit": "Vidi aquam",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Christopher Tatum",
+      "videos": [
+        {
+          "youtube_id": "ueexkdwx80k",
+          "youtube_url": "https://www.youtube.com/watch?v=ueexkdwx80k",
+          "title": "Vidi aquam",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "958"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "15539",
+      "file": "15539.gabc",
+      "incipit": "Factus est... alleluia",
+      "office_part": "Communio",
+      "mode": "7",
+      "book": "",
+      "transcriber": "",
+      "videos": [
+        {
+          "youtube_id": "OgruO7kgk10",
+          "youtube_url": "https://www.youtube.com/watch?v=OgruO7kgk10",
+          "title": "Graduale: Christus factus est",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "873"
+        },
+        {
+          "youtube_id": "uoR8vqSHdOY",
+          "youtube_url": "https://www.youtube.com/watch?v=uoR8vqSHdOY",
+          "title": "Communio: Factus est repente",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "7482"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16151",
+      "file": "16151.gabc",
+      "incipit": "Tibi dixit",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [
+        {
+          "youtube_id": "RnUz0Qju9uM",
+          "youtube_url": "https://www.youtube.com/watch?v=RnUz0Qju9uM",
+          "title": "Introitus: Tibi dixit",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "751"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16238",
+      "file": "16238.gabc",
+      "incipit": "Circumdederunt me",
+      "office_part": "Introitus",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "XGjOe0AE54k",
+          "youtube_url": "https://www.youtube.com/watch?v=XGjOe0AE54k",
+          "title": "Introitus: Circumdederunt me",
+          "playlist": "Dominica in Septuagesima",
+          "matched_gabc_id_from_title": "1168"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16240",
+      "file": "16240.gabc",
+      "incipit": "Factus est Dominus",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "OgruO7kgk10",
+          "youtube_url": "https://www.youtube.com/watch?v=OgruO7kgk10",
+          "title": "Graduale: Christus factus est",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "873"
+        },
+        {
+          "youtube_id": "uoR8vqSHdOY",
+          "youtube_url": "https://www.youtube.com/watch?v=uoR8vqSHdOY",
+          "title": "Communio: Factus est repente",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "7482"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16241",
+      "file": "16241.gabc",
+      "incipit": "In nomine Domini",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "RPLP0eusWUc",
+          "youtube_url": "https://www.youtube.com/watch?v=RPLP0eusWUc",
+          "title": "Introitus: In nomine Domini",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "236"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16243",
+      "file": "16243.gabc",
+      "incipit": "Ego clamavi",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "KVGJxssGN_A",
+          "youtube_url": "https://www.youtube.com/watch?v=KVGJxssGN_A",
+          "title": "Communio: Ego clamavi",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "464"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16244",
+      "file": "16244.gabc",
+      "incipit": "Exaudi Domine... tibi",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "TCVJXCjKpJU",
+          "youtube_url": "https://www.youtube.com/watch?v=TCVJXCjKpJU",
+          "title": "Offertorium: Domine,  exaudi orationem meam",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "461"
+        },
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        },
+        {
+          "youtube_id": "NZo-uJdg7yY",
+          "youtube_url": "https://www.youtube.com/watch?v=NZo-uJdg7yY",
+          "title": "Introitus: Exaudi Domine... tibi dixit",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "396"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16246",
+      "file": "16246.gabc",
+      "incipit": "Dum sanctificatus",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "OQIJUvuPf-M",
+          "youtube_url": "https://www.youtube.com/watch?v=OQIJUvuPf-M",
+          "title": "Introitus: Dum sanctificatus",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "418"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16252",
+      "file": "16252.gabc",
+      "incipit": "Prope es tu",
+      "office_part": "Introitus",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "PpakyqyEohM",
+          "youtube_url": "https://www.youtube.com/watch?v=PpakyqyEohM",
+          "title": "Graduale: Prope est Dominus",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "284"
+        },
+        {
+          "youtube_id": "8sbmcxNMeBY",
+          "youtube_url": "https://www.youtube.com/watch?v=8sbmcxNMeBY",
+          "title": "Introitus: Prope es tu Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "FCibb2HeIOA",
+          "youtube_url": "https://www.youtube.com/watch?v=FCibb2HeIOA",
+          "title": "Invitatorium: Prope est iam Dominus",
+          "playlist": "In Ultimis Feriis Adventu",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "47BXz5rMlNs",
+          "youtube_url": "https://www.youtube.com/watch?v=47BXz5rMlNs",
+          "title": "Improperia II (Ego propter te flagellavi Aegyptum - Popule meus)",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "1x8gGD81ptk",
+          "youtube_url": "https://www.youtube.com/watch?v=1x8gGD81ptk",
+          "title": "Improperia I (Popule meus - Hagios o Theos)",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "YCBceN5Wtb0",
+          "youtube_url": "https://www.youtube.com/watch?v=YCBceN5Wtb0",
+          "title": "Offertorium: Improperium expectavit... et dederunt",
+          "playlist": "Dominica in Palmis",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16253",
+      "file": "16253.gabc",
+      "incipit": "Omnis terra",
+      "office_part": "Introitus",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "mWvhPONpKzA",
+          "youtube_url": "https://www.youtube.com/watch?v=mWvhPONpKzA",
+          "title": "Introitus: Omnis terra",
+          "playlist": "Dominica II post Epiphaniam",
+          "matched_gabc_id_from_title": "13"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16256",
+      "file": "16256.gabc",
+      "incipit": "Nos autem",
+      "office_part": "Introitus",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "dESoLm7dph0",
+          "youtube_url": "https://www.youtube.com/watch?v=dESoLm7dph0",
+          "title": "Introitus: Nos autem gloriari",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "7037"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16258",
+      "file": "16258.gabc",
+      "incipit": "Misereris omnium",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "2_Z1En_eX5c",
+          "youtube_url": "https://www.youtube.com/watch?v=2_Z1En_eX5c",
+          "title": "Introitus: Misereris omnium",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "533"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16259",
+      "file": "16259.gabc",
+      "incipit": "Miserere mihi... ad te",
+      "office_part": "Introitus",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "6AfuIOBYWxs",
+          "youtube_url": "https://www.youtube.com/watch?v=6AfuIOBYWxs",
+          "title": "Offertorium: Miserere mihi Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "11229"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16260",
+      "file": "16260.gabc",
+      "incipit": "Memento nostri",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "KPtuWxJ2Gb4",
+          "youtube_url": "https://www.youtube.com/watch?v=KPtuWxJ2Gb4",
+          "title": "Introitus: Memento nostri",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "165"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16264",
+      "file": "16264.gabc",
+      "incipit": "Viderunt omnes",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "uvC0NGmpuFY",
+          "youtube_url": "https://www.youtube.com/watch?v=uvC0NGmpuFY",
+          "title": "Graduale: Viderunt omnes",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "1163"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16268",
+      "file": "16268.gabc",
+      "incipit": "Diffusa est",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "ovajphcs7Zw",
+          "youtube_url": "https://www.youtube.com/watch?v=ovajphcs7Zw",
+          "title": "Graduale: Diffusa est gratia",
+          "playlist": "Sanctae Dei Genetricis Mariae Die I ianuarii Graduale 1974",
+          "matched_gabc_id_from_title": "5077"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16271",
+      "file": "16271.gabc",
+      "incipit": "Ego autem",
+      "office_part": "Graduale",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "ISYi7vphkqo",
+          "youtube_url": "https://www.youtube.com/watch?v=ISYi7vphkqo",
+          "title": "Graduale: Ego autem",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "903"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16272",
+      "file": "16272.gabc",
+      "incipit": "Ex Sion species",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "pH_19oOYwQM",
+          "youtube_url": "https://www.youtube.com/watch?v=pH_19oOYwQM",
+          "title": "Graduale: Ex Sion species",
+          "playlist": "Dominica II Adventus",
+          "matched_gabc_id_from_title": "1268"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16273",
+      "file": "16273.gabc",
+      "incipit": "Haec dies... Confitemini",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "rePup3UK348",
+          "youtube_url": "https://www.youtube.com/watch?v=rePup3UK348",
+          "title": "Graduale: Haec dies ℣. Confitemini",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "1075"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16274",
+      "file": "16274.gabc",
+      "incipit": "Hodie scietis",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "IO_-Qzf0-vk",
+          "youtube_url": "https://www.youtube.com/watch?v=IO_-Qzf0-vk",
+          "title": "Graduale: Hodie scietis",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "202"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16276",
+      "file": "16276.gabc",
+      "incipit": "Inveni David",
+      "office_part": "Graduale",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "ws2ibKVArgE",
+          "youtube_url": "https://www.youtube.com/watch?v=ws2ibKVArgE",
+          "title": "Graduale: Inveni David",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "827"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16278",
+      "file": "16278.gabc",
+      "incipit": "Laetatus sum",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "QlAWfjaTpN0",
+          "youtube_url": "https://www.youtube.com/watch?v=QlAWfjaTpN0",
+          "title": "Graduale: Laetatus sum",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1011"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16280",
+      "file": "16280.gabc",
+      "incipit": "Miserere mei Deus",
+      "office_part": "Graduale",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "mdnGDWXnZFQ",
+          "youtube_url": "https://www.youtube.com/watch?v=mdnGDWXnZFQ",
+          "title": "Graduale:  Miserere mei,  Deus",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "754"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16281",
+      "file": "16281.gabc",
+      "incipit": "Misit Dominus",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "3ATMpROUGDs",
+          "youtube_url": "https://www.youtube.com/watch?v=3ATMpROUGDs",
+          "title": "Graduale: Misit Dominus",
+          "playlist": "Dominica II post Epiphaniam",
+          "matched_gabc_id_from_title": "932"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16282",
+      "file": "16282.gabc",
+      "incipit": "Oculi omnium",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "NF931f1jFtM",
+          "youtube_url": "https://www.youtube.com/watch?v=NF931f1jFtM",
+          "title": "Graduale: Oculi omnium",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "1230"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16286",
+      "file": "16286.gabc",
+      "incipit": "Sciant gentes",
+      "office_part": "Graduale",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "5kuPOei5DGU",
+          "youtube_url": "https://www.youtube.com/watch?v=5kuPOei5DGU",
+          "title": "Graduale: Sciant gentes",
+          "playlist": "Dominica in Sexagesima",
+          "matched_gabc_id_from_title": "1265"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16288",
+      "file": "16288.gabc",
+      "incipit": "Timebunt gentes",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "7ocIvloWNjU",
+          "youtube_url": "https://www.youtube.com/watch?v=7ocIvloWNjU",
+          "title": "Graduale: Timebunt gentes",
+          "playlist": "Dominica III et sequenti post Epiphaniam",
+          "matched_gabc_id_from_title": "1173"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16290",
+      "file": "16290.gabc",
+      "incipit": "Unam petii... Ut... protegar",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "t9Tv3Wpngls",
+          "youtube_url": "https://www.youtube.com/watch?v=t9Tv3Wpngls",
+          "title": "Graduale: Unam petii",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "574"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16291",
+      "file": "16291.gabc",
+      "incipit": "Universi",
+      "office_part": "Graduale",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "UY-GB4ffTRw",
+          "youtube_url": "https://www.youtube.com/watch?v=UY-GB4ffTRw",
+          "title": "Graduale: Universi qui te expectant",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16293",
+      "file": "16293.gabc",
+      "incipit": "Cantemus Domino",
+      "office_part": "Canticum",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "6phM-UdUH4o",
+          "youtube_url": "https://www.youtube.com/watch?v=6phM-UdUH4o",
+          "title": "Canticum (Tractus): Cantemus Domino",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16294",
+      "file": "16294.gabc",
+      "incipit": "Commovisti",
+      "office_part": "Tractus",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "PHrVrmC_JXU",
+          "youtube_url": "https://www.youtube.com/watch?v=PHrVrmC_JXU",
+          "title": "Tractus: Commovisti",
+          "playlist": "Dominica in Sexagesima",
+          "matched_gabc_id_from_title": "1178"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16295",
+      "file": "16295.gabc",
+      "incipit": "Qui confidunt",
+      "office_part": "Tractus",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "jalq-GaDfsg",
+          "youtube_url": "https://www.youtube.com/watch?v=jalq-GaDfsg",
+          "title": "Canticum (Tractus): Qui confidunt",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16296",
+      "file": "16296.gabc",
+      "incipit": "Domine exaudi",
+      "office_part": "Tractus",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16300",
+      "file": "16300.gabc",
+      "incipit": "Veni Sancte Spiritus",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "SmW57Srlafc",
+          "youtube_url": "https://www.youtube.com/watch?v=SmW57Srlafc",
+          "title": "Alleluia: Veni Sancte Spiritus",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "181"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16301",
+      "file": "16301.gabc",
+      "incipit": "Verba mea",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "g_6hJ1xcocg",
+          "youtube_url": "https://www.youtube.com/watch?v=g_6hJ1xcocg",
+          "title": "Introitus: Verba mea auribus percipe",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1248"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16303",
+      "file": "16303.gabc",
+      "incipit": "Benedictus qui venit",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "RgIfmm9Kg7U",
+          "youtube_url": "https://www.youtube.com/watch?v=RgIfmm9Kg7U",
+          "title": "Alleluia: Benedictus qui venit",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "866"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16304",
+      "file": "16304.gabc",
+      "incipit": "Cantate Domino",
+      "office_part": "Alleluia",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "Li7Kc-3OmAA",
+          "youtube_url": "https://www.youtube.com/watch?v=Li7Kc-3OmAA",
+          "title": "Communio: Cantate Domino",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "579"
+        },
+        {
+          "youtube_id": "g78WK_bd08A",
+          "youtube_url": "https://www.youtube.com/watch?v=g78WK_bd08A",
+          "title": "Introitus: Cantate Domino canticum novum",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "8407"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16305",
+      "file": "16305.gabc",
+      "incipit": "Cognoverunt",
+      "office_part": "Alleluia",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "x-dNeEKtdjA",
+          "youtube_url": "https://www.youtube.com/watch?v=x-dNeEKtdjA",
+          "title": "Alleluia: Cognoverunt discipuli",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16306",
+      "file": "16306.gabc",
+      "incipit": "Crastina die",
+      "office_part": "Alleluia",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "xpW6n3kdJTs",
+          "youtube_url": "https://www.youtube.com/watch?v=xpW6n3kdJTs",
+          "title": "Alleluia: Crastina die",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "167"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16307",
+      "file": "16307.gabc",
+      "incipit": "De profundis",
+      "office_part": "Alleluia",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "A4GOH9axVek",
+          "youtube_url": "https://www.youtube.com/watch?v=A4GOH9axVek",
+          "title": "Tractus: De profundis",
+          "playlist": "Dominica in Septuagesima",
+          "matched_gabc_id_from_title": "926"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16308",
+      "file": "16308.gabc",
+      "incipit": "Dextera Dei",
+      "office_part": "Alleluia",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "w6lTUbwq8zY",
+          "youtube_url": "https://www.youtube.com/watch?v=w6lTUbwq8zY",
+          "title": "Alleluia: Dextera Dei",
+          "playlist": "Hebdomada V Paschae",
+          "matched_gabc_id_from_title": "159"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16309",
+      "file": "16309.gabc",
+      "incipit": "Domine exaudi",
+      "office_part": "Alleluia",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "TCVJXCjKpJU",
+          "youtube_url": "https://www.youtube.com/watch?v=TCVJXCjKpJU",
+          "title": "Offertorium: Domine,  exaudi orationem meam",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "461"
+        },
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        },
+        {
+          "youtube_id": "NZo-uJdg7yY",
+          "youtube_url": "https://www.youtube.com/watch?v=NZo-uJdg7yY",
+          "title": "Introitus: Exaudi Domine... tibi dixit",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "396"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16312",
+      "file": "16312.gabc",
+      "incipit": "Dominus dixit",
+      "office_part": "Alleluia",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "DhEAP7KUpvA",
+          "youtube_url": "https://www.youtube.com/watch?v=DhEAP7KUpvA",
+          "title": "Alleluia: Dominus dixit",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "890"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16313",
+      "file": "16313.gabc",
+      "incipit": "Emitte Spiritum",
+      "office_part": "Alleluia",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "w3nW7kzNy_Q",
+          "youtube_url": "https://www.youtube.com/watch?v=w3nW7kzNy_Q",
+          "title": "Alleluia: Emitte Spiritum tuum (altera melodia)",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "14083"
+        },
+        {
+          "youtube_id": "5Y0m4FYhFlY",
+          "youtube_url": "https://www.youtube.com/watch?v=5Y0m4FYhFlY",
+          "title": "Alleluia: Emitte Spiritum tuum",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "14083"
+        },
+        {
+          "youtube_id": "aEoshuP5IWY",
+          "youtube_url": "https://www.youtube.com/watch?v=aEoshuP5IWY",
+          "title": "Offertorium: Emitte Spiritum tuum",
+          "playlist": "In Vigilia Pentecostes",
+          "matched_gabc_id_from_title": "14083"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16314",
+      "file": "16314.gabc",
+      "incipit": "Eripe me",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "WREhPUnq56w",
+          "youtube_url": "https://www.youtube.com/watch?v=WREhPUnq56w",
+          "title": "Graduale: Eripe me Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "760"
+        },
+        {
+          "youtube_id": "MTtKrj99bxY",
+          "youtube_url": "https://www.youtube.com/watch?v=MTtKrj99bxY",
+          "title": "Offertorium: Eripe me de inimicis meis, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "245"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16315",
+      "file": "16315.gabc",
+      "incipit": "Excita Domine",
+      "office_part": "Alleluia",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "qPo5FrGieL8",
+          "youtube_url": "https://www.youtube.com/watch?v=qPo5FrGieL8",
+          "title": "Alleluia: Excita, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "855"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16316",
+      "file": "16316.gabc",
+      "incipit": "Lauda anima mea",
+      "office_part": "Alleluia",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "uZ-ZWdrT_0g",
+          "youtube_url": "https://www.youtube.com/watch?v=uZ-ZWdrT_0g",
+          "title": "Offertorium: Lauda anima mea Dominum",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "668"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16317",
+      "file": "16317.gabc",
+      "incipit": "Non vos relinquam",
+      "office_part": "Alleluia",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "GoV3aBZhhlk",
+          "youtube_url": "https://www.youtube.com/watch?v=GoV3aBZhhlk",
+          "title": "Alleluia: Non vos relinquam",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "107"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16320",
+      "file": "16320.gabc",
+      "incipit": "Redemptionem",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "6z4cYFtBHQo",
+          "youtube_url": "https://www.youtube.com/watch?v=6z4cYFtBHQo",
+          "title": "Alleluia: Redemptionem",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "1341"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16322",
+      "file": "16322.gabc",
+      "incipit": "Veni Domine et noli",
+      "office_part": "Alleluia",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "TY-Z1DoKiDw",
+          "youtube_url": "https://www.youtube.com/watch?v=TY-Z1DoKiDw",
+          "title": "Alleluia: Veni, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "13662"
+        },
+        {
+          "youtube_id": "X-W2DJwQOpI",
+          "youtube_url": "https://www.youtube.com/watch?v=X-W2DJwQOpI",
+          "title": "Communio: Veni Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "11387"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16325",
+      "file": "16325.gabc",
+      "incipit": "Viri Galilaei",
+      "office_part": "Offertorium",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "-TY6Py6tXFw",
+          "youtube_url": "https://www.youtube.com/watch?v=-TY6Py6tXFw",
+          "title": "Offertorium: Viri Galilaei",
+          "playlist": "In Ascensione Domini",
+          "matched_gabc_id_from_title": "3315"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16326",
+      "file": "16326.gabc",
+      "incipit": "Ad te Domine",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "oSHD49tYU0k",
+          "youtube_url": "https://www.youtube.com/watch?v=oSHD49tYU0k",
+          "title": "Offertorium: Ad te, Domine, levavi",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "7084"
+        },
+        {
+          "youtube_id": "qPo5FrGieL8",
+          "youtube_url": "https://www.youtube.com/watch?v=qPo5FrGieL8",
+          "title": "Alleluia: Excita, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "855"
+        },
+        {
+          "youtube_id": "NkgtpHBPTpY",
+          "youtube_url": "https://www.youtube.com/watch?v=NkgtpHBPTpY",
+          "title": "Graduale: Excita Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "506"
+        },
+        {
+          "youtube_id": "-3YKK4Z2v7I",
+          "youtube_url": "https://www.youtube.com/watch?v=-3YKK4Z2v7I",
+          "title": "Offertorium: Benedixisti Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "113"
+        },
+        {
+          "youtube_id": "TY-Z1DoKiDw",
+          "youtube_url": "https://www.youtube.com/watch?v=TY-Z1DoKiDw",
+          "title": "Alleluia: Veni, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "13662"
+        },
+        {
+          "youtube_id": "X-W2DJwQOpI",
+          "youtube_url": "https://www.youtube.com/watch?v=X-W2DJwQOpI",
+          "title": "Communio: Veni Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "11387"
+        },
+        {
+          "youtube_id": "8sbmcxNMeBY",
+          "youtube_url": "https://www.youtube.com/watch?v=8sbmcxNMeBY",
+          "title": "Introitus: Prope es tu Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "IEyYjP2KLCQ",
+          "youtube_url": "https://www.youtube.com/watch?v=IEyYjP2KLCQ",
+          "title": "Graduale: Domine Deus virtutum",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "38"
+        },
+        {
+          "youtube_id": "Wq343zSL5YI",
+          "youtube_url": "https://www.youtube.com/watch?v=Wq343zSL5YI",
+          "title": "Graduale: Ostende nobis, Domine",
+          "playlist": "In Ultimis Feriis Adventu",
+          "matched_gabc_id_from_title": "4422"
+        },
+        {
+          "youtube_id": "gUipVNYBk_U",
+          "youtube_url": "https://www.youtube.com/watch?v=gUipVNYBk_U",
+          "title": "Hymnus: Benedictus es Domine Deus",
+          "playlist": "Sabbato Quatuor Temporum Adventus EF",
+          "matched_gabc_id_from_title": "2166"
+        },
+        {
+          "youtube_id": "LGwOTYay5lk",
+          "youtube_url": "https://www.youtube.com/watch?v=LGwOTYay5lk",
+          "title": "Communio: Domine, Dominus noster",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "998"
+        },
+        {
+          "youtube_id": "Uc2SCikfHaE",
+          "youtube_url": "https://www.youtube.com/watch?v=Uc2SCikfHaE",
+          "title": "Offertorium: Benedictus es Domine... in labiis meis",
+          "playlist": "Dominica in Quinquagesima",
+          "matched_gabc_id_from_title": "13675"
+        },
+        {
+          "youtube_id": "txxd2As5K5A",
+          "youtube_url": "https://www.youtube.com/watch?v=txxd2As5K5A",
+          "title": "Tractus: Domine, non secundum peccata nostra",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "425"
+        },
+        {
+          "youtube_id": "pkQKseVDLE8",
+          "youtube_url": "https://www.youtube.com/watch?v=pkQKseVDLE8",
+          "title": "Offertorium: Exaltabo te Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "xD5R7LbPamg",
+          "youtube_url": "https://www.youtube.com/watch?v=xD5R7LbPamg",
+          "title": "Graduale: Exaltabo te, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "6AfuIOBYWxs",
+          "youtube_url": "https://www.youtube.com/watch?v=6AfuIOBYWxs",
+          "title": "Offertorium: Miserere mihi Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "11229"
+        },
+        {
+          "youtube_id": "QKZYdohMi6o",
+          "youtube_url": "https://www.youtube.com/watch?v=QKZYdohMi6o",
+          "title": "Graduale: Exsurge Domine, non praevaleat homo",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "30"
+        },
+        {
+          "youtube_id": "WREhPUnq56w",
+          "youtube_url": "https://www.youtube.com/watch?v=WREhPUnq56w",
+          "title": "Graduale: Eripe me Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "760"
+        },
+        {
+          "youtube_id": "ZsxdmCvW5Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=ZsxdmCvW5Jc",
+          "title": "Offertorium: Confitebor tibi, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "10764"
+        },
+        {
+          "youtube_id": "ISlyIMtsdn4",
+          "youtube_url": "https://www.youtube.com/watch?v=ISlyIMtsdn4",
+          "title": "Introitus: Iudica Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "14589"
+        },
+        {
+          "youtube_id": "zUvdmyS_c2c",
+          "youtube_url": "https://www.youtube.com/watch?v=zUvdmyS_c2c",
+          "title": "Graduale: Exsurge Domine, et intende",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "8078"
+        },
+        {
+          "youtube_id": "MTtKrj99bxY",
+          "youtube_url": "https://www.youtube.com/watch?v=MTtKrj99bxY",
+          "title": "Offertorium: Eripe me de inimicis meis, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "245"
+        },
+        {
+          "youtube_id": "TCVJXCjKpJU",
+          "youtube_url": "https://www.youtube.com/watch?v=TCVJXCjKpJU",
+          "title": "Offertorium: Domine,  exaudi orationem meam",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "461"
+        },
+        {
+          "youtube_id": "5YWdKw49MUw",
+          "youtube_url": "https://www.youtube.com/watch?v=5YWdKw49MUw",
+          "title": "Antiphona: Domine, tu mihi lavas pedes",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "736"
+        },
+        {
+          "youtube_id": "yc5jupGa8Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=yc5jupGa8Jc",
+          "title": "Offertorium: Domine, ad adiuvandum me festina",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "18154"
+        },
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        },
+        {
+          "youtube_id": "NZo-uJdg7yY",
+          "youtube_url": "https://www.youtube.com/watch?v=NZo-uJdg7yY",
+          "title": "Introitus: Exaudi Domine... tibi dixit",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "396"
+        },
+        {
+          "youtube_id": "9LudI6APiVg",
+          "youtube_url": "https://www.youtube.com/watch?v=9LudI6APiVg",
+          "title": "Introitus: Sancti tui, Domine",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "1923"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16327",
+      "file": "16327.gabc",
+      "incipit": "Ave Maria... et benedictus",
+      "office_part": "Offertorium",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "vSNi49zoCLg",
+          "youtube_url": "https://www.youtube.com/watch?v=vSNi49zoCLg",
+          "title": "Offertorium: Ave Maria... et benedictus",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "843"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16328",
+      "file": "16328.gabc",
+      "incipit": "Benedicite gentes",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "yT-WV9A7L34",
+          "youtube_url": "https://www.youtube.com/watch?v=yT-WV9A7L34",
+          "title": "Offertorium: Benedicite gentes",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "860"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16329",
+      "file": "16329.gabc",
+      "incipit": "Confitebor tibi... in toto",
+      "office_part": "Offertorium",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "ZsxdmCvW5Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=ZsxdmCvW5Jc",
+          "title": "Offertorium: Confitebor tibi, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "10764"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16330",
+      "file": "16330.gabc",
+      "incipit": "Confortamini",
+      "office_part": "Offertorium",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "TIhL-Ci1EfM",
+          "youtube_url": "https://www.youtube.com/watch?v=TIhL-Ci1EfM",
+          "title": "Offertorium: Confortamini",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "290"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16332",
+      "file": "16332.gabc",
+      "incipit": "De profundis",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "A4GOH9axVek",
+          "youtube_url": "https://www.youtube.com/watch?v=A4GOH9axVek",
+          "title": "Tractus: De profundis",
+          "playlist": "Dominica in Septuagesima",
+          "matched_gabc_id_from_title": "926"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16333",
+      "file": "16333.gabc",
+      "incipit": "Deus Deus meus",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "8oFe4dcku0E",
+          "youtube_url": "https://www.youtube.com/watch?v=8oFe4dcku0E",
+          "title": "Offertorium: Deus, Deus meus",
+          "playlist": "Hebdomada IV Paschae",
+          "matched_gabc_id_from_title": "924"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16334",
+      "file": "16334.gabc",
+      "incipit": "Deus tu convertens",
+      "office_part": "Offertorium",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "Q5sWqJBoA8I",
+          "youtube_url": "https://www.youtube.com/watch?v=Q5sWqJBoA8I",
+          "title": "Offertorium: Deus, tu convertens",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "631"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16335",
+      "file": "16335.gabc",
+      "incipit": "Dextera Domini",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "DTUEQtqvm-0",
+          "youtube_url": "https://www.youtube.com/watch?v=DTUEQtqvm-0",
+          "title": "Offertorium: Dextera Domini",
+          "playlist": "Dominica III et sequenti post Epiphaniam",
+          "matched_gabc_id_from_title": "47"
+        },
+        {
+          "youtube_id": "3lHW0OAHBCk",
+          "youtube_url": "https://www.youtube.com/watch?v=3lHW0OAHBCk",
+          "title": "Offertorium: Dextera Domini (cum alleluia)",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "47"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16336",
+      "file": "16336.gabc",
+      "incipit": "Domine Deus... qui repertus",
+      "office_part": "Offertorium",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "IEyYjP2KLCQ",
+          "youtube_url": "https://www.youtube.com/watch?v=IEyYjP2KLCQ",
+          "title": "Graduale: Domine Deus virtutum",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "38"
+        },
+        {
+          "youtube_id": "gUipVNYBk_U",
+          "youtube_url": "https://www.youtube.com/watch?v=gUipVNYBk_U",
+          "title": "Hymnus: Benedictus es Domine Deus",
+          "playlist": "Sabbato Quatuor Temporum Adventus EF",
+          "matched_gabc_id_from_title": "2166"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16339",
+      "file": "16339.gabc",
+      "incipit": "Gressus meos",
+      "office_part": "Offertorium",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "OK5bJBJC3tk",
+          "youtube_url": "https://www.youtube.com/watch?v=OK5bJBJC3tk",
+          "title": "Offertorium: Gressus meos",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1099"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16341",
+      "file": "16341.gabc",
+      "incipit": "Laetentur caeli",
+      "office_part": "Offertorium",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "2W7HIu_9iSk",
+          "youtube_url": "https://www.youtube.com/watch?v=2W7HIu_9iSk",
+          "title": "Offertorium: Laetentur caeli",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "811"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16342",
+      "file": "16342.gabc",
+      "incipit": "Meditabor",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "XnI7dBGpTPo",
+          "youtube_url": "https://www.youtube.com/watch?v=XnI7dBGpTPo",
+          "title": "Offertorium: Meditabor",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "810"
+        },
+        {
+          "youtube_id": "RGJO6MjN0uo",
+          "youtube_url": "https://www.youtube.com/watch?v=RGJO6MjN0uo",
+          "title": "Offertorium: Meditabor (cum alleluia)",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "810"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16343",
+      "file": "16343.gabc",
+      "incipit": "Perfice gressus",
+      "office_part": "Offertorium",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "r6dTVvV3mcY",
+          "youtube_url": "https://www.youtube.com/watch?v=r6dTVvV3mcY",
+          "title": "Offertorium: Perfice gressus meos",
+          "playlist": "Dominica in Sexagesima",
+          "matched_gabc_id_from_title": "14093"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16347",
+      "file": "16347.gabc",
+      "incipit": "Reges Tharsis",
+      "office_part": "Offertorium",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "TgbpiCYL3Pw",
+          "youtube_url": "https://www.youtube.com/watch?v=TgbpiCYL3Pw",
+          "title": "Offertorium: Reges Tharsis",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "1147"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16349",
+      "file": "16349.gabc",
+      "incipit": "Scapulis suis",
+      "office_part": "Offertorium",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "hqFeq2Z0MdU",
+          "youtube_url": "https://www.youtube.com/watch?v=hqFeq2Z0MdU",
+          "title": "Offertorium: Scapulis suis",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "294"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16352",
+      "file": "16352.gabc",
+      "incipit": "Ecce lignum Crucis",
+      "office_part": "Antiphona",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "dodZ3oJ25HY",
+          "youtube_url": "https://www.youtube.com/watch?v=dodZ3oJ25HY",
+          "title": "Ecce lignum crucis",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1435"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16353",
+      "file": "16353.gabc",
+      "incipit": "Si ego Dominus",
+      "office_part": "Antiphona",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "YOmxJ7Czm8I",
+          "youtube_url": "https://www.youtube.com/watch?v=YOmxJ7Czm8I",
+          "title": "Antiphona: Si ego Dominus",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "504"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16355",
+      "file": "16355.gabc",
+      "incipit": "Domine tu mihi",
+      "office_part": "Antiphona",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "6AfuIOBYWxs",
+          "youtube_url": "https://www.youtube.com/watch?v=6AfuIOBYWxs",
+          "title": "Offertorium: Miserere mihi Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "11229"
+        },
+        {
+          "youtube_id": "5YWdKw49MUw",
+          "youtube_url": "https://www.youtube.com/watch?v=5YWdKw49MUw",
+          "title": "Antiphona: Domine, tu mihi lavas pedes",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "736"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16363",
+      "file": "16363.gabc",
+      "incipit": "Viderunt omnes",
+      "office_part": "Communio",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "FlWmosdd2Tc",
+          "youtube_url": "https://www.youtube.com/watch?v=FlWmosdd2Tc",
+          "title": "Communio: Viderunt omnes",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "1139"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16368",
+      "file": "16368.gabc",
+      "incipit": "Domine Dominus noster",
+      "office_part": "Communio",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "LGwOTYay5lk",
+          "youtube_url": "https://www.youtube.com/watch?v=LGwOTYay5lk",
+          "title": "Communio: Domine, Dominus noster",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "998"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16370",
+      "file": "16370.gabc",
+      "incipit": "Dominus dabit",
+      "office_part": "Communio",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "-lo19FkgAmc",
+          "youtube_url": "https://www.youtube.com/watch?v=-lo19FkgAmc",
+          "title": "Communio: Dominus dabit benignitatem",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "1036"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16372",
+      "file": "16372.gabc",
+      "incipit": "Ecce Dominus veniet",
+      "office_part": "Communio",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "jP8DTM1KV88",
+          "youtube_url": "https://www.youtube.com/watch?v=jP8DTM1KV88",
+          "title": "Communio: Ecce, Dominus veniet",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "439"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16373",
+      "file": "16373.gabc",
+      "incipit": "Ego sum vitis",
+      "office_part": "Communio",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "2uWkzyylLFQ",
+          "youtube_url": "https://www.youtube.com/watch?v=2uWkzyylLFQ",
+          "title": "Alleluia: Ego sum pastor bonus",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "2247"
+        },
+        {
+          "youtube_id": "LlRQqPdDKf8",
+          "youtube_url": "https://www.youtube.com/watch?v=LlRQqPdDKf8",
+          "title": "Communio: Ego sum pastor bonus",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "2247"
+        },
+        {
+          "youtube_id": "3iqCGv9vzUg",
+          "youtube_url": "https://www.youtube.com/watch?v=3iqCGv9vzUg",
+          "title": "Communio: Ego sum vitis vera",
+          "playlist": "Hebdomada V Paschae",
+          "matched_gabc_id_from_title": "10038"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16374",
+      "file": "16374.gabc",
+      "incipit": "Fili quid fecisti",
+      "office_part": "Communio",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "Bla_WqNZ0u4",
+          "youtube_url": "https://www.youtube.com/watch?v=Bla_WqNZ0u4",
+          "title": "Communio: Fili, quid fecisti nobis sic",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "705"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16376",
+      "file": "16376.gabc",
+      "incipit": "Hoc corpus",
+      "office_part": "Communio",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Jakub Jelínek",
+      "videos": [
+        {
+          "youtube_id": "UiQg-ubAkP0",
+          "youtube_url": "https://www.youtube.com/watch?v=UiQg-ubAkP0",
+          "title": "Communio: Hoc corpus",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "726"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16379",
+      "file": "16379.gabc",
+      "incipit": "In splendoribus",
+      "office_part": "Communio",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "nrtqADDCjdU",
+          "youtube_url": "https://www.youtube.com/watch?v=nrtqADDCjdU",
+          "title": "Communio: In splendoribus",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "117"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16380",
+      "file": "16380.gabc",
+      "incipit": "Introibo",
+      "office_part": "Communio",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "dV6nKbrGPr0",
+          "youtube_url": "https://www.youtube.com/watch?v=dV6nKbrGPr0",
+          "title": "Communio: Introibo",
+          "playlist": "Dominica in Sexagesima",
+          "matched_gabc_id_from_title": "554"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16381",
+      "file": "16381.gabc",
+      "incipit": "Manducaverunt",
+      "office_part": "Communio",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "hKNemhSuC4A",
+          "youtube_url": "https://www.youtube.com/watch?v=hKNemhSuC4A",
+          "title": "Communio: Manducaverunt",
+          "playlist": "Dominica in Quinquagesima",
+          "matched_gabc_id_from_title": "677"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16382",
+      "file": "16382.gabc",
+      "incipit": "Mitte manum... alleluia",
+      "office_part": "Communio",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "SX93gBpxbhg",
+          "youtube_url": "https://www.youtube.com/watch?v=SX93gBpxbhg",
+          "title": "Communio: Mitte manum tuam",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "10807"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16383",
+      "file": "16383.gabc",
+      "incipit": "Nemo te condemnavit",
+      "office_part": "Communio",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "eOH-D6OfT8Q",
+          "youtube_url": "https://www.youtube.com/watch?v=eOH-D6OfT8Q",
+          "title": "Communio: Nemo te condemnavit",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1010"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16384",
+      "file": "16384.gabc",
+      "incipit": "Potum meum",
+      "office_part": "Communio",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "koaV7pbggZY",
+          "youtube_url": "https://www.youtube.com/watch?v=koaV7pbggZY",
+          "title": "Communio: Potum meum",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "588"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16386",
+      "file": "16386.gabc",
+      "incipit": "Psallite Domino",
+      "office_part": "Communio",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "twykn0Pfpls",
+          "youtube_url": "https://www.youtube.com/watch?v=twykn0Pfpls",
+          "title": "Communio: Psallite Domino",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "263"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "16387",
+      "file": "16387.gabc",
+      "incipit": "Scapulis suis",
+      "office_part": "Communio",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [
+        {
+          "youtube_id": "bp522bsRseM",
+          "youtube_url": "https://www.youtube.com/watch?v=bp522bsRseM",
+          "title": "Communio: Scapulis suis",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "1100"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "17675",
+      "file": "17675.gabc",
+      "incipit": "Benedictus es Domine",
+      "office_part": "Canticum",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Dominique CROCHU",
+      "videos": [
+        {
+          "youtube_id": "gUipVNYBk_U",
+          "youtube_url": "https://www.youtube.com/watch?v=gUipVNYBk_U",
+          "title": "Hymnus: Benedictus es Domine Deus",
+          "playlist": "Sabbato Quatuor Temporum Adventus EF",
+          "matched_gabc_id_from_title": "2166"
+        },
+        {
+          "youtube_id": "Uc2SCikfHaE",
+          "youtube_url": "https://www.youtube.com/watch?v=Uc2SCikfHaE",
+          "title": "Offertorium: Benedictus es Domine... in labiis meis",
+          "playlist": "Dominica in Quinquagesima",
+          "matched_gabc_id_from_title": "13675"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18026",
+      "file": "18026.gabc",
+      "incipit": "Laudate Dominum",
+      "office_part": "Graduale",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [
+        {
+          "youtube_id": "-DXmooVV5Tg",
+          "youtube_url": "https://www.youtube.com/watch?v=-DXmooVV5Tg",
+          "title": "Offertorium: Laudate Dominum",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "899"
+        },
+        {
+          "youtube_id": "ZrjYklcFmE8",
+          "youtube_url": "https://www.youtube.com/watch?v=ZrjYklcFmE8",
+          "title": "Canticum (Tractus): Laudate Dominum omnes gentes",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18027",
+      "file": "18027.gabc",
+      "incipit": "Angelus Domini descendit",
+      "office_part": "Alleluia",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [
+        {
+          "youtube_id": "7amE6gDU7bc",
+          "youtube_url": "https://www.youtube.com/watch?v=7amE6gDU7bc",
+          "title": "Offertorium: Angelus Domini",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "15277"
+        },
+        {
+          "youtube_id": "_c6ftPgdSbQ",
+          "youtube_url": "https://www.youtube.com/watch?v=_c6ftPgdSbQ",
+          "title": "Alleluia: Angelus Domini descendit de caelo",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "51"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18196",
+      "file": "18196.gabc",
+      "incipit": "Ad te Domine",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Beda Szukics",
+      "videos": [
+        {
+          "youtube_id": "oSHD49tYU0k",
+          "youtube_url": "https://www.youtube.com/watch?v=oSHD49tYU0k",
+          "title": "Offertorium: Ad te, Domine, levavi",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "7084"
+        },
+        {
+          "youtube_id": "qPo5FrGieL8",
+          "youtube_url": "https://www.youtube.com/watch?v=qPo5FrGieL8",
+          "title": "Alleluia: Excita, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "855"
+        },
+        {
+          "youtube_id": "NkgtpHBPTpY",
+          "youtube_url": "https://www.youtube.com/watch?v=NkgtpHBPTpY",
+          "title": "Graduale: Excita Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "506"
+        },
+        {
+          "youtube_id": "-3YKK4Z2v7I",
+          "youtube_url": "https://www.youtube.com/watch?v=-3YKK4Z2v7I",
+          "title": "Offertorium: Benedixisti Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "113"
+        },
+        {
+          "youtube_id": "TY-Z1DoKiDw",
+          "youtube_url": "https://www.youtube.com/watch?v=TY-Z1DoKiDw",
+          "title": "Alleluia: Veni, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "13662"
+        },
+        {
+          "youtube_id": "X-W2DJwQOpI",
+          "youtube_url": "https://www.youtube.com/watch?v=X-W2DJwQOpI",
+          "title": "Communio: Veni Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "11387"
+        },
+        {
+          "youtube_id": "8sbmcxNMeBY",
+          "youtube_url": "https://www.youtube.com/watch?v=8sbmcxNMeBY",
+          "title": "Introitus: Prope es tu Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "IEyYjP2KLCQ",
+          "youtube_url": "https://www.youtube.com/watch?v=IEyYjP2KLCQ",
+          "title": "Graduale: Domine Deus virtutum",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "38"
+        },
+        {
+          "youtube_id": "Wq343zSL5YI",
+          "youtube_url": "https://www.youtube.com/watch?v=Wq343zSL5YI",
+          "title": "Graduale: Ostende nobis, Domine",
+          "playlist": "In Ultimis Feriis Adventu",
+          "matched_gabc_id_from_title": "4422"
+        },
+        {
+          "youtube_id": "gUipVNYBk_U",
+          "youtube_url": "https://www.youtube.com/watch?v=gUipVNYBk_U",
+          "title": "Hymnus: Benedictus es Domine Deus",
+          "playlist": "Sabbato Quatuor Temporum Adventus EF",
+          "matched_gabc_id_from_title": "2166"
+        },
+        {
+          "youtube_id": "LGwOTYay5lk",
+          "youtube_url": "https://www.youtube.com/watch?v=LGwOTYay5lk",
+          "title": "Communio: Domine, Dominus noster",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "998"
+        },
+        {
+          "youtube_id": "Uc2SCikfHaE",
+          "youtube_url": "https://www.youtube.com/watch?v=Uc2SCikfHaE",
+          "title": "Offertorium: Benedictus es Domine... in labiis meis",
+          "playlist": "Dominica in Quinquagesima",
+          "matched_gabc_id_from_title": "13675"
+        },
+        {
+          "youtube_id": "txxd2As5K5A",
+          "youtube_url": "https://www.youtube.com/watch?v=txxd2As5K5A",
+          "title": "Tractus: Domine, non secundum peccata nostra",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "425"
+        },
+        {
+          "youtube_id": "pkQKseVDLE8",
+          "youtube_url": "https://www.youtube.com/watch?v=pkQKseVDLE8",
+          "title": "Offertorium: Exaltabo te Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "xD5R7LbPamg",
+          "youtube_url": "https://www.youtube.com/watch?v=xD5R7LbPamg",
+          "title": "Graduale: Exaltabo te, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "6AfuIOBYWxs",
+          "youtube_url": "https://www.youtube.com/watch?v=6AfuIOBYWxs",
+          "title": "Offertorium: Miserere mihi Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "11229"
+        },
+        {
+          "youtube_id": "QKZYdohMi6o",
+          "youtube_url": "https://www.youtube.com/watch?v=QKZYdohMi6o",
+          "title": "Graduale: Exsurge Domine, non praevaleat homo",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "30"
+        },
+        {
+          "youtube_id": "WREhPUnq56w",
+          "youtube_url": "https://www.youtube.com/watch?v=WREhPUnq56w",
+          "title": "Graduale: Eripe me Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "760"
+        },
+        {
+          "youtube_id": "ZsxdmCvW5Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=ZsxdmCvW5Jc",
+          "title": "Offertorium: Confitebor tibi, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "10764"
+        },
+        {
+          "youtube_id": "ISlyIMtsdn4",
+          "youtube_url": "https://www.youtube.com/watch?v=ISlyIMtsdn4",
+          "title": "Introitus: Iudica Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "14589"
+        },
+        {
+          "youtube_id": "zUvdmyS_c2c",
+          "youtube_url": "https://www.youtube.com/watch?v=zUvdmyS_c2c",
+          "title": "Graduale: Exsurge Domine, et intende",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "8078"
+        },
+        {
+          "youtube_id": "MTtKrj99bxY",
+          "youtube_url": "https://www.youtube.com/watch?v=MTtKrj99bxY",
+          "title": "Offertorium: Eripe me de inimicis meis, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "245"
+        },
+        {
+          "youtube_id": "TCVJXCjKpJU",
+          "youtube_url": "https://www.youtube.com/watch?v=TCVJXCjKpJU",
+          "title": "Offertorium: Domine,  exaudi orationem meam",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "461"
+        },
+        {
+          "youtube_id": "5YWdKw49MUw",
+          "youtube_url": "https://www.youtube.com/watch?v=5YWdKw49MUw",
+          "title": "Antiphona: Domine, tu mihi lavas pedes",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "736"
+        },
+        {
+          "youtube_id": "yc5jupGa8Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=yc5jupGa8Jc",
+          "title": "Offertorium: Domine, ad adiuvandum me festina",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "18154"
+        },
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        },
+        {
+          "youtube_id": "NZo-uJdg7yY",
+          "youtube_url": "https://www.youtube.com/watch?v=NZo-uJdg7yY",
+          "title": "Introitus: Exaudi Domine... tibi dixit",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "396"
+        },
+        {
+          "youtube_id": "9LudI6APiVg",
+          "youtube_url": "https://www.youtube.com/watch?v=9LudI6APiVg",
+          "title": "Introitus: Sancti tui, Domine",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "1923"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18198",
+      "file": "18198.gabc",
+      "incipit": "Ad te Domine",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Beda Szukics",
+      "videos": [
+        {
+          "youtube_id": "oSHD49tYU0k",
+          "youtube_url": "https://www.youtube.com/watch?v=oSHD49tYU0k",
+          "title": "Offertorium: Ad te, Domine, levavi",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "7084"
+        },
+        {
+          "youtube_id": "qPo5FrGieL8",
+          "youtube_url": "https://www.youtube.com/watch?v=qPo5FrGieL8",
+          "title": "Alleluia: Excita, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "855"
+        },
+        {
+          "youtube_id": "NkgtpHBPTpY",
+          "youtube_url": "https://www.youtube.com/watch?v=NkgtpHBPTpY",
+          "title": "Graduale: Excita Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "506"
+        },
+        {
+          "youtube_id": "-3YKK4Z2v7I",
+          "youtube_url": "https://www.youtube.com/watch?v=-3YKK4Z2v7I",
+          "title": "Offertorium: Benedixisti Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "113"
+        },
+        {
+          "youtube_id": "TY-Z1DoKiDw",
+          "youtube_url": "https://www.youtube.com/watch?v=TY-Z1DoKiDw",
+          "title": "Alleluia: Veni, Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "13662"
+        },
+        {
+          "youtube_id": "X-W2DJwQOpI",
+          "youtube_url": "https://www.youtube.com/watch?v=X-W2DJwQOpI",
+          "title": "Communio: Veni Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "11387"
+        },
+        {
+          "youtube_id": "8sbmcxNMeBY",
+          "youtube_url": "https://www.youtube.com/watch?v=8sbmcxNMeBY",
+          "title": "Introitus: Prope es tu Domine",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": null
+        },
+        {
+          "youtube_id": "IEyYjP2KLCQ",
+          "youtube_url": "https://www.youtube.com/watch?v=IEyYjP2KLCQ",
+          "title": "Graduale: Domine Deus virtutum",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "38"
+        },
+        {
+          "youtube_id": "Wq343zSL5YI",
+          "youtube_url": "https://www.youtube.com/watch?v=Wq343zSL5YI",
+          "title": "Graduale: Ostende nobis, Domine",
+          "playlist": "In Ultimis Feriis Adventu",
+          "matched_gabc_id_from_title": "4422"
+        },
+        {
+          "youtube_id": "gUipVNYBk_U",
+          "youtube_url": "https://www.youtube.com/watch?v=gUipVNYBk_U",
+          "title": "Hymnus: Benedictus es Domine Deus",
+          "playlist": "Sabbato Quatuor Temporum Adventus EF",
+          "matched_gabc_id_from_title": "2166"
+        },
+        {
+          "youtube_id": "LGwOTYay5lk",
+          "youtube_url": "https://www.youtube.com/watch?v=LGwOTYay5lk",
+          "title": "Communio: Domine, Dominus noster",
+          "playlist": "Tempus Nativitatis",
+          "matched_gabc_id_from_title": "998"
+        },
+        {
+          "youtube_id": "Uc2SCikfHaE",
+          "youtube_url": "https://www.youtube.com/watch?v=Uc2SCikfHaE",
+          "title": "Offertorium: Benedictus es Domine... in labiis meis",
+          "playlist": "Dominica in Quinquagesima",
+          "matched_gabc_id_from_title": "13675"
+        },
+        {
+          "youtube_id": "txxd2As5K5A",
+          "youtube_url": "https://www.youtube.com/watch?v=txxd2As5K5A",
+          "title": "Tractus: Domine, non secundum peccata nostra",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "425"
+        },
+        {
+          "youtube_id": "pkQKseVDLE8",
+          "youtube_url": "https://www.youtube.com/watch?v=pkQKseVDLE8",
+          "title": "Offertorium: Exaltabo te Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "xD5R7LbPamg",
+          "youtube_url": "https://www.youtube.com/watch?v=xD5R7LbPamg",
+          "title": "Graduale: Exaltabo te, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "3255"
+        },
+        {
+          "youtube_id": "6AfuIOBYWxs",
+          "youtube_url": "https://www.youtube.com/watch?v=6AfuIOBYWxs",
+          "title": "Offertorium: Miserere mihi Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "11229"
+        },
+        {
+          "youtube_id": "QKZYdohMi6o",
+          "youtube_url": "https://www.youtube.com/watch?v=QKZYdohMi6o",
+          "title": "Graduale: Exsurge Domine, non praevaleat homo",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "30"
+        },
+        {
+          "youtube_id": "WREhPUnq56w",
+          "youtube_url": "https://www.youtube.com/watch?v=WREhPUnq56w",
+          "title": "Graduale: Eripe me Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "760"
+        },
+        {
+          "youtube_id": "ZsxdmCvW5Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=ZsxdmCvW5Jc",
+          "title": "Offertorium: Confitebor tibi, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "10764"
+        },
+        {
+          "youtube_id": "ISlyIMtsdn4",
+          "youtube_url": "https://www.youtube.com/watch?v=ISlyIMtsdn4",
+          "title": "Introitus: Iudica Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "14589"
+        },
+        {
+          "youtube_id": "zUvdmyS_c2c",
+          "youtube_url": "https://www.youtube.com/watch?v=zUvdmyS_c2c",
+          "title": "Graduale: Exsurge Domine, et intende",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "8078"
+        },
+        {
+          "youtube_id": "MTtKrj99bxY",
+          "youtube_url": "https://www.youtube.com/watch?v=MTtKrj99bxY",
+          "title": "Offertorium: Eripe me de inimicis meis, Domine",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "245"
+        },
+        {
+          "youtube_id": "TCVJXCjKpJU",
+          "youtube_url": "https://www.youtube.com/watch?v=TCVJXCjKpJU",
+          "title": "Offertorium: Domine,  exaudi orationem meam",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "461"
+        },
+        {
+          "youtube_id": "5YWdKw49MUw",
+          "youtube_url": "https://www.youtube.com/watch?v=5YWdKw49MUw",
+          "title": "Antiphona: Domine, tu mihi lavas pedes",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "736"
+        },
+        {
+          "youtube_id": "yc5jupGa8Jc",
+          "youtube_url": "https://www.youtube.com/watch?v=yc5jupGa8Jc",
+          "title": "Offertorium: Domine, ad adiuvandum me festina",
+          "playlist": "Tempus Quadragesimae",
+          "matched_gabc_id_from_title": "18154"
+        },
+        {
+          "youtube_id": "CvJZ12IfmH0",
+          "youtube_url": "https://www.youtube.com/watch?v=CvJZ12IfmH0",
+          "title": "Tractus: Domine exaudi",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": "824"
+        },
+        {
+          "youtube_id": "NZo-uJdg7yY",
+          "youtube_url": "https://www.youtube.com/watch?v=NZo-uJdg7yY",
+          "title": "Introitus: Exaudi Domine... tibi dixit",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "396"
+        },
+        {
+          "youtube_id": "9LudI6APiVg",
+          "youtube_url": "https://www.youtube.com/watch?v=9LudI6APiVg",
+          "title": "Introitus: Sancti tui, Domine",
+          "playlist": "Tempus Paschale",
+          "matched_gabc_id_from_title": "1923"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18205",
+      "file": "18205.gabc",
+      "incipit": "Deus tu convertens",
+      "office_part": "Offertorium",
+      "mode": "3",
+      "book": "",
+      "transcriber": "",
+      "videos": [
+        {
+          "youtube_id": "Q5sWqJBoA8I",
+          "youtube_url": "https://www.youtube.com/watch?v=Q5sWqJBoA8I",
+          "title": "Offertorium: Deus, tu convertens",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "631"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18314",
+      "file": "18314.gabc",
+      "incipit": "In monte Oliveti",
+      "office_part": "Responsorium",
+      "mode": "8",
+      "book": "The Liber Usualis, 1961, p. 633 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 178",
+      "transcriber": "Matthias Bry",
+      "videos": [
+        {
+          "youtube_id": "DHH07-Qo0a8",
+          "youtube_url": "https://www.youtube.com/watch?v=DHH07-Qo0a8",
+          "title": "Responsorium: In monte Oliveti",
+          "playlist": "Hebdomada Sancta",
+          "matched_gabc_id_from_title": null
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18316",
+      "file": "18316.gabc",
+      "incipit": "Confirma hoc cum Alleluia",
+      "office_part": "Offertorium",
+      "mode": "4",
+      "book": "Graduale Romanum, 1974, p. 255",
+      "transcriber": "Matthias Bry",
+      "videos": [
+        {
+          "youtube_id": "m37IkLbDufo",
+          "youtube_url": "https://www.youtube.com/watch?v=m37IkLbDufo",
+          "title": "Offertorium: Confirma hoc Deus",
+          "playlist": "Dominica Pentecostes",
+          "matched_gabc_id_from_title": "11193"
+        }
+      ],
+      "has_linked_video": true
+    },
+    {
+      "id": "18853",
+      "file": "18853.gabc",
+      "incipit": "Ad te levavi",
+      "office_part": "Introitus",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Frère Toussaint",
+      "videos": [
+        {
+          "youtube_id": "2U3Qsv3jThk",
+          "youtube_url": "https://www.youtube.com/watch?v=2U3Qsv3jThk",
+          "title": "Introitus: Ad te levavi",
+          "playlist": "Tempus Adventus",
+          "matched_gabc_id_from_title": "132"
+        }
+      ],
+      "has_linked_video": true
+    }
+  ],
+  "nabc_without_video_sample": [
+    {
+      "id": "4347",
+      "file": "4347.gabc",
+      "incipit": "Quomodo fiet istud",
+      "office_part": "Antiphona",
+      "mode": "7",
+      "book": "Antiphonale monasticum I, 2005, p. 37 & Antiphonale Romanum I, 2020, p. 33",
+      "transcriber": "Sr. Maria Ruth Malagoli osb",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "4427",
+      "file": "4427.gabc",
+      "incipit": "Ex quo facta est",
+      "office_part": "Antiphona",
+      "mode": "2",
+      "book": "Antiphonale monasticum I, 2005, p. 37 & Antiphonale monasticum III, 2007, p. 105 & Antiphonale Romanum I, 2020, p. 33",
+      "transcriber": "Sr. Maria Ruth Malagoli osb",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "9907",
+      "file": "9907.gabc",
+      "incipit": "Scientes",
+      "office_part": "Antiphona",
+      "mode": "3",
+      "book": "Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 7",
+      "transcriber": "Beda Szukics",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "10542",
+      "file": "10542.gabc",
+      "incipit": "Levita Laurentius",
+      "office_part": "Responsorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "11680",
+      "file": "11680.gabc",
+      "incipit": "Cum esset desponsata ... quod enim",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Joerg Hudelmaier",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14224",
+      "file": "14224.gabc",
+      "incipit": "Tolle quod tuum",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale Monasticum, 1934, p. 317 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 135",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14225",
+      "file": "14225.gabc",
+      "incipit": "Non licet mihi",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale Monasticum, 1934, p. 318 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 135",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14226",
+      "file": "14226.gabc",
+      "incipit": "Sic erunt novissimi",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale Monasticum, 1934, p. 318 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 135",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14347",
+      "file": "14347.gabc",
+      "incipit": "Ego dixi Domine",
+      "office_part": "Responsorium",
+      "mode": "2",
+      "book": "Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 145",
+      "transcriber": "Barbora Kleinová",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14736",
+      "file": "14736.gabc",
+      "incipit": "Domine labia mea",
+      "office_part": "Antiphona",
+      "mode": "7",
+      "book": "Antiphonale monasticum I, 2005, p. 138 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 151",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14739",
+      "file": "14739.gabc",
+      "incipit": "Trium puerorum cantemus",
+      "office_part": "Antiphona",
+      "mode": "8",
+      "book": "Antiphonale monasticum I, 2005, p. 139 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 151",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "14740",
+      "file": "14740.gabc",
+      "incipit": "Statuit ea in aeternum",
+      "office_part": "Antiphona",
+      "mode": "7",
+      "book": "Antiphonale monasticum I, 2005, p. 139 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 151",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15041",
+      "file": "15041.gabc",
+      "incipit": "Tunc acceptabis sacrificium",
+      "office_part": "Antiphona",
+      "mode": "7",
+      "book": "Antiphonale monasticum I, 2005, p. 159 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 162",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15060",
+      "file": "15060.gabc",
+      "incipit": "Justus germinabit sicut lilium",
+      "office_part": "Responsorium",
+      "mode": "1",
+      "book": "Cod. Sang. 391: Antiphonarium officii (summer volume), 1000, p. 179",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15061",
+      "file": "15061.gabc",
+      "incipit": "Dominus qui elegit te",
+      "office_part": "Responsorium",
+      "mode": "2",
+      "book": "Cod. Sang. 391: Antiphonarium officii (summer volume), 1000, p. 185",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15062",
+      "file": "15062.gabc",
+      "incipit": "Iste homo perfecit omnia",
+      "office_part": "Responsorium",
+      "mode": "8",
+      "book": "Cod. Sang. 391: Antiphonarium officii (summer volume), 1000, p. 185",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15081",
+      "file": "15081.gabc",
+      "incipit": "Abraham pater",
+      "office_part": "Antiphona",
+      "mode": "2",
+      "book": "Antiphonale monasticum I, 2005, p. 182 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 167",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15083",
+      "file": "15083.gabc",
+      "incipit": "Vos ascendite ad diem",
+      "office_part": "Antiphona",
+      "mode": "1",
+      "book": "Antiphonale Monasticum, 1934, p. 394 & Cod. Sang. 390: Antiphonarium officii (winter volume), 990, p. 169",
+      "transcriber": "Jakub Jelínek",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "15549",
+      "file": "15549.gabc",
+      "incipit": "",
+      "office_part": "Communio",
+      "mode": "",
+      "book": "",
+      "transcriber": "",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16144",
+      "file": "16144.gabc",
+      "incipit": "Vir erat (verses)",
+      "office_part": "Offertorium",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16145",
+      "file": "16145.gabc",
+      "incipit": "In exitu Israel",
+      "office_part": "Alleluia",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16146",
+      "file": "16146.gabc",
+      "incipit": "Domine refugium",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16147",
+      "file": "16147.gabc",
+      "incipit": "In voluntate",
+      "office_part": "Introitus",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16150",
+      "file": "16150.gabc",
+      "incipit": "Afferentur... proximae",
+      "office_part": "Offertorium",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16152",
+      "file": "16152.gabc",
+      "incipit": "Simile est... homini",
+      "office_part": "Communio",
+      "mode": "8",
+      "book": "",
+      "transcriber": "Matthias Bry",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16235",
+      "file": "16235.gabc",
+      "incipit": "Dum clamarem",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16236",
+      "file": "16236.gabc",
+      "incipit": "Benedicite Dominum",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "Graduale Romanum, 1961, p. 607",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16237",
+      "file": "16237.gabc",
+      "incipit": "De ventre matris",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16239",
+      "file": "16239.gabc",
+      "incipit": "Cognovi",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16242",
+      "file": "16242.gabc",
+      "incipit": "Gaudeamus... Sanctorum omnium",
+      "office_part": "Introitus",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16245",
+      "file": "16245.gabc",
+      "incipit": "Ecce Deus",
+      "office_part": "Introitus",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16247",
+      "file": "16247.gabc",
+      "incipit": "Judica Domine",
+      "office_part": "Introitus",
+      "mode": "4",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16248",
+      "file": "16248.gabc",
+      "incipit": "Vultum tuum",
+      "office_part": "Introitus",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16249",
+      "file": "16249.gabc",
+      "incipit": "Terribilis est",
+      "office_part": "Introitus",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16250",
+      "file": "16250.gabc",
+      "incipit": "Respice Domine",
+      "office_part": "Introitus",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16251",
+      "file": "16251.gabc",
+      "incipit": "Requiem",
+      "office_part": "Introitus",
+      "mode": "6",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16254",
+      "file": "16254.gabc",
+      "incipit": "Omnia quae fecisti",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16255",
+      "file": "16255.gabc",
+      "incipit": "Nunc scio vere",
+      "office_part": "Introitus",
+      "mode": "3",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16257",
+      "file": "16257.gabc",
+      "incipit": "Ne derelinquas me",
+      "office_part": "Introitus",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16265",
+      "file": "16265.gabc",
+      "incipit": "Beata gens",
+      "office_part": "Graduale",
+      "mode": "1",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16266",
+      "file": "16266.gabc",
+      "incipit": "Benedicam Dominum",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16267",
+      "file": "16267.gabc",
+      "incipit": "Clamaverunt",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16269",
+      "file": "16269.gabc",
+      "incipit": "Dirigatur oratio mea",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16270",
+      "file": "16270.gabc",
+      "incipit": "Domine refugium",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16275",
+      "file": "16275.gabc",
+      "incipit": "In Deo speravit",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16277",
+      "file": "16277.gabc",
+      "incipit": "Justus ut palma",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16279",
+      "file": "16279.gabc",
+      "incipit": "Liberasti nos",
+      "office_part": "Graduale",
+      "mode": "7",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16283",
+      "file": "16283.gabc",
+      "incipit": "Protector noster",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16284",
+      "file": "16284.gabc",
+      "incipit": "Requiem",
+      "office_part": "Graduale",
+      "mode": "2",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    },
+    {
+      "id": "16285",
+      "file": "16285.gabc",
+      "incipit": "Respice Domine",
+      "office_part": "Graduale",
+      "mode": "5",
+      "book": "",
+      "transcriber": "Marek Klein",
+      "videos": [],
+      "has_linked_video": false
+    }
+  ],
+  "nabc_without_video_count": 94
+}

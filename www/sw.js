@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.3.21';
+const CACHE_NAME = 'oremus-pwa-v1.3.27';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [
@@ -46,8 +46,6 @@ const PRECACHE_ASSETS = [
     './js/gregorian_search_engine.js',
     './js/gregorian_search_worker.js',
     './js/gregorian_search_ui.js',
-    './Caeciliae-Staffless.ttf',
-    './Caeciliae-Staffless-print.ttf',
     './icon/favicon.svg',
     './icon/apple-touch-icon.png',
     './icon/icon-192.png',

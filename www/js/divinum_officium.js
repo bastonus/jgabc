@@ -4628,11 +4628,21 @@ function buildHomeSaintCard(date, uiLang, feastTitle, missaResult, callback, isM
                 var heroEl = $hero[0];
                 var bgClipEl = $bgClip[0];
                 if (!wrapperEl || !heroEl || !bgClipEl) return;
+
+                var headerH = $('.do-top-header').outerHeight() || 72;
+                heroEl.style.setProperty('--do-header-offset', headerH + 'px');
+
                 var wrapperRect = wrapperEl.getBoundingClientRect();
                 var heroRect = heroEl.getBoundingClientRect();
+
                 var leftDelta = heroRect.left - wrapperRect.left;
                 bgClipEl.style.left = (-leftDelta) + 'px';
                 bgClipEl.style.width = wrapperRect.width + 'px';
+
+                // Aligner parfaitement le haut du clip d'ambiance avec le haut de la zone d'en-tête (supprime l'espace noir en haut)
+                var topDelta = (heroRect.top + window.pageYOffset) - (wrapperRect.top + window.pageYOffset);
+                bgClipEl.style.top = (-topDelta) + 'px';
+                bgClipEl.style.height = (480 + Math.max(0, topDelta)) + 'px';
             }
 
             callback($hero, function() {
@@ -7349,6 +7359,7 @@ function setHeaderLoading(isLoading) {
             _hasCompletedFirstHeaderLoad = true;
             $header.removeClass('is-header-loading').addClass('is-header-loaded');
             $('body').removeClass('header-is-loading');
+            $(window).triggerHandler('resize.saintHero');
 
             if (_headerLoadedTimer) clearTimeout(_headerLoadedTimer);
             _headerLoadedTimer = setTimeout(function() {
@@ -7356,6 +7367,7 @@ function setHeaderLoading(isLoading) {
                 if (typeof checkHeaderTitleMarquee === 'function') {
                     checkHeaderTitleMarquee();
                 }
+                $(window).triggerHandler('resize.saintHero');
             }, 450);
         }, minWait);
     }
@@ -10039,8 +10051,15 @@ function buildVersesAdLibitumGabc(lines, mode, clef, partKey) {
     var versesAdded = 0;
 
     for (var i = 0; i < lines.length; i++) {
-        var rawLine = (lines[i] || '').replace(/^\d+[a-z]*\.\s*/, '').trim();
+        var rawLine = (lines[i] || '')
+            .replace(/\ufeff/g, '')              // strip BOM
+            .replace(/\u00ad/g, '')              // strip soft hyphens
+            .replace(/^\d+[a-z]*\.\s*/, '')      // strip leading verse numbers
+            .trim();
         if (!rawLine) continue;
+
+        // Normalize the half-verse separator: " : *" → "*", " :" at end → ""
+        rawLine = rawLine.replace(/\s*:\s*\*/g, '*').replace(/\s*:\s*$/, '');
 
         var parts = rawLine.split('*');
         var left = parts[0].trim();
@@ -10184,9 +10203,9 @@ function renderVersesAdLibitumScore($content, gabc, fallbackLines, chantId, part
         var processedGabc = preprocessGabcForExsurge(gabc);
         var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
         var score = new exsurge.ChantScore(ctxt, mappings, false);
-
-        var cardWidth = $content.closest('.do-card-body').width() || $content.closest('.do-card').width() || $(window).width() - 32;
-        var width = Math.max(cardWidth - 8, 300);
+        var width = (typeof getOptimalChantWidth === 'function')
+            ? getOptimalChantWidth($content.closest('.do-card'))
+            : Math.max(280, Math.floor(($content.closest('.do-card-body').width() || $content.closest('.do-card').width() || $(window).width() - 32) - 8));
         ctxt.width = width;
 
         score.performLayout(ctxt);
@@ -11282,17 +11301,18 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
             var isHandleTap = isTap && $(target).closest('#partPickerDragHandleWrap, #partPickerDragHandle').length > 0;
 
             if (isHandleTap) {
+                // Tapping the grab handle always closes the drawer
                 triggerHapticFeedback('light');
-                if (isExpanded) {
-                    drawer.classList.remove('is-expanded');
-                } else {
-                    drawer.classList.add('is-expanded');
-                }
-                drawer.style.removeProperty('transform');
-                drawer.style.removeProperty('opacity');
-                document.documentElement.style.setProperty('--picker-drag-y', '0px');
-                setTimeout(syncPartPickerOffset, 150);
-                setTimeout(syncPartPickerOffset, 320);
+                drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
+                drawer.style.setProperty('transform', 'translateY(100%)', 'important');
+                drawer.style.setProperty('opacity', '0', 'important');
+                document.documentElement.style.setProperty('--picker-drag-y', drawerH + 'px');
+                setTimeout(function() {
+                    drawer.style.removeProperty('transition');
+                    drawer.style.removeProperty('transform');
+                    drawer.style.removeProperty('opacity');
+                    closeMassPartPicker();
+                }, 230);
                 return;
             }
 
@@ -11314,25 +11334,7 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
                 return;
             }
 
-            // Glissement vers le bas depuis le mode plein écran (75%) → revient à l'aperçu 1,5 cartes
-            if (deltaY > 28 && isExpanded) {
-                triggerHapticFeedback('light');
-                drawer.classList.remove('is-expanded');
-                drawer.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1)', 'important');
-                drawer.style.setProperty('transform', 'translateY(0)', 'important');
-                drawer.style.setProperty('opacity', '1', 'important');
-                document.documentElement.style.setProperty('--picker-drag-y', '0px');
-                setTimeout(function() {
-                    drawer.style.removeProperty('transition');
-                    drawer.style.removeProperty('transform');
-                    drawer.style.removeProperty('opacity');
-                    syncPartPickerOffset();
-                }, 220);
-                setTimeout(syncPartPickerOffset, 320);
-                return;
-            }
-
-            // Glissement vers le bas depuis le mode aperçu (1,5 cartes) → fermeture du tiroir
+            // Glissement vers le bas (peu importe l'état étendu ou aperçu) → fermeture du tiroir
             if (deltaY > drawerH * 0.15 || deltaY > 30 || (deltaY > 12 && vy > 0.22)) {
                 triggerHapticFeedback('light');
                 drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
@@ -14600,7 +14602,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.57';
+var CURRENT_APP_VERSION = 'beta-0.0.58';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -17926,16 +17928,26 @@ function setupMassToc(missaResult) {
     updateMassTocToggleStates();
 
     var isAlreadyOpen = $('body').hasClass('mass-toc-open') || !$('#doMassTocPanel').hasClass('hidden');
+    var isDesktop = window.innerWidth > 900;
 
     if (_massTocSectionsMap.length > 0) {
-        $('#doMassTocPill').removeClass('hidden');
-        if (isAlreadyOpen) {
-            $('#doMassTocPill').addClass('is-open');
+        if (isDesktop) {
+            $('#doMassTocPill').addClass('hidden');
+            $('#doMassTocBackdrop').addClass('hidden');
+            $('html, body').removeClass('mass-toc-open');
             $('#doMassTocPanel').removeClass('hidden');
-            $('#doMassTocBackdrop').removeClass('hidden');
-            stopBilingualSwipeHint();
         } else {
-            $('#doMassTocCurrentLabel').text('Sommaire');
+            $('#doMassTocPill').removeClass('hidden');
+            if (isAlreadyOpen) {
+                $('#doMassTocPill').addClass('is-open');
+                $('#doMassTocPanel').removeClass('hidden');
+                $('#doMassTocBackdrop').removeClass('hidden');
+                stopBilingualSwipeHint();
+            } else {
+                $('#doMassTocCurrentLabel').text('Sommaire');
+                $('#doMassTocPanel').addClass('hidden');
+                $('#doMassTocBackdrop').addClass('hidden');
+            }
         }
         initMassTocScrollSpy();
         updateMassTocActiveItem();
@@ -17955,7 +17967,9 @@ function updateMassTocToggleStates() {
 
 function hideMassToc() {
     $('#doMassTocPill').addClass('hidden');
-    closeMassTocPanel();
+    $('#doMassTocPanel').addClass('hidden');
+    $('#doMassTocBackdrop').addClass('hidden');
+    $('html, body').removeClass('mass-toc-open');
     _massTocSectionsMap = [];
 }
 
@@ -18103,6 +18117,18 @@ function updateMassTocActiveItem() {
         var $activeItem = $('#doMassTocList .do-mass-toc-item[data-target-id="' + activeSec.id + '"]');
         $activeItem.addClass('is-active');
         $('#doMassTocCurrentLabel').text(activeSec.label);
+
+        // Auto-scroll the sidebar list to keep active item in view on desktop
+        var listEl = document.getElementById('doMassTocList');
+        if (listEl && $activeItem.length && listEl.scrollHeight > listEl.clientHeight) {
+            var itemEl = $activeItem[0];
+            var offsetDiff = itemEl.offsetTop - listEl.scrollTop;
+            if (offsetDiff < 0) {
+                listEl.scrollTop = itemEl.offsetTop - 8;
+            } else if (offsetDiff + itemEl.offsetHeight > listEl.clientHeight) {
+                listEl.scrollTop = itemEl.offsetTop + itemEl.offsetHeight - listEl.clientHeight + 8;
+            }
+        }
     }
 }
 
@@ -18155,7 +18181,10 @@ function initMassTocEvents() {
         var targetEl = document.getElementById(targetId);
         if (targetEl) {
             triggerHapticFeedback('selection');
-            closeMassTocPanel();
+            var isDesktop = window.innerWidth > 900;
+            if (!isDesktop) {
+                closeMassTocPanel();
+            }
 
             // Pre-render any pending chant scores immediately so all SVG heights are final
             if (doState.includeGregorian) {
@@ -18218,11 +18247,33 @@ function initMassTocEvents() {
         renderDO();
     });
 
-    // Close on Escape key
+    // Close on Escape key (mobile flyout)
     $(document).off('keydown.domasstoc').on('keydown.domasstoc', function(e) {
-        if (e.key === 'Escape' && !$('#doMassTocPanel').hasClass('hidden')) {
+        if (e.key === 'Escape' && !$('#doMassTocPanel').hasClass('hidden') && window.innerWidth <= 900) {
             e.preventDefault();
             closeMassTocPanel();
+        }
+    });
+
+    // Responsive window resize handling
+    $(window).off('resize.domasstocresponsive').on('resize.domasstocresponsive', function() {
+        if (!_massTocSectionsMap || !_massTocSectionsMap.length) return;
+        var isDesktop = window.innerWidth > 900;
+        if (isDesktop) {
+            $('#doMassTocBackdrop').addClass('hidden');
+            $('#doMassTocPill').addClass('hidden');
+            $('html, body').removeClass('mass-toc-open');
+            $('#doMassTocPanel').removeClass('hidden');
+        } else {
+            $('#doMassTocPill').removeClass('hidden');
+            if ($('#doMassTocPill').hasClass('is-open')) {
+                $('#doMassTocPanel').removeClass('hidden');
+                $('#doMassTocBackdrop').removeClass('hidden');
+                $('html, body').addClass('mass-toc-open');
+            } else {
+                $('#doMassTocPanel').addClass('hidden');
+                $('#doMassTocBackdrop').addClass('hidden');
+            }
         }
     });
 }

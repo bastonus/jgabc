@@ -1,0 +1,23 @@
+name:Bonum est confidere;
+office-part:Graduale;
+mode:5;
+book:Graduale Romanum, 1961, p. 358 & The Liber Usualis, 1961, p. 1037;
+transcriber:Andrew Hinkley;
+ntranscriber:Marek Klein;
+nabc-lines:1;
+nabc-score:https://www.e-codices.unifr.ch/en/csg/0359/83;
+%%
+(c4) BO(ff|bv-)num(fg|pe>1) est(fef.|//polsc2) *(,) 
+con(f|vi)fí(ixg!hwi|///viqlhj)de(gf|/cllsc2)re(fgFD.1|//peSsut2) (,) 
+in(d|ta) Dó(dgf|//to|/gh|pe)mi(g|ta)no,(ixg.|////ta|/hiGF|pesu2|/fd|/pi|/f_[oh:h]g_[oh:h]f._[oh:h]|//toS) (;) 
+quam(ixhih|//////to) con(hg~|vi>)fí(gj|pehh)de(jjh|vihh`cl-hh)re(ixhv.|///vi-|/fhg___|//toS|/hiHGF|//toS2sut1|/f|ds|/hvGF|//cilsc2|/gf..|/cl) (,) 
+in(fg|peS) hó(g|vi)mi(gff|//po)ne.(dec.|//to-1) (,) (fhg___|//toS|/jkijh.|////tohi!cl-1hi|/fhg|//to-1|/hggf.0|/vi`pr) (z0::c3) 
+
+<sp>V/</sp>. Bo(d|talsc3)num(f|vi) est(gxfh/ih|////clhhppt2lsc3|/i_[oh:h]h|/clhilst2|//ivFD|//ci|//fh.|pe-|/ivFD|//cilsc2|/fhfg.|/tr-1) (,) 
+(fh/ih|/clhhpp2lsc3|/i_[oh:h]h|/clhhlst2|//ivFD|//ciS|/e_[oh:h]d.0|/cl-|/ddd|//ts-|/f_h/ijh.1|/tohjppu2) (;) 
+spe(hi|pe)rá(h|vi)re(hg|/cl) in(ij|pe>1hg) Dó(i_[oh:h]h|/clhhlst2)mi(h|vi)no,(hg|/cllsc2|/i_[oh:h]h|/clhhlst2|//jvIHG|//vihhsu3|/hf..|/cl-) (:) 
+quam(hh|bv-) spe(h|vi)rá(ih|/cl|/ij_h|//tohh| ih|/cl|/ij_ij|/tr-1hh|//hi/jij|//pohjpp2)re(jh|/clhjlsc2|/jki|//to-1hk|/hh|//ds-hh|/fgf.|//toS2) (;) 
+in(d!ef|sa) prin(f|vi)cí(f|ta-|hGF|/ciSlsc2)pi(i|pe)bus.(hhf.|prM) (,) 
+(gxg_[oh:h]f|/cl-|/gvED.|/ciS|/f|ta|gED.|/ciS|/fe/hv.hhhff/dfe/feed.0) (z0::c4)
+
+Bo(ff|bv-)num.(fg|pe>1) est(fef.|//polsc2) (::) 
