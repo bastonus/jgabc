@@ -1,9 +1,9 @@
 {
   "latestVersion": "beta-0.0.60",
   "versionCode": 60,
-  "releaseDate": "2026-09-15T22:20:00Z",
+  "releaseDate": "2026-09-15T22:20:58Z",
   "tagName": "v0.0.60",
   "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.60/Oremus.apk",
   "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.60",
-  "body": "Release v0.0.60 — Support des timestamps compacts (tuples) & fiabilisation du suivi temps réel du chant grégorien"
+  "body": "Release v0.0.60 — Oremus APK"
 }
