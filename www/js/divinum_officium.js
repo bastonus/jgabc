@@ -5938,50 +5938,33 @@ function _buildChantSequenceWithRepeats(score, allNotes) {
     return seq;
 }
 
-var _manualHighlightUntil = 0;
-var _isUserSeekingUntil = 0;
-function highlightChantNoteAtFraction(fraction) {
-    // Keep manual click highlight for 4s (first use for a piece) — must be before sync check
-    if (Date.now() < _manualHighlightUntil) {
-        return;
+
+// ── Pre-Processed Acoustic Model Alignment Engine (Certified Video <-> GABC Sync) ──
+function getPreprocessedChantAlignment(videoId, chantId) {
+    if (!window.GREGORIAN_PREPROCESSED_TIMESTAMPS) return null;
+    var data = window.GREGORIAN_PREPROCESSED_TIMESTAMPS;
+    if (videoId && data.byVideo && data.byVideo[videoId]) {
+        var pid = data.byVideo[videoId];
+        if (data.pieces && data.pieces[pid]) return data.pieces[pid];
     }
-    var isYtVideo = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth');
-    if (isYtVideo && window.doYT.syncEnabled === false) {
-        clearActiveNote();
-        return;
+    if (chantId && data.pieces && data.pieces[chantId]) {
+        return data.pieces[chantId];
     }
-    if (typeof fraction !== 'number' || isNaN(fraction)) return;
+    if (videoId && data.pieces && data.pieces[videoId]) {
+        return data.pieces[videoId];
+    }
+    return null;
+}
+window.getPreprocessedChantAlignment = getPreprocessedChantAlignment;
+
+function highlightChantNoteByIndex(targetIdx) {
+    if (Date.now() < _manualHighlightUntil) return;
+    if (typeof targetIdx !== 'number' || targetIdx < 0) return;
     if (!_doCurrentScore || !_doCurrentScore.notations) return;
     var info = _getChantWeightedInfo(_doCurrentScore);
     if (!info || !info.allNotes.length) return;
     var allNotes = info.allNotes;
-
-    var targetIdx;
-
-    if (isYtVideo) {
-        var seq = _buildChantSequenceWithRepeats(_doCurrentScore, allNotes);
-        // Build weighted durations for seq
-        var seqDurs = [];
-        var seqTotal = 0;
-        for (var si=0; si<seq.length; si++) { var d = info.noteDurs[seq[si]] || 1; seqDurs.push(d); seqTotal += d; if (info.gapAfterNote[seq[si]]) { seqTotal += info.gapAfterNote[seq[si]]; } }
-        // For simplicity map via cumulative weighted seq (including gaps approximated after each seq element)
-        var targetUnits = fraction * seqTotal;
-        var cum = 0;
-        targetIdx = seq[0];
-        for (var s2=0; s2<seq.length; s2++) {
-            var sd = seqDurs[s2];
-            if (targetUnits < cum + sd) { targetIdx = seq[s2]; break; }
-            cum += sd;
-            var sg = info.gapAfterNote[seq[s2]] || 0;
-            if (sg) {
-                if (targetUnits < cum + sg) { targetIdx = seq[s2]; break; }
-                cum += sg;
-            }
-            if (s2 === seq.length-1) targetIdx = seq[s2];
-        }
-    } else {
-        targetIdx = _fractionToChantIndex(info, fraction);
-    }
+    if (targetIdx >= allNotes.length) targetIdx = allNotes.length - 1;
 
     var note = allNotes[targetIdx];
     if (!note) return;
@@ -5991,13 +5974,19 @@ function highlightChantNoteAtFraction(fraction) {
     if (!scoreSvg) return;
 
     var noteElem = note.svgNode;
-    if (!noteElem) {
+    if (!noteElem || !noteElem.isConnected || (scoreSvg && !scoreSvg.contains(noteElem))) {
         var elemIdx = note.elementIndex;
-        if (elemIdx !== undefined) {
-            noteElem = $(scoreSvg).find('use[element-index="' + elemIdx + '"]')[0];
+        if (elemIdx !== undefined && scoreSvg && scoreSvg.querySelector) {
+            noteElem = scoreSvg.querySelector('use[element-index="' + elemIdx + '"]');
         }
-        if (!noteElem && note.sourceIndex !== undefined) {
-            noteElem = $(scoreSvg).find('use[source-index="' + note.sourceIndex + '"]')[0];
+        if (!noteElem && note.sourceIndex !== undefined && scoreSvg && scoreSvg.querySelector) {
+            noteElem = scoreSvg.querySelector('use[source-index="' + note.sourceIndex + '"]');
+        }
+        if (!noteElem && scoreSvg && scoreSvg.querySelectorAll) {
+            var allUses = scoreSvg.querySelectorAll('use.note, use[source-index], use[element-index]');
+            if (allUses && allUses[targetIdx]) {
+                noteElem = allUses[targetIdx];
+            }
         }
     }
 
@@ -6010,12 +5999,14 @@ function highlightChantNoteAtFraction(fraction) {
         _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
         _doActiveNoteEl.style.removeProperty('fill');
     }
-    $(scoreSvg).find('use.active').each(function() {
-        if (this !== noteElem) {
-            this.classList.remove('active', 'porrectus-left', 'porrectus-right');
-            this.style.removeProperty('fill');
-        }
-    });
+    if (scoreSvg && scoreSvg.querySelectorAll) {
+        scoreSvg.querySelectorAll('use.active').forEach(function(u) {
+            if (u !== noteElem) {
+                u.classList.remove('active', 'porrectus-left', 'porrectus-right');
+                u.style.removeProperty('fill');
+            }
+        });
+    }
 
     var href = noteElem.getAttribute('href') || (noteElem.attributes && noteElem.attributes.getNamedItem && noteElem.attributes.getNamedItem('href') ? noteElem.attributes.getNamedItem('href').value : '');
     if (href === '#None' && noteElem.previousSibling) {
@@ -6035,38 +6026,248 @@ function highlightChantNoteAtFraction(fraction) {
     if (note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
         lyricEl = note.neume.lyrics[0].svgNode;
     }
-    if (!lyricEl) {
-        var $grp = $(noteElem).closest('g.ChantNotationElement, g[class*="ChantNotation"]');
-        if (!$grp.length) $grp = $(noteElem).parent().parent();
-        lyricEl = $grp.find('text.lyric, text.dropCap, text.aboveLinesText, text')[0];
+    if (!lyricEl || !lyricEl.isConnected || (scoreSvg && !scoreSvg.contains(lyricEl))) {
+        var grp = (noteElem.closest && noteElem.closest('g.ChantNotationElement, g[class*="ChantNotation"]')) || noteElem.parentNode.parentNode;
+        if (grp && grp.querySelector) {
+            lyricEl = grp.querySelector('text.lyric, text.dropCap, text.aboveLinesText, text');
+        }
     }
 
     if (lyricEl) {
         if (_doActiveLyricEl && _doActiveLyricEl !== lyricEl) {
             _doActiveLyricEl.classList.remove('active');
             _doActiveLyricEl.style.removeProperty('fill');
-            $(_doActiveLyricEl).find('tspan').each(function() {
-                this.classList.remove('active');
-                this.style.removeProperty('fill');
+            if (_doActiveLyricEl.querySelectorAll) {
+                _doActiveLyricEl.querySelectorAll('tspan').forEach(function(t) {
+                    t.classList.remove('active');
+                    t.style.removeProperty('fill');
+                });
+            }
+        }
+        if (scoreSvg && scoreSvg.querySelectorAll) {
+            scoreSvg.querySelectorAll('text.active, tspan.active').forEach(function(el) {
+                if (el !== lyricEl && !lyricEl.contains(el)) {
+                    el.classList.remove('active');
+                    el.style.removeProperty('fill');
+                }
             });
         }
-        $(scoreSvg).find('text.active, tspan.active').each(function() {
-            if (this !== lyricEl && !lyricEl.contains(this)) {
-                this.classList.remove('active');
-                this.style.removeProperty('fill');
-            }
-        });
 
         lyricEl.classList.add('active');
         lyricEl.style.setProperty('fill', accentColor, 'important');
-        $(lyricEl).find('tspan').each(function() {
-            this.classList.add('active');
-            this.style.setProperty('fill', accentColor, 'important');
-        });
+        if (lyricEl.querySelectorAll) {
+            lyricEl.querySelectorAll('tspan').forEach(function(ts) {
+                ts.classList.add('active');
+                ts.style.setProperty('fill', accentColor, 'important');
+            });
+        }
         _doActiveLyricEl = lyricEl;
     }
 
-    if (typeof isElementInVisibleViewport === 'function' && typeof centerActiveNote === 'function') {
+    if (typeof window.onChantNoteActive === 'function') {
+        window.onChantNoteActive(noteElem);
+    } else if (typeof isElementInVisibleViewport === 'function' && typeof centerActiveNote === 'function') {
+        if (!isElementInVisibleViewport(noteElem) && (typeof _userIsScrolling === 'undefined' || !_userIsScrolling)) {
+            centerActiveNote(false);
+        }
+    }
+}
+window.highlightChantNoteByIndex = highlightChantNoteByIndex;
+
+function syncChantNoteWithModelTimestamps(alignment, cur) {
+    if (!alignment || !alignment.timestamps || !alignment.timestamps.length) {
+        clearActiveNote();
+        return;
+    }
+    var stamps = alignment.timestamps;
+    var noteIdx = -1;
+
+    var hasReprise = alignment.has_reprise && alignment.reprise;
+    var sungIndices = [];
+    for (var s = 0; s < stamps.length; s++) {
+        if (stamps[s].sung !== false && !stamps[s].omitted && stamps[s].start !== null && stamps[s].start !== undefined) {
+            sungIndices.push(s);
+        }
+    }
+
+    if (!sungIndices.length) {
+        clearActiveNote();
+        return;
+    }
+
+    var firstIdx = sungIndices[0];
+    var lastIdx = sungIndices[sungIndices.length - 1];
+
+    if (hasReprise && cur >= alignment.reprise.start) {
+        if (alignment.reprise.notes && alignment.reprise.notes.length > 0) {
+            var rNotes = alignment.reprise.notes;
+            if (cur >= rNotes[rNotes.length - 1].start) {
+                noteIdx = (rNotes[rNotes.length - 1].note_index !== undefined) ? rNotes[rNotes.length - 1].note_index : (rNotes.length - 1);
+            } else {
+                for (var r = 0; r < rNotes.length; r++) {
+                    var rNext = (r + 1 < rNotes.length) ? rNotes[r + 1].start : rNotes[r].end;
+                    if (cur >= rNotes[r].start && cur < rNext) {
+                        noteIdx = (rNotes[r].note_index !== undefined) ? rNotes[r].note_index : r;
+                        break;
+                    }
+                }
+            }
+        }
+    } else {
+        if (cur < stamps[firstIdx].start) {
+            noteIdx = -1; // Before singing starts
+        } else if (!hasReprise && stamps[lastIdx].end && cur >= stamps[lastIdx].end) {
+            noteIdx = -1; // After singing ends
+        } else {
+            for (var k = 0; k < sungIndices.length; k++) {
+                var sIdx = sungIndices[k];
+                var curNote = stamps[sIdx];
+                var nxtTime = (k + 1 < sungIndices.length) ? stamps[sungIndices[k + 1]].start : (hasReprise ? alignment.reprise.start : (curNote.end || curNote.start + 1));
+                if (cur >= curNote.start && cur < nxtTime) {
+                    noteIdx = (curNote.note_index !== undefined) ? curNote.note_index : sIdx;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (noteIdx >= 0) {
+        highlightChantNoteByIndex(noteIdx);
+    } else {
+        clearActiveNote();
+    }
+}
+window.syncChantNoteWithModelTimestamps = syncChantNoteWithModelTimestamps;
+
+var _manualHighlightUntil = 0;
+var _isUserSeekingUntil = 0;
+function highlightChantNoteAtFraction(fraction) {
+    // Keep manual click highlight for 4s (first use for a piece) — must be before sync check
+    if (Date.now() < _manualHighlightUntil) {
+        return;
+    }
+    var isYtVideo = (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth');
+    if (isYtVideo) {
+        // ONLY pre-processed sync through the acoustic model is available for videos!
+        var alignment = getPreprocessedChantAlignment(window.doYT.activeId, window.doYT.currentChantId);
+        if (!alignment || !alignment.timestamps || !alignment.timestamps.length || window.doYT.syncEnabled === false) {
+            clearActiveNote();
+            return;
+        }
+        var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
+        var dur = (player && typeof player.getDuration === 'function') ? (player.getDuration() || 0) : 0;
+        syncChantNoteWithModelTimestamps(alignment, fraction * dur);
+        return;
+    }
+    if (typeof fraction !== 'number' || isNaN(fraction)) return;
+    if (!_doCurrentScore || !_doCurrentScore.notations) return;
+    var info = _getChantWeightedInfo(_doCurrentScore);
+    if (!info || !info.allNotes.length) return;
+    var allNotes = info.allNotes;
+
+    var targetIdx = _fractionToChantIndex(info, fraction);
+
+    var note = allNotes[targetIdx];
+    if (!note) return;
+
+    var $card = _doCurrentPlayerCard;
+    var scoreSvg = ($card && $card.find('svg')[0]) || _doCurrentScore.svg;
+    if (!scoreSvg) return;
+
+    var noteElem = note.svgNode;
+    if (!noteElem || !noteElem.isConnected || (scoreSvg && !scoreSvg.contains(noteElem))) {
+        var elemIdx = note.elementIndex;
+        if (elemIdx !== undefined && scoreSvg && scoreSvg.querySelector) {
+            noteElem = scoreSvg.querySelector('use[element-index="' + elemIdx + '"]');
+        }
+        if (!noteElem && note.sourceIndex !== undefined && scoreSvg && scoreSvg.querySelector) {
+            noteElem = scoreSvg.querySelector('use[source-index="' + note.sourceIndex + '"]');
+        }
+        if (!noteElem && scoreSvg && scoreSvg.querySelectorAll) {
+            var allUses = scoreSvg.querySelectorAll('use.note, use[source-index], use[element-index]');
+            if (allUses && allUses[targetIdx]) {
+                noteElem = allUses[targetIdx];
+            }
+        }
+    }
+
+    if (!noteElem) return;
+    if (noteElem === _doActiveNoteEl && noteElem.classList.contains('active')) return;
+
+    var accentColor = (window.doState && window.doState.settings && window.doState.settings.color) || localStorage.getItem('do_color') || '#c96b63';
+
+    if (_doActiveNoteEl && _doActiveNoteEl !== noteElem) {
+        _doActiveNoteEl.classList.remove('active', 'porrectus-left', 'porrectus-right');
+        _doActiveNoteEl.style.removeProperty('fill');
+    }
+    if (scoreSvg && scoreSvg.querySelectorAll) {
+        scoreSvg.querySelectorAll('use.active').forEach(function(u) {
+            if (u !== noteElem) {
+                u.classList.remove('active', 'porrectus-left', 'porrectus-right');
+                u.style.removeProperty('fill');
+            }
+        });
+    }
+
+    var href = noteElem.getAttribute('href') || (noteElem.attributes && noteElem.attributes.getNamedItem && noteElem.attributes.getNamedItem('href') ? noteElem.attributes.getNamedItem('href').value : '');
+    if (href === '#None' && noteElem.previousSibling) {
+        noteElem = noteElem.previousSibling;
+        noteElem.classList.remove('porrectus-left');
+        noteElem.classList.add('porrectus-right');
+    } else if (/^#Porrectus/.test(href)) {
+        noteElem.classList.add('porrectus-left');
+    }
+
+    noteElem.classList.add('active');
+    noteElem.style.setProperty('fill', accentColor, 'important');
+    _doActiveNoteEl = noteElem;
+
+    // Find and highlight corresponding syllable
+    var lyricEl = null;
+    if (note.neume && note.neume.lyrics && note.neume.lyrics.length > 0 && note.neume.lyrics[0].svgNode) {
+        lyricEl = note.neume.lyrics[0].svgNode;
+    }
+    if (!lyricEl || !lyricEl.isConnected || (scoreSvg && !scoreSvg.contains(lyricEl))) {
+        var grp = (noteElem.closest && noteElem.closest('g.ChantNotationElement, g[class*="ChantNotation"]')) || noteElem.parentNode.parentNode;
+        if (grp && grp.querySelector) {
+            lyricEl = grp.querySelector('text.lyric, text.dropCap, text.aboveLinesText, text');
+        }
+    }
+
+    if (lyricEl) {
+        if (_doActiveLyricEl && _doActiveLyricEl !== lyricEl) {
+            _doActiveLyricEl.classList.remove('active');
+            _doActiveLyricEl.style.removeProperty('fill');
+            if (_doActiveLyricEl.querySelectorAll) {
+                _doActiveLyricEl.querySelectorAll('tspan').forEach(function(t) {
+                    t.classList.remove('active');
+                    t.style.removeProperty('fill');
+                });
+            }
+        }
+        if (scoreSvg && scoreSvg.querySelectorAll) {
+            scoreSvg.querySelectorAll('text.active, tspan.active').forEach(function(el) {
+                if (el !== lyricEl && !lyricEl.contains(el)) {
+                    el.classList.remove('active');
+                    el.style.removeProperty('fill');
+                }
+            });
+        }
+
+        lyricEl.classList.add('active');
+        lyricEl.style.setProperty('fill', accentColor, 'important');
+        if (lyricEl.querySelectorAll) {
+            lyricEl.querySelectorAll('tspan').forEach(function(ts) {
+                ts.classList.add('active');
+                ts.style.setProperty('fill', accentColor, 'important');
+            });
+        }
+        _doActiveLyricEl = lyricEl;
+    }
+
+    if (typeof window.onChantNoteActive === 'function') {
+        window.onChantNoteActive(noteElem);
+    } else if (typeof isElementInVisibleViewport === 'function' && typeof centerActiveNote === 'function') {
         if (!isElementInVisibleViewport(noteElem) && (typeof _userIsScrolling === 'undefined' || !_userIsScrolling)) {
             centerActiveNote(false);
         }
@@ -6230,20 +6431,7 @@ function handleChantElementClick(clickedEl, e) {
             var allNotesList = info2 ? info2.allNotes : [].concat.apply([], score.notations.map(function(n) { return n.notes || []; })).filter(function(n) { return !n.isAccidental; });
             var noteIndex = allNotesList.indexOf(note);
             if (noteIndex >= 0 && allNotesList.length > 0) {
-                // Convert note index → video fraction using repeat-aware sequence with weighted durations
-                var seq = _buildChantSequenceWithRepeats(score, allNotesList);
-                var seqPos = seq.indexOf(noteIndex);
-                if (seqPos < 0) seqPos = 0;
-                var fracPos = 0;
-                if (info2) {
-                    var seqDurs2 = []; var seqTot2 = 0;
-                    for (var sd2=0; sd2<seq.length; sd2++) { var dd = info2.noteDurs[seq[sd2]]||1; seqDurs2.push(dd); seqTot2+=dd; var gg = info2.gapAfterNote[seq[sd2]]||0; if(gg) seqTot2+=gg; }
-                    var cum2 = 0;
-                    for (var sp=0; sp<seqPos; sp++) { cum2 += seqDurs2[sp]; var gg2 = info2.gapAfterNote[seq[sp]]||0; if(gg2) cum2+=gg2; }
-                    fracPos = seqTot2 ? cum2/seqTot2 : seqPos/seq.length;
-                } else {
-                    fracPos = seqPos / seq.length;
-                }
+                var fracPos = info2 ? _indexToFraction(info2, noteIndex) : (noteIndex / allNotesList.length);
 
                 var ytPlayer = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
                 // Keep lastPercentage for first use when player not ready
@@ -7464,7 +7652,7 @@ window.doYT = window.doYT || {
     ready: false,
     _inited: false,
     lastPercentage: 0,
-    syncEnabled: (localStorage.getItem('do_video_sync_enabled') === 'true'),
+    syncEnabled: (localStorage.getItem('do_video_sync_enabled') !== 'false'),
 
     init: function() {
         if (window.doYT._inited) return;
@@ -7614,6 +7802,7 @@ window.doYT = window.doYT || {
                             delete window.doYT.pendingPlays[elementId];
                             try { player.playVideo(); } catch(e) {}
                             setDoPlayerBarState(true);
+                            updateDoSyncButtonState();
                             _userIsScrolling = false;
                             if (_userScrollTimer) { clearTimeout(_userScrollTimer); _userScrollTimer = null; }
                             setTimeout(function() { centerActiveNote(false); }, 180);
@@ -7683,6 +7872,7 @@ window.doYT = window.doYT || {
         $('.do-yt-item').removeClass('is-active');
         $('#doYtItem_synth').addClass('is-active');
         updateDoPitchButtonState();
+        updateDoSyncButtonState();
         if ($('#playerVideoDrawer').is(':visible')) { _sourceScrollInteracting = false; startSourceIdleAutoScroll(); }
 
         // Restore score times and set cursor position, but do NOT play
@@ -7730,6 +7920,7 @@ window.doYT = window.doYT || {
         $item.addClass('is-active');
         $item.find('.do-yt-poster').addClass('is-hidden');
         updateDoPitchButtonState();
+        updateDoSyncButtonState();
         if ($('#playerVideoDrawer').is(':visible')) { _sourceScrollInteracting = false; startSourceIdleAutoScroll(); }
 
         var curSpeedText = $('#playerSpeedCycleBtn').find('.do-speed-label').text() || '1.0';
@@ -8074,6 +8265,18 @@ $(document).off('click', '#playerBtnToggleSync').on('click', '#playerBtnToggleSy
     e.stopPropagation();
     triggerHapticFeedback('toggle');
     if (!window.doYT) window.doYT = {};
+
+    var isSynth = (!window.doYT.activeId || window.doYT.activeId === 'synth');
+    if (!isSynth) {
+        var alignment = getPreprocessedChantAlignment(window.doYT.activeId, window.doYT.currentChantId);
+        if (!alignment || !alignment.timestamps || !alignment.timestamps.length) {
+            window.doYT.syncEnabled = false;
+            updateDoSyncButtonState();
+            clearActiveNote();
+            return;
+        }
+    }
+
     window.doYT.syncEnabled = !(window.doYT.syncEnabled === true);
     var isEnabled = window.doYT.syncEnabled;
     localStorage.setItem('do_video_sync_enabled', isEnabled ? 'true' : 'false');
@@ -8082,13 +8285,13 @@ $(document).off('click', '#playerBtnToggleSync').on('click', '#playerBtnToggleSy
     if (!isEnabled) {
         clearActiveNote();
     } else {
-        if (window.doYT && window.doYT.activeId && window.doYT.activeId !== 'synth') {
+        if (!isSynth) {
             var player = window.doYT.activePlayer || window.doYT.players[window.doYT.activeId];
-            if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
+            if (player && typeof player.getCurrentTime === 'function') {
                 var cur = player.getCurrentTime() || 0;
-                var dur = player.getDuration() || 0;
-                if (dur > 0) {
-                    highlightChantNoteAtFraction(cur / dur);
+                var alignment = getPreprocessedChantAlignment(window.doYT.activeId, window.doYT.currentChantId);
+                if (alignment) {
+                    syncChantNoteWithModelTimestamps(alignment, cur);
                 }
             }
         } else if (window.getChantProgress) {
@@ -8103,11 +8306,36 @@ $(document).off('click', '#playerBtnToggleSync').on('click', '#playerBtnToggleSy
 function updateDoSyncButtonState() {
     var $btn = $('#playerBtnToggleSync');
     if (!$btn.length) return;
-    var isEnabled = !!(window.doYT && window.doYT.syncEnabled === true);
-    if (isEnabled) {
-        $btn.addClass('active').attr('title', 'Synchronisation active (Cliquer pour désactiver le suivi des notes)');
+
+    var isSynth = (!window.doYT || !window.doYT.activeId || window.doYT.activeId === 'synth');
+    if (isSynth) {
+        $btn.css('display', 'inline-flex').show();
+        var isEnabled = !!(window.doYT && window.doYT.syncEnabled === true);
+        if (isEnabled) {
+            $btn.addClass('active').attr('title', 'Suivi des notes actif (Synthétiseur GABC)');
+        } else {
+            $btn.removeClass('active').attr('title', 'Suivi des notes désactivé');
+        }
+        return;
+    }
+
+    // Video is active: ONLY disponible if pre-processed model timestamps exist!
+    var videoId = window.doYT.activeId;
+    var chantId = window.doYT.currentChantId;
+    var alignment = getPreprocessedChantAlignment(videoId, chantId);
+
+    if (alignment && alignment.timestamps && alignment.timestamps.length > 0) {
+        $btn.css('display', 'inline-flex').show();
+        var isEnabled = !!(window.doYT && window.doYT.syncEnabled === true);
+        if (isEnabled) {
+            $btn.addClass('active').attr('title', 'Synchronisation IA active (Alignement certifié ' + alignment.timestamps.length + ' notes)');
+        } else {
+            $btn.removeClass('active').attr('title', 'Synchronisation IA désactivée (Cliquer pour activer)');
+        }
     } else {
-        $btn.removeClass('active').attr('title', 'Synchronisation désactivée (Cliquer pour activer le suivi des notes)');
+        // NON-PRE-PROCESSED: STRICTLY UNAVAILABLE!
+        $btn.hide();
+        clearActiveNote();
     }
 }
 
@@ -8405,7 +8633,14 @@ function startDoProgressTracking() {
                     try { isYtPlaying = player.getPlayerState && player.getPlayerState() === 1; } catch(e){}
                     if (!isYtPlaying) return;
                     if (window.doYT.syncEnabled !== false) {
-                        highlightChantNoteAtFraction(frac);
+                        var alignment = getPreprocessedChantAlignment(window.doYT.activeId, window.doYT.currentChantId);
+                        if (alignment && alignment.timestamps && alignment.timestamps.length > 0) {
+                            syncChantNoteWithModelTimestamps(alignment, cur);
+                        } else {
+                            clearActiveNote();
+                        }
+                    } else {
+                        clearActiveNote();
                     }
                 }
             }
@@ -14602,7 +14837,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.58';
+var CURRENT_APP_VERSION = 'beta-0.0.59';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -17327,6 +17562,38 @@ function setupEventListeners() {
             triggerPwaInstall();
         } else {
             hidePwaInstallModal();
+        }
+    });
+
+    $(document).on('click', '#btnAlignmentLabSidebar, #btnAlignmentLabSettings', function(e) {
+        e.preventDefault();
+        var $modal = $('#alignmentLabModal');
+        var $iframe = $('#alignmentLabIframe');
+        if ($modal.length && $iframe.length) {
+            if ($iframe.attr('src') === 'about:blank' || !$iframe.attr('src')) {
+                $iframe.attr('src', 'pipeline/alignment-lab.html');
+            }
+            $modal.fadeIn(150);
+            $('body').css('overflow', 'hidden');
+        } else {
+            if (e.ctrlKey || e.metaKey || e.which === 2) {
+                window.open('pipeline/alignment-lab.html', '_blank');
+            } else {
+                window.location.href = 'pipeline/alignment-lab.html';
+            }
+        }
+    });
+
+    $(document).on('click', '#btnCloseAlignmentLabModal', function(e) {
+        e.preventDefault();
+        $('#alignmentLabModal').fadeOut(150);
+        $('body').css('overflow', '');
+    });
+
+    window.addEventListener('message', function(e) {
+        if (e.data === 'close_alignment_lab') {
+            $('#alignmentLabModal').fadeOut(150);
+            $('body').css('overflow', '');
         }
     });
 

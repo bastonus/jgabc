@@ -1,0 +1,70 @@
+name: Stage Alignment Reviews
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: alignment-reviews-queue
+  cancel-in-progress: false
+
+jobs:
+  stage-reviews:
+    if: contains(github.event.issue.labels.*.name, 'lab-review') || contains(github.event.issue.title, 'Validation Gr') || contains(github.event.issue.title, 'Validation Gregorienne') || contains(github.event.issue.body, 'Soumission de validations')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Stage reviews from issue body
+        id: stage
+        run: |
+          python tools/review_queue.py stage \
+            --issue-number "${{ github.event.issue.number }}" \
+            --issue-body "$ISSUE_BODY" \
+            --author "${{ github.event.issue.user.login }}" \
+            --issue-url "${{ github.event.issue.html_url }}"
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+
+      - name: Commit and push staged reviews
+        if: steps.stage.outputs.staged_count != '0' && steps.stage.outputs.staged_count != ''
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add pipeline/reviews/
+          git diff --staged --quiet || git commit -m "chore(reviews): stage ${{ steps.stage.outputs.staged_count }} reviews from #${{ github.event.issue.number }} for maintainer review"
+          for i in 1 2 3 4 5; do
+            git fetch origin master && git rebase origin/master && git push origin master && break || sleep 2
+          done
+
+      - name: Update issue with staging confirmation
+        if: steps.stage.outputs.staged_count != '0' && steps.stage.outputs.staged_count != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['pending-review']
+              });
+            } catch(e) {}
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "Vos avis grégoriens (${{ steps.stage.outputs.staged_count }} pièces) ont été mis en attente de vérification dans `pipeline/reviews/pending/`.\n\nPièces concernées : ${{ steps.stage.outputs.pieces_list }}\n\nUn mainteneur peut approuver et publier ces avis en répondant `/approve` sur ce ticket ou en appliquant le label `approved`."
+            });

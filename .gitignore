@@ -22,6 +22,8 @@ show-diffs.sh
 appid-secret.key
 open-new-release.sh
 pac.bak*
+dist_modules/*.zip
+dist_modules/*.tmp
 psalms and canticles/ps*
 divinum-officium-master/
 missalemeum-master/
@@ -43,5 +45,15 @@ scratch/
 __pycache__/
 *.pyc
 *.pyo
+
+# Dynamically synced www bulk data mirrors for APK packaging
+www/do_data/
+www/crampon/
+www/douay-rheims/
+www/vulgate/
+www/matos-soares/
+www/psalms/
+www/img/
+
 
 

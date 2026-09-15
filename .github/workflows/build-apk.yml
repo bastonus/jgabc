@@ -62,6 +62,7 @@ jobs:
 
       - name: Capacitor sync & clean external modules
         run: |
+          node tools/sync_apk_assets.mjs
           npx cap sync android
           node tools/clean_android_assets.mjs
 

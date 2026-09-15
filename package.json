@@ -1,6 +1,6 @@
 {
   "name": "oremus",
-  "version": "0.0.58",
+  "version": "0.0.59",
   "description": "Oremus — Divinum Officium & Missale Romanum — Application liturgique traditionnelle",
   "homepage": "https://github.com/bastonus/jgabc#readme",
   "bugs": {
@@ -20,7 +20,7 @@
   "scripts": {
     "pack:modules": "node tools/build_modules.mjs",
     "cap:clean": "node tools/clean_android_assets.mjs",
-    "cap:sync": "npm run pack:modules && npx cap sync android && npm run cap:clean",
+    "cap:sync": "npm run pack:modules && node tools/sync_apk_assets.mjs && npx cap sync android && npm run cap:clean",
     "cap:open": "npx cap open android",
     "cap:build": "npm run cap:sync && cd android && gradlew.bat assembleRelease"
   },

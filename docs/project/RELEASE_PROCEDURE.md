@@ -76,12 +76,18 @@ var CURRENT_APP_VERSION = 'beta-0.0.58';
 ---
 
 ### 4️⃣ Synchronisation du Répertoire [`www/`](file:///d:/Documents/jgabc/www)
-Capacitor compile l'APK à partir de `www/`. Copiez toujours les versions à jour vers `www/` :
-- [`www/js/divinum_officium.js`](file:///d:/Documents/jgabc/www/js/divinum_officium.js)
-- [`www/divinum-officium.html`](file:///d:/Documents/jgabc/www/divinum-officium.html)
-- [`www/sw.js`](file:///d:/Documents/jgabc/www/sw.js)
-- [`www/js/gregorian_youtube_links.js`](file:///d:/Documents/jgabc/www/js/gregorian_youtube_links.js)
-- [`www/js/gregorian_youtube_links.json`](file:///d:/Documents/jgabc/www/js/gregorian_youtube_links.json)
+Capacitor compile l'APK à partir de `www/`. La synchronisation est automatisée par le script :
+```bash
+node tools/sync_apk_assets.mjs
+```
+(inclus automatiquement dans `npm run cap:sync` et dans le workflow CI `.github/workflows/build-apk.yml`).
+Ce script synchronise l'ensemble des composants nécessaires :
+- [`www/divinum-officium.html`](file:///d:/Documents/jgabc/www/divinum-officium.html) et scripts racine (`jquery.min.js`, `moment.min.js`, `propersdata.js`, `ordinarydata.js`, etc.)
+- [`www/js/`](file:///d:/Documents/jgabc/www/js/) (moteurs grégoriens, audio, bibles)
+- [`www/css/`](file:///d:/Documents/jgabc/www/css/) (styles modernes et liturgiques)
+- [`www/pipeline/`](file:///d:/Documents/jgabc/www/pipeline/) (Laboratoire d'alignement `alignment-lab.html` et `lab_data.js`)
+- Textes liturgiques et bibles hors-ligne (`do_data/`, `crampon/`, `douay-rheims/`, `vulgate/`, `matos-soares/`)
+- Iconographie sacrée (`img/tempora/`, `icon/`, `fonts/`), en excluant les modules externes volumineux (`img/saints/` et partitions brutes `*.gabc`).
 
 ---
 

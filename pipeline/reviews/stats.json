@@ -1,0 +1,386 @@
+{
+  "updated_at": "2026-09-15T22:01:39.881117+00:00",
+  "total_candidate_pieces": 30,
+  "total_published_reviews": 37,
+  "total_pending_reviews": 0,
+  "status_summary": {
+    "approved": 6,
+    "rejected": 8,
+    "bad_gabc": 17,
+    "pending": 0
+  },
+  "pieces": {
+    "10057": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "10062": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "107": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "11": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "1117": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "119": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    },
+    "13": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "130": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "132": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "13657": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "14": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "14111": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "14262": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "159": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "16266": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "16304": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "16704": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "17": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "1914": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "2": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "2107": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "215": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "23": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "235": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "25": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "264": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "3089": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "3166": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "3373": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "3718": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "4015": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "4177": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "47": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "497": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "561": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "57": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "58": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "678": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "776": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    },
+    "8": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "988": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    },
+    "99": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "al-dextera_dei": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "al-dominus_in_sina": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "al-emitte_spiritum": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "al-o_quam_bonus": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "co-in_splendoribus": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "co-non_vos_relinquam": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "co-surrexit_dominus": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "gr-beata_gens": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "gr-exsurge": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    },
+    "gr-requiem": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "in-deus_in_loco_sancto": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "in-laetare": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "in-quasi_modo": {
+      "published": 0,
+      "pending": 0,
+      "total": 0,
+      "current_status": "unreviewed"
+    },
+    "ite_missa_est": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "missa4-agnus": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "of-audi_israel": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "rejected"
+    },
+    "of-calix_benedictionis": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    },
+    "of-deus_deus_meus": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "bad_gabc"
+    },
+    "of-dextera_domini-alleluia": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "approved"
+    },
+    "of-iustus_ut_palma_florebit": {
+      "published": 1,
+      "pending": 0,
+      "total": 1,
+      "current_status": "unreviewed"
+    }
+  }
+}

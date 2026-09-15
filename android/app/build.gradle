@@ -7,8 +7,8 @@ android {
         applicationId "com.chanttools.divinumofficium"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 58
-        versionName "beta-0.0.58"
+        versionCode 59
+        versionName "beta-0.0.59"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -100,6 +100,7 @@ task copyWebAssets(type: Copy) {
         include "js/gregorian_db.js"
         include "js/gregorian_index_data.js"
         include "js/gregorian_youtube_links.js"
+        include "js/gregorian_preprocessed_timestamps.js"
         include "js/gregorian_search_engine.js"
         include "js/gregorian_search_worker.js"
         include "js/gregorian_search_ui.js"
@@ -108,6 +109,8 @@ task copyWebAssets(type: Copy) {
         include "js/tempora_art_metadata.js"
 
         include "data/**"
+        include "pipeline/alignment-lab.html"
+        include "pipeline/lab_data.js"
 
         // Modules externes exclus de l'APK de base (chargement en direct via GitHub Usercontent)
         // include "img/saints/**"

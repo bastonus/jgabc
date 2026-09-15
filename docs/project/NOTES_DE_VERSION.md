@@ -1,5 +1,59 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.59 (16 Septembre 2026)
+
+---
+
+### 🎼 Intégration en Production des Alignements Grégoriens Prétraités
+
+* **30 Pièces Grégoriennes d'Autorité Alignées en Haute Précision :**
+  * Compilation native dans l'application (`js/gregorian_preprocessed_timestamps.js` et `data/gregorian_alignments.min.json`) couvrant **4 803 notes synchronisées** note par note sur 21 vidéos de référence.
+  * Défilement ultra-fluide et positionnement millimétré de la surbrillance sur les partitions Exsurge lors de la lecture des chants.
+  * Nouveaux outils de compilation (`tools/compile_alignments.py`) et gestion modulaire par pièce (`pipeline/alignments/*.json`).
+
+---
+
+### 🔬 Laboratoire d'Alignement Grégorien & File de Révision Collaborative
+
+* **Intégration Directe dans l'Application (Alignment Lab) :**
+  * Accès immédiat au Laboratoire d'alignement depuis la barre latérale (`#btnAlignmentLabSidebar`) et depuis la modale des Réglages (`#btnAlignmentLabSettings`).
+  * Synchronisation complète pour le Web et l'application Android native via `pipeline/alignment-lab.html` et `pipeline/lab_data.js`.
+  * Visualisation interactive neume par neume, zoom temporel, édition précise et export.
+* **File d'Attente et Modération Collaborative via GitHub Actions :**
+  * Nouveau cycle de validation sécurisé avec staging automatique des avis communautaires (`.github/workflows/stage_reviews.yml`) dans `pipeline/reviews/pending/`.
+  * Modération par les mainteneurs via commandes `/approve` ou `/reject` (`.github/workflows/process_reviews.yml`) avec recompilation automatique et publication en production.
+
+---
+
+### 🎵 Moteur Audio & Partitions Grégoriennes (Rendu & Suivi Musical)
+
+* **Fiabilisation de la Détection SVG & Reconnexion DOM :**
+  * Amélioration critique de `highlightChantNoteAtFraction` et `handleChantElementClick` dans `js/divinum_officium.js` et `util.js` : vérification stricte de connexion DOM (`!noteElem.isConnected`), recherche robuste de secours par `element-index` et `source-index`.
+  * Prise en charge du hook `window.onChantNoteActive` pour déléguer ou personnaliser le suivi visuel du chant.
+  * Règle CSS universelle de surbrillance active pour conteneurs et modales dans `css/divinum_officium.css`.
+  * Activation par défaut de la synchronisation vidéo (`syncEnabled: true`).
+
+---
+
+### 📦 Chaîne de Build Android & Synchronisation Automatisée (APK)
+
+* **Script Unifié de Synchronisation (`tools/sync_apk_assets.mjs`) :**
+  * Intégré au script `npm run cap:sync` et au workflow CI `.github/workflows/build-apk.yml`.
+  * Synchronisation automatique et exhaustive des textes liturgiques (`do_data/`), bibles (`crampon/`, `douay-rheims/`, `vulgate/`, `matos-soares/`, `psalms/`), styles, moteurs et iconographies vers `www/` et l'APK Android.
+* **Optimisation de l'APK :**
+  * Exclusion rigoureuse des modules lourds (`img/saints/`, fichiers `*.gabc` bruts) pour garantir un APK léger et performant.
+
+---
+
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.59'`, `versionCode 59` / `versionName "beta-0.0.59"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.59`), `package.json` (`0.0.59`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.27 → v1.3.28` (`sw.js` et `www/sw.js`).
+* Mise à jour du flux de notifications in-app (`notifications.json`).
+* Modules d'assets compressés re-générés (`dist_modules/gabc.pack` et `dist_modules/saints.pack`).
+
+---
+
 ## 🚀 Version 0.0.58 (15 Septembre 2026)
 
 ---

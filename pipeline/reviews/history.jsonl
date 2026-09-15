@@ -1,0 +1,20 @@
+{"action": "stage", "piece_id": "107", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Note 0 calée au millimètre", "logged_at": "2026-09-15T22:01:39.489168+00:00"}
+{"action": "stage", "piece_id": "11", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Excellente synchro neumes", "logged_at": "2026-09-15T22:01:39.493511+00:00"}
+{"action": "stage", "piece_id": "13", "status": "rejected", "author": "expert_gregorien", "issue_number": 1001, "comment": "Barres de reprise en retard", "logged_at": "2026-09-15T22:01:39.493511+00:00"}
+{"action": "stage", "piece_id": "130", "status": "bad_gabc", "author": "expert_gregorien", "issue_number": 1001, "comment": "Partition gabc incomplète", "logged_at": "2026-09-15T22:01:39.494657+00:00"}
+{"action": "stage", "piece_id": "14", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Rythme parfait", "logged_at": "2026-09-15T22:01:39.494657+00:00"}
+{"action": "stage", "piece_id": "15", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Conforme Solesmes", "logged_at": "2026-09-15T22:01:39.495680+00:00"}
+{"action": "stage", "piece_id": "159", "status": "rejected", "author": "expert_gregorien", "issue_number": 1001, "comment": "Audio trop bruité", "logged_at": "2026-09-15T22:01:39.495680+00:00"}
+{"action": "stage", "piece_id": "17", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Intonation claire", "logged_at": "2026-09-15T22:01:39.497094+00:00"}
+{"action": "stage", "piece_id": "215", "status": "bad_gabc", "author": "expert_gregorien", "issue_number": 1001, "comment": "Mauvais mode grégorien", "logged_at": "2026-09-15T22:01:39.497094+00:00"}
+{"action": "stage", "piece_id": "23", "status": "approved", "author": "expert_gregorien", "issue_number": 1001, "comment": "Cadence finale impeccable", "logged_at": "2026-09-15T22:01:39.498116+00:00"}
+{"action": "approve", "piece_id": "107", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.724156+00:00"}
+{"action": "approve", "piece_id": "11", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.725144+00:00"}
+{"action": "approve", "piece_id": "130", "status": "bad_gabc", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.726077+00:00"}
+{"action": "approve", "piece_id": "13", "status": "rejected", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.726077+00:00"}
+{"action": "approve", "piece_id": "14", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.727085+00:00"}
+{"action": "approve", "piece_id": "159", "status": "rejected", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.729234+00:00"}
+{"action": "approve", "piece_id": "15", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.729785+00:00"}
+{"action": "approve", "piece_id": "17", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.729785+00:00"}
+{"action": "approve", "piece_id": "215", "status": "bad_gabc", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.730870+00:00"}
+{"action": "approve", "piece_id": "23", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.730870+00:00"}

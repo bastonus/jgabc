@@ -1,0 +1,676 @@
+{
+  "id": "99",
+  "youtube_id": "5Y0m4FYhFlY",
+  "title": "Emitte Spiritum",
+  "incipit": "Emitte Spiritum",
+  "part": "Alleluia",
+  "office_part": "",
+  "youtube_url": "https://www.youtube.com/watch?v=5Y0m4FYhFlY",
+  "audio_duration": 180,
+  "has_nabc": false,
+  "has_reprise": false,
+  "total_notes": 132,
+  "timestamps": [
+    {
+      "note_index": 0,
+      "start": 2.02,
+      "end": 2.89
+    },
+    {
+      "note_index": 1,
+      "start": 2.89,
+      "end": 3.16
+    },
+    {
+      "note_index": 2,
+      "start": 3.16,
+      "end": 3.54
+    },
+    {
+      "note_index": 3,
+      "start": 3.54,
+      "end": 4.05
+    },
+    {
+      "note_index": 4,
+      "start": 4.05,
+      "end": 4.56
+    },
+    {
+      "note_index": 5,
+      "start": 4.56,
+      "end": 4.9
+    },
+    {
+      "note_index": 6,
+      "start": 4.9,
+      "end": 5.24
+    },
+    {
+      "note_index": 7,
+      "start": 5.24,
+      "end": 5.62
+    },
+    {
+      "note_index": 8,
+      "start": 5.62,
+      "end": 5.99
+    },
+    {
+      "note_index": 9,
+      "start": 5.99,
+      "end": 6.31
+    },
+    {
+      "note_index": 10,
+      "start": 6.31,
+      "end": 6.81
+    },
+    {
+      "note_index": 11,
+      "start": 6.81,
+      "end": 7.35
+    },
+    {
+      "note_index": 12,
+      "start": 7.35,
+      "end": 8.13
+    },
+    {
+      "note_index": 13,
+      "start": 8.13,
+      "end": 8.47
+    },
+    {
+      "note_index": 14,
+      "start": 8.47,
+      "end": 9.04
+    },
+    {
+      "note_index": 15,
+      "start": 9.04,
+      "end": 9.42
+    },
+    {
+      "note_index": 16,
+      "start": 9.42,
+      "end": 9.81
+    },
+    {
+      "note_index": 17,
+      "start": 9.81,
+      "end": 10.39
+    },
+    {
+      "note_index": 18,
+      "start": 10.39,
+      "end": 11.25
+    },
+    {
+      "note_index": 19,
+      "start": 11.25,
+      "end": 11.48
+    },
+    {
+      "note_index": 20,
+      "start": 11.48,
+      "end": 12.18
+    },
+    {
+      "note_index": 21,
+      "start": 12.18,
+      "end": 12.44
+    },
+    {
+      "note_index": 22,
+      "start": 12.44,
+      "end": 13.02
+    },
+    {
+      "note_index": 23,
+      "start": 13.02,
+      "end": 13.5
+    },
+    {
+      "note_index": 24,
+      "start": 13.5,
+      "end": 13.69
+    },
+    {
+      "note_index": 25,
+      "start": 13.69,
+      "end": 14.61
+    },
+    {
+      "note_index": 26,
+      "start": 14.61,
+      "end": 15.14
+    },
+    {
+      "note_index": 27,
+      "start": 15.14,
+      "end": 16.01
+    },
+    {
+      "note_index": 28,
+      "start": 16.01,
+      "end": 17.77
+    },
+    {
+      "note_index": 29,
+      "start": 17.77,
+      "end": 18.48
+    },
+    {
+      "note_index": 30,
+      "start": 18.54,
+      "end": 19.01
+    },
+    {
+      "note_index": 31,
+      "start": 19.01,
+      "end": 19.74
+    },
+    {
+      "note_index": 32,
+      "start": 19.74,
+      "end": 20.48
+    },
+    {
+      "note_index": 33,
+      "start": 20.48,
+      "end": 20.88
+    },
+    {
+      "note_index": 34,
+      "start": 20.88,
+      "end": 21.55
+    },
+    {
+      "note_index": 35,
+      "start": 21.55,
+      "end": 22.09
+    },
+    {
+      "note_index": 36,
+      "start": 22.09,
+      "end": 22.8
+    },
+    {
+      "note_index": 37,
+      "start": 22.8,
+      "end": 23.39
+    },
+    {
+      "note_index": 38,
+      "start": 23.39,
+      "end": 24.07
+    },
+    {
+      "note_index": 39,
+      "start": 24.07,
+      "end": 24.66
+    },
+    {
+      "note_index": 40,
+      "start": 24.66,
+      "end": 25.39
+    },
+    {
+      "note_index": 41,
+      "start": 25.39,
+      "end": 26.0
+    },
+    {
+      "note_index": 42,
+      "start": 26.0,
+      "end": 26.44
+    },
+    {
+      "note_index": 43,
+      "start": 26.44,
+      "end": 26.77
+    },
+    {
+      "note_index": 44,
+      "start": 26.77,
+      "end": 28.03
+    },
+    {
+      "note_index": 45,
+      "start": 28.03,
+      "end": 28.18
+    },
+    {
+      "note_index": 46,
+      "start": 28.18,
+      "end": 28.38
+    },
+    {
+      "note_index": 47,
+      "start": 28.38,
+      "end": 28.6
+    },
+    {
+      "note_index": 48,
+      "start": 28.6,
+      "end": 29.14
+    },
+    {
+      "note_index": 49,
+      "start": 29.14,
+      "end": 29.79
+    },
+    {
+      "note_index": 50,
+      "start": 29.79,
+      "end": 30.74
+    },
+    {
+      "note_index": 51,
+      "start": 30.74,
+      "end": 31.14
+    },
+    {
+      "note_index": 52,
+      "start": 31.14,
+      "end": 31.54
+    },
+    {
+      "note_index": 53,
+      "start": 31.54,
+      "end": 32.41
+    },
+    {
+      "note_index": 54,
+      "start": 32.58,
+      "end": 33.47
+    },
+    {
+      "note_index": 55,
+      "start": 33.47,
+      "end": 33.85
+    },
+    {
+      "note_index": 56,
+      "start": 33.85,
+      "end": 34.6
+    },
+    {
+      "note_index": 57,
+      "start": 34.6,
+      "end": 35.07
+    },
+    {
+      "note_index": 58,
+      "start": 35.07,
+      "end": 35.37
+    },
+    {
+      "note_index": 59,
+      "start": 35.37,
+      "end": 35.86
+    },
+    {
+      "note_index": 60,
+      "start": 35.86,
+      "end": 36.61
+    },
+    {
+      "note_index": 61,
+      "start": 36.61,
+      "end": 37.0
+    },
+    {
+      "note_index": 62,
+      "start": 37.0,
+      "end": 37.76
+    },
+    {
+      "note_index": 63,
+      "start": 37.76,
+      "end": 38.26
+    },
+    {
+      "note_index": 64,
+      "start": 38.26,
+      "end": 39.13
+    },
+    {
+      "note_index": 65,
+      "start": 39.13,
+      "end": 39.66
+    },
+    {
+      "note_index": 66,
+      "start": 39.66,
+      "end": 40.18
+    },
+    {
+      "note_index": 67,
+      "start": 40.18,
+      "end": 40.97
+    },
+    {
+      "note_index": 68,
+      "start": 40.97,
+      "end": 41.67
+    },
+    {
+      "note_index": 69,
+      "start": 41.67,
+      "end": 42.25
+    },
+    {
+      "note_index": 70,
+      "start": 42.25,
+      "end": 42.93
+    },
+    {
+      "note_index": 71,
+      "start": 42.93,
+      "end": 43.26
+    },
+    {
+      "note_index": 72,
+      "start": 43.26,
+      "end": 43.5
+    },
+    {
+      "note_index": 73,
+      "start": 43.5,
+      "end": 44.09
+    },
+    {
+      "note_index": 74,
+      "start": 44.09,
+      "end": 44.74
+    },
+    {
+      "note_index": 75,
+      "start": 44.74,
+      "end": 45.67
+    },
+    {
+      "note_index": 76,
+      "start": 45.67,
+      "end": 46.15
+    },
+    {
+      "note_index": 77,
+      "start": 46.15,
+      "end": 46.75
+    },
+    {
+      "note_index": 78,
+      "start": 46.75,
+      "end": 47.42
+    },
+    {
+      "note_index": 79,
+      "start": 47.42,
+      "end": 47.94
+    },
+    {
+      "note_index": 80,
+      "start": 47.94,
+      "end": 48.6
+    },
+    {
+      "note_index": 81,
+      "start": 48.6,
+      "end": 49.0
+    },
+    {
+      "note_index": 82,
+      "start": 49.0,
+      "end": 49.89
+    },
+    {
+      "note_index": 83,
+      "start": 49.89,
+      "end": 50.29
+    },
+    {
+      "note_index": 84,
+      "start": 50.29,
+      "end": 50.83
+    },
+    {
+      "note_index": 85,
+      "start": 50.83,
+      "end": 51.37
+    },
+    {
+      "note_index": 86,
+      "start": 51.37,
+      "end": 51.51
+    },
+    {
+      "note_index": 87,
+      "start": 51.51,
+      "end": 52.52
+    },
+    {
+      "note_index": 88,
+      "start": 52.52,
+      "end": 52.95
+    },
+    {
+      "note_index": 89,
+      "start": 53.09,
+      "end": 54.17
+    },
+    {
+      "note_index": 90,
+      "start": 54.17,
+      "end": 54.64
+    },
+    {
+      "note_index": 91,
+      "start": 54.64,
+      "end": 55.11
+    },
+    {
+      "note_index": 92,
+      "start": 55.11,
+      "end": 55.32
+    },
+    {
+      "note_index": 93,
+      "start": 55.32,
+      "end": 55.97
+    },
+    {
+      "note_index": 94,
+      "start": 55.97,
+      "end": 56.62
+    },
+    {
+      "note_index": 95,
+      "start": 56.62,
+      "end": 56.94
+    },
+    {
+      "note_index": 96,
+      "start": 56.94,
+      "end": 57.43
+    },
+    {
+      "note_index": 97,
+      "start": 57.43,
+      "end": 57.99
+    },
+    {
+      "note_index": 98,
+      "start": 57.99,
+      "end": 58.54
+    },
+    {
+      "note_index": 99,
+      "start": 58.54,
+      "end": 58.8
+    },
+    {
+      "note_index": 100,
+      "start": 58.8,
+      "end": 59.64
+    },
+    {
+      "note_index": 101,
+      "start": 59.64,
+      "end": 59.86
+    },
+    {
+      "note_index": 102,
+      "start": 59.86,
+      "end": 60.26
+    },
+    {
+      "note_index": 103,
+      "start": 60.26,
+      "end": 61.07
+    },
+    {
+      "note_index": 104,
+      "start": 61.07,
+      "end": 61.88
+    },
+    {
+      "note_index": 105,
+      "start": 61.88,
+      "end": 62.18
+    },
+    {
+      "note_index": 106,
+      "start": 62.18,
+      "end": 62.61
+    },
+    {
+      "note_index": 107,
+      "start": 62.61,
+      "end": 63.0
+    },
+    {
+      "note_index": 108,
+      "start": 63.0,
+      "end": 63.68
+    },
+    {
+      "note_index": 109,
+      "start": 63.68,
+      "end": 64.14
+    },
+    {
+      "note_index": 110,
+      "start": 64.14,
+      "end": 64.69
+    },
+    {
+      "note_index": 111,
+      "start": 64.69,
+      "end": 65.02
+    },
+    {
+      "note_index": 112,
+      "start": 65.02,
+      "end": 65.81
+    },
+    {
+      "note_index": 113,
+      "start": 65.81,
+      "end": 66.22
+    },
+    {
+      "note_index": 114,
+      "start": 66.22,
+      "end": 66.8
+    },
+    {
+      "note_index": 115,
+      "start": 66.8,
+      "end": 67.18
+    },
+    {
+      "note_index": 116,
+      "start": 67.18,
+      "end": 67.89
+    },
+    {
+      "note_index": 117,
+      "start": 67.89,
+      "end": 68.31
+    },
+    {
+      "note_index": 118,
+      "start": 68.31,
+      "end": 68.79
+    },
+    {
+      "note_index": 119,
+      "start": 68.79,
+      "end": 69.35
+    },
+    {
+      "note_index": 120,
+      "start": 69.35,
+      "end": 70.21
+    },
+    {
+      "note_index": 121,
+      "start": 70.21,
+      "end": 70.58
+    },
+    {
+      "note_index": 122,
+      "start": 70.58,
+      "end": 71.22
+    },
+    {
+      "note_index": 123,
+      "start": 71.22,
+      "end": 71.6
+    },
+    {
+      "note_index": 124,
+      "start": 71.6,
+      "end": 71.74
+    },
+    {
+      "note_index": 125,
+      "start": 71.74,
+      "end": 71.88
+    },
+    {
+      "note_index": 126,
+      "start": 71.88,
+      "end": 72.02
+    },
+    {
+      "note_index": 127,
+      "start": 72.02,
+      "end": 72.16
+    },
+    {
+      "note_index": 128,
+      "start": 72.16,
+      "end": 72.3
+    },
+    {
+      "note_index": 129,
+      "start": 72.3,
+      "end": 72.44
+    },
+    {
+      "note_index": 130,
+      "start": 72.44,
+      "end": 72.58
+    },
+    {
+      "note_index": 131,
+      "start": 72.58,
+      "end": 72.76
+    }
+  ],
+  "gabc_src": "name: Emitte Spiritum;\noffice-part: Alleluia;\nmode: 4;\nbook: Graduale Romanum, 1961, p. 293 & The Liber Usualis, 1961, p. 879;\ntranscriber: Andrew Hinkley;\ncommentary: Ps 103: 30;\n%%\n(c4) AL(fd~)le(ef'g)lú(hgh)ia.(ixhiHG'gf.0) {*}~<i>ij.</i>(,) (ixhiHG'ge./ghGF'Ef_gffe.) (::)\n<sp>V/</sp>. E(h)mít(h)te(ixg'//ivHG'hffe.) (,) Spí(fh)ri(ghg'/hf)tum(e[ll:1]d~) tu(egF'D)um,(d.) (:)\net(dc~) cre(f)a(ghg)bún(ixhiG'Eg./hiF'D//fffdgvFE.,df/h_f/!g_e/!fv.df!gvef~)tur:(e.) (:)\net(f) re(f)no(f)vá(ef)bis(f) fá(ef'g)ci(gdgvFE)em(e.) *(,)\nter(fd/ef!g'h)ræ.(ixhiHG'gf.0) (,) (ixhiHG'ge./ghGF'Ef_gffe.) (::)"
+}

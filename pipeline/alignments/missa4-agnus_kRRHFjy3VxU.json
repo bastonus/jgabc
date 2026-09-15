@@ -1,0 +1,451 @@
+{
+  "id": "missa4-agnus",
+  "youtube_id": "kRRHFjy3VxU",
+  "title": "Agnus Dei IV",
+  "incipit": "Agnus Dei IV",
+  "part": "Kyriale",
+  "office_part": "",
+  "youtube_url": "https://www.youtube.com/watch?v=kRRHFjy3VxU",
+  "audio_duration": 180,
+  "has_nabc": true,
+  "has_reprise": false,
+  "total_notes": 87,
+  "timestamps": [
+    {
+      "note_index": 0,
+      "start": 1.25,
+      "end": 2.04
+    },
+    {
+      "note_index": 1,
+      "start": 2.04,
+      "end": 2.55
+    },
+    {
+      "note_index": 2,
+      "start": 2.55,
+      "end": 3.06
+    },
+    {
+      "note_index": 3,
+      "start": 3.06,
+      "end": 3.93
+    },
+    {
+      "note_index": 4,
+      "start": 3.93,
+      "end": 4.57
+    },
+    {
+      "note_index": 5,
+      "start": 4.57,
+      "end": 5.33
+    },
+    {
+      "note_index": 6,
+      "start": 5.33,
+      "end": 5.71
+    },
+    {
+      "note_index": 7,
+      "start": 5.71,
+      "end": 6.14
+    },
+    {
+      "note_index": 8,
+      "start": 6.14,
+      "end": 7.12
+    },
+    {
+      "note_index": 9,
+      "start": 7.12,
+      "end": 7.72
+    },
+    {
+      "note_index": 10,
+      "start": 7.72,
+      "end": 8.26
+    },
+    {
+      "note_index": 11,
+      "start": 8.26,
+      "end": 8.81
+    },
+    {
+      "note_index": 12,
+      "start": 8.81,
+      "end": 9.11
+    },
+    {
+      "note_index": 13,
+      "start": 9.11,
+      "end": 9.54
+    },
+    {
+      "note_index": 14,
+      "start": 9.54,
+      "end": 10.17
+    },
+    {
+      "note_index": 15,
+      "start": 10.17,
+      "end": 10.62
+    },
+    {
+      "note_index": 16,
+      "start": 10.62,
+      "end": 11.28
+    },
+    {
+      "note_index": 17,
+      "start": 11.28,
+      "end": 11.48
+    },
+    {
+      "note_index": 18,
+      "start": 11.48,
+      "end": 12.07
+    },
+    {
+      "note_index": 19,
+      "start": 12.07,
+      "end": 13.23
+    },
+    {
+      "note_index": 20,
+      "start": 13.23,
+      "end": 16.38
+    },
+    {
+      "note_index": 21,
+      "start": 16.38,
+      "end": 16.53
+    },
+    {
+      "note_index": 22,
+      "start": 16.53,
+      "end": 16.97
+    },
+    {
+      "note_index": 23,
+      "start": 16.97,
+      "end": 17.35
+    },
+    {
+      "note_index": 24,
+      "start": 17.35,
+      "end": 17.49
+    },
+    {
+      "note_index": 25,
+      "start": 17.49,
+      "end": 17.63
+    },
+    {
+      "note_index": 26,
+      "start": 17.63,
+      "end": 18.15
+    },
+    {
+      "note_index": 27,
+      "start": 18.15,
+      "end": 18.45
+    },
+    {
+      "note_index": 28,
+      "start": 18.45,
+      "end": 19.01
+    },
+    {
+      "note_index": 29,
+      "start": 19.01,
+      "end": 19.46
+    },
+    {
+      "note_index": 30,
+      "start": 19.46,
+      "end": 20.55
+    },
+    {
+      "note_index": 31,
+      "start": 21.75,
+      "end": 22.46
+    },
+    {
+      "note_index": 32,
+      "start": 22.46,
+      "end": 23.17
+    },
+    {
+      "note_index": 33,
+      "start": 23.17,
+      "end": 23.69
+    },
+    {
+      "note_index": 34,
+      "start": 23.69,
+      "end": 24.51
+    },
+    {
+      "note_index": 35,
+      "start": 24.51,
+      "end": 25.14
+    },
+    {
+      "note_index": 36,
+      "start": 25.14,
+      "end": 25.71
+    },
+    {
+      "note_index": 37,
+      "start": 25.71,
+      "end": 26.13
+    },
+    {
+      "note_index": 38,
+      "start": 26.13,
+      "end": 26.53
+    },
+    {
+      "note_index": 39,
+      "start": 26.53,
+      "end": 27.25
+    },
+    {
+      "note_index": 40,
+      "start": 27.25,
+      "end": 27.62
+    },
+    {
+      "note_index": 41,
+      "start": 27.62,
+      "end": 28.2
+    },
+    {
+      "note_index": 42,
+      "start": 28.2,
+      "end": 28.51
+    },
+    {
+      "note_index": 43,
+      "start": 28.51,
+      "end": 29.15
+    },
+    {
+      "note_index": 44,
+      "start": 29.15,
+      "end": 29.51
+    },
+    {
+      "note_index": 45,
+      "start": 29.51,
+      "end": 30.35
+    },
+    {
+      "note_index": 46,
+      "start": 30.48,
+      "end": 31.78
+    },
+    {
+      "note_index": 47,
+      "start": 31.78,
+      "end": 32.2
+    },
+    {
+      "note_index": 48,
+      "start": 32.2,
+      "end": 33.03
+    },
+    {
+      "note_index": 49,
+      "start": 33.03,
+      "end": 33.53
+    },
+    {
+      "note_index": 50,
+      "start": 33.53,
+      "end": 33.94
+    },
+    {
+      "note_index": 51,
+      "start": 33.94,
+      "end": 34.83
+    },
+    {
+      "note_index": 52,
+      "start": 34.83,
+      "end": 35.32
+    },
+    {
+      "note_index": 53,
+      "start": 35.32,
+      "end": 35.92
+    },
+    {
+      "note_index": 54,
+      "start": 35.92,
+      "end": 36.4
+    },
+    {
+      "note_index": 55,
+      "start": 36.4,
+      "end": 37.38
+    },
+    {
+      "note_index": 56,
+      "start": 37.52,
+      "end": 39.76
+    },
+    {
+      "note_index": 57,
+      "start": 39.76,
+      "end": 40.25
+    },
+    {
+      "note_index": 58,
+      "start": 40.25,
+      "end": 40.74
+    },
+    {
+      "note_index": 59,
+      "start": 40.74,
+      "end": 41.26
+    },
+    {
+      "note_index": 60,
+      "start": 41.26,
+      "end": 42.28
+    },
+    {
+      "note_index": 61,
+      "start": 42.28,
+      "end": 42.75
+    },
+    {
+      "note_index": 62,
+      "start": 42.75,
+      "end": 43.21
+    },
+    {
+      "note_index": 63,
+      "start": 43.21,
+      "end": 43.7
+    },
+    {
+      "note_index": 64,
+      "start": 43.7,
+      "end": 44.43
+    },
+    {
+      "note_index": 65,
+      "start": 44.43,
+      "end": 45.28
+    },
+    {
+      "note_index": 66,
+      "start": 45.28,
+      "end": 45.83
+    },
+    {
+      "note_index": 67,
+      "start": 45.83,
+      "end": 46.18
+    },
+    {
+      "note_index": 68,
+      "start": 46.18,
+      "end": 46.69
+    },
+    {
+      "note_index": 69,
+      "start": 46.69,
+      "end": 47.08
+    },
+    {
+      "note_index": 70,
+      "start": 47.08,
+      "end": 47.76
+    },
+    {
+      "note_index": 71,
+      "start": 47.76,
+      "end": 48.34
+    },
+    {
+      "note_index": 72,
+      "start": 48.34,
+      "end": 48.81
+    },
+    {
+      "note_index": 73,
+      "start": 48.81,
+      "end": 49.1
+    },
+    {
+      "note_index": 74,
+      "start": 49.1,
+      "end": 49.61
+    },
+    {
+      "note_index": 75,
+      "start": 49.61,
+      "end": 50.17
+    },
+    {
+      "note_index": 76,
+      "start": 50.17,
+      "end": 51.37
+    },
+    {
+      "note_index": 77,
+      "start": 51.71,
+      "end": 52.58
+    },
+    {
+      "note_index": 78,
+      "start": 52.58,
+      "end": 53.11
+    },
+    {
+      "note_index": 79,
+      "start": 53.11,
+      "end": 54.02
+    },
+    {
+      "note_index": 80,
+      "start": 54.02,
+      "end": 54.69
+    },
+    {
+      "note_index": 81,
+      "start": 54.69,
+      "end": 55.06
+    },
+    {
+      "note_index": 82,
+      "start": 55.06,
+      "end": 55.86
+    },
+    {
+      "note_index": 83,
+      "start": 55.86,
+      "end": 56.83
+    },
+    {
+      "note_index": 84,
+      "start": 56.83,
+      "end": 57.54
+    },
+    {
+      "note_index": 85,
+      "start": 57.54,
+      "end": 58.58
+    },
+    {
+      "note_index": 86,
+      "start": 58.58,
+      "end": 61.19
+    }
+  ],
+  "gabc_src": "name:Agnus Dei IV;\noffice-part:Kyriale;\nmode:6;\nbook:Graduale Romanum, 1961, p. 17* & The Liber Usualis, 1961, p. 27 & Graduale Romanum, 1974, p. 727 & Chants of the Church, 1956, p. 18 & Gregorian Missal, 1990, p. 92 & Liber cantualis, 1983, p. 40;\ntranscriber:Andrew Hinkley;\ncommentary:(XII) XIII. s.;\n%%\n(c4) A(fg)gnus(gh) De(hvGF'E)i,(f.) *(,) qui(f) tol(gh~)lis(h') pec(j)cá(ixi)ta(hvGF) mun(gh~)di:(h.) (;) mi(h')se(f)ré(gvFE)re(g.) no(ghf)bis.(f.) (::)\nA(f)gnus(h') De(ixi)i,(j.) *(,) qui(ixi) tol(k')lis(j) pec(ixi')cá(j)ta(hvGF) mun(gh~)di:(h.) (;) mi(h')se(f)ré(gvFE)re(g.) no(ghf)bis.(f.) (::)\nA(fg)gnus(gh) De(hvGF'E)i,(f.) *(,) qui(f) tol(gh~)lis(h') pec(j)cá(ixi)ta(hvGF) mun(gh~)di:(h.) (;) do(h')na(f) no(gvFE)bis(g.) pa(ghf)cem.(f.) (::)"
+}

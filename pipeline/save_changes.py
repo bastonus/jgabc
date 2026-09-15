@@ -194,6 +194,12 @@ def save_review(piece_id: str, status: str, comment: str = "", reviewed_at: str 
     with open(REVIEWS_FILE, "w", encoding="utf-8") as f:
         json.dump(reviews, f, ensure_ascii=False, indent=2)
 
+    try:
+        from tools.review_queue import compute_and_save_stats
+        compute_and_save_stats()
+    except Exception:
+        pass
+
     print(f"[OK] Revue enregistrée pour le chant {piece_id} : {status} - {comment[:50]}")
     return True, f"Revue enregistrée pour {piece_id}"
 
@@ -296,7 +302,7 @@ def run_server(port=8080):
     server = HTTPServer(("0.0.0.0", port), LabApiHandler)
     print("============================================================")
     print(f" Serveur de Révision & Lab Oremus en écoute sur port {port}")
-    print(f" URL Lab : http://localhost:{port}/pipeline/align/alignment-lab.html")
+    print(f" URL Lab : http://localhost:{port}/pipeline/alignment-lab.html")
     print(f" URL App : http://localhost:{port}/divinum-officium.html")
     print("============================================================")
     try:

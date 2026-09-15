@@ -1,0 +1,2608 @@
+{
+  "id": "3089",
+  "youtube_id": "z6nSN6roHRU",
+  "title": "Amavit eum Dominus (All.)",
+  "incipit": "Amavit eum Dominus (All.)",
+  "part": "Alleluia",
+  "office_part": "",
+  "youtube_url": "https://www.youtube.com/watch?v=z6nSN6roHRU",
+  "audio_duration": 177.37,
+  "has_nabc": false,
+  "has_reprise": true,
+  "total_notes": 204,
+  "timestamps": [
+    {
+      "note_index": 0,
+      "start": 2.02,
+      "end": 3.07
+    },
+    {
+      "note_index": 1,
+      "start": 3.07,
+      "end": 3.6
+    },
+    {
+      "note_index": 2,
+      "start": 3.6,
+      "end": 3.93
+    },
+    {
+      "note_index": 3,
+      "start": 3.93,
+      "end": 4.5
+    },
+    {
+      "note_index": 4,
+      "start": 4.5,
+      "end": 5.21
+    },
+    {
+      "note_index": 5,
+      "start": 5.21,
+      "end": 6.08
+    },
+    {
+      "note_index": 6,
+      "start": 6.08,
+      "end": 6.63
+    },
+    {
+      "note_index": 7,
+      "start": 6.63,
+      "end": 7.04
+    },
+    {
+      "note_index": 8,
+      "start": 7.04,
+      "end": 7.6
+    },
+    {
+      "note_index": 9,
+      "start": 7.6,
+      "end": 8.16
+    },
+    {
+      "note_index": 10,
+      "start": 8.16,
+      "end": 8.72
+    },
+    {
+      "note_index": 11,
+      "start": 8.72,
+      "end": 8.99
+    },
+    {
+      "note_index": 12,
+      "start": 8.99,
+      "end": 9.56
+    },
+    {
+      "note_index": 13,
+      "start": 9.56,
+      "end": 9.98
+    },
+    {
+      "note_index": 14,
+      "start": 9.98,
+      "end": 10.77
+    },
+    {
+      "note_index": 15,
+      "start": 10.91,
+      "end": 11.83
+    },
+    {
+      "note_index": 16,
+      "start": 11.83,
+      "end": 12.35
+    },
+    {
+      "note_index": 17,
+      "start": 12.35,
+      "end": 12.9
+    },
+    {
+      "note_index": 18,
+      "start": 12.9,
+      "end": 13.15
+    },
+    {
+      "note_index": 19,
+      "start": 13.15,
+      "end": 14.09
+    },
+    {
+      "note_index": 20,
+      "start": 14.09,
+      "end": 14.86
+    },
+    {
+      "note_index": 21,
+      "start": 14.86,
+      "end": 15.53
+    },
+    {
+      "note_index": 22,
+      "start": 15.53,
+      "end": 15.95
+    },
+    {
+      "note_index": 23,
+      "start": 15.95,
+      "end": 16.59
+    },
+    {
+      "note_index": 24,
+      "start": 16.59,
+      "end": 17.17
+    },
+    {
+      "note_index": 25,
+      "start": 17.17,
+      "end": 17.72
+    },
+    {
+      "note_index": 26,
+      "start": 17.72,
+      "end": 17.91
+    },
+    {
+      "note_index": 27,
+      "start": 17.91,
+      "end": 18.4
+    },
+    {
+      "note_index": 28,
+      "start": 18.4,
+      "end": 20.12
+    },
+    {
+      "note_index": 29,
+      "start": 20.12,
+      "end": 20.48
+    },
+    {
+      "note_index": 30,
+      "start": 20.48,
+      "end": 21.03
+    },
+    {
+      "note_index": 31,
+      "start": 21.03,
+      "end": 21.46
+    },
+    {
+      "note_index": 32,
+      "start": 21.46,
+      "end": 21.84
+    },
+    {
+      "note_index": 33,
+      "start": 21.84,
+      "end": 22.41
+    },
+    {
+      "note_index": 34,
+      "start": 22.41,
+      "end": 23.43
+    },
+    {
+      "note_index": 35,
+      "start": 23.43,
+      "end": 24.12
+    },
+    {
+      "note_index": 36,
+      "start": 24.12,
+      "end": 24.77
+    },
+    {
+      "note_index": 37,
+      "start": 24.77,
+      "end": 25.27
+    },
+    {
+      "note_index": 38,
+      "start": 25.27,
+      "end": 25.77
+    },
+    {
+      "note_index": 39,
+      "start": 25.77,
+      "end": 26.64
+    },
+    {
+      "note_index": 40,
+      "start": 26.64,
+      "end": 26.84
+    },
+    {
+      "note_index": 41,
+      "start": 26.84,
+      "end": 27.18
+    },
+    {
+      "note_index": 42,
+      "start": 27.18,
+      "end": 27.84
+    },
+    {
+      "note_index": 43,
+      "start": 27.84,
+      "end": 31.34
+    },
+    {
+      "note_index": 44,
+      "start": 31.34,
+      "end": 33.53
+    },
+    {
+      "note_index": 45,
+      "start": 33.53,
+      "end": 34.49
+    },
+    {
+      "note_index": 46,
+      "start": 34.49,
+      "end": 34.67
+    },
+    {
+      "note_index": 47,
+      "start": 34.67,
+      "end": 34.85
+    },
+    {
+      "note_index": 48,
+      "start": 34.85,
+      "end": 35.85
+    },
+    {
+      "note_index": 49,
+      "start": 35.85,
+      "end": 38.39
+    },
+    {
+      "note_index": 50,
+      "start": 38.39,
+      "end": 38.67
+    },
+    {
+      "note_index": 51,
+      "start": 38.67,
+      "end": 38.82
+    },
+    {
+      "note_index": 52,
+      "start": 38.99,
+      "end": 40.91
+    },
+    {
+      "note_index": 53,
+      "start": 40.91,
+      "end": 43.45
+    },
+    {
+      "note_index": 54,
+      "start": 43.45,
+      "end": 45.99
+    },
+    {
+      "note_index": 55,
+      "start": 45.99,
+      "end": 46.77
+    },
+    {
+      "note_index": 56,
+      "start": 46.77,
+      "end": 47.82
+    },
+    {
+      "note_index": 57,
+      "start": 47.82,
+      "end": 48.39
+    },
+    {
+      "note_index": 58,
+      "start": 48.39,
+      "end": 48.61
+    },
+    {
+      "note_index": 59,
+      "start": 48.61,
+      "end": 48.82
+    },
+    {
+      "note_index": 60,
+      "start": 48.82,
+      "end": 49.0
+    },
+    {
+      "note_index": 61,
+      "start": 49.0,
+      "end": 50.41
+    },
+    {
+      "note_index": 62,
+      "start": 50.41,
+      "end": 51.65
+    },
+    {
+      "note_index": 63,
+      "start": 51.65,
+      "end": 52.88
+    },
+    {
+      "note_index": 64,
+      "start": 52.88,
+      "end": 53.06
+    },
+    {
+      "note_index": 65,
+      "start": 53.06,
+      "end": 53.24
+    },
+    {
+      "note_index": 66,
+      "start": 53.24,
+      "end": 53.42
+    },
+    {
+      "note_index": 67,
+      "start": 53.42,
+      "end": 53.6
+    },
+    {
+      "note_index": 68,
+      "start": 53.6,
+      "end": 53.78
+    },
+    {
+      "note_index": 69,
+      "start": 53.78,
+      "end": 54.03
+    },
+    {
+      "note_index": 70,
+      "start": 54.03,
+      "end": 57.11
+    },
+    {
+      "note_index": 71,
+      "start": 57.16,
+      "end": 57.78
+    },
+    {
+      "note_index": 72,
+      "start": 57.78,
+      "end": 57.92
+    },
+    {
+      "note_index": 73,
+      "start": 57.92,
+      "end": 58.08
+    },
+    {
+      "note_index": 74,
+      "start": 58.08,
+      "end": 58.22
+    },
+    {
+      "note_index": 75,
+      "start": 58.22,
+      "end": 58.45
+    },
+    {
+      "note_index": 76,
+      "start": 58.45,
+      "end": 59.22
+    },
+    {
+      "note_index": 77,
+      "start": 59.22,
+      "end": 61.32
+    },
+    {
+      "note_index": 78,
+      "start": 61.32,
+      "end": 62.06
+    },
+    {
+      "note_index": 79,
+      "start": 62.06,
+      "end": 62.8
+    },
+    {
+      "note_index": 80,
+      "start": 62.8,
+      "end": 62.94
+    },
+    {
+      "note_index": 81,
+      "start": 62.94,
+      "end": 63.08
+    },
+    {
+      "note_index": 82,
+      "start": 63.08,
+      "end": 63.22
+    },
+    {
+      "note_index": 83,
+      "start": 63.22,
+      "end": 63.36
+    },
+    {
+      "note_index": 84,
+      "start": 63.36,
+      "end": 63.5
+    },
+    {
+      "note_index": 85,
+      "start": 63.5,
+      "end": 63.64
+    },
+    {
+      "note_index": 86,
+      "start": 63.64,
+      "end": 63.85
+    },
+    {
+      "note_index": 87,
+      "start": 63.85,
+      "end": 63.99
+    },
+    {
+      "note_index": 88,
+      "start": 63.99,
+      "end": 64.86
+    },
+    {
+      "note_index": 89,
+      "start": 64.86,
+      "end": 67.52
+    },
+    {
+      "note_index": 90,
+      "start": 67.64,
+      "end": 68.82
+    },
+    {
+      "note_index": 91,
+      "start": 68.82,
+      "end": 69.43
+    },
+    {
+      "note_index": 92,
+      "start": 69.43,
+      "end": 69.98
+    },
+    {
+      "note_index": 93,
+      "start": 69.98,
+      "end": 70.52
+    },
+    {
+      "note_index": 94,
+      "start": 70.52,
+      "end": 71.12
+    },
+    {
+      "note_index": 95,
+      "start": 71.12,
+      "end": 71.72
+    },
+    {
+      "note_index": 96,
+      "start": 71.72,
+      "end": 72.9
+    },
+    {
+      "note_index": 97,
+      "start": 72.9,
+      "end": 73.05
+    },
+    {
+      "note_index": 98,
+      "start": 73.05,
+      "end": 73.42
+    },
+    {
+      "note_index": 99,
+      "start": 73.42,
+      "end": 73.56
+    },
+    {
+      "note_index": 100,
+      "start": 73.56,
+      "end": 73.7
+    },
+    {
+      "note_index": 101,
+      "start": 73.7,
+      "end": 73.84
+    },
+    {
+      "note_index": 102,
+      "start": 73.84,
+      "end": 73.98
+    },
+    {
+      "note_index": 103,
+      "start": 73.98,
+      "end": 74.12
+    },
+    {
+      "note_index": 104,
+      "start": 74.12,
+      "end": 74.27
+    },
+    {
+      "note_index": 105,
+      "start": 74.27,
+      "end": 74.41
+    },
+    {
+      "note_index": 106,
+      "start": 74.41,
+      "end": 74.55
+    },
+    {
+      "note_index": 107,
+      "start": 74.55,
+      "end": 75.62
+    },
+    {
+      "note_index": 108,
+      "start": 75.62,
+      "end": 76.45
+    },
+    {
+      "note_index": 109,
+      "start": 76.45,
+      "end": 76.97
+    },
+    {
+      "note_index": 110,
+      "start": 76.97,
+      "end": 77.5
+    },
+    {
+      "note_index": 111,
+      "start": 77.5,
+      "end": 78.12
+    },
+    {
+      "note_index": 112,
+      "start": 78.12,
+      "end": 78.5
+    },
+    {
+      "note_index": 113,
+      "start": 78.5,
+      "end": 79.05
+    },
+    {
+      "note_index": 114,
+      "start": 79.05,
+      "end": 80.1
+    },
+    {
+      "note_index": 115,
+      "start": 80.1,
+      "end": 80.42
+    },
+    {
+      "note_index": 116,
+      "start": 80.42,
+      "end": 80.92
+    },
+    {
+      "note_index": 117,
+      "start": 80.92,
+      "end": 81.88
+    },
+    {
+      "note_index": 118,
+      "start": 81.88,
+      "end": 82.08
+    },
+    {
+      "note_index": 119,
+      "start": 82.08,
+      "end": 82.22
+    },
+    {
+      "note_index": 120,
+      "start": 82.22,
+      "end": 82.36
+    },
+    {
+      "note_index": 121,
+      "start": 82.36,
+      "end": 82.67
+    },
+    {
+      "note_index": 122,
+      "start": 82.67,
+      "end": 82.81
+    },
+    {
+      "note_index": 123,
+      "start": 82.81,
+      "end": 82.95
+    },
+    {
+      "note_index": 124,
+      "start": 82.95,
+      "end": 83.09
+    },
+    {
+      "note_index": 125,
+      "start": 83.09,
+      "end": 83.55
+    },
+    {
+      "note_index": 126,
+      "start": 83.55,
+      "end": 83.84
+    },
+    {
+      "note_index": 127,
+      "start": 83.84,
+      "end": 83.98
+    },
+    {
+      "note_index": 128,
+      "start": 83.98,
+      "end": 84.12
+    },
+    {
+      "note_index": 129,
+      "start": 84.12,
+      "end": 84.3
+    },
+    {
+      "note_index": 130,
+      "start": 84.3,
+      "end": 84.44
+    },
+    {
+      "note_index": 131,
+      "start": 84.44,
+      "end": 84.59
+    },
+    {
+      "note_index": 132,
+      "start": 84.59,
+      "end": 84.73
+    },
+    {
+      "note_index": 133,
+      "start": 84.73,
+      "end": 85.33
+    },
+    {
+      "note_index": 134,
+      "start": 85.33,
+      "end": 85.99
+    },
+    {
+      "note_index": 135,
+      "start": 85.99,
+      "end": 86.53
+    },
+    {
+      "note_index": 136,
+      "start": 86.53,
+      "end": 86.85
+    },
+    {
+      "note_index": 137,
+      "start": 86.85,
+      "end": 87.25
+    },
+    {
+      "note_index": 138,
+      "start": 87.25,
+      "end": 87.8
+    },
+    {
+      "note_index": 139,
+      "start": 87.8,
+      "end": 88.66
+    },
+    {
+      "note_index": 140,
+      "start": 88.76,
+      "end": 89.46
+    },
+    {
+      "note_index": 141,
+      "start": 89.46,
+      "end": 89.88
+    },
+    {
+      "note_index": 142,
+      "start": 89.88,
+      "end": 90.43
+    },
+    {
+      "note_index": 143,
+      "start": 90.43,
+      "end": 90.71
+    },
+    {
+      "note_index": 144,
+      "start": 90.71,
+      "end": 91.33
+    },
+    {
+      "note_index": 145,
+      "start": 91.33,
+      "end": 91.82
+    },
+    {
+      "note_index": 146,
+      "start": 91.82,
+      "end": 92.66
+    },
+    {
+      "note_index": 147,
+      "start": 92.66,
+      "end": 93.28
+    },
+    {
+      "note_index": 148,
+      "start": 93.28,
+      "end": 93.66
+    },
+    {
+      "note_index": 149,
+      "start": 93.66,
+      "end": 94.19
+    },
+    {
+      "note_index": 150,
+      "start": 94.19,
+      "end": 94.68
+    },
+    {
+      "note_index": 151,
+      "start": 94.68,
+      "end": 95.51
+    },
+    {
+      "note_index": 152,
+      "start": 95.51,
+      "end": 96.11
+    },
+    {
+      "note_index": 153,
+      "start": 96.11,
+      "end": 96.68
+    },
+    {
+      "note_index": 154,
+      "start": 96.68,
+      "end": 97.07
+    },
+    {
+      "note_index": 155,
+      "start": 97.07,
+      "end": 97.72
+    },
+    {
+      "note_index": 156,
+      "start": 97.72,
+      "end": 98.3
+    },
+    {
+      "note_index": 157,
+      "start": 98.3,
+      "end": 98.87
+    },
+    {
+      "note_index": 158,
+      "start": 98.87,
+      "end": 99.24
+    },
+    {
+      "note_index": 159,
+      "start": 99.24,
+      "end": 99.76
+    },
+    {
+      "note_index": 160,
+      "start": 99.76,
+      "end": 100.4
+    },
+    {
+      "note_index": 161,
+      "start": 100.4,
+      "end": 101.44
+    },
+    {
+      "note_index": 162,
+      "start": 101.57,
+      "end": 102.28
+    },
+    {
+      "note_index": 163,
+      "start": 102.28,
+      "end": 102.74
+    },
+    {
+      "note_index": 164,
+      "start": 102.74,
+      "end": 103.1
+    },
+    {
+      "note_index": 165,
+      "start": 103.1,
+      "end": 103.58
+    },
+    {
+      "note_index": 166,
+      "start": 103.58,
+      "end": 104.49
+    },
+    {
+      "note_index": 167,
+      "start": 104.49,
+      "end": 105.11
+    },
+    {
+      "note_index": 168,
+      "start": 105.11,
+      "end": 105.64
+    },
+    {
+      "note_index": 169,
+      "start": 105.64,
+      "end": 106.31
+    },
+    {
+      "note_index": 170,
+      "start": 106.31,
+      "end": 106.92
+    },
+    {
+      "note_index": 171,
+      "start": 106.92,
+      "end": 107.34
+    },
+    {
+      "note_index": 172,
+      "start": 107.34,
+      "end": 108.1
+    },
+    {
+      "note_index": 173,
+      "start": 108.1,
+      "end": 108.34
+    },
+    {
+      "note_index": 174,
+      "start": 108.34,
+      "end": 108.93
+    },
+    {
+      "note_index": 175,
+      "start": 108.93,
+      "end": 109.75
+    },
+    {
+      "note_index": 176,
+      "start": 109.75,
+      "end": 110.77
+    },
+    {
+      "note_index": 177,
+      "start": 110.77,
+      "end": 111.55
+    },
+    {
+      "note_index": 178,
+      "start": 111.55,
+      "end": 111.99
+    },
+    {
+      "note_index": 179,
+      "start": 111.99,
+      "end": 112.6
+    },
+    {
+      "note_index": 180,
+      "start": 112.6,
+      "end": 112.99
+    },
+    {
+      "note_index": 181,
+      "start": 112.99,
+      "end": 113.41
+    },
+    {
+      "note_index": 182,
+      "start": 113.41,
+      "end": 113.59
+    },
+    {
+      "note_index": 183,
+      "start": 113.59,
+      "end": 114.0
+    },
+    {
+      "note_index": 184,
+      "start": 114.0,
+      "end": 115.38
+    },
+    {
+      "note_index": 185,
+      "start": 115.38,
+      "end": 115.79
+    },
+    {
+      "note_index": 186,
+      "start": 115.79,
+      "end": 116.72
+    },
+    {
+      "note_index": 187,
+      "start": 116.72,
+      "end": 117.0
+    },
+    {
+      "note_index": 188,
+      "start": 117.0,
+      "end": 117.52
+    },
+    {
+      "note_index": 189,
+      "start": 117.52,
+      "end": 117.88
+    },
+    {
+      "note_index": 190,
+      "start": 117.88,
+      "end": 118.53
+    },
+    {
+      "note_index": 191,
+      "start": 118.53,
+      "end": 119.18
+    },
+    {
+      "note_index": 192,
+      "start": 119.18,
+      "end": 120.03
+    },
+    {
+      "note_index": 193,
+      "start": 120.03,
+      "end": 120.64
+    },
+    {
+      "note_index": 194,
+      "start": 120.64,
+      "end": 121.32
+    },
+    {
+      "note_index": 195,
+      "start": 121.32,
+      "end": 122.03
+    },
+    {
+      "note_index": 196,
+      "start": 122.03,
+      "end": 122.67
+    },
+    {
+      "note_index": 197,
+      "start": 122.67,
+      "end": 123.19
+    },
+    {
+      "note_index": 198,
+      "start": 123.19,
+      "end": 123.82
+    },
+    {
+      "note_index": 199,
+      "start": 123.82,
+      "end": 124.13
+    },
+    {
+      "note_index": 200,
+      "start": 124.13,
+      "end": 124.77
+    },
+    {
+      "note_index": 201,
+      "start": 124.77,
+      "end": 126.24
+    },
+    {
+      "note_index": 202,
+      "start": 126.24,
+      "end": 127.14
+    },
+    {
+      "note_index": 203,
+      "start": 127.14,
+      "end": 128.35
+    }
+  ],
+  "gabc_src": "name: Amavit eum Dominus (All.);\noffice-part: Alleluia;\nmode: 4;\nbook: Graduale Romanum, 1961, p. [39] & The Liber Usualis, 1961, p. 1191;\ntranscriber: Andrew Hinkley;\ncommentary: Eccli 45: 9;\n%%\n(c4) AL(c)le(d!fde./fge/fddc)lú(de~)ia.(e.) {*}~<i>ij.</i>(;) (cd/fde./fge/fd/!dc/ege.) (,) (cd/fde./fge/fd/!dc/ege.) (,) (ghGF'Dee) (,) (fgF'Ededdc//fff/ghGFgvFE.) (::)\n<sp>V/</sp>. A(c)má(dfd/ef)vit(f.) e(ffe)um(e[ll:1]d~) Dó(deD'C)mi(de)nus,(e.) (;) et(c) or(eg~)ná(ggf/gefvED)vit(ce) e(effe)um:(e.) (:)\nsto(c)lam(e) gló(ixgh!ivHG//fhGE.,ixce/ghivHG//fhGE.,gvFED'evD'C)ri(de)æ(e.) (;) índ(c)u(dfd/ef)it(e.) *() e(cd/fde./fge/fd/!dc/ege.,cd/fde./fge/fd/!dc/ege.,ghGF'Dee,fgF'Ededdc//fff/ghGFgvFE)um.(e.) (::)",
+  "reprise": {
+    "start": 128.4,
+    "end": 172.66,
+    "duration": 44.26,
+    "antiphon_note_count": 71,
+    "reprise_after_section": "verse",
+    "skips_doxology": true,
+    "notes": [
+      {
+        "note_index": 0,
+        "mapping_index": 5,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "L",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": true,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 128.4,
+        "end": 129.11,
+        "duration": 0.71,
+        "confidence": 0.35
+      },
+      {
+        "note_index": 1,
+        "mapping_index": 5,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 129.11,
+        "end": 129.62,
+        "duration": 0.51,
+        "confidence": 0.49
+      },
+      {
+        "note_index": 2,
+        "mapping_index": 5,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 129.62,
+        "end": 129.95,
+        "duration": 0.33,
+        "confidence": 0.55
+      },
+      {
+        "note_index": 3,
+        "mapping_index": 5,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 129.95,
+        "end": 130.53,
+        "duration": 0.58,
+        "confidence": 0.79
+      },
+      {
+        "note_index": 4,
+        "mapping_index": 5,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 130.53,
+        "end": 131.33,
+        "duration": 0.8,
+        "confidence": 0.39
+      },
+      {
+        "note_index": 5,
+        "mapping_index": 5,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 131.33,
+        "end": 132.08,
+        "duration": 0.75,
+        "confidence": 0.77
+      },
+      {
+        "note_index": 6,
+        "mapping_index": 5,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 132.08,
+        "end": 132.64,
+        "duration": 0.56,
+        "confidence": 0.75
+      },
+      {
+        "note_index": 7,
+        "mapping_index": 5,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 132.64,
+        "end": 133.16,
+        "duration": 0.52,
+        "confidence": 0.38
+      },
+      {
+        "note_index": 8,
+        "mapping_index": 5,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 133.16,
+        "end": 133.65,
+        "duration": 0.49,
+        "confidence": 0.74
+      },
+      {
+        "note_index": 9,
+        "mapping_index": 5,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 133.65,
+        "end": 134.24,
+        "duration": 0.59,
+        "confidence": 0.57
+      },
+      {
+        "note_index": 10,
+        "mapping_index": 5,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 134.24,
+        "end": 134.83,
+        "duration": 0.59,
+        "confidence": 0.83
+      },
+      {
+        "note_index": 11,
+        "mapping_index": 5,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "le",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 134.83,
+        "end": 134.97,
+        "duration": 0.14,
+        "confidence": 0.3
+      },
+      {
+        "note_index": 12,
+        "mapping_index": 5,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "lú",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 134.97,
+        "end": 135.54,
+        "duration": 0.57,
+        "confidence": 0.6
+      },
+      {
+        "note_index": 13,
+        "mapping_index": 5,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "lú",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 135.54,
+        "end": 135.96,
+        "duration": 0.42,
+        "confidence": 0.37
+      },
+      {
+        "note_index": 14,
+        "mapping_index": 5,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "ia.",
+        "section": "reprise",
+        "is_word_end": true,
+        "is_syl_start": true,
+        "is_phrase_start": false,
+        "is_phrase_end": true,
+        "is_breath_after": true,
+        "bar_after": ";",
+        "start": 135.96,
+        "end": 136.9,
+        "duration": 0.94,
+        "confidence": 0.46
+      },
+      {
+        "note_index": 15,
+        "mapping_index": 62,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": true,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 137.02,
+        "end": 137.76,
+        "duration": 0.74,
+        "confidence": 0.74
+      },
+      {
+        "note_index": 16,
+        "mapping_index": 62,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 137.76,
+        "end": 138.2,
+        "duration": 0.44,
+        "confidence": 0.36
+      },
+      {
+        "note_index": 17,
+        "mapping_index": 62,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 138.2,
+        "end": 138.72,
+        "duration": 0.52,
+        "confidence": 0.45
+      },
+      {
+        "note_index": 18,
+        "mapping_index": 62,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 138.72,
+        "end": 138.98,
+        "duration": 0.26,
+        "confidence": 0.4
+      },
+      {
+        "note_index": 19,
+        "mapping_index": 62,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 138.98,
+        "end": 139.96,
+        "duration": 0.98,
+        "confidence": 0.41
+      },
+      {
+        "note_index": 20,
+        "mapping_index": 62,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 139.96,
+        "end": 140.68,
+        "duration": 0.72,
+        "confidence": 0.51
+      },
+      {
+        "note_index": 21,
+        "mapping_index": 62,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 140.68,
+        "end": 141.24,
+        "duration": 0.56,
+        "confidence": 0.41
+      },
+      {
+        "note_index": 22,
+        "mapping_index": 62,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 141.24,
+        "end": 141.74,
+        "duration": 0.5,
+        "confidence": 0.31
+      },
+      {
+        "note_index": 23,
+        "mapping_index": 62,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 141.74,
+        "end": 142.6,
+        "duration": 0.86,
+        "confidence": 0.71
+      },
+      {
+        "note_index": 24,
+        "mapping_index": 62,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 142.6,
+        "end": 143.01,
+        "duration": 0.41,
+        "confidence": 0.38
+      },
+      {
+        "note_index": 25,
+        "mapping_index": 62,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 143.01,
+        "end": 143.62,
+        "duration": 0.61,
+        "confidence": 0.28
+      },
+      {
+        "note_index": 26,
+        "mapping_index": 62,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 143.62,
+        "end": 143.96,
+        "duration": 0.34,
+        "confidence": 0.7
+      },
+      {
+        "note_index": 27,
+        "mapping_index": 62,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 143.96,
+        "end": 144.46,
+        "duration": 0.5,
+        "confidence": 0.52
+      },
+      {
+        "note_index": 28,
+        "mapping_index": 62,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 144.46,
+        "end": 145.22,
+        "duration": 0.76,
+        "confidence": 0.66
+      },
+      {
+        "note_index": 29,
+        "mapping_index": 62,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": true,
+        "bar_after": ",",
+        "start": 145.22,
+        "end": 145.97,
+        "duration": 0.75,
+        "confidence": 0.4
+      },
+      {
+        "note_index": 30,
+        "mapping_index": 92,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": true,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 145.97,
+        "end": 146.73,
+        "duration": 0.76,
+        "confidence": 0.64
+      },
+      {
+        "note_index": 31,
+        "mapping_index": 92,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 146.73,
+        "end": 147.29,
+        "duration": 0.56,
+        "confidence": 0.39
+      },
+      {
+        "note_index": 32,
+        "mapping_index": 92,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 147.29,
+        "end": 147.7,
+        "duration": 0.41,
+        "confidence": 0.49
+      },
+      {
+        "note_index": 33,
+        "mapping_index": 92,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 147.7,
+        "end": 148.15,
+        "duration": 0.45,
+        "confidence": 0.38
+      },
+      {
+        "note_index": 34,
+        "mapping_index": 92,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 148.15,
+        "end": 149.07,
+        "duration": 0.92,
+        "confidence": 0.39
+      },
+      {
+        "note_index": 35,
+        "mapping_index": 92,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 149.07,
+        "end": 149.78,
+        "duration": 0.71,
+        "confidence": 0.63
+      },
+      {
+        "note_index": 36,
+        "mapping_index": 92,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 149.78,
+        "end": 150.33,
+        "duration": 0.55,
+        "confidence": 0.38
+      },
+      {
+        "note_index": 37,
+        "mapping_index": 92,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 150.33,
+        "end": 150.76,
+        "duration": 0.43,
+        "confidence": 0.51
+      },
+      {
+        "note_index": 38,
+        "mapping_index": 92,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 150.76,
+        "end": 151.6,
+        "duration": 0.84,
+        "confidence": 0.82
+      },
+      {
+        "note_index": 39,
+        "mapping_index": 92,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 151.6,
+        "end": 151.99,
+        "duration": 0.39,
+        "confidence": 0.48
+      },
+      {
+        "note_index": 40,
+        "mapping_index": 92,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 151.99,
+        "end": 152.77,
+        "duration": 0.78,
+        "confidence": 0.25
+      },
+      {
+        "note_index": 41,
+        "mapping_index": 92,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 152.77,
+        "end": 153.11,
+        "duration": 0.34,
+        "confidence": 0.44
+      },
+      {
+        "note_index": 42,
+        "mapping_index": 92,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 153.11,
+        "end": 153.67,
+        "duration": 0.56,
+        "confidence": 0.42
+      },
+      {
+        "note_index": 43,
+        "mapping_index": 92,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 153.67,
+        "end": 154.34,
+        "duration": 0.67,
+        "confidence": 0.6
+      },
+      {
+        "note_index": 44,
+        "mapping_index": 92,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": true,
+        "bar_after": ",",
+        "start": 154.34,
+        "end": 155.35,
+        "duration": 1.01,
+        "confidence": 0.49
+      },
+      {
+        "note_index": 45,
+        "mapping_index": 122,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": true,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 155.35,
+        "end": 156.2,
+        "duration": 0.85,
+        "confidence": 0.34
+      },
+      {
+        "note_index": 46,
+        "mapping_index": 122,
+        "staff_position": 5,
+        "pitch_semitones": 21,
+        "pitch": 21,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 156.2,
+        "end": 156.62,
+        "duration": 0.42,
+        "confidence": 0.4
+      },
+      {
+        "note_index": 47,
+        "mapping_index": 122,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 156.62,
+        "end": 157.58,
+        "duration": 0.96,
+        "confidence": 0.66
+      },
+      {
+        "note_index": 48,
+        "mapping_index": 122,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 157.58,
+        "end": 157.72,
+        "duration": 0.14,
+        "confidence": 0.56
+      },
+      {
+        "note_index": 49,
+        "mapping_index": 122,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 157.72,
+        "end": 158.04,
+        "duration": 0.32,
+        "confidence": 0.43
+      },
+      {
+        "note_index": 50,
+        "mapping_index": 122,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 158.04,
+        "end": 158.91,
+        "duration": 0.87,
+        "confidence": 0.48
+      },
+      {
+        "note_index": 51,
+        "mapping_index": 122,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": true,
+        "bar_after": ",",
+        "start": 158.91,
+        "end": 159.26,
+        "duration": 0.35,
+        "confidence": 0.26
+      },
+      {
+        "note_index": 52,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": true,
+        "is_phrase_start": true,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 159.26,
+        "end": 159.98,
+        "duration": 0.72,
+        "confidence": 0.09
+      },
+      {
+        "note_index": 53,
+        "mapping_index": 137,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 159.98,
+        "end": 160.68,
+        "duration": 0.7,
+        "confidence": 0.56
+      },
+      {
+        "note_index": 54,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 160.68,
+        "end": 161.49,
+        "duration": 0.81,
+        "confidence": 0.51
+      },
+      {
+        "note_index": 55,
+        "mapping_index": 137,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 161.49,
+        "end": 161.63,
+        "duration": 0.14,
+        "confidence": 0.43
+      },
+      {
+        "note_index": 56,
+        "mapping_index": 137,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 161.63,
+        "end": 162.06,
+        "duration": 0.43,
+        "confidence": 0.38
+      },
+      {
+        "note_index": 57,
+        "mapping_index": 137,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 162.06,
+        "end": 162.37,
+        "duration": 0.31,
+        "confidence": 0.59
+      },
+      {
+        "note_index": 58,
+        "mapping_index": 137,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 162.37,
+        "end": 163.13,
+        "duration": 0.76,
+        "confidence": 0.66
+      },
+      {
+        "note_index": 59,
+        "mapping_index": 137,
+        "staff_position": 1,
+        "pitch_semitones": 14,
+        "pitch": 14,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 163.13,
+        "end": 163.88,
+        "duration": 0.75,
+        "confidence": 0.81
+      },
+      {
+        "note_index": 60,
+        "mapping_index": 137,
+        "staff_position": 0,
+        "pitch_semitones": 12,
+        "pitch": 12,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 163.88,
+        "end": 164.68,
+        "duration": 0.8,
+        "confidence": 0.47
+      },
+      {
+        "note_index": 61,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 164.68,
+        "end": 165.33,
+        "duration": 0.65,
+        "confidence": 0.63
+      },
+      {
+        "note_index": 62,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 165.33,
+        "end": 165.98,
+        "duration": 0.65,
+        "confidence": 0.85
+      },
+      {
+        "note_index": 63,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 165.98,
+        "end": 166.42,
+        "duration": 0.44,
+        "confidence": 0.84
+      },
+      {
+        "note_index": 64,
+        "mapping_index": 137,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 166.42,
+        "end": 167.18,
+        "duration": 0.76,
+        "confidence": 0.8
+      },
+      {
+        "note_index": 65,
+        "mapping_index": 137,
+        "staff_position": 5,
+        "pitch_semitones": 21,
+        "pitch": 21,
+        "shape": 0,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 167.18,
+        "end": 167.61,
+        "duration": 0.43,
+        "confidence": 0.66
+      },
+      {
+        "note_index": 66,
+        "mapping_index": 137,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 167.61,
+        "end": 168.39,
+        "duration": 0.78,
+        "confidence": 0.66
+      },
+      {
+        "note_index": 67,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 168.39,
+        "end": 168.68,
+        "duration": 0.29,
+        "confidence": 0.49
+      },
+      {
+        "note_index": 68,
+        "mapping_index": 137,
+        "staff_position": 4,
+        "pitch_semitones": 19,
+        "pitch": 19,
+        "shape": 1,
+        "is_pointed": false,
+        "duration_weight": 1,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 168.68,
+        "end": 169.33,
+        "duration": 0.65,
+        "confidence": 0.59
+      },
+      {
+        "note_index": 69,
+        "mapping_index": 137,
+        "staff_position": 3,
+        "pitch_semitones": 17,
+        "pitch": 17,
+        "shape": 2,
+        "is_pointed": false,
+        "duration_weight": 1.4,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": false,
+        "is_breath_after": false,
+        "bar_after": null,
+        "start": 169.33,
+        "end": 170.14,
+        "duration": 0.81,
+        "confidence": 0.36
+      },
+      {
+        "note_index": 70,
+        "mapping_index": 137,
+        "staff_position": 2,
+        "pitch_semitones": 16,
+        "pitch": 16,
+        "shape": 2,
+        "is_pointed": true,
+        "duration_weight": 2,
+        "word": "—",
+        "section": "reprise",
+        "is_word_end": false,
+        "is_syl_start": false,
+        "is_phrase_start": false,
+        "is_phrase_end": true,
+        "is_breath_after": true,
+        "bar_after": "::",
+        "start": 170.14,
+        "end": 172.66,
+        "duration": 2.52,
+        "confidence": 0.62
+      }
+    ]
+  }
+}

@@ -1,0 +1,1874 @@
+// Catalogue raisonné des œuvres d'art du Sanctoral (Auteur, Titre, Époque, Musée)
+window.DO_SAINT_ART_METADATA = {
+  "01-01": {
+    "artwork": "L'Adoration des bergers",
+    "artist": "Matthias Stom",
+    "year": "vers 1640",
+    "location": "Musée des Beaux-Arts de Nantes",
+    "feast": "Nativity of Jesus"
+  },
+  "01-02": {
+    "artwork": "Saint Étienne",
+    "artist": "Carlo Crivelli",
+    "year": "1476",
+    "location": "National Gallery, Londres",
+    "feast": "Saint Stephen"
+  },
+  "01-03": {
+    "artwork": "Saint Jean l'Évangéliste",
+    "artist": "Pierre Paul Rubens",
+    "year": "vers 1611",
+    "location": "Musée du Prado, Madrid",
+    "feast": "John the Apostle"
+  },
+  "01-04": {
+    "artwork": "La Vierge entourée des saints Innocents",
+    "artist": "École française classique",
+    "year": "XVIIe siècle",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Massacre of the Innocents"
+  },
+  "01-05": {
+    "artwork": "Le Pape saint Télesphore",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Telesphorus"
+  },
+  "01-06": {
+    "artwork": "L'Adoration des Mages",
+    "artist": "Edward Burne-Jones",
+    "year": "1890",
+    "location": "Manchester Art Gallery",
+    "feast": "Epiphany (Christian)"
+  },
+  "01-11": {
+    "artwork": "Le Pape saint Hygin",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Hyginus"
+  },
+  "01-13": {
+    "artwork": "Le Baptême du Christ",
+    "artist": "José Ferraz de Almeida Júnior",
+    "year": "1895",
+    "location": "Pinacothèque de l'État de São Paulo",
+    "feast": "Baptism of Jesus"
+  },
+  "01-14": {
+    "artwork": "Saint Hilaire de Poitiers",
+    "artist": "École classique française",
+    "year": "XVIIe siècle",
+    "location": "Cathédrale de Poitiers",
+    "feast": "Hilary of Poitiers"
+  },
+  "01-15": {
+    "artwork": "Saint Paul, premier ermite",
+    "artist": "José de Ribera",
+    "year": "1640",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Paul of Thebes"
+  },
+  "01-16": {
+    "artwork": "Saint Marcel pape et martyr",
+    "artist": "Domenico Tintoretto",
+    "year": "vers 1595",
+    "location": "Église San Marcello al Corso, Rome",
+    "feast": "Pope Marcellus I"
+  },
+  "01-17": {
+    "artwork": "Saint Antoine le Grand",
+    "artist": "Michel Damaskinos",
+    "year": "XVIe siècle",
+    "location": "Héraklion, Crète",
+    "feast": "Anthony of Egypt"
+  },
+  "01-18": {
+    "artwork": "Le Martyre de sainte Prisque",
+    "artist": "Domenico Passignano",
+    "year": "1600",
+    "location": "Église Sainte-Prisque, Rome",
+    "feast": "Saint Prisca"
+  },
+  "01-19": {
+    "artwork": "Saints Marius, Marthe, Audifax et Abachum",
+    "artist": "Le Guerchin (Guercino)",
+    "year": "vers 1640",
+    "location": "Bologne",
+    "feast": "Maris, Martha, Abachum and Audifax"
+  },
+  "01-20": {
+    "artwork": "Polyptyque de saint Sébastien",
+    "artist": "Giovanni Bellini",
+    "year": "1464",
+    "location": "Gallerie dell'Accademia, Venise",
+    "feast": "Pope Fabian"
+  },
+  "01-21": {
+    "artwork": "Sainte Agnès",
+    "artist": "Andrea del Sarto",
+    "year": "1531",
+    "location": "Cathédrale de Pise",
+    "feast": "Saint Agnes"
+  },
+  "01-22": {
+    "artwork": "Saint Vincent martyr",
+    "artist": "Maître de San Vicente",
+    "year": "XVe siècle",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Vincent of Saragossa"
+  },
+  "01-23": {
+    "artwork": "Saint Raymond de Peñafort",
+    "artist": "Alonso Cano",
+    "year": "vers 1650",
+    "location": "Séville",
+    "feast": "Raymond of Peñafort"
+  },
+  "01-24": {
+    "artwork": "Saint Timothée",
+    "artist": "Enluminure byzantine impériale",
+    "year": "XIe siècle",
+    "location": "Athènes",
+    "feast": "Saint Timothy"
+  },
+  "01-25": {
+    "artwork": "La Conversion de saint Paul sur le chemin de Damas",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1601",
+    "location": "Santa Maria del Popolo, Rome",
+    "feast": "Conversion of Paul the Apostle"
+  },
+  "01-26": {
+    "artwork": "Saint Polycarpe de Smyrne",
+    "artist": "Fresque paléochrétienne",
+    "year": "Smyrne",
+    "feast": "Polycarp"
+  },
+  "01-27": {
+    "artwork": "Saint Jean Chrysostome",
+    "artist": "Icône monumentale byzantine",
+    "year": "XVe siècle",
+    "location": "Mont Athos",
+    "feast": "John Chrysostom"
+  },
+  "01-28": {
+    "artwork": "Apparition de saint Pierre à saint Pierre Nolasque",
+    "artist": "Francisco de Zurbarán",
+    "year": "1629",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Saint Pedro Nolasco"
+  },
+  "01-29": {
+    "artwork": "Saint François de Sales",
+    "artist": "Atelier français classique",
+    "year": "XVIIe siècle",
+    "location": "Annecy",
+    "feast": "Francis de Sales"
+  },
+  "01-30": {
+    "artwork": "Sainte Martine",
+    "artist": "Pierre de Cortone (Pietro da Cortona)",
+    "year": "1634",
+    "location": "Église Santi Luca e Martina, Rome",
+    "feast": "Martina of Rome"
+  },
+  "01-31": {
+    "artwork": "Saint Jean Bosco",
+    "artist": "Portrait authentique",
+    "year": "1888",
+    "location": "Turin",
+    "feast": "John Bosco"
+  },
+  "02-01": {
+    "artwork": "Le Martyre de saint Ignace d'Antioche",
+    "artist": "Ménologe de Basile II",
+    "year": "vers 1000",
+    "location": "Bibliothèque apostolique vaticane",
+    "feast": "Ignatius of Antioch"
+  },
+  "02-02": {
+    "artwork": "La Présentation de Jésus au Temple",
+    "artist": "Fra Angelico",
+    "year": "1440",
+    "location": "Couvent San Marco, Florence",
+    "feast": "Presentation of Jesus at the Temple"
+  },
+  "02-03": {
+    "artwork": "Saint Blaise",
+    "artist": "Hans Memling",
+    "year": "1491",
+    "location": "Sainte-Anne de Lübeck",
+    "feast": "Saint Blaise"
+  },
+  "02-04": {
+    "artwork": "Saint André Corsini",
+    "artist": "Guido Reni",
+    "year": "1630",
+    "location": "Pinacothèque nationale de Bologne",
+    "feast": "Andrew Corsini"
+  },
+  "02-05": {
+    "artwork": "Le Martyre de sainte Agathe",
+    "artist": "Sebastiano del Piombo",
+    "year": "1520",
+    "location": "Galerie des Offices, Florence",
+    "feast": "Feast of Saint Agatha"
+  },
+  "02-06": {
+    "artwork": "Saint Tite disciple de saint Paul",
+    "artist": "Le Greco (El Greco)",
+    "year": "vers 1600",
+    "location": "Tolède",
+    "feast": "Saint Titus"
+  },
+  "02-07": {
+    "artwork": "La Vision de saint Romuald",
+    "artist": "Andrea Sacchi",
+    "year": "1631",
+    "location": "Pinacothèque vaticane, Rome",
+    "feast": "Romuald"
+  },
+  "02-08": {
+    "artwork": "La Vision de saint Jean de Matha",
+    "artist": "Vicente Carducho",
+    "year": "1632",
+    "location": "Musée du Prado, Madrid",
+    "feast": "John of Matha"
+  },
+  "02-09": {
+    "artwork": "Saint Cyrille d'Alexandrie",
+    "artist": "Fresque médiévale copte",
+    "year": "Le Caire",
+    "feast": "Cyril of Alexandria"
+  },
+  "02-10": {
+    "artwork": "La Mort de sainte Scholastique",
+    "artist": "Jean-Baptiste Jouvenet",
+    "year": "1700",
+    "location": "Musée des Beaux-Arts, Rouen",
+    "feast": "Scholastica"
+  },
+  "02-11": {
+    "artwork": "L'Apparition de l'Immaculée Conception",
+    "artist": "Tableau dévotionnel du XIXe siècle",
+    "year": "1864",
+    "location": "Sanctuaire de Lourdes",
+    "feast": "Our Lady of Lourdes"
+  },
+  "02-12": {
+    "artwork": "Les Sept Saints Fondateurs des Servites",
+    "artist": "Retable florentin de la Santissima Annunziata",
+    "year": "Florence",
+    "feast": "Servite Order"
+  },
+  "02-14": {
+    "artwork": "Saint Valentin baptisant sainte Lucille",
+    "artist": "Jacopo Bassano",
+    "year": "1575",
+    "location": "Musée Civique de Bassano",
+    "feast": "Saint Valentine"
+  },
+  "02-15": {
+    "artwork": "Le Martyre des saints Faustin et Jovite",
+    "artist": "Giambattista Tiepolo",
+    "year": "1755",
+    "location": "Brescia",
+    "feast": "Faustinus and Jovita"
+  },
+  "02-18": {
+    "artwork": "Saint Siméon, évêque de Jérusalem",
+    "artist": "Icône traditionnelle des Apôtres",
+    "year": "Jérusalem",
+    "feast": "Simeon of Jerusalem"
+  },
+  "02-22": {
+    "artwork": "La Chaire de saint Pierre",
+    "artist": "Pierre Paul Rubens",
+    "year": "vers 1620",
+    "location": "Vienne",
+    "feast": "Chair of Saint Peter"
+  },
+  "02-23": {
+    "artwork": "Saint Pierre Damien en cardinal",
+    "artist": "Ercole de' Roberti",
+    "year": "1480",
+    "location": "Pinacothèque de Brera, Milan",
+    "feast": "Petrus Damiani"
+  },
+  "02-24": {
+    "artwork": "L'Apôtre saint Matthias",
+    "artist": "Pierre Paul Rubens",
+    "year": "1611",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Saint Matthias"
+  },
+  "02-27": {
+    "artwork": "Saint Gabriel de l'Addolorata",
+    "artist": "Portrait canonique",
+    "year": "Isola del Gran Sasso",
+    "feast": "Gabriel of Our Lady of Sorrows"
+  },
+  "03-04": {
+    "artwork": "Saint Casimir en prière",
+    "artist": "Peinture originale anonyme",
+    "year": "1594",
+    "location": "Cathédrale de Vilnius, Lituanie",
+    "feast": "Saint Casimir"
+  },
+  "03-06": {
+    "artwork": "Sainte Perpétue et sainte Félicité",
+    "artist": "Ménologe de Basile II",
+    "year": "vers 1000",
+    "location": "Bibliothèque apostolique vaticane",
+    "feast": "Perpetua and Felicity"
+  },
+  "03-07": {
+    "artwork": "Saint Thomas d'Aquin en docteur de l'Église",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "vers 1665",
+    "location": "Musée de Séville",
+    "feast": "Thomas Aquinas"
+  },
+  "03-08": {
+    "artwork": "Saint Jean de Dieu portant un malade",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1672",
+    "location": "Hôpital de la Charité, Séville",
+    "feast": "John of God"
+  },
+  "03-09": {
+    "artwork": "Sainte Françoise Romaine avec son ange gardien",
+    "artist": "Antoniazzo Romano / Galli",
+    "year": "vers 1490",
+    "location": "Rome",
+    "feast": "Frances of Rome"
+  },
+  "03-10": {
+    "artwork": "Les Quarante Martyrs de Sébaste",
+    "artist": "Fresque de l'Oratoire antique",
+    "year": "VIe siècle",
+    "location": "Forum Romain, Rome",
+    "feast": "Forty Martyrs of Sebaste"
+  },
+  "03-12": {
+    "artwork": "Saint Grégoire le Grand dictant le chant grégorien",
+    "artist": "Enluminure carolingienne / Huile",
+    "year": "Abbaye Saint-Gall",
+    "feast": "Pope Gregory I"
+  },
+  "03-17": {
+    "artwork": "Saint Patrick évêque d'Irlande",
+    "artist": "Giambattista Tiepolo",
+    "year": "1746",
+    "location": "Musei Civici di Padova",
+    "feast": "Saint Patrick"
+  },
+  "03-19": {
+    "artwork": "Saint Joseph avec l'Enfant Jésus",
+    "artist": "Guido Reni",
+    "year": "vers 1635",
+    "location": "Musée de l'Ermitage, Saint-Pétersbourg",
+    "feast": "Saint Joseph"
+  },
+  "03-21": {
+    "artwork": "Saint Benoît de Nursie",
+    "artist": "Hans Memling (Triptyque Portinari)",
+    "year": "1487",
+    "location": "Galerie des Offices, Florence",
+    "feast": "Benedict of Nursia"
+  },
+  "03-24": {
+    "artwork": "L'Archange Gabriel (L'Annonciation)",
+    "artist": "Jan Van Eyck (Retable de Gand)",
+    "year": "1432",
+    "location": "Cathédrale Saint-Bavon, Gand",
+    "feast": "Gabriel"
+  },
+  "03-25": {
+    "artwork": "L'Annonciation à la Vierge",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1668",
+    "location": "Musée de Séville",
+    "feast": "Annunciation"
+  },
+  "03-27": {
+    "artwork": "Saint Jean Damascène écrivant",
+    "artist": "Fresque athonite",
+    "year": "XIVe siècle",
+    "location": "Mont Athos",
+    "feast": "John of Damascus"
+  },
+  "03-28": {
+    "artwork": "Saint Jean de Capistran",
+    "artist": "Alonso Cano",
+    "year": "vers 1650",
+    "location": "Séville",
+    "feast": "Giovanni da Capistrano"
+  },
+  "04-02": {
+    "artwork": "Saint François de Paule",
+    "artist": "Sebastiano Ricci",
+    "year": "1710",
+    "location": "Venise",
+    "feast": "Francis of Paola"
+  },
+  "04-04": {
+    "artwork": "Saint Isidore de Séville",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1655",
+    "location": "Cathédrale de Séville",
+    "feast": "Isidore of Seville"
+  },
+  "04-05": {
+    "artwork": "Saint Vincent Ferrier",
+    "artist": "Joan de Joanes",
+    "year": "vers 1550",
+    "location": "Valence",
+    "feast": "Vincent Ferrer"
+  },
+  "04-11": {
+    "artwork": "Le Pape saint Léon repoussant Attila",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1514",
+    "location": "Chambres de Raphaël, Vatican",
+    "feast": "Pope Leo I the Great"
+  },
+  "04-13": {
+    "artwork": "Le Triomphe de saint Herménégilde",
+    "artist": "Francisco de Herrera el Mozo",
+    "year": "1654",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Hermenegild"
+  },
+  "04-14": {
+    "artwork": "Saint Justin martyr philosophe",
+    "artist": "Fresque grecque orthodoxe",
+    "year": "Athènes",
+    "feast": "Justin Martyr"
+  },
+  "04-17": {
+    "artwork": "Saint Anicet, pape et martyr",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Anicetus"
+  },
+  "04-21": {
+    "artwork": "Saint Anselme de Cantorbéry",
+    "artist": "Francisco de Zurbarán",
+    "year": "1638",
+    "location": "Musée de Cadix",
+    "feast": "Anselm of Canterbury"
+  },
+  "04-22": {
+    "artwork": "Le Pape saint Soter",
+    "artist": "Cosimo Rosselli",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Soter"
+  },
+  "04-23": {
+    "artwork": "Saint Georges terrassant le Dragon",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1506",
+    "location": "National Gallery of Art, Washington",
+    "feast": "Saint George"
+  },
+  "04-24": {
+    "artwork": "Saint Fidèle de Sigmaringen",
+    "artist": "Retable capucin",
+    "year": "Fribourg",
+    "feast": "Fidelis of Sigmaringen"
+  },
+  "04-25": {
+    "artwork": "Saint Marc Évangéliste",
+    "artist": "Le Titien (Tiziano Vecellio)",
+    "year": "1510",
+    "location": "Basilique Santa Maria della Salute, Venise",
+    "feast": "Mark the Evangelist"
+  },
+  "04-26": {
+    "artwork": "Le Pape saint Clet",
+    "artist": "Palma il Giovane",
+    "year": "1592",
+    "location": "Église des Jésuites, Venise",
+    "feast": "Pope Anacletus"
+  },
+  "04-27": {
+    "artwork": "Saint Pierre Canisius",
+    "artist": "Portrait classique jésuite",
+    "year": "Fribourg",
+    "feast": "Petrus Canisius"
+  },
+  "04-28": {
+    "artwork": "Saint Paul de la Croix",
+    "artist": "Portrait officiel passionniste",
+    "year": "Rome",
+    "feast": "Paul of the Cross"
+  },
+  "04-29": {
+    "artwork": "Saint Pierre de Vérone, martyr",
+    "artist": "Fra Angelico",
+    "year": "1438",
+    "location": "Musée San Marco, Florence",
+    "feast": "Peter of Verona"
+  },
+  "04-30": {
+    "artwork": "Sainte Catherine de Sienne recevant les stigmates",
+    "artist": "Giovanni di Paolo",
+    "year": "1447",
+    "location": "Pinacothèque de Sienne",
+    "feast": "Catherine of Siena"
+  },
+  "05-01": {
+    "artwork": "Saint Joseph charpentier",
+    "artist": "Georges de La Tour",
+    "year": "1642",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Saint Joseph"
+  },
+  "05-02": {
+    "artwork": "Saint Athanase patriarche d'Alexandrie",
+    "artist": "Le Dominiquin (Domenichino)",
+    "year": "1610",
+    "location": "Abbaye de Grottaferrata",
+    "feast": "Saint Athanasius"
+  },
+  "05-03": {
+    "artwork": "L'Invention de la Vraie Croix par sainte Hélène",
+    "artist": "Piero della Francesca",
+    "year": "1452",
+    "location": "Basilique San Francesco, Arezzo",
+    "feast": "Feast of the Cross"
+  },
+  "05-04": {
+    "artwork": "Sainte Monique et saint Augustin",
+    "artist": "Ary Scheffer",
+    "year": "1846",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Monica of Hippo"
+  },
+  "05-05": {
+    "artwork": "Le Pape saint Pie V",
+    "artist": "Le Greco (El Greco)",
+    "year": "1600",
+    "location": "Tolède",
+    "feast": "Pope Pius V"
+  },
+  "05-07": {
+    "artwork": "Saint Stanislas évêque et martyr",
+    "artist": "Retable de la cathédrale du Wawel",
+    "year": "Cracovie",
+    "feast": "Stanislaus of Szczepanów"
+  },
+  "05-09": {
+    "artwork": "Saint Grégoire de Nazianze",
+    "artist": "Enluminure impériale byzantine",
+    "year": "Paris",
+    "feast": "Gregory of Nazianzus"
+  },
+  "05-10": {
+    "artwork": "L'Aumône de saint Antonin de Florence",
+    "artist": "Lorenzo Lotto",
+    "year": "1542",
+    "location": "Basilique San Zanipolo, Venise",
+    "feast": "Antoninus of Florence"
+  },
+  "05-11": {
+    "artwork": "L'Apôtre saint Philippe",
+    "artist": "Pierre Paul Rubens",
+    "year": "1611",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Saints Philip and James"
+  },
+  "05-12": {
+    "artwork": "Saints Nérée et Achillée",
+    "artist": "Cristoforo Roncalli (Le Pomarancio)",
+    "year": "1598",
+    "location": "Église Santi Nereo e Achilleo, Rome",
+    "feast": "Nereus, Achilleus, Domitilla and Pancratius"
+  },
+  "05-13": {
+    "artwork": "Saint Robert Bellarmin",
+    "artist": "Portrait officiel romain",
+    "year": "Rome",
+    "feast": "Robert Bellarmine"
+  },
+  "05-14": {
+    "artwork": "Saint Boniface de Tarse",
+    "artist": "Fresque des martyrs",
+    "year": "Tarse",
+    "feast": "Saint Boniface of Tarsus"
+  },
+  "05-15": {
+    "artwork": "Saint Jean-Baptiste de La Salle instruisant les enfants",
+    "artist": "Tableau de l'Institut",
+    "year": "Paris",
+    "feast": "Jean-Baptiste de la Salle"
+  },
+  "05-16": {
+    "artwork": "Saint Ubald évêque de Gubbio",
+    "artist": "Matteo da Gualdo",
+    "year": "vers 1480",
+    "location": "Palazzo dei Consoli, Gubbio",
+    "feast": "Ubald"
+  },
+  "05-17": {
+    "artwork": "La Vision de saint Pascal Baylon",
+    "artist": "Giambattista Tiepolo",
+    "year": "1769",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Paschal Baylon"
+  },
+  "05-18": {
+    "artwork": "Saint Venance martyr",
+    "artist": "Carlo Crivelli",
+    "year": "1490",
+    "location": "Pinacothèque de Brera, Milan",
+    "feast": "Venantius of Camerino"
+  },
+  "05-19": {
+    "artwork": "Le Pape saint Célestin V (Pierre Célestin)",
+    "artist": "Fresque de Collemaggio",
+    "year": "L'Aquila",
+    "feast": "Pope Celestine V"
+  },
+  "05-20": {
+    "artwork": "Saint Bernardin de Sienne prêchant le Nom de Jésus",
+    "artist": "Sano di Pietro",
+    "year": "1445",
+    "location": "Cathédrale de Sienne",
+    "feast": "Bernardino of Siena"
+  },
+  "05-25": {
+    "artwork": "Le Pape Grégoire VII et l'empereur Henri IV à Canossa",
+    "artist": "Federico Zuccari",
+    "year": "1583",
+    "location": "Palais du Vatican",
+    "feast": "Pope Gregory VII"
+  },
+  "05-26": {
+    "artwork": "Saint Philippe Néri en extase",
+    "artist": "Guido Reni",
+    "year": "1614",
+    "location": "Chiesa Nuova, Rome",
+    "feast": "Philip Neri"
+  },
+  "05-27": {
+    "artwork": "Saint Bède le Vénérable écrivant",
+    "artist": "Enluminure northumbrienne",
+    "year": "Durham",
+    "feast": "Bede"
+  },
+  "05-28": {
+    "artwork": "Saint Augustin de Cantorbéry",
+    "artist": "Enluminure médiévale",
+    "year": "British Library, Londres",
+    "feast": "Augustine of Canterbury"
+  },
+  "05-29": {
+    "artwork": "L'Extase de sainte Marie-Madeleine de Pazzi",
+    "artist": "Luca Giordano",
+    "year": "1685",
+    "location": "Florence",
+    "feast": "Magdalena de Pazzi"
+  },
+  "05-30": {
+    "artwork": "Le Pape saint Félix Ier",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Felix I"
+  },
+  "05-31": {
+    "artwork": "Le Couronnement de la Vierge Reine du Ciel",
+    "artist": "Fra Angelico",
+    "year": "1435",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Queenship of Mary"
+  },
+  "06-01": {
+    "artwork": "Sainte Angèle Mérici",
+    "artist": "Pietro Calzavecchia",
+    "year": "1540",
+    "location": "Brescia",
+    "feast": "Angela Merici"
+  },
+  "06-02": {
+    "artwork": "Le Martyre des saints Marcellin et Pierre",
+    "artist": "Le Guerchin (Guercino)",
+    "year": "1622",
+    "location": "Bologne",
+    "feast": "Marcellinus and Peter"
+  },
+  "06-04": {
+    "artwork": "Saint François Caracciolo adorant le Saint-Sacrement",
+    "artist": "Francesco De Mura",
+    "year": "1760",
+    "location": "Naples",
+    "feast": "Francis Caracciolo (saint)"
+  },
+  "06-05": {
+    "artwork": "Le Baptême des Frisons par saint Boniface",
+    "artist": "Johann von Schraudolph",
+    "year": "1844",
+    "location": "Munich",
+    "feast": "Saint Boniface"
+  },
+  "06-06": {
+    "artwork": "Saint Norbert triomphant de l'hérésie",
+    "artist": "Marten Pepijn",
+    "year": "1625",
+    "location": "Anvers",
+    "feast": "Norbert of Xanten"
+  },
+  "06-09": {
+    "artwork": "Saints Prime et Félicien",
+    "artist": "Ménologe impérial byzantin",
+    "year": "Rome",
+    "feast": "Primus and Felician"
+  },
+  "06-10": {
+    "artwork": "Sainte Marguerite reine d'Écosse",
+    "artist": "Tableau royal écossais",
+    "year": "National Galleries of Scotland",
+    "feast": "Saint Margaret of Scotland"
+  },
+  "06-11": {
+    "artwork": "Saint Barnabé guérissant les infirmes",
+    "artist": "Paul Véronèse (Paolo Veronese)",
+    "year": "1566",
+    "location": "Musée des Beaux-Arts de Rouen",
+    "feast": "Barnabas"
+  },
+  "06-12": {
+    "artwork": "Saint Jean de Sahagun",
+    "artist": "Alonso Cano",
+    "year": "vers 1650",
+    "location": "Salamanque",
+    "feast": "John of Sahagún"
+  },
+  "06-13": {
+    "artwork": "Saint Antoine de Padoue avec l'Enfant Jésus",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1656",
+    "location": "Cathédrale de Séville",
+    "feast": "Anthony of Padua"
+  },
+  "06-14": {
+    "artwork": "Saint Basile le Grand",
+    "artist": "Icône monumentale",
+    "year": "Césarée",
+    "feast": "Basil of Caesarea"
+  },
+  "06-15": {
+    "artwork": "Saint Guy martyr parmi les saints intercesseurs",
+    "artist": "Retable classique",
+    "year": "Prague",
+    "feast": "Vitus, Modestus, and Crescentia"
+  },
+  "06-17": {
+    "artwork": "Saint Grégoire Barbarigo",
+    "artist": "Sebastiano Ricci",
+    "year": "1720",
+    "location": "Venise",
+    "feast": "Gregory Barbarigo"
+  },
+  "06-18": {
+    "artwork": "Saint Éphrem le Syrien diacre et docteur",
+    "artist": "Fresque athonite",
+    "year": "Mont Athos",
+    "feast": "Ephrem the Syrian"
+  },
+  "06-19": {
+    "artwork": "La Dernière Communion de sainte Julienne Falconieri",
+    "artist": "Rutilio Manetti",
+    "year": "1630",
+    "location": "Florence",
+    "feast": "Juliana Falconieri"
+  },
+  "06-20": {
+    "artwork": "Le Pape saint Silvère",
+    "artist": "Fresque de l'île de Ponza",
+    "year": "Ponza",
+    "feast": "Pope Silverius"
+  },
+  "06-21": {
+    "artwork": "Saint Louis de Gonzague en prière",
+    "artist": "Francisco de Zurbarán",
+    "year": "1640",
+    "location": "Grenade",
+    "feast": "Aloysius Gonzaga"
+  },
+  "06-22": {
+    "artwork": "Saint Paulin évêque de Nole",
+    "artist": "Fresque campanienne antique",
+    "year": "Nole",
+    "feast": "Paulinus of Nola"
+  },
+  "06-24": {
+    "artwork": "L'Imposition du nom de saint Jean-Baptiste",
+    "artist": "Fra Angelico",
+    "year": "1435",
+    "location": "Musée San Marco, Florence",
+    "feast": "Nativity of Saint John the Baptist"
+  },
+  "06-25": {
+    "artwork": "Saint Guillaume de Verceil",
+    "artist": "Retable bénédictin",
+    "year": "Sanctuaire de Montevergine",
+    "feast": "William of Montevergine"
+  },
+  "06-26": {
+    "artwork": "Saints Jean et Paul martyrs romains",
+    "artist": "Fresque paléochrétienne",
+    "year": "Rome",
+    "feast": "John and Paul"
+  },
+  "06-29": {
+    "artwork": "Les Apôtres saint Pierre et saint Paul",
+    "artist": "Le Greco (El Greco)",
+    "year": "1592",
+    "location": "Musée de l'Ermitage, Saint-Pétersbourg",
+    "feast": "Feast of Saints Peter and Paul"
+  },
+  "06-30": {
+    "artwork": "Saint Paul apôtre écrivant ses épîtres",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1606",
+    "location": "Rome",
+    "feast": "Paul of Tarsus"
+  },
+  "07-01": {
+    "artwork": "Le Christ Rédempteur et le Précieux Sang",
+    "artist": "Andrea Mantegna",
+    "year": "1490",
+    "location": "Mantoue",
+    "feast": "Feast of the Most Precious Blood"
+  },
+  "07-02": {
+    "artwork": "La Visitation de la Vierge Marie à sainte Élisabeth",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1517",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Visitation (Christianity)"
+  },
+  "07-03": {
+    "artwork": "Tableau de Irenaeus",
+    "artist": "Maître de l'école classique",
+    "year": "XVIIe siècle",
+    "location": "Collection sacrée",
+    "feast": "Irenaeus"
+  },
+  "07-05": {
+    "artwork": "Saint Antoine-Marie Zaccaria",
+    "artist": "Retable barnabite",
+    "year": "Milan",
+    "feast": "Anthony Maria Zaccaria"
+  },
+  "07-07": {
+    "artwork": "Saints Cyrille et Méthode apôtres des Slaves",
+    "artist": "Jan Matejko",
+    "year": "1885",
+    "location": "Musée national de Varsovie",
+    "feast": "Saints Cyril and Methodius"
+  },
+  "07-08": {
+    "artwork": "Sainte Élisabeth reine de Portugal",
+    "artist": "Francisco de Zurbarán",
+    "year": "1635",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Elizabeth of Portugal"
+  },
+  "07-10": {
+    "artwork": "Les Sept Saints Frères martyrs",
+    "artist": "Ménologe impérial byzantin",
+    "year": "Vatican",
+    "feast": "Felicitas of Rome"
+  },
+  "07-11": {
+    "artwork": "Le Pape saint Pie Ier",
+    "artist": "Chapelle Sixtine",
+    "year": "1481",
+    "location": "Vatican",
+    "feast": "Pope Pius I"
+  },
+  "07-12": {
+    "artwork": "Saint Jean Gualbert abbé de Vallombreuse",
+    "artist": "Nardo di Cione",
+    "year": "1365",
+    "location": "Florence",
+    "feast": "John Gualbert"
+  },
+  "07-14": {
+    "artwork": "Saint Bonaventure en prière",
+    "artist": "Francisco de Zurbarán",
+    "year": "1629",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Bonaventure"
+  },
+  "07-15": {
+    "artwork": "Saint Henri empereur du Saint-Empire",
+    "artist": "Retable de la cathédrale de Bamberg",
+    "year": "Bamberg",
+    "feast": "Henry II, Holy Roman Emperor"
+  },
+  "07-16": {
+    "artwork": "La Vierge du Mont-Carmel remettant le scapulaire",
+    "artist": "Giambattista Tiepolo",
+    "year": "1740",
+    "location": "Scuola Grande dei Carmini, Venise",
+    "feast": "Our Lady of Mount Carmel"
+  },
+  "07-17": {
+    "artwork": "Saint Alexis découvert sous l'escalier",
+    "artist": "Georges de La Tour",
+    "year": "1648",
+    "location": "Musée des Beaux-Arts de Nancy",
+    "feast": "Alexius (saint)"
+  },
+  "07-18": {
+    "artwork": "Saint Camille de Lellis soignant les pestiférés",
+    "artist": "Pierre Subleyras",
+    "year": "1746",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Camillus de Lellis"
+  },
+  "07-19": {
+    "artwork": "Saint Vincent de Paul recevant les enfants abandonnés",
+    "artist": "Jean-François de Troy",
+    "year": "1732",
+    "location": "Paris",
+    "feast": "Vincent de Paul"
+  },
+  "07-20": {
+    "artwork": "Saint Jérôme Émilien avec les orphelins",
+    "artist": "Retable vénitien",
+    "year": "Venise",
+    "feast": "Gerolamo Emiliani"
+  },
+  "07-21": {
+    "artwork": "Saint Laurent de Brindisi docteur de l'Église",
+    "artist": "Giambattista Tiepolo",
+    "year": "1745",
+    "location": "Alte Pinakothek, Munich",
+    "feast": "Lawrence of Brindisi"
+  },
+  "07-22": {
+    "artwork": "Sainte Marie-Madeleine pénitente",
+    "artist": "Le Titien (Tiziano Vecellio)",
+    "year": "1565",
+    "location": "Musée de l'Ermitage, Saint-Pétersbourg",
+    "feast": "Mary Magdalene"
+  },
+  "07-23": {
+    "artwork": "Saint Apollinaire premier évêque de Ravenne",
+    "artist": "Mosaïque monumentale byzantine",
+    "year": "VIe siècle",
+    "location": "Sant'Apollinare in Classe, Ravenne",
+    "feast": "Apollinaris of Ravenna"
+  },
+  "07-24": {
+    "artwork": "Sainte Christine martyre",
+    "artist": "Lucas Cranach l'Ancien",
+    "year": "1520",
+    "location": "Musée d'Histoire de l'art, Vienne",
+    "feast": "Saint Christina of Bolsena"
+  },
+  "07-25": {
+    "artwork": "Saint Jacques le Majeur en pèlerin",
+    "artist": "Guido Reni",
+    "year": "1636",
+    "location": "Musée du Prado, Madrid",
+    "feast": "James the Great"
+  },
+  "07-26": {
+    "artwork": "La Vierge, l'Enfant Jésus et sainte Anne",
+    "artist": "Léonard de Vinci",
+    "year": "1510",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Saint Anne"
+  },
+  "07-27": {
+    "artwork": "Le Martyre de saint Pantaléon",
+    "artist": "Paul Véronèse (Paolo Veronese)",
+    "year": "1587",
+    "location": "Église San Pantalon, Venise",
+    "feast": "Saint Pantaleon"
+  },
+  "07-28": {
+    "artwork": "Les Saints Nazaire et Celse",
+    "artist": "Bernardino Luini",
+    "year": "1520",
+    "location": "Milan",
+    "feast": "Nazarius and Celsus"
+  },
+  "07-29": {
+    "artwork": "Marthe et Marie-Madeleine",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1598",
+    "location": "Detroit Institute of Arts",
+    "feast": "Martha"
+  },
+  "07-30": {
+    "artwork": "Les Saints Abdon et Sennen",
+    "artist": "Bernardo Martorell",
+    "year": "1442",
+    "location": "Barcelone",
+    "feast": "Abdon and Sennen"
+  },
+  "07-31": {
+    "artwork": "Les Miracles de saint Ignace de Loyola",
+    "artist": "Pierre Paul Rubens",
+    "year": "1619",
+    "location": "Kunsthistorisches Museum, Vienne",
+    "feast": "Ignatius of Loyola"
+  },
+  "08-01": {
+    "artwork": "La Libération de saint Pierre par l'ange",
+    "artist": "Le Guerchin (Guercino)",
+    "year": "1628",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Woman with seven sons"
+  },
+  "08-02": {
+    "artwork": "Saint Alphonse-Marie de Liguori évêque",
+    "artist": "Domenico Morelli",
+    "year": "vers 1880",
+    "location": "Naples",
+    "feast": "Alphonsus Liguori"
+  },
+  "08-04": {
+    "artwork": "Saint Dominique au pied de la Croix",
+    "artist": "Fra Angelico",
+    "year": "1442",
+    "location": "Couvent San Marco, Florence",
+    "feast": "Saint Dominic"
+  },
+  "08-05": {
+    "artwork": "Le Miracle de la neige (Fondation de Ste-Marie-Majeure)",
+    "artist": "Masolino da Panicale",
+    "year": "1428",
+    "location": "Musée de Capodimonte, Naples",
+    "feast": "Dedication of the Basilica of St Mary Major"
+  },
+  "08-06": {
+    "artwork": "La Transfiguration de Notre-Seigneur",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1520",
+    "location": "Pinacothèque vaticane, Rome",
+    "feast": "Transfiguration of Jesus"
+  },
+  "08-07": {
+    "artwork": "La Vision de saint Gaëtan de Thiene",
+    "artist": "Giambattista Tiepolo",
+    "year": "1735",
+    "location": "Venise",
+    "feast": "Saint Cajetan"
+  },
+  "08-08": {
+    "artwork": "Saint Jean-Marie Vianney, Curé d'Ars",
+    "artist": "Portrait authentique",
+    "year": "1855",
+    "location": "Sanctuaire d'Ars",
+    "feast": "Jean Vianney"
+  },
+  "08-09": {
+    "artwork": "Saint Romain martyr",
+    "artist": "Retable espagnol baroque",
+    "year": "Tolède",
+    "feast": "Romanus Ostiarius"
+  },
+  "08-10": {
+    "artwork": "Le Martyre de saint Laurent",
+    "artist": "Le Titien (Tiziano Vecellio)",
+    "year": "1558",
+    "location": "Église des Jésuites, Venise",
+    "feast": "Lawrence of Rome"
+  },
+  "08-11": {
+    "artwork": "Saint Tiburce et sainte Suzanne",
+    "artist": "Fresque de la Basilique Sainte-Suzanne",
+    "year": "Rome",
+    "feast": "Saint Tiburtius"
+  },
+  "08-12": {
+    "artwork": "Sainte Claire d'Assise",
+    "artist": "Simone Martini",
+    "year": "1317",
+    "location": "Basilique Saint-François, Assise",
+    "feast": "Clare of Assisi"
+  },
+  "08-13": {
+    "artwork": "Le Martyre de saint Hippolyte",
+    "artist": "Dieric Bouts & Hugo van der Goes",
+    "year": "1475",
+    "location": "Musée Groeninge, Bruges",
+    "feast": "Hippolytus of Rome"
+  },
+  "08-14": {
+    "artwork": "Saint Eusèbe de Rome",
+    "artist": "Anton Raphael Mengs",
+    "year": "1757",
+    "location": "Église Sant'Eusebio, Rome",
+    "feast": "Eusebius of Rome"
+  },
+  "08-15": {
+    "artwork": "L'Assomption de la Vierge Marie",
+    "artist": "Le Titien (Tiziano Vecellio)",
+    "year": "1518",
+    "location": "Basilique Santa Maria Gloriosa dei Frari, Venise",
+    "feast": "Assumption of Mary"
+  },
+  "08-16": {
+    "artwork": "La Rencontre à la Porte Dorée (St Joachim et Ste Anne)",
+    "artist": "Giotto di Bondone",
+    "year": "1305",
+    "location": "Chapelle des Scrovegni, Padoue",
+    "feast": "Joachim"
+  },
+  "08-17": {
+    "artwork": "Apparition de la Vierge à saint Hyacinthe de Cracovie",
+    "artist": "Lodovico Carracci",
+    "year": "1594",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Hyacinth of Poland"
+  },
+  "08-18": {
+    "artwork": "Saint Agapit martyr",
+    "artist": "Retable classique de la cathédrale de Préneste",
+    "year": "Palestrina",
+    "feast": "Agapitus of Palestrina"
+  },
+  "08-19": {
+    "artwork": "Saint Jean Eudes apôtre des Cœurs de Jésus et Marie",
+    "artist": "Huile sur toile classique",
+    "year": "XVIIe siècle",
+    "location": "Caen",
+    "feast": "Jean Eudes"
+  },
+  "08-20": {
+    "artwork": "L'Apparition de la Vierge à saint Bernard",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1660",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Bernard of Clairvaux"
+  },
+  "08-21": {
+    "artwork": "Sainte Jeanne-Françoise de Chantal",
+    "artist": "Tableau officiel de la Visitation",
+    "year": "Annecy",
+    "feast": "Jane Frances de Chantal"
+  },
+  "08-22": {
+    "artwork": "Le Cœur Immaculé de Marie",
+    "artist": "Leopold Kupelwieser",
+    "year": "1850",
+    "location": "Vienne",
+    "feast": "Immaculate Heart of Mary"
+  },
+  "08-23": {
+    "artwork": "Les Miracles de saint Philippe Bénizi",
+    "artist": "Andrea del Sarto",
+    "year": "1510",
+    "location": "Santissima Annunziata, Florence",
+    "feast": "Philip Benizi de Damiani"
+  },
+  "08-24": {
+    "artwork": "Le Martyre de saint Barthélemy",
+    "artist": "José de Ribera",
+    "year": "1639",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Bartholomew the Apostle"
+  },
+  "08-25": {
+    "artwork": "Saint Louis roi de France",
+    "artist": "Le Greco (El Greco)",
+    "year": "1595",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Louis IX of France"
+  },
+  "08-26": {
+    "artwork": "Le Pape saint Zéphyrin",
+    "artist": "Chapelle Sixtine",
+    "year": "1481",
+    "location": "Vatican",
+    "feast": "Pope Zephyrinus"
+  },
+  "08-27": {
+    "artwork": "La Dernière Communion de saint Joseph Calasanz",
+    "artist": "Francisco de Goya",
+    "year": "1819",
+    "location": "Musée San Antón, Madrid",
+    "feast": "Joseph Calasanctius"
+  },
+  "08-28": {
+    "artwork": "Saint Augustin docteur de la Grâce",
+    "artist": "Philippe de Champaigne",
+    "year": "1650",
+    "location": "Los Angeles County Museum of Art",
+    "feast": "Augustine of Hippo"
+  },
+  "08-29": {
+    "artwork": "La Décollation de saint Jean-Baptiste",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1608",
+    "location": "Co-cathédrale Saint-Jean, La Valette",
+    "feast": "Beheading of Saint John the Baptist"
+  },
+  "08-30": {
+    "artwork": "Sainte Rose de Lima",
+    "artist": "Claudio Coello",
+    "year": "1675",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Rose of Lima"
+  },
+  "08-31": {
+    "artwork": "Saint Raymond Nonnat délivrant les captifs",
+    "artist": "Francisco Pacheco",
+    "year": "1600",
+    "location": "Séville",
+    "feast": "Raymond Nonnatus"
+  },
+  "09-01": {
+    "artwork": "Le Miracle de saint Gilles",
+    "artist": "Le Maître de Saint Gilles",
+    "year": "vers 1500",
+    "location": "National Gallery, Londres",
+    "feast": "St. Giles"
+  },
+  "09-02": {
+    "artwork": "Le Baptême de saint Étienne roi de Hongrie",
+    "artist": "Gyula Benczúr",
+    "year": "1875",
+    "location": "Galerie nationale hongroise, Budapest",
+    "feast": "Stephen I of Hungary"
+  },
+  "09-03": {
+    "artwork": "Le Pape saint Pie X",
+    "artist": "Otto Hierl-Deronco",
+    "year": "1905",
+    "location": "Collections d'État de Bavière, Munich",
+    "feast": "Pope Pius X"
+  },
+  "09-05": {
+    "artwork": "Saint Laurent Justinien premier patriarche de Venise",
+    "artist": "Gentile Bellini",
+    "year": "1465",
+    "location": "Gallerie dell'Accademia, Venise",
+    "feast": "Lorenzo Giustiniani"
+  },
+  "09-08": {
+    "artwork": "La Naissance de la Bienheureuse Vierge Marie",
+    "artist": "Giotto di Bondone",
+    "year": "1305",
+    "location": "Chapelle des Scrovegni, Padoue",
+    "feast": "Nativity of Mary"
+  },
+  "09-09": {
+    "artwork": "Saint Gorgon martyr",
+    "artist": "Retable sculpté et peint",
+    "year": "Minden",
+    "feast": "Gorgonius"
+  },
+  "09-10": {
+    "artwork": "Saint Nicolas de Tolentino",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1501",
+    "location": "Pinacothèque de Brescia",
+    "feast": "Nicholas of Tolentino"
+  },
+  "09-11": {
+    "artwork": "Les Saints Prote et Hyacinthe martyrs",
+    "artist": "Fresque des catacombes romaines",
+    "year": "Catacombe de Priscille, Rome",
+    "feast": "Hyacinth and Protus"
+  },
+  "09-12": {
+    "artwork": "La Vierge en prière (Le Saint Nom de Marie)",
+    "artist": "Il Sassoferrato (Giovanni Battista Salvi)",
+    "year": "1650",
+    "location": "National Gallery, Londres",
+    "feast": "Holy Name of Mary"
+  },
+  "09-14": {
+    "artwork": "L'Exaltation de la Sainte Croix par sainte Hélène",
+    "artist": "Giambattista Tiepolo",
+    "year": "1745",
+    "location": "Gallerie dell'Accademia, Venise",
+    "feast": "Feast of the Cross"
+  },
+  "09-15": {
+    "artwork": "Notre-Dame des Sept Douleurs",
+    "artist": "Le Pérugin (Pietro Perugino)",
+    "year": "1495",
+    "location": "Florence",
+    "feast": "Our Lady of Sorrows"
+  },
+  "09-16": {
+    "artwork": "Saints Corneille et Cyprien",
+    "artist": "Maître du Retable de Saint-Barthélemy",
+    "year": "1500",
+    "location": "Cologne",
+    "feast": "Pope Cornelius"
+  },
+  "09-17": {
+    "artwork": "Saint François recevant les stigmates",
+    "artist": "Giotto di Bondone",
+    "year": "1295",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Stigmata"
+  },
+  "09-18": {
+    "artwork": "L'Extase de saint Joseph de Cupertino",
+    "artist": "Ludovico Mazzanti",
+    "year": "1753",
+    "location": "Osimo",
+    "feast": "Joseph of Cupertino"
+  },
+  "09-19": {
+    "artwork": "Saint Janvier évêque et martyr en gloire",
+    "artist": "José de Ribera (L'Espagnolet)",
+    "year": "1646",
+    "location": "Cathédrale de Naples",
+    "feast": "Januarius"
+  },
+  "09-20": {
+    "artwork": "La Vision de saint Eustache",
+    "artist": "Vittore Carpaccio",
+    "year": "1516",
+    "location": "Musée de la Chartreuse, Pavie",
+    "feast": "Saint Eustace"
+  },
+  "09-21": {
+    "artwork": "La Vocation de saint Matthieu",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1600",
+    "location": "Saint-Louis-des-Français, Rome",
+    "feast": "Matthew the Apostle"
+  },
+  "09-22": {
+    "artwork": "Saint Thomas de Villeneuve distribuant les aumônes",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1668",
+    "location": "Musée des Beaux-Arts de Séville",
+    "feast": "Thomas of Villanova"
+  },
+  "09-23": {
+    "artwork": "Le Pape saint Lin premier successeur de Pierre",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Linus"
+  },
+  "09-24": {
+    "artwork": "La Vierge de la Merci protégeant l'Ordre",
+    "artist": "Francisco de Zurbarán",
+    "year": "1635",
+    "location": "Musée de Séville",
+    "feast": "Feast of Our Lady of Ransom"
+  },
+  "09-26": {
+    "artwork": "Les Saints Côme et Damien guérissant les malades",
+    "artist": "Fra Angelico",
+    "year": "1440",
+    "location": "Musée San Marco, Florence",
+    "feast": "Cyprian and Justina"
+  },
+  "09-27": {
+    "artwork": "Le Martyre des saints Côme et Damien",
+    "artist": "Fra Angelico",
+    "year": "1443",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Cosmas and Damian"
+  },
+  "09-28": {
+    "artwork": "Saint Venceslas duc de Bohême",
+    "artist": "Codex impérial de Gumpold",
+    "year": "Xe siècle",
+    "location": "Bibliothèque de Wolfenbüttel",
+    "feast": "Wenceslaus I, Duke of Bohemia"
+  },
+  "09-29": {
+    "artwork": "Saint Michel terrassant le Démon",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1518",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Michael (archangel)"
+  },
+  "09-30": {
+    "artwork": "Saint Jérôme écrivant la Vulgate",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1606",
+    "location": "Galerie Borghèse, Rome",
+    "feast": "Jerome"
+  },
+  "10-01": {
+    "artwork": "Le Baptême de Clovis par saint Remi de Reims",
+    "artist": "Grandes Chroniques de France",
+    "year": "XIVe siècle",
+    "location": "Bibliothèque nationale de France",
+    "feast": "Saint Remigius"
+  },
+  "10-02": {
+    "artwork": "L'Ange Gardien protégeant l'âme",
+    "artist": "Pierre de Cortone (Pietro da Cortona)",
+    "year": "1656",
+    "location": "Musée Capitolin, Rome",
+    "feast": "Guardian angel (spirit)"
+  },
+  "10-03": {
+    "artwork": "Sainte Thérèse de l'Enfant-Jésus et de la Sainte-Face",
+    "artist": "Cliché original au carmel",
+    "year": "1896",
+    "location": "Carmel de Lisieux",
+    "feast": "Thérèse de Lisieux"
+  },
+  "10-04": {
+    "artwork": "Saint François d'Assise en extase",
+    "artist": "Le Caravage / Giotto",
+    "year": "Assise",
+    "feast": "Francis of Assisi"
+  },
+  "10-05": {
+    "artwork": "Saint Placide martyr",
+    "artist": "Antonio Galli Bibiena",
+    "year": "1750",
+    "location": "Bologne",
+    "feast": "Placidus (martyr)"
+  },
+  "10-06": {
+    "artwork": "Saint Bruno en prière dans la solitude",
+    "artist": "Eustache Le Sueur",
+    "year": "1648",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Bruno of Cologne"
+  },
+  "10-07": {
+    "artwork": "La Madone du Rosaire",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1607",
+    "location": "Kunsthistorisches Museum, Vienne",
+    "feast": "Our Lady of the Rosary"
+  },
+  "10-08": {
+    "artwork": "Sainte Brigitte de Suède recevant ses révélations",
+    "artist": "Retable médiéval suédois",
+    "year": "Vadstena",
+    "feast": "Bridget of Sweden"
+  },
+  "10-09": {
+    "artwork": "Le Martyre de saint Denis premier évêque de Paris",
+    "artist": "Léon Bonnat",
+    "year": "1880",
+    "location": "Panthéon, Paris",
+    "feast": "John Leonardi"
+  },
+  "10-10": {
+    "artwork": "Saint François Borgia devant le corps de l'impératrice",
+    "artist": "Francisco de Goya",
+    "year": "1788",
+    "location": "Cathédrale de Valence",
+    "feast": "Francis Borgia"
+  },
+  "10-11": {
+    "artwork": "Vierge d'Humilité (Maternité Divine de Marie)",
+    "artist": "Fra Angelico",
+    "year": "1433",
+    "location": "Musée Thyssen-Bornemisza, Madrid",
+    "feast": "Maternity of Mary"
+  },
+  "10-13": {
+    "artwork": "Saint Édouard le Confesseur roi d'Angleterre",
+    "artist": "Maître anglais du Diptyque de Wilton",
+    "year": "1395",
+    "location": "National Gallery, Londres",
+    "feast": "Edward the Confessor"
+  },
+  "10-14": {
+    "artwork": "Le Pape saint Calixte Ier",
+    "artist": "Fresque de la Basilique Saint-Paul",
+    "year": "Rome",
+    "feast": "Pope Callixtus I"
+  },
+  "10-15": {
+    "artwork": "Sainte Thérèse d'Avila réformatrice du Carmel",
+    "artist": "Pierre Paul Rubens",
+    "year": "1614",
+    "location": "Musée d'Histoire de l'art, Vienne",
+    "feast": "Teresa of Ávila"
+  },
+  "10-16": {
+    "artwork": "Sainte Edwige de Silésie secourant les pauvres",
+    "artist": "Codex de sainte Edwige",
+    "year": "1353",
+    "location": "Wrocław",
+    "feast": "Hedwig of Andechs"
+  },
+  "10-17": {
+    "artwork": "Sainte Marguerite-Marie en prière devant le Sacré-Cœur",
+    "artist": "Tableau du monastère de la Visitation",
+    "year": "XVIIe siècle",
+    "location": "Paray-le-Monial",
+    "feast": "Marguerite Marie Alacoque"
+  },
+  "10-18": {
+    "artwork": "Saint Luc peignant la Vierge Marie",
+    "artist": "Le Greco (El Greco)",
+    "year": "1605",
+    "location": "Cathédrale de Tolède",
+    "feast": "Luke the Evangelist"
+  },
+  "10-19": {
+    "artwork": "Saint Pierre d'Alcantara marchant sur les eaux",
+    "artist": "Claudio Coello",
+    "year": "1690",
+    "location": "Musée d'Art de Cleveland",
+    "feast": "Peter of Alcantara"
+  },
+  "10-20": {
+    "artwork": "Saint Jean de Kenty docteur de l'Université",
+    "artist": "Retable de Cracovie",
+    "year": "Cracovie",
+    "feast": "John Cantius"
+  },
+  "10-21": {
+    "artwork": "Saint Hilarion le Grand au désert",
+    "artist": "Ménologe impérial byzantin",
+    "year": "vers 1000",
+    "location": "Vatican",
+    "feast": "Hilarion"
+  },
+  "10-23": {
+    "artwork": "Tableau de Anthony Mary Claret",
+    "artist": "Maître de l'école classique",
+    "year": "XVIIe siècle",
+    "location": "Collection sacrée",
+    "feast": "Anthony Mary Claret"
+  },
+  "10-24": {
+    "artwork": "L'Archange saint Raphaël et Tobie",
+    "artist": "Le Pérugin (Pietro Perugino)",
+    "year": "1499",
+    "location": "National Gallery, Londres",
+    "feast": "Raphael (archangel)"
+  },
+  "10-25": {
+    "artwork": "Saints Chrysanthe et Darie martyrs",
+    "artist": "Ménologe de Basile II",
+    "year": "vers 1000",
+    "location": "Bibliothèque apostolique vaticane",
+    "feast": "Saints Chrysanthus and Daria"
+  },
+  "10-26": {
+    "artwork": "Le Pape saint Évariste",
+    "artist": "Sandro Botticelli",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Evaristus"
+  },
+  "10-28": {
+    "artwork": "L'Apôtre saint Simon le Zélote",
+    "artist": "Pierre Paul Rubens",
+    "year": "1611",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Simon the Zealot"
+  },
+  "11-01": {
+    "artwork": "Les Précurseurs du Christ avec les saints et martyrs",
+    "artist": "Fra Angelico",
+    "year": "1430",
+    "location": "National Gallery, Londres",
+    "feast": "All Saints' Day"
+  },
+  "11-02": {
+    "artwork": "La Résurrection des morts (Jour des défunts)",
+    "artist": "William-Adolphe Bouguereau",
+    "year": "1859",
+    "location": "Musée des Beaux-Arts de Bordeaux",
+    "feast": "All Souls' Day"
+  },
+  "11-04": {
+    "artwork": "Saint Charles Borromée priant devant la sainte Épine",
+    "artist": "Il Cerano (Giovanni Battista Crespi)",
+    "year": "1610",
+    "location": "Dôme de Milan",
+    "feast": "Charles Borromeo"
+  },
+  "11-08": {
+    "artwork": "Les Quatre Saints Couronnés martyrs",
+    "artist": "Fresque paléochrétienne",
+    "year": "Basilique des Quatre-Couronnés, Rome",
+    "feast": "Four Crowned Martyrs"
+  },
+  "11-09": {
+    "artwork": "Le Songe d'Innocent III (Dédicace de Saint-Jean-de-Latran)",
+    "artist": "Giotto di Bondone",
+    "year": "1297",
+    "location": "Basilique Saint-François, Assise",
+    "feast": "Archbasilica of Saint John Lateran"
+  },
+  "11-10": {
+    "artwork": "La Mort de saint André Avellin à l'autel",
+    "artist": "Giambattista Tiepolo",
+    "year": "1742",
+    "location": "Église des Théatins, Munich",
+    "feast": "Andrew Avellino"
+  },
+  "11-11": {
+    "artwork": "Saint Martin partageant son manteau avec le pauvre",
+    "artist": "Simone Martini",
+    "year": "1315",
+    "location": "Basilique Saint-François, Assise",
+    "feast": "Martin of Tours"
+  },
+  "11-12": {
+    "artwork": "Le Pape saint Martin Ier pape et confesseur",
+    "artist": "Carlo Laurenti",
+    "year": "1630",
+    "location": "Todi, Ombrie",
+    "feast": "Pope Martin I"
+  },
+  "11-13": {
+    "artwork": "Saint Diego d'Alcalá et les anges dans la cuisine",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1646",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Didacus of Alcalá"
+  },
+  "11-14": {
+    "artwork": "Saint Josaphat archevêque de Polotsk et martyr",
+    "artist": "Retable de la Basilique Saint-Pierre",
+    "year": "Rome",
+    "feast": "Josaphat Kuntsevych"
+  },
+  "11-15": {
+    "artwork": "Saint Albert le Grand en dominicain",
+    "artist": "Fra Angelico",
+    "year": "1442",
+    "location": "Musée San Marco, Florence",
+    "feast": "Albertus Magnus"
+  },
+  "11-16": {
+    "artwork": "L'Extase mystique de sainte Gertrude la Grande",
+    "artist": "Pietro Liberi",
+    "year": "1665",
+    "location": "Basilique Sainte-Justine, Padoue",
+    "feast": "Gertrude the Great"
+  },
+  "11-17": {
+    "artwork": "Saint Grégoire le Thaumaturge",
+    "artist": "Icône traditionnelle orthodoxe",
+    "year": "Néocésarée",
+    "feast": "Gregory Thaumaturgus"
+  },
+  "11-18": {
+    "artwork": "Les Apôtres saint Pierre et saint Paul",
+    "artist": "Le Guerchin (Guercino)",
+    "year": "1645",
+    "location": "Bologne",
+    "feast": "Dedication of the Basilicas of Saints Peter and Paul"
+  },
+  "11-19": {
+    "artwork": "Sainte Élisabeth de Hongrie soignant les lépreux",
+    "artist": "Simone Martini",
+    "year": "1317",
+    "location": "Basilique d'Assise",
+    "feast": "Elizabeth of Hungary"
+  },
+  "11-20": {
+    "artwork": "Saint Félix de Valois co-fondateur des Trinitaires",
+    "artist": "Jean-Baptiste Jouvenet",
+    "year": "1701",
+    "location": "Musée des Beaux-Arts de Rennes",
+    "feast": "Felix of Valois"
+  },
+  "11-21": {
+    "artwork": "La Présentation de la Vierge au Temple",
+    "artist": "Le Titien (Tiziano Vecellio)",
+    "year": "1538",
+    "location": "Gallerie dell'Accademia, Venise",
+    "feast": "Presentation of Mary"
+  },
+  "11-22": {
+    "artwork": "L'Extase de sainte Cécile avec les instruments sacrés",
+    "artist": "Raphaël (Raffaello Sanzio)",
+    "year": "1516",
+    "location": "Pinacothèque nationale de Bologne",
+    "feast": "Cecilia (saint)"
+  },
+  "11-23": {
+    "artwork": "Le Pape saint Clément adorant la Sainte Trinité",
+    "artist": "Giambattista Tiepolo",
+    "year": "1739",
+    "location": "Alte Pinakothek, Munich",
+    "feast": "Pope Clement I"
+  },
+  "11-24": {
+    "artwork": "Saint Jean de la Croix en prière",
+    "artist": "Francisco de Zurbarán",
+    "year": "1656",
+    "location": "Tolède",
+    "feast": "John of the Cross"
+  },
+  "11-25": {
+    "artwork": "Sainte Catherine d'Alexandrie et la roue",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1598",
+    "location": "Musée Thyssen-Bornemisza, Madrid",
+    "feast": "Catherine of Alexandria"
+  },
+  "11-26": {
+    "artwork": "Saint Sylvestre Gozzolini abbé",
+    "artist": "Retable bénédictin de Monte Fano",
+    "year": "Fabriano",
+    "feast": "Sylvester Gozzolini"
+  },
+  "11-29": {
+    "artwork": "Le Martyre de saint Saturnin de Toulouse",
+    "artist": "Retable de la Basilique Saint-Sernin",
+    "year": "Toulouse",
+    "feast": "Saturnin"
+  },
+  "11-30": {
+    "artwork": "Le Martyre de l'Apôtre saint André sur sa croix",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1675",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Andrew the Apostle"
+  },
+  "12-02": {
+    "artwork": "Sainte Bibienne devant le préfet de Rome",
+    "artist": "Pierre de Cortone (Pietro da Cortona)",
+    "year": "1626",
+    "location": "Église Sainte-Bibienne, Rome",
+    "feast": "Saint Bibiana"
+  },
+  "12-03": {
+    "artwork": "Les Miracles de saint François Xavier aux Indes",
+    "artist": "Pierre Paul Rubens",
+    "year": "1618",
+    "location": "Musée d'Histoire de l'art, Vienne",
+    "feast": "Francis Xavier"
+  },
+  "12-04": {
+    "artwork": "Saint Pierre Chrysologue docteur de l'Église",
+    "artist": "Mosaïque monumentale byzantine",
+    "year": "Ve siècle",
+    "location": "Chapelle archiépiscopale, Ravenne",
+    "feast": "Peter Chrysologus"
+  },
+  "12-05": {
+    "artwork": "Saint Sabas le Sanctifié abbé",
+    "artist": "Fresque de la Grande Laure",
+    "year": "Mar Saba, Terre Sainte",
+    "feast": "Sabbas the Sanctified"
+  },
+  "12-06": {
+    "artwork": "Histoire et miracles de saint Nicolas évêque de Myre",
+    "artist": "Gentile da Fabriano",
+    "year": "1425",
+    "location": "Pinacothèque vaticane, Rome",
+    "feast": "Saint Nicholas"
+  },
+  "12-07": {
+    "artwork": "Saint Ambroise interdisant l'entrée du temple à Théodose",
+    "artist": "Pierre Paul Rubens & Antoine van Dyck",
+    "year": "1618",
+    "location": "Kunsthistorisches Museum, Vienne",
+    "feast": "Ambrose"
+  },
+  "12-08": {
+    "artwork": "L'Immaculée Conception de Soult",
+    "artist": "Bartolomé Esteban Murillo",
+    "year": "1678",
+    "location": "Musée du Prado, Madrid",
+    "feast": "Feast of the Immaculate Conception"
+  },
+  "12-10": {
+    "artwork": "Le Pape saint Melchiade",
+    "artist": "Fra Diamante",
+    "year": "1481",
+    "location": "Chapelle Sixtine, Vatican",
+    "feast": "Pope Miltiades"
+  },
+  "12-11": {
+    "artwork": "Le Pape saint Damase premier promoteur de la Vulgate",
+    "artist": "Enluminure des Grandes Heures de Bretagne",
+    "year": "1505",
+    "location": "BnF, Paris",
+    "feast": "Pope Damasus I"
+  },
+  "12-13": {
+    "artwork": "Sainte Lucie vierge et martyre",
+    "artist": "Francisco de Zurbarán",
+    "year": "1636",
+    "location": "Musée des Beaux-Arts de Chartres",
+    "feast": "Saint Lucy"
+  },
+  "12-16": {
+    "artwork": "Saint Eusèbe de Verceil proclamant la divinité du Christ",
+    "artist": "Sebastiano Ricci",
+    "year": "1725",
+    "location": "Cathédrale de Verceil",
+    "feast": "Eusebius of Vercelli"
+  },
+  "12-21": {
+    "artwork": "L'Incrédulité de saint Thomas apôtre",
+    "artist": "Le Caravage (Caravaggio)",
+    "year": "1602",
+    "location": "Palais de Sanssouci, Potsdam",
+    "feast": "Thomas the Apostle"
+  },
+  "12-24": {
+    "artwork": "La Vigile de la Nativité",
+    "artist": "Viggo Johansen",
+    "year": "1891",
+    "location": "Statens Museum for Kunst, Copenhague",
+    "feast": "Christmas Eve"
+  },
+  "12-25": {
+    "artwork": "L'Adoration des bergers dans la nuit sainte",
+    "artist": "Georges de La Tour",
+    "year": "1644",
+    "location": "Musée du Louvre, Paris",
+    "feast": "Nativity of Jesus"
+  },
+  "12-26": {
+    "artwork": "La Lapidation de saint Étienne premier martyr",
+    "artist": "Giotto di Bondone",
+    "year": "1330",
+    "location": "Basilique Santa Croce, Florence",
+    "feast": "Saint Stephen"
+  },
+  "12-27": {
+    "artwork": "L'Apôtre saint Jean à Patmos",
+    "artist": "Le Dominiquin (Domenichino)",
+    "year": "1625",
+    "location": "National Gallery, Londres",
+    "feast": "John the Apostle"
+  },
+  "12-28": {
+    "artwork": "Le Massacre des Saints Innocents",
+    "artist": "Pierre Paul Rubens",
+    "year": "1638",
+    "location": "Alte Pinakothek, Munich",
+    "feast": "Massacre of the Innocents"
+  },
+  "12-29": {
+    "artwork": "Le Martyre de saint Thomas Becket archevêque",
+    "artist": "Enluminure royale du Maître de Thomas Becket",
+    "year": "vers 1200",
+    "location": "British Library, Londres",
+    "feast": "Thomas Becket"
+  },
+  "12-31": {
+    "artwork": "Le Miracle du pape saint Sylvestre et le dragon",
+    "artist": "Maso di Banco",
+    "year": "1340",
+    "location": "Basilique Santa Croce, Florence",
+    "feast": "Pope Sylvester I"
+  }
+};

@@ -1,0 +1,556 @@
+{
+  "id": "215",
+  "youtube_id": "JhEj0V4N6Rk",
+  "title": "Surrexit Christus qui",
+  "incipit": "Surrexit Christus qui",
+  "part": "Alleluia",
+  "office_part": "",
+  "youtube_url": "https://www.youtube.com/watch?v=JhEj0V4N6Rk",
+  "audio_duration": 180,
+  "has_nabc": false,
+  "has_reprise": false,
+  "total_notes": 108,
+  "timestamps": [
+    {
+      "note_index": 0,
+      "start": 2.69,
+      "end": 3.42
+    },
+    {
+      "note_index": 1,
+      "start": 3.42,
+      "end": 4.32
+    },
+    {
+      "note_index": 2,
+      "start": 4.32,
+      "end": 6.25
+    },
+    {
+      "note_index": 3,
+      "start": 6.25,
+      "end": 7.14
+    },
+    {
+      "note_index": 4,
+      "start": 7.14,
+      "end": 8.02
+    },
+    {
+      "note_index": 5,
+      "start": 8.02,
+      "end": 8.33
+    },
+    {
+      "note_index": 6,
+      "start": 8.33,
+      "end": 10.01
+    },
+    {
+      "note_index": 7,
+      "start": 10.01,
+      "end": 10.8
+    },
+    {
+      "note_index": 8,
+      "start": 10.8,
+      "end": 11.59
+    },
+    {
+      "note_index": 9,
+      "start": 11.59,
+      "end": 12.05
+    },
+    {
+      "note_index": 10,
+      "start": 12.05,
+      "end": 13.17
+    },
+    {
+      "note_index": 11,
+      "start": 13.17,
+      "end": 13.84
+    },
+    {
+      "note_index": 12,
+      "start": 13.84,
+      "end": 14.26
+    },
+    {
+      "note_index": 13,
+      "start": 14.26,
+      "end": 14.54
+    },
+    {
+      "note_index": 14,
+      "start": 14.54,
+      "end": 14.92
+    },
+    {
+      "note_index": 15,
+      "start": 14.92,
+      "end": 15.87
+    },
+    {
+      "note_index": 16,
+      "start": 15.87,
+      "end": 16.45
+    },
+    {
+      "note_index": 17,
+      "start": 16.45,
+      "end": 16.72
+    },
+    {
+      "note_index": 18,
+      "start": 16.72,
+      "end": 18.6
+    },
+    {
+      "note_index": 19,
+      "start": 18.6,
+      "end": 18.99
+    },
+    {
+      "note_index": 20,
+      "start": 18.99,
+      "end": 20.84
+    },
+    {
+      "note_index": 21,
+      "start": 20.84,
+      "end": 21.65
+    },
+    {
+      "note_index": 22,
+      "start": 21.65,
+      "end": 22.45
+    },
+    {
+      "note_index": 23,
+      "start": 22.45,
+      "end": 23.31
+    },
+    {
+      "note_index": 24,
+      "start": 23.31,
+      "end": 25.52
+    },
+    {
+      "note_index": 25,
+      "start": 25.52,
+      "end": 26.44
+    },
+    {
+      "note_index": 26,
+      "start": 26.44,
+      "end": 26.73
+    },
+    {
+      "note_index": 27,
+      "start": 26.73,
+      "end": 27.02
+    },
+    {
+      "note_index": 28,
+      "start": 27.02,
+      "end": 27.3
+    },
+    {
+      "note_index": 29,
+      "start": 27.3,
+      "end": 27.8
+    },
+    {
+      "note_index": 30,
+      "start": 27.85,
+      "end": 30.09
+    },
+    {
+      "note_index": 31,
+      "start": 30.09,
+      "end": 30.43
+    },
+    {
+      "note_index": 32,
+      "start": 30.43,
+      "end": 30.9
+    },
+    {
+      "note_index": 33,
+      "start": 30.9,
+      "end": 32.32
+    },
+    {
+      "note_index": 34,
+      "start": 32.32,
+      "end": 32.66
+    },
+    {
+      "note_index": 35,
+      "start": 32.66,
+      "end": 35.09
+    },
+    {
+      "note_index": 36,
+      "start": 35.09,
+      "end": 35.73
+    },
+    {
+      "note_index": 37,
+      "start": 35.73,
+      "end": 36.9
+    },
+    {
+      "note_index": 38,
+      "start": 36.9,
+      "end": 38.37
+    },
+    {
+      "note_index": 39,
+      "start": 38.37,
+      "end": 39.61
+    },
+    {
+      "note_index": 40,
+      "start": 39.61,
+      "end": 40.87
+    },
+    {
+      "note_index": 41,
+      "start": 40.87,
+      "end": 41.96
+    },
+    {
+      "note_index": 42,
+      "start": 41.96,
+      "end": 42.3
+    },
+    {
+      "note_index": 43,
+      "start": 42.3,
+      "end": 42.64
+    },
+    {
+      "note_index": 44,
+      "start": 42.64,
+      "end": 45.13
+    },
+    {
+      "note_index": 45,
+      "start": 45.13,
+      "end": 47.96
+    },
+    {
+      "note_index": 46,
+      "start": 47.96,
+      "end": 48.3
+    },
+    {
+      "note_index": 47,
+      "start": 48.3,
+      "end": 48.64
+    },
+    {
+      "note_index": 48,
+      "start": 48.64,
+      "end": 48.98
+    },
+    {
+      "note_index": 49,
+      "start": 48.98,
+      "end": 49.32
+    },
+    {
+      "note_index": 50,
+      "start": 49.32,
+      "end": 49.66
+    },
+    {
+      "note_index": 51,
+      "start": 49.66,
+      "end": 51.5
+    },
+    {
+      "note_index": 52,
+      "start": 51.5,
+      "end": 52.23
+    },
+    {
+      "note_index": 53,
+      "start": 52.23,
+      "end": 52.72
+    },
+    {
+      "note_index": 54,
+      "start": 52.72,
+      "end": 53.38
+    },
+    {
+      "note_index": 55,
+      "start": 53.38,
+      "end": 55.22
+    },
+    {
+      "note_index": 56,
+      "start": 55.22,
+      "end": 56.97
+    },
+    {
+      "note_index": 57,
+      "start": 56.97,
+      "end": 57.44
+    },
+    {
+      "note_index": 58,
+      "start": 57.44,
+      "end": 57.98
+    },
+    {
+      "note_index": 59,
+      "start": 57.98,
+      "end": 59.14
+    },
+    {
+      "note_index": 60,
+      "start": 59.14,
+      "end": 59.56
+    },
+    {
+      "note_index": 61,
+      "start": 59.56,
+      "end": 60.6
+    },
+    {
+      "note_index": 62,
+      "start": 60.6,
+      "end": 63.58
+    },
+    {
+      "note_index": 63,
+      "start": 63.58,
+      "end": 65.02
+    },
+    {
+      "note_index": 64,
+      "start": 65.02,
+      "end": 66.51
+    },
+    {
+      "note_index": 65,
+      "start": 66.51,
+      "end": 66.91
+    },
+    {
+      "note_index": 66,
+      "start": 66.91,
+      "end": 67.31
+    },
+    {
+      "note_index": 67,
+      "start": 67.31,
+      "end": 69.17
+    },
+    {
+      "note_index": 68,
+      "start": 69.17,
+      "end": 71.02
+    },
+    {
+      "note_index": 69,
+      "start": 71.02,
+      "end": 72.87
+    },
+    {
+      "note_index": 70,
+      "start": 72.87,
+      "end": 73.55
+    },
+    {
+      "note_index": 71,
+      "start": 73.55,
+      "end": 74.07
+    },
+    {
+      "note_index": 72,
+      "start": 74.07,
+      "end": 75.19
+    },
+    {
+      "note_index": 73,
+      "start": 75.19,
+      "end": 76.85
+    },
+    {
+      "note_index": 74,
+      "start": 76.85,
+      "end": 78.47
+    },
+    {
+      "note_index": 75,
+      "start": 78.47,
+      "end": 79.33
+    },
+    {
+      "note_index": 76,
+      "start": 79.33,
+      "end": 80.38
+    },
+    {
+      "note_index": 77,
+      "start": 80.38,
+      "end": 81.89
+    },
+    {
+      "note_index": 78,
+      "start": 81.89,
+      "end": 83.39
+    },
+    {
+      "note_index": 79,
+      "start": 83.39,
+      "end": 83.73
+    },
+    {
+      "note_index": 80,
+      "start": 83.73,
+      "end": 84.07
+    },
+    {
+      "note_index": 81,
+      "start": 84.07,
+      "end": 84.41
+    },
+    {
+      "note_index": 82,
+      "start": 84.41,
+      "end": 84.75
+    },
+    {
+      "note_index": 83,
+      "start": 84.75,
+      "end": 85.09
+    },
+    {
+      "note_index": 84,
+      "start": 85.09,
+      "end": 85.43
+    },
+    {
+      "note_index": 85,
+      "start": 85.43,
+      "end": 87.31
+    },
+    {
+      "note_index": 86,
+      "start": 87.31,
+      "end": 89.19
+    },
+    {
+      "note_index": 87,
+      "start": 89.19,
+      "end": 91.43
+    },
+    {
+      "note_index": 88,
+      "start": 91.43,
+      "end": 92.33
+    },
+    {
+      "note_index": 89,
+      "start": 92.33,
+      "end": 93.29
+    },
+    {
+      "note_index": 90,
+      "start": 93.29,
+      "end": 93.91
+    },
+    {
+      "note_index": 91,
+      "start": 93.91,
+      "end": 94.25
+    },
+    {
+      "note_index": 92,
+      "start": 94.25,
+      "end": 96.23
+    },
+    {
+      "note_index": 93,
+      "start": 96.23,
+      "end": 96.58
+    },
+    {
+      "note_index": 94,
+      "start": 96.58,
+      "end": 98.15
+    },
+    {
+      "note_index": 95,
+      "start": 98.15,
+      "end": 99.0
+    },
+    {
+      "note_index": 96,
+      "start": 99.0,
+      "end": 99.85
+    },
+    {
+      "note_index": 97,
+      "start": 99.85,
+      "end": 100.7
+    },
+    {
+      "note_index": 98,
+      "start": 100.7,
+      "end": 103.42
+    },
+    {
+      "note_index": 99,
+      "start": 103.42,
+      "end": 104.28
+    },
+    {
+      "note_index": 100,
+      "start": 104.28,
+      "end": 104.64
+    },
+    {
+      "note_index": 101,
+      "start": 104.64,
+      "end": 105.0
+    },
+    {
+      "note_index": 102,
+      "start": 105.0,
+      "end": 105.38
+    },
+    {
+      "note_index": 103,
+      "start": 105.38,
+      "end": 106.95
+    },
+    {
+      "note_index": 104,
+      "start": 106.95,
+      "end": 109.67
+    },
+    {
+      "note_index": 105,
+      "start": 109.67,
+      "end": 110.02
+    },
+    {
+      "note_index": 106,
+      "start": 110.02,
+      "end": 110.49
+    },
+    {
+      "note_index": 107,
+      "start": 110.49,
+      "end": 112.32
+    }
+  ],
+  "gabc_src": "name:Surrexit Christus qui;\noffice-part:Alleluia;\nmode:2;\nbook:Graduale Romanum, 1961, p. 254 & The Liber Usualis, 1961, p. 798;\ntranscriber:Andrew Hinkley;\n%%\n(f3) AL(c)le(ef//efef)lú(efghffe~)ia.(ef..) {*}~<i>ij.</i>(,) (fg!h'i//giH'GF'//e!hhhvGFggf.0) (::)\n<sp>V/</sp>. Sur(c)ré(ef)xit(ef) Chris(f)tus,(fhf'gvFE.) (;) qui(h) cre(h)á(h)vit(gh/ihhg) óm(f)ni(f!gwhgh)a:(gf..) (:)\net(f) mi(fi)sér(i)tus(hghvGF'g) est(gf..) (;) hu(fgffe)má(h)no(ghgg) *()\ngé(f)ne(fgf)ri.(f.) (,) (fg!h'i//giH'GF'//e!hhhvGFggf.0) (::)"
+}
