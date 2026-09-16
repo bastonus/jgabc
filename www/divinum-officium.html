@@ -22,7 +22,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="css/modern.css?v=28.2&ts=202608311218">
-    <link rel="stylesheet" href="css/divinum_officium.css?v=78.5&ts=202609141350">
+    <link rel="stylesheet" href="css/divinum_officium.css?v=78.6&ts=202609162025">
     <link rel="stylesheet" href="css/gregorian_search.css?v=2.57&ts=202609141315">
     <script>
         (function() {
@@ -85,8 +85,8 @@
     <script src="js/tempora_art_metadata.js?v=1.1&ts=202609021535"></script>
     <script src="js/horas_common_chants.js?v=1.0"></script>
     <script src="js/horas_compline_chants.js?v=1.0"></script>
-    <script src="js/divinum_officium.js?v=78.5&ts=202609141350"></script>
-    <script src="js/gregorian_db.js?v=2.1"></script>
+    <script src="js/gregorian_db.js?v=2.2"></script>
+    <script src="js/divinum_officium.js?v=78.6&ts=202609162025"></script>
     <script src="js/gregorian_index_data.js?v=3.4&ts=202609011145"></script>
     <script src="js/gregorian_youtube_links.js?v=1.0"></script>
     <script src="js/gregorian_preprocessed_timestamps.js?v=1.0"></script>
@@ -1518,7 +1518,7 @@
         </div>
     </div>
     <!-- ── In-App Alignment Lab Frame Modal ── -->
-    <div id="alignmentLabModal" class="do-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; height:100dvh; z-index:1200; background:var(--background-base, #000);">
+    <div id="alignmentLabModal" class="do-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; height:100dvh; z-index:1200; background:var(--background-base, #000); padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px); padding-left:env(safe-area-inset-left, 0px); padding-right:env(safe-area-inset-right, 0px); box-sizing:border-box;">
         <button id="btnCloseAlignmentLabModal" style="display:none;" aria-hidden="true"></button>
         <iframe id="alignmentLabIframe" src="about:blank" style="width:100%; height:100%; border:none; display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
     </div>

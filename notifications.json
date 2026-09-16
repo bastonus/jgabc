@@ -1,8 +1,92 @@
 {
-  "version": "1.0.8",
-  "updatedAt": "2026-09-16T15:15:00Z",
+  "version": "1.0.9",
+  "updatedAt": "2026-09-16T18:20:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.62",
+      "enabled": true,
+      "priority": 200,
+      "platforms": [
+        "all"
+      ],
+      "minVersion": "beta-0.0.62",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.62",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.62 : Nouveau système universel à double paquet GABC, streaming en direct, zéro duplication de données et documentation complète.",
+      "cancelsNotifications": [
+        "notif-release-beta-0.0.61",
+        "notif-release-beta-0.0.60",
+        "notif-release-beta-0.0.59",
+        "notif-release-beta-0.0.58",
+        "notif-release-beta-0.0.57",
+        "notif-release-beta-0.0.56",
+        "notif-release-beta-0.0.55",
+        "notif-release-beta-0.0.54",
+        "notif-release-beta-0.0.53",
+        "notif-release-beta-0.0.52",
+        "notif-release-beta-0.0.51",
+        "notif-release-beta-0.0.50",
+        "notif-release-beta-0.0.49",
+        "notif-release-beta-0.0.48",
+        "notif-release-beta-0.0.47",
+        "notif-release-beta-0.0.46",
+        "notif-release-beta-0.0.45",
+        "notif-release-beta-0.0.44",
+        "notif-release-beta-0.0.43",
+        "notif-release-beta-0.0.42",
+        "notif-release-beta-0.0.41",
+        "notif-release-beta-0.0.40",
+        "notif-release-beta-0.0.39",
+        "notif-release-beta-0.0.38",
+        "notif-oremus-welcome-v1"
+      ],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.62 : Modules Grégoriens Autonomes & Streaming Unifié",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.62)",
+        "subtitle": "Nouveau Système GABC · Zéro Duplication · Streaming GitHub · Documentation",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés majeures de la v0.0.62",
+            "content": "<ul><li><strong>Nouveau Système de Paquets Grégoriens Autonomes :</strong> Découpage en deux paquets distincts dans <em>Paramètres &gt; Moduli &amp; Memoria</em> : Pack Liturgique (5 330 pièces, ~2.8 Mo) et Corpus Complet GregoBase (25 290 pièces, ~6.4 Mo).</li><li><strong>Streaming GitHub &amp; Zéro Mo Initial :</strong> Aucun chant n'est pré-embarqué par défaut, garantissant un APK ultra-léger (~15 Mo). Chargement à la volée depuis GitHub Raw avec mise en cache automatique et persistante (IndexedDB + CacheStorage).</li><li><strong>Suppression des Duplications :</strong> Élimination du fichier obsolète gregorian_chants.json, suppression des doubles requêtes AJAX, exclusion stricte des gros JSON du bundle APK et mémoire vive unifiée.</li><li><strong>Résolution Centralisée :</strong> Moteur en cascade unifié via <code>window.gregorianDB.getGabc()</code> utilisé par toute l'application (Offices, Messes, Recherche, Propres).</li><li><strong>Documentation Exhaustive :</strong> Ajout des guides d'architecture technique et de handoff pour les futurs agents dans <code>docs/</code>.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels de la v0.0.61",
+            "content": "<ul><li><strong>Chants des Heures :</strong> Indexation complète du Bréviaire romain et sommaire liturgique dynamique étendu à l'Office.</li><li><strong>Dédoublonnage Visuel :</strong> Suppression du texte latin redondant et mise en valeur de la traduction vernaculaire.</li><li><strong>Pont Android :</strong> Intégration plein écran avec partage natif pour L'Atelier des Chantres.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour vos retours",
+            "content": "Merci à tous les utilisateurs, chantres et prêtres pour leur fidélité et leurs retours précieux !"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.61",
       "enabled": true,

@@ -1780,7 +1780,7 @@ div.do-rubric-inline {
     display: none;
     position: fixed !important;
     inset: 0 !important;
-    z-index: 1550 !important;
+    z-index: 2100 !important;
     background: rgba(0, 0, 0, 0.45) !important;
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
@@ -2293,7 +2293,7 @@ body.is-bible-mode .modern-player-bar {
     max-height: 100dvh !important;
     width: 360px !important;
     max-width: 92vw !important;
-    z-index: 1600 !important;
+    z-index: 2200 !important;
     transform: translateX(110%) !important;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.45) !important;
@@ -4596,6 +4596,53 @@ body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not
     align-items: stretch;
     justify-content: flex-start;
     padding: 12px 8px;
+}
+
+.do-chant-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: var(--do-text-secondary, #777);
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    margin: 4px 0;
+}
+
+[data-theme="dark"] .do-chant-error,
+[data-theme="oled"] .do-chant-error,
+:root:not([data-theme="light"]) .do-chant-error {
+    color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.do-chant-retry-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary-color, #c96b63);
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
+    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.do-chant-retry-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.22);
+}
+
+.do-chant-retry-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .do-chant-preview svg,
@@ -8914,3 +8961,13 @@ body.is-dragging-picker #massPartPickerDrawer {
 
 
 
+
+
+/* ── Alignment Lab Modal Safe-Area Support ── */
+#alignmentLabModal {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    padding-left: env(safe-area-inset-left, 0px) !important;
+    padding-right: env(safe-area-inset-right, 0px) !important;
+    box-sizing: border-box !important;
+}

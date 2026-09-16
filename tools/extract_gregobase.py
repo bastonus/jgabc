@@ -577,13 +577,8 @@ def extract_from_local_gabc_dir(gabc_dir, output_dir):
     with open(index_file, 'w', encoding='utf-8') as f:
         json.dump(index_records, f, ensure_ascii=False, separators=(',', ':'))
 
-    print(f"[*] Écriture de {chants_file} ({len(chants_dict)} partitions)...")
-    with open(chants_file, 'w', encoding='utf-8') as f:
-        json.dump(chants_dict, f, ensure_ascii=False, separators=(',', ':'))
-
     index_size_kb = os.path.getsize(index_file) / 1024
-    chants_size_kb = os.path.getsize(chants_file) / 1024
-    print(f"[SUCCÈS] Index universel généré : {index_size_kb:.1f} Ko ({len(index_records)} entrées) | Dictionnaire GABC : {chants_size_kb:.1f} Ko")
+    print(f"[SUCCÈS] Index universel généré : {index_size_kb:.1f} Ko ({len(index_records)} entrées)")
     return True
 
 def main():

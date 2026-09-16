@@ -93,7 +93,7 @@ for (const dir of fullDirs) {
   const opts = { excludeDirs: ['vendor'] };
   if (dir === 'data') {
     // Les paquets volumineux GABC sont téléchargeables à la demande via GitHub Raw pour ne pas alourdir l'APK
-    opts.excludeFiles = ['gregorian_all.json', 'gregorian_liturgy.json'];
+    opts.excludeFiles = ['gregorian_all.json', 'gregorian_liturgy.json', 'gregorian_chants.json'];
   }
   const count = copyDirectorySync(src, dest, opts);
   console.log(`[SYNC] Copied ${count} files for ${dir}/`);

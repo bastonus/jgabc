@@ -1,5 +1,33 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.62 (16 Septembre 2026)
+
+---
+
+### 📦 Restructuration Définitive des Modules GABC & Zéro Duplication
+
+* **Double Paquet Autonome Téléchargeable :**
+  * **Pack Liturgique (Messes & Heures)** : 5 330 partitions grégoriennes (`data/gregorian_liturgy.json` et `dist_modules/liturgy.pack`), ~2.8 Mo compressé gzip (5.39 Mo pack zippé, ~34 Mo JSON).
+  * **Corpus Complet GregoBase** : 25 290 partitions intégrales (`data/gregorian_all.json` et `dist_modules/gabc.pack`), ~6.4 Mo compressé gzip (16.66 Mo pack zippé, ~48 Mo JSON).
+  * Contrôle complet et fluide dans **Paramètres > Moduli & Memoria** : boutons Télécharger, Supprimer, Mettre en pause, Reprendre et Annuler.
+* **Mode 100% En Ligne par Défaut (0 Mo Requis) :**
+  * Zéro stockage consommé à l'installation initiale (l'APK Android reste ultra-léger à ~15 Mo).
+  * Streaming à la volée via GitHub Raw Usercontent (`raw.githubusercontent.com/bastonus/jgabc/master/`).
+  * Auto-caching dynamique et persistant dans **IndexedDB** (`oremus_gabc_db`) et `CacheStorage`.
+* **Élimination Stricte des Données Redondantes :**
+  * Suppression définitive de l'ancien fichier monolithique obsolète `data/gregorian_chants.json`.
+  * Élimination des requêtes AJAX en double dans `loadGabcAndRender` et `loadScore` de `js/divinum_officium.js` : toute l'application s'appuie désormais sur le résolveur unique et unifié `window.gregorianDB.getGabc(chantId)`.
+  * Cache mémoire unifié : `GABC_LOCAL_CACHE` partage la même référence sur `window` pour zéro duplication d'objets en RAM.
+  * Exclusion stricte des gros JSON de `www/data/` et des assets APK dans `tools/sync_apk_assets.mjs`.
+* **Documentation & Handoff Technique pour les Futurs Développeurs / Agents :**
+  * Point d'entrée centralisé dans `docs/README.md`.
+  * Guide exhaustif de l'architecture du streaming et des paquets dans `docs/architecture/ARCHITECTURE_MODULES_GABC.md`.
+  * Guide de handoff complet pour le projet d'alignement audio/vidéo des notes GABC dans `docs/architecture/GABC_VIDEO_ALIGNMENT_HANDOFF.md`.
+* **Tests & Validation Automatisés :**
+  * Suite de 51 tests d'intégrité globale (`scratch/test_gabc_system.mjs`) et 10 tests de simulation du résolveur (`scratch/test_gabc_resolver.mjs`) validés à 100%.
+
+---
+
 ## 🚀 Version 0.0.61 (16 Septembre 2026)
 
 ---

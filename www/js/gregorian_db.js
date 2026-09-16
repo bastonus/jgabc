@@ -17,6 +17,30 @@
     var DB_VERSION = 1;
     var STORE_NAME = 'chants';
     var GITHUB_BASE = 'https://raw.githubusercontent.com/bastonus/jgabc/master/';
+    var JSDELIVR_BASE = 'https://cdn.jsdelivr.net/gh/bastonus/jgabc@master/';
+
+    function isValidGabcText(txt) {
+        if (!txt || typeof txt !== 'string') return false;
+        var trimmed = txt.trim();
+        if (trimmed.length < 5) return false;
+        if (trimmed.startsWith('<') || trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('{"')) return false;
+        return (trimmed.indexOf('(') !== -1 && trimmed.indexOf(')') !== -1) || trimmed.indexOf('%%') !== -1 || trimmed.indexOf('name:') !== -1;
+    }
+
+    function fetchWithTimeout(url, timeoutMs) {
+        var timeout = timeoutMs || 4000;
+        if (typeof AbortController !== 'undefined') {
+            var controller = new AbortController();
+            var timer = setTimeout(function() {
+                try { controller.abort(); } catch (e) {}
+            }, timeout);
+            return fetch(url, { signal: controller.signal })
+                .finally(function() {
+                    clearTimeout(timer);
+                });
+        }
+        return fetch(url);
+    }
 
     var _dbInstance = null;
     var _dbInitPromise = null;
@@ -29,12 +53,12 @@
         if (_dbInitPromise) return _dbInitPromise;
 
         _dbInitPromise = new Promise(function(resolve, reject) {
-            if (!('indexedDB' in window)) {
+            if (!('indexedDB' in window) || !window.indexedDB) {
                 console.warn('[GregorianDB] IndexedDB non supporté dans cet environnement.');
                 return resolve(null);
             }
             try {
-                var req = indexedDB.open(DB_NAME, DB_VERSION);
+                var req = window.indexedDB.open(DB_NAME, DB_VERSION);
                 req.onupgradeneeded = function(e) {
                     var db = e.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -190,6 +214,7 @@
 
             var urls = [
                 'data/gregorian_liturgy.json',
+                JSDELIVR_BASE + 'data/gregorian_liturgy.json',
                 GITHUB_BASE + 'data/gregorian_liturgy.json'
             ];
 
@@ -197,7 +222,7 @@
             for (var i = 0; i < urls.length; i++) {
                 try {
                     if (typeof cancelCheck === 'function' && cancelCheck()) throw new Error('cancelled');
-                    var res = await fetch(urls[i]);
+                    var res = await fetchWithTimeout(urls[i], 8000);
                     if (res.ok) {
                         if (typeof cancelCheck === 'function' && cancelCheck()) throw new Error('cancelled');
                         if (typeof onProgress === 'function') onProgress(40);
@@ -240,6 +265,7 @@
 
             var urls = [
                 'data/gregorian_all.json',
+                JSDELIVR_BASE + 'data/gregorian_all.json',
                 GITHUB_BASE + 'data/gregorian_all.json'
             ];
 
@@ -247,7 +273,7 @@
             for (var i = 0; i < urls.length; i++) {
                 try {
                     if (typeof cancelCheck === 'function' && cancelCheck()) throw new Error('cancelled');
-                    var res = await fetch(urls[i]);
+                    var res = await fetchWithTimeout(urls[i], 12000);
                     if (res.ok) {
                         if (typeof cancelCheck === 'function' && cancelCheck()) throw new Error('cancelled');
                         if (typeof onProgress === 'function') onProgress(45);
@@ -325,7 +351,7 @@
             // 2. Base locale IndexedDB (si pack téléchargé ou pièce déjà consultée)
             try {
                 var idbText = await idbGet(strId);
-                if (idbText) {
+                if (idbText && isValidGabcText(idbText)) {
                     window.GABC_LOCAL_CACHE[strId] = idbText;
                     return idbText;
                 }
@@ -335,40 +361,56 @@
             if ('caches' in window) {
                 try {
                     var cache = await caches.open('oremus-gabc-cache');
-                    var remoteUrlCheck = GITHUB_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc';
+                    var remoteUrlCheck = JSDELIVR_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc';
                     var matched = await cache.match(remoteUrlCheck);
                     if (!matched) {
-                        var remoteGbCheck = GITHUB_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc';
-                        matched = await cache.match(remoteGbCheck);
+                        matched = await cache.match(GITHUB_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc');
+                    }
+                    if (!matched) {
+                        matched = await cache.match(JSDELIVR_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
+                    }
+                    if (!matched) {
+                        matched = await cache.match(GITHUB_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
                     }
                     if (!matched && strId.indexOf('/') !== -1) {
-                        matched = await cache.match(GITHUB_BASE + strId.replace(/^\//, '') + '.gabc');
+                        var cPath = strId.replace(/^\//, '');
+                        if (!cPath.endsWith('.gabc')) cPath += '.gabc';
+                        matched = await cache.match(JSDELIVR_BASE + cPath);
+                        if (!matched) matched = await cache.match(GITHUB_BASE + cPath);
                     }
                     if (matched) {
                         var cachedText = await matched.text();
-                        window.GABC_LOCAL_CACHE[strId] = cachedText;
-                        idbPut(strId, cachedText).catch(function() {});
-                        return cachedText;
+                        if (isValidGabcText(cachedText)) {
+                            window.GABC_LOCAL_CACHE[strId] = cachedText;
+                            idbPut(strId, cachedText).catch(function() {});
+                            return cachedText;
+                        }
                     }
                 } catch (ce) {}
             }
 
+            var isNumericId = /^\d+$/.test(strId);
+
             // 4. Fichier local relatif si disponible (ex: serveur local ou bundle complet)
-            var localCandidates = [
-                'gabc/' + encodeURIComponent(strId) + '.gabc',
-                'gregobase/' + encodeURIComponent(strId) + '.gabc',
-                'gabc/litanies/' + encodeURIComponent(strId) + '.gabc'
-            ];
+            var localCandidates = [];
             if (strId.indexOf('/') !== -1) {
-                localCandidates.unshift(strId.replace(/^\//, '') + (strId.endsWith('.gabc') ? '' : '.gabc'));
+                localCandidates.push(strId.replace(/^\//, '') + (strId.endsWith('.gabc') ? '' : '.gabc'));
             }
+            if (isNumericId) {
+                localCandidates.push('gregobase/' + encodeURIComponent(strId) + '.gabc');
+                localCandidates.push('gabc/' + encodeURIComponent(strId) + '.gabc');
+            } else {
+                localCandidates.push('gabc/' + encodeURIComponent(strId) + '.gabc');
+                localCandidates.push('gregobase/' + encodeURIComponent(strId) + '.gabc');
+            }
+            localCandidates.push('gabc/litanies/' + encodeURIComponent(strId) + '.gabc');
 
             for (var c = 0; c < localCandidates.length; c++) {
                 try {
-                    var resLocal = await fetch(localCandidates[c]);
+                    var resLocal = await fetchWithTimeout(localCandidates[c], 1500);
                     if (resLocal.ok) {
                         var textLocal = await resLocal.text();
-                        if (textLocal && textLocal.indexOf('(') !== -1) {
+                        if (isValidGabcText(textLocal)) {
                             window.GABC_LOCAL_CACHE[strId] = textLocal;
                             idbPut(strId, textLocal).catch(function() {});
                             return textLocal;
@@ -377,25 +419,38 @@
                 } catch (le) {}
             }
 
-            // 5. En ligne à la volée via GitHub Raw Usercontent (Comportement Par Défaut)
-            var remoteCandidates = [
-                GITHUB_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc',
-                GITHUB_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc',
-                GITHUB_BASE + 'gabc/litanies/' + encodeURIComponent(strId) + '.gabc'
-            ];
+            // 5. En ligne via multiples sources fiables : CDN jsDelivr (prioritaire, ultra-rapide) + GitHub Raw + GregoBase API
+            var remoteCandidates = [];
             if (strId.indexOf('/') !== -1) {
                 var cleanPath = strId.replace(/^\//, '');
                 if (!cleanPath.endsWith('.gabc')) cleanPath += '.gabc';
-                remoteCandidates.unshift(GITHUB_BASE + cleanPath);
+                remoteCandidates.push(JSDELIVR_BASE + cleanPath);
+                remoteCandidates.push(GITHUB_BASE + cleanPath);
+            } else if (isNumericId) {
+                // 1. CDN jsDelivr gregobase (prioritaire mondial)
+                remoteCandidates.push(JSDELIVR_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc');
+                // 2. Direct GitHub Raw gregobase
+                remoteCandidates.push(GITHUB_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc');
+                // 3. GregoBase Official Download API
+                remoteCandidates.push('https://gregobase.selapa.net/download.php?id=' + encodeURIComponent(strId) + '&format=gabc');
+                // 4. Fallback gabc
+                remoteCandidates.push(JSDELIVR_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
+                remoteCandidates.push(GITHUB_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
+            } else {
+                remoteCandidates.push(JSDELIVR_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
+                remoteCandidates.push(GITHUB_BASE + 'gabc/' + encodeURIComponent(strId) + '.gabc');
+                remoteCandidates.push(JSDELIVR_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc');
+                remoteCandidates.push(GITHUB_BASE + 'gregobase/' + encodeURIComponent(strId) + '.gabc');
+                remoteCandidates.push(GITHUB_BASE + 'gabc/litanies/' + encodeURIComponent(strId) + '.gabc');
             }
 
             for (var r = 0; r < remoteCandidates.length; r++) {
                 var rUrl = remoteCandidates[r];
                 try {
-                    var resRemote = await fetch(rUrl);
+                    var resRemote = await fetchWithTimeout(rUrl, 4500);
                     if (resRemote.ok) {
                         var textRemote = await resRemote.text();
-                        if (textRemote && textRemote.indexOf('(') !== -1) {
+                        if (isValidGabcText(textRemote)) {
                             // Mise en cache mémoire
                             window.GABC_LOCAL_CACHE[strId] = textRemote;
 

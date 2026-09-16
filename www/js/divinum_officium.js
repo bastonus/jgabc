@@ -9151,10 +9151,22 @@ function renderSingleChantScore($wrapper, force, onComplete) {
     async function loadGabcAndRender() {
         try {
             var rawGabc = $wrapper.data('raw-gabc') || GABC_LOCAL_CACHE[chantId];
-            if (!rawGabc && window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
-                try {
-                    rawGabc = await window.gregorianDB.getGabc(chantId);
-                } catch(e) {}
+            if (!rawGabc) {
+                var gdb = window.gregorianDB;
+                if (!gdb || typeof gdb.getGabc !== 'function') {
+                    for (var w = 0; w < 25; w++) {
+                        await new Promise(function(resolve) { setTimeout(resolve, 100); });
+                        if (window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
+                            gdb = window.gregorianDB;
+                            break;
+                        }
+                    }
+                }
+                if (gdb && typeof gdb.getGabc === 'function') {
+                    try {
+                        rawGabc = await gdb.getGabc(chantId);
+                    } catch(e) {}
+                }
             }
 
             // Check if card moved out of viewport during async download
@@ -9164,7 +9176,12 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             }
 
             if (!rawGabc) {
-                $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Partition #' + escHtml(chantId) + ' non disponible.</div>');
+                $preview.removeClass('gregorian-skeleton').html(
+                    '<div class="do-chant-error">' +
+                        '<span>Partition #' + escHtml(chantId) + ' non disponible.</span>' +
+                        '<button type="button" class="do-chant-retry-btn" data-chant-id="' + escHtml(chantId) + '" title="Tenter de nouveau le chargement">Réessayer</button>' +
+                    '</div>'
+                );
                 $wrapper.data('is-rendering', false);
                 return;
             }
@@ -9401,6 +9418,15 @@ function renderSingleChantScore($wrapper, force, onComplete) {
 window.renderSingleChantScore = renderSingleChantScore;
 window.relayoutAllChantScores = relayoutAllChantScores;
 window.getOptimalChantWidth = getOptimalChantWidth;
+
+$(document).off('click.dochantretry', '.do-chant-retry-btn').on('click.dochantretry', '.do-chant-retry-btn', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $btn = $(this);
+    var $wrapper = $btn.closest('.do-chant-card-wrapper');
+    $btn.text('Chargement...').prop('disabled', true);
+    renderSingleChantScore($wrapper, true);
+});
 
 function getOptimalChantWidth($card) {
     var $preview = $card.find('.do-chant-preview');
@@ -15106,7 +15132,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.61';
+var CURRENT_APP_VERSION = 'beta-0.0.62';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -17928,6 +17954,15 @@ function setupEventListeners() {
             }
             $modal.fadeIn(150);
             $('body').css('overflow', 'hidden');
+            setTimeout(function() {
+                try {
+                    if ($iframe[0] && $iframe[0].contentWindow) {
+                        var sat = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0', 10);
+                        var sab = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0', 10);
+                        $iframe[0].contentWindow.postMessage({ type: 'safe_area_insets', top: sat, bottom: sab }, '*');
+                    }
+                } catch(e) {}
+            }, 80);
             if (pushState !== false && window.location.hash !== '#align') {
                 try {
                     history.pushState({ screen: 'align' }, '', '#align');
