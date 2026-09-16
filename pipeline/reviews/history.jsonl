@@ -18,3 +18,77 @@
 {"action": "approve", "piece_id": "17", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.729785+00:00"}
 {"action": "approve", "piece_id": "215", "status": "bad_gabc", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.730870+00:00"}
 {"action": "approve", "piece_id": "23", "status": "approved", "approved_by": "senior_editor", "issue_number": 1001, "logged_at": "2026-09-15T22:01:39.730870+00:00"}
+{"action": "stage", "piece_id": "47", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "119", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "trop rapide", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "132", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "497", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "561", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "678", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "776", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.625457+00:00"}
+{"action": "stage", "piece_id": "988", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.630706+00:00"}
+{"action": "stage", "piece_id": "1117", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Commebnce trop tot", "logged_at": "2026-09-16T12:46:07.631400+00:00"}
+{"action": "stage", "piece_id": "2107", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.631963+00:00"}
+{"action": "stage", "piece_id": "3373", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.631963+00:00"}
+{"action": "stage", "piece_id": "3718", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.632851+00:00"}
+{"action": "stage", "piece_id": "4015", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.632851+00:00"}
+{"action": "stage", "piece_id": "4177", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.633445+00:00"}
+{"action": "stage", "piece_id": "10057", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.633445+00:00"}
+{"action": "stage", "piece_id": "10062", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.633445+00:00"}
+{"action": "stage", "piece_id": "13657", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.634164+00:00"}
+{"action": "stage", "piece_id": "14111", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.634164+00:00"}
+{"action": "stage", "piece_id": "14262", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Gabc vide", "logged_at": "2026-09-16T12:46:07.634164+00:00"}
+{"action": "stage", "piece_id": "16266", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Pas le bon chant", "logged_at": "2026-09-16T12:46:07.635302+00:00"}
+{"action": "stage", "piece_id": "16304", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.635302+00:00"}
+{"action": "stage", "piece_id": "16704", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Commence trop tot", "logged_at": "2026-09-16T12:46:07.635817+00:00"}
+{"action": "stage", "piece_id": "missa4-agnus", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.635817+00:00"}
+{"action": "stage", "piece_id": "co-surrexit_dominus", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.635817+00:00"}
+{"action": "stage", "piece_id": "of-audi_israel", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Commence trop tot", "logged_at": "2026-09-16T12:46:07.635817+00:00"}
+{"action": "stage", "piece_id": "of-dextera_domini-alleluia", "status": "approved", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.635817+00:00"}
+{"action": "stage", "piece_id": "co-in_splendoribus", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Maivais chant", "logged_at": "2026-09-16T12:46:07.637831+00:00"}
+{"action": "stage", "piece_id": "in-deus_in_loco_sancto", "status": "rejected", "author": "user_app", "issue_number": 0, "comment": "Commence trop tot", "logged_at": "2026-09-16T12:46:07.638178+00:00"}
+{"action": "stage", "piece_id": "of-deus_deus_meus", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.638178+00:00"}
+{"action": "stage", "piece_id": "gr-beata_gens", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.638178+00:00"}
+{"action": "stage", "piece_id": "in-laetare", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.639028+00:00"}
+{"action": "stage", "piece_id": "co-non_vos_relinquam", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.639028+00:00"}
+{"action": "stage", "piece_id": "gr-requiem", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.639028+00:00"}
+{"action": "stage", "piece_id": "ite_missa_est", "status": "bad_gabc", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.640036+00:00"}
+{"action": "stage", "piece_id": "of-iustus_ut_palma_florebit", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.640036+00:00"}
+{"action": "stage", "piece_id": "of-calix_benedictionis", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "hfzbfhzYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", "logged_at": "2026-09-16T12:46:07.640629+00:00"}
+{"action": "stage", "piece_id": "gr-exsurge", "status": "unreviewed", "author": "user_app", "issue_number": 0, "comment": "", "logged_at": "2026-09-16T12:46:07.640629+00:00"}
+{"action": "approve", "piece_id": "10057", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.159275+00:00"}
+{"action": "approve", "piece_id": "10062", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.160283+00:00"}
+{"action": "approve", "piece_id": "1117", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.161296+00:00"}
+{"action": "approve", "piece_id": "119", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.161296+00:00"}
+{"action": "approve", "piece_id": "132", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.162419+00:00"}
+{"action": "approve", "piece_id": "13657", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.162854+00:00"}
+{"action": "approve", "piece_id": "14111", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.162854+00:00"}
+{"action": "approve", "piece_id": "14262", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.164503+00:00"}
+{"action": "approve", "piece_id": "16266", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.165516+00:00"}
+{"action": "approve", "piece_id": "16304", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.165516+00:00"}
+{"action": "approve", "piece_id": "16704", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.166514+00:00"}
+{"action": "approve", "piece_id": "2107", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.167516+00:00"}
+{"action": "approve", "piece_id": "3373", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.168515+00:00"}
+{"action": "approve", "piece_id": "3718", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.169514+00:00"}
+{"action": "approve", "piece_id": "4015", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.169514+00:00"}
+{"action": "approve", "piece_id": "4177", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.171030+00:00"}
+{"action": "approve", "piece_id": "47", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.172045+00:00"}
+{"action": "approve", "piece_id": "497", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.172598+00:00"}
+{"action": "approve", "piece_id": "561", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.173267+00:00"}
+{"action": "approve", "piece_id": "678", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.173267+00:00"}
+{"action": "approve", "piece_id": "776", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.174278+00:00"}
+{"action": "approve", "piece_id": "988", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.175283+00:00"}
+{"action": "approve", "piece_id": "co-in_splendoribus", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.175283+00:00"}
+{"action": "approve", "piece_id": "co-non_vos_relinquam", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.176278+00:00"}
+{"action": "approve", "piece_id": "co-surrexit_dominus", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.177278+00:00"}
+{"action": "approve", "piece_id": "gr-beata_gens", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.178284+00:00"}
+{"action": "approve", "piece_id": "gr-exsurge", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.178284+00:00"}
+{"action": "approve", "piece_id": "gr-requiem", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.181943+00:00"}
+{"action": "approve", "piece_id": "in-deus_in_loco_sancto", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.181943+00:00"}
+{"action": "approve", "piece_id": "in-laetare", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.181943+00:00"}
+{"action": "approve", "piece_id": "ite_missa_est", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.183232+00:00"}
+{"action": "approve", "piece_id": "missa4-agnus", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.184235+00:00"}
+{"action": "approve", "piece_id": "of-audi_israel", "status": "rejected", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.185233+00:00"}
+{"action": "approve", "piece_id": "of-calix_benedictionis", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.186240+00:00"}
+{"action": "approve", "piece_id": "of-deus_deus_meus", "status": "bad_gabc", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.187229+00:00"}
+{"action": "approve", "piece_id": "of-dextera_domini-alleluia", "status": "approved", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.187229+00:00"}
+{"action": "approve", "piece_id": "of-iustus_ut_palma_florebit", "status": "unreviewed", "approved_by": "maintainer", "issue_number": 0, "logged_at": "2026-09-16T12:48:45.188227+00:00"}

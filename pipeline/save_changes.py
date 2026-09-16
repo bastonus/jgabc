@@ -195,6 +195,22 @@ def save_review(piece_id: str, status: str, comment: str = "", reviewed_at: str 
         json.dump(reviews, f, ensure_ascii=False, indent=2)
 
     try:
+        from tools.review_queue import stage_reviews
+        payload_str = json.dumps({
+            piece_id: {
+                "status": status,
+                "comment": comment or "",
+                "reviewedAt": reviews[piece_id]["reviewedAt"],
+                "title": reviews[piece_id].get("title", ""),
+                "incipit": reviews[piece_id].get("incipit", ""),
+                "youtube_id": reviews[piece_id].get("youtube_id", "")
+            }
+        })
+        stage_reviews(issue_number=0, issue_body=f"```json\n{payload_str}\n```", author="local_user")
+    except Exception as e:
+        pass
+
+    try:
         from tools.review_queue import compute_and_save_stats
         compute_and_save_stats()
     except Exception:

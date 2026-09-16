@@ -5,7 +5,9 @@
     "reviewedAt": "2026-09-15T10:38:59.224Z",
     "title": "Graduale: Salvum fac servum tuum",
     "incipit": "Salvum fac servum",
-    "youtube_id": "TZvEodf6ShI"
+    "youtube_id": "TZvEodf6ShI",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "14262": {
     "status": "rejected",
@@ -13,7 +15,9 @@
     "reviewedAt": "2026-09-15T10:38:46.153Z",
     "title": "Credo 1",
     "incipit": "",
-    "youtube_id": "gogbwq4PTLg"
+    "youtube_id": "gogbwq4PTLg",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "16266": {
     "status": "rejected",
@@ -21,7 +25,9 @@
     "reviewedAt": "2026-09-15T10:38:28.616Z",
     "title": "Offertorium: Benedicam Dominum",
     "incipit": "Benedicam Dominum",
-    "youtube_id": "YWVLdF2BPCU"
+    "youtube_id": "YWVLdF2BPCU",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "16704": {
     "status": "rejected",
@@ -29,7 +35,9 @@
     "reviewedAt": "2026-09-15T10:38:02.515Z",
     "title": "Te Deum laudamus (tonus simplex)",
     "incipit": "Te Deum",
-    "youtube_id": "SRACOQ7g9-E"
+    "youtube_id": "SRACOQ7g9-E",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "missa4-agnus": {
     "status": "approved",
@@ -37,7 +45,9 @@
     "reviewedAt": "2026-09-15T10:30:40.167Z",
     "title": "Agnus Dei IV",
     "incipit": "Agnus Dei IV",
-    "youtube_id": "kRRHFjy3VxU"
+    "youtube_id": "kRRHFjy3VxU",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "co-surrexit_dominus": {
     "status": "rejected",
@@ -45,7 +55,9 @@
     "reviewedAt": "2026-09-15T10:30:54.754Z",
     "title": "Communio: Surrexit Dominus",
     "incipit": "Surrexit Dominus et apparuit (Com.)",
-    "youtube_id": "n4hSRYYWogY"
+    "youtube_id": "n4hSRYYWogY",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "of-audi_israel": {
     "status": "rejected",
@@ -53,7 +65,9 @@
     "reviewedAt": "2026-09-15T10:31:47.118Z",
     "title": "Offertorium: Audi Israel",
     "incipit": "Audi Israel",
-    "youtube_id": "go-yQLQNxkw"
+    "youtube_id": "go-yQLQNxkw",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "of-dextera_domini-alleluia": {
     "status": "approved",
@@ -61,7 +75,9 @@
     "reviewedAt": "2026-09-15T10:37:37.243Z",
     "title": "Dextera Domini",
     "incipit": "Dextera Domini",
-    "youtube_id": "DTUEQtqvm-0"
+    "youtube_id": "DTUEQtqvm-0",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "co-in_splendoribus": {
     "status": "rejected",
@@ -69,7 +85,9 @@
     "reviewedAt": "2026-09-15T10:39:14.519Z",
     "title": "Communio: In splendoribus",
     "incipit": "in splendoribus",
-    "youtube_id": "nrtqADDCjdU"
+    "youtube_id": "nrtqADDCjdU",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "in-deus_in_loco_sancto": {
     "status": "rejected",
@@ -77,7 +95,9 @@
     "reviewedAt": "2026-09-15T10:39:35.334Z",
     "title": "Introitus: Deus in loco sancto suo",
     "incipit": "Deus in loco sancto",
-    "youtube_id": "f6XKSs-aQug"
+    "youtube_id": "f6XKSs-aQug",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "3373": {
     "status": "approved",
@@ -85,7 +105,9 @@
     "reviewedAt": "2026-09-15T11:26:10.110Z",
     "title": "Offertorium: Exsultabunt sancti in gloria",
     "incipit": "Exsultabunt sancti",
-    "youtube_id": "6oTPCJQUhvQ"
+    "youtube_id": "6oTPCJQUhvQ",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "678": {
     "status": "approved",
@@ -93,7 +115,9 @@
     "reviewedAt": "2026-09-15T11:26:11.878Z",
     "title": "Credo - more ambrosiano",
     "incipit": "Credo IV",
-    "youtube_id": "00Oi8r8pKIw"
+    "youtube_id": "00Oi8r8pKIw",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "2107": {
     "status": "approved",
@@ -101,7 +125,9 @@
     "reviewedAt": "2026-09-15T11:26:12.893Z",
     "title": "Missa 13: Gloria",
     "incipit": "Gloria XIII",
-    "youtube_id": "rvjmUPNgh34"
+    "youtube_id": "rvjmUPNgh34",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "4177": {
     "status": "bad_gabc",
@@ -109,7 +135,9 @@
     "reviewedAt": "2026-09-15T11:34:05.725Z",
     "title": "Sequentia: Mittit Ad Virginem",
     "incipit": "Mittit ad Virginem",
-    "youtube_id": "qThPYEVdjb0"
+    "youtube_id": "qThPYEVdjb0",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "of-deus_deus_meus": {
     "status": "bad_gabc",
@@ -117,7 +145,9 @@
     "reviewedAt": "2026-09-15T11:38:51.094Z",
     "title": "Offertorium: Deus, Deus meus",
     "incipit": "Deus Deus meus",
-    "youtube_id": "8oFe4dcku0E"
+    "youtube_id": "8oFe4dcku0E",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "14111": {
     "status": "bad_gabc",
@@ -125,7 +155,9 @@
     "reviewedAt": "2026-09-15T12:16:39.032Z",
     "title": "Invitatorium: Non sit vobis vanum",
     "incipit": "Non sit vobis vanum",
-    "youtube_id": "ctavd6WeddQ"
+    "youtube_id": "ctavd6WeddQ",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "gr-beata_gens": {
     "status": "bad_gabc",
@@ -133,7 +165,9 @@
     "reviewedAt": "2026-09-15T12:33:55.223Z",
     "title": "Graduale: Beata gens",
     "incipit": "Beata gens",
-    "youtube_id": "-kZMSP6Iatc"
+    "youtube_id": "-kZMSP6Iatc",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "in-laetare": {
     "status": "bad_gabc",
@@ -141,7 +175,9 @@
     "reviewedAt": "2026-09-15T12:36:40.768Z",
     "title": "Introitus: Laetare Ierusalem",
     "incipit": "laetare ierusalem",
-    "youtube_id": "IXhIPtK9ABc"
+    "youtube_id": "IXhIPtK9ABc",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "132": {
     "status": "bad_gabc",
@@ -149,7 +185,9 @@
     "reviewedAt": "2026-09-15T12:38:03.654Z",
     "title": "Introitus: Ad te levavi",
     "incipit": "Ad te levavi",
-    "youtube_id": "2U3Qsv3jThk"
+    "youtube_id": "2U3Qsv3jThk",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "561": {
     "status": "bad_gabc",
@@ -157,7 +195,9 @@
     "reviewedAt": "2026-09-15T12:38:13.753Z",
     "title": "Communio: Video caelos apertos",
     "incipit": "Video caelos",
-    "youtube_id": "vs4a6JULLJg"
+    "youtube_id": "vs4a6JULLJg",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "497": {
     "status": "bad_gabc",
@@ -165,7 +205,9 @@
     "reviewedAt": "2026-09-15T13:18:09.520Z",
     "title": "Asperges me III.",
     "incipit": "Asperges me",
-    "youtube_id": "yzgYQK6PEZw"
+    "youtube_id": "yzgYQK6PEZw",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "co-non_vos_relinquam": {
     "status": "bad_gabc",
@@ -173,7 +215,9 @@
     "reviewedAt": "2026-09-15T13:18:27.983Z",
     "title": "Communio: Non vos relinquam orphanos",
     "incipit": "Non vos relinquam",
-    "youtube_id": "UX1T3_ROHsM"
+    "youtube_id": "UX1T3_ROHsM",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "gr-requiem": {
     "status": "bad_gabc",
@@ -181,7 +225,9 @@
     "reviewedAt": "2026-09-15T13:18:41.144Z",
     "title": "Graduale: Requiem aeternam",
     "incipit": "Requiem",
-    "youtube_id": "__6Kbhxo0oU"
+    "youtube_id": "__6Kbhxo0oU",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "10062": {
     "status": "bad_gabc",
@@ -189,7 +235,9 @@
     "reviewedAt": "2026-09-15T14:12:50.041Z",
     "title": "Alleluia: Angelus Domini descendit de caelo",
     "incipit": "Angelus Domini descendit",
-    "youtube_id": "_c6ftPgdSbQ"
+    "youtube_id": "_c6ftPgdSbQ",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "16304": {
     "status": "bad_gabc",
@@ -197,7 +245,9 @@
     "reviewedAt": "2026-09-15T15:06:40.718Z",
     "title": "Introitus: Cantate Domino canticum novum",
     "incipit": "Cantate Domino",
-    "youtube_id": "g78WK_bd08A"
+    "youtube_id": "g78WK_bd08A",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "4015": {
     "status": "bad_gabc",
@@ -205,7 +255,9 @@
     "reviewedAt": "2026-09-15T15:06:46.427Z",
     "title": "Psalmus responsorius: Misericordias Domini in aeternum cantabo",
     "incipit": "Misericordias Domini",
-    "youtube_id": "boiWr2XfW-I"
+    "youtube_id": "boiWr2XfW-I",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "13657": {
     "status": "bad_gabc",
@@ -213,7 +265,9 @@
     "reviewedAt": "2026-09-15T15:06:57.068Z",
     "title": "Graduale: Angelus Domini Raphael",
     "incipit": "Angelus Domini Raphael",
-    "youtube_id": "xH7P0WyAli0"
+    "youtube_id": "xH7P0WyAli0",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "10057": {
     "status": "bad_gabc",
@@ -221,7 +275,9 @@
     "reviewedAt": "2026-09-15T15:07:04.100Z",
     "title": "Offertorium: Angelus Domini",
     "incipit": "Angelus Domini locutus est mulieribus",
-    "youtube_id": "7amE6gDU7bc"
+    "youtube_id": "7amE6gDU7bc",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "ite_missa_est": {
     "status": "bad_gabc",
@@ -229,7 +285,9 @@
     "reviewedAt": "2026-09-15T15:07:09.475Z",
     "title": "Kyriale - Missa 4: Ite missa est",
     "incipit": "ite missa est",
-    "youtube_id": "DdHW2OcvjJM"
+    "youtube_id": "DdHW2OcvjJM",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "of-iustus_ut_palma_florebit": {
     "status": "unreviewed",
@@ -237,7 +295,9 @@
     "reviewedAt": "2026-09-15T15:45:26.519Z",
     "title": "Offertorium: Iustus ut palma florebit",
     "incipit": "Justus ut palma (Off.)",
-    "youtube_id": "aGuODi58byY"
+    "youtube_id": "aGuODi58byY",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "of-calix_benedictionis": {
     "status": "unreviewed",
@@ -245,7 +305,9 @@
     "reviewedAt": "2026-09-15T15:48:28.970Z",
     "title": "Offertorium: Calix benedictionis",
     "incipit": "Calix benedictionis",
-    "youtube_id": "u6sRiHeOnMU"
+    "youtube_id": "u6sRiHeOnMU",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "988": {
     "status": "unreviewed",
@@ -253,7 +315,9 @@
     "reviewedAt": "2026-09-15T15:58:53.252Z",
     "title": "Alleluia: Beatus vir sanctus Martinus",
     "incipit": "Beatus vir sanctus Martinus",
-    "youtube_id": "wkzD0tjTthc"
+    "youtube_id": "wkzD0tjTthc",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "gr-exsurge": {
     "status": "unreviewed",
@@ -261,7 +325,9 @@
     "reviewedAt": "2026-09-15T15:58:59.827Z",
     "title": "Graduale: Exsurge Domine, et intende",
     "incipit": "Exsurge... non praevaleat",
-    "youtube_id": "zUvdmyS_c2c"
+    "youtube_id": "zUvdmyS_c2c",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "776": {
     "status": "unreviewed",
@@ -269,7 +335,9 @@
     "reviewedAt": "2026-09-15T15:59:06.107Z",
     "title": "Introitus: Sitientes venite ad aquas",
     "incipit": "Sitientes",
-    "youtube_id": "iOkAAMsZg7M"
+    "youtube_id": "iOkAAMsZg7M",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "47": {
     "status": "bad_gabc",
@@ -277,7 +345,9 @@
     "reviewedAt": "2026-09-15T16:31:39.069Z",
     "title": "Dextera Domini",
     "incipit": "Dextera Domini",
-    "youtube_id": "3lHW0OAHBCk"
+    "youtube_id": "3lHW0OAHBCk",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "3718": {
     "status": "approved",
@@ -285,7 +355,9 @@
     "reviewedAt": "2026-09-15T20:47:58.681Z",
     "title": "Sapientiam sanctorum (Intr.)",
     "incipit": "Sapientiam sanctorum (Intr.)",
-    "youtube_id": "Cm1E06bF9Rs"
+    "youtube_id": "Cm1E06bF9Rs",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   },
   "119": {
     "status": "unreviewed",
@@ -293,6 +365,8 @@
     "reviewedAt": "2026-09-15T20:48:18.438Z",
     "title": "O quam bonus",
     "incipit": "O quam bonus",
-    "youtube_id": "Xzp5nq_bqaQ"
+    "youtube_id": "Xzp5nq_bqaQ",
+    "approved_by": "maintainer",
+    "approved_at": "2026-09-16T12:48:45.155251+00:00"
   }
 }
