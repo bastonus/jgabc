@@ -1,6 +1,20 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.63 (16 Septembre 2026)
+
+---
+
+### 🔧 Serveur Coolify Autonome & Configuration Intégrée
+
+* **URL API par défaut** : `api-oremus.silverhorse.fr` préconfigurée dans l'APK Android pour un accès immédiat au serveur Coolify.
+* **Modal de configuration** : Interface dédiée dans Paramètres pour saisir, tester et enregistrer l'URL du serveur Coolify (`saveCoolifyServerUrl`, `testCoolifyServerConnection`).
+* **Synchronisation automatique** : Batch auto-sync toutes les 5 minutes avec garde-fous contre les erreurs 404 GitHub Issues.
+* **Stabilisation générale** : Corrections diverses et améliorations de robustesse suite à la refonte GABC v0.0.62.
+
+---
+
 ## 🚀 Version 0.0.62 (16 Septembre 2026)
+
 
 ---
 
