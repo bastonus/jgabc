@@ -4389,7 +4389,7 @@
       const count = Object.keys(batch).length;
       if (count === 0) return;
 
-      const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://review-relay.oremus.workers.dev/api/review';
+      const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://api-oremus.silverhorse.fr/api/review';
       const payload = {
         reviews: batch,
         count: count,
@@ -4492,7 +4492,7 @@
       }
       const { count, title, body } = payload;
 
-      const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://review-relay.oremus.workers.dev/api/review';
+      const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://api-oremus.silverhorse.fr/api/review';
       if (relayUrl) {
         showToast('Transmission en arrière-plan en cours...');
         try {
@@ -4757,6 +4757,10 @@
     });
 
     function init() {
+      // Initialiser l'URL du serveur Coolify par défaut si non configurée
+      if (!localStorage.getItem('oremus_review_relay_url')) {
+        localStorage.setItem('oremus_review_relay_url', 'https://api-oremus.silverhorse.fr/api/review');
+      }
       initReviews();
       pickNextRandomChant();
       checkTutorialOnStartup();
