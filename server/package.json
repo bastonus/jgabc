@@ -1,0 +1,14 @@
+{
+  "name": "oremus-review-relay",
+  "version": "1.0.0",
+  "description": "Serveur distant autonome et relais de synchronisation pour les avis du Laboratoire Grégorien Oremus",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs",
+    "dev": "node --watch index.mjs"
+  },
+  "keywords": ["oremus", "gregorian", "coolify", "review-relay"],
+  "author": "Oremus",
+  "license": "MIT"
+}

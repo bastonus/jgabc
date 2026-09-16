@@ -400,6 +400,54 @@ try {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ETAPE 8 : Vérification de l'UI et des fonctions du serveur Coolify
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n⚙️ Étape 8 : Vérification de la configuration UI du serveur Coolify');
+
+const labHtmlPath = path.join(rootDir, 'pipeline', 'alignment-lab.html');
+const labHtml = fs.readFileSync(labHtmlPath, 'utf-8');
+
+// 8a. Champ d'entrée URL présent
+assert(labHtml.includes('id="coolifyServerUrlInput"'), 'Le champ coolifyServerUrlInput est présent dans le syncModal');
+
+// 8b. Div statut présent
+assert(labHtml.includes('id="coolifyServerStatus"'), 'Le div de statut coolifyServerStatus est présent dans le syncModal');
+
+// 8c. Fonctions JS Coolify définies
+assert(labHtml.includes('function saveCoolifyServerUrl()'), 'Fonction saveCoolifyServerUrl() définie');
+assert(labHtml.includes('function clearCoolifyServerUrl()'), 'Fonction clearCoolifyServerUrl() définie');
+assert(labHtml.includes('async function testCoolifyServerConnection()'), 'Fonction testCoolifyServerConnection() définie');
+assert(labHtml.includes('function showCoolifyStatus('), 'Fonction showCoolifyStatus() définie');
+
+// 8d. Fonctions référencées dans les onclick du HTML
+assert(labHtml.includes('onclick="saveCoolifyServerUrl()"'), 'Bouton Enregistrer pointe vers saveCoolifyServerUrl()');
+assert(labHtml.includes('onclick="testCoolifyServerConnection()"'), 'Bouton Tester pointe vers testCoolifyServerConnection()');
+assert(labHtml.includes('onclick="clearCoolifyServerUrl()"'), 'Bouton Supprimer pointe vers clearCoolifyServerUrl()');
+
+// 8e. openSyncModal pré-remplit le champ Coolify
+assert(labHtml.includes('coolifyServerUrlInput') && labHtml.includes('oremus_review_relay_url'), 'openSyncModal pré-remplit le champ depuis localStorage');
+
+// 8f. Serveur Dockerfile existe
+const dockerfilePath = path.join(rootDir, 'server', 'Dockerfile');
+assert(fs.existsSync(dockerfilePath), 'server/Dockerfile existe pour le déploiement Coolify');
+
+// 8g. Vérification que le server index.mjs contient les routes attendues
+const serverIndexPath = path.join(rootDir, 'server', 'index.mjs');
+if (fs.existsSync(serverIndexPath)) {
+  const serverSrc = fs.readFileSync(serverIndexPath, 'utf-8');
+  assert(serverSrc.includes('/health'), 'Serveur expose la route GET /health');
+  assert(serverSrc.includes('/api/review'), 'Serveur expose la route POST /api/review');
+  assert(serverSrc.includes('/api/reviews/pending'), 'Serveur expose la route GET /api/reviews/pending');
+} else {
+  assert(false, 'server/index.mjs introuvable');
+}
+
+// 8h. Copie miroir pipeline/align/ est à jour
+const alignLabHtmlPath = path.join(rootDir, 'pipeline', 'align', 'alignment-lab.html');
+const alignLabHtml = fs.readFileSync(alignLabHtmlPath, 'utf-8');
+assert(alignLabHtml.includes('id="coolifyServerUrlInput"'), 'Copie pipeline/align/ contient aussi coolifyServerUrlInput');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BILAN DE LA SIMULATION
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n===============================================================');

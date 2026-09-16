@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  oremus-relay:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: oremus-relay:latest
+    container_name: oremus-relay
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATA_DIR=/app/data
+      # Définissez votre jeton GitHub pour committer automatiquement les avis sur GitHub
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_OWNER=${GITHUB_OWNER:-bastonus}
+      - GITHUB_REPO=${GITHUB_REPO:-jgabc}
+      - GITHUB_BRANCH=${GITHUB_BRANCH:-master}
+      # Optionnel : Clé API pour restreindre l'accès
+      - API_KEY=${API_KEY:-}
+    volumes:
+      - oremus_reviews_data:/app/data
+
+volumes:
+  oremus_reviews_data:
+    driver: local
