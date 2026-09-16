@@ -500,10 +500,14 @@ def main():
     args = parser.parse_args()
 
     if args.command == "stage":
-        body = args.issue_body
+        body = args.issue_body or os.environ.get("ISSUE_BODY", "")
         if args.file and os.path.exists(args.file):
             with open(args.file, "r", encoding="utf-8") as f:
-                body = f"```json\n{f.read()}\n```"
+                content = f.read()
+                if "```json" in content:
+                    body = content
+                else:
+                    body = f"```json\n{content}\n```"
         stage_reviews(args.issue_number, body, author=args.author, issue_url=args.issue_url)
 
     elif args.command == "list":

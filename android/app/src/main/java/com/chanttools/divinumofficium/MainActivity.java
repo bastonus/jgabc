@@ -109,9 +109,88 @@ public class MainActivity extends BridgeActivity {
                 wv.addJavascriptInterface(new AppIconInterface(), "AndroidAppIcon");
                 wv.addJavascriptInterface(new AppUpdateInterface(), "AndroidAppUpdate");
                 wv.addJavascriptInterface(new AppNotificationInterface(), "AndroidNotification");
+                wv.addJavascriptInterface(new AppBrowserInterface(), "AndroidBrowser");
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public class AppBrowserInterface {
+        @JavascriptInterface
+        public void openUrl(String url) {
+            if (url == null || url.trim().isEmpty()) return;
+            runOnUiThread(() -> {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url.trim()));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        Toast.makeText(MainActivity.this, "Impossible d'ouvrir le navigateur : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (Exception ignored) {}
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void shareText(String title, String text) {
+            if (text == null || text.trim().isEmpty()) return;
+            runOnUiThread(() -> {
+                try {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    if (title != null && !title.trim().isEmpty()) {
+                        sendIntent.putExtra(Intent.EXTRA_TITLE, title.trim());
+                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, title.trim());
+                    }
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+                    sendIntent.setType("text/plain");
+                    Intent shareIntent = Intent.createChooser(sendIntent, (title != null && !title.isEmpty()) ? title : "Partager");
+                    shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(shareIntent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        Toast.makeText(MainActivity.this, "Erreur de partage : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (Exception ignored) {}
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void sendBackgroundBatch(String urlStr, String jsonPayload, String authHeader) {
+            if (urlStr == null || urlStr.trim().isEmpty() || jsonPayload == null || jsonPayload.trim().isEmpty()) return;
+            downloadExecutor.execute(() -> {
+                HttpURLConnection conn = null;
+                try {
+                    URL url = new URL(urlStr.trim());
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("User-Agent", "Oremus-Android-APK/1.0");
+                    if (authHeader != null && !authHeader.trim().isEmpty()) {
+                        conn.setRequestProperty("Authorization", authHeader.trim());
+                    }
+                    conn.setConnectTimeout(20000);
+                    conn.setReadTimeout(20000);
+                    conn.setDoOutput(true);
+                    try (java.io.OutputStream os = conn.getOutputStream()) {
+                        byte[] input = jsonPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                        os.write(input, 0, input.length);
+                    }
+                    int responseCode = conn.getResponseCode();
+                    android.util.Log.d("OremusBackgroundSync", "Background batch HTTP response: " + responseCode);
+                } catch (Exception e) {
+                    android.util.Log.e("OremusBackgroundSync", "Background sync failed: " + e.getMessage(), e);
+                } finally {
+                    if (conn != null) {
+                        try { conn.disconnect(); } catch (Exception ignored) {}
+                    }
+                }
+            });
         }
     }
 

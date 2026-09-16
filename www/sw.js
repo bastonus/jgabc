@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.3.29';
+const CACHE_NAME = 'oremus-pwa-v1.3.30';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [
@@ -38,6 +38,8 @@ const PRECACHE_ASSETS = [
     './Caeciliae-Staffless-print.ttf',
     './js/bible_mappings.js',
     './js/divinum_officium.js',
+    './js/horas_common_chants.js',
+    './js/horas_compline_chants.js',
     './js/vendor/dexie.min.js',
     './js/vendor/flexsearch.bundle.min.js',
     './js/gregorian_db.js',

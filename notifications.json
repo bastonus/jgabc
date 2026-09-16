@@ -1,8 +1,91 @@
 {
-  "version": "1.0.7",
-  "updatedAt": "2026-09-15T22:20:00Z",
+  "version": "1.0.8",
+  "updatedAt": "2026-09-16T15:15:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.61",
+      "enabled": true,
+      "priority": 190,
+      "platforms": [
+        "all"
+      ],
+      "minVersion": "beta-0.0.61",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.61",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.61 : Modules grégoriens hors-ligne, index des Heures et intégration native du Laboratoire d'alignement.",
+      "cancelsNotifications": [
+        "notif-release-beta-0.0.60",
+        "notif-release-beta-0.0.59",
+        "notif-release-beta-0.0.58",
+        "notif-release-beta-0.0.57",
+        "notif-release-beta-0.0.56",
+        "notif-release-beta-0.0.55",
+        "notif-release-beta-0.0.54",
+        "notif-release-beta-0.0.53",
+        "notif-release-beta-0.0.52",
+        "notif-release-beta-0.0.51",
+        "notif-release-beta-0.0.50",
+        "notif-release-beta-0.0.49",
+        "notif-release-beta-0.0.48",
+        "notif-release-beta-0.0.47",
+        "notif-release-beta-0.0.46",
+        "notif-release-beta-0.0.45",
+        "notif-release-beta-0.0.44",
+        "notif-release-beta-0.0.43",
+        "notif-release-beta-0.0.42",
+        "notif-release-beta-0.0.41",
+        "notif-release-beta-0.0.40",
+        "notif-release-beta-0.0.39",
+        "notif-release-beta-0.0.38",
+        "notif-oremus-welcome-v1"
+      ],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.61 : Modules Grégoriens Hors-Ligne & Heures de l'Office",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.61)",
+        "subtitle": "Modules Grégoriens Hors-Ligne · Heures de l'Office · Lab & Pont Android",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés majeures de la v0.0.61",
+            "content": "<ul><li><strong>Architecture des Modules Grégoriens & Streaming GABC :</strong> Fonctionnement 100% en ligne par défaut (0 Mo d'empreinte dans l'APK) avec téléchargement à la demande depuis GitHub Raw, et disponibilité de deux paquets hors-ligne dans <em>Paramètres &gt; Moduli &amp; Memoria</em> : Pack Liturgique (5 330 pièces, ~2.8 Mo) et Corpus Complet GregoBase (25 290 pièces, ~6.4 Mo) avec auto-caching persistant (IndexedDB &amp; CacheStorage).</li><li><strong>Chants Grégoriens de l'Office Divin &amp; Heures :</strong> Indexation complète des dialogues, versets et répons du Bréviaire romain (<em>Deus in adjutorium</em>, <em>Domine labia mea</em>, Complies, etc.) et extension du Sommaire liturgique avec ScrollSpy aux Heures.</li><li><strong>Dédoublonnage Visuel des Textes :</strong> Suppression du texte latin redondant lorsque la partition grégorienne est affichée, et mise en valeur élégante de la traduction vernaculaire sous la portée en mode bilingue.</li><li><strong>Pont Android Natif pour L'Atelier des Chantres :</strong> Intégration plein écran avec ouverture navigateur externe, partage natif ShareSheet et synchronisation par lot en tâche de fond.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels des nouveautés de la v0.0.60",
+            "content": "<ul><li><strong>Timestamps Compacts :</strong> Décodage universel des structures tuples et des reprises musicales.</li><li><strong>Bouton Sync Vidéo :</strong> Détection dynamique et calage temps réel optimisé.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour vos retours",
+            "content": "Merci à tous les utilisateurs et chantres pour leurs précieux retours qui continuent d'enrichir l'application Oremus !"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.60",
       "enabled": true,

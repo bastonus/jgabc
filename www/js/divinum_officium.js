@@ -3030,6 +3030,9 @@ function renderOfficeCardHTML(cardData, vernCardData) {
         ? '<div class="do-card-actions">' + ptBtnHtml + gpBtnHtml + bibleBtnHtml + '</div>'
         : '';
 
+    var linesModifier = isBilingual ? ' is-bilingual' : (isVernOnly ? ' is-vern-only' : ' is-latin-only');
+    var linesContainerHtml = '<div class="do-card-text-lines' + linesModifier + '">' + bodyHtml + '</div>';
+
     return '<div class="do-card' + cardMod + '"' + cardIdAttr + '>' +
         '<div class="do-card-header">' +
             '<div>' +
@@ -3038,7 +3041,7 @@ function renderOfficeCardHTML(cardData, vernCardData) {
             '</div>' +
             actionsHtml +
         '</div>' +
-        '<div class="do-card-body">' + bodyHtml + '</div>' +
+        '<div class="do-card-body">' + linesContainerHtml + '</div>' +
     '</div>';
 }
 
@@ -5003,7 +5006,7 @@ function getLocalizedFeastTitle(rawTitle, uiLang) {
 // GREGORIAN CHANT ENGINE (PROPRIUM, KYRIALE & EXSURGE NOTATION)
 // =============================================================
 
-var GABC_LOCAL_CACHE = {};
+var GABC_LOCAL_CACHE = window.GABC_LOCAL_CACHE = (window.GABC_LOCAL_CACHE || {});
 
 function parseGabcHeader(gabc) {
     var header = {};
@@ -5444,6 +5447,251 @@ function getGregorianChantsMapForMissa(mom, officiumKey, selectedKyriale, missaR
     var iName = ord ? getOrdName(ord.ite, 'Ite Missa est') : 'Ite Missa est';
     var iCh = resolvePartChant('conclusio', iDef, iName, 'Ite Missa est');
     if (iCh) result['conclusio'] = iCh;
+
+    return result;
+}
+
+/* =============================================================
+   getGregorianChantsMapForHours
+   Résolution automatique des pièces grégoriennes pour toutes
+   les Heures de l'Office Divin (Complies, Vêpres, Laudes, etc.)
+   ============================================================= */
+var HORAS_OFFICE_MAP = null;
+var isHorasOfficeMapLoading = false;
+
+function loadHorasOfficeMap(callback) {
+    if (HORAS_OFFICE_MAP) {
+        if (typeof callback === 'function') callback(HORAS_OFFICE_MAP);
+        return Promise.resolve(HORAS_OFFICE_MAP);
+    }
+    if (typeof window !== 'undefined' && window.HORAS_OFFICE_MAP) {
+        HORAS_OFFICE_MAP = window.HORAS_OFFICE_MAP;
+        if (typeof callback === 'function') callback(HORAS_OFFICE_MAP);
+        return Promise.resolve(HORAS_OFFICE_MAP);
+    }
+    if (isHorasOfficeMapLoading) return Promise.resolve({});
+    isHorasOfficeMapLoading = true;
+    return fetch('data/horas_office_map.json')
+        .then(function(res) {
+            if (res.ok) return res.json();
+            throw new Error('horas_office_map not found');
+        })
+        .then(function(json) {
+            isHorasOfficeMapLoading = false;
+            HORAS_OFFICE_MAP = json;
+            if (typeof window !== 'undefined') window.HORAS_OFFICE_MAP = json;
+            if (typeof callback === 'function') callback(json);
+            return json;
+        })
+        .catch(function(err) {
+            isHorasOfficeMapLoading = false;
+            console.warn('[HorasGregorian] loadHorasOfficeMap error:', err);
+            return {};
+        });
+}
+
+if (typeof window !== 'undefined') {
+    loadHorasOfficeMap();
+}
+
+function getGregorianChantsMapForHours(mom, hora, officiumKey, hoursResult) {
+    var result = {};
+    if (!hoursResult || !hoursResult.cards) return result;
+
+    var momObj = (mom && typeof mom.isValid === 'function' && mom.isValid()) ? mom : (doState.date ? moment(doState.date) : moment());
+    var season = (typeof getSeasonForMoment === 'function') ? getSeasonForMoment(momObj) : '';
+    var isPasch = (season === 'Pasch');
+    var isPass = (season === 'Pass');
+    var isAdv = (season === 'Adv');
+    var isSunday = (momObj && momObj.day() === 0);
+
+    var officeMap = HORAS_OFFICE_MAP || (typeof window !== 'undefined' ? window.HORAS_OFFICE_MAP : null) || {};
+
+    function addPartChant(partKey, id, name, part, isPt, versesRef) {
+        if (!id) return;
+        if (!result[partKey]) result[partKey] = [];
+        var isPsalmToned = !!isPt;
+        if (doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey])) {
+            isPsalmToned = true;
+        }
+        result[partKey].push({
+            id: String(id),
+            name: name || ('Chant ' + id),
+            part: part || 'Chant',
+            partKey: partKey,
+            isPsalmToned: isPsalmToned,
+            versesRef: versesRef || undefined
+        });
+    }
+
+    function lookupOfficeMapChant(sectionName) {
+        if (!officiumKey) return null;
+        var cleanKey = String(officiumKey).replace(/^\//, '').replace(/\.txt$/i, '');
+        if (officeMap[cleanKey] && officeMap[cleanKey][sectionName]) {
+            return officeMap[cleanKey][sectionName];
+        }
+        if (hoursResult && hoursResult.communeRef) {
+            var cKey = 'Commune/' + hoursResult.communeRef;
+            if (officeMap[cKey] && officeMap[cKey][sectionName]) {
+                return officeMap[cKey][sectionName];
+            }
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------
+    // COMPLETORIUM (Complies)
+    // -------------------------------------------------------------
+    if (hora === 'completorium') {
+        var isPriest = (doState.isPriestOfficiant !== false);
+
+        // 1. Incipit : Jube domne/domine + Bénédiction Noctem quietam + Converte nos + Deus in adjutorium
+        addPartChant('incipit', isPriest ? 'jube_domne' : 'jube_domine', isPriest ? 'Jube domne benedicere' : 'Jube Dómine benedicere', 'Versiculus');
+        addPartChant('incipit', 'blessing', 'Noctem quietam', 'Benedictio');
+        addPartChant('incipit', 'converte_nos', 'Converte nos Deus', 'Versiculus');
+        var deusKeyComp = isPasch ? 'deus_in_adjutorium_alleluia' : ((season === 'Quad' || isPass) ? 'deus_in_adjutorium_laus_tibi' : 'deus_in_adjutorium');
+        addPartChant('incipit', deusKeyComp, 'Deus in adjutorium', 'Incipit');
+
+        // 2. Lectio Brevis
+        addPartChant('lectio_brevis', 'lesson', 'Lectio brevis : Sobrii estote', 'Lectio');
+
+        // 3. Antiphona des Psaumes
+        var dayNum = momObj.day();
+        var antCompKey = isPasch ? 'psalms_ant_pt' : ('psalms_' + dayNum + '_ant');
+        var antCompName = isPasch ? 'Ant. Allelúia' : 'Ant. Miserére mihi';
+        addPartChant('antiphona', antCompKey, antCompName, 'Antiphona');
+
+        // 4. Psaumes (4, 90, 133 ou psautier de la semaine)
+        if (doState.fullComplinePsalmody) {
+            var fullPsKey = isPasch ? ('psalms_' + dayNum + '_psalm_pt_full') : ('psalms_' + dayNum + '_psalm_full');
+            addPartChant('psalmus_4', fullPsKey, 'Psalmodia Completorii', 'Psalmus');
+        }
+
+        // 5. Hymnus : Te lucis ante terminum (parmi les 17 mélodies grégoriennes)
+        var teLucisKey = (typeof window.getComplineTeLucisKey === 'function')
+            ? window.getComplineTeLucisKey(season, officiumKey, momObj)
+            : 'te_lucis_ordinary';
+        addPartChant('hymnus', teLucisKey, 'Te lucis ante términum', 'Hymnus');
+
+        // 6. Capitulum : Tu autem in nobis es
+        addPartChant('capitulum', 'chapter', 'Capitulum : Tu in nobis es', 'Capitulum');
+
+        // 7. Responsorium : In manus tuas Domine
+        var inManusKey = (typeof window.getComplineInManusTuasKey === 'function')
+            ? window.getComplineInManusTuasKey(season)
+            : 'in_manus_tuas_ordinary';
+        addPartChant('responsorium', inManusKey, 'In manus tuas Dómine', 'Responsorium breve');
+
+        // 8. Versus : Custodi nos Domine
+        var custodiKey = isPasch ? 'custodi_nos_pt' : (isAdv ? 'custodi_nos_advent' : 'custodi_nos');
+        addPartChant('versus', custodiKey, 'Custódi nos Dómine', 'Versiculus');
+
+        // 9. Canticum Nunc Dimittis & Antiphona Salva nos Domine
+        var salvaNosKey = isPasch ? 'canticle_ant_pt' : 'canticle_ant';
+        addPartChant('nunc_dimittis', salvaNosKey, 'Ant. Salva nos Dómine', 'Antiphona');
+        addPartChant('nunc_dimittis', 'canticle_psalm', 'Canticum Nunc dimíttis', 'Canticum');
+
+        // 10. Oratio : Visita quaesumus Domine
+        addPartChant('oratio', 'prayer', 'Orátio : Visita quǽsumus Dómine', 'Oratio');
+
+        // 11. Conclusio : Benedicamus Domino & Fidelium animae
+        addPartChant('conclusio', 'benedicamus_domino', 'Benedicámus Dómino', 'Conclusio');
+        addPartChant('conclusio', 'fidelium_animae', 'Fidélium ánimæ', 'Conclusio');
+
+        // 12. Antienne Mariale Finale (Alma, Ave Regina, Regina Caeli, Salve Regina)
+        if (typeof window.getComplineMarianAntiphon === 'function') {
+            var marian = window.getComplineMarianAntiphon(season, !!doState.isSolemnMarianAntiphon);
+            if (marian && marian.antiphonKey) {
+                addPartChant('salve_regina', marian.antiphonKey, marian.title, 'Antiphona Finalis B.M.V.');
+                if (marian.prayerKey) {
+                    addPartChant('salve_regina', marian.prayerKey, 'Versus & Oratio B.M.V.', 'Oratio');
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // -------------------------------------------------------------
+    // AUTRES HEURES (Matutinum, Laudes, Prima..Nona, Vesperae)
+    // -------------------------------------------------------------
+
+    // 1. Incipit
+    if (hora === 'matutinum') {
+        addPartChant('incipit', 'domine_labia_mea', 'Dómine lábia mea apéries', 'Incipit');
+    }
+    var deusKey = isPasch ? 'deus_in_adjutorium_paschal' : (isSunday ? 'deus_in_adjutorium_festal' : 'deus_in_adjutorium_ferial');
+    addPartChant('incipit', deusKey, 'Deus in adjutórium', 'Incipit');
+
+    // 2. Matutinum Invitatorium
+    if (hora === 'matutinum') {
+        var invData = lookupOfficeMapChant('Invit');
+        if (invData && invData.id) {
+            addPartChant('invitatorium', invData.id, invData.name || 'Invitatorium', 'Invitatorium');
+        }
+    }
+
+    // 3. Hymnus
+    var hymSecName = (hora === 'laudes') ? 'Hymnus Laudes' : ((hora === 'vesperae') ? 'Hymnus Vespera' : 'Hymnus');
+    var hymData = lookupOfficeMapChant(hymSecName) || lookupOfficeMapChant('Hymnus');
+    if (hymData && hymData.id) {
+        addPartChant('hymnus', hymData.id, hymData.name || 'Hymnus', 'Hymnus');
+    } else {
+        var minorHymnIds = {
+            prima: { id: 1813, name: 'Jam lucis orto sídere' },
+            tertia: { id: 1814, name: 'Nunc Sancte nobis Spíritus' },
+            sexta: { id: 1815, name: 'Rector potens verax Deus' },
+            nona: { id: 1816, name: 'Rerum Deus tenax vigor' },
+            laudes: { id: 1173, name: 'Ætérne rerum Cónditor' },
+            vesperae: { id: 1342, name: 'Lucis Creátor óptime' }
+        };
+        if (minorHymnIds[hora]) {
+            addPartChant('hymnus', minorHymnIds[hora].id, minorHymnIds[hora].name, 'Hymnus');
+        }
+    }
+
+    // 4. Antiennes des Psaumes
+    var antSecName = (hora === 'laudes') ? 'Ant Laudes' : ((hora === 'vesperae') ? 'Ant Vespera' : 'Antiphona');
+    var antGenData = lookupOfficeMapChant(antSecName);
+    if (antGenData && antGenData.id) {
+        addPartChant('antiphona', antGenData.id, antGenData.name || 'Antiphona', 'Antiphona');
+    } else {
+        for (var aIdx = 1; aIdx <= 5; aIdx++) {
+            var aData = lookupOfficeMapChant('Ant ' + aIdx);
+            if (aData && aData.id) {
+                addPartChant('antiphona', aData.id, aData.name || ('Antiphona ' + aIdx), 'Antiphona');
+                addPartChant('psalmus_' + aIdx, aData.id, aData.name, 'Antiphona', true);
+            }
+        }
+    }
+
+    // 5. Canticum Benedictus (Laudes) & Magnificat (Vesperae)
+    if (hora === 'laudes') {
+        var benData = lookupOfficeMapChant('Ant Benedictus') || lookupOfficeMapChant('Ant 2');
+        if (benData && benData.id) {
+            addPartChant('benedictus', benData.id, benData.name || 'Ant. ad Benedíctus', 'Antiphona');
+        }
+    } else if (hora === 'vesperae') {
+        var magData = lookupOfficeMapChant('Ant Magnificat') || lookupOfficeMapChant('Ant 1') || lookupOfficeMapChant('Ant 3');
+        if (magData && magData.id) {
+            addPartChant('magnificat', magData.id, magData.name || 'Ant. ad Magníficat', 'Antiphona');
+        }
+    }
+
+    // 6. Responsorium
+    if (hora === 'matutinum') {
+        for (var rIdx = 1; rIdx <= 9; rIdx++) {
+            var rData = lookupOfficeMapChant('Responsory' + rIdx);
+            if (rData && rData.id) {
+                addPartChant('responsory_' + rIdx, rData.id, rData.name || ('Responsorium ' + rIdx), 'Responsorium');
+            }
+        }
+    }
+
+    // 7. Conclusio
+    var benedicamusDominoId = isSunday ? 'benedicamus_domino_festal' : 'benedicamus_domino_laudes_vesperae';
+    addPartChant('conclusio', benedicamusDominoId, 'Benedicámus Dómino', 'Conclusio');
+    addPartChant('conclusio', 'fidelium_animae', 'Fidélium ánimæ', 'Conclusio');
 
     return result;
 }
@@ -8908,33 +9156,6 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                     rawGabc = await window.gregorianDB.getGabc(chantId);
                 } catch(e) {}
             }
-            if (!rawGabc) {
-                try {
-                    rawGabc = await $.ajax({
-                        url: 'gabc/' + chantId + '.gabc',
-                        dataType: 'text',
-                        cache: true
-                    });
-                } catch(e) {}
-            }
-            if (!rawGabc) {
-                try {
-                    rawGabc = await $.ajax({
-                        url: 'gregobase/' + chantId + '.gabc',
-                        dataType: 'text',
-                        cache: true
-                    });
-                } catch(e) {}
-            }
-            if (!rawGabc) {
-                try {
-                    rawGabc = await $.ajax({
-                        url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/' + encodeURIComponent(chantId) + '.gabc',
-                        dataType: 'text',
-                        cache: true
-                    });
-                } catch(e) {}
-            }
 
             // Check if card moved out of viewport during async download
             if (!force && $wrapper.data('is-visible') === false) {
@@ -8956,6 +9177,16 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             var title = header.name || defaultName;
             var officePart = header['office-part'] || defaultPart;
             var mode = header.mode || '';
+            if (!mode && header.annotation) {
+                var am = String(header.annotation).match(/\b([1-8])\b/);
+                if (am) mode = am[1];
+            }
+            if (!mode && header.annotations && header.annotations.length) {
+                for (var anIdx = 0; anIdx < header.annotations.length; anIdx++) {
+                    var am2 = String(header.annotations[anIdx]).match(/\b([1-8])\b/);
+                    if (am2) { mode = am2[1]; break; }
+                }
+            }
 
             var partKey = $wrapper.data('part-key') || '';
             var isPsalmToned = ($wrapper.data('is-psalm-toned') === true || $wrapper.attr('data-is-psalm-toned') === 'true' || !!(partKey && (doState.isGlobalPsalmTone || (doState.psalmTonedParts && doState.psalmTonedParts[partKey]))));
@@ -9989,16 +10220,6 @@ function renderDrawerItemScore($card) {
             var cachedGabc = GABC_LOCAL_CACHE[chantId];
             if (!cachedGabc && window.gregorianDB && typeof window.gregorianDB.getGabc === 'function') {
                 try { cachedGabc = await window.gregorianDB.getGabc(chantId); } catch(e) {}
-            }
-            if (!cachedGabc) {
-                try {
-                    cachedGabc = await $.ajax({ url: 'gabc/' + chantId + '.gabc', dataType: 'text', cache: true });
-                } catch(e) {}
-            }
-            if (!cachedGabc) {
-                try {
-                    cachedGabc = await $.ajax({ url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/gabc/' + encodeURIComponent(chantId) + '.gabc', dataType: 'text', cache: true });
-                } catch(e) {}
             }
             if (!cachedGabc) {
                 $container.removeClass('gregorian-skeleton').html('<div class="do-chant-error" style="font-size:0.75rem; padding:8px;">Partition indisponible</div>');
@@ -12009,7 +12230,14 @@ function displayResult(result, vernResult) {
         });
     }
 
-    var chantsMap = (isMissa && doState.includeGregorian) ? getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale, result) : {};
+    var chantsMap = {};
+    if (doState.includeGregorian) {
+        if (isMissa) {
+            chantsMap = getGregorianChantsMapForMissa(doState.date, doState.testFeastKey || doState.officiumKey, doState.selectedKyriale, result);
+        } else {
+            chantsMap = getGregorianChantsMapForHours(doState.date, doState.hora, doState.officiumKey, result);
+        }
+    }
 
     result.cards.forEach(function(card) {
         var vernCard = (card.id && vernMap[card.id]) ? vernMap[card.id] : null;
@@ -12017,8 +12245,13 @@ function displayResult(result, vernResult) {
         var $cardNode = $(cardHtml);
 
         // If card has associated Gregorian chant(s)
-        var chantList = (isMissa && doState.includeGregorian && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
+        var chantList = (doState.includeGregorian && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
         if (chantList && chantList.length) {
+            $cardNode.addClass('has-gregorian-score');
+            var $body = $cardNode.find('.do-card-body');
+            $body.addClass('has-gregorian-score');
+
+            var wrappersHtml = '';
             chantList.forEach(function(ch) {
                 var isPt = !!ch.isPsalmToned;
                 var wrapperHtml = 
@@ -12031,9 +12264,7 @@ function displayResult(result, vernResult) {
                     (doState.includeGregorian ? '' : ' style="display:none;"') + '>' +
                     '<div class="do-chant-card"><div class="do-chant-preview gregorian-skeleton">' + renderChantSkeleton(2) + '</div></div>' +
                     '</div>';
-                
-                var $body = $cardNode.find('.do-card-body');
-                $body.prepend(wrapperHtml);
+                wrappersHtml += wrapperHtml;
 
                 if (ch.versesRef) {
                     var isExpanded = !!(doState.expandedVerses && doState.expandedVerses[card.id]);
@@ -12052,13 +12283,18 @@ function displayResult(result, vernResult) {
                         (isExpanded ? ' style="display:block;"' : ' style="display:none;"') + '>' +
                             '<div class="do-verses-content"><div class="gregorian-skeleton" style="height:28px; border-radius:4px;"></div></div>' +
                         '</div>';
-                    $body.find('.do-chant-card-wrapper[data-part-key="' + card.id + '"]').after(versesHtml);
-                    if (isExpanded) {
-                        setTimeout(function() {
-                            var $c = $body.find('.do-verses-score-container[data-part-key="' + card.id + '"]');
-                            loadAndRenderVersesAdLibitum($c, ch.versesRef);
-                        }, 50);
-                    }
+                    wrappersHtml += versesHtml;
+                }
+            });
+
+            $body.prepend(wrappersHtml);
+
+            chantList.forEach(function(ch) {
+                if (ch.versesRef && doState.expandedVerses && doState.expandedVerses[card.id]) {
+                    setTimeout(function() {
+                        var $c = $body.find('.do-verses-score-container[data-part-key="' + card.id + '"]');
+                        loadAndRenderVersesAdLibitum($c, ch.versesRef);
+                    }, 50);
                 }
             });
         }
@@ -12074,14 +12310,14 @@ function displayResult(result, vernResult) {
     }
 
     // Lazy render chant scores via IntersectionObserver when Gregorian is enabled
-    if (isMissa && doState.includeGregorian) {
+    if (doState.includeGregorian) {
         renderAllChantScoresInDOM($stream, false);
     }
 
     if (isMissa) {
         setupMassToc(result);
     } else {
-        hideMassToc();
+        setupOfficeToc(result);
     }
 
     isViewInDom = true;
@@ -14870,7 +15106,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.60';
+var CURRENT_APP_VERSION = 'beta-0.0.61';
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
@@ -16554,6 +16790,7 @@ function setupEventListeners() {
             localStorage.removeItem('do_officiumKey');
         }
         closeModals();
+        $('#alignmentLabModal').fadeOut(150);
         if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
     });
@@ -16907,6 +17144,7 @@ function setupEventListeners() {
         triggerHapticFeedback('toggle');
         doState.includeOrdinarium = isChecked;
         localStorage.setItem('do_ordinarium', isChecked);
+        updateMassTocToggleStates();
         renderDO();
     });
 
@@ -16919,6 +17157,14 @@ function setupEventListeners() {
         if (!isChecked && doState.hora === 'missa_gregorian') {
             doState.hora = 'missa';
             localStorage.setItem('do_hora', 'missa');
+        }
+        updateMassTocToggleStates();
+        if (isChecked && window.OremusModuleManager) {
+            if (!OremusModuleManager.isInstalled('gabc_liturgy') && !OremusModuleManager.isInstalled('gabc_all')) {
+                if (localStorage.getItem('do_module_prompt_shown') !== 'true') {
+                    OremusModuleManager.showPromptModal();
+                }
+            }
         }
         renderDO();
     });
@@ -17019,7 +17265,8 @@ function setupEventListeners() {
         $(this).toggleClass('active', isNowOn);
         $(this).find('span').text('Partitions Grégoriennes : ' + (isNowOn ? 'ACTIVÉES' : 'DÉSACTIVÉES'));
         $('#toggleGregorian').prop('checked', isNowOn);
-        renderAllChantScoresInDOM($('#do-content-stream'));
+        updateMassTocToggleStates();
+        renderDO();
     });
 
     $(document).on('change', '#doKyrialeSelect', function() {
@@ -17140,21 +17387,39 @@ function setupEventListeners() {
        ============================================================= */
     var OremusModuleManager = window.OremusModuleManager = {
         modules: {
-            gabc: {
-                id: 'gabc',
-                name: 'Cantus Gregorianus & GABC',
-                sizeText: '8.7 Mo',
-                url: 'https://raw.githubusercontent.com/bastonus/jgabc/master/data/gregorian_chants.json',
-                storageKey: 'do_module_gabc_installed',
-                rowId: '#moduleRowGabc',
-                badgeId: '#badgeModuleGabc',
-                btnDownloadId: '#btnDownloadModuleGabc',
-                btnDeleteId: '#btnDeleteModuleGabc',
-                progressWrapperId: '#moduleProgressGabc',
-                progressBarId: '#moduleProgressBarGabc',
-                progressTextId: '#moduleProgressTextGabc',
-                btnPauseId: '#btnPauseModuleGabc',
-                btnCancelId: '#btnCancelModuleGabc',
+            gabc_liturgy: {
+                id: 'gabc_liturgy',
+                name: 'Cantus Liturgicus (Messes & Heures)',
+                sizeText: '~2.8 Mo',
+                storageKey: 'do_module_gabc_liturgy_installed',
+                rowId: '#moduleRowGabcLiturgy',
+                badgeId: '#badgeModuleGabcLiturgy',
+                btnDownloadId: '#btnDownloadModuleGabcLiturgy',
+                btnDeleteId: '#btnDeleteModuleGabcLiturgy',
+                progressWrapperId: '#moduleProgressGabcLiturgy',
+                progressBarId: '#moduleProgressBarGabcLiturgy',
+                progressTextId: '#moduleProgressTextGabcLiturgy',
+                btnPauseId: '#btnPauseModuleGabcLiturgy',
+                btnCancelId: '#btnCancelModuleGabcLiturgy',
+                isPaused: false,
+                isCancelled: false,
+                currentPercent: 0,
+                interval: null
+            },
+            gabc_all: {
+                id: 'gabc_all',
+                name: 'Corpus Gregorianum Complet (GregoBase)',
+                sizeText: '~6.4 Mo',
+                storageKey: 'do_module_gabc_all_installed',
+                rowId: '#moduleRowGabcAll',
+                badgeId: '#badgeModuleGabcAll',
+                btnDownloadId: '#btnDownloadModuleGabcAll',
+                btnDeleteId: '#btnDeleteModuleGabcAll',
+                progressWrapperId: '#moduleProgressGabcAll',
+                progressBarId: '#moduleProgressBarGabcAll',
+                progressTextId: '#moduleProgressTextGabcAll',
+                btnPauseId: '#btnPauseModuleGabcAll',
+                btnCancelId: '#btnCancelModuleGabcAll',
                 isPaused: false,
                 isCancelled: false,
                 currentPercent: 0,
@@ -17184,21 +17449,33 @@ function setupEventListeners() {
 
         isInstalled: function(modId) {
             var m = this.modules[modId];
-            return m ? (localStorage.getItem(m.storageKey) === 'true') : false;
+            if (!m) return false;
+            if (modId === 'gabc_liturgy' && window.gregorianDB) {
+                return window.gregorianDB.isPackInstalled('liturgy');
+            }
+            if (modId === 'gabc_all' && window.gregorianDB) {
+                return window.gregorianDB.isPackInstalled('all');
+            }
+            return localStorage.getItem(m.storageKey) === 'true';
         },
 
         initUI: function() {
             var self = this;
-
-            // Visible uniquement dans l'APK Android natif (Capacitor)
-            if (!isNativeAndroidApp()) {
-                $('#settingsGroupModules').hide();
-                return;
-            }
+            // Accessible sur toutes les plateformes (Web, PWA, Android)
+            $('#settingsGroupModules').show();
 
             Object.keys(self.modules).forEach(function(id) {
                 self.updateModuleCardUI(id);
             });
+        },
+
+        showPromptModal: function() {
+            $('#modulePromptModalBackdrop, #modulePromptModal').removeClass('hidden');
+        },
+
+        closePromptModal: function() {
+            $('#modulePromptModalBackdrop, #modulePromptModal').addClass('hidden');
+            localStorage.setItem('do_module_prompt_shown', 'true');
         },
 
         updateModuleCardUI: function(modId) {
@@ -17219,7 +17496,7 @@ function setupEventListeners() {
                 $btnDel.show();
             } else {
                 if ($badge.length) $badge.text('En ligne').addClass('is-online').removeClass('is-installed is-downloading');
-                $btnDl.show().find('span').text('Rendre disponible hors connexion (' + m.sizeText + ')');
+                $btnDl.show();
                 $btnDel.hide();
             }
         },
@@ -17290,6 +17567,7 @@ function setupEventListeners() {
             m.currentPercent = 0;
             if (m.interval) { clearInterval(m.interval); m.interval = null; }
 
+            var $badge = $(m.badgeId);
             var $btnDl = $(m.btnDownloadId);
             var $btnDel = $(m.btnDeleteId);
             var $prog = $(m.progressWrapperId);
@@ -17297,6 +17575,7 @@ function setupEventListeners() {
             var $txt = $(m.progressTextId);
             var $pauseBtn = $(m.btnPauseId);
 
+            if ($badge.length) $badge.text('Téléchargement...').addClass('is-downloading').removeClass('is-online is-installed');
             $pauseBtn.removeClass('is-paused').attr('title', 'Mettre en pause');
             $pauseBtn.find('.do-icon-pause').show();
             $pauseBtn.find('.do-icon-play').hide();
@@ -17329,29 +17608,26 @@ function setupEventListeners() {
             }
 
             var promise;
-            if (modId === 'gabc') {
-                var currentPct = 5;
-                m.interval = setInterval(function() {
-                    if (m.isCancelled) {
-                        clearInterval(m.interval);
-                        m.interval = null;
-                        return;
-                    }
-                    if (m.isPaused) return;
-
-                    currentPct = Math.min(94, currentPct + Math.floor(Math.random() * 8) + 4);
-                    setProgress(currentPct);
-                }, 200);
-
-                promise = (window.gregorianDB && typeof window.gregorianDB._loadFullDictionary === 'function')
-                    ? window.gregorianDB._loadFullDictionary().catch(function() {})
-                    : fetch(m.url).catch(function() {});
-                
-                promise = promise.then(function() {
-                    if (m.interval) { clearInterval(m.interval); m.interval = null; }
-                    if (m.isCancelled) return Promise.reject('cancelled');
-                    setProgress(100);
-                });
+            if (modId === 'gabc_liturgy') {
+                if (window.gregorianDB && typeof window.gregorianDB.installLiturgyPack === 'function') {
+                    promise = window.gregorianDB.installLiturgyPack(function(pct) {
+                        setProgress(pct);
+                    }, function() {
+                        return m.isCancelled;
+                    });
+                } else {
+                    promise = Promise.reject(new Error('Gestionnaire grégorien indisponible'));
+                }
+            } else if (modId === 'gabc_all') {
+                if (window.gregorianDB && typeof window.gregorianDB.installAllPack === 'function') {
+                    promise = window.gregorianDB.installAllPack(function(pct) {
+                        setProgress(pct);
+                    }, function() {
+                        return m.isCancelled;
+                    });
+                } else {
+                    promise = Promise.reject(new Error('Gestionnaire grégorien indisponible'));
+                }
             } else if (modId === 'saints') {
                 if ('caches' in window && window.DO_SAINT_ART_METADATA) {
                     var keys = Object.keys(window.DO_SAINT_ART_METADATA);
@@ -17411,17 +17687,18 @@ function setupEventListeners() {
                     $prog.addClass('hidden');
                     self.updateModuleCardUI(modId);
                     triggerHapticFeedback('success');
-                    showToastNotification('Module ' + m.name + ' téléchargé pour usage hors-ligne !', 'success');
+                    showToastNotification('Module ' + m.name + ' prêt pour le hors-ligne !', 'success');
                     if (typeof onComplete === 'function') onComplete(true);
                 }, 350);
             }).catch(function(err) {
                 if (err === 'cancelled' || m.isCancelled) {
                     return;
                 }
-                localStorage.setItem(m.storageKey, 'true');
+                console.warn('[OremusModuleManager] Erreur téléchargement module ' + modId + ':', err);
                 $prog.addClass('hidden');
                 self.updateModuleCardUI(modId);
-                if (typeof onComplete === 'function') onComplete(true);
+                showToastNotification('Erreur lors du téléchargement de ' + m.name, 'warning');
+                if (typeof onComplete === 'function') onComplete(false);
             });
         },
 
@@ -17432,37 +17709,63 @@ function setupEventListeners() {
 
             triggerHapticFeedback('warning');
             localStorage.removeItem(m.storageKey);
-            if ('caches' in window) {
-                if (modId === 'saints') {
+            if (modId === 'gabc_liturgy') {
+                if (window.gregorianDB && typeof window.gregorianDB.deletePack === 'function') {
+                    window.gregorianDB.deletePack('liturgy');
+                }
+            } else if (modId === 'gabc_all') {
+                if (window.gregorianDB && typeof window.gregorianDB.deletePack === 'function') {
+                    window.gregorianDB.deletePack('all');
+                }
+            } else if (modId === 'saints') {
+                if ('caches' in window) {
                     caches.delete('oremus-saints-cache').catch(function() {});
-                } else if (modId === 'gabc') {
-                    caches.delete('oremus-gabc-cache').catch(function() {});
                 }
             }
             self.updateModuleCardUI(modId);
-            showToastNotification('Module ' + m.name + ' retiré du cache (disponible en ligne).', 'info');
+            showToastNotification('Module ' + m.name + ' retiré du cache (chargement GitHub actif).', 'info');
         }
     };
 
     // Binding des boutons des modules dans les Paramètres
-    $(document).on('click', '#btnDownloadModuleGabc', function(e) {
+    $(document).on('click', '#btnDownloadModuleGabcLiturgy', function(e) {
         e.preventDefault();
-        OremusModuleManager.downloadModule('gabc');
+        OremusModuleManager.downloadModule('gabc_liturgy');
     });
 
-    $(document).on('click', '#btnDeleteModuleGabc', function(e) {
+    $(document).on('click', '#btnDeleteModuleGabcLiturgy', function(e) {
         e.preventDefault();
-        OremusModuleManager.deleteModule('gabc');
+        OremusModuleManager.deleteModule('gabc_liturgy');
     });
 
-    $(document).on('click', '#btnPauseModuleGabc', function(e) {
+    $(document).on('click', '#btnPauseModuleGabcLiturgy', function(e) {
         e.preventDefault();
-        OremusModuleManager.togglePauseModule('gabc');
+        OremusModuleManager.togglePauseModule('gabc_liturgy');
     });
 
-    $(document).on('click', '#btnCancelModuleGabc', function(e) {
+    $(document).on('click', '#btnCancelModuleGabcLiturgy', function(e) {
         e.preventDefault();
-        OremusModuleManager.cancelModuleDownload('gabc');
+        OremusModuleManager.cancelModuleDownload('gabc_liturgy');
+    });
+
+    $(document).on('click', '#btnDownloadModuleGabcAll', function(e) {
+        e.preventDefault();
+        OremusModuleManager.downloadModule('gabc_all');
+    });
+
+    $(document).on('click', '#btnDeleteModuleGabcAll', function(e) {
+        e.preventDefault();
+        OremusModuleManager.deleteModule('gabc_all');
+    });
+
+    $(document).on('click', '#btnPauseModuleGabcAll', function(e) {
+        e.preventDefault();
+        OremusModuleManager.togglePauseModule('gabc_all');
+    });
+
+    $(document).on('click', '#btnCancelModuleGabcAll', function(e) {
+        e.preventDefault();
+        OremusModuleManager.cancelModuleDownload('gabc_all');
     });
 
     $(document).on('click', '#btnDownloadModuleSaints', function(e) {
@@ -17483,6 +17786,24 @@ function setupEventListeners() {
     $(document).on('click', '#btnCancelModuleSaints', function(e) {
         e.preventDefault();
         OremusModuleManager.cancelModuleDownload('saints');
+    });
+
+    // Modale Module Download Prompt
+    $(document).on('click', '#btnCloseModulePromptModal, #btnCancelModulePrompt, #modulePromptModalBackdrop', function(e) {
+        e.preventDefault();
+        OremusModuleManager.closePromptModal();
+    });
+
+    $(document).on('click', '#btnConfirmModulePromptLiturgy', function(e) {
+        e.preventDefault();
+        OremusModuleManager.closePromptModal();
+        OremusModuleManager.downloadModule('gabc_liturgy');
+    });
+
+    $(document).on('click', '#btnConfirmModulePromptAll', function(e) {
+        e.preventDefault();
+        OremusModuleManager.closePromptModal();
+        OremusModuleManager.downloadModule('gabc_all');
     });
 
     OremusModuleManager.initUI();
@@ -17598,8 +17919,7 @@ function setupEventListeners() {
         }
     });
 
-    $(document).on('click', '#btnAlignmentLabSidebar, #btnAlignmentLabSettings', function(e) {
-        e.preventDefault();
+    function openAlignmentLab(pushState) {
         var $modal = $('#alignmentLabModal');
         var $iframe = $('#alignmentLabIframe');
         if ($modal.length && $iframe.length) {
@@ -17608,25 +17928,121 @@ function setupEventListeners() {
             }
             $modal.fadeIn(150);
             $('body').css('overflow', 'hidden');
+            if (pushState !== false && window.location.hash !== '#align') {
+                try {
+                    history.pushState({ screen: 'align' }, '', '#align');
+                } catch(e) {
+                    window.location.hash = 'align';
+                }
+            }
         } else {
-            if (e.ctrlKey || e.metaKey || e.which === 2) {
-                window.open('pipeline/alignment-lab.html', '_blank');
-            } else {
-                window.location.href = 'pipeline/alignment-lab.html';
+            window.location.href = 'pipeline/alignment-lab.html';
+        }
+    }
+
+    function closeAlignmentLab(popHistory) {
+        var $modal = $('#alignmentLabModal');
+        if ($modal.is(':visible')) {
+            $modal.fadeOut(150);
+            $('body').css('overflow', '');
+            if (popHistory !== false && window.location.hash === '#align') {
+                try {
+                    history.back();
+                } catch(e) {
+                    window.location.hash = '';
+                }
             }
         }
+    }
+
+    $(document).on('click', '#btnAlignmentLabSidebar, #btnAlignmentLabSettings', function(e) {
+        e.preventDefault();
+        openAlignmentLab(true);
     });
 
     $(document).on('click', '#btnCloseAlignmentLabModal', function(e) {
         e.preventDefault();
-        $('#alignmentLabModal').fadeOut(150);
-        $('body').css('overflow', '');
+        closeAlignmentLab(true);
+    });
+
+    // Close alignment lab when clicking any navigation link in sidebar
+    $(document).on('click', '#doSidebar a, #doSidebar button:not(#btnAlignmentLabSidebar)', function() {
+        if ($('#alignmentLabModal').is(':visible')) {
+            closeAlignmentLab(false);
+        }
+    });
+
+    // Hash routing for #align / #atelier
+    if (window.location.hash === '#align' || window.location.hash === '#atelier' || window.location.hash === '#alignment-lab') {
+        setTimeout(function() {
+            openAlignmentLab(false);
+        }, 300);
+    }
+
+    window.addEventListener('popstate', function(e) {
+        if (window.location.hash === '#align' || window.location.hash === '#atelier') {
+            openAlignmentLab(false);
+        } else if ($('#alignmentLabModal').is(':visible')) {
+            closeAlignmentLab(false);
+        }
+    });
+
+    window.addEventListener('hashchange', function() {
+        if (window.location.hash === '#align' || window.location.hash === '#atelier') {
+            openAlignmentLab(false);
+        } else if ($('#alignmentLabModal').is(':visible')) {
+            closeAlignmentLab(false);
+        }
     });
 
     window.addEventListener('message', function(e) {
-        if (e.data === 'close_alignment_lab') {
-            $('#alignmentLabModal').fadeOut(150);
-            $('body').css('overflow', '');
+        if (!e.data) return;
+        if (e.data === 'close_alignment_lab' || (typeof e.data === 'object' && e.data.type === 'close_alignment_lab')) {
+            closeAlignmentLab(true);
+        } else if (typeof e.data === 'object' && e.data.type === 'open_sidebar') {
+            // Open sidebar over the alignment lab
+            var $sb = $('#doSidebar');
+            $sb.removeClass('anim-overshoot');
+            if ($sb[0]) void $sb[0].offsetWidth;
+            $sb.addClass('open active anim-overshoot');
+            $('#sidebarBackdrop').addClass('open active');
+            $('body').addClass('sidebar-open');
+            document.body.style.overflow = 'hidden';
+            $sb.css('z-index', '1400');
+            $('#sidebarBackdrop').css('z-index', '1350');
+        } else if (typeof e.data === 'object' && e.data.type === 'open_external_url' && e.data.url) {
+            if (window.AndroidBrowser && typeof window.AndroidBrowser.openUrl === 'function') {
+                window.AndroidBrowser.openUrl(e.data.url);
+            } else {
+                window.open(e.data.url, '_blank');
+            }
+        } else if (typeof e.data === 'object' && e.data.type === 'share_text' && e.data.text) {
+            if (window.AndroidBrowser && typeof window.AndroidBrowser.shareText === 'function') {
+                window.AndroidBrowser.shareText(e.data.title || 'Avis Oremus', e.data.text);
+            } else if (navigator.share) {
+                navigator.share({ title: e.data.title || 'Avis Oremus', text: e.data.text }).catch(function() {});
+            }
+        } else if (typeof e.data === 'object' && e.data.type === 'send_background_batch' && e.data.url) {
+            if (window.AndroidBrowser && typeof window.AndroidBrowser.sendBackgroundBatch === 'function') {
+                window.AndroidBrowser.sendBackgroundBatch(e.data.url, e.data.payload, e.data.authHeader || '');
+            } else if (window.fetch) {
+                var hdrs = { 'Content-Type': 'application/json' };
+                if (e.data.authHeader) hdrs['Authorization'] = e.data.authHeader;
+                fetch(e.data.url, {
+                    method: 'POST',
+                    headers: hdrs,
+                    body: e.data.payload,
+                    keepalive: true
+                }).catch(function() {});
+            }
+        } else if (typeof e.data === 'object' && e.data.type === 'open_sidebar') {
+            var $sb = $('#doSidebar');
+            $sb.removeClass('anim-overshoot');
+            if ($sb[0]) void $sb[0].offsetWidth; // force reflow
+            $sb.addClass('open active anim-overshoot');
+            $('#sidebarBackdrop').addClass('open active');
+            $('body').addClass('sidebar-open');
+            document.body.style.overflow = 'hidden';
         }
     });
 
@@ -18257,12 +18673,105 @@ function setupMassToc(missaResult) {
     }
 }
 
+function setupOfficeToc(hoursResult) {
+    _massTocSectionsMap = [];
+    var $list = $('#doMassTocList').empty();
+    var $cards = $('#do-content-stream .do-card');
+
+    if (!$cards.length) {
+        hideMassToc();
+        return;
+    }
+
+    var groupItemsHtml = '';
+    $cards.each(function(idx) {
+        var $c = $(this);
+        var cardId = ($c.attr('data-card-id') || '').trim();
+        var rawCardTitle = ($c.find('.do-card-title').text() || '').trim();
+        var rawCardType = ($c.find('.do-card-type').text() || '').trim();
+
+        // Extract a clean display label for TOC
+        var displayLabel = rawCardTitle || rawCardType || ('Partie ' + (idx + 1));
+        var sectionId = 'office-sec-' + idx;
+        this.setAttribute('id', sectionId);
+
+        _massTocSectionsMap.push({
+            id: sectionId,
+            label: displayLabel,
+            element: this
+        });
+
+        groupItemsHtml += 
+            '<button class="do-mass-toc-item" data-target-id="' + sectionId + '" data-label="' + escHtml(displayLabel) + '">' +
+                '<span>' + escHtml(displayLabel) + '</span>' +
+            '</button>';
+    });
+
+    if (groupItemsHtml) {
+        var groupHtml = 
+            '<div class="do-mass-toc-group">' +
+                groupItemsHtml +
+            '</div>';
+        $list.append(groupHtml);
+    }
+
+    // Update bottom toggle button active states
+    updateMassTocToggleStates();
+
+    var isAlreadyOpen = $('body').hasClass('mass-toc-open') || !$('#doMassTocPanel').hasClass('hidden');
+    var isDesktop = window.innerWidth > 900;
+
+    if (_massTocSectionsMap.length > 0) {
+        if (isDesktop) {
+            $('#doMassTocPill').addClass('hidden');
+            $('#doMassTocBackdrop').addClass('hidden');
+            $('html, body').removeClass('mass-toc-open');
+            $('#doMassTocPanel').removeClass('hidden');
+        } else {
+            $('#doMassTocPill').removeClass('hidden');
+            if (isAlreadyOpen) {
+                $('#doMassTocPill').addClass('is-open');
+                $('#doMassTocPanel').removeClass('hidden');
+                $('#doMassTocBackdrop').removeClass('hidden');
+                stopBilingualSwipeHint();
+            } else {
+                $('#doMassTocCurrentLabel').text('Sommaire');
+                $('#doMassTocPanel').addClass('hidden');
+                $('#doMassTocBackdrop').addClass('hidden');
+            }
+        }
+        initMassTocScrollSpy();
+        updateMassTocActiveItem();
+        updateMassTocListScrollMask();
+    } else {
+        hideMassToc();
+    }
+}
+
 function updateMassTocToggleStates() {
     var chantActive = (doState.includeGregorian !== false);
     var ordinariumActive = (doState.includeOrdinarium === true);
+    var isMissa = (doState.hora === 'missa' || doState.hora === 'missa_gregorian');
 
     $('#btnMassTocToggleChant').toggleClass('is-active', chantActive);
     $('#btnMassTocToggleOrdinarium').toggleClass('is-active', ordinariumActive);
+
+    // Ordinaire button applies only to Mass
+    if (isMissa) {
+        $('#btnMassTocToggleOrdinarium').show();
+    } else {
+        $('#btnMassTocToggleOrdinarium').hide();
+    }
+
+    // Bidirectional sync with settings panel
+    $('#toggleGregorian').prop('checked', chantActive);
+    $('#toggleOrdinarium').prop('checked', ordinariumActive);
+
+    // Sync test toolbar button if present
+    if ($('#btnToggleGregorianChants').length) {
+        $('#btnToggleGregorianChants').toggleClass('active', chantActive);
+        $('#btnToggleGregorianChants').find('span').text('Partitions Grégoriennes : ' + (chantActive ? 'ACTIVÉES' : 'DÉSACTIVÉES'));
+    }
 }
 
 function hideMassToc() {
@@ -18533,6 +19042,13 @@ function initMassTocEvents() {
         localStorage.setItem('do_include_gregorian', doState.includeGregorian);
         $('#toggleGregorian').prop('checked', doState.includeGregorian);
         updateMassTocToggleStates();
+        if (doState.includeGregorian && window.OremusModuleManager) {
+            if (!OremusModuleManager.isInstalled('gabc_liturgy') && !OremusModuleManager.isInstalled('gabc_all')) {
+                if (localStorage.getItem('do_module_prompt_shown') !== 'true') {
+                    OremusModuleManager.showPromptModal();
+                }
+            }
+        }
         renderDO();
     });
 

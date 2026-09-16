@@ -1478,14 +1478,6 @@
         );
 
         var gabc = await window.gregorianDB.getGabc(chantId);
-        if (!gabc) {
-            if (window.gregorianDB && typeof window.gregorianDB._loadFullDictionary === 'function') {
-                var dict = await window.gregorianDB._loadFullDictionary();
-                if (dict && dict[chantId]) {
-                    gabc = dict[chantId];
-                }
-            }
-        }
 
         if (!gabc) {
             $('#doHeaderTitle .title-text').text('Chant #' + chantId);

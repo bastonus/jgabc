@@ -59,7 +59,7 @@ console.log(`[SYNC] Copied ${copiedFilesCount} root files to www/`);
 
 // Helper for recursive copy with exclusions
 function copyDirectorySync(srcDir, destDir, options = {}) {
-  const { excludeExt = [], excludeDirs = [], includeOnlyExt = null } = options;
+  const { excludeExt = [], excludeDirs = [], excludeFiles = [], includeOnlyExt = null } = options;
   if (!fs.existsSync(srcDir)) return 0;
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
@@ -74,6 +74,7 @@ function copyDirectorySync(srcDir, destDir, options = {}) {
       if (excludeDirs.includes(entry.name)) continue;
       count += copyDirectorySync(srcPath, destPath, options);
     } else if (entry.isFile()) {
+      if (excludeFiles.includes(entry.name)) continue;
       const ext = path.extname(entry.name).toLowerCase();
       if (excludeExt.includes(ext)) continue;
       if (includeOnlyExt && !includeOnlyExt.includes(ext)) continue;
@@ -89,7 +90,12 @@ const fullDirs = ['css', 'js', 'data', 'patterns', 'icon', 'fonts', 'crampon', '
 for (const dir of fullDirs) {
   const src = path.join(rootDir, dir);
   const dest = path.join(wwwDir, dir);
-  const count = copyDirectorySync(src, dest, { excludeDirs: ['vendor'] });
+  const opts = { excludeDirs: ['vendor'] };
+  if (dir === 'data') {
+    // Les paquets volumineux GABC sont téléchargeables à la demande via GitHub Raw pour ne pas alourdir l'APK
+    opts.excludeFiles = ['gregorian_all.json', 'gregorian_liturgy.json'];
+  }
+  const count = copyDirectorySync(src, dest, opts);
   console.log(`[SYNC] Copied ${count} files for ${dir}/`);
 }
 

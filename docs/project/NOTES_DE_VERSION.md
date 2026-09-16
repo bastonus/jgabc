@@ -1,5 +1,65 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.61 (16 Septembre 2026)
+
+---
+
+### 📦 Architecture des Modules Grégoriens & Streaming GABC Hybride
+
+* **Par Défaut : Mode En Ligne & Zéro Mo :**
+  * Aucune pièce grégorienne volumineuse n'est pré-embarquée dans le paquet de l'APK Android (taille initiale ultra-légère ~15 Mo).
+  * Les partitions GABC sont téléchargées à la demande via GitHub Raw Usercontent (`raw.githubusercontent.com/bastonus/jgabc/master/`).
+  * Chaque pièce consultée est automatiquement mise en cache local persistant (IndexedDB `oremus_gabc_db` + CacheStorage `oremus-gabc-cache`).
+* **Deux Paquets Autonomes Hors-Ligne Disponibles au Téléchargement :**
+  * **Pack Liturgique (Messes & Heures)** : 5 330 pièces grégoriennes (`gabc/` et `do_data/**/*.gabc`), ~2.8 Mo compressé gzip (5.39 Mo pack, 34.6 Mo JSON).
+  * **Corpus Complet GregoBase** : 25 290 pièces intégrales (`gabc/`, `do_data/`, `gregobase/`, `litanies/`), ~6.4 Mo compressé gzip (16.66 Mo pack, 48.1 Mo JSON).
+  * Gestion accessible à tout moment dans **Paramètres > Moduli & Memoria**.
+* **Ingestion Ultra-Rapide dans IndexedDB :**
+  * Traitement par lots de 500 entrées dans `js/gregorian_db.js` sans blocage de l'interface graphique.
+  * Modale pédagogique d'activation initiale (`#modulePromptModal`) proposant les trois choix dès la première activation du chant grégorien.
+* **Outils d'Empaquetage Haute Performance :**
+  * Nouveaux utilitaires `tools/pack_zip.py` et mise à niveau de `tools/build_modules.mjs` produisant `liturgy.pack`, `gabc.pack`, `gregorian_liturgy.json` et `gregorian_all.json` en quelques secondes.
+  * Exclusion ciblée des JSON volumineux du bundle `www/` via `tools/sync_apk_assets.mjs` pour préserver la légèreté de l'APK.
+
+---
+
+### 📖 Intégration Liturgique de l'Office Divin & Heures Canoniques
+
+* **Indexation Grégorienne Complète des Heures (Breviarium Romanum) :**
+  * Nouveaux modules `js/horas_common_chants.js` et `js/horas_compline_chants.js` intégrant les gabarits GABC pour tous les dialogues, versets et répons de l'Office (`Deus in adjutorium`, `Domine labia mea`, Complies, etc.).
+  * Script de génération d'index automatique `tools/generate_horas_gregorian_index.mjs` mappant le répertoire Grégobase avec les fichiers liturgiques de Divinum Officium.
+* **Sommaire Liturgique Étendu aux Heures :**
+  * Le sommaire flottant dynamique et le ScrollSpy (`setupOfficeToc`) fonctionnent désormais sur l'Office Divin avec navigation immédiate par partie liturgique.
+
+---
+
+### 🎨 Dédoublonnage Visuel des Textes & Lisibilité
+
+* **Suppression du Texte Latin Redondant :**
+  * Lorsque la partition grégorienne est affichée sur une carte, le texte latin déjà présent sous les neumes n'est plus dupliqué en dessous (`.has-gregorian-score .is-latin-only { display: none !important; }`).
+* **Mise en Valeur de la Traduction Vernaculaire :**
+  * En affichage bilingue, seule la traduction vernaculaire (Français, Anglais, etc.) s'affiche sous la portée, stylisée en italique avec filet séparateur discret.
+
+---
+
+### 🔬 Laboratoire d'Alignement ("L'Atelier des Chantres") & Pont Android Natif
+
+* **Intégration Plein Écran & Passerelle Native :**
+  * `MainActivity.java` enrichi avec la passerelle `AndroidBrowser` (`openUrl`, `shareText`, `sendBackgroundBatch`).
+  * Communication bidirectionnelle iframe/hôte sécurisée via `postMessage`.
+  * Support du partage natif (ShareSheet) sans compte GitHub et envoi automatique en tâche de fond par lot.
+  * Suite de tests automatisée de bout en bout (`tests/simulate_apk_review_flow.mjs` - 37/37 succès).
+
+---
+
+### 🛡️ Versionnage & Maintenance
+
+* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.61'`, `versionCode 61` / `versionName "beta-0.0.61"` (`android/app/build.gradle`), `version.json` (`tagName v0.0.61`), `package.json` (`0.0.61`).
+* Incrément du cache Service Worker `oremus-pwa-v1.3.29 → v1.3.30` (`sw.js` et `www/sw.js`) avec ajout des scripts d'heures au pré-cache.
+* Documentation technique enrichie dans `docs/README.md` et `docs/architecture/ARCHITECTURE_MODULES_GABC.md`.
+
+---
+
 ## 🚀 Version 0.0.60 (16 Septembre 2026)
 
 ---

@@ -171,6 +171,7 @@
 .do-sidebar-backdrop.active {
     display: block;
     opacity: 1;
+    z-index: 1900 !important;
 }
 
 body.is-dragging-sidebar,
@@ -2239,6 +2240,7 @@ body.is-bible-mode .modern-player-bar {
     .do-sidebar.open,
     .do-sidebar.active {
         transform: translateX(0);
+        z-index: 2000 !important;
     }
 
     .do-sidebar.open.anim-overshoot {
@@ -4520,6 +4522,40 @@ body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not
     display: block !important;
     clear: both !important;
     transition: all 0.25s ease;
+}
+
+/* Gregorian Chant Text Deduplication:
+   When a Gregorian chant score is rendered for a card, the Latin text
+   is already displayed note-for-note under the neumes. Do not duplicate it. */
+.do-card.has-gregorian-score .do-card-text-lines.is-latin-only {
+    display: none !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-la {
+    display: none !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row {
+    width: 100% !important;
+    transform: none !important;
+    display: block !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row > .do-col-vernacular {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
+    font-style: italic;
+    color: var(--do-text-secondary, #666);
+    line-height: 1.6;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-wrapper {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--do-border-subtle, rgba(0, 0, 0, 0.12));
 }
 
 .do-chant-card {
