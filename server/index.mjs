@@ -1346,23 +1346,23 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
       const potentialXp = estimatedCount * 25; // 25 XP par chant calculé
       
-      document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? `~${estimatedCount} chants` : 'Illimité (continu)';
-      document.getElementById('estXpDisplay').textContent = `+${potentialXp} XP Monastiques`;
+      document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? \`~\${estimatedCount} chants\` : 'Illimité (continu)';
+      document.getElementById('estXpDisplay').textContent = \`+\${potentialXp} XP Monastiques\`;
 
       const pseudo = document.getElementById('filterWorkerInput').value.trim() || 'Ami';
-      const durArg = currentDurationMins > 0 ? ` --duration ${currentDurationMins}` : '';
+      const durArg = currentDurationMins > 0 ? \` --duration \${currentDurationMins}\` : '';
       const origin = window.location.origin;
 
       // Commandes dynamiques avec pseudo et durée pré-configurés
       const winCode = (pseudo === 'Ami' && currentDurationMins === 0)
-        ? `irm ${origin}/run.ps1 | iex`
-        : `& ([scriptblock]::Create((irm ${origin}/run.ps1))) -Name "${pseudo}"${currentDurationMins > 0 ? ` -Duration ${currentDurationMins}` : ''}`;
+        ? \`irm \${origin}/run.ps1 | iex\`
+        : \`& ([scriptblock]::Create((irm \${origin}/run.ps1))) -Name "\${pseudo}"\${currentDurationMins > 0 ? \` -Duration \${currentDurationMins}\` : ''}\`;
 
       const unixCode = (pseudo === 'Ami' && currentDurationMins === 0)
-        ? `curl -fsSL ${origin}/run.sh | bash`
-        : `curl -fsSL ${origin}/run.sh | bash -s -- --name "${pseudo}"${durArg}`;
+        ? \`curl -fsSL \${origin}/run.sh | bash\`
+        : \`curl -fsSL \${origin}/run.sh | bash -s -- --name "\${pseudo}"\${durArg}\`;
 
-      const pyCode = `curl -fsSL ${origin}/worker.py | python3 - --name "${pseudo}"${durArg}`;
+      const pyCode = \`curl -fsSL \${origin}/worker.py | python3 - --name "\${pseudo}"\${durArg}\`;
 
       const elWin = document.getElementById('cliCmdWindows');
       const elUnix = document.getElementById('cliCmdUnix');
@@ -1637,7 +1637,31 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 3b. API : File d'alignements pour l'App ordonnée par intérêt liturgique (/api/alignments/queue)
+  // 3b. Fichiers CLI téléchargeables (run.sh, run.ps1, worker.py, requirements.txt)
+  const CLI_FILES = {
+    '/run.sh':            { name: 'run.sh',            mime: 'text/x-shellscript' },
+    '/run.ps1':           { name: 'run.ps1',           mime: 'text/plain' },
+    '/worker.py':         { name: 'worker.py',         mime: 'text/x-python' },
+    '/requirements.txt':  { name: 'requirements.txt',  mime: 'text/plain' },
+  };
+  if ((req.method === 'GET' || req.method === 'HEAD') && CLI_FILES[pathname]) {
+    const { name, mime } = CLI_FILES[pathname];
+    const filePath = path.join(PUBLIC_DIR, name);
+    if (fs.existsSync(filePath)) {
+      const stat = fs.statSync(filePath);
+      res.writeHead(200, {
+        ...CORS_HEADERS,
+        'Content-Type': mime,
+        'Content-Length': stat.size,
+        'Content-Disposition': `attachment; filename="${name}"`,
+      });
+      return req.method === 'HEAD' ? res.end() : fs.createReadStream(filePath).pipe(res);
+    } else {
+      return sendJson(res, 404, { error: `Fichier ${name} non trouvé dans public/.` });
+    }
+  }
+
+  // 3c. API : File d'alignements pour l'App ordonnée par intérêt liturgique (/api/alignments/queue)
   if (req.method === 'GET' && (pathname === '/api/alignments/queue' || pathname === '/api/alignments/feed' || pathname === '/api/alignments')) {
     return sendJson(res, 200, getAlignmentsQueue());
   }
