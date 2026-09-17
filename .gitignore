@@ -56,5 +56,7 @@ www/matos-soares/
 www/psalms/
 www/img/
 
-
-
+# Serveur distant & tests runtime data
+server/data/
+tests/temp_dist_data/
+tests/temp_coolify_data/

@@ -98,43 +98,125 @@ function parseBody(req) {
 
 let tasksCache = null;
 let workersCache = null;
+let seedAlignmentsCache = null;
+
+function loadSeedAlignments() {
+  if (seedAlignmentsCache) return seedAlignmentsCache;
+  seedAlignmentsCache = {};
+  if (fs.existsSync(SEED_ALIGNMENTS_PATH)) {
+    try {
+      seedAlignmentsCache = JSON.parse(fs.readFileSync(SEED_ALIGNMENTS_PATH, 'utf8'));
+    } catch (e) {
+      console.warn('[ALIGNMENTS] Erreur lecture alignments_seed.json:', e.message);
+    }
+  }
+  return seedAlignmentsCache;
+}
+
+function syncTasksWithAlignments() {
+  if (!tasksCache || !Array.isArray(tasksCache)) return;
+  const seeds = loadSeedAlignments();
+  const diskFiles = new Set();
+  try {
+    if (fs.existsSync(ALIGNMENTS_DIR)) {
+      fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json')).forEach(f => {
+        diskFiles.add(f.replace('.json', ''));
+      });
+    }
+  } catch (e) {}
+
+  let modified = false;
+  const existingIds = new Set();
+
+  for (const task of tasksCache) {
+    const pid = String(task.id);
+    existingIds.add(pid);
+    if (task.status !== 'completed') {
+      if (diskFiles.has(pid)) {
+        task.status = 'completed';
+        if (!task.completed_at) task.completed_at = new Date().toISOString();
+        if (!task.worker_id) task.worker_id = 'Ami-Anonyme';
+        modified = true;
+      } else if (seeds[pid] && Array.isArray(seeds[pid].timestamps) && seeds[pid].timestamps.length > 0) {
+        task.status = 'completed';
+        task.worker_id = seeds[pid].worker_id || 'Atelier-Chantres';
+        task.completed_at = seeds[pid].completed_at || '2026-09-15T12:00:00.000Z';
+        if (seeds[pid].incipit && (!task.incipit || task.incipit.startsWith('Pièce #'))) {
+          task.incipit = seeds[pid].incipit;
+        }
+        modified = true;
+      }
+    }
+  }
+
+  // Intégrer les pièces seed avec horodatages réels qui ne figuraient pas dans le catalogue
+  for (const [key, s] of Object.entries(seeds)) {
+    const pid = String(s.piece_id || key);
+    if (!existingIds.has(pid) && !existingIds.has(key) && Array.isArray(s.timestamps) && s.timestamps.length > 0) {
+      tasksCache.push({
+        id: pid,
+        incipit: s.incipit || `Pièce #${pid}`,
+        part: s.part || 'Chant',
+        youtube_id: s.youtube_id || '',
+        youtube_url: s.youtube_url || (s.youtube_id ? `https://www.youtube.com/watch?v=${s.youtube_id}` : ''),
+        gabc_src: s.gabc_src || '',
+        pack: 'liturgy',
+        is_liturgy_pack: true,
+        status: 'completed',
+        worker_id: s.worker_id || 'Atelier-Chantres',
+        claimed_at: null,
+        completed_at: s.completed_at || '2026-09-15T12:00:00.000Z',
+        error: null
+      });
+      existingIds.add(pid);
+      modified = true;
+    }
+  }
+
+  if (modified) {
+    saveTasks();
+  }
+}
 
 function loadTasks() {
   if (tasksCache) return tasksCache;
   if (fs.existsSync(TASKS_FILE)) {
     try {
       tasksCache = JSON.parse(fs.readFileSync(TASKS_FILE, 'utf8'));
-      return tasksCache;
     } catch (e) {
       console.warn('[JOBS] Erreur lecture tasks.json, réinitialisation...');
     }
   }
 
-  // Initialisation à partir du catalogue de pièces
-  let catalog = [];
-  if (fs.existsSync(CATALOG_PATH)) {
-    try {
-      catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
-    } catch (e) {}
+  // Initialisation à partir du catalogue de pièces si nécessaire
+  if (!tasksCache) {
+    let catalog = [];
+    if (fs.existsSync(CATALOG_PATH)) {
+      try {
+        catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+      } catch (e) {}
+    }
+
+    tasksCache = catalog.map(p => ({
+      id: String(p.id),
+      incipit: p.incipit || p.title || `Pièce #${p.id}`,
+      part: p.part || 'Chant',
+      youtube_id: p.youtube_id || '',
+      youtube_url: p.youtube_url || (p.youtube_id ? `https://www.youtube.com/watch?v=${p.youtube_id}` : ''),
+      gabc_src: p.gabc_src || '',
+      pack: p.pack || (p.is_liturgy_pack ? 'liturgy' : 'extension'),
+      is_liturgy_pack: p.is_liturgy_pack !== undefined ? p.is_liturgy_pack : (p.pack === 'liturgy'),
+      status: 'pending', // 'pending' | 'claimed' | 'completed' | 'failed'
+      worker_id: null,
+      claimed_at: null,
+      completed_at: null,
+      error: null
+    }));
   }
 
-  tasksCache = catalog.map(p => ({
-    id: String(p.id),
-    incipit: p.incipit || p.title || `Pièce #${p.id}`,
-    part: p.part || 'Chant',
-    youtube_id: p.youtube_id || '',
-    youtube_url: p.youtube_url || (p.youtube_id ? `https://www.youtube.com/watch?v=${p.youtube_id}` : ''),
-    gabc_src: p.gabc_src || '',
-    pack: p.pack || (p.is_liturgy_pack ? 'liturgy' : 'extension'),
-    is_liturgy_pack: p.is_liturgy_pack !== undefined ? p.is_liturgy_pack : (p.pack === 'liturgy'),
-    status: 'pending', // 'pending' | 'claimed' | 'completed' | 'failed'
-    worker_id: null,
-    claimed_at: null,
-    completed_at: null,
-    error: null
-  }));
+  // Synchronisation systématique avec les alignements pré-calculés et sur disque
+  syncTasksWithAlignments();
 
-  saveTasks();
   return tasksCache;
 }
 
@@ -152,10 +234,22 @@ function loadWorkers() {
   if (fs.existsSync(WORKERS_FILE)) {
     try {
       workersCache = JSON.parse(fs.readFileSync(WORKERS_FILE, 'utf8'));
-      return workersCache;
     } catch (e) {}
   }
-  workersCache = {};
+  if (!workersCache) workersCache = {};
+
+  // S'assurer que le compte Atelier-Chantres (seed curator) apparaît au leaderboard
+  const seeds = loadSeedAlignments();
+  const seedKeys = Object.keys(seeds).filter(k => Array.isArray(seeds[k].timestamps) && seeds[k].timestamps.length > 0);
+  const uniqueSeedPieces = new Set(seedKeys.map(k => seeds[k].piece_id || k));
+  if (uniqueSeedPieces.size > 0 && !workersCache['Atelier-Chantres']) {
+    workersCache['Atelier-Chantres'] = {
+      count: uniqueSeedPieces.size,
+      last_active: '2026-09-15T12:00:00.000Z',
+      device: 'Meta MMS_FA (Curated)'
+    };
+  }
+
   return workersCache;
 }
 
@@ -336,49 +430,76 @@ function getBenchmarks() {
 
 function getWorkerPieces(workerId) {
   try {
-    const files = fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json'));
     const list = [];
     const targetWorker = (workerId || '').trim().toLowerCase();
+    const seenPieceIds = new Set();
 
-    for (const f of files) {
-      try {
-        const item = JSON.parse(fs.readFileSync(path.join(ALIGNMENTS_DIR, f), 'utf8'));
-        if (!targetWorker || (item.worker_id && item.worker_id.toLowerCase().includes(targetWorker))) {
-          list.push({
-            id: item.piece_id,
-            piece_id: item.piece_id,
-            incipit: item.incipit || `Pièce #${item.piece_id}`,
-            part: item.part || 'Chant',
-            worker: item.worker_id,
-            worker_id: item.worker_id,
-            youtube_id: item.youtube_id || '',
-            youtube_url: item.youtube_url || '',
-            compute_time_sec: item.compute_time_sec || 0,
-            audio_duration_sec: item.audio_duration_sec || 0,
-            completed_at: item.completed_at,
-            notes_count: Array.isArray(item.timestamps) ? item.timestamps.length : 0
-          });
-        }
-      } catch (e) {}
+    // 1. Alignements calculés sur disque
+    if (fs.existsSync(ALIGNMENTS_DIR)) {
+      const files = fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json'));
+      for (const f of files) {
+        try {
+          const item = JSON.parse(fs.readFileSync(path.join(ALIGNMENTS_DIR, f), 'utf8'));
+          const pid = String(item.piece_id || f.replace('.json', ''));
+          const wId = item.worker_id || 'Ami-Anonyme';
+          if (!targetWorker || targetWorker === 'all' || wId.toLowerCase().includes(targetWorker)) {
+            seenPieceIds.add(pid);
+            list.push({
+              id: pid,
+              piece_id: pid,
+              incipit: item.incipit || `Pièce #${pid}`,
+              part: item.part || 'Chant',
+              worker: wId,
+              worker_id: wId,
+              youtube_id: item.youtube_id || '',
+              youtube_url: item.youtube_url || '',
+              compute_time_sec: item.compute_time_sec || 0,
+              audio_duration_sec: item.audio_duration_sec || 0,
+              completed_at: item.completed_at || new Date().toISOString(),
+              notes_count: Array.isArray(item.timestamps) ? item.timestamps.length : 0
+            });
+          }
+        } catch (e) {}
+      }
+    }
+
+    // 2. Alignements pré-calculés issus du seed (Atelier-Chantres)
+    const seeds = loadSeedAlignments();
+    const tasks = loadTasks();
+    const taskMap = new Map(tasks.map(t => [String(t.id), t]));
+
+    for (const [key, s] of Object.entries(seeds)) {
+      const pid = String(s.piece_id || key);
+      if (seenPieceIds.has(pid)) continue;
+      if (!Array.isArray(s.timestamps) || s.timestamps.length === 0) continue;
+
+      const workerName = (s.worker_id || 'Atelier-Chantres');
+      if (!targetWorker || targetWorker === 'all' || workerName.toLowerCase().includes(targetWorker)) {
+        seenPieceIds.add(pid);
+        const task = taskMap.get(pid) || taskMap.get(String(key)) || {};
+        list.push({
+          id: pid,
+          piece_id: pid,
+          incipit: s.incipit || task.incipit || `Pièce #${pid}`,
+          part: s.part || task.part || 'Chant',
+          worker: workerName,
+          worker_id: workerName,
+          youtube_id: s.youtube_id || task.youtube_id || '',
+          youtube_url: s.youtube_url || task.youtube_url || (s.youtube_id ? `https://www.youtube.com/watch?v=${s.youtube_id}` : ''),
+          compute_time_sec: s.compute_time_sec || 3.8,
+          audio_duration_sec: s.audio_duration_sec || 0,
+          completed_at: s.completed_at || '2026-09-15T12:00:00.000Z',
+          notes_count: s.timestamps.length
+        });
+      }
     }
 
     list.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
-    return list.slice(0, 30);
+    return list.slice(0, 50);
   } catch (e) {
+    console.error('[WORKER] Erreur getWorkerPieces:', e);
     return [];
   }
-}
-
-let seedAlignmentsCache = null;
-function loadSeedAlignments() {
-  if (seedAlignmentsCache) return seedAlignmentsCache;
-  seedAlignmentsCache = {};
-  if (fs.existsSync(SEED_ALIGNMENTS_PATH)) {
-    try {
-      seedAlignmentsCache = JSON.parse(fs.readFileSync(SEED_ALIGNMENTS_PATH, 'utf8'));
-    } catch (e) {}
-  }
-  return seedAlignmentsCache;
 }
 
 function getPieceDetails(pieceId) {
@@ -814,7 +935,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         <span style="font-weight:800; color:var(--emerald); font-size:1.15rem;" id="progressPct">${stats.percentage}%</span>
       </div>
       <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBar"></div>
+        <div class="progress-bar-fill" id="progressBar" style="width: ${stats.percentage}%;"></div>
       </div>
       <div class="stats-row">
         <div class="stat-chip">
@@ -1169,7 +1290,20 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         const res = await fetch(url);
         const data = await res.json();
         
-        if (!data.pieces || data.pieces.length === 0) {
+        let pieces = data.pieces || [];
+        let isFallback = false;
+
+        if (pieces.length === 0 && workerName) {
+          // Fallback vers les pièces communautaires pour permettre la relecture immédiate
+          const commRes = await fetch('/api/jobs/worker/pieces');
+          const commData = await commRes.json();
+          if (commData.pieces && commData.pieces.length > 0) {
+            pieces = commData.pieces;
+            isFallback = true;
+          }
+        }
+
+        if (pieces.length === 0) {
           grid.innerHTML = \`
             <div style="grid-column: 1/-1; text-align:center; padding:24px; color:var(--text-muted);">
               Aucune pièce récemment calculée trouvée pour "<strong>\${workerName || 'tous'}</strong>".<br>
@@ -1178,7 +1312,12 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           return;
         }
 
-        grid.innerHTML = data.pieces.map(p => \`
+        const banner = isFallback ? \`
+          <div style="grid-column: 1/-1; padding:12px 16px; border-radius:10px; background:rgba(196,152,79,0.12); border:1px solid var(--border-accent); font-size:0.85rem; color:var(--gold-light); margin-bottom:12px; text-align:center;">
+            ✦ Vous n'avez pas encore de calcul personnel pour "<strong>\${workerName}</strong>". Voici les partitions pré-alignées disponibles pour vous entraîner et gagner des points :
+          </div>\` : '';
+
+        grid.innerHTML = banner + pieces.map(p => \`
           <div class="piece-card">
             <div>
               <div style="font-size:0.75rem; color:var(--gold-light); font-weight:700; text-transform:uppercase;">\${p.part || 'Chant'}</div>

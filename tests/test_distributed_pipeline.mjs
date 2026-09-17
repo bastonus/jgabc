@@ -127,7 +127,9 @@ try {
   const statusRes = await requestHttp('GET', '/api/jobs/status');
   assert(statusRes.status === 200, 'GET /api/jobs/status répond HTTP 200');
   assert(statusRes.json.total_pieces >= 0, `Nombre de pièces dans le catalogue : ${statusRes.json.total_pieces}`);
+  assert(statusRes.json.completed >= 20, `Pièces pré-alignées (seed) synchronisées dans le statut : ${statusRes.json.completed}`);
   assert(Array.isArray(statusRes.json.leaderboard), 'Tableau du leaderboard présent');
+  const initialCompleted = statusRes.json.completed;
 
   // ── TEST 5 : Attribution d'une tâche (Claim) ──
   console.log('\n🎯 Test 5 : Attribution d\'une tâche à un worker (/api/jobs/claim)');
@@ -168,10 +170,11 @@ try {
   // ── TEST 7 : Mise à jour du Leaderboard ──
   console.log('\n🏆 Test 7 : Vérification du leaderboard mis à jour');
   const statusRes2 = await requestHttp('GET', '/api/jobs/status');
-  assert(statusRes2.json.completed === 1, '1 tâche marquée comme complétée');
+  assert(statusRes2.json.completed === initialCompleted + 1, '1 tâche supplémentaire marquée comme complétée');
   assert(statusRes2.json.leaderboard.length >= 1, 'Au moins un contributeur au classement');
-  assert(statusRes2.json.leaderboard[0].name === 'Ami-Alexandre-RTX', 'Nom du contributeur fidèle');
-  assert(statusRes2.json.leaderboard[0].count === 1, 'Score du contributeur = 1');
+  const alexContributor = statusRes2.json.leaderboard.find(c => c.name === 'Ami-Alexandre-RTX');
+  assert(alexContributor !== undefined, 'Nom du contributeur fidèle (Ami-Alexandre-RTX)');
+  assert(alexContributor && alexContributor.count === 1, 'Score du contributeur = 1');
 
   // ── TEST 8 : Export des alignements collectés ──
   console.log('\n📦 Test 8 : Export des alignements (/api/jobs/export)');
