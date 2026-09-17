@@ -1329,6 +1329,22 @@
       font-size: 0.74rem;
       flex-shrink: 0;
     }
+    .score-badge-liturgy {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .score-badge-worker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
     /* ── Full-Screen Sacred Views (No Popups, 100% Screen like Notes de Version) ── */
     .lab-modal-overlay {
@@ -1999,9 +2015,17 @@
         </div>
       </section>
 
-      <!-- ── Right Column: Gregorian Score (With correct cardScoreSlot ID) ── -->
+      <!-- ── Right Column: Gregorian Score ── -->
       <section class="lab-right-column" id="labRightCol">
-
+        <div class="score-header-bar" id="scoreHeaderBar">
+          <span class="score-chant-part" id="lblChantPart">Chant</span>
+          <span class="score-chant-incipit" id="lblChantTitle">Chargement...</span>
+          <span class="score-chant-mode" id="lblChantMode"></span>
+          <span class="score-badge-liturgy" id="lblPackBadge" style="display:none;">⚜️ Liturgie</span>
+          <span class="score-badge-worker" id="lblWorkerBadge" style="display:none;">⚡ Aligné</span>
+          <span style="flex:1;"></span>
+          <span class="score-chant-mode" id="lblChantDetails" style="font-size:0.75rem; opacity:0.8;"></span>
+        </div>
         <div class="score-viewport" id="cardScoreSlot"></div>
       </section>
 
@@ -3096,6 +3120,76 @@
       }
     }
 
+    function getCoolifyBaseUrl() {
+      const raw = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://api-oremus.silverhorse.fr/api/review';
+      try {
+        const u = new URL(raw);
+        return u.origin;
+      } catch (e) {
+        return 'https://api-oremus.silverhorse.fr';
+      }
+    }
+
+    async function fetchOnlineAlignmentQueue() {
+      const baseUrl = getCoolifyBaseUrl();
+      const queueUrl = `${baseUrl}/api/alignments/queue`;
+
+      const isInitialEmpty = (!PIECES || PIECES.length === 0);
+      if (isInitialEmpty) {
+        const container = document.getElementById('cardScoreSlot');
+        if (container) {
+          container.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:220px; color:var(--text-secondary); gap:12px;"><div style="font-size:2rem;">⚜️</div><div style="font-size:1rem; font-weight:600;">Chargement des alignements en ligne...</div><div style="font-size:0.8rem; color:var(--text-tertiary);">Connexion à l\'API Oremus</div></div>';
+        }
+      }
+
+      try {
+        const res = await fetch(queueUrl, { signal: AbortSignal.timeout(10000) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.queue) && data.queue.length > 0) {
+            PIECES = data.queue;
+            try {
+              localStorage.setItem('oremus_alignments_cache', JSON.stringify({
+                timestamp: Date.now(),
+                queue: data.queue
+              }));
+            } catch(e) {}
+            updateCounterDisplay();
+            if (isInitialEmpty || currentPieceIndex < 0) {
+              pickNextRandomChant();
+            }
+            return true;
+          }
+        }
+      } catch (err) {
+        console.warn('[ALIGNMENTS] Impossible de contacter l\'API Oremus en direct:', err);
+      }
+
+      // Fallback : cache local dans localStorage
+      try {
+        const cachedStr = localStorage.getItem('oremus_alignments_cache');
+        if (cachedStr) {
+          const cached = JSON.parse(cachedStr);
+          if (cached && Array.isArray(cached.queue) && cached.queue.length > 0) {
+            PIECES = cached.queue;
+            updateCounterDisplay();
+            if (isInitialEmpty || currentPieceIndex < 0) {
+              pickNextRandomChant();
+            }
+            return true;
+          }
+        }
+      } catch(e) {}
+
+      if (isInitialEmpty && (!PIECES || PIECES.length === 0)) {
+        const container = document.getElementById('cardScoreSlot');
+        if (container) {
+          container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-tertiary);"><p style="font-size:1.1rem; font-weight:600; margin-bottom:8px;">Aucun alignement disponible hors-ligne</p><p style="font-size:0.85rem; margin-bottom:14px;">Connectez-vous à Internet pour charger la file d\'alignements depuis l\'API Oremus.</p><button type="button" onclick="fetchOnlineAlignmentQueue()" style="padding:8px 18px; border-radius:8px; background:var(--primary-color); color:#fff; border:none; cursor:pointer; font-weight:600;">Réessayer</button></div>';
+        }
+      }
+      return false;
+    }
+
     function pickNextRandomChant() {
       if (isCeremonyActive) return;
       if (!PIECES || PIECES.length === 0) return;
@@ -3103,7 +3197,18 @@
       const candidates = [];
       PIECES.forEach((p, idx) => {
         if (p && p.timestamps && p.timestamps.length > 0 && p.youtube_id && p.gabc_src) {
-          candidates.push({ piece: p, index: idx, count: getPieceEffectiveReviewCount(p.id) });
+          const effectiveReviewCount = getPieceEffectiveReviewCount(p.id);
+          const hasUserReviewed = userSessionReviewedIds.has(p.id) || (LOCAL_USER_REVIEWS && LOCAL_USER_REVIEWS[p.id] && LOCAL_USER_REVIEWS[p.id].status);
+          const isSkipped = sessionSkippedIds.has(p.id);
+
+          // Score de base fourni par l'API (ex: 1000 pour liturgy unreviewed, 800 pour extension unreviewed)
+          let baseScore = (typeof p.priority_score === 'number') ? p.priority_score : (p.is_liturgy_pack ? 1000 : 800);
+
+          // Priorité absolue aux pièces jamais révisées par cet utilisateur
+          if (hasUserReviewed) baseScore -= 10000;
+          if (isSkipped) baseScore -= 500;
+
+          candidates.push({ piece: p, index: idx, effectiveScore: baseScore, count: effectiveReviewCount });
         }
       });
 
@@ -3112,34 +3217,18 @@
         return;
       }
 
-      const minCount = Math.min(...candidates.map(c => c.count));
-      let pool = candidates.filter(c => c.count === minCount);
+      const available = candidates.filter(c => c.index !== currentPieceIndex);
+      const poolCandidates = available.length > 0 ? available : candidates;
 
-      const unreviewedByMe = pool.filter(c => !userSessionReviewedIds.has(c.piece.id) && c.index !== currentPieceIndex);
-      if (unreviewedByMe.length > 0) {
-        const notSkipped = unreviewedByMe.filter(c => !sessionSkippedIds.has(c.piece.id));
-        const finalPool = notSkipped.length > 0 ? notSkipped : unreviewedByMe;
-        const chosen = finalPool[Math.floor(Math.random() * finalPool.length)];
-        loadPiece(chosen.index);
-        return;
-      }
+      // Trier par score effectif décroissant
+      poolCandidates.sort((a, b) => b.effectiveScore - a.effectiveScore);
 
-      const otherInTier = pool.filter(c => c.index !== currentPieceIndex);
-      if (otherInTier.length > 0) {
-        const notSkipped = otherInTier.filter(c => !sessionSkippedIds.has(c.piece.id));
-        const finalPool = notSkipped.length > 0 ? notSkipped : otherInTier;
-        const chosen = finalPool[Math.floor(Math.random() * finalPool.length)];
-        loadPiece(chosen.index);
-        return;
-      }
+      // Sélectionner au hasard au sein du groupe de tête (meilleure priorité) pour la variété
+      const topScore = poolCandidates[0].effectiveScore;
+      const topTier = poolCandidates.filter(c => c.effectiveScore === topScore);
 
-      const fallback = candidates.filter(c => c.index !== currentPieceIndex);
-      if (fallback.length > 0) {
-        fallback.sort((a, b) => a.count - b.count);
-        loadPiece(fallback[0].index);
-      } else {
-        loadPiece(candidates[0].index);
-      }
+      const chosen = topTier[Math.floor(Math.random() * topTier.length)];
+      loadPiece(chosen.index);
     }
 
     function loadPiece(index) {
@@ -3155,8 +3244,39 @@
 
       const lblDetails = document.getElementById('lblChantDetails');
       if (lblDetails) {
-        const noteCount = piece.timestamps ? piece.timestamps.length : (piece.total_notes || 0);
+        const noteCount = piece.timestamps ? piece.timestamps.length : (piece.total_notes || piece.notes_count || 0);
         lblDetails.textContent = `${noteCount} notes • #${piece.id}`;
+      }
+
+      const packBadge = document.getElementById('lblPackBadge');
+      if (packBadge) {
+        const isLit = piece.is_liturgy_pack !== undefined ? piece.is_liturgy_pack : (piece.pack === 'liturgy');
+        if (isLit) {
+          packBadge.textContent = '⚜️ Liturgie';
+          packBadge.style.display = 'inline-flex';
+          packBadge.style.background = 'rgba(196, 152, 79, 0.18)';
+          packBadge.style.color = 'var(--gold-sacred)';
+          packBadge.title = 'Chant du bréviaire ou missel quotidien (liturgy.pack)';
+        } else {
+          packBadge.textContent = '📦 Extension';
+          packBadge.style.display = 'inline-flex';
+          packBadge.style.background = 'rgba(148, 163, 184, 0.18)';
+          packBadge.style.color = 'var(--text-secondary)';
+          packBadge.title = 'Chant du répertoire d\'extension (gabc.pack)';
+        }
+      }
+
+      const workerBadge = document.getElementById('lblWorkerBadge');
+      if (workerBadge) {
+        if (piece.worker_id) {
+          workerBadge.textContent = '⚡ ' + piece.worker_id;
+          workerBadge.style.display = 'inline-flex';
+          workerBadge.style.background = 'rgba(59, 130, 246, 0.16)';
+          workerBadge.style.color = '#60a5fa';
+          workerBadge.title = 'Aligné par ' + piece.worker_id + (piece.compute_device ? ` (${piece.compute_device})` : '');
+        } else {
+          workerBadge.style.display = 'none';
+        }
       }
 
       const modeBadge = document.getElementById('lblScoreModeBadge');
@@ -4928,6 +5048,18 @@
       if (!localStorage.getItem('oremus_review_relay_url')) {
         localStorage.setItem('oremus_review_relay_url', 'https://api-oremus.silverhorse.fr/api/review');
       }
+
+      // Précharger depuis le cache local si disponible pour affichage instantané
+      try {
+        const cachedStr = localStorage.getItem('oremus_alignments_cache');
+        if (cachedStr) {
+          const cached = JSON.parse(cachedStr);
+          if (cached && Array.isArray(cached.queue) && cached.queue.length > 0 && (!PIECES || PIECES.length === 0)) {
+            PIECES = cached.queue;
+          }
+        }
+      } catch(e) {}
+
       // Si des avis étaient restés en attente (ex: coupure réseau précédente), tenter l'envoi immédiat
       const pendingBatch = getUnsyncedBatch();
       if (Object.keys(pendingBatch).length > 0) {
@@ -4936,7 +5068,12 @@
         }, 1200);
       }
       initReviews();
-      pickNextRandomChant();
+      if (PIECES && PIECES.length > 0) {
+        pickNextRandomChant();
+      }
+
+      // Charger dynamiquement la file à jour depuis l'API Oremus
+      fetchOnlineAlignmentQueue();
       checkTutorialOnStartup();
     }
 

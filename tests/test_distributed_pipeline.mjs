@@ -233,6 +233,33 @@ try {
   assert(pieceDetailRes.json.timestamps.length === 2, '2 notes synchronisées présentes');
   assert(pieceDetailRes.json.youtube_url !== undefined || pieceDetailRes.json.youtube_id !== undefined, 'Lien YouTube disponible pour player');
 
+  // ── TEST 13 : File dynamique d'alignements pour l'App (/api/alignments/queue) ──
+  console.log('\n⚜️ Test 13 : Consultation de la file dynamique d\'alignements pour l\'App (/api/alignments/queue)');
+  const queueRes = await requestHttp('GET', '/api/alignments/queue');
+  assert(queueRes.status === 200, 'GET /api/alignments/queue répond HTTP 200');
+  assert(queueRes.json.ok === true, 'Réponse ok: true');
+  assert(queueRes.json.total_aligned >= 1, `Total de pièces alignées >= 1 (${queueRes.json.total_aligned})`);
+  assert(Array.isArray(queueRes.json.pieces), 'La réponse contient un tableau de pièces');
+
+  const foundPiece = queueRes.json.pieces.find(p => p.id === String(claimedJob.id));
+  assert(foundPiece !== undefined, `La pièce récemment alignée (${claimedJob.id}) figure dans la file de l'App`);
+  assert(foundPiece && foundPiece.timestamps && foundPiece.timestamps.length === 2, 'Les horodatages sont complets');
+  assert(foundPiece && typeof foundPiece.is_liturgy_pack === 'boolean', 'Le drapeau is_liturgy_pack est présent');
+  assert(foundPiece && foundPiece.priority_score > 0, `Score de priorité liturgique calculé : ${foundPiece ? foundPiece.priority_score : 0}`);
+
+  // ── TEST 14 : Vérification de l'ordonnancement par priorité liturgique ──
+  console.log('\n🎯 Test 14 : Vérification du tri par ordre de priorité (liturgy.pack & non-révisé)');
+  const piecesList = queueRes.json.pieces;
+  let isSorted = true;
+  for (let i = 0; i < piecesList.length - 1; i++) {
+    if (piecesList[i].priority_score < piecesList[i + 1].priority_score) {
+      isSorted = false;
+      break;
+    }
+  }
+  assert(isSorted === true, 'Les pièces sont rigoureusement triées par priority_score décroissant');
+  assert(piecesList[0].priority_score >= 800, `La première pièce proposée est de haute priorité (score ${piecesList[0].priority_score})`);
+
 } finally {
   console.log('\n🛑 Arrêt du serveur de test...');
   serverProcess.kill('SIGTERM');

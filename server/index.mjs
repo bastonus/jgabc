@@ -43,6 +43,7 @@ const CLAIM_LEASE_MS = 20 * 60 * 1000;
 const TASKS_FILE = path.join(JOBS_DIR, 'tasks.json');
 const WORKERS_FILE = path.join(JOBS_DIR, 'workers.json');
 const CATALOG_PATH = path.join(__dirname, 'catalog.json');
+const SEED_ALIGNMENTS_PATH = path.join(__dirname, 'alignments_seed.json');
 
 // Création des répertoires de données locaux
 try {
@@ -124,6 +125,8 @@ function loadTasks() {
     youtube_id: p.youtube_id || '',
     youtube_url: p.youtube_url || (p.youtube_id ? `https://www.youtube.com/watch?v=${p.youtube_id}` : ''),
     gabc_src: p.gabc_src || '',
+    pack: p.pack || (p.is_liturgy_pack ? 'liturgy' : 'extension'),
+    is_liturgy_pack: p.is_liturgy_pack !== undefined ? p.is_liturgy_pack : (p.pack === 'liturgy'),
     status: 'pending', // 'pending' | 'claimed' | 'completed' | 'failed'
     worker_id: null,
     claimed_at: null,
@@ -366,6 +369,18 @@ function getWorkerPieces(workerId) {
   }
 }
 
+let seedAlignmentsCache = null;
+function loadSeedAlignments() {
+  if (seedAlignmentsCache) return seedAlignmentsCache;
+  seedAlignmentsCache = {};
+  if (fs.existsSync(SEED_ALIGNMENTS_PATH)) {
+    try {
+      seedAlignmentsCache = JSON.parse(fs.readFileSync(SEED_ALIGNMENTS_PATH, 'utf8'));
+    } catch (e) {}
+  }
+  return seedAlignmentsCache;
+}
+
 function getPieceDetails(pieceId) {
   const safeId = String(pieceId).replace(/[^a-zA-Z0-9_\-\.]/g, '');
   const alignmentPath = path.join(ALIGNMENTS_DIR, `${safeId}.json`);
@@ -380,6 +395,29 @@ function getPieceDetails(pieceId) {
     } catch (e) {}
   }
 
+  // Fallback vers les alignements initiaux pré-calculés (seed)
+  const seeds = loadSeedAlignments();
+  if (seeds[pieceId] || seeds[safeId]) {
+    const s = seeds[pieceId] || seeds[safeId];
+    const tasks = loadTasks();
+    const task = tasks.find(t => t.id === pieceId) || {};
+    return {
+      id: pieceId,
+      piece_id: pieceId,
+      incipit: task.incipit || `Pièce #${pieceId}`,
+      part: task.part || 'Chant',
+      youtube_id: task.youtube_id || '',
+      youtube_url: task.youtube_url || (task.youtube_id ? `https://www.youtube.com/watch?v=${task.youtube_id}` : ''),
+      gabc_src: task.gabc_src || '',
+      timestamps: s.timestamps || [],
+      notes_count: Array.isArray(s.timestamps) ? s.timestamps.length : 0,
+      worker_id: s.worker_id || 'Atelier-Chantres',
+      compute_device: s.compute_device || 'Meta MMS_FA (Curated)',
+      pack: task.pack || 'liturgy',
+      is_liturgy_pack: task.is_liturgy_pack !== undefined ? task.is_liturgy_pack : true
+    };
+  }
+
   const tasks = loadTasks();
   const task = tasks.find(t => t.id === pieceId);
   if (task) {
@@ -392,11 +430,143 @@ function getPieceDetails(pieceId) {
       youtube_url: task.youtube_url,
       gabc_src: task.gabc_src,
       timestamps: [],
-      status: task.status
+      status: task.status,
+      pack: task.pack || 'liturgy',
+      is_liturgy_pack: task.is_liturgy_pack !== undefined ? task.is_liturgy_pack : true
     };
   }
 
   return null;
+}
+
+/**
+ * Construit la file dynamique des pièces alignées pour revue dans l'application,
+ * ordonnée par priorité d'intérêt liturgique :
+ * 1. Pièces jamais révisées issues de liturgy.pack (cœur de la liturgie quotidienne)
+ * 2. Pièces jamais révisées issues de l'extension (gabc.pack)
+ * 3. Pièces signalées 'décalé' (pour vérification)
+ * 4. Pièces déjà approuvées
+ * Décroissance fine selon le nombre de relectures pour maximiser la couverture globale.
+ */
+function getAlignmentsQueue(options = {}) {
+  const tasks = loadTasks();
+  const seeds = loadSeedAlignments();
+  const reviewsByPiece = {};
+
+  // 1. Lire les avis enregistrés
+  try {
+    if (fs.existsSync(PENDING_DIR)) {
+      const revFiles = fs.readdirSync(PENDING_DIR).filter(f => f.endsWith('.json'));
+      for (const rf of revFiles) {
+        try {
+          const rev = JSON.parse(fs.readFileSync(path.join(PENDING_DIR, rf), 'utf8'));
+          const pid = rev.piece_id || rev.id;
+          if (pid) {
+            if (!reviewsByPiece[pid]) {
+              reviewsByPiece[pid] = { count: 0, status: rev.status, author: rev.author };
+            }
+            reviewsByPiece[pid].count++;
+            if (rev.status) reviewsByPiece[pid].status = rev.status;
+          }
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+
+  // 2. Vérifier les alignements calculés sur disque
+  const diskAlignments = new Set();
+  try {
+    if (fs.existsSync(ALIGNMENTS_DIR)) {
+      const files = fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json'));
+      for (const f of files) {
+        diskAlignments.add(f.replace('.json', ''));
+      }
+    }
+  } catch (e) {}
+
+  const list = [];
+
+  for (const t of tasks) {
+    const pid = String(t.id);
+    let alignData = null;
+
+    if (diskAlignments.has(pid)) {
+      try {
+        alignData = JSON.parse(fs.readFileSync(path.join(ALIGNMENTS_DIR, `${pid}.json`), 'utf8'));
+      } catch (e) {}
+    } else if (seeds[pid]) {
+      alignData = seeds[pid];
+    }
+
+    // Proposer uniquement les pièces dotées d'horodatages réels
+    if (alignData && Array.isArray(alignData.timestamps) && alignData.timestamps.length > 0) {
+      const rev = reviewsByPiece[pid] || { count: 0, status: null };
+      const isLit = t.is_liturgy_pack !== undefined ? t.is_liturgy_pack : (t.pack === 'liturgy');
+      const packName = isLit ? 'liturgy' : 'extension';
+
+      // 3. Calcul du score de priorité liturgique
+      let score = 0;
+      const status = rev.status || null;
+
+      if (!status || rev.count === 0) {
+        // Priorité absolue aux pièces non révisées pour accélérer la validation
+        score = isLit ? 1000 : 800;
+      } else if (status === 'delayed' || status === 'rejected') {
+        score = isLit ? 600 : 500;
+      } else if (status === 'approved') {
+        score = isLit ? 300 : 200;
+      } else if (status === 'bad_gabc') {
+        score = 100;
+      } else {
+        score = 150;
+      }
+
+      // Privilégier les pièces ayant le moins de votes pour tout couvrir
+      score -= Math.min(60, rev.count * 15);
+
+      list.push({
+        id: pid,
+        piece_id: pid,
+        incipit: t.incipit || `Pièce #${pid}`,
+        part: t.part || 'Chant',
+        youtube_id: t.youtube_id || '',
+        youtube_url: t.youtube_url || (t.youtube_id ? `https://www.youtube.com/watch?v=${t.youtube_id}` : ''),
+        gabc_src: t.gabc_src || '',
+        timestamps: alignData.timestamps,
+        notes_count: alignData.timestamps.length,
+        audio_duration_sec: alignData.audio_duration_sec || 0,
+        worker_id: alignData.worker_id || 'Inconnu',
+        compute_device: alignData.compute_device || '',
+        pack: packName,
+        is_liturgy_pack: isLit,
+        review_status: status,
+        review_count: rev.count,
+        priority_score: score
+      });
+    }
+  }
+
+  // Tri décroissant par priorité
+  list.sort((a, b) => b.priority_score - a.priority_score);
+
+  let unreviewedCount = 0;
+  let litCount = 0;
+  let extCount = 0;
+
+  for (const item of list) {
+    if (!item.review_status || item.review_count === 0) unreviewedCount++;
+    if (item.is_liturgy_pack) litCount++;
+    else extCount++;
+  }
+
+  return {
+    ok: true,
+    total_aligned: list.length,
+    unreviewed_count: unreviewedCount,
+    liturgy_pack_count: litCount,
+    extension_count: extCount,
+    pieces: list
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1194,6 +1364,11 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // 3b. API : File d'alignements pour l'App ordonnée par intérêt liturgique (/api/alignments/queue)
+  if (req.method === 'GET' && (pathname === '/api/alignments/queue' || pathname === '/api/alignments/feed' || pathname === '/api/alignments')) {
+    return sendJson(res, 200, getAlignmentsQueue());
+  }
+
   // 4. API : Benchmarks réels de calcul par matériel (/api/jobs/benchmarks)
   if (req.method === 'GET' && pathname === '/api/jobs/benchmarks') {
     return sendJson(res, 200, getBenchmarks());
@@ -1453,6 +1628,7 @@ const server = http.createServer(async (req, res) => {
       'GET  /worker (Portail interactif & revue directe)',
       'GET  /download/worker.zip (Pack de calcul 1-clic)',
       'GET  /api/jobs/benchmarks',
+      'GET  /api/alignments/queue (File prioritaire pour l\'App mobile & web)',
       'GET  /api/jobs/worker/:worker_id/pieces',
       'GET  /api/jobs/piece/:piece_id',
       'GET  /api/jobs/claim?worker_id=xxx',
