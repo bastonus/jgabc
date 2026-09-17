@@ -30,9 +30,9 @@ USER node
 # Exposer le port du serveur
 EXPOSE 3000
 
-# Vérification de santé (healthcheck natif Docker & Coolify)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1
+# Vérification de santé (healthcheck natif Node.js & Coolify)
+HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 # Démarrage
 CMD ["node", "index.mjs"]
