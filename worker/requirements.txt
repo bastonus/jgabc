@@ -1,0 +1,6 @@
+# Dépendances du Worker de Calcul Distribué Oremus
+torch>=2.0.0
+torchaudio>=2.0.0
+yt-dlp>=2024.0.0
+requests>=2.28.0
+numpy>=1.22.0

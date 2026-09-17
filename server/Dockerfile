@@ -9,10 +9,11 @@ LABEL description="Serveur distant autonome et relais de synchronisation pour Or
 WORKDIR /app
 
 # Copier les fichiers de l'application
-COPY package.json index.mjs ./
+COPY package.json index.mjs catalog.json* ./
+COPY public/ ./public/
 
-# Créer le répertoire de données persistant avec permissions pour le compte node
-RUN mkdir -p /app/data/pending && chown -R node:node /app
+# Créer les répertoires de données persistants avec permissions pour le compte node
+RUN mkdir -p /app/data/pending /app/data/alignments /app/data/jobs /app/public && chown -R node:node /app
 
 # Variables d'environnement par défaut
 ENV NODE_ENV=production \

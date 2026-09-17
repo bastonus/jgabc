@@ -47,9 +47,17 @@ Ce micro-service autonome permet aux relecteurs de l'application mobile Android 
 | Méthode | Route | Description |
 | :--- | :--- | :--- |
 | `GET` | `/health` ou `/` | Health-check pour Coolify et statut du service |
-| `POST` | `/api/review` | Réception d'un lot ou d'un avis unitaire |
+| `GET` | `/worker` ou `/compute` | **Portail web public & guide pas-à-pas pour les amis** |
+| `GET` | `/download/worker.zip` | Téléchargement direct du pack de calcul autonome (1-clic) |
+| `GET` | `/api/jobs/claim?worker_id=xxx` | Attribution de la prochaine pièce à aligner (bail de 20 min) |
+| `POST` | `/api/jobs/submit` | Envoi des horodatages calculés par le worker |
+| `GET` | `/api/jobs/status` | Avancement global, contributeurs et leaderboard |
+| `GET` | `/api/jobs/export` | Export complet de tous les alignements collectés |
+| `POST` | `/api/review` | Réception d'un lot ou d'un avis d'alignement unitaire |
 | `GET` | `/api/reviews/pending` | Liste des avis en attente stockés sur le volume |
-| `GET` | `/api/reviews/stats` | Statistiques (total, conformes, décalés, mauvais chants) |
+| `GET` | `/api/reviews/stats` | Statistiques des avis enregistrés |
+| `GET` | `/api/reviews/export` | **Export JSON complet des avis pour amélioration du modèle** |
+| `GET` | `/api/reviews/export.csv` | **Export CSV tabulaire des avis (Excel / Pandas)** |
 
 ---
 

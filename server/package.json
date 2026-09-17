@@ -1,7 +1,7 @@
 {
   "name": "oremus-review-relay",
-  "version": "1.0.0",
-  "description": "Serveur distant autonome et relais de synchronisation pour les avis du Laboratoire Grégorien Oremus",
+  "version": "1.1.0",
+  "description": "Serveur distant autonome, calcul distribué et relais de synchronisation pour Oremus",
   "main": "index.mjs",
   "type": "module",
   "scripts": {
