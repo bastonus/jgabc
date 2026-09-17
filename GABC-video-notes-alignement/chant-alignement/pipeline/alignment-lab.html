@@ -4307,11 +4307,15 @@
     }
 
     // ==========================================================================
-    // AUTOMATIC BACKGROUND BATCH SYNC ENGINE (5-Min Inactivity & App Exit)
+    // ==========================================================================
+    // INSTANT API SYNC & ROBUST OFFLINE RETRY QUEUE
     // ==========================================================================
     const BATCH_STORAGE_KEY = 'oremus_unsynced_reviews_batch';
-    const AUTO_SYNC_INACTIVITY_MS = 5 * 60 * 1000; // 5 minutes debounce
-    let autoSyncTimerId = null;
+    let isSyncInProgress = false;
+    let syncPendingQueued = false;
+    let syncRetryTimerId = null;
+    let syncRetryDelayMs = 5000; // Délai initial de réessai (5s), avec backoff progressif
+    const MAX_SYNC_RETRY_DELAY_MS = 60000; // Plafond à 60s
 
     function getUnsyncedBatch() {
       try {
@@ -4338,8 +4342,11 @@
 
     function queueReviewForAutoBatch(pieceId, status, comment) {
       const batch = getUnsyncedBatch();
-      const p = (typeof PIECES !== 'undefined' && Array.isArray(PIECES)) ? PIECES.find(x => x.id === pieceId) : null;
+      const p = (typeof currentPiece !== 'undefined' && currentPiece && currentPiece.id === pieceId) 
+        ? currentPiece 
+        : ((typeof LAB_DATA !== 'undefined' && Array.isArray(LAB_DATA)) ? LAB_DATA.find(x => x.id === pieceId) : null);
       batch[pieceId] = {
+        id: pieceId,
         status: status,
         comment: comment || (LAB_REVIEWS[pieceId] ? LAB_REVIEWS[pieceId].comment : '') || '',
         reviewedAt: (LAB_REVIEWS[pieceId] && LAB_REVIEWS[pieceId].reviewedAt) ? LAB_REVIEWS[pieceId].reviewedAt : new Date().toISOString(),
@@ -4348,7 +4355,8 @@
         youtube_id: (p ? p.youtube_id : '') || ''
       };
       saveUnsyncedBatch(batch);
-      armAutoSyncTimer();
+      // ENVOI IMMÉDIAT : dès qu'un avis est saisi, on tente directement la transmission sans attendre
+      sendBatchReviewsInBackground('immediate_vote');
     }
 
     function unqueueReviewFromAutoBatch(pieceId) {
@@ -4360,13 +4368,8 @@
     }
 
     function armAutoSyncTimer() {
-      if (autoSyncTimerId) {
-        clearTimeout(autoSyncTimerId);
-        autoSyncTimerId = null;
-      }
-      autoSyncTimerId = setTimeout(function() {
-        sendBatchReviewsInBackground('inactivity_timeout_5min');
-      }, AUTO_SYNC_INACTIVITY_MS);
+      // Les avis sont désormais envoyés immédiatement ; conservé pour compatibilité ascendante
+      sendBatchReviewsInBackground('immediate_auto');
     }
 
     function updateBatchBannerUI() {
@@ -4384,62 +4387,135 @@
       }
     }
 
-    function sendBatchReviewsInBackground(triggerReason) {
+    // Moteur principal : transmission immédiate + vérification du retour API + réessai automatique en cas d'échec
+    async function sendBatchReviewsInBackground(triggerReason) {
       const batch = getUnsyncedBatch();
-      const count = Object.keys(batch).length;
+      const keysToSend = Object.keys(batch);
+      const count = keysToSend.length;
       if (count === 0) return;
 
+      // Si une requête est déjà en cours, marquer pour re-synchroniser dès qu'elle termine
+      if (isSyncInProgress) {
+        syncPendingQueued = true;
+        return;
+      }
+
       const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://api-oremus.silverhorse.fr/api/review';
+      const isExitTrigger = (triggerReason === 'visibility_hidden' || triggerReason === 'pagehide' || triggerReason === 'beforeunload');
+
       const payload = {
         reviews: batch,
         count: count,
         client: (window.AndroidBrowser || (window.Capacitor && window.Capacitor.isNativePlatform())) ? 'android_apk' : 'web',
         timestamp: new Date().toISOString(),
-        reason: triggerReason || 'auto_batch'
+        reason: triggerReason || 'immediate'
       };
       const payloadStr = JSON.stringify(payload);
 
-      // 1. Android Native Background Bridge (independent Java thread)
-      if (window.AndroidBrowser && typeof window.AndroidBrowser.sendBackgroundBatch === 'function') {
-        window.AndroidBrowser.sendBackgroundBatch(relayUrl, payloadStr, '');
-      } else if (window.parent && window.parent !== window) {
-        // 2. Parent window message dispatch
-        window.parent.postMessage({
-          type: 'send_background_batch',
-          url: relayUrl,
-          payload: payloadStr,
-          authHeader: ''
-        }, '*');
-      } else if (window.fetch) {
-        // 3. Web keepalive fetch
-        fetch(relayUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payloadStr,
-          keepalive: true
-        }).catch(function() {});
+      // Si fermeture de l'application sur APK Android, transmettre aussi au thread Java natif de sécurité
+      if (isExitTrigger && window.AndroidBrowser && typeof window.AndroidBrowser.sendBackgroundBatch === 'function') {
+        try { window.AndroidBrowser.sendBackgroundBatch(relayUrl, payloadStr, ''); } catch (e) {}
       }
 
-      // Clear local batch once handed to background delivery
-      clearUnsyncedBatch();
-      if (autoSyncTimerId) {
-        clearTimeout(autoSyncTimerId);
-        autoSyncTimerId = null;
-      }
-      if (triggerReason === 'manual_button') {
-        showToast('Envoi des avis en arrière-plan effectué !');
+      isSyncInProgress = true;
+      let apiConfirmed = false;
+
+      try {
+        if (window.fetch) {
+          const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+          const timeoutId = controller ? setTimeout(function() { controller.abort(); }, 12000) : null;
+          const res = await fetch(relayUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payloadStr,
+            signal: controller ? controller.signal : undefined,
+            keepalive: true
+          });
+          if (timeoutId) clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json().catch(function() { return {}; });
+            // Vérification du retour API (success: true ou statut HTTP 2xx)
+            if (data && data.success !== false) {
+              apiConfirmed = true;
+            }
+          }
+        }
+
+        if (apiConfirmed) {
+          // RETOUR API CONFIRMÉ : on retire uniquement les avis validés de la file d'attente
+          const currentBatch = getUnsyncedBatch();
+          keysToSend.forEach(function(k) { delete currentBatch[k]; });
+          saveUnsyncedBatch(currentBatch);
+
+          // Réinitialiser le timer et le délai de réessai
+          syncRetryDelayMs = 5000;
+          if (syncRetryTimerId) {
+            clearTimeout(syncRetryTimerId);
+            syncRetryTimerId = null;
+          }
+
+          if (triggerReason === 'manual_sync_button' || triggerReason === 'manual_button') {
+            showToast('✅ Avis synchronisés avec succès sur le serveur !');
+          }
+        } else {
+          // Réponse non-200 ou success=false -> lever une erreur pour planifier le réessai
+          throw new Error('Réponse serveur non concluante');
+        }
+      } catch (err) {
+        // EN CAS D'ÉCHEC RÉSEAU OU D'ABSENCE DE CONFIRMATION API :
+        // Les avis RESTENT stockés dans le batch local oremus_unsynced_reviews_batch.
+        // On planifie un réessai ultérieur ("s'il n'est pas reçu alors il faut essayer plus tard").
+        console.warn('[Sync Oremus] Non reçu par l\'API (' + (err.message || 'erreur réseau') + '). Réessai programmé dans ' + (syncRetryDelayMs / 1000) + 's.');
+        scheduleSyncRetry();
+
+        if (triggerReason === 'manual_sync_button' || triggerReason === 'manual_button') {
+          showToast('⚠️ Serveur temporairement injoignable. Réessai automatique programmé.');
+        }
+      } finally {
+        isSyncInProgress = false;
+        if (syncPendingQueued) {
+          syncPendingQueued = false;
+          // De nouveaux avis ont été ajoutés pendant la requête en vol -> ré-exécuter
+          sendBatchReviewsInBackground('pending_queued');
+        }
       }
     }
 
-    // Lifecycle events for background dispatch on app exit / tab switch / screen off
+    function scheduleSyncRetry() {
+      if (syncRetryTimerId) return; // Un compte à rebours de réessai est déjà armé
+      syncRetryTimerId = setTimeout(function() {
+        syncRetryTimerId = null;
+        sendBatchReviewsInBackground('scheduled_retry');
+      }, syncRetryDelayMs);
+      // Backoff progressif : 5s -> 10s -> 20s -> 40s -> max 60s
+      syncRetryDelayMs = Math.min(syncRetryDelayMs * 2, MAX_SYNC_RETRY_DELAY_MS);
+    }
+
+    // Déclencheurs de reconnexion réseau et de cycle de vie
+    window.addEventListener('online', function() {
+      const batch = getUnsyncedBatch();
+      if (Object.keys(batch).length > 0) {
+        syncRetryDelayMs = 5000;
+        sendBatchReviewsInBackground('network_online');
+      }
+    });
+
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'hidden') {
         sendBatchReviewsInBackground('visibility_hidden');
+      } else if (document.visibilityState === 'visible') {
+        const batch = getUnsyncedBatch();
+        if (Object.keys(batch).length > 0) {
+          sendBatchReviewsInBackground('app_foreground');
+        }
       }
     });
+
     window.addEventListener('pagehide', function() {
       sendBatchReviewsInBackground('pagehide');
     });
+
     window.addEventListener('beforeunload', function() {
       sendBatchReviewsInBackground('beforeunload');
     });
@@ -4760,6 +4836,13 @@
       // Initialiser l'URL du serveur Coolify par défaut si non configurée
       if (!localStorage.getItem('oremus_review_relay_url')) {
         localStorage.setItem('oremus_review_relay_url', 'https://api-oremus.silverhorse.fr/api/review');
+      }
+      // Si des avis étaient restés en attente (ex: coupure réseau précédente), tenter l'envoi immédiat
+      const pendingBatch = getUnsyncedBatch();
+      if (Object.keys(pendingBatch).length > 0) {
+        setTimeout(function() {
+          sendBatchReviewsInBackground('startup_pending_flush');
+        }, 1200);
       }
       initReviews();
       pickNextRandomChant();

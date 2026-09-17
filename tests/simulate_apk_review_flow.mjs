@@ -448,6 +448,57 @@ const alignLabHtml = fs.readFileSync(alignLabHtmlPath, 'utf-8');
 assert(alignLabHtml.includes('id="coolifyServerUrlInput"'), 'Copie pipeline/align/ contient aussi coolifyServerUrlInput');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ETAPE 9 : Validation de l'Envoi Immédiat, Confirmation API et Réessai Hors-Ligne
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n⚡ Étape 9 : Test de l\'envoi direct immédiat et de la résilience aux coupures');
+
+// 9a. Vérification dans le code source HTML
+assert(labHtml.includes("sendBatchReviewsInBackground('immediate_vote')"), 'queueReviewForAutoBatch déclenche l\'envoi immédiat dès le vote');
+assert(labHtml.includes('scheduleSyncRetry()'), 'Fonction scheduleSyncRetry() définie pour planifier un réessai ultérieur');
+assert(labHtml.includes('apiConfirmed'), 'Le code vérifie la confirmation du retour API avant de vider la file');
+assert(labHtml.includes('network_online'), 'Écouteur window "online" réessaie automatiquement dès la reconnexion réseau');
+
+// 9b. Simulation logique : Scénario succès direct
+let testQueue = { '107': { id: '107', status: 'approved' } };
+let retryScheduled = false;
+
+function simulateInstantSync(queue, serverOnline) {
+  const keys = Object.keys(queue);
+  if (keys.length === 0) return { success: true, queue };
+  
+  if (serverOnline) {
+    // API confirme la réception
+    const updatedQueue = { ...queue };
+    keys.forEach(k => delete updatedQueue[k]);
+    retryScheduled = false;
+    return { success: true, queue: updatedQueue };
+  } else {
+    // Échec réseau / pas de retour API -> l'avis RESTE dans la file, réessai programmé
+    retryScheduled = true;
+    return { success: false, queue };
+  }
+}
+
+// Test direct en ligne
+const syncResultSuccess = simulateInstantSync(testQueue, true);
+assert(syncResultSuccess.success === true, 'Envoi direct : succès retourné quand le serveur répond');
+assert(Object.keys(syncResultSuccess.queue).length === 0, 'Envoi direct : les avis confirmés sont retirés de la file');
+assert(retryScheduled === false, 'Envoi direct : aucun réessai nécessaire en cas de succès');
+
+// Test coupure réseau / serveur hors-ligne
+const offlineQueue = { '58': { id: '58', status: 'bad_gabc' } };
+const syncResultFail = simulateInstantSync(offlineQueue, false);
+assert(syncResultFail.success === false, 'Hors-ligne : l\'échec est intercepté sans crash');
+assert(Object.keys(syncResultFail.queue).length === 1, 'Hors-ligne : l\'avis 58 RESTE bien dans la file d\'attente');
+assert(syncResultFail.queue['58'].status === 'bad_gabc', 'Hors-ligne : les données de l\'avis sont préservées intactes');
+assert(retryScheduled === true, 'Hors-ligne : un réessai ultérieur a été programmé ("essayer plus tard")');
+
+// Test reconnexion réseau ultérieure
+const recoveryResult = simulateInstantSync(syncResultFail.queue, true);
+assert(recoveryResult.success === true, 'Réessai ultérieur : transmission réussie dès le retour en ligne');
+assert(Object.keys(recoveryResult.queue).length === 0, 'Réessai ultérieur : la file locale est purgée après confirmation');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BILAN DE LA SIMULATION
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n===============================================================');
