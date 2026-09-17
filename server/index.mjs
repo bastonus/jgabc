@@ -561,10 +561,12 @@ function getAlignmentsQueue(options = {}) {
 
   return {
     ok: true,
+    total: list.length,
     total_aligned: list.length,
     unreviewed_count: unreviewedCount,
     liturgy_pack_count: litCount,
     extension_count: extCount,
+    queue: list,
     pieces: list
   };
 }

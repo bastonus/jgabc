@@ -3146,12 +3146,13 @@
         const res = await fetch(queueUrl, { signal: AbortSignal.timeout(10000) });
         if (res.ok) {
           const data = await res.json();
-          if (data && Array.isArray(data.queue) && data.queue.length > 0) {
-            PIECES = data.queue;
+          const list = (data && (data.pieces || data.queue)) ? (data.pieces || data.queue) : (Array.isArray(data) ? data : []);
+          if (Array.isArray(list) && list.length > 0) {
+            PIECES = list;
             try {
               localStorage.setItem('oremus_alignments_cache', JSON.stringify({
                 timestamp: Date.now(),
-                queue: data.queue
+                queue: list
               }));
             } catch(e) {}
             updateCounterDisplay();
@@ -3170,8 +3171,9 @@
         const cachedStr = localStorage.getItem('oremus_alignments_cache');
         if (cachedStr) {
           const cached = JSON.parse(cachedStr);
-          if (cached && Array.isArray(cached.queue) && cached.queue.length > 0) {
-            PIECES = cached.queue;
+          const cachedList = cached && (cached.pieces || cached.queue);
+          if (Array.isArray(cachedList) && cachedList.length > 0) {
+            PIECES = cachedList;
             updateCounterDisplay();
             if (isInitialEmpty || currentPieceIndex < 0) {
               pickNextRandomChant();
@@ -5054,8 +5056,9 @@
         const cachedStr = localStorage.getItem('oremus_alignments_cache');
         if (cachedStr) {
           const cached = JSON.parse(cachedStr);
-          if (cached && Array.isArray(cached.queue) && cached.queue.length > 0 && (!PIECES || PIECES.length === 0)) {
-            PIECES = cached.queue;
+          const cachedList = cached && (cached.pieces || cached.queue);
+          if (Array.isArray(cachedList) && cachedList.length > 0 && (!PIECES || PIECES.length === 0)) {
+            PIECES = cachedList;
           }
         }
       } catch(e) {}
