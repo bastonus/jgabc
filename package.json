@@ -18,6 +18,7 @@
     "test": "tests"
   },
   "scripts": {
+    "test": "node tests/test_coolify_server.mjs && node tests/simulate_apk_review_flow.mjs && node tests/test_distributed_pipeline.mjs",
     "pack:modules": "node tools/build_modules.mjs",
     "cap:clean": "node tools/clean_android_assets.mjs",
     "cap:sync": "npm run pack:modules && node tools/sync_apk_assets.mjs && npx cap sync android && npm run cap:clean",

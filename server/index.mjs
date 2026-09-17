@@ -825,6 +825,34 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     }
     .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 25px -4px rgba(196, 152, 79, 0.6); }
 
+    /* CLI Command Section Styles */
+    .cli-section { margin-top: 20px; }
+    .cli-tabs { display: flex; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .cli-tab-btn {
+      background: none; border: none; color: var(--text-muted); padding: 7px 14px;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer; border-radius: 6px; transition: all 0.15s;
+    }
+    .cli-tab-btn:hover { color: #fff; }
+    .cli-tab-btn.active {
+      background: rgba(56, 189, 248, 0.15); color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .cli-box {
+      background: rgba(0, 0, 0, 0.55); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; display: flex;
+      justify-content: space-between; align-items: center; gap: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem; color: #38bdf8; margin-bottom: 8px; overflow-x: auto;
+    }
+    .cli-box code { white-space: nowrap; user-select: all; font-family: inherit; }
+    .btn-copy-cli {
+      background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #fff;
+      padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-copy-cli:hover { background: #38bdf8; color: #000; }
+    .btn-copy-cli.copied { background: var(--emerald); border-color: var(--emerald); color: #000; }
+
     /* Batch & Review Section */
     .batch-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
     .user-filter-box { display: flex; gap: 8px; align-items: center; }
@@ -996,12 +1024,74 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           </div>
         </div>
 
-        <a href="/download/worker.zip" class="btn-cta">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Télécharger le pack Worker pour cette session (oremus-worker.zip)
-        </a>
-        <div style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:8px;" id="cmdHint">
-          Commande directe : <span style="font-family:monospace; color:var(--blue);" id="cmdSnippet">python worker.py --name "MonAmi" --duration 30</span>
+        <!-- Mode de lancement : 1. Ligne de commande directe (CLI) -->
+        <div class="cli-section">
+          <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span>💻 Option 1 : Lancement direct en Ligne de Commande (Terminal)</span>
+            <span style="font-size:0.75rem; color:var(--emerald); text-transform:none; font-weight:700;">⚡ Zéro téléchargement manuel</span>
+          </div>
+          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">
+            Copiez-collez une seule ligne dans votre terminal. L'environnement virtuel isolé et les modules IA sont configurés automatiquement.
+          </p>
+
+          <div class="cli-tabs">
+            <button type="button" class="cli-tab-btn active" data-os="windows" onclick="switchCliTab('windows')">🪟 Windows (PowerShell)</button>
+            <button type="button" class="cli-tab-btn" data-os="unix" onclick="switchCliTab('unix')">🍎 macOS & 🐧 Linux (Bash)</button>
+            <button type="button" class="cli-tab-btn" data-os="python" onclick="switchCliTab('python')">🐍 Python direct</button>
+          </div>
+
+          <div id="cliPanelWindows">
+            <div class="cli-box">
+              <code id="cliCmdWindows">irm https://api-oremus.silverhorse.fr/run.ps1 | iex</code>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdWindows', this)">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copier
+              </button>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">
+              💡 <em>Ouvrez PowerShell, collez la commande et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+            </div>
+          </div>
+
+          <div id="cliPanelUnix" style="display:none;">
+            <div class="cli-box">
+              <code id="cliCmdUnix">curl -fsSL https://api-oremus.silverhorse.fr/run.sh | bash</code>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdUnix', this)">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copier
+              </button>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">
+              💡 <em>Ouvrez votre Terminal (macOS / Linux), collez et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+            </div>
+          </div>
+
+          <div id="cliPanelPython" style="display:none;">
+            <div class="cli-box">
+              <code id="cliCmdPython">curl -fsSL https://api-oremus.silverhorse.fr/worker.py | python3 -</code>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdPython', this)">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copier
+              </button>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">
+              💡 <em>Exécution directe via Python (recommandé si PyTorch est déjà présent sur votre machine).</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode de lancement : 2. Pack ZIP 1-Clic -->
+        <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+          <div class="choice-group-label" style="margin-bottom:8px;">
+            <span>📦 Option 2 : Téléchargement du Pack Autonome (Archive ZIP)</span>
+          </div>
+          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">
+            Idéal si vous préférez un dossier zippé avec lanceurs double-clic tout prêts.
+          </p>
+          <a href="/download/worker.zip" class="btn-cta">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Télécharger le pack Worker (oremus-worker.zip)
+          </a>
         </div>
       </div>
     </div>
@@ -1256,13 +1346,55 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
       const potentialXp = estimatedCount * 25; // 25 XP par chant calculé
       
-      document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? \`~\${estimatedCount} chants\` : 'Illimité (continu)';
-      document.getElementById('estXpDisplay').textContent = \`+\${potentialXp} XP Monastiques\`;
+      document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? `~${estimatedCount} chants` : 'Illimité (continu)';
+      document.getElementById('estXpDisplay').textContent = `+${potentialXp} XP Monastiques`;
 
       const pseudo = document.getElementById('filterWorkerInput').value.trim() || 'Ami';
-      const durArg = currentDurationMins > 0 ? \` --duration \${currentDurationMins}\` : '';
-      document.getElementById('cmdSnippet').textContent = \`python worker.py --name "\${pseudo}"\${durArg}\`;
+      const durArg = currentDurationMins > 0 ? ` --duration ${currentDurationMins}` : '';
+      const origin = window.location.origin;
+
+      // Commandes dynamiques avec pseudo et durée pré-configurés
+      const winCode = (pseudo === 'Ami' && currentDurationMins === 0)
+        ? `irm ${origin}/run.ps1 | iex`
+        : `& ([scriptblock]::Create((irm ${origin}/run.ps1))) -Name "${pseudo}"${currentDurationMins > 0 ? ` -Duration ${currentDurationMins}` : ''}`;
+
+      const unixCode = (pseudo === 'Ami' && currentDurationMins === 0)
+        ? `curl -fsSL ${origin}/run.sh | bash`
+        : `curl -fsSL ${origin}/run.sh | bash -s -- --name "${pseudo}"${durArg}`;
+
+      const pyCode = `curl -fsSL ${origin}/worker.py | python3 - --name "${pseudo}"${durArg}`;
+
+      const elWin = document.getElementById('cliCmdWindows');
+      const elUnix = document.getElementById('cliCmdUnix');
+      const elPy = document.getElementById('cliCmdPython');
+      if (elWin) elWin.textContent = winCode;
+      if (elUnix) elUnix.textContent = unixCode;
+      if (elPy) elPy.textContent = pyCode;
     }
+
+    window.switchCliTab = function(os) {
+      document.querySelectorAll('.cli-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.os === os));
+      document.getElementById('cliPanelWindows').style.display = os === 'windows' ? 'block' : 'none';
+      document.getElementById('cliPanelUnix').style.display = os === 'unix' ? 'block' : 'none';
+      document.getElementById('cliPanelPython').style.display = os === 'python' ? 'block' : 'none';
+    };
+
+    window.copyCliCommand = function(elemId, btn) {
+      const codeElem = document.getElementById(elemId);
+      if (!codeElem) return;
+      const text = codeElem.textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = '✅ Copié !';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = oldHtml;
+          btn.classList.remove('copied');
+        }, 1800);
+      }).catch(() => {
+        prompt('Copiez la commande ci-dessous (Ctrl+C) :', text);
+      });
+    };
 
     // 3. User Filter & Batch View
     function setupUserFilter() {

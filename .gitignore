@@ -37,8 +37,12 @@ build-output/
 *.keystore
 !android/app/release.keystore
 *.jks
+releases/
+*.apk
+dist_modules/*.pack
 scratch/
 deepseek4free/
+temp_*/
 *~lock~
 *.af~lock~
 
@@ -46,6 +50,12 @@ deepseek4free/
 __pycache__/
 *.pyc
 *.pyo
+
+# Caches, logs & AI tools
+.aider*
+logs/
+*.log
+liturgical_cache.db
 
 # Dynamically synced www bulk data mirrors for APK packaging
 www/do_data/
@@ -60,3 +70,4 @@ www/img/
 server/data/
 tests/temp_dist_data/
 tests/temp_coolify_data/
+
