@@ -4705,9 +4705,9 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     display: block !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    margin-top: 14px !important;
-    padding-top: 12px !important;
-    border-top: 1px dashed color-mix(in srgb, var(--text-primary) 18%, transparent) !important;
+    margin-top: 8px !important;
+    padding-top: 0 !important;
+    border-top: none !important;
 }
 
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-wrapper {
@@ -4731,10 +4731,10 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     transition: none !important;
     display: block !important;
     gap: 0 !important;
-    margin: 6px 0 !important;
+    margin: 4px 0 !important;
 }
 
-/* 4. Vernacular Column: Full-width, crisp white / text-primary, regular typography */
+/* 4. Vernacular Column: Full-width, crisp white / text-primary, smaller font size */
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular,
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row > .do-col-vernacular {
     width: 100% !important;
@@ -4747,17 +4747,19 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     text-align: justify !important;
     text-justify: inter-word !important;
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
-    font-size: 1.12rem !important;
-    line-height: 1.8 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
     font-style: normal !important;
     color: var(--text-primary) !important;
 }
 
-/* Ensure all text elements, paragraphs and non-rubric spans inside vernacular column use var(--text-primary) (white in dark/OLED) */
+/* Ensure all text elements, paragraphs and non-rubric spans inside vernacular column use smaller white font */
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular p,
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular div,
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
     color: var(--text-primary) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
     font-style: normal;
 }
 
@@ -4766,9 +4768,10 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular em {
     color: inherit !important;
     font-style: italic !important;
+    font-size: inherit !important;
 }
 
-/* Preserve liturgical rubric symbols in accent red */
+/* Preserve liturgical rubric symbols in accent red with proportional size */
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular .do-resp-sym,
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular b,
 .do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular strong,
@@ -4777,13 +4780,21 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 .do-card.has-gregorian-score .do-card-text-lines.is-vern-only strong {
     color: var(--primary-color) !important;
     font-weight: normal !important;
+    font-size: 0.95rem !important;
 }
 
-/* 5. Vernacular-only mode under score: white text, normal typography */
+/* 5. Vernacular-only mode under score: smaller white text, normal typography, no separator */
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only {
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
+}
+
 .do-card.has-gregorian-score .do-card-text-lines.is-vern-only p,
 .do-card.has-gregorian-score .do-card-text-lines.is-vern-only div,
 .do-card.has-gregorian-score .do-card-text-lines.is-vern-only span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
     color: var(--text-primary) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
     font-style: normal;
 }
 

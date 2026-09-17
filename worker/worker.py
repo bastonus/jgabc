@@ -276,6 +276,36 @@ def download_youtube_audio(yt_url: str, output_path: str):
     raise FileNotFoundError(f"Fichier audio non généré : {final_wav}")
 
 
+def format_duration(seconds: float) -> str:
+    """Formate une durée en secondes en texte lisible (ex: 1h 12m 45s)."""
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h > 0:
+        return f"{h}h {m:02d}m {s:02d}s"
+    elif m > 0:
+        return f"{m}m {s:02d}s"
+    return f"{s}s"
+
+
+def print_session_summary(worker_name: str, server_url: str, count: int, elapsed_sec: float, reason: str = "Fin de session"):
+    """Affiche le récapitulatif liturgique de fin de session avec le lien de relecture directe du lot."""
+    xp_earned = count * 25
+    dur_str = format_duration(elapsed_sec)
+    review_url = f"{server_url}/worker?worker={urllib.parse.quote(worker_name)}#batch"
+
+    print("\n" + "=" * 75)
+    print(f"  ✦ {reason.upper()} — SCRIPTORIUM OREMUS ✦")
+    print(f"  ✦ Contributeur       : \033[92m{worker_name}\033[0m")
+    print(f"  ✦ Temps consacré     : \033[94m{dur_str}\033[0m")
+    print(f"  ✦ Chants synchronisés: \033[93m{count} pièces\033[0m")
+    print(f"  ✦ Enluminure gagnée  : \033[92m+{xp_earned} XP liturgiques\033[0m")
+    print("-" * 75)
+    print("  📋 Inspectez et validez immédiatement votre lot de partitions alignées :")
+    print(f"  👉 \033[96m{review_url}\033[0m")
+    print("  (Chaque validation approuvée vous accorde +10 XP supplémentaires !)")
+    print("=" * 75 + "\n")
+
+
 def request_json(url: str, method: str = "GET", payload: dict = None, timeout: int = 15):
     """Effectue un appel API HTTP standard avec urllib."""
     headers = {"User-Agent": "Oremus-Distributed-Worker/1.0", "Content-Type": "application/json", "Accept": "application/json"}
@@ -286,11 +316,21 @@ def request_json(url: str, method: str = "GET", payload: dict = None, timeout: i
         return json.loads(resp.read().decode("utf-8"))
 
 
+# État global de session pour bilan en cas d'interruption
+SESSION_STATE = {
+    "worker_name": "",
+    "server_url": DEFAULT_SERVER,
+    "jobs_processed": 0,
+    "start_time": time.time()
+}
+
+
 def main():
     print(BANNER)
     parser = argparse.ArgumentParser(description="Worker de calcul distribué pour Oremus")
     parser.add_argument("--server", default=DEFAULT_SERVER, help=f"Adresse du serveur Coolify (défaut: {DEFAULT_SERVER})")
     parser.add_argument("--name", default="", help="Votre pseudo pour le tableau des contributeurs")
+    parser.add_argument("--duration", type=float, default=0.0, help="Durée de la session en minutes (0 = continu/illimité)")
     parser.add_argument("--max-jobs", type=int, default=0, help="Nombre max de pièces à traiter (0 = infini)")
     args = parser.parse_args()
 
@@ -298,16 +338,31 @@ def main():
     device_type, device_desc = detect_device()
     worker_name = args.name.strip() or get_default_worker_name()
 
+    SESSION_STATE["worker_name"] = worker_name
+    SESSION_STATE["server_url"] = server_url
+    SESSION_STATE["start_time"] = time.time()
+
+    max_duration_sec = args.duration * 60.0 if args.duration > 0 else 0.0
+
     print(f"  ✦ Contributeur : \033[92m{worker_name}\033[0m")
     print(f"  ✦ Accélération : \033[94m{device_desc}\033[0m")
-    print(f"  ✦ Serveur      : \033[96m{server_url}\033[0m\n")
+    print(f"  ✦ Serveur      : \033[96m{server_url}\033[0m")
+    if max_duration_sec > 0:
+        print(f"  ✦ Durée        : \033[93m{args.duration:g} minute(s)\033[0m (arrêt auto en fin de session)\n")
+    else:
+        print(f"  ✦ Durée        : \033[93mEn continu\033[0m (arrêt possible à tout instant avec Ctrl+C)\n")
     print("=" * 75)
 
     jobs_processed = 0
 
     while True:
+        elapsed = time.time() - SESSION_STATE["start_time"]
+        if max_duration_sec > 0 and elapsed >= max_duration_sec:
+            print_session_summary(worker_name, server_url, jobs_processed, elapsed, reason="Durée de session impartie atteinte")
+            break
+
         if args.max_jobs > 0 and jobs_processed >= args.max_jobs:
-            print(f"\n[OK] Quota de {args.max_jobs} pièces atteint. Merci pour votre aide !")
+            print_session_summary(worker_name, server_url, jobs_processed, elapsed, reason=f"Quota de {args.max_jobs} pièces atteint")
             break
 
         print(f"\n[*] Recherche d'une tâche à aligner auprès du serveur...")
@@ -378,6 +433,7 @@ def main():
             if sub_resp.get("success"):
                 print(f"  \033[92m[SUCCÈS]\033[0m Enregistré avec succès sur le serveur ! Total de vos contributions : {sub_resp.get('worker_total', jobs_processed + 1)} chant(s).")
                 jobs_processed += 1
+                SESSION_STATE["jobs_processed"] = jobs_processed
             else:
                 print(f"  [WARN] Le serveur a retourné une réponse inattendue : {sub_resp}")
 
@@ -409,5 +465,12 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n[INFO] Arrêt du worker demandé (Ctrl+C). Merci pour votre contribution !")
+        elapsed = time.time() - SESSION_STATE["start_time"]
+        print_session_summary(
+            SESSION_STATE["worker_name"] or get_default_worker_name(),
+            SESSION_STATE["server_url"],
+            SESSION_STATE["jobs_processed"],
+            elapsed,
+            reason="Session interrompue (Ctrl+C)"
+        )
         sys.exit(0)

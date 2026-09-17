@@ -207,6 +207,32 @@ try {
   assert(exportRevCsv.headers['content-type'].includes('text/csv'), 'Content-Type est text/csv');
   assert(exportRevCsv.bodyText.includes('piece_test_101') && exportRevCsv.bodyText.includes('piece_test_102'), 'CSV contient les deux identifiants');
 
+  // ── TEST 10 : Statistiques de benchmarks matériels ──
+  console.log('\n⚡ Test 10 : Benchmarks réels de calcul (/api/jobs/benchmarks)');
+  const benchRes = await requestHttp('GET', '/api/jobs/benchmarks');
+  assert(benchRes.status === 200, 'GET /api/jobs/benchmarks répond HTTP 200');
+  assert(benchRes.json && benchRes.json.cuda !== undefined, 'Benchmarks contiennent le profil CUDA');
+  assert(benchRes.json && benchRes.json.mps !== undefined, 'Benchmarks contiennent le profil MPS');
+  assert(benchRes.json && benchRes.json.cpu !== undefined, 'Benchmarks contiennent le profil CPU');
+  assert(benchRes.json.cuda.pieces_per_hour > 0, `Vitesse CUDA positive (${benchRes.json.cuda.pieces_per_hour} pièces/h)`);
+
+  // ── TEST 11 : Lot de pièces récemment calculées par un worker ──
+  console.log('\n📋 Test 11 : Récupération du lot récemment calculé (/api/jobs/worker/:id/pieces)');
+  const workerBatchRes = await requestHttp('GET', '/api/jobs/worker/Ami-Alexandre-RTX/pieces');
+  assert(workerBatchRes.status === 200, 'GET /api/jobs/worker/Ami-Alexandre-RTX/pieces répond HTTP 200');
+  assert(workerBatchRes.json.total >= 1, `Total de pièces pour Ami-Alexandre-RTX >= 1 (${workerBatchRes.json.total})`);
+  assert(workerBatchRes.json.pieces[0].id === String(claimedJob.id), 'Identifiant de pièce correspond à la soumission');
+  assert(workerBatchRes.json.pieces[0].worker === 'Ami-Alexandre-RTX', 'Contributeur bien identifié');
+
+  // ── TEST 12 : Détail complet d'une pièce pour relecture directe ──
+  console.log('\n🔍 Test 12 : Détail d\'une pièce pour relecture directe (/api/jobs/piece/:id)');
+  const pieceDetailRes = await requestHttp('GET', `/api/jobs/piece/${claimedJob.id}`);
+  assert(pieceDetailRes.status === 200, `GET /api/jobs/piece/${claimedJob.id} répond HTTP 200`);
+  assert(pieceDetailRes.json.id === String(claimedJob.id), 'ID conforme dans le détail');
+  assert(Array.isArray(pieceDetailRes.json.timestamps), 'Horodatages présents sous forme de tableau');
+  assert(pieceDetailRes.json.timestamps.length === 2, '2 notes synchronisées présentes');
+  assert(pieceDetailRes.json.youtube_url !== undefined || pieceDetailRes.json.youtube_id !== undefined, 'Lien YouTube disponible pour player');
+
 } finally {
   console.log('\n🛑 Arrêt du serveur de test...');
   serverProcess.kill('SIGTERM');

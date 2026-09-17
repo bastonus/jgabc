@@ -40,11 +40,22 @@ DEFAULT_NAME=$(hostname -s 2>/dev/null || echo "Ami-Mac")
 read -p "Entrez votre prénom ou pseudo pour le classement [$DEFAULT_NAME] : " USER_NAME
 WORKER_NAME="${USER_NAME:-$DEFAULT_NAME}"
 
+# 5. Choix de la durée de session
+echo ""
+echo "Combien de temps souhaitez-vous consacrer au calcul ?"
+echo "(Exemples : 15, 30, 60, 120 minutes, ou 0 pour laisser tourner en continu)"
+read -p "Durée en minutes [défaut: 0 (continu)] : " DURATION_INPUT
+WORKER_DURATION="${DURATION_INPUT:-0}"
+
 echo ""
 echo "======================================================================="
 echo "Démarrage du worker avec le pseudo : $WORKER_NAME"
-echo "(Arrêt possible à tout moment avec Ctrl + C)"
+if [ "$WORKER_DURATION" = "0" ]; then
+    echo "Durée de session : En continu (Arrêt possible avec Ctrl + C)"
+else
+    echo "Durée de session programmée : $WORKER_DURATION minutes"
+fi
 echo "======================================================================="
 echo ""
 
-python worker.py --name "$WORKER_NAME"
+python worker.py --name "$WORKER_NAME" --duration "$WORKER_DURATION"

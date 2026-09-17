@@ -10,7 +10,8 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
 1. Décompressez le dossier `oremus-worker.zip`.
 2. Double-cliquez sur le fichier **`start_worker.bat`**.
 3. Entrez votre prénom ou pseudo (pour figurer sur le tableau des contributeurs en ligne !).
-4. **C'est tout !** Votre ordinateur commence à aligner les pièces musicales et à envoyer les résultats au serveur.
+4. Choisissez la durée de votre session de calcul (ex: 15, 30, 60 minutes, ou 0 pour continu).
+5. **C'est tout !** Votre ordinateur commence à aligner les pièces musicales et à envoyer les résultats au serveur. Dès la fin de la session, un lien direct s'affiche pour inspecter et valider votre lot !
 
 ### Sous macOS (MacBook, iMac) ou Linux :
 1. Décompressez l'archive.
@@ -20,7 +21,7 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
    chmod +x start_worker.sh
    ./start_worker.sh
    ```
-4. Indiquez votre pseudo et validez !
+4. Indiquez votre pseudo, votre durée de session et validez !
 
 ---
 

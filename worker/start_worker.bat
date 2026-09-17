@@ -56,14 +56,26 @@ echo.
 set /p USER_INPUT="Entrez votre prenom ou pseudo pour le classement [defaut: %COMPUTERNAME%]: "
 if not "%USER_INPUT%"=="" set WORKER_NICK=%USER_INPUT%
 
+:: 5. Choix de la duree de session
+set WORKER_MINS=0
+echo.
+echo Combien de temps souhaitez-vous consacrer au calcul ?
+echo (Exemples : 15, 30, 60, 120 minutes, ou 0 pour laisser tourner en continu)
+set /p DURATION_INPUT="Duree en minutes [defaut: 0 (continu)]: "
+if not "%DURATION_INPUT%"=="" set WORKER_MINS=%DURATION_INPUT%
+
 echo.
 echo =======================================================================
 echo Lancement du calcul avec le pseudo : %WORKER_NICK%
-echo (Vous pouvez arreter a tout moment en appuyant sur Ctrl + C)
+if "%WORKER_MINS%"=="0" (
+    echo Duree de session : En continu (arret avec Ctrl + C)
+) else (
+    echo Duree de session : %WORKER_MINS% minute(s)
+)
 echo =======================================================================
 echo.
 
-python worker.py --name "%WORKER_NICK%"
+python worker.py --name "%WORKER_NICK%" --duration %WORKER_MINS%
 
 if %ERRORLEVEL% neq 0 (
     echo.
