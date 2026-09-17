@@ -209,6 +209,12 @@
       transform: none !important;
     }
 
+    @media (min-width: 900px) {
+      .do-mobile-menu-btn {
+        display: none !important;
+      }
+    }
+
     .header-title-area {
       min-width: 0;
       flex: 1;
@@ -347,28 +353,30 @@
       transform: none !important;
     }
 
-    /* ── Main Workspace ── */
+    /* ── Main Workspace: Vertical Flow (Chant Directly Below Video) ── */
     .lab-workspace {
       flex: 1;
       min-height: 0;
       display: flex;
-      padding: 6px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;
-      gap: 16px;
+      flex-direction: column !important;
+      padding: 6px 16px calc(142px + var(--sab)) 16px;
+      gap: 10px;
       overflow: hidden;
       position: relative;
-      max-width: 1400px;
+      max-width: 820px;
       width: 100%;
       margin: 0 auto;
       box-sizing: border-box;
     }
 
-    /* Left Column (Desktop) */
+    /* Video Section (Top) */
     .lab-left-column {
-      width: 420px;
-      max-width: 440px;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 4px;
       flex-shrink: 0;
       min-height: 0;
     }
@@ -385,7 +393,7 @@
       position: relative !important;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 220px;
+      max-height: 215px;
       border-radius: 12px;
       overflow: hidden;
       background: #000000;
@@ -410,11 +418,149 @@
 
 
 
+    /* ── Desktop Chant Information Card (Frameless) ── */
+    .lab-chant-info-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: none !important;
+      box-shadow: none !important;
+      flex-shrink: 0;
+    }
+    [data-theme="light"] .lab-chant-info-card {
+      background: rgba(0, 0, 0, 0.035);
+    }
+    .chant-info-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .score-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: rgba(var(--primary-color-rgb), 0.12);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .chant-info-title {
+      margin: 2px 0 0 0;
+      padding: 0;
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.08rem;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chant-info-details {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .lab-decision-panel {
       display: flex;
       flex-direction: column;
       gap: 6px;
       border: none !important;
+      flex-shrink: 0;
+    }
+
+    /* ── Desktop Keyboard Shortcuts & Controls Card (Frameless) ── */
+    .lab-desktop-shortcuts-card {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+      border: none !important;
+      box-shadow: none !important;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+    }
+    [data-theme="light"] .lab-desktop-shortcuts-card {
+      background: rgba(0, 0, 0, 0.025);
+    }
+    .shortcuts-header {
+      font-size: 0.70rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 2px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    [data-theme="light"] .shortcuts-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      padding: 2px 0;
+    }
+    .shortcut-desc {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .shortcut-row kbd {
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border: none;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+    [data-theme="light"] .shortcut-row kbd {
+      background: rgba(0, 0, 0, 0.07);
+    }
+    .shortcut-action-badge {
+      font-size: 0.70rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(var(--primary-color-rgb), 0.12);
+      color: var(--primary-color);
+      flex-shrink: 0;
+    }
+    .shortcut-xp-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gold-sacred, #f59e0b);
+      margin-left: 4px;
     }
 
     /* Right Column (Score) */
@@ -934,10 +1080,29 @@
       transform: none !important;
     }
 
-    /* ── Mobile Sticky Bottom Dock ── */
+    /* ── Bottom Decision Dock (Unified for Desktop & Mobile) ── */
     .lab-mobile-dock {
-      display: none;
+      display: flex !important;
+      flex-direction: column;
+      gap: 8px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: color-mix(in srgb, var(--background-base) 92%, transparent);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       border: none !important;
+      padding: 8px max(12px, calc(12px + var(--sal))) max(16px, calc(12px + var(--sab))) max(12px, calc(12px + var(--sar)));
+      z-index: 200;
+      box-sizing: border-box;
+    }
+
+    .lab-mobile-dock .decision-normal-view,
+    .lab-mobile-dock .decision-comment-view {
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     /* ── In-Place Level Up Ceremony Stage (Frameless) ── */
@@ -1687,50 +1852,30 @@
     }
 
         /* ── Responsive Adaptations ── */
-    @media (max-width: 960px) {
+    @media (min-width: 900px) {
+      .do-mobile-menu-btn {
+        display: none !important;
+      }
       .lab-workspace {
-        flex-direction: column;
-        padding: 4px 12px calc(142px + var(--sab)) 12px;
-        gap: 8px;
-        overflow: hidden;
-      }
-      .lab-left-column {
-        width: 100%;
-        max-width: 100%;
-        flex-shrink: 0;
-      }
-      .lab-left-column .lab-decision-panel {
-        display: none;
-      }
-      .video-viewport {
-        max-height: 180px;
-      }
-      .lab-right-column {
-        flex: 1;
-        min-height: 0;
-        width: 100%;
-        border-radius: 10px;
-        overflow: hidden;
-      }
-      .score-viewport {
-        padding: 8px 6px;
+        padding-top: 8px !important;
+        padding-bottom: 135px !important;
       }
       .lab-mobile-dock {
-        display: flex;
-        flex-direction: column;
+        padding-bottom: 14px !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .video-viewport {
+        max-height: 165px;
+      }
+      .score-viewport {
+        padding: 8px 8px;
+      }
+      .lab-workspace {
+        padding-left: 10px;
+        padding-right: 10px;
         gap: 8px;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: color-mix(in srgb, var(--background-base) 90%, transparent);
-        backdrop-filter: blur(20px) saturate(160%);
-        -webkit-backdrop-filter: blur(20px) saturate(160%);
-        border: none !important;
-        /* Ample clearance for Android gesture pill / 3-button navigation bar */
-        padding: 8px max(12px, calc(12px + var(--sal))) max(20px, calc(12px + var(--sab))) max(12px, calc(12px + var(--sar)));
-        z-index: 200;
-        box-sizing: border-box;
       }
     }
 
@@ -1836,77 +1981,12 @@
         </button>
       </div>
 
-      <!-- ── Left Column: Video & Decisions (Desktop) ── -->
+      <!-- ── Video (Top) ── -->
       <section class="lab-left-column" id="labLeftCol">
         <!-- Video Container Wrap (16:9, Relative position) -->
         <div class="video-container-wrap">
           <div class="video-viewport" id="cardVideoSlot">
             <div id="ytPlayerContainer"></div>
-          </div>
-          </div>
-        <!-- Decisions Panel (Desktop) -->
-        <div class="lab-decision-panel">
-          <div class="decision-normal-view" id="desktopNormalView">
-            <!-- Shrinked Comment Bubble (Shown when a comment exists) -->
-            <div class="chant-comment-bubble" id="desktopCommentBubble" style="display: none;" onclick="openInlineCommentMode()" title="Cliquer pour modifier la remarque">
-              <span class="comment-bubble-icon">💬</span>
-              <span class="comment-bubble-text" id="desktopCommentBubbleText"></span>
-              <button type="button" class="comment-bubble-action-btn" title="Modifier la remarque">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button type="button" class="comment-bubble-action-btn btn-bubble-delete" onclick="event.stopPropagation(); deleteInlineComment();" title="Supprimer la remarque">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-
-            <div class="decision-buttons-grid">
-              <button type="button" class="btn-decision btn-approved" onclick="triggerVote('approved')" title="Bien aligné (→)">
-                <span class="decision-label">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Bien aligné
-                </span>
-                <span class="decision-shortcut">[ → ]</span>
-              </button>
-              <button type="button" class="btn-decision btn-delayed" onclick="triggerVote('rejected')" title="Décalé (D)">
-                <span class="decision-label">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  Décalé
-                </span>
-                <span class="decision-shortcut">[ D ]</span>
-              </button>
-              <button type="button" class="btn-decision btn-bad" onclick="triggerVote('bad_gabc')" title="Mauvais chant (←)">
-                <span class="decision-label">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  Mauvais
-                </span>
-                <span class="decision-shortcut">[ ← ]</span>
-              </button>
-            </div>
-
-            <div class="utility-actions-row">
-              <button type="button" class="btn-utility btn-skip-prominent" onclick="skipCurrentChant()" title="Passer au chant suivant (↓)">
-                <span>Passer ce chant</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-              <button type="button" class="btn-utility btn-comment-trigger" onclick="openInlineCommentMode()" title="Écrire une remarque (C)">
-                <span style="font-size: 0.90rem;">💬</span>
-                <span id="desktopBtnCommentLabel">Remarque</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Inline Expanding Comment View (Replaces all buttons when active) -->
-          <div class="decision-comment-view" id="desktopCommentView" style="display: none;">
-            <textarea id="desktopCommentInput" class="inline-comment-textarea" placeholder="Précisez un décalage, erreur de note, audio manquant..." rows="2" oninput="autoExpandTextarea(this)"></textarea>
-            <div class="comment-actions-row">
-              <button type="button" class="btn-comment-cancel" onclick="closeInlineCommentMode()" title="Fermer la saisie">
-                <span>Fermer</span>
-              </button>
-              <button type="button" class="btn-comment-submit" onclick="submitInlineComment('desktop')" title="Enregistrer la remarque">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                <span>Envoyer</span>
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -1935,23 +2015,26 @@
         </div>
 
         <div class="decision-buttons-grid">
-          <button type="button" class="btn-decision btn-approved" onclick="triggerVote('approved')">
+          <button type="button" class="btn-decision btn-approved" onclick="triggerVote('approved')" title="Bien aligné (→)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               Bien aligné
             </span>
+            <span class="decision-shortcut">[ → ]</span>
           </button>
-          <button type="button" class="btn-decision btn-delayed" onclick="triggerVote('rejected')">
+          <button type="button" class="btn-decision btn-delayed" onclick="triggerVote('rejected')" title="Décalé (D)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               Décalé
             </span>
+            <span class="decision-shortcut">[ D ]</span>
           </button>
-          <button type="button" class="btn-decision btn-bad" onclick="triggerVote('bad_gabc')">
+          <button type="button" class="btn-decision btn-bad" onclick="triggerVote('bad_gabc')" title="Mauvais chant (←)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               Mauvais
             </span>
+            <span class="decision-shortcut">[ ← ]</span>
           </button>
         </div>
 
@@ -3184,7 +3267,7 @@
 
       // Auto-save pending comment if user voted while in comment mode
       const isMobile = window.innerWidth <= 960;
-      const curIn = document.getElementById(isMobile ? 'mobileCommentInput' : 'desktopCommentInput');
+      const curIn = document.getElementById('mobileCommentInput') || document.getElementById('desktopCommentInput');
       if (curIn && curIn.value.trim()) {
         const piece = PIECES[currentPieceIndex];
         if (!LAB_REVIEWS[piece.id]) LAB_REVIEWS[piece.id] = {};
@@ -3849,7 +3932,7 @@
 
       setTimeout(() => {
         const isMobile = window.innerWidth <= 960;
-        const targetInput = document.getElementById(isMobile ? 'mobileCommentInput' : 'desktopCommentInput');
+        const targetInput = document.getElementById('mobileCommentInput') || document.getElementById('desktopCommentInput');
         if (targetInput) {
           targetInput.focus();
           targetInput.setSelectionRange(targetInput.value.length, targetInput.value.length);

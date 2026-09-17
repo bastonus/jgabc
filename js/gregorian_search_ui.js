@@ -1221,6 +1221,15 @@
             triggerSearch(false);
         });
 
+        // Défilement horizontal fluide de la barre de filtres à la molette (desktop)
+        $(document).on('wheel', '#gregorianFilterBar', function(e) {
+            var evt = e.originalEvent || e;
+            if (evt.deltaY !== 0 && this.scrollWidth > this.clientWidth) {
+                e.preventDefault();
+                this.scrollLeft += evt.deltaY;
+            }
+        });
+
         // Bascule Grille / Liste
         $(document).on('click', '#gregorianToggleViewBtn', function() {
             currentViewMode = (currentViewMode === 'grid') ? 'list' : 'grid';

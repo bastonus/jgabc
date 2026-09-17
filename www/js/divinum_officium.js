@@ -5638,12 +5638,16 @@ function getGregorianChantsMapForHours(mom, hora, officiumKey, hoursResult) {
         addPartChant('hymnus', hymData.id, hymData.name || 'Hymnus', 'Hymnus');
     } else {
         var minorHymnIds = {
-            prima: { id: 1813, name: 'Jam lucis orto sídere' },
-            tertia: { id: 1814, name: 'Nunc Sancte nobis Spíritus' },
-            sexta: { id: 1815, name: 'Rector potens verax Deus' },
-            nona: { id: 1816, name: 'Rerum Deus tenax vigor' },
-            laudes: { id: 1173, name: 'Ætérne rerum Cónditor' },
-            vesperae: { id: 1342, name: 'Lucis Creátor óptime' }
+            prima: { id: '11944', name: 'Jam lucis orto sídere' },
+            prime: { id: '11944', name: 'Jam lucis orto sídere' },
+            tertia: { id: '10022', name: 'Nunc Sancte nobis Spíritus' },
+            tierce: { id: '10022', name: 'Nunc Sancte nobis Spíritus' },
+            sexta: { id: '11789', name: 'Rector potens verax Deus' },
+            sexte: { id: '11789', name: 'Rector potens verax Deus' },
+            nona: { id: '13226', name: 'Rerum Deus tenax vigor' },
+            none: { id: '13226', name: 'Rerum Deus tenax vigor' },
+            laudes: { id: '13348', name: 'Ætérne rerum Cónditor' },
+            vesperae: { id: '13307', name: 'Lucis Creátor óptime' }
         };
         if (minorHymnIds[hora]) {
             addPartChant('hymnus', minorHymnIds[hora].id, minorHymnIds[hora].name, 'Hymnus');
@@ -9183,6 +9187,16 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                     '</div>'
                 );
                 $wrapper.data('is-rendering', false);
+                var $parentCardFail = $wrapper.closest('.do-card');
+                if ($parentCardFail.length) {
+                    var anyDoneFail = $parentCardFail.find('.do-chant-card-wrapper').filter(function() {
+                        return $(this).data('do-rendered') === true && this !== $wrapper[0];
+                    }).length > 0;
+                    if (!anyDoneFail) {
+                        $parentCardFail.removeClass('has-gregorian-score');
+                        $parentCardFail.find('.do-card-body').removeClass('has-gregorian-score');
+                    }
+                }
                 return;
             }
 
@@ -9396,6 +9410,13 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                     $card.data('chant-gabc', processedGabc);
                     $wrapper.data('do-rendered', true);
                     $wrapper.data('is-rendering', false);
+
+                    var $parentCard = $wrapper.closest('.do-card');
+                    if ($parentCard.length) {
+                        $parentCard.addClass('has-gregorian-score');
+                        $parentCard.find('.do-card-body').addClass('has-gregorian-score');
+                    }
+
                     $card.trigger('chant:rendered', [score]);
                     $wrapper.trigger('chant:rendered', [score]);
                     if (typeof onComplete === 'function') onComplete(score);
@@ -9409,6 +9430,16 @@ function renderSingleChantScore($wrapper, force, onComplete) {
             console.warn('[DivinumOfficium] Exsurge error chant ID ' + chantId, e);
             $preview.removeClass('gregorian-skeleton').html('<div class="do-chant-error">Erreur de rendu Exsurge: ' + escHtml(e.message) + '</div>');
             $wrapper.data('is-rendering', false);
+            var $parentCardCatch = $wrapper.closest('.do-card');
+            if ($parentCardCatch.length) {
+                var anyDoneCatch = $parentCardCatch.find('.do-chant-card-wrapper').filter(function() {
+                    return $(this).data('do-rendered') === true && this !== $wrapper[0];
+                }).length > 0;
+                if (!anyDoneCatch) {
+                    $parentCardCatch.removeClass('has-gregorian-score');
+                    $parentCardCatch.find('.do-card-body').removeClass('has-gregorian-score');
+                }
+            }
             if (typeof onComplete === 'function') onComplete(null, e);
         }
     }
@@ -9566,6 +9597,8 @@ function renderAllChantScoresInDOM($root, force) {
 
     if (!doState.includeGregorian && doState.hora !== 'gregorian_chant') {
         $wrappers.hide();
+        $('.do-card.has-gregorian-score').removeClass('has-gregorian-score');
+        $('.do-card-body.has-gregorian-score').removeClass('has-gregorian-score');
         return;
     }
 
@@ -12273,10 +12306,6 @@ function displayResult(result, vernResult) {
         // If card has associated Gregorian chant(s)
         var chantList = (doState.includeGregorian && card.id && chantsMap[card.id]) ? chantsMap[card.id] : null;
         if (chantList && chantList.length) {
-            $cardNode.addClass('has-gregorian-score');
-            var $body = $cardNode.find('.do-card-body');
-            $body.addClass('has-gregorian-score');
-
             var wrappersHtml = '';
             chantList.forEach(function(ch) {
                 var isPt = !!ch.isPsalmToned;
@@ -12313,6 +12342,7 @@ function displayResult(result, vernResult) {
                 }
             });
 
+            var $body = $cardNode.find('.do-card-body');
             $body.prepend(wrappersHtml);
 
             chantList.forEach(function(ch) {
@@ -14517,6 +14547,29 @@ function renderHeaderDropdownItems() {
     var normalizedFilter = normalizeSearchStr(rawInput);
     var tokens = normalizedFilter.split(/\s+/).filter(Boolean);
 
+    // Wire the floating sticky group header to the scroll position of the list
+    var $floatHdr = $('#hddStickyGroupHeader');
+    $list.off('scroll.hddMonthSticky').on('scroll.hddMonthSticky', function() {
+        var scrollTop = this.scrollTop;
+        if (scrollTop <= 4) {
+            $floatHdr.css('opacity', '0');
+            return;
+        }
+        var activeTitle = '';
+        $(this).find('.hdd-group-title').each(function() {
+            if (this.offsetTop <= scrollTop + 2) {
+                activeTitle = $(this).text();
+            }
+        });
+        if (activeTitle) {
+            $floatHdr.text(activeTitle).css('opacity', '1');
+        } else {
+            $floatHdr.css('opacity', '0');
+        }
+    });
+    // Reset floating header on each re-render
+    $floatHdr.css('opacity', '0').text('');
+
     if (isBible) {
         var bibleMode = doState.hddBibleMode || 'vetus';
         var bookGroups = {};
@@ -14658,11 +14711,35 @@ function renderHeaderDropdownItems() {
                 });
             });
 
-            // Sort all items chronologically by date
+            // Sort chronologically — Temporale first within same date
             allItems.sort(function(a, b) {
                 var diff = a.itemDate.valueOf() - b.itemDate.valueOf();
                 if (diff !== 0) return diff;
                 return a.isTempora ? -1 : 1;
+            });
+
+            // Deduplicate: one prevailing feast per calendar date
+            // Rule: on Sundays → Temporale wins; on weekdays → Sanctoral wins over Temporale
+            var dateWinner = {}; // dateStr → winning entry
+            allItems.forEach(function(entry) {
+                var ds = entry.itemDate.format('YYYY-MM-DD');
+                if (!dateWinner[ds]) {
+                    dateWinner[ds] = entry;
+                } else {
+                    var existing = dateWinner[ds];
+                    var isSunday = entry.itemDate.day() === 0;
+                    if (!isSunday) {
+                        // Weekday: Sanctoral wins over Temporale
+                        if (!entry.isTempora && existing.isTempora) {
+                            dateWinner[ds] = entry;
+                        }
+                    }
+                    // Sunday: Temporale already placed first and wins (already stored)
+                }
+            });
+            allItems = allItems.filter(function(entry) {
+                var ds = entry.itemDate.format('YYYY-MM-DD');
+                return dateWinner[ds] === entry;
             });
 
             // Group chronologically by month
@@ -14735,8 +14812,17 @@ function renderHeaderDropdownItems() {
 
             rawList.forEach(function(rawEntry) {
                 var item = rawEntry.item ? rawEntry.item : rawEntry;
+                var entryIsTempora = (rawEntry.isTempora === true);
                 var itemDate = rawEntry.itemDate ? rawEntry.itemDate : getDateForLiturgicalKey(item.key, year);
-                var isSel = doState.officiumKey ? (item.key === doState.officiumKey) : (itemDate && itemDate.format('YYYY-MM-DD') === curDateStr && !item.key.match(/_[a-z0-9]+$/i));
+
+                // Selection: match officiumKey if set, otherwise match by current date
+                var isSel;
+                if (doState.officiumKey) {
+                    isSel = (item.key === doState.officiumKey);
+                } else {
+                    isSel = !!(itemDate && itemDate.format('YYYY-MM-DD') === curDateStr && !item.key.match(/_[a-z0-9]+$/i));
+                }
+
                 var dateBadge = itemDate ? formatBadgeDate(itemDate, uiLang) : '';
                 var dispTitle = getVernacularItemTitle(item, uiLang);
 
@@ -14748,10 +14834,19 @@ function renderHeaderDropdownItems() {
                         triggerHapticFeedback('selection');
                         if (itemDate && itemDate.isValid()) {
                             doState.date = itemDate;
-                            doState.officiumKey = null;
+                            // Sanctoral items in explicit sanctorum mode need officiumKey to load correctly
+                            if (!entryIsTempora && mode === 'sanctorum') {
+                                doState.officiumKey = item.key;
+                                localStorage.setItem('do_officiumKey', item.key);
+                            } else {
+                                doState.officiumKey = null;
+                                localStorage.removeItem('do_officiumKey');
+                            }
                             doState.userChangedHddMode = false;
-                            localStorage.removeItem('do_officiumKey');
                         }
+                        // Immediately show the vernacular title in the header (before async renderDO)
+                        $('#doHeaderTitle .title-text').text(dispTitle);
+                        if (typeof checkHeaderTitleMarquee === 'function') checkHeaderTitleMarquee();
                         closeHeaderDropdown();
                         if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
                         renderDO();
@@ -14764,11 +14859,226 @@ function renderHeaderDropdownItems() {
         if (!hasItems) {
             $list.html('<div style="text-align:center; padding:32px 16px; opacity:0.6; font-size:0.9rem; font-family:\'Inter\',sans-serif;">' + (uiLang === 'fr' ? 'Aucune fête trouvée pour votre recherche' : 'Nullum festum inventum') + '</div>');
         }
+
+        // Auto-scroll to selected item after each render
+        setTimeout(function() {
+            var $listEl = $('#hddItemsList');
+            var $sel = $listEl.find('.hdd-item-card.selected');
+            if ($sel.length && $listEl.length && $listEl[0]) {
+                $listEl[0].scrollTop = Math.max(0, $sel[0].offsetTop - 120);
+            }
+        }, 10);
     }
 }
 
 function getDefaultHddModeForDate(date) {
     return 'annus';
+}
+
+// ---- Unified Cross-Category Search for Header Dropdown ----
+function renderHddSearchResults(query) {
+    var $list = $('#hddItemsList').empty();
+    var uiLang = getUiLang();
+    var year = doState.date.year();
+    var hora = doState.hora || 'home';
+    var horaMap = DO_HORA_TITLES_BY_LANG[uiLang] || DO_HORA_TITLES_BY_LANG['fr'];
+
+    var normQuery = normalizeSearchStr(query);
+    var tokens = normQuery.split(/\s+/).filter(Boolean);
+    if (!tokens.length) { renderHeaderDropdownItems(); return; }
+
+    // ---- Collect liturgical matches (sanctoral + temporal) ----
+    var liturgyMatches = [];
+    var seenLiturgyKeys = {};
+
+    var allSundays = (typeof sundayKeys !== 'undefined' ? sundayKeys : (window.sundayKeys || []));
+    var allSaints  = (typeof saintKeys  !== 'undefined' ? saintKeys  : (window.saintKeys  || []));
+
+    allSundays.forEach(function(item) {
+        if (!item.key || seenLiturgyKeys[item.key]) return;
+        var titleLa = item.title || item.key;
+        var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+        var frAlias = getFrAliasesForKey(item.key);
+        var target = normalizeSearchStr(titleLa + ' ' + (item.en || '') + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+        if (tokens.every(function(t) { return target.indexOf(t) >= 0; })) {
+            var d = getDateForLiturgicalKey(item.key, year);
+            seenLiturgyKeys[item.key] = true;
+            liturgyMatches.push({ item: item, itemDate: d, isTempora: true,
+                title: getVernacularItemTitle(item, uiLang),
+                dateBadge: d ? formatBadgeDate(d, uiLang) : '' });
+        }
+    });
+
+    var seenSaintBase = {};
+    allSaints.forEach(function(item) {
+        if (!item.key) return;
+        var baseKey = item.key.replace(/_[a-z0-9]+$/i, '');
+        if (seenLiturgyKeys[item.key] || seenSaintBase[baseKey]) return;
+        seenLiturgyKeys[item.key] = true;
+        seenSaintBase[baseKey] = true;
+        var titleLa = item.title || item.key;
+        var titleFr = (typeof item.fr === 'string' ? item.fr : '');
+        var frAlias = getFrAliasesForKey(item.key);
+        var target = normalizeSearchStr(titleLa + ' ' + (item.en || '') + ' ' + titleFr + ' ' + item.key + ' ' + frAlias);
+        if (tokens.every(function(t) { return target.indexOf(t) >= 0; })) {
+            var d = getDateForLiturgicalKey(item.key, year);
+            liturgyMatches.push({ item: item, itemDate: d, isTempora: false,
+                title: getVernacularItemTitle(item, uiLang),
+                dateBadge: d ? formatBadgeDate(d, uiLang) : '' });
+        }
+    });
+
+    // Sort by date
+    liturgyMatches.sort(function(a, b) {
+        if (!a.itemDate) return 1;
+        if (!b.itemDate) return -1;
+        return a.itemDate.valueOf() - b.itemDate.valueOf();
+    });
+
+    // ---- Collect Bible matches ----
+    var bibleMatches = [];
+    if (typeof DO_BIBLE_BOOKS !== 'undefined' && Array.isArray(DO_BIBLE_BOOKS)) {
+        DO_BIBLE_BOOKS.forEach(function(b) {
+            var nameFr = b.fr || b.la || b.id;
+            var nameLa = b.la || b.id;
+            var target = normalizeSearchStr(nameFr + ' ' + nameLa + ' ' + b.id + ' ' + (b.cat || ''));
+            if (tokens.every(function(t) { return target.indexOf(t) >= 0; })) {
+                bibleMatches.push({ id: b.id, title: (uiLang === 'fr' ? nameFr : nameLa), cat: b.cat || 'Sacra Biblia' });
+            }
+        });
+    }
+
+    var hasAny = liturgyMatches.length || bibleMatches.length;
+    if (!hasAny) {
+        var noRes = uiLang === 'fr' ? 'Aucun résultat' : (uiLang === 'en' ? 'No results' : 'Nihil inventum');
+        $list.html('<div style="text-align:center;padding:32px 16px;opacity:0.55;font-size:0.88rem;font-family:\'Inter\',sans-serif;">' + noRes + '</div>');
+        return;
+    }
+
+    // ---- Determine section order based on current hora ----
+    var isMissaHora = (hora === 'missa' || hora === 'missa_gregorian' || hora === 'home');
+    var isOfficeHora = !isMissaHora && hora !== 'bible';
+
+    var massLabel   = horaMap.missa || 'Sainte Messe';
+    var officeLabel = isOfficeHora ? (horaMap[hora] || 'Office') : (horaMap.matutinum || 'Matines');
+
+    // Helper: render a section of liturgy items targeting a specific hora
+    function renderLiturgySection(label, targetHora, items, maxItems) {
+        if (!items.length) return;
+        var $grp = $('<div class="hdd-group-title hdd-search-section-title">').text(label);
+        $list.append($grp);
+
+        var shown = items.slice(0, maxItems || 6);
+        shown.forEach(function(m) {
+            var $card = $('<button class="hdd-item-card">')
+                .append('<span class="hdd-item-title">' + escHtml(m.title) + '</span>')
+                .append('<span class="hdd-item-date">' + escHtml(m.dateBadge) + '</span>')
+                .on('click', function(e) {
+                    e.stopPropagation();
+                    triggerHapticFeedback('selection');
+                    if (m.itemDate && m.itemDate.isValid()) {
+                        doState.date = m.itemDate;
+                    }
+                    if (!m.isTempora) {
+                        doState.officiumKey = m.item.key;
+                        localStorage.setItem('do_officiumKey', m.item.key);
+                    } else {
+                        doState.officiumKey = null;
+                        localStorage.removeItem('do_officiumKey');
+                    }
+                    doState.hora = targetHora;
+                    localStorage.setItem('do_hora', targetHora);
+                    doState.userChangedHddMode = false;
+                    $('#doHeaderTitle .title-text').text(m.title);
+                    if (typeof checkHeaderTitleMarquee === 'function') checkHeaderTitleMarquee();
+                    closeHeaderDropdown();
+                    if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
+                    renderDO();
+                });
+            $list.append($card);
+        });
+    }
+
+    // Render sections in priority order
+    var officeTargetHora = isOfficeHora ? hora : 'matutinum';
+
+    if (isMissaHora) {
+        // Messe first, then Office
+        renderLiturgySection(massLabel,   'missa',          liturgyMatches, 6);
+        renderLiturgySection(officeLabel, officeTargetHora, liturgyMatches, 4);
+    } else {
+        // Current Office hora first, then Messe
+        renderLiturgySection(officeLabel, officeTargetHora, liturgyMatches, 6);
+        renderLiturgySection(massLabel,   'missa',          liturgyMatches, 4);
+    }
+
+    // Bible section always last
+    if (bibleMatches.length) {
+        var bibleLabel = horaMap.bible || (uiLang === 'fr' ? 'Sainte Bible' : 'Sacra Biblia');
+        $list.append($('<div class="hdd-group-title hdd-search-section-title">').text(bibleLabel));
+        bibleMatches.slice(0, 4).forEach(function(b) {
+            var $card = $('<button class="hdd-item-card">')
+                .append('<span class="hdd-item-title">' + escHtml(b.title) + '</span>')
+                .append('<span class="hdd-item-date">' + escHtml(b.cat) + '</span>')
+                .on('click', function(e) {
+                    e.stopPropagation();
+                    triggerHapticFeedback('selection');
+                    closeHeaderDropdown();
+                    openBible(b.id, 1, 1);
+                });
+            $list.append($card);
+        });
+    }
+}
+
+var _hddSavedScrollY = 0;
+var _hddTouchStartY = 0;
+
+function _hddBlockWindowScroll(e) {
+    var $dd = $('#headerDropdown');
+    if ($dd.hasClass('hidden')) return;
+
+    var listEl = document.getElementById('hddItemsList');
+    var calEl = document.getElementById('hddCustomCalendar');
+    var isInsideList = listEl && (listEl.contains(e.target) || e.target === listEl);
+    var isInsideCal = calEl && (calEl.contains(e.target) || e.target === calEl);
+    var scrollTarget = isInsideList ? listEl : (isInsideCal ? calEl : null);
+
+    if (e.type === 'wheel') {
+        if (scrollTarget) {
+            var delta = e.deltaY;
+            var scrollingUp = delta < 0;
+            var scrollingDown = delta > 0;
+            var atTop = scrollTarget.scrollTop <= 0;
+            var atBottom = scrollTarget.scrollTop + scrollTarget.clientHeight >= scrollTarget.scrollHeight - 1;
+            if ((scrollingUp && atTop) || (scrollingDown && atBottom)) {
+                e.preventDefault();
+            }
+            return;
+        }
+        // Wheel outside the scrollable item list / calendar (e.g. over header, dock, background)
+        e.preventDefault();
+    } else if (e.type === 'touchstart') {
+        if (e.touches && e.touches.length) {
+            _hddTouchStartY = e.touches[0].clientY;
+        }
+    } else if (e.type === 'touchmove') {
+        if (!scrollTarget) {
+            e.preventDefault();
+            return;
+        }
+        if (e.touches && e.touches.length) {
+            var currentY = e.touches[0].clientY;
+            var deltaY = currentY - _hddTouchStartY;
+            var touchScrollingDown = deltaY < 0;
+            var touchScrollingUp = deltaY > 0;
+            var atTopTouch = scrollTarget.scrollTop <= 0;
+            var atBottomTouch = scrollTarget.scrollTop + scrollTarget.clientHeight >= scrollTarget.scrollHeight - 1;
+            if ((touchScrollingUp && atTopTouch) || (touchScrollingDown && atBottomTouch)) {
+                e.preventDefault();
+            }
+        }
+    }
 }
 
 function updateHeaderDropdownPosition() {
@@ -14777,10 +15087,12 @@ function updateHeaderDropdownPosition() {
     var headerEl = document.querySelector('.do-top-header');
     if (headerEl) {
         var headerBottom = headerEl.getBoundingClientRect().bottom;
+        var hBot = Math.max(0, Math.round(headerBottom));
         $dd.css({
-            'top': Math.round(headerBottom) + 'px',
-            'max-height': 'calc(100dvh - ' + Math.round(headerBottom) + 'px)',
-            'height': 'calc(100dvh - ' + Math.round(headerBottom) + 'px)'
+            'top': '0px',
+            'height': '100dvh',
+            'max-height': '100dvh',
+            'padding-top': hBot + 'px'
         });
     }
 }
@@ -14789,7 +15101,14 @@ function openHeaderDropdown() {
     if (typeof closeMassTocPanel === 'function') {
         closeMassTocPanel();
     }
-    $('body').addClass('header-dropdown-open');
+    _hddSavedScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    $('body, html').addClass('header-dropdown-open');
+    // Do NOT set overflow:hidden on body/html — that breaks position:sticky on sidebar and header
+
+    window.addEventListener('wheel', _hddBlockWindowScroll, { passive: false });
+    window.addEventListener('touchstart', _hddBlockWindowScroll, { passive: true });
+    window.addEventListener('touchmove', _hddBlockWindowScroll, { passive: false });
+
     if (!doState.userChangedHddMode) {
         doState.hddMode = getDefaultHddModeForDate(doState.date);
     }
@@ -14808,13 +15127,26 @@ function openHeaderDropdown() {
 }
 
 function closeHeaderDropdown() {
-    $('body').removeClass('header-dropdown-open');
+    window.removeEventListener('wheel', _hddBlockWindowScroll, { passive: false });
+    window.removeEventListener('touchstart', _hddBlockWindowScroll, { passive: true });
+    window.removeEventListener('touchmove', _hddBlockWindowScroll, { passive: false });
+
+    $('body, html').removeClass('header-dropdown-open');
+    window.scrollTo(0, _hddSavedScrollY);
+
     $('#headerDropdown').addClass('hidden');
     $('#doHeaderTitle .dropdown-icon').css('transform', 'rotate(0deg)');
 }
 
 window.addEventListener('resize', updateHeaderDropdownPosition);
-window.addEventListener('scroll', updateHeaderDropdownPosition, { passive: true });
+window.addEventListener('scroll', function() {
+    if (!$('#headerDropdown').hasClass('hidden')) {
+        if (typeof _hddSavedScrollY === 'number' && (window.pageYOffset || document.documentElement.scrollTop) !== _hddSavedScrollY) {
+            window.scrollTo(0, _hddSavedScrollY);
+        }
+    }
+    updateHeaderDropdownPosition();
+}, { passive: true });
 
 // ---- Theme & Color Management ----
 function initTheme() {
@@ -17030,9 +17362,20 @@ function setupEventListeners() {
         }
     });
 
-    // Prevent clicks inside the dropdown from closing it
+    // Clicks on backdrop outside items/dock close dropdown; clicks inside are stopped
     $(document).on('click', '#headerDropdown', function(e) {
+        if (e.target === this) {
+            closeHeaderDropdown();
+            return;
+        }
         e.stopPropagation();
+    });
+
+    // Close header dropdown on Escape key
+    $(document).on('keydown.hddEsc', function(e) {
+        if ((e.key === 'Escape' || e.keyCode === 27) && !$('#headerDropdown').hasClass('hidden')) {
+            closeHeaderDropdown();
+        }
     });
 
     // Mode Toggle (Temporale vs Sanctorale OR Vetus vs Novum Testamentum)
@@ -17130,9 +17473,15 @@ function setupEventListeners() {
         renderDO();
     });
 
-    // Filter search
+    // Unified search: when query is non-empty, show cross-category grouped results
+    // When query is cleared, return to the calendar list view
     $(document).on('input', '#hddSearchInput', function() {
-        renderHeaderDropdownItems();
+        var q = $(this).val() || '';
+        if (q.trim().length > 0) {
+            renderHddSearchResults(q);
+        } else {
+            renderHeaderDropdownItems();
+        }
     });
 
     $(document).on('click', '#btnOpenSidebarMobile', function(e) {
@@ -17949,11 +18298,31 @@ function setupEventListeners() {
         var $modal = $('#alignmentLabModal');
         var $iframe = $('#alignmentLabIframe');
         if ($modal.length && $iframe.length) {
+            // ── Reset sidebar scroll so logo/search are always visible ──
+            var $sidebarNav = $('#doSidebar .do-sidebar-nav');
+            if ($sidebarNav.length) $sidebarNav.scrollTop(0);
+
+            // ── On mobile: close the sidebar drawer before opening the modal ──
+            if (window.innerWidth < 900) {
+                var $sb = $('#doSidebar');
+                $sb.removeClass('open active anim-overshoot').css('transform', '');
+                $('#sidebarBackdrop').removeClass('open active').css({ 'opacity': '', 'display': '' });
+                $('body').removeClass('sidebar-open is-dragging-sidebar');
+                document.body.style.overflow = '';
+            }
+
             if ($iframe.attr('src') === 'about:blank' || !$iframe.attr('src')) {
                 $iframe.attr('src', 'pipeline/alignment-lab.html');
             }
             $modal.fadeIn(150);
-            $('body').css('overflow', 'hidden');
+            $('#btnAlignmentLabSidebar').addClass('is-active active');
+            $('.do-nav-item').removeClass('is-active active');
+
+            // ── Lock scroll on the parent page to prevent sidebar from scrolling ──
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+
             setTimeout(function() {
                 try {
                     if ($iframe[0] && $iframe[0].contentWindow) {
@@ -17979,7 +18348,11 @@ function setupEventListeners() {
         var $modal = $('#alignmentLabModal');
         if ($modal.is(':visible')) {
             $modal.fadeOut(150);
-            $('body').css('overflow', '');
+            // ── Restore scroll ──
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            $('#btnAlignmentLabSidebar').removeClass('is-active active');
+            $('.do-nav-item[data-hora="' + (doState && doState.hora ? doState.hora : 'missa') + '"]').addClass('active');
             if (popHistory !== false && window.location.hash === '#align') {
                 try {
                     history.back();
@@ -17992,6 +18365,7 @@ function setupEventListeners() {
 
     $(document).on('click', '#btnAlignmentLabSidebar, #btnAlignmentLabSettings', function(e) {
         e.preventDefault();
+        closeModals();
         openAlignmentLab(true);
     });
 

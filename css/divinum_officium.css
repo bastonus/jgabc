@@ -93,10 +93,26 @@
     -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
 }
 
-[data-theme="dark"] .do-header-dropdown,
+body.header-dropdown-open .do-top-header {
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    z-index: 1025 !important;
+}
+
+[data-theme="dark"] body.header-dropdown-open .do-top-header,
+[data-theme="oled"] body.header-dropdown-open .do-top-header {
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 [data-theme="dark"] .settings-panel,
 [data-theme="dark"] .modern-player-bar,
-[data-theme="oled"] .do-header-dropdown,
 [data-theme="oled"] .settings-panel,
 [data-theme="oled"] .modern-player-bar {
     background-color: rgba(0, 0, 0, 0.92) !important;
@@ -567,6 +583,18 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
     background: rgba(var(--primary-color-rgb), 0.14) !important;
     color: var(--primary-color) !important;
     transform: none !important;
+}
+
+.do-footer-btn.is-active,
+.do-footer-btn.active {
+    background: rgba(var(--primary-color-rgb), 0.15) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+.do-footer-btn.is-active svg,
+.do-footer-btn.active svg {
+    stroke: var(--primary-color) !important;
 }
 
 /* =============================================================
@@ -2822,13 +2850,15 @@ body.is-bible-mode .modern-player-bar {
    ============================================================= */
 .do-header-dropdown {
     position: fixed !important;
-    top: 64px;
+    top: 0 !important;
     left: 280px !important;
     right: 0 !important;
     bottom: 0 !important;
-    height: auto;
-    max-height: calc(100vh - 64px);
-    max-height: calc(100dvh - 64px);
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    box-sizing: border-box !important;
     background-color: color-mix(in srgb, var(--background-base) 80%, transparent) !important;
     background-image: var(--noise-overlay) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
@@ -2838,18 +2868,23 @@ body.is-bible-mode .modern-player-bar {
     z-index: 1020 !important;
     display: flex !important;
     flex-direction: column !important;
+    align-items: center !important;
     overflow: hidden !important;
-    animation: dropdownReveal 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overscroll-behavior: contain !important;
+    touch-action: none !important;
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 @media (max-width: 900px) {
     .do-header-dropdown {
         left: 0 !important;
         right: 0 !important;
-        top: calc(58px + env(safe-area-inset-top, 0px));
+        top: 0 !important;
         bottom: 0 !important;
-        max-height: calc(100vh - (58px + env(safe-area-inset-top, 0px)));
-        max-height: calc(100dvh - (58px + env(safe-area-inset-top, 0px)));
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
         padding-bottom: 0 !important;
         z-index: 1020 !important;
     }
@@ -2864,10 +2899,17 @@ body.header-dropdown-open .do-mass-toc-backdrop {
     visibility: hidden !important;
 }
 
+/* Interdire tout défilement à travers le menu lorsqu'il est déroulé
+   (Le verrouillage est assuré par interception événementielle non-passive sans altérer le contexte sticky) */
+body.header-dropdown-open {
+    overscroll-behavior: none !important;
+}
+
 .do-header-dropdown.hidden {
     display: none !important;
 }
 
+[data-theme="dark"] .do-header-dropdown,
 [data-theme="oled"] .do-header-dropdown {
     background-color: rgba(0, 0, 0, 0.78) !important;
     background-image: var(--noise-overlay) !important;
@@ -2875,33 +2917,59 @@ body.header-dropdown-open .do-mass-toc-backdrop {
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
 }
 
-@keyframes dropdownReveal {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes dropdownFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
-/* Items list on top taking all remaining vertical height */
+/* Items list on top taking all remaining vertical height - centered with header on desktop */
 .hdd-items-list {
     overflow-y: auto;
     flex: 1;
-    padding: 0 24px 16px;
-    max-width: 900px;
+    min-height: 0;
+    padding: 10px 20px 16px;
+    max-width: 760px;
     width: 100%;
-    margin: 0;
+    margin: 0 auto;
     box-sizing: border-box;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
 }
 
-/* Seamless Floating Bottom Control Dock */
+[data-theme="light"] .hdd-items-list {
+    scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+
+.hdd-items-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.hdd-items-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hdd-items-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+}
+
+[data-theme="light"] .hdd-items-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.18);
+}
+
+/* Seamless Floating Bottom Control Dock - centered with header on desktop */
 .hdd-bottom-controls,
 .hdd-header-controls {
     flex-shrink: 0;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 8px 24px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
-    max-width: 900px;
+    padding: 10px 20px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    max-width: 760px;
     width: 100%;
-    margin: 0;
+    margin: 0 auto;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -2911,11 +2979,13 @@ body.header-dropdown-open .do-mass-toc-backdrop {
 
 @media (max-width: 900px) {
     .hdd-items-list {
-        padding: 0 14px 12px !important;
+        padding: 8px 16px 12px !important;
+        max-width: 100% !important;
     }
     .hdd-bottom-controls,
     .hdd-header-controls {
-        padding: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 8px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        max-width: 100% !important;
     }
 }
 
@@ -3188,25 +3258,36 @@ body.header-dropdown-open .do-mass-toc-backdrop {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .hdd-search-icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     color: var(--text-secondary);
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.hdd-search-bar:focus-within .hdd-search-icon {
+    color: var(--primary-color);
 }
 
 .hdd-search-input {
     width: 100%;
-    background: color-mix(in srgb, var(--background-highlight) 60%, transparent);
+    height: 40px;
+    background: var(--background-highlight);
     color: var(--text-primary);
     border: none !important;
-    border-radius: 10px;
-    padding: 8px 12px 8px 36px;
-    font-size: 0.84rem;
-    font-family: 'Inter', sans-serif;
+    border-radius: 12px;
+    padding: 0 14px 0 40px;
+    font-size: 0.88rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     outline: none;
+    box-sizing: border-box;
     transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
@@ -3215,30 +3296,61 @@ body.header-dropdown-open .do-mass-toc-backdrop {
     box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.22);
 }
 
+/* Floating transparent sticky month label (above #hddItemsList, JS-driven via scroll events).
+   Fully transparent — items clip naturally at the list overflow boundary, no background surface. */
+#hddStickyGroupHeader,
+.hdd-sticky-group-header {
+    flex-shrink: 0;
+    display: block;
+    padding: 6px 20px 2px;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--primary-color);
+    background: transparent !important;
+    pointer-events: none;
+    min-height: 26px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+/* Inline group title markers inside the scroll list: static + transparent.
+   They scroll away normally; items clip at the list overflow boundary. */
 .hdd-group-title {
-    padding: 6px 10px 4px !important;
+    position: static !important;
+    display: block;
+    padding: 14px 12px 4px !important;
     font-family: 'Inter', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--primary-color) !important;
-    position: sticky !important;
-    top: 0 !important;
-    background-color: color-mix(in srgb, var(--background-base) 80%, transparent) !important;
-    background-image: var(--noise-overlay) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    z-index: 10 !important;
+    background: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: 0 !important;
+    z-index: auto !important;
     margin: 0 !important;
+    opacity: 0.75;
 }
 
-.hdd-group-title:not(:first-child) {
-    margin-top: 8px !important;
+.hdd-group-title:first-child {
+    padding-top: 4px !important;
 }
 
-[data-theme="oled"] .hdd-group-title {
-    background-color: rgba(0, 0, 0, 0.78) !important;
+/* Search section titles: accent left-border to distinguish from month markers */
+.hdd-search-section-title {
+    border-left: 2px solid var(--primary-color) !important;
+    padding-left: 10px !important;
+    opacity: 0.9;
 }
 
 .hdd-item-card {
@@ -3246,24 +3358,26 @@ body.header-dropdown-open .do-mass-toc-backdrop {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 9px 12px;
-    border-radius: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
     width: 100%;
+    box-sizing: border-box;
     text-align: left;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .hdd-item-card:hover {
-    background: rgba(var(--primary-color-rgb), 0.08) !important;
+    background: rgba(var(--primary-color-rgb), 0.09) !important;
+    transform: translateX(2px);
 }
 
 .hdd-item-card.selected {
-    background: rgba(var(--primary-color-rgb), 0.14) !important;
+    background: rgba(var(--primary-color-rgb), 0.15) !important;
     color: var(--primary-color) !important;
 }
 
@@ -3816,16 +3930,56 @@ body.is-missa-mode .do-top-header.is-scrolled {
     -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
 }
 
-/* Surtitre (heure / date) de la couleur du titre UNIQUEMENT quand le header est transparent en position haute avec une image */
-body:has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
-body:has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
-body.has-hero-image .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
-body.has-hero-image .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
-.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
-.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
-body:has(.do-home-saint-hero:not(.do-hero-no-image)):not(.is-header-scrolled) .header-title-area #doHourLabel:not(.is-header-loading),
-body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not(.is-header-loading) {
+[data-theme="dark"] body.is-home-mode .do-top-header.is-scrolled,
+[data-theme="oled"] body.is-home-mode .do-top-header.is-scrolled,
+[data-theme="dark"] body.is-missa-mode .do-top-header.is-scrolled,
+[data-theme="oled"] body.is-missa-mode .do-top-header.is-scrolled {
+    background-color: rgba(0, 0, 0, 0.72) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+}
+
+/* Header dropdown open: header is completely transparent so #headerDropdown's single blurred glass shows behind it */
+body.header-dropdown-open .do-top-header,
+body.header-dropdown-open.is-home-mode .do-top-header,
+body.header-dropdown-open.is-missa-mode .do-top-header {
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    z-index: 1025 !important;
+}
+
+[data-theme="dark"] body.header-dropdown-open .do-top-header,
+[data-theme="oled"] body.header-dropdown-open .do-top-header,
+[data-theme="dark"] body.header-dropdown-open.is-home-mode .do-top-header,
+[data-theme="oled"] body.header-dropdown-open.is-home-mode .do-top-header,
+[data-theme="dark"] body.header-dropdown-open.is-missa-mode .do-top-header,
+[data-theme="oled"] body.header-dropdown-open.is-missa-mode .do-top-header {
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Surtitre (heure / date) de la couleur du titre UNIQUEMENT quand le header est transparent en position haute avec une image (menu fermé) */
+body:not(.header-dropdown-open):has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
+body:not(.header-dropdown-open):has(.do-home-saint-hero:not(.do-hero-no-image)) .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
+body.has-hero-image:not(.header-dropdown-open) .do-top-header:not(.is-scrolled):not(.is-header-loading) #doHourLabel,
+body.has-hero-image:not(.header-dropdown-open) .do-top-header:not(.is-scrolled):not(.is-header-loading) .header-title-area .card-type,
+.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading):not(.is-dropdown-open) #doHourLabel,
+.do-top-header.has-hero-image:not(.is-scrolled):not(.is-header-loading):not(.is-dropdown-open) .header-title-area .card-type,
+body:has(.do-home-saint-hero:not(.do-hero-no-image)):not(.is-header-scrolled):not(.header-dropdown-open) .header-title-area #doHourLabel:not(.is-header-loading),
+body.has-hero-image:not(.is-header-scrolled):not(.header-dropdown-open) .header-title-area #doHourLabel:not(.is-header-loading) {
     color: var(--text-primary) !important;
+}
+
+body.header-dropdown-open .header-title-area #doHourLabel,
+body.header-dropdown-open .do-top-header #doHourLabel {
+    color: var(--primary-color) !important;
 }
 
 
@@ -4526,36 +4680,10 @@ body.has-hero-image:not(.is-header-scrolled) .header-title-area #doHourLabel:not
 
 /* Gregorian Chant Text Deduplication:
    When a Gregorian chant score is rendered for a card, the Latin text
-   is already displayed note-for-note under the neumes. Do not duplicate it. */
-.do-card.has-gregorian-score .do-card-text-lines.is-latin-only {
+   and lyrics are already displayed note-for-note under the neumes.
+   Hide the duplicate text lines cleanly without altering typography colors. */
+.do-card.has-gregorian-score .do-card-text-lines {
     display: none !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-la {
-    display: none !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row {
-    width: 100% !important;
-    transform: none !important;
-    display: block !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row > .do-col-vernacular {
-    flex: 1 1 100% !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    transform: none !important;
-    font-style: italic;
-    color: var(--do-text-secondary, #666);
-    line-height: 1.6;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-wrapper {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--do-border-subtle, rgba(0, 0, 0, 0.12));
 }
 
 .do-chant-card {
@@ -7822,98 +7950,101 @@ body.mass-toc-open #modernPlayerBar {
 }
 
 /* =============================================================
-   DESKTOP TABLE OF CONTENTS (Exact Same Mobile Design, Positioned on the Left)
+   DESKTOP TABLE OF CONTENTS (Floating overlay, right-aligned, collapsed by default)
    ============================================================= */
 @media (min-width: 901px) {
-    /* Hide floating pill and backdrop on desktop */
+    /* On desktop: pill and backdrop behave the same as mobile (fixed, visible) */
     #doMassTocPill,
-    .do-mass-toc-pill,
+    .do-mass-toc-pill {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
     #doMassTocBackdrop,
     .do-mass-toc-backdrop {
-        display: none !important;
-        pointer-events: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+        display: block !important;
+        visibility: visible !important;
     }
 
     body.mass-toc-open #do-content-stream {
         pointer-events: auto !important;
     }
 
-    /* Main layout flex container */
+    /* No sidebar layout: app-main is unchanged (block, not flex) */
     .app-main {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-        position: relative !important;
-        width: 100% !important;
-        min-height: calc(100vh - var(--do-header-offset, 58px)) !important;
+        display: block !important;
     }
 
-    /* Sticky Left Panel (Identical transparent, borderless mobile design) */
+    /* TOC panel: fixed overlay to the right of the viewport, does NOT push content */
     #doMassTocPanel {
-        position: sticky !important;
-        top: calc(var(--do-header-offset, 58px) + 16px) !important;
-        bottom: auto !important;
+        position: fixed !important;
+        top: auto !important;
+        bottom: calc(max(20px, calc(var(--toc-margin, 16px) + env(safe-area-inset-bottom, 0px))) + var(--toc-pill-height, 40px) + 10px) !important;
+        right: var(--toc-margin, 16px) !important;
         left: auto !important;
-        right: auto !important;
-        width: 250px !important;
-        min-width: 210px !important;
-        max-width: 260px !important;
+        width: 280px !important;
+        min-width: unset !important;
+        max-width: calc(100vw - 32px) !important;
         height: auto !important;
-        max-height: calc(100vh - var(--do-header-offset, 58px) - 32px) !important;
-        margin: 0 0 0 16px !important;
-        padding: 6px 0 !important;
+        max-height: min(480px, calc(100vh - 200px)) !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        z-index: 90 !important;
-        transform: none !important;
+        z-index: 970 !important;
+        transform-origin: bottom right !important;
+        transform: translateY(0) scale(1) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
         box-sizing: border-box !important;
-        flex-shrink: 0 !important;
-        transition: opacity 0.2s ease !important;
+        flex-shrink: unset !important;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.25s ease,
+                    bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
-    body.player-dock-open #doMassTocPanel {
-        max-height: calc(100vh - var(--do-header-offset, 58px) - var(--player-bar-offset, 146px) - 24px) !important;
+    body.player-dock-open #doMassTocPanel,
+    .has-player-open #doMassTocPanel {
+        bottom: calc(var(--player-bar-offset, 146px) + var(--toc-margin, 16px) + var(--toc-pill-height, 40px) + 10px) !important;
     }
 
+    /* Hidden state: same animation as mobile */
     #doMassTocPanel.hidden {
-        display: none !important;
+        display: flex !important;
+        transform: translateY(16px) scale(0.92) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 
-    /* Left-align body and items on desktop */
+    /* Keep items right-aligned (same as mobile) */
     .do-mass-toc-body {
-        align-items: flex-start !important;
-        padding: 6px 12px 6px 4px !important;
+        align-items: flex-end !important;
+        padding: 10px 4px 10px 12px !important;
         gap: 6px !important;
     }
 
     .do-mass-toc-group {
-        align-items: flex-start !important;
+        align-items: flex-end !important;
         gap: 6px !important;
     }
 
     .do-mass-toc-item {
-        justify-content: flex-start !important;
-        text-align: left !important;
+        justify-content: flex-end !important;
+        text-align: right !important;
     }
 
     .do-mass-toc-footer {
-        justify-content: flex-start !important;
-        padding: 6px 4px 2px 4px !important;
+        justify-content: flex-end !important;
+        padding: 6px 4px 2px !important;
     }
 
-    /* Content Area centered beside TOC */
+    /* Content area: no change, centered as usual */
     .content-area {
-        flex: 1 1 auto !important;
         max-width: 760px !important;
         margin: 0 auto !important;
-        padding-left: 20px !important;
-        padding-right: 20px !important;
     }
 }
 
@@ -8602,34 +8733,20 @@ body.is-dragging-picker #massPartPickerDrawer {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: max-content !important;
-    gap: 12px;
+    gap: 10px;
 }
 
 @media (min-width: 600px) {
     .do-part-picker-drawer .gregorian-results.is-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
     }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 901px) {
     .do-part-picker-drawer .gregorian-results.is-grid {
-        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-        gap: 16px;
-    }
-}
-
-@media (min-width: 1280px) {
-    .do-part-picker-drawer .gregorian-results.is-grid {
-        grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-        gap: 16px;
-    }
-}
-
-@media (min-width: 1600px) {
-    .do-part-picker-drawer .gregorian-results.is-grid {
-        grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
-        gap: 18px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
     }
 }
 
@@ -8637,8 +8754,8 @@ body.is-dragging-picker #massPartPickerDrawer {
     background: var(--background-surface, #141416) !important;
     border: none !important;
     box-shadow: none !important;
-    border-radius: 14px !important;
-    padding: 14px 16px;
+    border-radius: 12px !important;
+    padding: 12px 13px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -8970,4 +9087,45 @@ body.is-dragging-picker #massPartPickerDrawer {
     padding-left: env(safe-area-inset-left, 0px) !important;
     padding-right: env(safe-area-inset-right, 0px) !important;
     box-sizing: border-box !important;
+}
+
+/* Alignment Lab Modal — base (mobile-first) */
+#alignmentLabModal {
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 1200 !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    padding-left: env(safe-area-inset-left, 0px) !important;
+    padding-right: env(safe-area-inset-right, 0px) !important;
+}
+
+/* Desktop: dock modal to the right of the permanent 280px sidebar.
+   z-index must be > do-top-header (965) so the modal covers the main header
+   in its zone and the iframe's own header is the sole visible header. */
+@media (min-width: 900px) {
+    #alignmentLabModal {
+        left: 280px !important;
+        width: calc(100% - 280px) !important;
+        z-index: 1200 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+/* Sidebar nav scrollbar — hide track but keep scrollability */
+.do-sidebar-nav::-webkit-scrollbar {
+    width: 3px;
+}
+.do-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+.do-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+}
+[data-theme="light"] .do-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.10);
 }

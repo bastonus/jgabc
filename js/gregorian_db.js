@@ -325,6 +325,16 @@
                     } catch (ce) {}
                 }
                 window.GABC_LOCAL_CACHE = {};
+                // Ré-injecter les pièces communes indispensables de l'Office
+                if (window.HORAS_COMMON_CHANTS) {
+                    Object.keys(window.HORAS_COMMON_CHANTS).forEach(function(k) {
+                        var e = window.HORAS_COMMON_CHANTS[k];
+                        window.GABC_LOCAL_CACHE[k] = (typeof e === 'string') ? e : (e.gabc || '');
+                    });
+                }
+                if (window.HORAS_COMPLINE_CHANTS) {
+                    Object.assign(window.GABC_LOCAL_CACHE, window.HORAS_COMPLINE_CHANTS);
+                }
             }
         },
 
@@ -332,10 +342,12 @@
          * Récupère le code GABC d'un chant par son ID ou chemin
          * Cascade de résolution :
          * 1. Cache mémoire immédiat (window.GABC_LOCAL_CACHE)
+         * 1b. Pièces communes de l'Office (HORAS_COMMON_CHANTS & HORAS_COMPLINE_CHANTS)
+         * 1c. Gabarits fondamentaux intégrés (Incipit, dialogues, versets)
          * 2. IndexedDB local (si pack installé ou pièce déjà mise en cache)
          * 3. CacheStorage persistant (oremus-gabc-cache)
          * 4. Fichier local (gabc/, gregobase/, do_data/)
-         * 5. En ligne à la volée via GitHub Usercontent (raw.githubusercontent.com)
+         * 5. En ligne via CDN jsDelivr mondial, GitHub Raw, et API GregoBase
          * 6. Auto-caching dynamique dans IndexedDB & CacheStorage
          */
         getGabc: async function(chantId) {
@@ -346,6 +358,41 @@
             // 1. Cache mémoire immédiat
             if (window.GABC_LOCAL_CACHE && window.GABC_LOCAL_CACHE[strId]) {
                 return window.GABC_LOCAL_CACHE[strId];
+            }
+
+            // 1b. Pièces communes de l'Office (dialogues, versets, hymnes usuelles)
+            if (window.HORAS_COMMON_CHANTS && window.HORAS_COMMON_CHANTS[strId]) {
+                var cEntry = window.HORAS_COMMON_CHANTS[strId];
+                var cGabc = (typeof cEntry === 'string') ? cEntry : (cEntry.gabc || null);
+                if (cGabc && isValidGabcText(cGabc)) {
+                    if (!window.GABC_LOCAL_CACHE) window.GABC_LOCAL_CACHE = {};
+                    window.GABC_LOCAL_CACHE[strId] = cGabc;
+                    return cGabc;
+                }
+            }
+            if (window.HORAS_COMPLINE_CHANTS && window.HORAS_COMPLINE_CHANTS[strId]) {
+                var compEntry = window.HORAS_COMPLINE_CHANTS[strId];
+                var compGabc = (typeof compEntry === 'string') ? compEntry : (compEntry.gabc || null);
+                if (compGabc && isValidGabcText(compGabc)) {
+                    if (!window.GABC_LOCAL_CACHE) window.GABC_LOCAL_CACHE = {};
+                    window.GABC_LOCAL_CACHE[strId] = compGabc;
+                    return compGabc;
+                }
+            }
+
+            // 1c. Table interne de secours inviolable pour les pièces d'ouverture et dialogues
+            var CORE_OFFICE_FALLBACKS = {
+                "deus_in_adjutorium_festal": "(c3) DE(h)us(h'_) (,) in(h) ad(h)ju(h)tó(i)ri(h)um(h) me(h)um(h'_) in(h)tén(g)de.(h.) (::) <sp>R/</sp>. Dó(h)mi(h)ne(h'_) (,) ad(h) ad(h)ju(h)ván(h)dum(h) me(h'_) fe(h)stí(g)na.(h.) (:) Gló(h)ri(h)a(h) Pa(h)tri,(h) et(h) Fí(h)li(h)o,(h'_) (,) et(h) Spi(h)rí(h)tu(h)i(h) San(g)cto.(h.) (:) Sic(h)ut(h) e(h)rat(h) in(h) prin(h)cí(h)pi(h)o,(h) et(h) nunc,(h) et(h) sem(h)per,(h.) (,) et(h) in(h) sǽ(h)cu(h)la(h) sæ(h)cu(h)ló(h)rum.(h) A(g)men.(h.) (;) Al(h)le(i)lú(hg~)ia.(g.) (::)",
+                "deus_in_adjutorium_ferial": "(c3) DE(h)us(h) (,) in(h) ad(h)ju(h)tó(h)ri(h)um(h) me(h)um(h) in(h)tén(h)de.(h.) (::) <sp>R/</sp>. Dó(h)mi(h)ne(h) (,) ad(h) ad(h)ju(h)ván(h)dum(h) me(h) fe(h)stí(h)na.(h.) (:) Gló(h)ri(h)a(h) Pa(h)tri,(h) et(h) Fí(h)li(h)o,(h) (,) et(h) Spi(h)rí(h)tu(h)i(h) San(h)cto.(h.) (:) Sic(h)ut(h) e(h)rat(h) in(h) prin(h)cí(h)pi(h)o,(h) et(h) nunc,(h) et(h) sem(h)per,(h) (,) et(h) in(h) sǽ(h)cu(h)la(h) sæ(h)cu(h)ló(h)rum.(h) A(h)men.(h.) (;) Al(h)le(h)lú(h)ia.(h.) (::)",
+                "deus_in_adjutorium_lent": "(c3) DE(h)us(h'_) (,) in(h) ad(h)ju(h)tó(i)ri(h)um(h) me(h)um(h'_) in(h)tén(g)de.(h.) (::) <sp>R/</sp>. Dó(h)mi(h)ne(h'_) (,) ad(h) ad(h)ju(h)ván(h)dum(h) me(h'_) fe(h)stí(g)na.(h.) (:) Gló(h)ri(h)a(h) Pa(h)tri,(h) et(h) Fí(h)li(h)o,(h'_) (,) et(h) Spi(h)rí(h)tu(h)i(h) San(g)cto.(h.) (:) Sic(h)ut(h) e(h)rat(h) in(h) prin(h)cí(h)pi(h)o,(h) et(h) nunc,(h) et(h) sem(h)per,(h.) (,) et(h) in(h) sǽ(h)cu(h)la(h) sæ(h)cu(h)ló(h)rum.(h) A(g)men.(h.) (;) Laus(h) ti(h)bi(h) Dó(h)mi(h)ne(h.) Rex(h) æ(h)tér(h)næ(i) gló(h)ri(h)æ.(g.) (::)",
+                "domine_labia_mea": "(c3) Dó(h)mi(h)ne,(h'_) (,) lá(h)bi(h)a(h) me(h)a(h) a(h)pé(g)ri(h)es.(h.) (::) <sp>R/</sp>. Et(h) os(h) me(h)um(h'_) (,) an(h)nun(h)ti(h)á(h)bit(h) lau(h)dem(h) tu(g)am.(h.) (::)",
+                "jube_domne": "(c3) <sp>V/</sp>. Ju(h)be(h) dom(h)ne(g) be(h)ne(h)dí(h)ce(d)re.(d.) (::) <sp>R/</sp>. Noc(h)tem(h) qui(h)é(h)tam(h) et(h) fi(h)nem(g) per(f)féc(h)tum(h.) (,) con(h)cé(h)dat(h) no(h)bis(h) Dó(h)mi(h)nus(h) om(h)ní(h)po(d)tens.(d.) (::) <sp>R/</sp>. A(g.)men.(h.) (::)",
+                "converte_nos": "(c3) <sp>V/</sp>. Con(h)vér(h)te(h) nos(h) ✠(,) De(h)us(h) sa(h)lu(h)tá(g)ris(f) no(h)ster.(h.) (::) <sp>R/</sp>. Et(h) a(h)vér(h)te(h) i(h)ram(h) tu(h)am(g) a(f) no(h)bis.(h.) (::)"
+            };
+            if (CORE_OFFICE_FALLBACKS[strId]) {
+                if (!window.GABC_LOCAL_CACHE) window.GABC_LOCAL_CACHE = {};
+                window.GABC_LOCAL_CACHE[strId] = CORE_OFFICE_FALLBACKS[strId];
+                return CORE_OFFICE_FALLBACKS[strId];
             }
 
             // 2. Base locale IndexedDB (si pack téléchargé ou pièce déjà consultée)
@@ -378,6 +425,27 @@
                         matched = await cache.match(JSDELIVR_BASE + cPath);
                         if (!matched) matched = await cache.match(GITHUB_BASE + cPath);
                     }
+
+                    // Recherche selon le chemin explicite de l'index universel
+                    var indexedPath = null;
+                    if (window.GregorianSearchEngine && typeof window.GregorianSearchEngine.getChantById === 'function') {
+                        var cItem = window.GregorianSearchEngine.getChantById(strId);
+                        if (cItem && cItem.path) indexedPath = cItem.path;
+                    } else if (window.GREGORIAN_INDEX && Array.isArray(window.GREGORIAN_INDEX)) {
+                        for (var idx = 0; idx < window.GREGORIAN_INDEX.length; idx++) {
+                            if (window.GREGORIAN_INDEX[idx].id === strId && window.GREGORIAN_INDEX[idx].path) {
+                                indexedPath = window.GREGORIAN_INDEX[idx].path;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!matched && indexedPath) {
+                        var cIdxP = indexedPath.replace(/^\//, '');
+                        matched = await cache.match(JSDELIVR_BASE + cIdxP);
+                        if (!matched) matched = await cache.match(GITHUB_BASE + cIdxP);
+                    }
+
                     if (matched) {
                         var cachedText = await matched.text();
                         if (isValidGabcText(cachedText)) {
@@ -393,6 +461,9 @@
 
             // 4. Fichier local relatif si disponible (ex: serveur local ou bundle complet)
             var localCandidates = [];
+            if (indexedPath) {
+                localCandidates.push(indexedPath.replace(/^\//, ''));
+            }
             if (strId.indexOf('/') !== -1) {
                 localCandidates.push(strId.replace(/^\//, '') + (strId.endsWith('.gabc') ? '' : '.gabc'));
             }
@@ -421,6 +492,11 @@
 
             // 5. En ligne via multiples sources fiables : CDN jsDelivr (prioritaire, ultra-rapide) + GitHub Raw + GregoBase API
             var remoteCandidates = [];
+            if (indexedPath) {
+                var cleanIdxPath = indexedPath.replace(/^\//, '');
+                remoteCandidates.push(JSDELIVR_BASE + cleanIdxPath);
+                remoteCandidates.push(GITHUB_BASE + cleanIdxPath);
+            }
             if (strId.indexOf('/') !== -1) {
                 var cleanPath = strId.replace(/^\//, '');
                 if (!cleanPath.endsWith('.gabc')) cleanPath += '.gabc';

@@ -298,6 +298,12 @@
         extractSmartSnippet: extractSmartSnippet,
         highlightTitle: highlightTitle,
 
+        getChantById: function(id) {
+            if (!id) return null;
+            var strId = String(id).replace(/^#/, '').trim();
+            return this.chantsMap[strId] || null;
+        },
+
         buildShowcaseList: function() {
             var missae = [];
             var biblia = [];
@@ -362,6 +368,7 @@
 
             for (var i = 0; i < this.chantsList.length; i++) {
                 var item = this.chantsList[i];
+                item._indexPos = i;
                 this.chantsMap[item.id] = item;
                 item.normIncipit = normalizeLatin(item.incipit || '');
                 item.normTitleLa = normalizeLatin(item.titleLa || item.incipit || '');
@@ -380,7 +387,7 @@
                 var titleWords = (item.normTitleLa + ' ' + item.normTitleFr).split(/\s+/).filter(function(w) { return w.length > 1; });
                 item.titleTokenSet = new Set(titleWords);
 
-                var fullStr = item.normIncipit + ' ' + item.normTitleLa + ' ' + item.normTitleFr + ' ' + item.normTags + ' ' + item.normFullTextLa + ' ' + item.normFullTextFr;
+                var fullStr = (item.id || '') + ' ' + item.normIncipit + ' ' + item.normTitleLa + ' ' + item.normTitleFr + ' ' + item.normTags + ' ' + item.normFullTextLa + ' ' + item.normFullTextFr;
                 var words = fullStr.split(/\s+/).filter(function(w) { return w.length > 1 && !STOP_WORDS.has(w); });
                 var seenTokens = new Set();
                 var seenStems = new Set();
@@ -460,6 +467,17 @@
                         scores[b] += 600;
                         matchedSet[b] = 1;
                     }
+                }
+            }
+
+            // 0b. Recherche par ID direct (ex: 13348, #13348, an--...)
+            var cleanIdQ = query.replace(/^#/, '').trim();
+            if (cleanIdQ && this.chantsMap[cleanIdQ]) {
+                var dItem = this.chantsMap[cleanIdQ];
+                var dIdx = (dItem._indexPos !== undefined) ? dItem._indexPos : this.chantsList.indexOf(dItem);
+                if (dIdx !== -1) {
+                    scores[dIdx] += 1000;
+                    matchedSet[dIdx] = 1;
                 }
             }
 
@@ -575,8 +593,13 @@
                 }
 
                 // Filtre Mode
-                if (filterMode && chant.mode && chant.mode !== filterMode) {
-                    continue;
+                if (filterMode) {
+                    if (!chant.mode) continue;
+                    var cModeNum = String(chant.mode).replace(/[^0-9a-zA-Z]/g, '').trim();
+                    var fModeNum = String(filterMode).replace(/[^0-9a-zA-Z]/g, '').trim();
+                    if (!cModeNum || cModeNum !== fModeNum) {
+                        continue;
+                    }
                 }
 
                 var sc = scores[c];
@@ -584,19 +607,20 @@
                 // Construire la chaîne de recherche autorisée pour la langue choisie
                 var chantSearchText = '';
                 var chantTitle = '';
+                var chantIdStr = chant.id ? String(chant.id).toLowerCase() : '';
                 if (userLang === 'fr') {
                     chantTitle = (chant.normTitleLa || '') + ' ' + (chant.normTitleFr || '');
-                    chantSearchText = (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '') + ' ' + (chant.normFullTextFr || '');
+                    chantSearchText = chantIdStr + ' ' + (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '') + ' ' + (chant.normFullTextFr || '');
                 } else if (userLang === 'en') {
                     chantTitle = (chant.normTitleLa || '') + ' ' + (chant.normTitleEn || '');
-                    chantSearchText = (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '') + ' ' + (chant.normFullTextEn || '');
+                    chantSearchText = chantIdStr + ' ' + (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '') + ' ' + (chant.normFullTextEn || '');
                 } else {
                     chantTitle = (chant.normTitleLa || '');
-                    chantSearchText = (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '');
+                    chantSearchText = chantIdStr + ' ' + (chant.normIncipit || '') + ' ' + chantTitle + ' ' + (chant.normTags || '') + ' ' + (chant.normFullTextLa || '');
                 }
 
                 if (normQ) {
-                    var hasExactMatch = (chantSearchText.indexOf(normQ) !== -1);
+                    var hasExactMatch = (chantSearchText.indexOf(normQ) !== -1 || (cleanIdQ && chantIdStr === cleanIdQ.toLowerCase()));
                     if (!hasExactMatch) {
                         var allFound = true;
                         for (var qt = 0; qt < qTokens.length; qt++) {
@@ -608,6 +632,10 @@
                         if (!allFound && sc < 100) {
                             continue;
                         }
+                    }
+
+                    if (cleanIdQ && chant.id === cleanIdQ) {
+                        sc += 1000;
                     }
 
                     if (chant.normIncipit === normQ) {
