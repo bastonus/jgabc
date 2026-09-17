@@ -38,6 +38,7 @@ build-output/
 !android/app/release.keystore
 *.jks
 scratch/
+deepseek4free/
 *~lock~
 *.af~lock~
 

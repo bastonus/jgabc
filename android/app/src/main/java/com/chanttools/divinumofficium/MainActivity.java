@@ -316,6 +316,28 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public String getVersionName() {
+            try {
+                return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public int getVersionCode() {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    return (int) getPackageManager().getPackageInfo(getPackageName(), 0).getLongVersionCode();
+                } else {
+                    return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+                }
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+
+        @JavascriptInterface
         public void downloadAndInstallApk(String apkUrl, String versionTag) {
             if (apkUrl == null || apkUrl.trim().isEmpty()) {
                 notifyJsError("URL de téléchargement invalide");

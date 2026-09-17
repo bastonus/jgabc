@@ -4678,13 +4678,115 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     transition: all 0.25s ease;
 }
 
-/* Gregorian Chant Text Deduplication:
-   When a Gregorian chant score is rendered for a card, the Latin text
-   and lyrics are already displayed note-for-note under the neumes.
-   Hide the duplicate text lines cleanly without altering typography colors. */
-.do-card.has-gregorian-score .do-card-text-lines {
+/* =============================================================
+   Gregorian Chant Text Deduplication & Vernacular Translation
+   - When a Gregorian chant score is rendered, the Latin text and lyrics
+     are sung note-for-note under the neumes in the score itself.
+   - If Latin-only mode is active, hide duplicate Latin text lines.
+   - If Bilingual or Vernacular mode is active, display the full
+     vernacular translation underneath the Gregorian score in crisp white
+     (var(--text-primary)), standard roman typography, with proper liturgical
+     rubric styling ("en blanc, présentée comme elle devrait l'être").
+   ============================================================= */
+
+/* 1. Latin-only: hide duplicate text lines entirely */
+.do-card.has-gregorian-score .do-card-text-lines.is-latin-only {
     display: none !important;
 }
+
+/* 2. Bilingual mode: hide Latin column (avoid duplicate of the chant neumes) */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-la {
+    display: none !important;
+}
+
+/* 3. Vernacular Translation Container underneath Gregorian Score */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 1px dashed color-mix(in srgb, var(--text-primary) 18%, transparent) !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-wrapper {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-grid {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
+    transition: none !important;
+    display: block !important;
+    gap: 0 !important;
+    margin: 6px 0 !important;
+}
+
+/* 4. Vernacular Column: Full-width, crisp white / text-primary, regular typography */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row > .do-col-vernacular {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    display: block !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    font-size: 1.12rem !important;
+    line-height: 1.8 !important;
+    font-style: normal !important;
+    color: var(--text-primary) !important;
+}
+
+/* Ensure all text elements, paragraphs and non-rubric spans inside vernacular column use var(--text-primary) (white in dark/OLED) */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular p,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular div,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
+    color: var(--text-primary) !important;
+    font-style: normal;
+}
+
+/* Preserve italics ONLY for genuine semantic emphasis / citations */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular i,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular em {
+    color: inherit !important;
+    font-style: italic !important;
+}
+
+/* Preserve liturgical rubric symbols in accent red */
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular .do-resp-sym,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular b,
+.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular strong,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only .do-resp-sym,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only b,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only strong {
+    color: var(--primary-color) !important;
+    font-weight: normal !important;
+}
+
+/* 5. Vernacular-only mode under score: white text, normal typography */
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only p,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only div,
+.do-card.has-gregorian-score .do-card-text-lines.is-vern-only span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
+    color: var(--text-primary) !important;
+    font-style: normal;
+}
+
 
 .do-chant-card {
     width: 100% !important;

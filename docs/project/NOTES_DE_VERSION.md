@@ -1,5 +1,18 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.64 (17 Septembre 2026)
+
+---
+
+### 💬 Avis Utilisateurs Directs, Indexation Grégorienne Universelle & Détection Native des Versions
+
+* **Envoi direct et immédiat des avis** : Soumission directe avec accusé de réception serveur et file d'attente hors-ligne avec réessai automatique.
+* **Indexation grégorienne universelle** : Recherche unifiée et optimisée de tous les chants liturgiques et pièces du bréviaire (`build_universal_gregorian_index`).
+* **Détection native des versions (Correction du bug de boucle de mise à jour)** : Interrogation directe de `PackageManager` Android via `AndroidAppUpdate.getVersionName()` et `getVersionCode()`, éliminant les faux positifs où l'application proposait la mise à jour alors qu'elle était déjà installée.
+* **Synchronisation et stabilité accrues** : Harmonisation des thèmes, correctifs d'alignement audio/partitions et performance générale.
+
+---
+
 ## 🚀 Version 0.0.63 (16 Septembre 2026)
 
 ---

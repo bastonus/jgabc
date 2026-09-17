@@ -12499,9 +12499,8 @@ function updateSidebarAndHeader() {
 
     // Haptics & Updates state
     $('#toggleHaptics').prop('checked', localStorage.getItem('do_haptics') !== 'false');
-    $('#toggleAutoUpdate').prop('checked', localStorage.getItem('do_auto_update') !== 'false');
     $('#toggleIncludeBeta').prop('checked', localStorage.getItem('do_include_beta') !== 'false');
-    $('#updateStatusText').text('Version actuelle : ' + CURRENT_APP_VERSION).css('color', 'var(--text-tertiary)');
+    $('#updateStatusText').text('Version actuelle : ' + (typeof getInstalledAppVersion === 'function' ? getInstalledAppVersion() : CURRENT_APP_VERSION)).css('color', 'var(--text-tertiary)');
 }
 
 function openBible(bookId, chapterNum, pageNum) {
@@ -15464,11 +15463,36 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.63';
+var CURRENT_APP_VERSION = 'beta-0.0.64';
+
+function getInstalledAppVersion() {
+    try {
+        if (window.AndroidAppUpdate && typeof window.AndroidAppUpdate.getVersionName === 'function') {
+            var nativeVer = window.AndroidAppUpdate.getVersionName();
+            if (nativeVer && typeof nativeVer === 'string' && nativeVer.trim()) {
+                return nativeVer.trim();
+            }
+        }
+    } catch (e) {}
+    return (typeof CURRENT_APP_VERSION !== 'undefined' && CURRENT_APP_VERSION) ? CURRENT_APP_VERSION : 'beta-0.0.64';
+}
+
+function getInstalledAppVersionCode() {
+    try {
+        if (window.AndroidAppUpdate && typeof window.AndroidAppUpdate.getVersionCode === 'function') {
+            var nativeCode = window.AndroidAppUpdate.getVersionCode();
+            if (typeof nativeCode === 'number' && nativeCode > 0) {
+                return nativeCode;
+            }
+        }
+    } catch (e) {}
+    return 0;
+}
 
 function parseVersionString(str) {
     if (!str) return [0, 0, 0];
-    var clean = str.replace(/^(v|beta-|vbeta-)+/i, '').trim();
+    var clean = String(str).replace(/^(v|beta-|vbeta-)+/i, '').trim();
+    clean = clean.replace(/[^0-9.]/g, '');
     var parts = clean.split('.').map(function(p) {
         var n = parseInt(p, 10);
         return isNaN(n) ? 0 : n;
@@ -15491,6 +15515,9 @@ function compareVersions(v1, v2) {
 
 function isNativeAndroidApp() {
     try {
+        if (typeof window.AndroidAppUpdate !== 'undefined' || typeof window.AndroidAppIcon !== 'undefined' || typeof window.AndroidNotification !== 'undefined' || typeof window.AndroidBrowser !== 'undefined') {
+            return true;
+        }
         return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
     } catch (e) {
         return false;
@@ -15549,7 +15576,19 @@ function checkForAppUpdates(isManual) {
 
         var targetRelease = validReleases[0];
         var latestTag = targetRelease.tag_name;
-        var isNewer = compareVersions(latestTag, CURRENT_APP_VERSION) > 0;
+        var curVersion = getInstalledAppVersion();
+        var curCode = getInstalledAppVersionCode();
+        var isNewer = compareVersions(latestTag, curVersion) > 0;
+
+        // If numeric versionCode is available from Android bridge and release metadata, verify strictly
+        var targetCode = (typeof targetRelease.versionCode === 'number' && targetRelease.versionCode > 0) ? targetRelease.versionCode : 0;
+        if (targetCode > 0 && curCode > 0) {
+            if (targetCode <= curCode) {
+                isNewer = false;
+            } else {
+                isNewer = true;
+            }
+        }
 
         if (isNewer) {
             // Find APK URL to verify availability
@@ -15611,7 +15650,7 @@ function checkForAppUpdates(isManual) {
         } else {
             window._hasPendingAppUpdate = false;
             if (isManual) {
-                $statusText.text('Vous utilisez la dernière version (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
+                $statusText.text('Vous utilisez la dernière version (' + curVersion + ')').css('color', 'var(--text-tertiary)');
             }
         }
     }
@@ -15628,6 +15667,7 @@ function checkForAppUpdates(isManual) {
             html_url: data.htmlUrl || ('https://github.com/bastonus/jgabc/releases/tag/' + tagName),
             body: data.body || ('Mise à jour ' + tagName),
             published_at: data.releaseDate || new Date().toISOString(),
+            versionCode: (typeof data.versionCode === 'number') ? data.versionCode : 0,
             assets: [
                 {
                     name: 'Oremus.apk',
@@ -15656,7 +15696,7 @@ function checkForAppUpdates(isManual) {
         })
         .catch(function(err) {
             if (isManual) {
-                $statusText.text('Vous utilisez la dernière version locale (' + CURRENT_APP_VERSION + ')').css('color', 'var(--text-tertiary)');
+                $statusText.text('Vous utilisez la dernière version locale (' + getInstalledAppVersion() + ')').css('color', 'var(--text-tertiary)');
             }
         });
 }
@@ -16289,11 +16329,12 @@ var OremusNotifications = (function() {
             if (n.endDate && new Date(n.endDate) < now) return false;
 
             // Version bounds
+            var activeVer = (typeof getInstalledAppVersion === 'function') ? getInstalledAppVersion() : CURRENT_APP_VERSION;
             if (n.minVersion && typeof compareVersions === 'function') {
-                if (compareVersions(CURRENT_APP_VERSION, n.minVersion) < 0) return false;
+                if (compareVersions(activeVer, n.minVersion) < 0) return false;
             }
             if (n.maxVersion && typeof compareVersions === 'function') {
-                if (compareVersions(CURRENT_APP_VERSION, n.maxVersion) > 0) return false;
+                if (compareVersions(activeVer, n.maxVersion) > 0) return false;
             }
 
             // Dependency check: only show if dependsOn was dismissed
