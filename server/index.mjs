@@ -1024,6 +1024,14 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       text-underline-offset: 4px;
     }
 
+    /* Pastille active du mode partition simplifiée */
+    .demo-chip-active {
+      color: var(--primary-color) !important;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     /* Contrôles de lecture démo */
     .demo-btn {
       background: transparent !important;
@@ -1340,7 +1348,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
             </button>
             <button type="button" class="demo-btn-sec" onclick="seekDemoRelative(-3)">-3s</button>
             <button type="button" class="demo-btn-sec" onclick="seekDemoRelative(3)">+3s</button>
-            <span class="demo-time" id="demoTimeDisplay" style="margin-left:auto;">0:00 / 1:01</span>
+            <span class="demo-time" id="demoTimeDisplay" style="margin-left:auto;">0:00 / 1:15</span>
           </div>
 
           <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
@@ -1695,11 +1703,40 @@ ${JSON.stringify(getValidatedDemoPieces())}
     }
 
     function highlightDemoNote(idx) {
-      if (!demoChantInfo || !demoChantInfo.allNotes || idx < 0 || idx >= demoChantInfo.allNotes.length) return;
       if (idx === demoActiveNoteIdx) return;
+      if (idx < 0 || !currentDemoPiece || !currentDemoPiece.timestamps || idx >= currentDemoPiece.timestamps.length) return;
 
       const prevIdx = demoActiveNoteIdx;
       demoActiveNoteIdx = idx;
+
+      // Ligne d'information toujours mise à jour (même en mode simplifié)
+      const stamp = currentDemoPiece.timestamps[idx];
+      const chipEl = document.getElementById('demoDetailText');
+      if (chipEl && stamp && typeof stamp.start === 'number') {
+        chipEl.textContent = 'Note ' + (idx + 1) + '/' + currentDemoPiece.notes_count + ' (' + stamp.start.toFixed(2) + 's) • ' + currentDemoPiece.incipit;
+      }
+
+      const slot = document.getElementById('demoScoreSlot');
+
+      // Mode simplifié : surligner la pastille texte
+      try {
+        const fb = document.getElementById('demoFallbackGrid');
+        if (fb && slot) {
+          const prev = fb.querySelector('.demo-chip-active');
+          if (prev) prev.classList.remove('demo-chip-active');
+          const cur = fb.querySelector('[data-demo-idx="' + idx + '"]');
+          if (cur) {
+            cur.classList.add('demo-chip-active');
+            const fr = cur.getBoundingClientRect();
+            const sr = slot.getBoundingClientRect();
+            if (fr.top < sr.top + 10 || fr.bottom > sr.bottom - 10) {
+              cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }
+      } catch (eFb) {}
+
+      if (!demoChantInfo || !demoChantInfo.allNotes || idx >= demoChantInfo.allNotes.length) return;
 
       // Nettoyer ancienne note (aucun glow)
       if (prevIdx >= 0 && demoChantInfo.allNotes[prevIdx]) {
@@ -1739,13 +1776,6 @@ ${JSON.stringify(getValidatedDemoPieces())}
         }
       }
 
-      const stamp = currentDemoPiece.timestamps[idx];
-      const chipEl = document.getElementById('demoDetailText');
-      if (chipEl && stamp) {
-        chipEl.textContent = 'Note ' + (idx + 1) + '/' + currentDemoPiece.notes_count + ' (' + stamp.start.toFixed(2) + 's) • ' + currentDemoPiece.incipit;
-      }
-
-      const slot = document.getElementById('demoScoreSlot');
       if (curNote && curNote.svgNode && slot) {
         const nRect = curNote.svgNode.getBoundingClientRect();
         const sRect = slot.getBoundingClientRect();
@@ -1755,9 +1785,69 @@ ${JSON.stringify(getValidatedDemoPieces())}
       }
     }
 
+    // Partition simplifiée : pastilles texte cliquables (secours si Exsurge indisponible)
+    function renderDemoFallback(reason) {
+      const container = document.getElementById('demoScoreSlot');
+      if (!container || !currentDemoPiece || !currentDemoPiece.timestamps || !currentDemoPiece.timestamps.length) {
+        if (container) container.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Partition indisponible. <button type="button" class="demo-btn-sec" onclick="switchDemoPiece(&quot;16335&quot;)">Réessayer</button></div>';
+        return;
+      }
+      demoChantInfo = null;
+      demoScore = null;
+      const stamps = currentDemoPiece.timestamps;
+      let html = '<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:8px;">' +
+        (reason || 'Partition simplifiée') + ' • ' + stamps.length + ' notes • cliquez pour naviguer</div>' +
+        '<div id="demoFallbackGrid" style="display:flex; flex-wrap:wrap; gap:4px;">';
+      for (let k = 0; k < stamps.length; k++) {
+        const st = stamps[k];
+        const t = (st && typeof st.start === 'number') ? st.start.toFixed(1) + 's' : '—';
+        html += '<button type="button" data-demo-idx="' + k + '" onclick="seekDemoNote(' + k + ')" ' +
+          'style="background:transparent; color:var(--text-secondary); font-size:0.72rem; padding:3px 7px; cursor:pointer; font-family:ui-monospace,monospace;">' +
+          (k + 1) + ' · ' + t + '</button>';
+      }
+      html += '</div><div style="margin-top:8px;"><button type="button" class="demo-btn-sec" onclick="retryDemoScore()">Réessayer la partition</button></div>';
+      container.innerHTML = html;
+      const keepIdx = demoActiveNoteIdx;
+      demoActiveNoteIdx = -1;
+      if (keepIdx >= 0) highlightDemoNote(keepIdx);
+    }
+
+    window.seekDemoNote = function(idx) {
+      if (!currentDemoPiece || !currentDemoPiece.timestamps || !currentDemoPiece.timestamps[idx]) return;
+      const st = currentDemoPiece.timestamps[idx];
+      if (demoYtPlayer && typeof demoYtPlayer.seekTo === 'function' && st && typeof st.start === 'number') {
+        try { demoYtPlayer.seekTo(st.start, true); } catch (e) {}
+      }
+      highlightDemoNote(idx);
+    };
+
+    window.retryDemoScore = function() {
+      demoActiveNoteIdx = -1;
+      if (currentDemoPiece) {
+        if (typeof exsurge === 'undefined') {
+          waitForExsurge(function() {
+            if (currentDemoPiece) renderDemoScore(currentDemoPiece.gabc_src);
+          });
+        } else {
+          renderDemoScore(currentDemoPiece.gabc_src);
+        }
+      }
+    };
+
     function renderDemoScore(gabcSrc) {
       const container = document.getElementById('demoScoreSlot');
-      if (!container || typeof exsurge === 'undefined') return;
+      if (!container) return;
+      if (typeof exsurge === 'undefined') {
+        container.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement du moteur de partition…</div>';
+        waitForExsurge(function() {
+          if (currentDemoPiece) renderDemoScore(currentDemoPiece.gabc_src);
+        });
+        return;
+      }
+      if (!gabcSrc) {
+        renderDemoFallback('Partition indisponible pour cette pièce');
+        return;
+      }
 
       try {
         const ctxt = new exsurge.ChantContext();
@@ -1782,6 +1872,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
         score.performLayout(ctxt);
         score.layoutChantLines(ctxt, availWidth - 10, function() {
+          try {
           container.innerHTML = '';
           const svgNode = score.createSvgNode(ctxt);
           svgNode.setAttribute('width', '100%');
@@ -1844,9 +1935,14 @@ ${JSON.stringify(getValidatedDemoPieces())}
           });
 
           highlightDemoNote(0);
+          } catch (errSvg) {
+            console.warn('Erreur rendu demo:', errSvg);
+            renderDemoFallback('Rendu vectoriel indisponible');
+          }
         });
       } catch(err) {
         console.warn('Erreur Exsurge demo:', err);
+        renderDemoFallback('Rendu vectoriel indisponible');
       }
     }
 
@@ -1872,26 +1968,52 @@ ${JSON.stringify(getValidatedDemoPieces())}
         return;
       }
       // Fallback : donnees validees via l'API en direct
+      const slotEl = document.getElementById('demoScoreSlot');
+      if (slotEl) slotEl.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement de la partition…</div>';
       fetch('/api/jobs/piece/' + encodeURIComponent(pieceId)).then(function(r) { return r.json(); }).then(function(p) {
         if (p && p.timestamps && p.timestamps.length) {
           VALIDATED_DEMO_PIECES[pieceId] = p;
           applyPiece(p);
+        } else {
+          renderDemoFallback('Pièce introuvable via l\u2019API');
         }
-      }).catch(function() {});
+      }).catch(function() {
+        renderDemoFallback('Connexion à l\u2019API impossible');
+      });
     };
 
     function initInteractiveDemo() {
-      const firstId = VALIDATED_DEMO_PIECES['16335'] ? '16335' : Object.keys(VALIDATED_DEMO_PIECES)[0];
-      if (firstId) switchDemoPiece(firstId);
+      const ids = Object.keys(VALIDATED_DEMO_PIECES || {});
+      if (ids.length === 0) {
+        const c = document.getElementById('demoScoreSlot');
+        if (c) c.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Aucune pièce de démonstration disponible. <button type="button" class="demo-btn-sec" onclick="switchDemoPiece(&quot;16335&quot;)">Réessayer</button></div>';
+        // Dernière chance : données validées via l'API en direct
+        switchDemoPiece('16335');
+        return;
+      }
+      const firstId = VALIDATED_DEMO_PIECES['16335'] ? '16335' : ids[0];
+      switchDemoPiece(firstId);
     }
 
-    function waitForExsurge(cb, maxTries) {
-      if (typeof maxTries === 'undefined') maxTries = 35;
+    let exsurgeWaitTries = 0;
+    function waitForExsurge(cb) {
       if (typeof exsurge !== 'undefined') {
-        cb();
-      } else if (maxTries > 0) {
-        setTimeout(function() { waitForExsurge(cb, maxTries - 1); }, 100);
+        exsurgeWaitTries = 0;
+        try { cb(); } catch (eCb) {
+          console.warn('Erreur init partition:', eCb);
+          renderDemoFallback('Rendu vectoriel indisponible');
+        }
+        return;
       }
+      exsurgeWaitTries++;
+      // Attente persistante (~60s) : aucun abandon silencieux, repli texte au-delà
+      if (exsurgeWaitTries > 240) {
+        if (!document.getElementById('demoFallbackGrid')) {
+          renderDemoFallback('Moteur de partition indisponible');
+        }
+        return;
+      }
+      setTimeout(function() { waitForExsurge(cb); }, 250);
     }
 
     // Initialisation
@@ -2295,11 +2417,32 @@ ${JSON.stringify(getValidatedDemoPieces())}
     }
 
     function highlightModalNote(idx) {
-      if (!currentModalChantInfo || !currentModalChantInfo.allNotes || !currentModalChantInfo.allNotes.length) return;
-      if (idx < 0 || idx >= currentModalChantInfo.allNotes.length) return;
-      if (idx === modalActiveNoteIndex && modalActiveNoteEl && modalActiveNoteEl.classList.contains('active')) return;
-
+      if (idx < 0 || !currentModalPiece || !currentModalPiece.timestamps || idx >= currentModalPiece.timestamps.length) return;
+      if (idx === modalActiveNoteIndex && currentModalChantInfo) return;
       modalActiveNoteIndex = idx;
+
+      // Mode simplifié : pastille texte
+      try {
+        const fb = document.getElementById('modalFallbackGrid');
+        const vp = document.getElementById('modalScoreSlot');
+        if (fb && vp) {
+          const prev = fb.querySelector('.demo-chip-active');
+          if (prev) prev.classList.remove('demo-chip-active');
+          const cur = fb.querySelector('[data-note-index="' + idx + '"]');
+          if (cur) {
+            cur.classList.add('demo-chip-active');
+            const fr = cur.getBoundingClientRect();
+            const vr = vp.getBoundingClientRect();
+            if (fr.top < vr.top + 10 || fr.bottom > vr.bottom - 10) {
+              cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }
+      } catch (eFb) {}
+
+      if (!currentModalChantInfo || !currentModalChantInfo.allNotes || !currentModalChantInfo.allNotes.length) return;
+      if (idx >= currentModalChantInfo.allNotes.length) return;
+      if (modalActiveNoteEl && modalActiveNoteEl.classList.contains('active')) return;
       const note = currentModalChantInfo.allNotes[idx];
       const accentColor = '#c96b63';
 
@@ -2354,9 +2497,61 @@ ${JSON.stringify(getValidatedDemoPieces())}
       }
     }
 
+    // Partition simplifiée de secours pour la modale (pastilles cliquables)
+    function renderModalFallback(reason) {
+      const container = document.getElementById('modalScoreSlot');
+      if (!container || !currentModalPiece || !currentModalPiece.timestamps || !currentModalPiece.timestamps.length) {
+        if (container) container.innerHTML = '<div style="padding:16px 0; color:var(--text-tertiary);">Partition indisponible.</div>';
+        return;
+      }
+      currentModalChantInfo = null;
+      currentModalScore = null;
+      const stamps = currentModalPiece.timestamps;
+      let html = '<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:8px;">' +
+        (reason || 'Partition simplifiée') + ' • ' + stamps.length + ' notes • cliquez pour naviguer</div>' +
+        '<div id="modalFallbackGrid" style="display:flex; flex-wrap:wrap; gap:4px;">';
+      for (var k = 0; k < stamps.length; k++) {
+        const st = stamps[k];
+        const t = (st && typeof st.start === 'number') ? st.start.toFixed(1) + 's' : '—';
+        html += '<button type="button" data-note-index="' + k + '" onclick="seekModalNote(' + k + ')" ' +
+          'style="background:transparent; color:var(--text-secondary); font-size:0.72rem; padding:3px 7px; cursor:pointer; font-family:ui-monospace,monospace;">' +
+          (k + 1) + ' · ' + t + '</button>';
+      }
+      html += '</div><div style="margin-top:8px;"><button type="button" class="demo-btn-sec" onclick="retryModalScore()">Réessayer la partition</button></div>';
+      container.innerHTML = html;
+      const keepIdx = modalActiveNoteIndex;
+      modalActiveNoteIndex = -1;
+      if (keepIdx >= 0) highlightModalNote(keepIdx);
+    }
+
+    window.seekModalNote = function(idx) {
+      if (!currentModalPiece || !currentModalPiece.timestamps || !currentModalPiece.timestamps[idx]) return;
+      const st = currentModalPiece.timestamps[idx];
+      if (modalYtPlayer && typeof modalYtPlayer.seekTo === 'function' && st && typeof st.start === 'number') {
+        try { modalYtPlayer.seekTo(st.start, true); } catch (e) {}
+      }
+      highlightModalNote(idx);
+    };
+
+    window.retryModalScore = function() {
+      modalActiveNoteIndex = -1;
+      if (currentModalPiece) renderModalScore(currentModalPiece.gabc_src);
+    };
+
     function renderModalScore(gabcSrc) {
       const container = document.getElementById('modalScoreSlot');
-      if (!container || typeof exsurge === 'undefined') return;
+      if (!container) return;
+      if (typeof exsurge === 'undefined') {
+        container.innerHTML = '<div style="padding:16px 0; color:var(--text-tertiary);">Chargement du moteur de partition…</div>';
+        waitForExsurge(function() {
+          if (currentModalPiece) renderModalScore(currentModalPiece.gabc_src);
+        });
+        return;
+      }
+      if (!gabcSrc) {
+        renderModalFallback('Partition indisponible pour cette pièce');
+        return;
+      }
 
       try {
         const ctxt = new exsurge.ChantContext();
@@ -2381,6 +2576,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
         score.performLayout(ctxt);
         score.layoutChantLines(ctxt, availWidth - 10, function() {
+          try {
           container.innerHTML = '';
           const svgNode = score.createSvgNode(ctxt);
           svgNode.setAttribute('width', '100%');
@@ -2443,9 +2639,14 @@ ${JSON.stringify(getValidatedDemoPieces())}
           });
 
           highlightModalNote(0);
+          } catch (errSvg) {
+            console.warn('Erreur rendu modal:', errSvg);
+            renderModalFallback('Rendu vectoriel indisponible');
+          }
         });
       } catch(err) {
         console.warn('Erreur Exsurge modal:', err);
+        renderModalFallback('Rendu vectoriel indisponible');
       }
     }
 
