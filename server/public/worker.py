@@ -813,15 +813,23 @@ def print_session_summary(worker_name: str, server_url: str, count: int, elapsed
     dur_str = format_duration(elapsed_sec)
     review_url = f"{server_url}/worker?worker={urllib.parse.quote(worker_name)}#batch"
 
+    local_lab = Path(__file__).resolve().parent.parent / "pipeline" / "align" / "alignment-lab.html"
+    if local_lab.exists():
+        worker_lab_url = local_lab.as_uri() + f"?worker={urllib.parse.quote(worker_name)}"
+    else:
+        worker_lab_url = f"https://bastonus.github.io/jgabc/pipeline/align/alignment-lab.html?worker={urllib.parse.quote(worker_name)}"
+
     print("\n" + "=" * 75)
     print(f"  ✦ {reason.upper()} — SCRIPTORIUM OREMUS ✦")
-    print(f"  ✦ Contributeur       : \033[92m{worker_name}\033[0m")
-    print(f"  ✦ Temps consacré     : \033[94m{dur_str}\033[0m")
-    print(f"  ✦ Chants synchronisés: \033[93m{count} pièces\033[0m")
-    print(f"  ✦ Enluminure gagnée  : \033[92m+{xp_earned} XP liturgiques\033[0m")
+    print(f"  ✦ Contributeur        : \033[92m{worker_name}\033[0m")
+    print(f"  ✦ Temps consacré      : \033[94m{dur_str}\033[0m")
+    print(f"  ✦ Chants synchronisés : \033[93m{count} pièces\033[0m")
+    print(f"  ✦ Enluminure gagnée   : \033[92m+{xp_earned} XP liturgiques\033[0m")
     print("-" * 75)
-    print("  ✦ Inspectez et validez immédiatement votre lot de partitions alignées :")
-    print(f"  ✦ \033[96m{review_url}\033[0m")
+    print("  ✦ Validez immédiatement vos pièces dans le jeu In-App :")
+    print(f"  ✦ \033[96m{worker_lab_url}\033[0m")
+    print("  ✦ Ou visualisez votre bilan sur le portail Web :")
+    print(f"  ✦ \033[90m{review_url}\033[0m")
     print("  (Chaque validation approuvée vous accorde +10 XP supplémentaires !)")
     print("=" * 75 + "\n")
 
@@ -976,6 +984,15 @@ def main():
                 print(f"  \033[92m[SUCCÈS]\033[0m Enregistré avec succès sur le serveur ! Total de vos contributions : {sub_resp.get('worker_total', jobs_processed + 1)} chant(s).")
                 jobs_processed += 1
                 SESSION_STATE["jobs_processed"] = jobs_processed
+
+                # Affichage du lien direct de relecture immédiate
+                local_lab = Path(__file__).resolve().parent.parent / "pipeline" / "align" / "alignment-lab.html"
+                if local_lab.exists():
+                    local_url = local_lab.as_uri() + f"?id={piece_id}"
+                    print(f"  ✦ \033[1mRelecture in-app immédiate\033[0m : \033[96m{local_url}\033[0m")
+                else:
+                    web_lab = f"https://bastonus.github.io/jgabc/pipeline/align/alignment-lab.html?id={piece_id}"
+                    print(f"  ✦ \033[1mRelecture in-app immédiate\033[0m : \033[96m{web_lab}\033[0m")
             else:
                 print(f"  [WARN] Le serveur a retourné une réponse inattendue : {sub_resp}")
 

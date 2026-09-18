@@ -352,6 +352,13 @@
       opacity: 0.8;
       transform: none !important;
     }
+    .do-header-icon-btn.spinning svg {
+      animation: spin-clockwise 0.8s linear infinite;
+    }
+    @keyframes spin-clockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
 
     /* ── Main Workspace: Vertical Flow (Chant Directly Below Video) ── */
     .lab-workspace {
@@ -1930,12 +1937,21 @@
             <span class="monk-sub-title" id="headerRankName">Postulant</span>
             <span class="monk-sub-badge" id="headerRankLevel">Degré 1</span>
             <span class="monk-sub-xp" id="headerRankXp">0 XP</span>
-            <span class="monk-sub-streak" id="headerStreakBadge" style="display:none;">🔥 <span id="headerStreakCount">1</span></span>
+            <span class="monk-sub-streak" id="headerStreakBadge" style="display:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:2px;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span id="headerStreakCount">1</span></span>
           </div>
         </div>
       </div>
 
       <div class="do-top-right">
+        <!-- Manual Queue Refresh Button -->
+        <button type="button" class="do-header-icon-btn" id="btnRefreshQueue" onclick="refreshQueueManually()" title="Actualiser la file d'attente (Touche R)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+
         <!-- Undo Button (Revert previous vote) -->
         <button type="button" class="do-header-icon-btn" onclick="undoLastVote()" title="Annuler le dernier vote (Touche ↑)">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2004,7 +2020,7 @@
       <div class="decision-normal-view" id="mobileNormalView">
         <!-- Shrinked Comment Bubble (Shown when a comment exists) -->
         <div class="chant-comment-bubble" id="mobileCommentBubble" style="display: none;" onclick="openInlineCommentMode()" title="Cliquer pour modifier la remarque">
-          <span class="comment-bubble-icon">💬</span>
+          <span class="comment-bubble-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
           <span class="comment-bubble-text" id="mobileCommentBubbleText"></span>
           <button type="button" class="comment-bubble-action-btn" title="Modifier la remarque">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -2044,7 +2060,7 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <button type="button" class="btn-utility btn-comment-trigger" onclick="openInlineCommentMode()">
-            <span style="font-size: 0.90rem;">💬</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span id="mobileBtnCommentLabel">Remarque</span>
           </button>
         </div>
@@ -2208,6 +2224,7 @@
             <kbd style="background:rgba(255,255,255,0.08); padding:3px 10px; border-radius:6px; color:var(--text-primary); font-weight:600; text-align:center;">↑</kbd> <span>Annuler le vote précédent</span>
             <kbd style="background:rgba(255,255,255,0.08); padding:3px 10px; border-radius:6px; color:var(--text-primary); font-weight:600; text-align:center;">Espace</kbd> <span>Lecture / Pause</span>
             <kbd style="background:rgba(255,255,255,0.08); padding:3px 10px; border-radius:6px; color:var(--text-primary); font-weight:600; text-align:center;">C</kbd> <span>Ajouter une remarque (+15 XP)</span>
+            <kbd style="background:rgba(255,255,255,0.08); padding:3px 10px; border-radius:6px; color:var(--text-primary); font-weight:600; text-align:center;">R</kbd> <span>Actualiser la file de calculs</span>
           </div>
         </div>
       </div>
@@ -2347,7 +2364,7 @@
         minXp: 30,
         iconKey: "candle",
         relic: "La Chandelle des Vigiles",
-        relicDesc: "Déblocage du bonus de série (Flamme de Vigile 🔥 x1.2)",
+        relicDesc: "Déblocage du bonus de série (Flamme de Vigile x1.2)",
         desc: "Vous apprenez à tenir le souffle et veillez aux matines sous la lueur des cierges."
       },
       {
@@ -2598,8 +2615,8 @@
       const toast = document.createElement('div');
       toast.className = 'xp-float-toast';
       let text = `+${xp} XP`;
-      if (mult > 1) text += ` 🔥x${mult.toFixed(1)}`;
-      if (hasComment) text += ` ✒️ Scribe`;
+      if (mult > 1) text += ` (Série x${mult.toFixed(1)})`;
+      if (hasComment) text += ` • Scribe`;
       toast.textContent = text;
       document.body.appendChild(toast);
       setTimeout(() => { toast.remove(); }, 1500);
@@ -3098,15 +3115,65 @@
       }
     }
 
-    async function fetchOnlineAlignmentQueue() {
+    let TARGET_PIECE_ID = null;
+    let FILTER_WORKER = null;
+
+    function parseUrlParameters() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        TARGET_PIECE_ID = params.get('id') || params.get('piece_id') || null;
+        FILTER_WORKER = params.get('worker') || params.get('contributor') || null;
+        if (TARGET_PIECE_ID) TARGET_PIECE_ID = String(TARGET_PIECE_ID).trim();
+        if (FILTER_WORKER) FILTER_WORKER = String(FILTER_WORKER).trim();
+      } catch (e) {}
+    }
+
+    async function loadPieceById(targetId) {
+      if (!targetId) return false;
+      const strId = String(targetId).trim();
+
+      // 1. Chercher dans PIECES s'il est déjà en mémoire
+      if (PIECES && PIECES.length > 0) {
+        const idx = PIECES.findIndex(p => String(p.id) === strId || String(p.piece_id) === strId);
+        if (idx >= 0) {
+          loadPiece(idx);
+          showToast(`Pièce #${strId} prête pour révision`);
+          return true;
+        }
+      }
+
+      // 2. Si non trouvée dans la file, interroger directement l'API /api/jobs/piece/:id
+      try {
+        const baseUrl = getCoolifyBaseUrl();
+        const res = await fetch(`${baseUrl}/api/jobs/piece/${encodeURIComponent(strId)}`, { signal: AbortSignal.timeout(8000) });
+        if (res.ok) {
+          const piece = await res.json();
+          if (piece && piece.timestamps && piece.timestamps.length > 0) {
+            if (!PIECES) PIECES = [];
+            PIECES.unshift(piece);
+            loadPiece(0);
+            updateCounterDisplay();
+            showToast(`Pièce #${strId} chargée avec succès`);
+            return true;
+          }
+        }
+      } catch (err) {
+        console.warn(`[ALIGNMENTS] Erreur chargement direct pièce #${strId}:`, err);
+      }
+
+      showToast(`Pièce #${strId} introuvable sur le serveur.`);
+      return false;
+    }
+
+    async function fetchOnlineAlignmentQueue(options = {}) {
       const baseUrl = getCoolifyBaseUrl();
       const queueUrl = `${baseUrl}/api/alignments/queue`;
 
       const isInitialEmpty = (!PIECES || PIECES.length === 0);
-      if (isInitialEmpty) {
+      if (isInitialEmpty && !options.silent) {
         const container = document.getElementById('cardScoreSlot');
         if (container) {
-          container.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:220px; color:var(--text-secondary); gap:12px;"><div style="font-size:2rem;">⚜️</div><div style="font-size:1rem; font-weight:600;">Chargement des alignements en ligne...</div><div style="font-size:0.8rem; color:var(--text-tertiary);">Connexion à l\'API Oremus</div></div>';
+          container.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:220px; color:var(--text-secondary); gap:12px;"><div style="font-size:1.8rem; color:var(--gold-sacred);">✦</div><div style="font-size:1rem; font-weight:600;">Chargement des alignements en ligne...</div><div style="font-size:0.8rem; color:var(--text-tertiary);">Connexion à l\'API Oremus</div></div>';
         }
       }
 
@@ -3116,6 +3183,9 @@
           const data = await res.json();
           const list = (data && (data.pieces || data.queue)) ? (data.pieces || data.queue) : (Array.isArray(data) ? data : []);
           if (Array.isArray(list) && list.length > 0) {
+            const previousIds = new Set((PIECES || []).map(p => String(p.id)));
+            const newIncoming = list.filter(p => !previousIds.has(String(p.id)));
+
             PIECES = list;
             try {
               localStorage.setItem('oremus_alignments_cache', JSON.stringify({
@@ -3124,8 +3194,16 @@
               }));
             } catch(e) {}
             updateCounterDisplay();
-            if (isInitialEmpty || currentPieceIndex < 0) {
+
+            if (TARGET_PIECE_ID && (isInitialEmpty || currentPieceIndex < 0 || options.forceTarget)) {
+              await loadPieceById(TARGET_PIECE_ID);
+              TARGET_PIECE_ID = null;
+            } else if (isInitialEmpty || currentPieceIndex < 0) {
               pickNextRandomChant();
+            } else if (newIncoming.length > 0 && options.silent) {
+              const firstNew = newIncoming[0];
+              const author = firstNew.worker_id ? ` par ${firstNew.worker_id}` : '';
+              showToast(`✦ ${newIncoming.length} nouvelle(s) pièce(s)${author} disponible(s)`);
             }
             return true;
           }
@@ -3143,7 +3221,10 @@
           if (Array.isArray(cachedList) && cachedList.length > 0) {
             PIECES = cachedList;
             updateCounterDisplay();
-            if (isInitialEmpty || currentPieceIndex < 0) {
+            if (TARGET_PIECE_ID) {
+              await loadPieceById(TARGET_PIECE_ID);
+              TARGET_PIECE_ID = null;
+            } else if (isInitialEmpty || currentPieceIndex < 0) {
               pickNextRandomChant();
             }
             return true;
@@ -3160,6 +3241,42 @@
       return false;
     }
 
+    async function refreshQueueManually() {
+      const btn = document.getElementById('btnRefreshQueue');
+      if (btn) btn.classList.add('spinning');
+
+      const success = await fetchOnlineAlignmentQueue({ manual: true });
+
+      if (btn) {
+        setTimeout(() => {
+          btn.classList.remove('spinning');
+        }, 500);
+      }
+
+      if (success) {
+        const count = PIECES ? PIECES.length : 0;
+        showToast(`File d'attente actualisée (${count} pièces prêtes).`);
+      } else {
+        showToast('Impossible de contacter l\'API Oremus.');
+      }
+    }
+
+    let backgroundPollTimer = null;
+    function startBackgroundAlignmentPolling() {
+      if (backgroundPollTimer) clearInterval(backgroundPollTimer);
+      backgroundPollTimer = setInterval(() => {
+        if (!document.hidden) {
+          fetchOnlineAlignmentQueue({ silent: true });
+        }
+      }, 25000);
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          fetchOnlineAlignmentQueue({ silent: true });
+        }
+      });
+    }
+
     function pickNextRandomChant() {
       if (isCeremonyActive) return;
       if (!PIECES || PIECES.length === 0) return;
@@ -3174,8 +3291,18 @@
           // Score de base fourni par l'API (ex: 1000 pour liturgy unreviewed, 800 pour extension unreviewed)
           let baseScore = (typeof p.priority_score === 'number') ? p.priority_score : (p.is_liturgy_pack ? 1000 : 800);
 
+          // Si un filtre contributeur/worker est actif (?worker=Nom)
+          if (FILTER_WORKER) {
+            const workerMatch = p.worker_id && p.worker_id.toLowerCase().includes(FILTER_WORKER.toLowerCase());
+            if (workerMatch) {
+              baseScore += 10000; // Priorité absolue aux pièces calculées par ce contributeur
+            } else {
+              baseScore -= 10000;
+            }
+          }
+
           // Priorité absolue aux pièces jamais révisées par cet utilisateur
-          if (hasUserReviewed) baseScore -= 10000;
+          if (hasUserReviewed) baseScore -= 20000;
           if (isSkipped) baseScore -= 500;
 
           candidates.push({ piece: p, index: idx, effectiveScore: baseScore, count: effectiveReviewCount });
@@ -3215,7 +3342,8 @@
       const lblDetails = document.getElementById('lblChantDetails');
       if (lblDetails) {
         const noteCount = piece.timestamps ? piece.timestamps.length : (piece.total_notes || piece.notes_count || 0);
-        lblDetails.textContent = `${noteCount} notes • #${piece.id}`;
+        const workerInfo = piece.worker_id ? ` • Par ${piece.worker_id}` : '';
+        lblDetails.textContent = `${noteCount} notes • #${piece.id}${workerInfo}`;
       }
 
       const modeBadge = document.getElementById('lblScoreModeBadge');
@@ -4241,7 +4369,7 @@
       if (userList.length === 0) {
         listEl.innerHTML = `
           <div style="text-align:center; padding:48px 16px; display:flex; flex-direction:column; align-items:center; gap:10px;">
-            <div style="font-size:2.4rem; opacity:0.6;">📜</div>
+            <div style="opacity:0.6;"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
             <div style="font-size:0.95rem; font-weight:700; color:var(--text-primary);">Aucune validation pour le moment</div>
             <div style="font-size:0.82rem; color:var(--text-secondary); max-width:320px; line-height:1.45;">Vos avis et annotations apparaîtront ici au fil de vos écoutes dans l'Atelier.</div>
           </div>
@@ -4368,18 +4496,18 @@
         // Remplacer le chemin par /health
         healthUrl = url.origin + '/health';
       } catch {
-        showCoolifyStatus('error', '❌ URL invalide.');
+        showCoolifyStatus('error', 'URL invalide.');
         return;
       }
-      showCoolifyStatus('info', '🔄 Test de connexion en cours…');
+      showCoolifyStatus('info', 'Test de connexion en cours...');
       try {
         const res = await fetch(healthUrl, { method: 'GET', signal: AbortSignal.timeout(8000) });
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
-          showCoolifyStatus('success', `✅ Serveur connecté (${data.status || 'ok'}) — ${healthUrl}`);
+          showCoolifyStatus('success', `Serveur connecté (${data.status || 'ok'}) — ${healthUrl}`);
           showToast('Serveur Coolify accessible !');
         } else {
-          showCoolifyStatus('error', `❌ Serveur répond avec le code HTTP ${res.status}`);
+          showCoolifyStatus('error', `Serveur répond avec le code HTTP ${res.status}`);
         }
       } catch (err) {
         showCoolifyStatus('error', '❌ Connexion impossible — vérifiez l\'URL et que le serveur est démarré. (' + err.message + ')');
@@ -4921,6 +5049,11 @@
         return;
       }
 
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        refreshQueueManually();
+        return;
+      }
       if (e.key === 'h' || e.key === 'H') {
         e.preventDefault();
         openHistoryModal();
@@ -4988,6 +5121,8 @@
         localStorage.setItem('oremus_review_relay_url', 'https://api-oremus.silverhorse.fr/api/review');
       }
 
+      parseUrlParameters();
+
       // Précharger depuis le cache local si disponible pour affichage instantané
       try {
         const cachedStr = localStorage.getItem('oremus_alignments_cache');
@@ -5008,12 +5143,25 @@
         }, 1200);
       }
       initReviews();
-      if (PIECES && PIECES.length > 0) {
+
+      if (TARGET_PIECE_ID) {
+        if (PIECES && PIECES.length > 0) {
+          const foundIdx = PIECES.findIndex(p => String(p.id) === String(TARGET_PIECE_ID));
+          if (foundIdx >= 0) {
+            loadPiece(foundIdx);
+          }
+        }
+      } else if (PIECES && PIECES.length > 0) {
         pickNextRandomChant();
       }
 
+      if (FILTER_WORKER) {
+        showToast(`Filtre contributeur actif : ${FILTER_WORKER}`);
+      }
+
       // Charger dynamiquement la file à jour depuis l'API Oremus
-      fetchOnlineAlignmentQueue();
+      fetchOnlineAlignmentQueue({ forceTarget: true });
+      startBackgroundAlignmentPolling();
       checkTutorialOnStartup();
     }
 
