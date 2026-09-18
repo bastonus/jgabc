@@ -311,7 +311,10 @@ function submitTaskResult(result) {
   if (!task) return { success: false, error: 'Tâche introuvable' };
 
   const now = Date.now();
-  const workerId = result.worker_id || 'Ami-Anonyme';
+  const workerId = (result.worker_id || '').trim();
+  if (!workerId || workerId.toLowerCase() === 'ami-anonyme' || workerId.toLowerCase() === 'anonyme' || workerId.toLowerCase() === 'ami') {
+    return { success: false, error: 'Nom ou pseudo de contributeur obligatoire pour comptabiliser vos points' };
+  }
 
   if (result.status === 'completed' && Array.isArray(result.timestamps)) {
     task.status = 'completed';
@@ -1252,7 +1255,19 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </p>
 
       <div class="planner-section">
-        <div class="choice-group-label">1. Choisissez la durée de votre session :</div>
+        <!-- Étape 1 : Saisie obligatoire du prénom ou pseudo -->
+        <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span>1. Entrez votre prénom ou pseudo (obligatoire pour compter vos points) :</span>
+          <span style="font-size:0.75rem; color:var(--gold-sacred); font-weight:700;">✦ +25 XP par chant calculé</span>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="plannerWorkerInput" class="filter-input" style="max-width:100%; width:100%; font-size:1.02rem; padding:12px 14px; border-radius:10px; background:rgba(255,255,255,0.06); border:1.5px solid rgba(196,152,79,0.4); color:#ffffff; font-weight:600;" placeholder="Ex : theobald, frère-bernard, abbaye-saint-benoît..." autocomplete="name">
+          <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:6px;" id="plannerWorkerHint">
+            ✦ Vos points d'XP et vos chants calculés seront automatiquement enregistrés et comptabilisés sous ce nom.
+          </div>
+        </div>
+
+        <div class="choice-group-label">2. Choisissez la durée de votre session :</div>
         <div class="btn-pill-group" id="durationGroup">
           <button type="button" class="btn-pill" data-mins="15">15 minutes</button>
           <button type="button" class="btn-pill active" data-mins="30">30 minutes</button>
@@ -1266,7 +1281,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           <div class="slider-val-badge" id="sliderValDisplay">30 min</div>
         </div>
 
-        <div class="choice-group-label">2. Sélectionnez votre matériel (accélération) :</div>
+        <div class="choice-group-label">3. Sélectionnez votre matériel (accélération) :</div>
         <div class="btn-pill-group" id="hardwareGroup">
           <button type="button" class="btn-pill active" data-hw="cuda">NVIDIA GPU (CUDA)</button>
           <button type="button" class="btn-pill" data-hw="mps">Apple Silicon (M1-M4)</button>
@@ -1683,20 +1698,28 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? \`~\${estimatedCount} chants\` : 'Illimité (continu)';
       document.getElementById('estXpDisplay').textContent = \`+\${potentialXp} XP Monastiques\`;
 
-      const pseudo = document.getElementById('filterWorkerInput').value.trim() || 'Ami';
+      const plannerInput = document.getElementById('plannerWorkerInput');
+      const filterInput = document.getElementById('filterWorkerInput');
+      const pseudo = (plannerInput ? plannerInput.value.trim() : '') ||
+                     (filterInput ? filterInput.value.trim() : '') ||
+                     localStorage.getItem('oremus_worker_name') || '';
       const durArg = currentDurationMins > 0 ? \` --duration \${currentDurationMins}\` : '';
       const origin = window.location.origin;
 
-      // Commandes dynamiques avec pseudo et durée pré-configurés
-      const winCode = (pseudo === 'Ami' && currentDurationMins === 0)
-        ? \`irm \${origin}/run.ps1 | iex\`
-        : \`& ([scriptblock]::Create((irm \${origin}/run.ps1))) -Name "\${pseudo}"\${currentDurationMins > 0 ? \` -Duration \${currentDurationMins}\` : ''}\`;
+      // Commandes dynamiques avec pseudo obligatoire pour compter les points
+      let winCode = '';
+      let unixCode = '';
+      let pyCode = '';
 
-      const unixCode = (pseudo === 'Ami' && currentDurationMins === 0)
-        ? \`curl -fsSL \${origin}/run.sh | bash\`
-        : \`curl -fsSL \${origin}/run.sh | bash -s -- --name "\${pseudo}"\${durArg}\`;
-
-      const pyCode = \`curl -fsSL \${origin}/worker.py | python3 - --name "\${pseudo}"\${durArg}\`;
+      if (pseudo) {
+        winCode = \`$env:WORKER_NAME="\${pseudo}"; irm \${origin}/run.ps1 | iex\`;
+        unixCode = \`WORKER_NAME="\${pseudo}" curl -fsSL \${origin}/run.sh | bash\`;
+        pyCode = \`curl -fsSL \${origin}/worker.py | python3 - --name "\${pseudo}"\${durArg}\`;
+      } else {
+        winCode = \`irm \${origin}/run.ps1 | iex\`;
+        unixCode = \`curl -fsSL \${origin}/run.sh | bash\`;
+        pyCode = \`curl -fsSL \${origin}/worker.py | python3 -\`;
+      }
 
       const elWin = document.getElementById('cliCmdWindows');
       const elUnix = document.getElementById('cliCmdUnix');
@@ -1714,6 +1737,28 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     };
 
     window.copyCliCommand = function(elemId, btn) {
+      const plannerInput = document.getElementById('plannerWorkerInput');
+      const filterInput = document.getElementById('filterWorkerInput');
+      const pseudo = (plannerInput ? plannerInput.value.trim() : '') ||
+                     (filterInput ? filterInput.value.trim() : '') ||
+                     localStorage.getItem('oremus_worker_name') || '';
+      
+      // Imposer la saisie du nom avant de pouvoir copier la commande
+      if (!pseudo) {
+        if (plannerInput) {
+          plannerInput.focus();
+          plannerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          plannerInput.style.borderColor = 'var(--primary-color)';
+          plannerInput.style.boxShadow = '0 0 12px rgba(201, 107, 99, 0.4)';
+          setTimeout(() => {
+            plannerInput.style.borderColor = 'rgba(196,152,79,0.4)';
+            plannerInput.style.boxShadow = 'none';
+          }, 2000);
+        }
+        awardUserXp(0, 'Saisissez votre prénom ou pseudo pour compter vos points');
+        return;
+      }
+
       const codeElem = document.getElementById(elemId);
       if (!codeElem) return;
       const text = codeElem.textContent.trim();
@@ -1732,25 +1777,38 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
     // 3. User Filter & Batch View (Priorité absolue aux pièces de l'utilisateur)
     function setupUserFilter() {
-      const input = document.getElementById('filterWorkerInput');
+      const filterInput = document.getElementById('filterWorkerInput');
+      const plannerInput = document.getElementById('plannerWorkerInput');
       const urlParams = new URLSearchParams(window.location.search);
       const paramUser = urlParams.get('worker') || urlParams.get('name') || '';
       const savedUser = paramUser || localStorage.getItem('oremus_worker_name') || '';
+
       if (savedUser) {
-        input.value = savedUser;
+        if (filterInput) filterInput.value = savedUser;
+        if (plannerInput) plannerInput.value = savedUser;
         localStorage.setItem('oremus_worker_name', savedUser);
       }
 
-      input.addEventListener('input', () => {
-        const val = input.value.trim();
+      function syncName(val) {
         localStorage.setItem('oremus_worker_name', val);
+        if (filterInput && filterInput.value !== val) filterInput.value = val;
+        if (plannerInput && plannerInput.value !== val) plannerInput.value = val;
         updateEstimator();
         fetchWorkerBatch(val);
-      });
+      }
 
-      document.getElementById('btnRefreshBatch').addEventListener('click', () => {
-        fetchWorkerBatch(input.value.trim());
-      });
+      if (plannerInput) {
+        plannerInput.addEventListener('input', () => syncName(plannerInput.value.trim()));
+      }
+      if (filterInput) {
+        filterInput.addEventListener('input', () => syncName(filterInput.value.trim()));
+      }
+      const refreshBtn = document.getElementById('btnRefreshBatch');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          fetchWorkerBatch(filterInput ? filterInput.value.trim() : '');
+        });
+      }
     }
 
     async function fetchWorkerBatch(workerName) {
@@ -2547,9 +2605,16 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 7. API : Attribution de la prochaine tâche au worker (Claim)
+  // 7. API : Attribution de la prochaine tâche au worker (Claim - Nom obligatoire pour compter les points)
   if (req.method === 'GET' && (pathname === '/api/jobs/claim' || pathname === '/api/jobs/next')) {
-    const workerId = reqUrl.searchParams.get('worker_id') || reqUrl.searchParams.get('worker') || 'Ami-Anonyme';
+    const rawWorkerId = reqUrl.searchParams.get('worker_id') || reqUrl.searchParams.get('worker') || '';
+    const workerId = rawWorkerId.trim();
+    if (!workerId || workerId.toLowerCase() === 'ami-anonyme' || workerId.toLowerCase() === 'anonyme' || workerId.toLowerCase() === 'ami') {
+      return sendJson(res, 400, {
+        ok: false,
+        error: 'Nom ou pseudo de contributeur obligatoire pour réclamer une partition et compter vos points.'
+      });
+    }
     const job = claimNextTask(workerId);
     if (job) {
       return sendJson(res, 200, { ok: true, job });
@@ -2558,10 +2623,18 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 8. API : Soumission du résultat calculé par le worker (Submit)
+  // 8. API : Soumission du résultat calculé par le worker (Submit - Nom obligatoire pour compter les points)
   if (req.method === 'POST' && pathname === '/api/jobs/submit') {
     try {
       const data = await parseBody(req);
+      const rawWorkerId = data.worker_id || data.worker || '';
+      const workerId = rawWorkerId.trim();
+      if (!workerId || workerId.toLowerCase() === 'ami-anonyme' || workerId.toLowerCase() === 'anonyme' || workerId.toLowerCase() === 'ami') {
+        return sendJson(res, 400, {
+          success: false,
+          error: 'Nom ou pseudo de contributeur obligatoire pour soumettre un calcul et comptabiliser vos points.'
+        });
+      }
       const resData = submitTaskResult(data);
       return sendJson(res, resData.success ? 200 : 400, resData);
     } catch (err) {

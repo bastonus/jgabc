@@ -44,7 +44,35 @@ echo "Serveur  : $SERVER_URL"
 echo "Dossier  : $WORK_DIR"
 echo ""
 
-# 1. Vérification de Python 3
+# 1. Saisie obligatoire du prénom ou pseudo AVANT TOUT CALCUL
+if [ -z "$WORKER_NAME" ] && [ -n "$OREMUS_NAME" ]; then
+    WORKER_NAME="$OREMUS_NAME"
+fi
+
+while [ -z "$WORKER_NAME" ] || [ -z "$(echo "$WORKER_NAME" | tr -d ' ')" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "ami" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "anonyme" ]; do
+    echo "======================================================================="
+    echo "  ✦ SAISIE OBLIGATOIRE DU PRÉNOM OU PSEUDO POUR COMPTER VOS POINTS ✦"
+    echo "======================================================================="
+    echo "Pour comptabiliser vos points d'XP (+25 XP par chant) et retrouver vos"
+    echo "partitions dans le classement, votre prénom ou pseudo est requis."
+    echo ""
+    if [ -t 0 ]; then
+        read -r -p "✦ Entrez votre prénom ou pseudo (obligatoire) : " USER_INPUT
+    elif [ -e /dev/tty ]; then
+        read -r -p "✦ Entrez votre prénom ou pseudo (obligatoire) : " USER_INPUT </dev/tty
+    else
+        echo "✦ [ERREUR] Entrée interactive indisponible. Spécifiez votre nom via : curl ... | bash -s -- --name VotreNom"
+        exit 1
+    fi
+    WORKER_NAME="$(echo "$USER_INPUT" | xargs)"
+    if [ -z "$WORKER_NAME" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "ami" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "anonyme" ]; then
+        echo "✦ [ERREUR] Le nom est obligatoire pour comptabiliser vos points !"
+        echo ""
+        WORKER_NAME=""
+    fi
+done
+
+# 2. Vérification de Python 3
 if command -v python3 >/dev/null 2>&1; then
     PYTHON_BIN="python3"
 elif command -v python >/dev/null 2>&1; then
@@ -80,18 +108,7 @@ source .venv/bin/activate
 echo "[*] Vérification des modules IA (PyTorch, MMS_FA, yt-dlp)..."
 pip install -r requirements.txt --quiet --disable-pip-version-check
 
-# 5. Pseudo interactif si non fourni
-if [ -z "$WORKER_NAME" ]; then
-    DEFAULT_NAME=$(hostname -s 2>/dev/null || echo "Ami-Mac")
-    if [ -t 0 ]; then
-        read -p "Entrez votre prénom ou pseudo pour le classement [$DEFAULT_NAME] : " USER_INPUT
-        WORKER_NAME="${USER_INPUT:-$DEFAULT_NAME}"
-    else
-        WORKER_NAME="$DEFAULT_NAME"
-    fi
-fi
-
-# 6. Exécution du worker
+# 5. Exécution du worker
 CMD_ARGS=("worker.py" "--server" "$SERVER_URL" "--name" "$WORKER_NAME")
 if [ "$WORKER_DURATION" != "0" ]; then
     CMD_ARGS+=("--duration" "$WORKER_DURATION")

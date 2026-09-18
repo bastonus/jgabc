@@ -10,7 +10,25 @@ echo "Ce script configure automatiquement votre environnement et lance le"
 echo "calcul de synchronisation des partitions grégoriennes."
 echo ""
 
-# 1. Vérification de Python 3
+# 1. Saisie obligatoire du prénom ou pseudo AVANT TOUT CALCUL
+WORKER_NAME=""
+while [ -z "$WORKER_NAME" ] || [ -z "$(echo "$WORKER_NAME" | tr -d ' ')" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "ami" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "anonyme" ]; do
+    echo "======================================================================="
+    echo "  ✦ SAISIE OBLIGATOIRE DU PRÉNOM OU PSEUDO POUR COMPTER VOS POINTS ✦"
+    echo "======================================================================="
+    echo "Pour comptabiliser vos points d'XP (+25 XP par chant) et retrouver vos"
+    echo "partitions dans le classement, votre prénom ou pseudo est requis."
+    echo ""
+    read -r -p "✦ Entrez votre prénom ou pseudo (obligatoire) : " USER_NAME
+    WORKER_NAME="$(echo "$USER_NAME" | xargs)"
+    if [ -z "$WORKER_NAME" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "ami" ] || [ "$(echo "$WORKER_NAME" | tr '[:upper:]' '[:lower:]')" = "anonyme" ]; then
+        echo "✦ [ERREUR] Le nom est obligatoire pour comptabiliser vos points !"
+        echo ""
+        WORKER_NAME=""
+    fi
+done
+
+# 2. Vérification de Python 3
 if command -v python3 >/dev/null 2>&1; then
     PYTHON_BIN="python3"
 elif command -v python >/dev/null 2>&1; then
@@ -22,7 +40,7 @@ else
     exit 1
 fi
 
-# 2. Création de l'environnement virtuel
+# 3. Création de l'environnement virtuel
 if [ ! -d ".venv" ]; then
     echo "[*] Création de l'environnement virtuel isolé (.venv)..."
     $PYTHON_BIN -m venv .venv
@@ -31,14 +49,9 @@ fi
 # Activation de l'environnement
 source .venv/bin/activate
 
-# 3. Installation des dépendances
+# 4. Installation des dépendances
 echo "[*] Installation / Vérification des dépendances (PyTorch, MMS_FA, yt-dlp)..."
 pip install -r requirements.txt --quiet --disable-pip-version-check
-
-# 4. Choix du pseudo
-DEFAULT_NAME=$(hostname -s 2>/dev/null || echo "Ami-Mac")
-read -p "Entrez votre prénom ou pseudo pour le classement [$DEFAULT_NAME] : " USER_NAME
-WORKER_NAME="${USER_NAME:-$DEFAULT_NAME}"
 
 # 5. Choix de la durée de session
 echo ""

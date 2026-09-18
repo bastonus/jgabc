@@ -452,8 +452,27 @@ def main():
     args = parser.parse_args()
 
     server_url = args.server.rstrip("/")
+    worker_name = args.name.strip()
+
+    # Saisie obligatoire du prénom ou pseudo AVANT tout calcul pour compter les points
+    while not worker_name or worker_name.lower() in ("ami", "anonyme", "ami-anonyme", "unknown"):
+        print("\n" + "=" * 75)
+        print("  ✦ SAISIE OBLIGATOIRE DU PRÉNOM OU PSEUDO POUR COMPTER VOS POINTS ✦")
+        print("  Chaque chant aligné vous rapporte +25 XP et s'inscrit à votre nom.")
+        print("=" * 75)
+        try:
+            worker_name = input("✦ Entrez votre prénom ou pseudo (obligatoire) : ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nArrêt du programme.")
+            sys.exit(0)
+        
+        if not worker_name:
+            print("\033[91m✦ [ERREUR] Le nom est obligatoire pour comptabiliser vos points et vos chants !\033[0m")
+        elif worker_name.lower() in ("ami", "anonyme", "ami-anonyme", "unknown"):
+            print("\033[91m✦ [ERREUR] Veuillez choisir un prénom ou pseudo personnalisé pour compter vos points.\033[0m")
+            worker_name = ""
+
     device_type, device_desc = detect_device()
-    worker_name = args.name.strip() or get_default_worker_name()
 
     SESSION_STATE["worker_name"] = worker_name
     SESSION_STATE["server_url"] = server_url

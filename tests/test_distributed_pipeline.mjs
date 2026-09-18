@@ -133,6 +133,15 @@ try {
 
   // ── TEST 5 : Attribution d'une tâche (Claim) ──
   console.log('\n🎯 Test 5 : Attribution d\'une tâche à un worker (/api/jobs/claim)');
+  // 5a. Rejet si nom absent ou anonyme
+  const anonymousClaim1 = await requestHttp('GET', '/api/jobs/claim');
+  assert(anonymousClaim1.status === 400, 'GET /api/jobs/claim sans worker_id est rejeté avec HTTP 400');
+  assert(anonymousClaim1.json.ok === false, 'Réponse ok: false en l\'absence de nom');
+
+  const anonymousClaim2 = await requestHttp('GET', '/api/jobs/claim?worker_id=Ami');
+  assert(anonymousClaim2.status === 400, 'GET /api/jobs/claim avec "Ami" générique est rejeté avec HTTP 400');
+
+  // 5b. Attribution réussie avec nom personnalisé
   const claimRes = await requestHttp('GET', '/api/jobs/claim?worker_id=Ami-Alexandre-RTX');
   assert(claimRes.status === 200, 'GET /api/jobs/claim répond HTTP 200');
   assert(claimRes.json.ok === true, 'Réponse ok: true');

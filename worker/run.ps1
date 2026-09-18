@@ -24,7 +24,26 @@ Write-Host "Serveur : $Server" -ForegroundColor Cyan
 Write-Host "Dossier : $WorkDir" -ForegroundColor DarkGray
 Write-Host ""
 
-# 1. Vérification de Python
+# 1. Vérification ou saisie obligatoire du prénom ou pseudo AVANT TOUT CALCUL
+if (-not $Name -and $env:WORKER_NAME) {
+    $Name = $env:WORKER_NAME.Trim()
+}
+
+while (-not $Name -or $Name.Trim() -eq "" -or $Name.Trim().ToLower() -eq "ami" -or $Name.Trim().ToLower() -eq "anonyme") {
+    Write-Host "✦ SAISIE OBLIGATOIRE DU PRÉNOM OU PSEUDO POUR COMPTER VOS POINTS ✦" -ForegroundColor Yellow
+    Write-Host "Pour comptabiliser vos points d'XP (+25 XP par chant) et retrouver vos" -ForegroundColor White
+    Write-Host "partitions dans le classement, votre prénom ou pseudo est requis." -ForegroundColor White
+    Write-Host ""
+    $InputName = Read-Host "✦ Entrez votre prénom ou pseudo (obligatoire)"
+    if ($InputName -and $InputName.Trim() -ne "" -and $InputName.Trim().ToLower() -ne "ami" -and $InputName.Trim().ToLower() -ne "anonyme") {
+        $Name = $InputName.Trim()
+    } else {
+        Write-Host "✦ [ERREUR] Le nom est obligatoire pour comptabiliser vos points !" -ForegroundColor Red
+        Write-Host ""
+    }
+}
+
+# 2. Vérification de Python
 $PythonCmd = $null
 if (Get-Command python -ErrorAction SilentlyContinue) {
     $PythonCmd = "python"
@@ -59,16 +78,9 @@ if (-not (Test-Path $VenvDir)) {
 $VenvPython = Join-Path $VenvDir "Scripts\python.exe"
 $VenvPip = Join-Path $VenvDir "Scripts\pip.exe"
 
-# 5. Dépendances IA
+# 6. Dépendances IA
 Write-Host "[*] Vérification des modules IA (PyTorch, MMS_FA, yt-dlp)..." -ForegroundColor Cyan
 & $VenvPip install -r requirements.txt --quiet --disable-pip-version-check
-
-# 6. Pseudo interactif si non fourni
-if (-not $Name) {
-    $DefaultName = $env:COMPUTERNAME
-    $InputName = Read-Host "Entrez votre prénom ou pseudo pour le classement [$DefaultName]"
-    if ($InputName) { $Name = $InputName } else { $Name = $DefaultName }
-}
 
 # 7. Lancement du worker
 Write-Host "[*] Lancement du calcul pour : $Name" -ForegroundColor Green

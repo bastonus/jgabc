@@ -11,6 +11,21 @@ echo Ce script va automatiquement configurer votre ordinateur et commencer
 echo a calculer l'alignement note-par-note des chants liturgiques.
 echo.
 
+:ask_nick
+echo =======================================================================
+echo   ✦ SAISIE OBLIGATOIRE DU PRENOM OU PSEUDO POUR COMPTER VOS POINTS ✦
+echo =======================================================================
+echo Pour comptabiliser vos points d'XP (+25 XP par chant) et retrouver vos
+echo partitions dans le classement, votre prenom ou pseudo est requis.
+echo.
+set /p USER_INPUT="✦ Entrez votre prenom ou pseudo (obligatoire) : "
+if "%USER_INPUT%"=="" (
+    echo [ERREUR] Le prenom ou pseudo est obligatoire pour compter vos points !
+    echo.
+    goto ask_nick
+)
+set WORKER_NICK=%USER_INPUT%
+
 :: 1. Verification de Python
 where python >nul 2>nul
 if %ERRORLEVEL% neq 0 (
@@ -50,13 +65,7 @@ call .venv\Scripts\activate.bat
 echo [*] Verification des modules d'intelligence artificielle (PyTorch, MMS_FA, yt-dlp)...
 pip install -r requirements.txt --quiet --disable-pip-version-check
 
-:: 4. Choix du pseudo pour le tableau des contributeurs
-set WORKER_NICK=%COMPUTERNAME%
-echo.
-set /p USER_INPUT="Entrez votre prenom ou pseudo pour le classement [defaut: %COMPUTERNAME%]: "
-if not "%USER_INPUT%"=="" set WORKER_NICK=%USER_INPUT%
-
-:: 5. Choix de la duree de session
+:: 4. Choix de la duree de session
 set WORKER_MINS=0
 echo.
 echo Combien de temps souhaitez-vous consacrer au calcul ?
