@@ -145,6 +145,13 @@ function syncTasksWithAlignments() {
           task.incipit = seeds[pid].incipit;
         }
         modified = true;
+      } else if (task.status === 'failed' && task.error && (task.error.includes('No module named') || task.error.includes('ImportError') || task.error.includes('ModuleNotFoundError'))) {
+        // Déblocage des pièces échouées par manque de module local
+        task.status = 'pending';
+        task.error = null;
+        task.claimed_at = null;
+        task.worker_id = null;
+        modified = true;
       }
     }
   }
@@ -266,10 +273,18 @@ function claimNextTask(workerId) {
   const tasks = loadTasks();
   const now = Date.now();
 
-  const task = tasks.find(t => 
+  let task = tasks.find(t => 
     t.status === 'pending' || 
     (t.status === 'claimed' && t.claimed_at && (now - t.claimed_at > CLAIM_LEASE_MS))
   );
+
+  // Si aucune tâche en attente, retenter les tâches ayant échoué précédemment
+  if (!task) {
+    task = tasks.find(t => t.status === 'failed' && (!t.failed_at || (now - t.failed_at > 120000)));
+    if (task) {
+      task.error = null;
+    }
+  }
 
   if (!task) return null;
 
@@ -340,8 +355,17 @@ function submitTaskResult(result) {
     return { success: true, piece_id: pieceId, worker_total: workers[workerId].count };
 
   } else if (result.status === 'failed') {
-    task.status = 'failed';
-    task.error = result.error || 'Erreur inconnue signalée par le worker';
+    const errStr = String(result.error || '');
+    if (errStr.includes('No module named') || errStr.includes('ImportError') || errStr.includes('ModuleNotFoundError')) {
+      task.status = 'pending';
+      task.claimed_at = null;
+      task.worker_id = null;
+      task.error = null;
+    } else {
+      task.status = 'failed';
+      task.failed_at = now;
+      task.error = result.error || 'Erreur inconnue signalée par le worker';
+    }
     saveTasks();
     return { success: true, piece_id: pieceId, status: 'failed_recorded' };
   }
@@ -702,206 +726,314 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
   <title>Oremus — Calcul Distribué & Scriptorium Liturgique</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
+    /* Oremus Frameless Zero-Stroke Design System Tokens */
     :root {
-      --bg: #090d16;
-      --surface: #111726;
-      --surface-card: #161f33;
-      --surface-elevated: #1b263e;
-      --border: #1e293b;
-      --border-accent: rgba(196, 152, 79, 0.35);
-      --gold: #c4984f;
-      --gold-light: #fbbf24;
-      --gold-dark: #926628;
-      --emerald: #10b981;
-      --crimson: #ef4444;
-      --blue: #38bdf8;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --radius: 14px;
+      --primary-color: #c96b63;
+      --primary-color-rgb: 201, 107, 99;
+      --gold-sacred: #c4984f;
+      --gold-sacred-bg: rgba(196, 152, 79, 0.12);
+
+      --background-base: #000000;
+      --background-surface: #0a0a0a;
+      --background-card: #141414;
+      --background-highlight: #1e1e22;
+
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+
+      --status-success: #10b981;
+      --status-success-bg: rgba(16, 185, 129, 0.14);
+      --status-warning: #f59e0b;
+      --status-warning-bg: rgba(245, 158, 11, 0.14);
+      --status-danger: #c96b63;
+      --status-danger-bg: rgba(201, 107, 99, 0.14);
+
+      --card-radius: 14px;
+      --btn-radius: 12px;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--background-base);
+      color: var(--text-primary);
       line-height: 1.5;
-      padding: 16px 12px 60px;
+      padding: 16px 14px 60px;
     }
-    .container { max-width: 960px; margin: 0 auto; }
-    
-    /* Top Bar Header (Monastic Rank Widget) */
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* Top Bar Header (Monastic Rank Widget Frameless) */
     .header-bar {
       display: flex; justify-content: space-between; align-items: center;
-      background: var(--surface); border: 1px solid var(--border-accent);
-      border-radius: var(--radius); padding: 12px 18px; margin-bottom: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      background: var(--background-surface); border: none !important;
+      border-radius: var(--card-radius); padding: 12px 18px; margin-bottom: 24px;
     }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .monk-avatar {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--gold-sacred); color: #121214;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; border: 2px solid var(--gold-light);
-      box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+      font-size: 1.25rem; font-weight: 700; flex-shrink: 0;
     }
-    .monk-info-title { font-weight: 700; font-size: 1.05rem; color: #fff; }
-    .monk-info-sub { font-size: 0.8rem; color: var(--gold-light); display: flex; align-items: center; gap: 8px; }
-    .streak-pill { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 1px 6px; border-radius: 999px; font-weight: 700; font-size: 0.75rem; }
-    
+    .monk-info-title {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-weight: 700; font-size: 1.05rem; color: var(--text-primary);
+    }
+    .monk-info-sub {
+      font-size: 0.78rem; color: var(--gold-sacred); display: flex; align-items: center; gap: 8px; margin-top: 1px;
+    }
+    .streak-pill {
+      background: rgba(245, 158, 11, 0.14); color: #f59e0b;
+      padding: 1px 7px; border-radius: 999px; font-weight: 700; font-size: 0.72rem;
+    }
     .header-right { display: flex; align-items: center; gap: 10px; }
     .xp-counter-badge {
-      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-      border-radius: 8px; padding: 6px 12px; text-align: right;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 10px; padding: 6px 12px; text-align: right;
     }
-    .xp-num { font-weight: 800; color: var(--gold-light); font-size: 0.95rem; }
-    .xp-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+    .xp-num { font-weight: 800; color: var(--gold-sacred); font-size: 0.95rem; }
+    .xp-label { font-size: 0.68rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* Titles */
-    .page-hero { text-align: center; margin-bottom: 28px; }
+    /* Page Titles */
+    .page-hero { text-align: center; margin-bottom: 26px; }
     .badge-hero {
-      display: inline-block; padding: 4px 14px; border-radius: 999px;
-      background: rgba(196, 152, 79, 0.15); border: 1px solid var(--border-accent);
-      color: var(--gold-light); font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; margin-bottom: 10px;
+      display: inline-block; padding: 3px 12px; border-radius: 999px;
+      background: var(--gold-sacred-bg); color: var(--gold-sacred);
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 8px;
     }
-    h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
-    p.lead { font-size: 1.02rem; color: var(--text-muted); max-width: 680px; margin: 0 auto; }
+    h1 {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.95rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    p.lead { font-size: 0.96rem; color: var(--text-secondary); max-width: 640px; margin: 0 auto; line-height: 1.5; }
 
-    /* Cards */
+    /* Cards (Frameless) */
     .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px; margin-bottom: 22px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
+      background: var(--background-surface); border: none !important;
+      border-radius: var(--card-radius); padding: 22px; margin-bottom: 20px;
     }
-    .card-gold { border-color: var(--border-accent); background: linear-gradient(180deg, rgba(22, 31, 51, 0.9), var(--surface)); }
-    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; color: #fff; }
+    .card-title {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+      color: var(--text-primary);
+    }
 
     /* Progress Bar */
-    .progress-bar-bg { height: 12px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-top: 10px; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); width: ${stats.percentage}%; transition: width 0.5s; }
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
-    .stat-chip { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; text-align: center; }
-    .stat-chip-val { font-size: 1.5rem; font-weight: 800; }
-    .stat-chip-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+    .progress-bar-bg { height: 10px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .progress-bar-fill { height: 100%; background: #10b981; width: ${stats.percentage}%; transition: width 0.5s; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 16px; }
+    .stat-chip { background: rgba(255,255,255,0.025); border-radius: 10px; padding: 12px; text-align: center; }
+    .stat-chip-val { font-size: 1.45rem; font-weight: 800; }
+    .stat-chip-lbl { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
     /* Session Planner Controls */
-    .planner-section { margin-top: 8px; }
-    .choice-group-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gold-light); font-weight: 700; margin-bottom: 8px; }
+    .planner-section { margin-top: 6px; }
+    .choice-group-label { font-size: 0.80rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); font-weight: 700; margin-bottom: 8px; }
     .btn-pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .btn-pill {
-      background: var(--surface-card); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 16px; border-radius: 8px;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+      background: rgba(255, 255, 255, 0.05); border: none;
+      color: var(--text-secondary); padding: 8px 15px; border-radius: 9px;
+      font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
     }
-    .btn-pill:hover { border-color: var(--gold); color: #fff; }
-    .btn-pill.active { background: var(--gold); color: #000; font-weight: 700; border-color: var(--gold-light); box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+    .btn-pill:hover { background: rgba(255, 255, 255, 0.10); color: var(--text-primary); }
+    .btn-pill.active { background: var(--primary-color); color: #fff; font-weight: 600; }
 
     .slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .slider-input { flex: 1; accent-color: var(--gold-light); cursor: pointer; height: 6px; }
-    .slider-val-badge { background: rgba(0,0,0,0.3); border: 1px solid var(--gold); padding: 4px 10px; border-radius: 6px; font-weight: 700; color: var(--gold-light); min-width: 75px; text-align: center; }
+    .slider-input { flex: 1; accent-color: var(--primary-color); cursor: pointer; height: 6px; }
+    .slider-val-badge {
+      background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px;
+      font-weight: 700; color: var(--primary-color); min-width: 70px; text-align: center; font-size: 0.85rem;
+    }
 
     /* Estimation Highlight Box */
     .estimation-card {
-      background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 12px; padding: 16px; margin: 16px 0; display: flex;
-      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+      background: rgba(16, 185, 129, 0.08); border-radius: 12px; padding: 16px;
+      margin: 16px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
     }
-    .est-number { font-size: 1.8rem; font-weight: 900; color: #34d399; }
-    .est-label { font-size: 0.85rem; color: var(--text-muted); }
-    .est-xp-badge { background: rgba(251, 191, 36, 0.15); border: 1px solid var(--gold); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; }
+    .est-number { font-size: 1.7rem; font-weight: 800; color: #10b981; }
+    .est-label { font-size: 0.82rem; color: var(--text-secondary); }
+    .est-xp-badge { background: var(--gold-sacred-bg); color: var(--gold-sacred); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; }
 
     /* CTA Button */
     .btn-cta {
       display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-      background: linear-gradient(135deg, var(--gold), #926628);
-      color: #fff; text-decoration: none; padding: 14px 28px;
-      font-size: 1.05rem; font-weight: 700; border-radius: 10px; border: none;
-      cursor: pointer; box-shadow: 0 8px 20px -4px rgba(196, 152, 79, 0.4);
-      transition: transform 0.15s, box-shadow 0.15s; width: 100%;
+      background: rgba(255, 255, 255, 0.08); color: var(--text-primary);
+      text-decoration: none; padding: 12px 24px; font-size: 0.95rem; font-weight: 600;
+      border-radius: 10px; border: none; cursor: pointer; transition: background 0.15s; width: 100%;
     }
-    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 25px -4px rgba(196, 152, 79, 0.6); }
+    .btn-cta:hover { background: rgba(255, 255, 255, 0.14); }
 
     /* CLI Command Section Styles */
     .cli-section { margin-top: 20px; }
-    .cli-tabs { display: flex; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .cli-tabs { display: flex; gap: 8px; margin-bottom: 10px; padding-bottom: 6px; }
     .cli-tab-btn {
-      background: none; border: none; color: var(--text-muted); padding: 7px 14px;
-      font-size: 0.88rem; font-weight: 700; cursor: pointer; border-radius: 6px; transition: all 0.15s;
+      background: none; border: none; color: var(--text-tertiary); padding: 6px 12px;
+      font-size: 0.84rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.15s;
     }
-    .cli-tab-btn:hover { color: #fff; }
+    .cli-tab-btn:hover { color: var(--text-primary); }
     .cli-tab-btn.active {
-      background: rgba(56, 189, 248, 0.15); color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(201, 107, 99, 0.14); color: var(--primary-color);
     }
     .cli-box {
-      background: rgba(0, 0, 0, 0.55); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 16px; display: flex;
+      background: #000000; border-radius: 10px; padding: 12px 14px; display: flex;
       justify-content: space-between; align-items: center; gap: 14px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.88rem; color: #38bdf8; margin-bottom: 8px; overflow-x: auto;
+      font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px; overflow-x: auto;
     }
     .cli-box code { white-space: nowrap; user-select: all; font-family: inherit; }
     .btn-copy-cli {
-      background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #fff;
-      padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;
+      background: rgba(201, 107, 99, 0.15); border: none; color: var(--primary-color);
+      padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
       cursor: pointer; white-space: nowrap; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
     }
-    .btn-copy-cli:hover { background: #38bdf8; color: #000; }
-    .btn-copy-cli.copied { background: var(--emerald); border-color: var(--emerald); color: #000; }
+    .btn-copy-cli:hover { background: rgba(201, 107, 99, 0.28); }
+    .btn-copy-cli.copied { background: rgba(16, 185, 129, 0.2); color: #10b981; }
 
     /* Batch & Review Section */
     .batch-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
     .user-filter-box { display: flex; gap: 8px; align-items: center; }
     .user-input {
-      background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-      color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
+      background: rgba(255,255,255,0.05); border: none;
+      color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; outline: none;
     }
-    .user-input:focus { border-color: var(--gold); outline: none; }
+    .user-input:focus { background: rgba(255,255,255,0.08); }
     
-    .pieces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .pieces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
     .piece-card {
-      background: var(--surface-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px; display: flex; flex-direction: column;
-      justify-content: space-between; gap: 10px; transition: border-color 0.15s;
+      background: var(--background-card); border-radius: 12px;
+      padding: 14px; display: flex; flex-direction: column;
+      justify-content: space-between; gap: 10px; transition: background 0.15s;
     }
-    .piece-card:hover { border-color: rgba(255,255,255,0.2); }
-    .piece-title { font-weight: 700; font-size: 0.95rem; color: #fff; line-height: 1.3; }
-    .piece-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 10px; }
+    .piece-card:hover { background: var(--background-highlight); }
+    .piece-title {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-weight: 700; font-size: 0.98rem; color: #fff; line-height: 1.3;
+    }
+    .piece-meta { font-size: 0.78rem; color: var(--text-tertiary); display: flex; gap: 10px; }
     .btn-review-card {
-      background: rgba(196, 152, 79, 0.15); border: 1px solid var(--gold);
-      color: var(--gold-light); padding: 6px 12px; border-radius: 6px;
-      font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: center;
-      transition: all 0.15s;
+      background: var(--gold-sacred-bg); border: none;
+      color: var(--gold-sacred); padding: 7px 12px; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center;
+      transition: background 0.15s;
     }
-    .btn-review-card:hover { background: var(--gold); color: #000; }
+    .btn-review-card:hover { background: rgba(196, 152, 79, 0.24); }
 
-    /* Modal Review Player */
+    /* Modal Review Player — style alignment-lab (frameless) */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.88); backdrop-filter: blur(10px);
       display: none; align-items: center; justify-content: center; z-index: 9999;
       padding: 16px;
     }
     .modal-content {
-      background: var(--surface); border: 1px solid var(--border-accent);
-      border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh;
-      overflow-y: auto; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      background: #0a0a0a; border: none;
+      border-radius: 20px; width: 100%; max-width: 700px; max-height: 92vh;
+      overflow-y: auto; padding: 24px;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.85);
       position: relative;
     }
-    .modal-close {
-      position: absolute; top: 14px; right: 14px; background: none; border: none;
-      color: var(--text-muted); font-size: 1.5rem; cursor: pointer;
+    .modal-close-btn {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 9px;
+      background: rgba(255,255,255,0.07); border: none;
+      color: #94a3b8; font-size: 1.0rem; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
     }
-    .video-frame-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; margin: 14px 0; }
+    .modal-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+    .modal-chant-badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.68rem; font-weight: 700; color: #c96b63;
+      background: rgba(201,107,99,0.12); padding: 2px 8px;
+      border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .modal-chant-title {
+      font-size: 1.3rem; font-weight: 700;
+      color: #f8fafc; margin-bottom: 2px; line-height: 1.25;
+    }
+    .modal-chant-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 14px; }
+    .video-frame-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin: 14px 0; }
     .video-frame-container iframe { width: 100%; height: 100%; border: none; }
-    .review-action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
-    .btn-vote-approve { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    .btn-vote-sync { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    .btn-vote-bad { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .modal-timestamps-info {
+      padding: 10px 14px; border-radius: 10px;
+      background: rgba(255,255,255,0.035);
+      font-size: 0.84rem; color: #94a3b8; margin-bottom: 16px;
+    }
+    .modal-timestamps-info strong { color: #10b981; }
+    /* Boutons de décision — identiques au laboratoire d'alignement */
+    .decision-buttons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-decision {
+      height: 54px; border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      cursor: pointer; user-select: none;
+      border: none !important; outline: none !important;
+      box-shadow: none !important; transform: none !important;
+      padding: 6px 4px;
+      transition: background-color 0.15s ease, opacity 0.15s ease;
+    }
+    .btn-decision:active { opacity: 0.8; }
+    .btn-decision .decision-label {
+      font-size: 0.84rem; font-weight: 600; line-height: 1.1;
+      text-align: center; display: flex; align-items: center; gap: 5px;
+    }
+    .btn-decision .decision-xp { font-size: 0.65rem; opacity: 0.65; font-weight: 500; }
+    .btn-decision.btn-approved { background: rgba(16,185,129,0.14) !important; color: #10b981 !important; }
+    .btn-decision.btn-approved:hover { background: rgba(16,185,129,0.24) !important; }
+    .btn-decision.btn-delayed { background: rgba(245,158,11,0.14) !important; color: #f59e0b !important; }
+    .btn-decision.btn-delayed:hover { background: rgba(245,158,11,0.24) !important; }
+    .btn-decision.btn-bad { background: rgba(201,107,99,0.14) !important; color: #c96b63 !important; }
+    .btn-decision.btn-bad:hover { background: rgba(201,107,99,0.24) !important; }
+
+    /* Ligne d'actions secondaires (Passer, Remarque) */
+    .utility-actions-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .btn-utility {
+      flex: 1; height: 34px; border-radius: 9px;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: none !important; outline: none !important;
+      color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .btn-utility:hover { background: rgba(255, 255, 255, 0.10) !important; color: #fff; }
+    .btn-utility.btn-skip-prominent { flex: 2; font-weight: 600; color: #f8fafc; }
+    .btn-utility.btn-comment-trigger {
+      flex: 1; font-weight: 600; color: #f8fafc;
+      background: rgba(201, 107, 99, 0.14) !important;
+    }
+    .btn-utility.btn-comment-trigger:hover { background: rgba(201, 107, 99, 0.24) !important; }
+
+    /* Zone de commentaire dépliable */
+    .decision-comment-view { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 8px; animation: commentExpandIn 0.2s ease-out; }
+    @keyframes commentExpandIn { from { opacity: 0; transform: scaleY(0.96); } to { opacity: 1; transform: scaleY(1); } }
+    .inline-comment-textarea {
+      width: 100%; min-height: 56px; max-height: 120px; padding: 10px 12px;
+      border-radius: 12px; background: #1e1e22 !important; border: none !important; outline: none !important;
+      color: #f8fafc; font-family: inherit; font-size: 0.86rem; line-height: 1.4; resize: none; box-sizing: border-box;
+    }
+    .comment-actions-row { display: flex; gap: 10px; width: 100%; margin-top: 6px; }
+    .btn-comment-cancel {
+      flex: 1; height: 38px; border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08) !important; color: #f8fafc !important;
+      border: none !important; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-comment-submit {
+      flex: 1.3; height: 38px; border-radius: 10px;
+      background: #c96b63 !important; color: #ffffff !important;
+      border: none !important; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-comment-submit:hover { filter: brightness(1.1); }
 
     /* Floating XP Toast */
     .xp-float-toast {
@@ -967,26 +1099,26 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
       <div class="stats-row">
         <div class="stat-chip">
-          <div class="stat-chip-val" style="color:var(--emerald);" id="statCompleted">${stats.completed}</div>
+          <div class="stat-chip-val" style="color: #10b981;" id="statCompleted">${stats.completed}</div>
           <div class="stat-chip-lbl">Chants alignés</div>
         </div>
         <div class="stat-chip">
-          <div class="stat-chip-val" style="color:var(--gold-light);" id="statPending">${stats.pending}</div>
+          <div class="stat-chip-val" style="color: var(--gold-sacred);" id="statPending">${stats.pending}</div>
           <div class="stat-chip-lbl">En attente</div>
         </div>
         <div class="stat-chip">
-          <div class="stat-chip-val" style="color:var(--blue);" id="statWorkers">${stats.active_workers}</div>
+          <div class="stat-chip-val" style="color: var(--primary-color);" id="statWorkers">${stats.active_workers}</div>
           <div class="stat-chip-lbl">Ordinateurs d'amis</div>
         </div>
       </div>
     </div>
 
     <!-- Section 1 : Interactive Session Planner with Estimator -->
-    <div class="card card-gold">
+    <div class="card">
       <div class="card-title">
         <span>⏱️</span> Planificateur de Session & Estimation
       </div>
-      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">
+      <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">
         Choisissez combien de temps vous souhaitez consacrer au calcul. L'estimation est calculée dynamiquement à partir des benchmarks réels de nos serveurs.
       </p>
 
@@ -1020,7 +1152,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           </div>
           <div style="text-align:right;">
             <div class="est-xp-badge" id="estXpDisplay">+1075 XP Monastiques</div>
-            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">+25 XP par chant calculé</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">+25 XP par chant calculé</div>
           </div>
         </div>
 
@@ -1028,9 +1160,9 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         <div class="cli-section">
           <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span>💻 Option 1 : Lancement direct en Ligne de Commande (Terminal)</span>
-            <span style="font-size:0.75rem; color:var(--emerald); text-transform:none; font-weight:700;">⚡ Zéro téléchargement manuel</span>
+            <span style="font-size:0.75rem; color:#10b981; text-transform:none; font-weight:700;">⚡ Zéro téléchargement manuel</span>
           </div>
-          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">
+          <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
             Copiez-collez une seule ligne dans votre terminal. L'environnement virtuel isolé et les modules IA sont configurés automatiquement.
           </p>
 
@@ -1048,7 +1180,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
                 Copier
               </button>
             </div>
-            <div style="font-size:0.78rem; color:var(--text-muted);">
+            <div style="font-size:0.78rem; color:var(--text-tertiary);">
               💡 <em>Ouvrez PowerShell, collez la commande et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
             </div>
           </div>
@@ -1061,7 +1193,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
                 Copier
               </button>
             </div>
-            <div style="font-size:0.78rem; color:var(--text-muted);">
+            <div style="font-size:0.78rem; color:var(--text-tertiary);">
               💡 <em>Ouvrez votre Terminal (macOS / Linux), collez et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
             </div>
           </div>
@@ -1074,22 +1206,22 @@ function renderWorkerPortalHtml(stats, benchmarks) {
                 Copier
               </button>
             </div>
-            <div style="font-size:0.78rem; color:var(--text-muted);">
+            <div style="font-size:0.78rem; color:var(--text-tertiary);">
               💡 <em>Exécution directe via Python (recommandé si PyTorch est déjà présent sur votre machine).</em>
             </div>
           </div>
         </div>
 
         <!-- Mode de lancement : 2. Pack ZIP 1-Clic -->
-        <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+        <div style="margin-top:20px; padding-top:16px;">
           <div class="choice-group-label" style="margin-bottom:8px;">
             <span>📦 Option 2 : Téléchargement du Pack Autonome (Archive ZIP)</span>
           </div>
-          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">
+          <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
             Idéal si vous préférez un dossier zippé avec lanceurs double-clic tout prêts.
           </p>
           <a href="/download/worker.zip" class="btn-cta">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             Télécharger le pack Worker (oremus-worker.zip)
           </a>
         </div>
@@ -1101,27 +1233,27 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       <div class="card-title">
         <span>🚀</span> Instructions Simplifiées (1 Clic pour Débutants)
       </div>
-      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:14px;">
+      <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:14px;">
         Aucune connaissance technique requise. Décompressez l'archive et lancez le script correspondant à votre système :
       </p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
-        <div style="background:var(--surface-elevated); border:1px solid var(--border); border-radius:10px; padding:14px;">
-          <div style="font-weight:700; color:var(--emerald); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+        <div style="background:var(--background-card); border-radius:12px; padding:16px;">
+          <div style="font-weight:700; color:#10b981; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
             <span style="font-size:1.1rem;">🪟</span> <strong>Windows (1 Clic)</strong>
           </div>
-          <ol style="font-size:0.86rem; color:var(--text-muted); margin-left:20px; line-height:1.6;">
+          <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
             <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
-            <li>Double-cliquez simplement sur <code style="color:var(--emerald); background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">start_worker.bat</code>.</li>
+            <li>Double-cliquez simplement sur <code style="color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">start_worker.bat</code>.</li>
             <li>Indiquez votre pseudo et la durée souhaitée : l'alignement commence immédiatement !</li>
           </ol>
         </div>
-        <div style="background:var(--surface-elevated); border:1px solid var(--border); border-radius:10px; padding:14px;">
-          <div style="font-weight:700; color:var(--blue); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+        <div style="background:var(--background-card); border-radius:12px; padding:16px;">
+          <div style="font-weight:700; color:var(--primary-color); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
             <span style="font-size:1.1rem;">🍎</span> <strong>macOS & Linux</strong>
           </div>
-          <ol style="font-size:0.86rem; color:var(--text-muted); margin-left:20px; line-height:1.6;">
+          <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
             <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
-            <li>Dans le terminal ou Finder, lancez <code style="color:var(--blue); background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:4px;">start_worker.sh</code>.</li>
+            <li>Dans le terminal ou Finder, lancez <code style="color:var(--primary-color); background:rgba(201,107,99,0.12); padding:2px 6px; border-radius:4px;">start_worker.sh</code>.</li>
             <li>L'accélération Apple Silicon (MPS) ou CUDA est détectée automatiquement.</li>
           </ol>
         </div>
@@ -1172,32 +1304,68 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
     </div>
 
-    <!-- Modal : Lecteur de Revue Directe -->
-    <div class="modal-backdrop" id="reviewModal">
+    <!-- Modal : Lecteur de Revue Directe (Fidèle à alignment-lab.html) -->
+    <div class="modal-backdrop" id="reviewModal" onclick="handleBackdropClick(event)">
       <div class="modal-content">
-        <button type="button" class="modal-close" onclick="closeReviewModal()">&times;</button>
-        <div class="badge-hero" id="modalPiecePart" style="margin-bottom:6px;">Kyriale</div>
-        <h2 id="modalPieceTitle" style="font-size:1.4rem; margin-bottom:4px;">Incipit du Chant</h2>
-        <div style="font-size:0.85rem; color:var(--text-muted);" id="modalPieceAuthor">Aligné par : Ami</div>
+        <button type="button" class="modal-close-btn" onclick="closeReviewModal()" aria-label="Fermer">✕</button>
+
+        <div class="modal-chant-badge" id="modalPiecePart">Kyriale</div>
+        <div class="modal-chant-title" id="modalPieceTitle">Incipit du Chant</div>
+        <div class="modal-chant-sub" id="modalPieceAuthor">Aligné par : Ami</div>
 
         <div class="video-frame-container">
           <iframe id="modalVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
         </div>
 
-        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px; margin-top:10px; font-size:0.85rem;" id="modalTimestampsSummary">
-          Horodatages calculés : <strong style="color:var(--emerald);" id="modalNotesCount">0</strong> notes synchronisées.
+        <div class="modal-timestamps-info">
+          Notes synchronisées : <strong id="modalNotesCount">0</strong> horodatages calculés.
         </div>
 
-        <div class="review-action-row">
-          <button type="button" class="btn-vote-approve" onclick="submitReviewVote('approved')">
-            ✅ Approuver (+10 XP)
+        <!-- 3 Boutons de décision identiques au Laboratoire d'Alignement -->
+        <div class="decision-buttons-grid">
+          <button type="button" class="btn-decision btn-approved" onclick="submitReviewVote('approved')" title="Bien aligné">
+            <span class="decision-label">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Bien aligné
+            </span>
+            <span class="decision-xp">+10 XP</span>
           </button>
-          <button type="button" class="btn-vote-sync" onclick="submitReviewVote('rejected')">
-            ⚠️ Décalage (+10 XP)
+          <button type="button" class="btn-decision btn-delayed" onclick="submitReviewVote('rejected')" title="Décalé">
+            <span class="decision-label">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Décalé
+            </span>
+            <span class="decision-xp">+10 XP</span>
           </button>
-          <button type="button" class="btn-vote-bad" onclick="submitReviewVote('bad_gabc')">
-            ❌ Mauvais GABC (+10 XP)
+          <button type="button" class="btn-decision btn-bad" onclick="submitReviewVote('bad_gabc')" title="Mauvais chant">
+            <span class="decision-label">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Mauvais
+            </span>
+            <span class="decision-xp">+10 XP</span>
           </button>
+        </div>
+
+        <!-- Ligne d'actions secondaires : Passer & Remarque -->
+        <div class="utility-actions-row">
+          <button type="button" class="btn-utility btn-skip-prominent" onclick="closeReviewModal()">
+            <span>Fermer / Passer</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button type="button" class="btn-utility btn-comment-trigger" onclick="toggleReviewComment()">
+            <span>💬 Remarque</span>
+          </button>
+        </div>
+
+        <!-- Zone de saisie d'une remarque (dépliable) -->
+        <div class="decision-comment-view" id="modalCommentView" style="display:none;">
+          <textarea id="modalCommentInput" class="inline-comment-textarea" placeholder="Précisez un décalage, mot incorrect ou problème audio..."></textarea>
+          <div class="comment-actions-row">
+            <button type="button" class="btn-comment-cancel" onclick="toggleReviewComment(false)">Annuler</button>
+            <button type="button" class="btn-comment-submit" onclick="submitReviewWithComment()">
+              <span>Envoyer la remarque</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1500,16 +1668,43 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     window.closeReviewModal = function() {
       document.getElementById('reviewModal').style.display = 'none';
       document.getElementById('modalVideoFrame').src = 'about:blank';
+      toggleReviewComment(false);
       currentReviewPieceId = null;
     };
 
-    window.submitReviewVote = async function(status) {
+    window.handleBackdropClick = function(e) {
+      if (e.target === document.getElementById('reviewModal')) {
+        closeReviewModal();
+      }
+    };
+
+    window.toggleReviewComment = function(show) {
+      const view = document.getElementById('modalCommentView');
+      const input = document.getElementById('modalCommentInput');
+      if (typeof show === 'boolean') {
+        view.style.display = show ? 'flex' : 'none';
+      } else {
+        view.style.display = view.style.display === 'none' ? 'flex' : 'none';
+      }
+      if (view.style.display === 'flex') {
+        input.focus();
+      } else {
+        input.value = '';
+      }
+    };
+
+    window.submitReviewWithComment = function() {
+      const comment = (document.getElementById('modalCommentInput').value || '').trim();
+      submitReviewVote('commented', comment || 'Remarque utilisateur');
+    };
+
+    window.submitReviewVote = async function(status, customComment) {
       if (!currentReviewPieceId) return;
       
       const payload = {
         piece_id: currentReviewPieceId,
         status: status,
-        comment: 'Relecture directe via portail worker',
+        comment: customComment || 'Relecture directe via portail worker',
         author: document.getElementById('filterWorkerInput').value.trim() || 'Ami-Reviewer'
       };
 
@@ -1523,6 +1718,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         if (res.ok) {
           awardUserXp(10, '📜 Relecture');
           closeReviewModal();
+          const pseudo = document.getElementById('filterWorkerInput').value.trim();
+          fetchWorkerBatch(pseudo);
         } else {
           alert('Erreur lors de l\\'enregistrement du vote.');
         }

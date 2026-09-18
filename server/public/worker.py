@@ -45,6 +45,49 @@ BANNER = r"""
                  ✦ Calcul Distribué Liturgique & Grégorien ✦
 """
 
+def ensure_dependencies():
+    """Vérifie que les modules requis sont installés (yt-dlp, torch, torchaudio). Si manquant, tente l'auto-installation."""
+    missing = []
+    try:
+        import yt_dlp
+    except ImportError:
+        missing.append("yt-dlp")
+    try:
+        import torch
+        import torchaudio
+    except ImportError:
+        if "torch" not in missing:
+            missing.append("torch")
+        missing.append("torchaudio")
+
+    if not missing:
+        return
+
+    print("\n" + "!" * 75)
+    print(f"  [!] Modules requis manquants détectés : {', '.join(missing)}")
+    print("  [*] Tentative d'installation automatique via pip...")
+    print("!" * 75 + "\n")
+
+    import subprocess
+    req_file = Path(__file__).parent / "requirements.txt"
+    try:
+        if req_file.exists():
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req_file)])
+        else:
+            subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing)
+        print("\n  \033[92m[✓] Dépendances installées avec succès !\033[0m Reprise de l'exécution...\n")
+    except Exception as e:
+        print("\n" + "=" * 75)
+        print(f"  \033[91m[ERREUR]\033[0m Impossible d'installer automatiquement les modules : {e}")
+        print("  Pour installer manuellement, lancez dans votre terminal :")
+        print(f"      {sys.executable} -m pip install yt-dlp torch torchaudio")
+        print("  Ou utilisez simplement le lanceur tout-en-un :")
+        print("      • Sous Windows : double-cliquez sur start_worker.bat")
+        print("      • Ou en 1 ligne : irm https://api-oremus.silverhorse.fr/run.ps1 | iex")
+        print("=" * 75 + "\n")
+        sys.exit(1)
+
+
 def detect_device():
     """Détecte automatiquement le meilleur accélérateur de calcul disponible."""
     try:
@@ -327,6 +370,8 @@ SESSION_STATE = {
 
 def main():
     print(BANNER)
+    ensure_dependencies()
+
     parser = argparse.ArgumentParser(description="Worker de calcul distribué pour Oremus")
     parser.add_argument("--server", default=DEFAULT_SERVER, help=f"Adresse du serveur Coolify (défaut: {DEFAULT_SERVER})")
     parser.add_argument("--name", default="", help="Votre pseudo pour le tableau des contributeurs")
@@ -436,6 +481,12 @@ def main():
                 SESSION_STATE["jobs_processed"] = jobs_processed
             else:
                 print(f"  [WARN] Le serveur a retourné une réponse inattendue : {sub_resp}")
+
+        except (ImportError, ModuleNotFoundError) as mod_err:
+            print(f"\n  \033[91m[ERREUR ENVIRONNEMENT]\033[0m Module manquant lors du calcul : {mod_err}")
+            print(f"  La tâche {piece_id} n'a pas été marquée comme échouée sur le serveur.")
+            print("  Veuillez réinstaller les dépendances : pip install -r requirements.txt\n")
+            break
 
         except Exception as err:
             print(f"  \033[91m[ÉCHEC]\033[0m Erreur lors du calcul de la pièce {piece_id} : {err}")
