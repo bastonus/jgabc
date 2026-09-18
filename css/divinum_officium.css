@@ -4901,22 +4901,67 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 
 /* Dark Mode & OLED Theme: Chant Notes, Staff Lines, Glyphs and Lyric Text in White */
 [data-theme="dark"] .do-chant-preview svg,
+[data-theme="dark"] .gregorian-score-container svg,
+[data-theme="dark"] .do-verses-score-container svg,
+[data-theme="dark"] svg.Exsurge,
+[data-theme="dark"] svg.ChantScore,
+[data-theme="dark"] .score-viewport svg,
 [data-theme="oled"] .do-chant-preview svg,
-:root:not([data-theme="light"]) .do-chant-preview svg {
+[data-theme="oled"] .gregorian-score-container svg,
+[data-theme="oled"] .do-verses-score-container svg,
+[data-theme="oled"] svg.Exsurge,
+[data-theme="oled"] svg.ChantScore,
+[data-theme="oled"] .score-viewport svg,
+:root:not([data-theme="light"]) .do-chant-preview svg,
+:root:not([data-theme="light"]) .gregorian-score-container svg,
+:root:not([data-theme="light"]) .do-verses-score-container svg,
+:root:not([data-theme="light"]) svg.Exsurge,
+:root:not([data-theme="light"]) svg.ChantScore,
+:root:not([data-theme="light"]) .score-viewport svg {
     color: #ffffff !important;
     fill: #ffffff !important;
 }
 
 [data-theme="dark"] .do-chant-preview svg line,
+[data-theme="dark"] .gregorian-score-container svg line,
+[data-theme="dark"] .do-verses-score-container svg line,
+[data-theme="dark"] svg.Exsurge line,
+[data-theme="dark"] svg.ChantScore line,
+[data-theme="dark"] .score-viewport svg line,
 [data-theme="oled"] .do-chant-preview svg line,
-:root:not([data-theme="light"]) .do-chant-preview svg line {
+[data-theme="oled"] .gregorian-score-container svg line,
+[data-theme="oled"] .do-verses-score-container svg line,
+[data-theme="oled"] svg.Exsurge line,
+[data-theme="oled"] svg.ChantScore line,
+[data-theme="oled"] .score-viewport svg line,
+:root:not([data-theme="light"]) .do-chant-preview svg line,
+:root:not([data-theme="light"]) .gregorian-score-container svg line,
+:root:not([data-theme="light"]) .do-verses-score-container svg line,
+:root:not([data-theme="light"]) svg.Exsurge line,
+:root:not([data-theme="light"]) svg.ChantScore line,
+:root:not([data-theme="light"]) .score-viewport svg line {
     stroke: rgba(255, 255, 255, 0.55) !important;
     fill: none !important;
 }
 
 [data-theme="dark"] .do-chant-preview svg path.brace,
+[data-theme="dark"] .gregorian-score-container svg path.brace,
+[data-theme="dark"] .do-verses-score-container svg path.brace,
+[data-theme="dark"] svg.Exsurge path.brace,
+[data-theme="dark"] svg.ChantScore path.brace,
+[data-theme="dark"] .score-viewport svg path.brace,
 [data-theme="oled"] .do-chant-preview svg path.brace,
-:root:not([data-theme="light"]) .do-chant-preview svg path.brace {
+[data-theme="oled"] .gregorian-score-container svg path.brace,
+[data-theme="oled"] .do-verses-score-container svg path.brace,
+[data-theme="oled"] svg.Exsurge path.brace,
+[data-theme="oled"] svg.ChantScore path.brace,
+[data-theme="oled"] .score-viewport svg path.brace,
+:root:not([data-theme="light"]) .do-chant-preview svg path.brace,
+:root:not([data-theme="light"]) .gregorian-score-container svg path.brace,
+:root:not([data-theme="light"]) .do-verses-score-container svg path.brace,
+:root:not([data-theme="light"]) svg.Exsurge path.brace,
+:root:not([data-theme="light"]) svg.ChantScore path.brace,
+:root:not([data-theme="light"]) .score-viewport svg path.brace {
     stroke: #ffffff !important;
     fill: none !important;
 }
@@ -4924,60 +4969,199 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 [data-theme="dark"] .do-chant-preview svg .neumeLine,
 [data-theme="dark"] .do-chant-preview svg .neumeBeam,
 [data-theme="dark"] .do-chant-preview svg .dividerLine,
+[data-theme="dark"] .do-chant-preview svg .horizontalEpisema,
+[data-theme="dark"] .gregorian-score-container svg .neumeLine,
+[data-theme="dark"] .gregorian-score-container svg .neumeBeam,
+[data-theme="dark"] .gregorian-score-container svg .dividerLine,
+[data-theme="dark"] .gregorian-score-container svg .horizontalEpisema,
+[data-theme="dark"] .do-verses-score-container svg .neumeLine,
+[data-theme="dark"] .do-verses-score-container svg .neumeBeam,
+[data-theme="dark"] .do-verses-score-container svg .dividerLine,
+[data-theme="dark"] .do-verses-score-container svg .horizontalEpisema,
+[data-theme="dark"] svg.Exsurge .neumeLine,
+[data-theme="dark"] svg.Exsurge .neumeBeam,
+[data-theme="dark"] svg.Exsurge .dividerLine,
+[data-theme="dark"] svg.Exsurge .horizontalEpisema,
+[data-theme="dark"] svg.ChantScore .neumeLine,
+[data-theme="dark"] svg.ChantScore .neumeBeam,
+[data-theme="dark"] svg.ChantScore .dividerLine,
+[data-theme="dark"] svg.ChantScore .horizontalEpisema,
 [data-theme="oled"] .do-chant-preview svg .neumeLine,
 [data-theme="oled"] .do-chant-preview svg .neumeBeam,
 [data-theme="oled"] .do-chant-preview svg .dividerLine,
+[data-theme="oled"] .do-chant-preview svg .horizontalEpisema,
+[data-theme="oled"] .gregorian-score-container svg .neumeLine,
+[data-theme="oled"] .gregorian-score-container svg .neumeBeam,
+[data-theme="oled"] .gregorian-score-container svg .dividerLine,
+[data-theme="oled"] .gregorian-score-container svg .horizontalEpisema,
+[data-theme="oled"] .do-verses-score-container svg .neumeLine,
+[data-theme="oled"] .do-verses-score-container svg .neumeBeam,
+[data-theme="oled"] .do-verses-score-container svg .dividerLine,
+[data-theme="oled"] .do-verses-score-container svg .horizontalEpisema,
+[data-theme="oled"] svg.Exsurge .neumeLine,
+[data-theme="oled"] svg.Exsurge .neumeBeam,
+[data-theme="oled"] svg.Exsurge .dividerLine,
+[data-theme="oled"] svg.Exsurge .horizontalEpisema,
+[data-theme="oled"] svg.ChantScore .neumeLine,
+[data-theme="oled"] svg.ChantScore .neumeBeam,
+[data-theme="oled"] svg.ChantScore .dividerLine,
+[data-theme="oled"] svg.ChantScore .horizontalEpisema,
 :root:not([data-theme="light"]) .do-chant-preview svg .neumeLine,
 :root:not([data-theme="light"]) .do-chant-preview svg .neumeBeam,
-:root:not([data-theme="light"]) .do-chant-preview svg .dividerLine {
+:root:not([data-theme="light"]) .do-chant-preview svg .dividerLine,
+:root:not([data-theme="light"]) .do-chant-preview svg .horizontalEpisema,
+:root:not([data-theme="light"]) .gregorian-score-container svg .neumeLine,
+:root:not([data-theme="light"]) .gregorian-score-container svg .neumeBeam,
+:root:not([data-theme="light"]) .gregorian-score-container svg .dividerLine,
+:root:not([data-theme="light"]) .gregorian-score-container svg .horizontalEpisema,
+:root:not([data-theme="light"]) .do-verses-score-container svg .neumeLine,
+:root:not([data-theme="light"]) .do-verses-score-container svg .neumeBeam,
+:root:not([data-theme="light"]) .do-verses-score-container svg .dividerLine,
+:root:not([data-theme="light"]) .do-verses-score-container svg .horizontalEpisema,
+:root:not([data-theme="light"]) svg.Exsurge .neumeLine,
+:root:not([data-theme="light"]) svg.Exsurge .neumeBeam,
+:root:not([data-theme="light"]) svg.Exsurge .dividerLine,
+:root:not([data-theme="light"]) svg.Exsurge .horizontalEpisema,
+:root:not([data-theme="light"]) svg.ChantScore .neumeLine,
+:root:not([data-theme="light"]) svg.ChantScore .neumeBeam,
+:root:not([data-theme="light"]) svg.ChantScore .dividerLine,
+:root:not([data-theme="light"]) svg.ChantScore .horizontalEpisema {
     fill: #ffffff !important;
 }
 
 [data-theme="dark"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 [data-theme="dark"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="dark"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="dark"] .do-verses-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .do-verses-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="dark"] svg.Exsurge path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] svg.Exsurge use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="dark"] svg.ChantScore path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] svg.ChantScore use:not(.active):not([class*="active"]):not(.selected),
 [data-theme="oled"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 [data-theme="oled"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] .do-verses-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .do-verses-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] svg.Exsurge path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] svg.Exsurge use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] svg.ChantScore path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] svg.ChantScore use:not(.active):not([class*="active"]):not(.selected),
 :root:not([data-theme="light"]) .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected) {
+:root:not([data-theme="light"]) .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) .do-verses-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .do-verses-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) svg.Exsurge path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) svg.Exsurge use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) svg.ChantScore path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) svg.ChantScore use:not(.active):not([class*="active"]):not(.selected) {
     fill: #ffffff !important;
 }
 
 [data-theme="dark"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
 [data-theme="dark"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 [data-theme="oled"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
 [data-theme="oled"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 :root:not([data-theme="light"]) .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
     fill: #ffffff !important;
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
 }
 
 /* Light Mode */
-[data-theme="light"] .do-chant-preview svg {
+[data-theme="light"] .do-chant-preview svg,
+[data-theme="light"] .gregorian-score-container svg,
+[data-theme="light"] .do-verses-score-container svg,
+[data-theme="light"] svg.Exsurge,
+[data-theme="light"] svg.ChantScore {
     color: #111317 !important;
     fill: #111317 !important;
 }
 
-[data-theme="light"] .do-chant-preview svg line {
+[data-theme="light"] .do-chant-preview svg line,
+[data-theme="light"] .gregorian-score-container svg line,
+[data-theme="light"] .do-verses-score-container svg line,
+[data-theme="light"] svg.Exsurge line,
+[data-theme="light"] svg.ChantScore line {
     stroke: rgba(0, 0, 0, 0.45) !important;
     fill: none !important;
 }
 
-[data-theme="light"] .do-chant-preview svg path.brace {
+[data-theme="light"] .do-chant-preview svg path.brace,
+[data-theme="light"] .gregorian-score-container svg path.brace,
+[data-theme="light"] .do-verses-score-container svg path.brace,
+[data-theme="light"] svg.Exsurge path.brace,
+[data-theme="light"] svg.ChantScore path.brace {
     stroke: #111317 !important;
     fill: none !important;
 }
 
 [data-theme="light"] .do-chant-preview svg .neumeLine,
 [data-theme="light"] .do-chant-preview svg .neumeBeam,
-[data-theme="light"] .do-chant-preview svg .dividerLine {
+[data-theme="light"] .do-chant-preview svg .dividerLine,
+[data-theme="light"] .gregorian-score-container svg .neumeLine,
+[data-theme="light"] .gregorian-score-container svg .neumeBeam,
+[data-theme="light"] .gregorian-score-container svg .dividerLine,
+[data-theme="light"] .do-verses-score-container svg .neumeLine,
+[data-theme="light"] .do-verses-score-container svg .neumeBeam,
+[data-theme="light"] .do-verses-score-container svg .dividerLine,
+[data-theme="light"] svg.Exsurge .neumeLine,
+[data-theme="light"] svg.Exsurge .neumeBeam,
+[data-theme="light"] svg.Exsurge .dividerLine,
+[data-theme="light"] svg.ChantScore .neumeLine,
+[data-theme="light"] svg.ChantScore .neumeBeam,
+[data-theme="light"] svg.ChantScore .dividerLine {
     fill: #111317 !important;
 }
 
 [data-theme="light"] .do-chant-preview svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 [data-theme="light"] .do-chant-preview svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="light"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="light"] .do-verses-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .do-verses-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="light"] svg.Exsurge path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] svg.Exsurge use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="light"] svg.ChantScore path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] svg.ChantScore use:not(.active):not([class*="active"]):not(.selected),
 [data-theme="light"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+[data-theme="light"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
     fill: #111317 !important;
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
 }

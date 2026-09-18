@@ -1027,7 +1027,47 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       max-height: 280px; overflow-y: auto; overscroll-behavior: contain;
       padding: 12px 6px; font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
     }
-    .score-viewport svg { display: block; width: 100%; height: auto; }
+    .score-viewport svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      color: #ffffff !important;
+      fill: #ffffff !important;
+    }
+    .score-viewport svg line {
+      stroke: rgba(255, 255, 255, 0.55) !important;
+      fill: none !important;
+      pointer-events: none !important;
+    }
+    .score-viewport svg path.brace {
+      stroke: #ffffff !important;
+      fill: none !important;
+    }
+    .score-viewport svg .neumeLine,
+    .score-viewport svg .neumeBeam,
+    .score-viewport svg .dividerLine,
+    .score-viewport svg .horizontalEpisema {
+      fill: #ffffff !important;
+    }
+    .score-viewport svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+    .score-viewport svg use:not(.active):not([class*="active"]):not(.selected),
+    .score-viewport svg .glyph {
+      fill: #ffffff !important;
+    }
+    .score-viewport svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+    .score-viewport svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+      fill: #ffffff !important;
+      font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    }
+    .score-viewport svg text.rubric,
+    .score-viewport svg text.specialChar,
+    .score-viewport svg tspan.rubric,
+    .score-viewport svg tspan.specialChar,
+    .score-viewport svg .rubric,
+    .score-viewport svg [class*="rubric"],
+    .score-viewport svg [class*="specialChar"] {
+      fill: var(--primary-color) !important;
+    }
     /* Note & syllabe active en cours de chant (reprise fidele du laboratoire) */
     .score-viewport svg use.active,
     .score-viewport svg use[class*="active"],
@@ -1051,6 +1091,9 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     .score-viewport svg text[data-note-index],
     .score-viewport svg tspan[data-note-index] {
       cursor: pointer;
+    }
+    .score-viewport svg use[data-note-index]:hover {
+      opacity: 0.82;
     }
 
     /* Barre de contrôle du lecteur dans la modal */
@@ -2192,6 +2235,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           svgNode.setAttribute('width', '100%');
           svgNode.style.width = '100%';
           svgNode.style.height = 'auto';
+          svgNode.style.color = '#ffffff';
+          svgNode.style.fill = '#ffffff';
           container.appendChild(svgNode);
           currentModalScore = score;
           currentModalChantInfo = _getChantInfo(score);

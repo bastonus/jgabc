@@ -630,6 +630,82 @@ body.is-search-mode #gregorianFilterBar::-webkit-scrollbar {
     animation: fadeIn 0.22s ease;
 }
 
+/* Rendu fidèle des neumes grégoriens Exsurge en mode sombre et clair */
+[data-theme="dark"] .gregorian-score-container svg,
+[data-theme="oled"] .gregorian-score-container svg,
+:root:not([data-theme="light"]) .gregorian-score-container svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+}
+[data-theme="dark"] .gregorian-score-container svg line,
+[data-theme="oled"] .gregorian-score-container svg line,
+:root:not([data-theme="light"]) .gregorian-score-container svg line {
+    stroke: rgba(255, 255, 255, 0.55) !important;
+    fill: none !important;
+}
+[data-theme="dark"] .gregorian-score-container svg path.brace,
+[data-theme="oled"] .gregorian-score-container svg path.brace,
+:root:not([data-theme="light"]) .gregorian-score-container svg path.brace {
+    stroke: #ffffff !important;
+    fill: none !important;
+}
+[data-theme="dark"] .gregorian-score-container svg .neumeLine,
+[data-theme="dark"] .gregorian-score-container svg .neumeBeam,
+[data-theme="dark"] .gregorian-score-container svg .dividerLine,
+[data-theme="dark"] .gregorian-score-container svg .horizontalEpisema,
+[data-theme="oled"] .gregorian-score-container svg .neumeLine,
+[data-theme="oled"] .gregorian-score-container svg .neumeBeam,
+[data-theme="oled"] .gregorian-score-container svg .dividerLine,
+[data-theme="oled"] .gregorian-score-container svg .horizontalEpisema,
+:root:not([data-theme="light"]) .gregorian-score-container svg .neumeLine,
+:root:not([data-theme="light"]) .gregorian-score-container svg .neumeBeam,
+:root:not([data-theme="light"]) .gregorian-score-container svg .dividerLine,
+:root:not([data-theme="light"]) .gregorian-score-container svg .horizontalEpisema {
+    fill: #ffffff !important;
+}
+[data-theme="dark"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="dark"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+[data-theme="oled"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected),
+:root:not([data-theme="light"]) .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected) {
+    fill: #ffffff !important;
+}
+[data-theme="dark"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="dark"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+    fill: #ffffff !important;
+}
+
+[data-theme="light"] .gregorian-score-container svg {
+    color: #111317 !important;
+    fill: #111317 !important;
+}
+[data-theme="light"] .gregorian-score-container svg line {
+    stroke: rgba(0, 0, 0, 0.45) !important;
+    fill: none !important;
+}
+[data-theme="light"] .gregorian-score-container svg path.brace {
+    stroke: #111317 !important;
+    fill: none !important;
+}
+[data-theme="light"] .gregorian-score-container svg .neumeLine,
+[data-theme="light"] .gregorian-score-container svg .neumeBeam,
+[data-theme="light"] .gregorian-score-container svg .dividerLine {
+    fill: #111317 !important;
+}
+[data-theme="light"] .gregorian-score-container svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
+[data-theme="light"] .gregorian-score-container svg use:not(.active):not([class*="active"]):not(.selected) {
+    fill: #111317 !important;
+}
+[data-theme="light"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
+[data-theme="light"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+    fill: #111317 !important;
+}
+
 /* =========================================================================
    Aperçu du texte latin liturgique pour les Offices, Messes, Bible & Chants
    ========================================================================= */
