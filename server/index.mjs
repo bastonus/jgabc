@@ -458,6 +458,8 @@ function getWorkerPieces(workerId) {
     const targetWorker = (workerId || '').trim().toLowerCase();
     const seenPieceIds = new Set();
 
+    const isTarget = (w) => targetWorker && targetWorker !== 'all' && String(w || '').toLowerCase().includes(targetWorker);
+
     // 1. Alignements calculés sur disque
     if (fs.existsSync(ALIGNMENTS_DIR)) {
       const files = fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json'));
@@ -466,23 +468,22 @@ function getWorkerPieces(workerId) {
           const item = JSON.parse(fs.readFileSync(path.join(ALIGNMENTS_DIR, f), 'utf8'));
           const pid = String(item.piece_id || f.replace('.json', ''));
           const wId = item.worker_id || 'Ami-Anonyme';
-          if (!targetWorker || targetWorker === 'all' || wId.toLowerCase().includes(targetWorker)) {
-            seenPieceIds.add(pid);
-            list.push({
-              id: pid,
-              piece_id: pid,
-              incipit: item.incipit || `Pièce #${pid}`,
-              part: item.part || 'Chant',
-              worker: wId,
-              worker_id: wId,
-              youtube_id: item.youtube_id || '',
-              youtube_url: item.youtube_url || '',
-              compute_time_sec: item.compute_time_sec || 0,
-              audio_duration_sec: item.audio_duration_sec || 0,
-              completed_at: item.completed_at || new Date().toISOString(),
-              notes_count: Array.isArray(item.timestamps) ? item.timestamps.length : 0
-            });
-          }
+          seenPieceIds.add(pid);
+          list.push({
+            id: pid,
+            piece_id: pid,
+            incipit: item.incipit || `Pièce #${pid}`,
+            part: item.part || 'Chant',
+            worker: wId,
+            worker_id: wId,
+            is_user_piece: isTarget(wId),
+            youtube_id: item.youtube_id || '',
+            youtube_url: item.youtube_url || '',
+            compute_time_sec: item.compute_time_sec || 0,
+            audio_duration_sec: item.audio_duration_sec || 0,
+            completed_at: item.completed_at || new Date().toISOString(),
+            notes_count: Array.isArray(item.timestamps) ? item.timestamps.length : 0
+          });
         } catch (e) {}
       }
     }
@@ -498,28 +499,35 @@ function getWorkerPieces(workerId) {
       if (!Array.isArray(s.timestamps) || s.timestamps.length === 0) continue;
 
       const workerName = (s.worker_id || 'Atelier-Chantres');
-      if (!targetWorker || targetWorker === 'all' || workerName.toLowerCase().includes(targetWorker)) {
-        seenPieceIds.add(pid);
-        const task = taskMap.get(pid) || taskMap.get(String(key)) || {};
-        list.push({
-          id: pid,
-          piece_id: pid,
-          incipit: s.incipit || task.incipit || `Pièce #${pid}`,
-          part: s.part || task.part || 'Chant',
-          worker: workerName,
-          worker_id: workerName,
-          youtube_id: s.youtube_id || task.youtube_id || '',
-          youtube_url: s.youtube_url || task.youtube_url || (s.youtube_id ? `https://www.youtube.com/watch?v=${s.youtube_id}` : ''),
-          compute_time_sec: s.compute_time_sec || 3.8,
-          audio_duration_sec: s.audio_duration_sec || 0,
-          completed_at: s.completed_at || '2026-09-15T12:00:00.000Z',
-          notes_count: s.timestamps.length
-        });
-      }
+      seenPieceIds.add(pid);
+      const task = taskMap.get(pid) || taskMap.get(String(key)) || {};
+      list.push({
+        id: pid,
+        piece_id: pid,
+        incipit: s.incipit || task.incipit || `Pièce #${pid}`,
+        part: s.part || task.part || 'Chant',
+        worker: workerName,
+        worker_id: workerName,
+        is_user_piece: isTarget(workerName),
+        youtube_id: s.youtube_id || task.youtube_id || '',
+        youtube_url: s.youtube_url || task.youtube_url || (s.youtube_id ? `https://www.youtube.com/watch?v=${s.youtube_id}` : ''),
+        compute_time_sec: s.compute_time_sec || 3.8,
+        audio_duration_sec: s.audio_duration_sec || 0,
+        completed_at: s.completed_at || '2026-09-15T12:00:00.000Z',
+        notes_count: s.timestamps.length
+      });
     }
 
-    list.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
-    return list.slice(0, 50);
+    // Tri : Les pièces calculées par l'utilisateur apparaissent EN PREMIER LIEU, puis par date de calcul décroissante
+    list.sort((a, b) => {
+      if (targetWorker && targetWorker !== 'all') {
+        if (a.is_user_piece && !b.is_user_piece) return -1;
+        if (!a.is_user_piece && b.is_user_piece) return 1;
+      }
+      return new Date(b.completed_at) - new Date(a.completed_at);
+    });
+
+    return list.slice(0, 60);
   } catch (e) {
     console.error('[WORKER] Erreur getWorkerPieces:', e);
     return [];
@@ -529,12 +537,24 @@ function getWorkerPieces(workerId) {
 function getPieceDetails(pieceId) {
   const safeId = String(pieceId).replace(/[^a-zA-Z0-9_\-\.]/g, '');
   const alignmentPath = path.join(ALIGNMENTS_DIR, `${safeId}.json`);
+  const tasks = loadTasks();
+  const task = tasks.find(t => String(t.id) === String(pieceId) || String(t.id) === safeId) || {};
   
   if (fs.existsSync(alignmentPath)) {
     try {
       const data = JSON.parse(fs.readFileSync(alignmentPath, 'utf8'));
       return {
         id: data.piece_id || safeId,
+        piece_id: data.piece_id || safeId,
+        incipit: data.incipit || task.incipit || `Pièce #${safeId}`,
+        part: data.part || task.part || 'Chant',
+        youtube_id: data.youtube_id || task.youtube_id || '',
+        youtube_url: data.youtube_url || task.youtube_url || (data.youtube_id ? `https://www.youtube.com/watch?v=${data.youtube_id}` : ''),
+        gabc_src: data.gabc_src || task.gabc_src || '',
+        timestamps: data.timestamps || [],
+        notes_count: Array.isArray(data.timestamps) ? data.timestamps.length : 0,
+        worker_id: data.worker_id || 'Ami',
+        compute_device: data.compute_device || '',
         ...data
       };
     } catch (e) {}
@@ -544,16 +564,14 @@ function getPieceDetails(pieceId) {
   const seeds = loadSeedAlignments();
   if (seeds[pieceId] || seeds[safeId]) {
     const s = seeds[pieceId] || seeds[safeId];
-    const tasks = loadTasks();
-    const task = tasks.find(t => t.id === pieceId) || {};
     return {
       id: pieceId,
       piece_id: pieceId,
-      incipit: task.incipit || `Pièce #${pieceId}`,
-      part: task.part || 'Chant',
-      youtube_id: task.youtube_id || '',
-      youtube_url: task.youtube_url || (task.youtube_id ? `https://www.youtube.com/watch?v=${task.youtube_id}` : ''),
-      gabc_src: task.gabc_src || '',
+      incipit: s.incipit || task.incipit || `Pièce #${pieceId}`,
+      part: s.part || task.part || 'Chant',
+      youtube_id: s.youtube_id || task.youtube_id || '',
+      youtube_url: s.youtube_url || task.youtube_url || (s.youtube_id ? `https://www.youtube.com/watch?v=${s.youtube_id}` : ''),
+      gabc_src: s.gabc_src || task.gabc_src || '',
       timestamps: s.timestamps || [],
       notes_count: Array.isArray(s.timestamps) ? s.timestamps.length : 0,
       worker_id: s.worker_id || 'Atelier-Chantres',
@@ -563,9 +581,7 @@ function getPieceDetails(pieceId) {
     };
   }
 
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === pieceId);
-  if (task) {
+  if (task && task.id) {
     return {
       id: task.id,
       piece_id: task.id,
@@ -573,8 +589,9 @@ function getPieceDetails(pieceId) {
       part: task.part,
       youtube_id: task.youtube_id,
       youtube_url: task.youtube_url,
-      gabc_src: task.gabc_src,
+      gabc_src: task.gabc_src || '',
       timestamps: [],
+      notes_count: 0,
       status: task.status,
       pack: task.pack || 'liturgy',
       is_liturgy_pack: task.is_liturgy_pack !== undefined ? task.is_liturgy_pack : true
@@ -732,6 +749,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="/exsurge.min.js"></script>
   <style>
     /* Oremus Frameless Zero-Stroke Design System Tokens */
     :root {
@@ -781,7 +799,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       width: 40px; height: 40px; border-radius: 50%;
       background: var(--gold-sacred); color: #121214;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.25rem; font-weight: 700; flex-shrink: 0;
+      font-size: 1.05rem; font-weight: 800; font-family: 'Libre Baskerville', serif; flex-shrink: 0;
     }
     .monk-info-title {
       font-family: 'Libre Baskerville', 'Crimson Text', serif;
@@ -913,8 +931,25 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       background: var(--background-card); border-radius: 12px;
       padding: 14px; display: flex; flex-direction: column;
       justify-content: space-between; gap: 10px; transition: background 0.15s;
+      position: relative;
     }
     .piece-card:hover { background: var(--background-highlight); }
+    .piece-card.is-user-card {
+      border-left: 3px solid var(--gold-sacred);
+      background: rgba(196, 152, 79, 0.05);
+    }
+    .piece-card.is-user-card:hover {
+      background: rgba(196, 152, 79, 0.09);
+    }
+    .badge-user-piece {
+      background: var(--gold-sacred-bg); color: var(--gold-sacred);
+      padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .badge-other-piece {
+      background: rgba(255,255,255,0.05); color: var(--text-tertiary);
+      padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 500;
+    }
     .piece-title {
       font-family: 'Libre Baskerville', 'Crimson Text', serif;
       font-weight: 700; font-size: 0.98rem; color: #fff; line-height: 1.3;
@@ -931,15 +966,15 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     /* Modal Review Player — style alignment-lab (frameless) */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.88); backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
       display: none; align-items: center; justify-content: center; z-index: 9999;
       padding: 16px;
     }
     .modal-content {
       background: #0a0a0a; border: none;
-      border-radius: 20px; width: 100%; max-width: 700px; max-height: 92vh;
+      border-radius: 20px; width: 100%; max-width: 820px; max-height: 94vh;
       overflow-y: auto; padding: 24px;
-      box-shadow: 0 32px 64px rgba(0,0,0,0.85);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.9);
       position: relative;
     }
     .modal-close-btn {
@@ -963,14 +998,33 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       color: #f8fafc; margin-bottom: 2px; line-height: 1.25;
     }
     .modal-chant-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 14px; }
-    .video-frame-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin: 14px 0; }
+    
+    .modal-media-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+    .video-frame-container { width: 100%; aspect-ratio: 16/9; max-height: 260px; background: #000; border-radius: 12px; overflow: hidden; }
     .video-frame-container iframe { width: 100%; height: 100%; border: none; }
-    .modal-timestamps-info {
-      padding: 10px 14px; border-radius: 10px;
-      background: rgba(255,255,255,0.035);
-      font-size: 0.84rem; color: #94a3b8; margin-bottom: 16px;
+
+    /* Gregorian Score Box (Exsurge) */
+    .modal-score-box {
+      background: #000000; border-radius: 12px; padding: 14px;
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .modal-timestamps-info strong { color: #10b981; }
+    .modal-score-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .modal-score-title {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--gold-sacred);
+    }
+    .modal-score-meta {
+      font-size: 0.74rem; color: var(--text-tertiary);
+    }
+    .score-viewport {
+      max-height: 280px; overflow-y: auto; overscroll-behavior: contain;
+      padding: 12px 6px; font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    }
+    .score-viewport svg { display: block; width: 100%; height: auto; }
+
     /* Boutons de décision — identiques au laboratoire d'alignement */
     .decision-buttons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .btn-decision {
@@ -1063,12 +1117,12 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     <!-- Header / Scriptorium Monastic Rank Widget -->
     <header class="header-bar">
       <div class="header-left">
-        <div class="monk-avatar" id="headerAvatar">📖</div>
+        <div class="monk-avatar" id="headerAvatar">I</div>
         <div>
-          <div class="monk-info-title" id="headerTitle">Novice du Scriptorium</div>
+          <div class="monk-info-title" id="headerTitle">Novice du Chœur</div>
           <div class="monk-info-sub">
             <span id="headerLevel">Degré 1 • Novicius</span>
-            <span class="streak-pill" id="headerStreak">🔥 Série : 0</span>
+            <span class="streak-pill" id="headerStreak">Série : 0</span>
           </div>
         </div>
       </div>
@@ -1116,7 +1170,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     <!-- Section 1 : Interactive Session Planner with Estimator -->
     <div class="card">
       <div class="card-title">
-        <span>⏱️</span> Planificateur de Session & Estimation
+        Planificateur de Session & Estimation
       </div>
       <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">
         Choisissez combien de temps vous souhaitez consacrer au calcul. L'estimation est calculée dynamiquement à partir des benchmarks réels de nos serveurs.
@@ -1139,9 +1193,9 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
         <div class="choice-group-label">2. Sélectionnez votre matériel (accélération) :</div>
         <div class="btn-pill-group" id="hardwareGroup">
-          <button type="button" class="btn-pill active" data-hw="cuda">🚀 NVIDIA GPU (CUDA)</button>
-          <button type="button" class="btn-pill" data-hw="mps">🍏 Apple Silicon (M1-M4)</button>
-          <button type="button" class="btn-pill" data-hw="cpu">💻 Processeur (CPU)</button>
+          <button type="button" class="btn-pill active" data-hw="cuda">NVIDIA GPU (CUDA)</button>
+          <button type="button" class="btn-pill" data-hw="mps">Apple Silicon (M1-M4)</button>
+          <button type="button" class="btn-pill" data-hw="cpu">Processeur (CPU)</button>
         </div>
 
         <!-- Live Estimator Display -->
@@ -1159,17 +1213,17 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         <!-- Mode de lancement : 1. Ligne de commande directe (CLI) -->
         <div class="cli-section">
           <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span>💻 Option 1 : Lancement direct en Ligne de Commande (Terminal)</span>
-            <span style="font-size:0.75rem; color:#10b981; text-transform:none; font-weight:700;">⚡ Zéro téléchargement manuel</span>
+            <span>Option 1 : Lancement direct en Ligne de Commande (Terminal)</span>
+            <span style="font-size:0.75rem; color:#10b981; text-transform:none; font-weight:700;">Zéro téléchargement manuel</span>
           </div>
           <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
             Copiez-collez une seule ligne dans votre terminal. L'environnement virtuel isolé et les modules IA sont configurés automatiquement.
           </p>
 
           <div class="cli-tabs">
-            <button type="button" class="cli-tab-btn active" data-os="windows" onclick="switchCliTab('windows')">🪟 Windows (PowerShell)</button>
-            <button type="button" class="cli-tab-btn" data-os="unix" onclick="switchCliTab('unix')">🍎 macOS & 🐧 Linux (Bash)</button>
-            <button type="button" class="cli-tab-btn" data-os="python" onclick="switchCliTab('python')">🐍 Python direct</button>
+            <button type="button" class="cli-tab-btn active" data-os="windows" onclick="switchCliTab('windows')">Windows (PowerShell)</button>
+            <button type="button" class="cli-tab-btn" data-os="unix" onclick="switchCliTab('unix')">macOS & Linux (Bash)</button>
+            <button type="button" class="cli-tab-btn" data-os="python" onclick="switchCliTab('python')">Python direct</button>
           </div>
 
           <div id="cliPanelWindows">
@@ -1181,7 +1235,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               </button>
             </div>
             <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              💡 <em>Ouvrez PowerShell, collez la commande et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+              <em>Note : Ouvrez PowerShell, collez la commande et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
             </div>
           </div>
 
@@ -1194,7 +1248,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               </button>
             </div>
             <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              💡 <em>Ouvrez votre Terminal (macOS / Linux), collez et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+              <em>Note : Ouvrez votre Terminal (macOS / Linux), collez et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
             </div>
           </div>
 
@@ -1207,7 +1261,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               </button>
             </div>
             <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              💡 <em>Exécution directe via Python (recommandé si PyTorch est déjà présent sur votre machine).</em>
+              <em>Note : Exécution directe via Python (recommandé si PyTorch est déjà présent sur votre machine).</em>
             </div>
           </div>
         </div>
@@ -1215,7 +1269,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         <!-- Mode de lancement : 2. Pack ZIP 1-Clic -->
         <div style="margin-top:20px; padding-top:16px;">
           <div class="choice-group-label" style="margin-bottom:8px;">
-            <span>📦 Option 2 : Téléchargement du Pack Autonome (Archive ZIP)</span>
+            <span>Option 2 : Téléchargement du Pack Autonome (Archive ZIP)</span>
           </div>
           <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
             Idéal si vous préférez un dossier zippé avec lanceurs double-clic tout prêts.
@@ -1231,7 +1285,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     <!-- Quick-Start Instructions for Non-Tech Friends -->
     <div class="card">
       <div class="card-title">
-        <span>🚀</span> Instructions Simplifiées (1 Clic pour Débutants)
+        Instructions Simplifiées (1 Clic pour Débutants)
       </div>
       <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:14px;">
         Aucune connaissance technique requise. Décompressez l'archive et lancez le script correspondant à votre système :
@@ -1239,7 +1293,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
         <div style="background:var(--background-card); border-radius:12px; padding:16px;">
           <div style="font-weight:700; color:#10b981; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-            <span style="font-size:1.1rem;">🪟</span> <strong>Windows (1 Clic)</strong>
+            <strong>Windows (1 Clic)</strong>
           </div>
           <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
             <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
@@ -1249,7 +1303,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         </div>
         <div style="background:var(--background-card); border-radius:12px; padding:16px;">
           <div style="font-weight:700; color:var(--primary-color); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-            <span style="font-size:1.1rem;">🍎</span> <strong>macOS & Linux</strong>
+            <strong>macOS & Linux</strong>
           </div>
           <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
             <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
@@ -1264,7 +1318,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     <div class="card" id="batchSection">
       <div class="batch-header-row">
         <div class="card-title" style="margin-bottom:0;">
-          <span>📋</span> Mon Lot Récemment Aligné
+          Mon Lot Récemment Aligné
         </div>
         <div class="user-filter-box">
           <input type="text" id="filterWorkerInput" class="user-input" placeholder="Votre pseudo d'ami..." style="width:160px;">
@@ -1285,7 +1339,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     <!-- Section 3 : Leaderboard des Amis -->
     <div class="card">
       <div class="card-title">
-        <span>🏆</span> Tableau d'Honneur des Amis Contributeurs
+        Tableau d'Honneur des Amis Contributeurs
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -1304,21 +1358,34 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
     </div>
 
-    <!-- Modal : Lecteur de Revue Directe (Fidèle à alignment-lab.html) -->
+    <!-- Modal : Lecteur de Revue Directe avec Partition Grégorienne Exsurge -->
     <div class="modal-backdrop" id="reviewModal" onclick="handleBackdropClick(event)">
       <div class="modal-content">
         <button type="button" class="modal-close-btn" onclick="closeReviewModal()" aria-label="Fermer">✕</button>
 
-        <div class="modal-chant-badge" id="modalPiecePart">Kyriale</div>
-        <div class="modal-chant-title" id="modalPieceTitle">Incipit du Chant</div>
-        <div class="modal-chant-sub" id="modalPieceAuthor">Aligné par : Ami</div>
-
-        <div class="video-frame-container">
-          <iframe id="modalVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
+        <div style="margin-bottom:12px;">
+          <div class="modal-chant-badge" id="modalPiecePart">Kyriale</div>
+          <div class="modal-chant-title" id="modalPieceTitle">Incipit du Chant</div>
+          <div class="modal-chant-sub" id="modalPieceAuthor">Aligné par : Ami</div>
         </div>
 
-        <div class="modal-timestamps-info">
-          Notes synchronisées : <strong id="modalNotesCount">0</strong> horodatages calculés.
+        <div class="modal-media-grid">
+          <div class="video-frame-container">
+            <iframe id="modalVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
+          </div>
+
+          <!-- Affichage fidèle de la partition grégorienne via Exsurge -->
+          <div class="modal-score-box">
+            <div class="modal-score-header">
+              <span class="modal-score-title">✦ Partition Grégorienne (Neumes)</span>
+              <span class="modal-score-meta" id="modalNotesCountBadge">0 notes synchronisées</span>
+            </div>
+            <div class="score-viewport" id="modalScoreSlot">
+              <div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">
+                Chargement des neumes grégoriens...
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 3 Boutons de décision identiques au Laboratoire d'Alignement -->
@@ -1353,7 +1420,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <button type="button" class="btn-utility btn-comment-trigger" onclick="toggleReviewComment()">
-            <span>💬 Remarque</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Remarque</span>
           </button>
         </div>
 
@@ -1376,18 +1444,18 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     // Configuration & Benchmarks transmis par le serveur
     const BENCHMARKS = ${JSON.stringify(benchmarks)};
     
-    // Rangs Monastiques Oremus (Identiques au Laboratoire d'Alignement)
+    // Rangs Monastiques Oremus (Numération romaine monastique sans émojis)
     const MONK_RANKS = [
-      { level: 1, title: "Novice du Chœur", latin: "Novicius", minXp: 0, icon: "📖" },
-      { level: 2, title: "Scribe du Chapitre", latin: "Scriptor", minXp: 100, icon: "✒️" },
-      { level: 3, title: "Enlumineur Sacré", latin: "Illuminator", minXp: 250, icon: "🎨" },
-      { level: 4, title: "Cantor du Lutrin", latin: "Cantor", minXp: 450, icon: "🎵" },
-      { level: 5, title: "Succenteur de Chœur", latin: "Succentor", minXp: 700, icon: "🔔" },
-      { level: 6, title: "Maître de Chapelle", latin: "Magister Chori", minXp: 1000, icon: "👑" },
-      { level: 7, title: "Prieur du Scriptorium", latin: "Prior", minXp: 1350, icon: "🏛️" },
-      { level: 8, title: "Abbé Bénédictin", latin: "Abbas", minXp: 1700, icon: "✝️" },
-      { level: 9, title: "Cardinal Préfet", latin: "Cardinalis", minXp: 2100, icon: "🕊️" },
-      { level: 10, title: "Pape Saint Grégoire", latin: "Pontifex Maximus", minXp: 2600, icon: "⚜️" }
+      { level: 1, title: "Novice du Chœur", latin: "Novicius", minXp: 0, icon: "I" },
+      { level: 2, title: "Scribe du Chapitre", latin: "Scriptor", minXp: 100, icon: "II" },
+      { level: 3, title: "Enlumineur Sacré", latin: "Illuminator", minXp: 250, icon: "III" },
+      { level: 4, title: "Cantor du Lutrin", latin: "Cantor", minXp: 450, icon: "IV" },
+      { level: 5, title: "Succenteur de Chœur", latin: "Succentor", minXp: 700, icon: "V" },
+      { level: 6, title: "Maître de Chapelle", latin: "Magister Chori", minXp: 1000, icon: "VI" },
+      { level: 7, title: "Prieur du Scriptorium", latin: "Prior", minXp: 1350, icon: "VII" },
+      { level: 8, title: "Abbé Bénédictin", latin: "Abbas", minXp: 1700, icon: "VIII" },
+      { level: 9, title: "Cardinal Préfet", latin: "Cardinalis", minXp: 2100, icon: "IX" },
+      { level: 10, title: "Pape Saint Grégoire", latin: "Pontifex Maximus", minXp: 2600, icon: "X" }
     ];
 
     // State Local
@@ -1395,6 +1463,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     let currentDurationMins = 30;
     let currentHardware = 'cuda';
     let currentReviewPieceId = null;
+    let currentModalScore = null;
+    let currentModalGabc = '';
 
     // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
@@ -1441,7 +1511,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       document.getElementById('headerTitle').textContent = currentRank.title;
       document.getElementById('headerLevel').textContent = \`Degré \${currentRank.level} • \${currentRank.latin}\`;
       document.getElementById('headerXp').textContent = \`\${userGamification.xp} XP\`;
-      document.getElementById('headerStreak').textContent = \`🔥 Série : \${userGamification.streak}\`;
+      document.getElementById('headerStreak').textContent = \`Série : \${userGamification.streak}\`;
     }
 
     function awardUserXp(amount, label) {
@@ -1553,7 +1623,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       const text = codeElem.textContent.trim();
       navigator.clipboard.writeText(text).then(() => {
         const oldHtml = btn.innerHTML;
-        btn.innerHTML = '✅ Copié !';
+        btn.innerHTML = 'Copié !';
         btn.classList.add('copied');
         setTimeout(() => {
           btn.innerHTML = oldHtml;
@@ -1564,16 +1634,22 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       });
     };
 
-    // 3. User Filter & Batch View
+    // 3. User Filter & Batch View (Priorité absolue aux pièces de l'utilisateur)
     function setupUserFilter() {
       const input = document.getElementById('filterWorkerInput');
-      const savedUser = localStorage.getItem('oremus_worker_name') || '';
-      if (savedUser) input.value = savedUser;
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramUser = urlParams.get('worker') || urlParams.get('name') || '';
+      const savedUser = paramUser || localStorage.getItem('oremus_worker_name') || '';
+      if (savedUser) {
+        input.value = savedUser;
+        localStorage.setItem('oremus_worker_name', savedUser);
+      }
 
       input.addEventListener('input', () => {
-        localStorage.setItem('oremus_worker_name', input.value.trim());
+        const val = input.value.trim();
+        localStorage.setItem('oremus_worker_name', val);
         updateEstimator();
-        fetchWorkerBatch(input.value.trim());
+        fetchWorkerBatch(val);
       });
 
       document.getElementById('btnRefreshBatch').addEventListener('click', () => {
@@ -1583,7 +1659,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
     async function fetchWorkerBatch(workerName) {
       const grid = document.getElementById('piecesGrid');
-      grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--text-muted);">Mise à jour de vos pièces récentes...</div>';
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--text-secondary); font-size:0.88rem;">Mise à jour de vos pièces récentes...</div>';
       
       try {
         const url = workerName ? \`/api/jobs/worker/\${encodeURIComponent(workerName)}/pieces\` : '/api/jobs/worker/pieces';
@@ -1591,54 +1667,148 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         const data = await res.json();
         
         let pieces = data.pieces || [];
-        let isFallback = false;
-
-        if (pieces.length === 0 && workerName) {
-          // Fallback vers les pièces communautaires pour permettre la relecture immédiate
-          const commRes = await fetch('/api/jobs/worker/pieces');
-          const commData = await commRes.json();
-          if (commData.pieces && commData.pieces.length > 0) {
-            pieces = commData.pieces;
-            isFallback = true;
-          }
-        }
 
         if (pieces.length === 0) {
           grid.innerHTML = \`
-            <div style="grid-column: 1/-1; text-align:center; padding:24px; color:var(--text-muted);">
+            <div style="grid-column: 1/-1; text-align:center; padding:24px; color:var(--text-tertiary); font-size:0.88rem;">
               Aucune pièce récemment calculée trouvée pour "<strong>\${workerName || 'tous'}</strong>".<br>
               Lancez le worker pour voir vos premiers chants apparaître ici !
             </div>\`;
           return;
         }
 
-        const banner = isFallback ? \`
-          <div style="grid-column: 1/-1; padding:12px 16px; border-radius:10px; background:rgba(196,152,79,0.12); border:1px solid var(--border-accent); font-size:0.85rem; color:var(--gold-light); margin-bottom:12px; text-align:center;">
-            ✦ Vous n'avez pas encore de calcul personnel pour "<strong>\${workerName}</strong>". Voici les partitions pré-alignées disponibles pour vous entraîner et gagner des points :
-          </div>\` : '';
+        const userPieces = pieces.filter(p => p.is_user_piece);
+        let bannerHtml = '';
 
-        grid.innerHTML = banner + pieces.map(p => \`
-          <div class="piece-card">
+        if (userPieces.length > 0) {
+          bannerHtml = \`
+            <div style="grid-column: 1/-1; padding:10px 14px; border-radius:10px; background:rgba(196,152,79,0.1); font-size:0.84rem; color:var(--gold-sacred); margin-bottom:4px;">
+              ✦ <strong>\${userPieces.length}</strong> partition(s) calculée(s) par vous (\${workerName}) placée(s) en tête de liste pour votre relecture.
+            </div>\`;
+        } else if (workerName) {
+          bannerHtml = \`
+            <div style="grid-column: 1/-1; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.03); font-size:0.84rem; color:var(--text-secondary); margin-bottom:4px;">
+              ✦ Aucune partition encore calculée par "\${workerName}". Voici les partitions de la communauté prêtes à être vérifiées :
+            </div>\`;
+        }
+
+        grid.innerHTML = bannerHtml + pieces.map(p => \`
+          <div class="piece-card \${p.is_user_piece ? 'is-user-card' : ''}">
             <div>
-              <div style="font-size:0.75rem; color:var(--gold-light); font-weight:700; text-transform:uppercase;">\${p.part || 'Chant'}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
+                <span style="font-size:0.75rem; color:var(--gold-sacred); font-weight:700; text-transform:uppercase;">\${p.part || 'Chant'}</span>
+                \${p.is_user_piece 
+                  ? '<span class="badge-user-piece">✦ Votre alignement</span>' 
+                  : \`<span class="badge-other-piece">\${p.worker_id || 'Ami'}</span>\`}
+              </div>
               <div class="piece-title">\${p.incipit || p.piece_id}</div>
               <div class="piece-meta" style="margin-top:6px;">
-                <span>🎵 \${p.notes_count} notes</span>
-                <span>⚡ \${p.compute_time_sec ? p.compute_time_sec + 's' : ''}</span>
+                <span>\${p.notes_count} notes</span>
+                <span>\${p.compute_time_sec ? p.compute_time_sec + 's' : ''}</span>
               </div>
             </div>
             <button type="button" class="btn-review-card" onclick="openReviewModal('\${p.piece_id}')">
-              🔍 Examiner & Réviser
+              Examiner & Réviser
             </button>
           </div>
         \`).join('');
 
       } catch(e) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--crimson);">Erreur lors de la récupération des pièces.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--primary-color);">Erreur lors de la récupération des pièces.</div>';
       }
     }
 
-    // 4. Modal de Revue Directe
+    // 4. Rendu Grégorien Exsurge & Modal de Revue Directe
+    function preprocessGabcForExsurge(gabc) {
+      if (!gabc) return '';
+      gabc = gabc.replace(/<sp>['’]<\/sp>/g, "'");
+      gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) { return b.toUpperCase() + '/.'; })
+                 .replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) { return b.toUpperCase() + '/.'; });
+      gabc = gabc.replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1<c><i>Ps.</i></c>');
+      gabc = gabc.replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
+      gabc = gabc.replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
+      gabc = gabc.replace(/(^|\s|\))(V\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
+      gabc = gabc.replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
+      gabc = gabc.replace(/(^|\s|\))(R\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
+      return gabc;
+    }
+
+    function renderModalScore(gabcSrc) {
+      const container = document.getElementById('modalScoreSlot');
+      if (!container) return;
+      currentModalGabc = gabcSrc || '';
+
+      if (!gabcSrc) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">Partition GABC non disponible pour cette pièce.</div>';
+        return;
+      }
+
+      if (typeof exsurge === 'undefined') {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--status-danger); font-size:0.85rem;">Module Exsurge en cours de chargement...</div>';
+        return;
+      }
+
+      try {
+        const ctxt = new exsurge.ChantContext();
+        const accentColor = '#c96b63';
+
+        ctxt.textColor = '#ffffff';
+        ctxt.noteColor = '#ffffff';
+        ctxt.neumeLineColor = '#ffffff';
+        ctxt.dividerLineColor = '#ffffff';
+        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.55)';
+
+        ctxt.setFont("'Crimson Text', 'Libre Baskerville', Georgia, serif", 17.5);
+        ctxt.setRubricColor(accentColor);
+        ctxt.specialCharColor = accentColor;
+        ctxt.rubricColor = accentColor;
+        ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
+        ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
+        ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
+        ctxt.specialCharMap = { '℣': '℣', '℟': '℟', 'V': 'V', 'R': 'R', '+': '+', '*': '*' };
+        ctxt.lyricTextColor = '#ffffff';
+        ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
+        ctxt.annotationTextFont = ctxt.lyricTextFont;
+
+        if (ctxt.textStyles) {
+          Object.keys(ctxt.textStyles).forEach(function(k) {
+            if (ctxt.textStyles[k]) {
+              ctxt.textStyles[k].color = '#ffffff';
+              ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
+            }
+          });
+          if (ctxt.textStyles.al) {
+            ctxt.textStyles.al.color = 'rgba(255, 255, 255, 0.85)';
+            ctxt.textStyles.al.font = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
+            ctxt.textStyles.al.size = 12;
+          }
+        }
+
+        const processed = preprocessGabcForExsurge(gabcSrc);
+        const mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
+        const score = new exsurge.ChantScore(ctxt, mappings, true);
+
+        var availWidth = container.clientWidth || 700;
+        if (availWidth < 340) availWidth = 340;
+        ctxt.width = availWidth;
+
+        score.performLayout(ctxt);
+
+        score.layoutChantLines(ctxt, availWidth - 20, function() {
+          container.innerHTML = '';
+          const svgNode = score.createSvgNode(ctxt);
+          svgNode.setAttribute('width', '100%');
+          svgNode.style.width = '100%';
+          svgNode.style.height = 'auto';
+          container.appendChild(svgNode);
+          currentModalScore = score;
+        });
+      } catch (err) {
+        console.error('Erreur Exsurge:', err);
+        container.innerHTML = '<div style="padding:20px; color:var(--status-danger); text-align:center; font-size:0.85rem;">Erreur de rendu grégorien : ' + err.message + '</div>';
+      }
+    }
+
     window.openReviewModal = async function(pieceId) {
       currentReviewPieceId = pieceId;
       const modal = document.getElementById('reviewModal');
@@ -1646,6 +1816,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
       document.getElementById('modalPieceTitle').textContent = 'Chargement de la partition...';
       document.getElementById('modalVideoFrame').src = 'about:blank';
+      document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">Chargement des neumes grégoriens...</div>';
 
       try {
         const res = await fetch(\`/api/jobs/piece/\${encodeURIComponent(pieceId)}\`);
@@ -1654,20 +1825,30 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         document.getElementById('modalPieceTitle').textContent = piece.incipit || piece.piece_id;
         document.getElementById('modalPiecePart').textContent = piece.part || 'Liturgie';
         document.getElementById('modalPieceAuthor').textContent = \`Aligné par : \${piece.worker_id || 'Ami'}\`;
-        document.getElementById('modalNotesCount').textContent = piece.timestamps ? piece.timestamps.length : 0;
+        document.getElementById('modalNotesCountBadge').textContent = \`\${piece.timestamps ? piece.timestamps.length : 0} notes synchronisées\`;
 
         const ytId = piece.youtube_id || (piece.youtube_url ? piece.youtube_url.split('v=')[1] : '');
         if (ytId) {
           document.getElementById('modalVideoFrame').src = \`https://www.youtube-nocookie.com/embed/\${ytId}?autoplay=0\`;
         }
+
+        if (piece.gabc_src) {
+          renderModalScore(piece.gabc_src);
+        } else {
+          document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">Partition GABC non disponible pour ce chant.</div>';
+        }
       } catch(e) {
         document.getElementById('modalPieceTitle').textContent = 'Erreur de chargement';
+        document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:20px; text-align:center; color:var(--status-danger); font-size:0.85rem;">Impossible de charger la partition.</div>';
       }
     };
 
     window.closeReviewModal = function() {
       document.getElementById('reviewModal').style.display = 'none';
       document.getElementById('modalVideoFrame').src = 'about:blank';
+      document.getElementById('modalScoreSlot').innerHTML = '';
+      currentModalScore = null;
+      currentModalGabc = '';
       toggleReviewComment(false);
       currentReviewPieceId = null;
     };
@@ -1716,7 +1897,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         });
         
         if (res.ok) {
-          awardUserXp(10, '📜 Relecture');
+          awardUserXp(10, 'Relecture');
           closeReviewModal();
           const pseudo = document.getElementById('filterWorkerInput').value.trim();
           fetchWorkerBatch(pseudo);
@@ -1834,12 +2015,13 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 3b. Fichiers CLI téléchargeables (run.sh, run.ps1, worker.py, requirements.txt)
+  // 3b. Fichiers CLI & ressources statiques (run.sh, run.ps1, worker.py, requirements.txt, exsurge.min.js)
   const CLI_FILES = {
     '/run.sh':            { name: 'run.sh',            mime: 'text/x-shellscript' },
     '/run.ps1':           { name: 'run.ps1',           mime: 'text/plain' },
     '/worker.py':         { name: 'worker.py',         mime: 'text/x-python' },
     '/requirements.txt':  { name: 'requirements.txt',  mime: 'text/plain' },
+    '/exsurge.min.js':    { name: 'exsurge.min.js',    mime: 'application/javascript; charset=utf-8' },
   };
   if ((req.method === 'GET' || req.method === 'HEAD') && CLI_FILES[pathname]) {
     const { name, mime } = CLI_FILES[pathname];
@@ -2140,8 +2322,8 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`=======================================================`);
-  console.log(`🚀 Oremus Coolify Server actif sur http://${HOST}:${PORT}`);
-  console.log(`📁 Repertoire de donnees : ${DATA_DIR}`);
+  console.log(`✦ Oremus Coolify Server actif sur http://${HOST}:${PORT}`);
+  console.log(`✦ Repertoire de donnees : ${DATA_DIR}`);
   console.log(`✦ Portail Interactif Worker : http://${HOST}:${PORT}/worker`);
   console.log(`=======================================================`);
 });

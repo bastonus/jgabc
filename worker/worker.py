@@ -415,8 +415,8 @@ def print_session_summary(worker_name: str, server_url: str, count: int, elapsed
     print(f"  ✦ Chants synchronisés: \033[93m{count} pièces\033[0m")
     print(f"  ✦ Enluminure gagnée  : \033[92m+{xp_earned} XP liturgiques\033[0m")
     print("-" * 75)
-    print("  📋 Inspectez et validez immédiatement votre lot de partitions alignées :")
-    print(f"  👉 \033[96m{review_url}\033[0m")
+    print("  ✦ Inspectez et validez immédiatement votre lot de partitions alignées :")
+    print(f"  ✦ \033[96m{review_url}\033[0m")
     print("  (Chaque validation approuvée vous accorde +10 XP supplémentaires !)")
     print("=" * 75 + "\n")
 

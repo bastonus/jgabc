@@ -31,7 +31,7 @@ if (Get-Command python -ErrorAction SilentlyContinue) {
 } elseif (Get-Command py -ErrorAction SilentlyContinue) {
     $PythonCmd = "py"
 } else {
-    Write-Host "❌ Erreur : Python n'est pas détecté sur votre système Windows." -ForegroundColor Red
+    Write-Host "✦ [ERREUR] : Python n'est pas détecté sur votre système Windows." -ForegroundColor Red
     Write-Host "Pour l'installer en 1 minute :" -ForegroundColor Yellow
     Write-Host "1. Rendez-vous sur https://www.python.org/downloads/" -ForegroundColor White
     Write-Host "2. Cochez impérativement la case [X] 'Add python.exe to PATH' lors de l'installation." -ForegroundColor Green

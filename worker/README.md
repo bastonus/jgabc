@@ -4,7 +4,7 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
 
 ---
 
-## 🚀 Démarrage en 1 minute (Même si vous n'y connaissez rien en informatique !)
+## Démarrage en 1 minute (Même si vous n'y connaissez rien en informatique !)
 
 ### Sous Windows :
 1. Décompressez le dossier `oremus-worker.zip`.
@@ -25,7 +25,7 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
 
 ---
 
-## ❓ Questions Fréquentes (FAQ)
+## Questions Fréquentes (FAQ)
 
 ### 1. Puis-je arrêter le calcul à tout moment ?
 **Oui, absolument !** Fermez la fenêtre noire ou appuyez sur les touches `Ctrl + C`. Le serveur attribuera automatiquement la pièce non terminée à un autre ami, aucun travail n'est perdu. Vous pouvez relancer le script quand vous le souhaitez.
@@ -41,7 +41,7 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
 
 ### 4. Comment voir ma progression ?
 Rendez-vous sur la page web en direct :
-👉 **https://api-oremus.silverhorse.fr/worker**
+✦ **https://api-oremus.silverhorse.fr/worker**
 Vous y verrez le nombre total de pièces synchronisées et votre pseudo dans le classement des amis contributeurs !
 
 ---

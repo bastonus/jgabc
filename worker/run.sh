@@ -50,7 +50,7 @@ if command -v python3 >/dev/null 2>&1; then
 elif command -v python >/dev/null 2>&1; then
     PYTHON_BIN="python"
 else
-    echo "❌ Erreur : Python 3 n'est pas installé sur votre ordinateur."
+    echo "✦ [ERREUR] : Python 3 n'est pas installé sur votre ordinateur."
     echo "• macOS : installez Python via 'brew install python3' ou https://www.python.org/downloads/"
     echo "• Linux : 'sudo apt update && sudo apt install -y python3 python3-venv python3-pip'"
     exit 1
