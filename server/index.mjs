@@ -2691,6 +2691,7 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, getJobsStats());
   }
 
+
   // 10. API : Exportation des alignements collectés
   if (req.method === 'GET' && pathname === '/api/jobs/export') {
     try {
@@ -2708,6 +2709,70 @@ const server = http.createServer(async (req, res) => {
       });
     } catch (err) {
       return sendJson(res, 500, { error: err.message });
+    }
+  }
+
+  // 10b. API Admin : Purge des alignements recents (POST /api/admin/purge-recent)
+  // Header requis : X-Admin-Key: <valeur de API_KEY>
+  if (req.method === 'POST' && pathname === '/api/admin/purge-recent') {
+    const adminKey = req.headers['x-admin-key'] || '';
+    if (!API_KEY || adminKey !== API_KEY) {
+      return sendJson(res, 401, { error: 'Cle admin invalide ou absente (header X-Admin-Key requis).' });
+    }
+    try {
+      const body = await parseBody(req);
+      const hours = parseFloat(body.hours || '24');
+      const cutoffMs = Date.now() - hours * 3600 * 1000;
+
+      const seeds = loadSeedAlignments();
+      const seedIds = new Set(Object.keys(seeds).map(k => String(seeds[k].piece_id || k)));
+
+      const purgedIds = [];
+      const tasks = loadTasks();
+
+      if (fs.existsSync(ALIGNMENTS_DIR)) {
+        const files = fs.readdirSync(ALIGNMENTS_DIR).filter(f => f.endsWith('.json'));
+        for (const filename of files) {
+          const filepath = path.join(ALIGNMENTS_DIR, filename);
+          const pieceId = filename.replace('.json', '');
+          if (seedIds.has(pieceId)) continue;
+
+          let fileCompletedAt = fs.statSync(filepath).mtimeMs;
+          try {
+            const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+            if (data.completed_at) fileCompletedAt = new Date(data.completed_at).getTime();
+          } catch (e) {}
+
+          if (fileCompletedAt < cutoffMs) continue;
+
+          purgedIds.push(pieceId);
+          fs.unlinkSync(filepath);
+        }
+      }
+
+      let resetCount = 0;
+      for (const task of tasks) {
+        if (purgedIds.includes(String(task.id))) {
+          task.status = 'pending';
+          task.worker_id = null;
+          task.claimed_at = null;
+          task.completed_at = null;
+          task.error = null;
+          resetCount++;
+        }
+      }
+      if (resetCount > 0) saveTasks();
+
+      console.log(`[ADMIN] Purge ${hours}h : ${purgedIds.length} alignements supprimes, ${resetCount} taches remises a pending.`);
+      return sendJson(res, 200, {
+        success: true,
+        purged_count: purgedIds.length,
+        reset_count: resetCount,
+        purged_ids: purgedIds,
+        cutoff_iso: new Date(cutoffMs).toISOString()
+      });
+    } catch (err) {
+      return sendJson(res, 500, { success: false, error: err.message });
     }
   }
 

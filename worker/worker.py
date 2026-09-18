@@ -6,7 +6,10 @@ Ce script s'exécute sur l'ordinateur de l'utilisateur (ou d'un ami) et :
 1. Détecte automatiquement l'accélération matérielle (NVIDIA CUDA, Apple MPS ou CPU multi-cœurs).
 2. Récupère automatiquement la prochaine pièce liturgique à aligner depuis le serveur Coolify.
 3. Télécharge la piste audio YouTube en mémoire/fichier temporaire.
-4. Calcule les horodatages note-par-note avec le modèle acoustique MMS_FA (Meta).
+4. Calcule les horodatages note-par-note avec un pipeline acoustique double modèle :
+   - Passe 1 : MMS_FA (Meta) — alignement forcé CTC pour ancrer les mots en temps.
+   - Passe 2 : TorchCREPE — estimation F0 à 10 ms + détection de paliers de hauteur
+     fusionnée avec les priors de durée dérivés du GABC (., _, ss/vv, quilisma).
 5. Renvoie les résultats au serveur et supprime immédiatement les fichiers audio temporaires.
 
 Usage direct :
@@ -23,6 +26,7 @@ import socket
 import argparse
 import tempfile
 import urllib.request
+import numpy as np
 from pathlib import Path
 
 # Configuration de l'encodage UTF-8 et des couleurs ANSI / VT100
@@ -66,7 +70,7 @@ BANNER = r"""
 """
 
 def ensure_dependencies():
-    """Vérifie que les modules requis sont installés (yt-dlp, torch, torchaudio). Si manquant, tente l'auto-installation."""
+    """Vérifie que les modules requis sont installés (yt-dlp, torch, torchaudio, torchcrepe, scipy). Si manquant, tente l'auto-installation."""
     missing = []
     try:
         import yt_dlp
@@ -83,6 +87,14 @@ def ensure_dependencies():
         if "torch" not in missing:
             missing.append("torch")
         missing.append("torchaudio")
+    try:
+        import torchcrepe
+    except ImportError:
+        missing.append("torchcrepe")
+    try:
+        from scipy.signal import medfilt
+    except ImportError:
+        missing.append("scipy")
 
     if not missing:
         return
@@ -212,52 +224,194 @@ def clean_latin_text(text: str) -> str:
     return text
 
 
-def parse_gabc_simple(gabc_src: str):
-    """Extrait la liste ordonnée des mots et notes depuis le code GABC."""
+def parse_gabc_file(gabc_src: str) -> list:
+    """
+    Parse un source GABC complet (headers + %% + notation) en liste de mots.
+    Chaque mot : {word, clean_latin, notes, total_weight, is_melisma}.
+    Portage de batch_align_gabc_v3.py v3.1.
+    """
     if not gabc_src:
         return []
-    # Ignorer les en-têtes avant %%
+
     if "%%" in gabc_src:
-        body = gabc_src.split("%%", 1)[1]
+        _, notation = gabc_src.split("%%", 1)
     else:
-        body = gabc_src
+        notation = gabc_src
 
-    # Supprimer les commentaires et balises d'en-tête
-    body = re.sub(r"%.*", "", body)
-    
-    # Regex syllabes : texte(notes)
-    syllables = re.findall(r"([^(]*)\(([^)]*)\)", body)
+    notation = re.sub(r"%.*", "", notation)
+
+    _CLEF_RE = re.compile(r"^(c|f)b?\d")
+    _IGNORABLE_RE = re.compile(r"\[[^\]]*\]")
+    _SHAPE_MODS = r"(?:o|w|W|v|V|s|~|<|>|=|r\d?|R|x\??|X|y\??|Y|##?\??|q|O)*"
+    _RHYTHM_MODS = r"(?:\.{1,2})?(?:_\d*)?(?:\'\d?)?"
+    _TOKEN_RE = re.compile("[a-pA-P]" + _SHAPE_MODS + _RHYTHM_MODS)
+    _SYL_RE = re.compile(r"([^()]*)(\([^()]*\))")
+
+    def _dur_weight(token):
+        w = 1.0
+        if ".." in token:
+            w *= 2.4
+        elif "." in token:
+            w *= 1.9
+        if "_" in token:
+            w *= 1.25
+        if "w" in token or "W" in token:
+            w *= 0.9
+        return w
+
+    def _is_repeated(prev, tok):
+        return bool(re.search(r"(ss|sss|vv|vvv)$", tok))
+
+    def _tokenize(raw):
+        cleaned = _IGNORABLE_RE.sub("", raw)
+        cleaned = re.sub(r"(/{{1,2}}|!)", r" \1 ", cleaned)
+        notes = []
+        pos = 0
+        prev = ""
+        while pos < len(cleaned):
+            c = cleaned[pos]
+            if c.isspace():
+                pos += 1
+                continue
+            chunk = cleaned[pos:]
+            cm = _CLEF_RE.match(chunk)
+            if cm:
+                pos += len(cm.group(0))
+                continue
+            m = _TOKEN_RE.match(chunk)
+            if m and m.group(0):
+                tok = m.group(0)
+                pl = tok[0].lower()
+                if pl in "abcdefghijklmnop":
+                    notes.append({{
+                        "token": tok,
+                        "duration_weight": _dur_weight(tok),
+                        "repeated": _is_repeated(prev, tok),
+                        "pitch_letter": pl,
+                    }})
+                    prev = tok
+                pos += len(tok)
+                continue
+            bm = re.match(r"`0?|\^0?|,0?|;\d?|:\??|::", chunk)
+            if bm:
+                pos += len(bm.group(0))
+                continue
+            pos += 1
+        return notes
+
     words = []
-    current_word = {"text": "", "clean_latin": "", "notes": []}
-    
-    pitch_re = re.compile(r"[a-pA-P]")
+    current_word = {{"word": "", "clean_latin": "", "notes": []}}
 
-    for text_part, notes_part in syllables:
-        # Nettoyer le texte
-        clean_syl = re.sub(r"[<>{}\[\]*+!/;,.:]", "", text_part).strip()
-        
-        # Extraire les notes de hauteur (lettres a-p)
-        # Ignorer les clefs du style c1-c4, f3, f4
-        clean_notes = re.sub(r"\b[cf][1-4]\b", "", notes_part)
-        found_notes = pitch_re.findall(clean_notes)
+    for match in _SYL_RE.finditer(notation):
+        text_part = match.group(1)
+        notes_str = match.group(2)[1:-1]
+        notes = _tokenize(notes_str)
 
-        if clean_syl:
-            if current_word["text"] and (text_part.startswith(" ") or text_part.endswith(" ") or len(current_word["notes"]) > 0):
-                current_word["clean_latin"] = clean_latin_text(current_word["text"])
-                if current_word["notes"] or current_word["clean_latin"]:
-                    words.append(current_word)
-                current_word = {"text": clean_syl, "clean_latin": "", "notes": []}
-            else:
-                current_word["text"] += clean_syl
+        clean_text = re.sub(r"\[[^\]]*\]|<[^>]*>", "", text_part)
+        clean_stripped = clean_text.strip()
+        if clean_stripped:
+            current_word["word"] += clean_stripped
+        current_word["notes"].extend(notes)
 
-        for n in found_notes:
-            current_word["notes"].append(n.lower())
+        if re.search(r"\s$", text_part) or (notes_str.strip() == "" and current_word["word"]):
+            if current_word["word"] or current_word["notes"]:
+                cw = dict(current_word)
+                cw["clean_latin"] = clean_latin_text(cw["word"])
+                cw["total_weight"] = sum(n["duration_weight"] for n in cw["notes"]) or 1.0
+                nc = len(cw["notes"])
+                nl = len(cw["clean_latin"])
+                cw["is_melisma"] = nc > max(1, nl)
+                if nc > 0:
+                    words.append(cw)
+            current_word = {{"word": "", "clean_latin": "", "notes": []}}
 
-    if current_word["text"] or current_word["notes"]:
-        current_word["clean_latin"] = clean_latin_text(current_word["text"])
-        words.append(current_word)
+    if current_word["word"] or current_word["notes"]:
+        cw = dict(current_word)
+        cw["clean_latin"] = clean_latin_text(cw["word"])
+        cw["total_weight"] = sum(n["duration_weight"] for n in cw["notes"]) or 1.0
+        nc = len(cw["notes"])
+        nl = len(cw["clean_latin"])
+        cw["is_melisma"] = nc > max(1, nl)
+        if nc > 0:
+            words.append(cw)
 
     return words
+
+
+def compute_gabc_duration_priors(notes: list) -> "np.ndarray":
+    """Normalise les poids de duree GABC en prior de note (somme=1)."""
+    weights = np.array([n["duration_weight"] for n in notes], dtype=np.float64)
+    total = weights.sum()
+    if total <= 0:
+        return np.ones(len(notes), dtype=np.float64) / max(1, len(notes))
+    return weights / total
+
+
+def detect_pitch_plateaus(local_pitch, notes_count, smoothing_kernel=5, min_semitone_jump=0.5):
+    """
+    Detecte les frontieres de notes par analyse des paliers de frequence F0.
+    Retourne (boundaries, confidence).
+    Portage de batch_align_gabc_v3.py.
+    """
+    try:
+        from scipy.signal import medfilt as _medfilt
+    except ImportError:
+        return None, 0.0
+
+    voiced = local_pitch > 0
+    if voiced.sum() < notes_count:
+        return None, 0.0
+
+    with np.errstate(divide="ignore"):
+        midi = 12 * np.log2(
+            np.where(local_pitch > 0, local_pitch, 1) / 440.0
+        ) + 69
+    midi[~voiced] = np.nan
+
+    kernel = smoothing_kernel if smoothing_kernel % 2 == 1 else smoothing_kernel + 1
+    filled = np.where(np.isnan(midi), np.nanmedian(midi) if voiced.any() else 0, midi)
+    kernel = min(kernel, len(filled) - (1 - len(filled) % 2))
+    kernel = max(kernel, 1)
+    smoothed = _medfilt(filled, kernel_size=kernel)
+
+    deriv = np.abs(np.diff(smoothed))
+    candidate_idx = np.where(deriv > min_semitone_jump)[0]
+
+    boundaries = []
+    for idx in candidate_idx:
+        if not boundaries or idx - boundaries[-1] > 2:
+            boundaries.append(int(idx))
+
+    detected_count = len(boundaries) + 1
+    confidence = 1.0 - min(abs(detected_count - notes_count) / max(notes_count, 1), 1.0)
+    return boundaries, confidence
+
+
+def blend_detection_with_priors(w_start, w_end, notes_count, detected_boundaries, confidence,
+                                gabc_priors, has_repeated_notes):
+    """
+    Combine frontieres CREPE et prior GABC, ponderees par la confiance.
+    Portage de batch_align_gabc_v3.py.
+    """
+    duration = w_end - w_start
+    prior_times = w_start + np.cumsum(np.insert(gabc_priors, 0, 0.0))[:-1] * duration
+
+    effective_confidence = min(confidence, 0.4) if has_repeated_notes else confidence
+
+    if detected_boundaries is None or len(detected_boundaries) == 0:
+        return [round(float(t), 3) for t in prior_times]
+
+    step_sec = duration / max(len(detected_boundaries) + 1, 1)
+    detected_times = [w_start] + [w_start + b * step_sec for b in detected_boundaries]
+    detected_times = detected_times[:notes_count]
+    while len(detected_times) < notes_count:
+        detected_times.append(detected_times[-1] + step_sec)
+
+    blended = [
+        effective_confidence * d + (1 - effective_confidence) * p
+        for d, p in zip(detected_times, prior_times)
+    ]
+    return [round(float(t), 3) for t in blended]
 
 
 def load_audio_waveform(wav_path: str, target_sample_rate: int = 16000):
@@ -336,117 +490,252 @@ def load_audio_waveform(wav_path: str, target_sample_rate: int = 16000):
 
 def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
     """
-    Exécute l'alignement forcé MMS_FA sur le fichier audio.
-    Retourne la liste des horodatages calculés pour chaque note.
+    Pipeline acoustique double modele pour l'alignement note-par-note :
+      Passe 1 — MMS_FA (torchaudio) : alignement force CTC pour ancrer les mots en temps.
+      Passe 2 — TorchCREPE : estimation F0 a 10 ms + detection de paliers de hauteur
+                              fusionnee avec les priors de duree GABC (., _, ss/vv).
     """
     import torch
     import torchaudio
     import torchaudio.functional as F
 
-    # 1. Charger le modèle MMS_FA
+    # 1. Charger le modele MMS_FA
     bundle = torchaudio.pipelines.MMS_FA
     model = bundle.get_model().to(device_type)
     dictionary = bundle.get_dict()
     star_idx = dictionary["*"]
 
-    # 2. Charger et rééchantillonner l'audio en 16kHz mono (décodage direct sans TorchCodec)
+    # 2. Charger et reechantillonner l'audio en 16kHz mono
     waveform, sr, total_sec = load_audio_waveform(wav_path, bundle.sample_rate)
     waveform = waveform.to(device_type)
 
-    # 3. Parser le GABC
-    words = parse_gabc_simple(gabc_src)
+    # 3. Parser le GABC (version v3.1 avec duration weights)
+    words = parse_gabc_file(gabc_src)
     if not words:
         raise ValueError("Impossible d'extraire des syllabes/notes du GABC")
 
-    # 4. Construire les tokens CTC
+    # 4. Construire les tokens CTC avec tokens star pour les melismes
     flat_tokens = []
-    note_to_word_map = []
-    
+    word_spans = []   # (w_idx, s_idx, e_idx, is_melisma)
+
     for w_idx, w in enumerate(words):
         cleaned = w["clean_latin"]
         toks = [dictionary[c] for c in cleaned if c in dictionary]
-        notes_count = len(w["notes"])
+        n_count = len(w["notes"])
+        w_weight = w["total_weight"]
 
-        if notes_count > len(toks):
-            # Présence d'un mélisme : allouer des tokens star pour absorber la durée
-            extra_stars = max(1, notes_count - len(toks))
-            toks.extend([star_idx] * extra_stars)
-
-        for t in toks:
-            flat_tokens.append(t)
-            note_to_word_map.append(w_idx)
+        if w["is_melisma"] or n_count > len(toks):
+            # Melisme : tokens star proportionnels au poids GABC
+            star_count = max(1, round(w_weight / 2.0))
+            s = len(flat_tokens)
+            flat_tokens.extend([star_idx] * star_count)
+            e = len(flat_tokens)
+            word_spans.append((w_idx, s, e, True))
+        elif toks:
+            s = len(flat_tokens)
+            flat_tokens.extend(toks)
+            e = len(flat_tokens)
+            word_spans.append((w_idx, s, e, False))
+        else:
+            word_spans.append((w_idx, -1, -1, False))
 
     if not flat_tokens:
-        # Fallback tokens de base
         flat_tokens = [star_idx] * max(1, sum(len(w["notes"]) for w in words))
 
-    # 5. Inférence acoustique
+    # 5. Inference MMS_FA par chunks de 30 s pour eviter les OOM
+    CHUNK_SEC = 30
+    chunk_samples = CHUNK_SEC * bundle.sample_rate
+    all_emissions = []
     with torch.inference_mode():
-        emissions, _ = model(waveform)
-        log_probs = emissions.log_softmax(dim=-1)
-        targets = torch.tensor([flat_tokens], dtype=torch.int32, device=device_type)
-        input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32)
-        target_lengths = torch.tensor([targets.shape[1]], dtype=torch.int32)
-        paths, _ = F.forced_align(log_probs.cpu(), targets.cpu(), input_lengths, target_lengths, blank=0)
+        for start_s in range(0, waveform.shape[1], chunk_samples):
+            chunk = waveform[:, start_s : start_s + chunk_samples]
+            if chunk.shape[1] < 1600:
+                continue
+            em, _ = model(chunk)
+            all_emissions.append(em)
+    emission = torch.cat(all_emissions, dim=1)
+    model.cpu()
+    del model
+    try:
+        torch.cuda.empty_cache()
+    except Exception:
+        pass
 
-    # 6. Extraction des intervalles temporels
-    path = paths[0].tolist()
-    frames_per_sec = log_probs.shape[1] / total_sec
-    
-    token_spans = []
-    current_tok = None
-    start_frame = 0
+    log_probs = emission.log_softmax(dim=-1)
+    targets = torch.tensor([flat_tokens], dtype=torch.int32)
+    input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32)
+    target_lengths = torch.tensor([targets.shape[1]], dtype=torch.int32)
+    paths, scores = F.forced_align(log_probs.cpu(), targets.cpu(), input_lengths, target_lengths, blank=0)
+    frame_dur = total_sec / log_probs.shape[1]
 
-    for f_idx, token_idx in enumerate(path):
-        if token_idx != current_tok:
-            if current_tok is not None and current_tok != 0:
-                token_spans.append({
-                    "token": current_tok,
-                    "start": start_frame / frames_per_sec,
-                    "end": f_idx / frames_per_sec
-                })
-            current_tok = token_idx
-            start_frame = f_idx
-
-    if current_tok and current_tok != 0:
-        token_spans.append({
-            "token": current_tok,
-            "start": start_frame / frames_per_sec,
-            "end": len(path) / frames_per_sec
+    # 6. Extraire start/end par mot depuis les spans CTC
+    spans = F.merge_tokens(paths[0], scores[0])
+    word_records = []
+    for w_idx, s_idx, e_idx, is_mel in word_spans:
+        w = words[w_idx]
+        if s_idx >= 0 and e_idx <= len(spans) and e_idx > s_idx:
+            w_start = spans[s_idx].start * frame_dur
+            w_end = spans[e_idx - 1].end * frame_dur
+            dur = max(0.04, w_end - w_start)
+            score = float(sum(spans[k].score for k in range(s_idx, e_idx)) / (e_idx - s_idx))
+            unit_dur = dur / max(0.1, w["total_weight"])
+            min_score = -4.5 if is_mel else -2.8
+            is_reliable = (unit_dur >= 0.10 and dur >= 0.20 and score > min_score and w_end > w_start)
+        else:
+            w_start, w_end, dur, score, is_reliable = None, None, None, -5.0, False
+        word_records.append({
+            "word": w["word"],
+            "notes": w["notes"],
+            "total_weight": w["total_weight"],
+            "start": w_start,
+            "end": w_end,
+            "score": score,
+            "is_reliable": is_reliable,
         })
 
-    # 7. Interpolation des notes individuelles
-    timestamps = []
-    total_notes_in_piece = sum(len(w["notes"]) for w in words)
-    
-    if token_spans:
-        piece_start = token_spans[0]["start"]
-        piece_end = token_spans[-1]["end"]
-    else:
-        piece_start = 1.0
-        piece_end = max(2.0, total_sec - 1.0)
+    # 7. Anti-derive arriere
+    last_reliable_end = 0.0
+    for wr in word_records:
+        if wr["is_reliable"]:
+            if wr["start"] < last_reliable_end - 0.2:
+                wr["is_reliable"] = False
+            else:
+                last_reliable_end = wr["end"]
 
-    step = (piece_end - piece_start) / max(1, total_notes_in_piece)
-    
+    # 8. Etirement GABC pour les mots non detectes
+    i = 0
+    while i < len(word_records):
+        if not word_records[i]["is_reliable"]:
+            p_start = i
+            while i < len(word_records) and not word_records[i]["is_reliable"]:
+                i += 1
+            p_end = i - 1
+            t_left = word_records[p_start - 1]["end"] if p_start > 0 else 0.4
+            t_right = word_records[p_end + 1]["start"] if p_end < len(word_records) - 1 else total_sec - 0.4
+            portion_weight = sum(word_records[k]["total_weight"] for k in range(p_start, p_end + 1))
+            avail_dur = max(0.2, t_right - t_left)
+            cur_t = t_left
+            for k in range(p_start, p_end + 1):
+                wr = word_records[k]
+                w_dur = (wr["total_weight"] / max(portion_weight, 0.01)) * avail_dur
+                wr["start"] = cur_t
+                wr["end"] = cur_t + w_dur
+                wr["is_reliable"] = False
+                cur_t += w_dur
+        else:
+            i += 1
+
+    # 9. Monotonicite stricte entre mots
+    for k in range(len(word_records) - 1):
+        if word_records[k]["end"] is not None and word_records[k + 1]["start"] is not None:
+            if word_records[k]["end"] > word_records[k + 1]["start"]:
+                mid = (word_records[k]["end"] + word_records[k + 1]["start"]) / 2.0
+                word_records[k]["end"] = mid
+                word_records[k + 1]["start"] = mid
+
+    # 10. Passe 2 : TorchCREPE pour l'alignement intra-mot (note par note)
+    try:
+        import torchcrepe
+        hop_length = 160  # 10 ms a 16 kHz
+        fmin, fmax = 80, 800
+
+        # Charger l'audio en numpy pour TorchCREPE
+        try:
+            import soundfile as _sf
+            audio_np, _sr2 = _sf.read(wav_path, dtype="float32")
+            if len(audio_np.shape) > 1:
+                audio_np = audio_np.mean(axis=1)
+        except Exception:
+            audio_np = waveform[0].cpu().numpy()
+
+        audio_tensor = torch.tensor(audio_np).unsqueeze(0).to(device_type)
+        pitch, periodicity = torchcrepe.predict(
+            audio_tensor,
+            bundle.sample_rate,
+            hop_length=hop_length,
+            fmin=fmin,
+            fmax=fmax,
+            model="full",
+            device=device_type,
+            batch_size=2048,
+            return_periodicity=True,
+        )
+        pitch_np = pitch.squeeze().cpu().numpy()
+        periodicity_np = periodicity.squeeze().cpu().numpy()
+        pitch_np[periodicity_np < 0.35] = 0.0
+        step_sec = hop_length / bundle.sample_rate
+        crepe_available = True
+        try:
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+    except Exception as crepe_err:
+        print(f"  [INFO] TorchCREPE non disponible ({crepe_err}), utilisation des priors GABC seuls.")
+        pitch_np = None
+        step_sec = None
+        crepe_available = False
+
+    # 11. Generation note par note
+    timestamps = []
     note_global_idx = 0
-    for w in words:
-        w_notes = w["notes"]
-        for n_pos, n_pitch in enumerate(w_notes):
-            n_start = round(piece_start + note_global_idx * step, 2)
-            n_end = round(n_start + step, 2)
+
+    for wr in word_records:
+        w_start = float(wr["start"])
+        w_end = float(wr["end"])
+        w_dur = max(0.05, w_end - w_start)
+        notes = wr["notes"]
+        notes_count = len(notes)
+        w_weight = wr["total_weight"]
+
+        if notes_count == 0:
+            continue
+
+        gabc_priors = compute_gabc_duration_priors(notes)
+        has_repeated = any(n.get("repeated", False) for n in notes)
+
+        if crepe_available and pitch_np is not None and step_sec is not None:
+            idx_start = int(w_start / step_sec)
+            idx_end = int(w_end / step_sec)
+            local_pitch = pitch_np[idx_start : min(idx_end, len(pitch_np))]
+
+            boundaries, confidence = detect_pitch_plateaus(local_pitch, notes_count)
+            note_starts = blend_detection_with_priors(
+                w_start, w_end, notes_count,
+                boundaries, confidence,
+                gabc_priors, has_repeated
+            )
+        else:
+            # Fallback : priors GABC seuls (pas de TorchCREPE)
+            confidence = 0.0
+            cum = np.cumsum(np.insert(gabc_priors, 0, 0.0))[:-1]
+            note_starts = [round(float(w_start + t * w_dur), 3) for t in cum]
+
+        for i_n, (n_meta, n_start) in enumerate(zip(notes, note_starts)):
+            if i_n + 1 < len(note_starts):
+                n_end = note_starts[i_n + 1]
+            else:
+                n_end = w_end
+            n_dur = max(0.02, round(n_end - n_start, 3))
             timestamps.append({
                 "note_index": note_global_idx,
-                "pitch": n_pitch,
-                "word": w["text"],
-                "start": n_start,
-                "end": n_end,
-                "duration": round(n_end - n_start, 2),
-                "confidence": 0.85
+                "pitch": n_meta.get("pitch_letter", n_meta.get("token", "?")),
+                "word": wr["word"],
+                "start": round(n_start, 3),
+                "end": round(min(n_end, total_sec), 3),
+                "duration": n_dur,
+                "confidence": round(float(confidence if crepe_available else 0.3), 2),
             })
             note_global_idx += 1
 
-    return timestamps, total_sec
+    # 12. Raccordement inter-mots : la derniere note du mot reste active jusqu'au debut du mot suivant
+    for idx in range(len(timestamps) - 1):
+        if timestamps[idx]["word"] != timestamps[idx + 1]["word"]:
+            nxt_start = timestamps[idx + 1]["start"]
+            if nxt_start > timestamps[idx]["end"]:
+                timestamps[idx]["end"] = nxt_start
+                timestamps[idx]["duration"] = round(nxt_start - timestamps[idx]["start"], 3)
 
+    return timestamps, total_sec
 
 def download_youtube_audio(yt_url: str, output_path: str):
     """Télécharge la piste audio YouTube en WAV 16kHz mono via yt-dlp."""
@@ -631,7 +920,7 @@ def main():
             wav_file = download_youtube_audio(yt_url, temp_out)
 
             # 2. Alignement MMS_FA
-            print(f"  [2/3] Calcul de l'alignement note-par-note avec le modèle acoustique ({device_type})...")
+            print(f"  [2/3] Calcul de l'alignement note-par-note (MMS_FA + TorchCREPE) ({device_type})...")
             timestamps, audio_dur = compute_alignment_mms(wav_file, gabc_src, device_type)
             duration_sec = round(time.time() - start_time, 2)
 
