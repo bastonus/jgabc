@@ -6,6 +6,8 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
 
 ## Démarrage en 1 minute (Même si vous n'y connaissez rien en informatique !)
 
+**Tout est automatique** : Python 3.12 (via winget / apt / brew si absent), environnement virtuel `.venv`, mise à jour de pip, `ffmpeg` (requis par yt-dlp), PyTorch CUDA si NVIDIA détectée, puis lancement du calcul. Première exécution en administrateur recommandée sous Windows (installation silencieuse tous utilisateurs).
+
 ### Sous Windows :
 1. Décompressez le dossier `oremus-worker.zip`.
 2. Double-cliquez sur le fichier **`start_worker.bat`**.
@@ -22,6 +24,15 @@ Merci de prêter la puissance de votre ordinateur pour aider à synchroniser les
    ./start_worker.sh
    ```
 4. Indiquez votre pseudo, votre durée de session et validez !
+
+### Via Docker (100% autonome, idéal NVIDIA) :
+Prérequis : Docker + pilote NVIDIA + `nvidia-container-toolkit`. Tout le reste (Python 3.12, CUDA 12.4, PyTorch, ffmpeg, dépendances) est déjà dans l'image.
+```bash
+docker build -t oremus-worker:latest ./worker
+docker run --rm --gpus all -e WORKER_NAME="VotrePseudo" oremus-worker:latest
+# CPU ou durée limitée :
+docker run --rm -e WORKER_NAME="VotrePseudo" oremus-worker:latest --duration 60
+```
 
 ---
 

@@ -20,6 +20,8 @@ FILES_TO_PACK = [
     "start_worker.bat",
     "start_worker.sh",
     "requirements.txt",
+    "Dockerfile",
+    "docker-entrypoint.sh",
     "README.md"
 ]
 

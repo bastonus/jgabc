@@ -51,18 +51,93 @@ while (-not $Name -or $Name.Trim() -eq "" -or $Name.Trim().ToLower() -eq "ami" -
     }
 }
 
-# 2. Vérification de Python
-$PythonCmd = $null
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    $PythonCmd = "python"
-} elseif (Get-Command py -ErrorAction SilentlyContinue) {
-    $PythonCmd = "py"
-} else {
-    Write-Host "✦ [ERREUR] : Python n'est pas détecté sur votre système Windows." -ForegroundColor Red
-    Write-Host "Pour l'installer en 1 minute :" -ForegroundColor Yellow
-    Write-Host "1. Rendez-vous sur https://www.python.org/downloads/" -ForegroundColor White
-    Write-Host "2. Cochez impérativement la case [X] 'Add python.exe to PATH' lors de l'installation." -ForegroundColor Green
+# 2. Bootstrap automatique : Python 3.10+ et ffmpeg (installation si absents)
+function Get-PythonInfo {
+    $candidates = @(
+        @{ Cmd = "py"; Args = @("-3.12") },
+        @{ Cmd = "py"; Args = @("-3") },
+        @{ Cmd = "python"; Args = @() },
+        @{ Cmd = "python3"; Args = @() }
+    )
+    foreach ($cand in $candidates) {
+        if (Get-Command $cand.Cmd -ErrorAction SilentlyContinue) {
+            try {
+                $allArgs = @() + $cand.Args + @("-c", "import sys; print(str(sys.version_info[0]) + '.' + str(sys.version_info[1]))")
+                $verOut = & $cand.Cmd @allArgs 2>$null
+                if ($verOut -and $verOut.Trim() -match "^(\d+)\.(\d+)$") {
+                    $major = [int]$Matches[1]; $minor = [int]$Matches[2]
+                    if ($major -gt 3 -or ($major -eq 3 -and $minor -ge 10)) {
+                        return @{ Cmd = $cand.Cmd; Args = $cand.Args; Version = $verOut.Trim() }
+                    }
+                }
+            } catch {}
+        }
+    }
+    return $null
+}
+
+function Refresh-Path {
+    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $user = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = "$machine;$user"
+}
+
+function Install-Python312 {
+    Write-Host "[*] Python 3.10+ non détecté. Installation automatique de Python 3.12..." -ForegroundColor Yellow
+    # Méthode 1 : winget (Windows 10 1809+ / Windows 11)
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        try {
+            Write-Host "[*] Installation via winget (Python.Python.3.12, silencieux)..." -ForegroundColor Cyan
+            & winget install --id Python.Python.3.12 --silent --accept-source-agreements --accept-package-agreements --override "/passive InstallAllUsers=1 PrependPath=1 Include_test=0" 2>&1 | Out-Null
+            Refresh-Path
+            if (Get-PythonInfo) { return $true }
+            Write-Host "[WARN] winget n'a pas suffi, tentative via python.org..." -ForegroundColor DarkYellow
+        } catch {}
+    }
+    # Méthode 2 : installateur officiel python.org en silencieux
+    try {
+        $installer = Join-Path $env:TEMP "python-3.12-setup.exe"
+        Write-Host "[*] Téléchargement de Python 3.12 depuis python.org..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe" -OutFile $installer -UseBasicParsing
+        Write-Host "[*] Installation silencieuse (tous utilisateurs + PATH)..." -ForegroundColor Cyan
+        $proc = Start-Process -FilePath $installer -ArgumentList "/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0" -Wait -PassThru
+        Remove-Item $installer -Force -ErrorAction SilentlyContinue
+        Refresh-Path
+        return ($proc.ExitCode -eq 0)
+    } catch {
+        Write-Host "✦ [ERREUR] Installation automatique impossible : $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+}
+
+$PythonInfo = Get-PythonInfo
+if (-not $PythonInfo) {
+    if (Install-Python312) { $PythonInfo = Get-PythonInfo }
+}
+if (-not $PythonInfo) {
+    Write-Host "✦ [ERREUR] : Python 3.10+ reste introuvable après installation automatique." -ForegroundColor Red
+    Write-Host "Installez-le manuellement depuis https://www.python.org/downloads/" -ForegroundColor Yellow
+    Write-Host "(cochez impérativement la case 'Add python.exe to PATH'), puis relancez." -ForegroundColor Yellow
     exit 1
+}
+$PythonCmd = $PythonInfo.Cmd
+$PythonBaseArgs = @() + $PythonInfo.Args
+Write-Host "[*] Python détecté : $PythonCmd $($PythonBaseArgs -join ' ') (version $($PythonInfo.Version))" -ForegroundColor Green
+
+# ffmpeg requis par yt-dlp pour extraire l'audio YouTube
+if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+    Write-Host "[*] ffmpeg non détecté, installation automatique..." -ForegroundColor Yellow
+    $ffmpegOk = $false
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        try {
+            & winget install --id Gyan.FFmpeg --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null
+            Refresh-Path
+            if (Get-Command ffmpeg -ErrorAction SilentlyContinue) { $ffmpegOk = $true }
+        } catch {}
+    }
+    if (-not $ffmpegOk) {
+        Write-Host "[WARN] ffmpeg introuvable : installez-le depuis https://www.gyan.dev/ffmpeg/builds/ (sinon le téléchargement audio échouera)." -ForegroundColor DarkYellow
+    }
 }
 
 # 3. Création du dossier de travail
@@ -80,11 +155,14 @@ Invoke-RestMethod -Uri "$Server/requirements.txt" -OutFile "requirements.txt"
 $VenvDir = Join-Path $WorkDir ".venv"
 if (-not (Test-Path $VenvDir)) {
     Write-Host "[*] Initialisation de l'environnement virtuel (.venv)..." -ForegroundColor Cyan
-    & $PythonCmd -m venv $VenvDir
+    & $PythonCmd @PythonBaseArgs -m venv $VenvDir
 }
 
 $VenvPython = Join-Path $VenvDir "Scripts\python.exe"
 $VenvPip = Join-Path $VenvDir "Scripts\pip.exe"
+
+Write-Host "[*] Mise à jour de pip..." -ForegroundColor Cyan
+& $VenvPython -m pip install --upgrade pip --quiet --disable-pip-version-check
 
 # 6. Dépendances IA avec détection matérielle intelligente (NVIDIA CUDA / CPU)
 Write-Host "[*] Détection du matériel d'accélération IA..." -ForegroundColor Cyan
@@ -128,7 +206,7 @@ if ($HasNvidia -and -not $TorchHasCuda) {
     Write-Host "✦ Installation de PyTorch avec accélération CUDA (vitesse multipliée par 25)..." -ForegroundColor Yellow
     Write-Host "=======================================================================" -ForegroundColor Green
     & $VenvPip uninstall -y torch torchaudio | Out-Null
-    & $VenvPip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+    & $VenvPip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124/
 }
 
 Write-Host "[*] Vérification des modules IA (MMS_FA, yt-dlp)..." -ForegroundColor Cyan

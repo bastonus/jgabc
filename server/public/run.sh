@@ -72,16 +72,67 @@ while [ -z "$WORKER_NAME" ] || [ -z "$(echo "$WORKER_NAME" | tr -d ' ')" ] || [ 
     fi
 done
 
-# 2. Vérification de Python 3
+# 2. Bootstrap automatique de Python 3 et ffmpeg (installation si absents)
+PYTHON_BIN=""
 if command -v python3 >/dev/null 2>&1; then
     PYTHON_BIN="python3"
 elif command -v python >/dev/null 2>&1; then
     PYTHON_BIN="python"
-else
-    echo "✦ [ERREUR] : Python 3 n'est pas installé sur votre ordinateur."
-    echo "• macOS : installez Python via 'brew install python3' ou https://www.python.org/downloads/"
-    echo "• Linux : 'sudo apt update && sudo apt install -y python3 python3-venv python3-pip'"
+fi
+
+install_system_python() {
+    echo "[*] Python 3 non détecté. Installation automatique..."
+    OS="$(uname -s)"
+    if [ "$OS" = "Darwin" ]; then
+        if command -v brew >/dev/null 2>&1; then
+            brew install python3 ffmpeg
+        else
+            echo "✦ [ERREUR] Homebrew requis : https://brew.sh puis 'brew install python3 ffmpeg'"
+            exit 1
+        fi
+    elif [ -f /etc/debian_version ]; then
+        sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip ffmpeg
+    elif [ -f /etc/fedora-release ]; then
+        sudo dnf install -y python3 python3-pip ffmpeg
+    elif [ -f /etc/arch-release ]; then
+        sudo pacman -Sy --noconfirm python python-pip ffmpeg
+    else
+        echo "✦ [ERREUR] : installez Python 3.12 depuis https://www.python.org/downloads/ puis relancez."
+        exit 1
+    fi
+}
+
+if [ -z "$PYTHON_BIN" ]; then
+    install_system_python
+    if command -v python3 >/dev/null 2>&1; then PYTHON_BIN="python3"
+    elif command -v python >/dev/null 2>&1; then PYTHON_BIN="python"
+    else echo "✦ [ERREUR] : Python 3 reste introuvable après installation."; exit 1; fi
+fi
+
+# Vérifie que la version convient (>= 3.10) et que le module venv existe
+if ! $PYTHON_BIN -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" 2>/dev/null; then
+    echo "✦ [ERREUR] : Python 3.10+ requis (détecté : $($PYTHON_BIN --version 2>&1))."
     exit 1
+fi
+echo "[*] Python détecté : $($PYTHON_BIN --version 2>&1)"
+
+if ! $PYTHON_BIN -m venv --help >/dev/null 2>&1; then
+    echo "[*] Module venv manquant, installation..."
+    if [ -f /etc/debian_version ]; then
+        PYVER="$($PYTHON_BIN -c 'import sys; v = sys.version_info; print(str(v[0]) + chr(46) + str(v[1]))')"
+        sudo apt-get install -y "python${PYVER}-venv" || sudo apt-get install -y python3-venv
+    else
+        echo "✦ [ERREUR] : module venv indisponible pour $PYTHON_BIN."
+        exit 1
+    fi
+fi
+
+if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "[*] ffmpeg non détecté (requis par yt-dlp), tentative d'installation..."
+    if [ "$(uname -s)" = "Darwin" ] && command -v brew >/dev/null 2>&1; then brew install ffmpeg || true
+    elif [ -f /etc/debian_version ]; then sudo apt-get install -y ffmpeg || true
+    fi
+    command -v ffmpeg >/dev/null 2>&1 || echo "[WARN] ffmpeg introuvable : le téléchargement audio risque d'échouer."
 fi
 
 mkdir -p "$WORK_DIR"
@@ -104,6 +155,9 @@ if [ ! -d ".venv" ]; then
 fi
 source .venv/bin/activate
 
+echo "[*] Mise à jour de pip..."
+pip install --upgrade pip --quiet --disable-pip-version-check
+
 # 4. Installation des dépendances avec détection intelligente NVIDIA CUDA
 echo "[*] Détection du matériel d'accélération IA (NVIDIA CUDA / CPU)..."
 if command -v nvidia-smi >/dev/null 2>&1; then
@@ -113,7 +167,7 @@ if command -v nvidia-smi >/dev/null 2>&1; then
         echo "✦ Installation de PyTorch CUDA pour multiplier la vitesse par 25..."
         echo "======================================================================="
         pip uninstall -y torch torchaudio >/dev/null 2>&1 || true
-        pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+        pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124/
     fi
 fi
 echo "[*] Vérification des modules audio et réseau..."
