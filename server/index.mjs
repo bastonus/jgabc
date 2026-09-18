@@ -749,6 +749,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="/exsurge.min.js"></script>
   <style>
     /* Oremus Frameless Zero-Stroke Design System Tokens */
@@ -1024,6 +1025,80 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       padding: 12px 6px; font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
     }
     .score-viewport svg { display: block; width: 100%; height: auto; }
+    /* Note & syllabe active en cours de chant (reprise fidele du laboratoire) */
+    .score-viewport svg use.active,
+    .score-viewport svg use[class*="active"],
+    .score-viewport svg use.active-note-highlight,
+    .score-viewport svg text.active,
+    .score-viewport svg text.active *,
+    .score-viewport svg text.active tspan,
+    .score-viewport svg tspan.active,
+    .score-viewport svg text.dropCap.active,
+    .score-viewport svg text.lyric.active,
+    .score-viewport svg text.lyric.active tspan,
+    .score-viewport svg text.aboveLinesText.active,
+    .score-viewport svg text.aboveLinesText.active tspan,
+    .score-viewport svg .note.active {
+      fill: var(--primary-color) !important;
+      color: var(--primary-color) !important;
+      stroke: none !important;
+      transition: fill 0.08s ease;
+    }
+    .score-viewport svg use[data-note-index],
+    .score-viewport svg text[data-note-index],
+    .score-viewport svg tspan[data-note-index] {
+      cursor: pointer;
+    }
+
+    /* Barre de contrôle du lecteur dans la modal */
+    .modal-player-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .btn-player-mini {
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-player-mini:hover { background: rgba(255, 255, 255, 0.14); }
+    .btn-player-mini:active { opacity: 0.8; }
+    .btn-player-play {
+      background: rgba(201, 107, 99, 0.22);
+      color: #fff;
+    }
+    .btn-player-play:hover {
+      background: rgba(201, 107, 99, 0.35);
+    }
+    .modal-player-time {
+      font-family: monospace;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-left: 4px;
+    }
+    .modal-player-hint {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--gold-sacred);
+      opacity: 0.9;
+    }
+    @media (max-width: 600px) {
+      .modal-player-hint { display: none; }
+    }
 
     /* Boutons de décision — identiques au laboratoire d'alignement */
     .decision-buttons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -1371,7 +1446,28 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
         <div class="modal-media-grid">
           <div class="video-frame-container">
-            <iframe id="modalVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
+            <div id="modalVideoContainer" style="position:relative; width:100%; height:100%;">
+              <iframe id="modalVideoFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>
+            </div>
+          </div>
+
+          <!-- Barre de transport et lecture synchronisée -->
+          <div class="modal-player-bar">
+            <button type="button" class="btn-player-mini" onclick="seekModalRelative(-3)" title="Reculer de 3s (Touche J)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+              <span>-3s</span>
+            </button>
+            <button type="button" class="btn-player-mini btn-player-play" onclick="toggleModalPlayPause()" id="modalBtnPlayPause" title="Lecture / Pause (Espace)">
+              <svg id="modalIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="modalIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span id="modalPlayText">Lecture</span>
+            </button>
+            <button type="button" class="btn-player-mini" onclick="seekModalRelative(3)" title="Avancer de 3s (Touche L)">
+              <span>+3s</span>
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+            </button>
+            <span class="modal-player-time" id="modalTimeDisplay">0:00 / 0:00</span>
+            <span class="modal-player-hint">✦ Cliquez sur un neume pour vous y synchroniser</span>
           </div>
 
           <!-- Affichage fidèle de la partition grégorienne via Exsurge -->
@@ -1733,6 +1829,245 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       return gabc;
     }
 
+    let modalYtPlayer = null;
+    let modalPlaybackInterval = null;
+    let currentModalPiece = null;
+    let currentModalScore = null;
+    let currentModalChantInfo = null;
+    let modalActiveNoteIndex = -1;
+    let modalActiveNoteEl = null;
+    let modalActiveLyricEl = null;
+
+    function _getChantInfo(score) {
+      if (!score || !score.notations) return null;
+      var allNotes = [].concat.apply([], score.notations.map(function(n){ return n.notes || []; }))
+                              .filter(function(n){ return n && !n.isAccidental; });
+      return { allNotes: allNotes, score: score };
+    }
+
+    function initModalPlayer(videoId) {
+      if (modalPlaybackInterval) {
+        clearInterval(modalPlaybackInterval);
+        modalPlaybackInterval = null;
+      }
+      if (modalYtPlayer && typeof modalYtPlayer.destroy === 'function') {
+        try { modalYtPlayer.destroy(); } catch(e) {}
+        modalYtPlayer = null;
+      }
+
+      const container = document.getElementById('modalVideoContainer');
+      if (!container) return;
+      
+      if (!videoId) {
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:13px;">Aucune piste vidéo disponible</div>';
+        return;
+      }
+
+      const originParam = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+        ? ('&origin=' + encodeURIComponent(window.location.origin))
+        : '';
+      const embedUrl = 'https://www.youtube-nocookie.com/embed/' + videoId + '?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1' + originParam;
+      container.innerHTML = '<iframe id="modalVideoFrame" src="' + embedUrl + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>';
+
+      function attach() {
+        if (!window.YT || !window.YT.Player) {
+          setTimeout(attach, 100);
+          return;
+        }
+        try {
+          modalYtPlayer = new YT.Player('modalVideoFrame', {
+            events: {
+              onReady: function() {
+                updateModalPlayPauseState(false);
+                startModalSyncTracker();
+              },
+              onStateChange: function(event) {
+                if (event.data === YT.PlayerState.PLAYING) {
+                  updateModalPlayPauseState(true);
+                  startModalSyncTracker();
+                } else {
+                  updateModalPlayPauseState(false);
+                }
+              }
+            }
+          });
+        } catch(err) {
+          console.warn('YT.Player attach warning:', err);
+        }
+      }
+      attach();
+    }
+
+    window.toggleModalPlayPause = function() {
+      if (!modalYtPlayer || typeof modalYtPlayer.getPlayerState !== 'function') return;
+      try {
+        const state = modalYtPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          modalYtPlayer.pauseVideo();
+        } else {
+          modalYtPlayer.playVideo();
+        }
+      } catch(e) {}
+    };
+
+    function updateModalPlayPauseState(isPlaying) {
+      const iconPlay = document.getElementById('modalIconPlay');
+      const iconPause = document.getElementById('modalIconPause');
+      const label = document.getElementById('modalPlayText');
+      if (iconPlay && iconPause) {
+        iconPlay.style.display = isPlaying ? 'none' : 'block';
+        iconPause.style.display = isPlaying ? 'block' : 'none';
+      }
+      if (label) {
+        label.textContent = isPlaying ? 'Pause' : 'Lecture';
+      }
+    }
+
+    window.seekModalRelative = function(sec) {
+      if (!modalYtPlayer || typeof modalYtPlayer.getCurrentTime !== 'function') return;
+      try {
+        const cur = modalYtPlayer.getCurrentTime();
+        modalYtPlayer.seekTo(Math.max(0, cur + sec), true);
+      } catch(e) {}
+    };
+
+    function seekModalPlayer(sec) {
+      if (!modalYtPlayer || typeof modalYtPlayer.seekTo !== 'function') return;
+      try {
+        modalYtPlayer.seekTo(Math.max(0, sec), true);
+      } catch(e) {}
+    }
+
+    function startModalSyncTracker() {
+      if (modalPlaybackInterval) clearInterval(modalPlaybackInterval);
+      modalPlaybackInterval = setInterval(function() {
+        if (!modalYtPlayer || typeof modalYtPlayer.getCurrentTime !== 'function') return;
+        try {
+          const cur = modalYtPlayer.getCurrentTime();
+          if (typeof cur === 'number' && !isNaN(cur)) {
+            syncModalActiveNote(cur);
+            const dur = (typeof modalYtPlayer.getDuration === 'function') ? modalYtPlayer.getDuration() : 0;
+            const timeEl = document.getElementById('modalTimeDisplay');
+            if (timeEl && dur > 0) {
+              const fmt = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+              timeEl.textContent = fmt(cur) + ' / ' + fmt(dur);
+            }
+          }
+        } catch(e) {}
+      }, 80);
+    }
+
+    function syncModalActiveNote(cur) {
+      if (!currentModalPiece || !currentModalPiece.timestamps || !currentModalPiece.timestamps.length) return;
+      const stamps = currentModalPiece.timestamps;
+      var noteIdx = -1;
+
+      for (var k = 0; k < stamps.length; k++) {
+        var curNote = stamps[k];
+        if (curNote.start === null || curNote.start === undefined) continue;
+        var nxtTime = (k + 1 < stamps.length && stamps[k + 1].start !== undefined) ? stamps[k + 1].start : (curNote.end || curNote.start + 1.2);
+        if (cur >= curNote.start && cur < nxtTime) {
+          noteIdx = k;
+          break;
+        }
+      }
+      if (noteIdx === -1 && stamps.length > 0 && cur >= stamps[stamps.length - 1].start) {
+        noteIdx = stamps.length - 1;
+      }
+      if (noteIdx >= 0 && noteIdx !== modalActiveNoteIndex) {
+        highlightModalNote(noteIdx);
+      }
+    }
+
+    function highlightModalNote(idx) {
+      if (!currentModalChantInfo || !currentModalChantInfo.allNotes || !currentModalChantInfo.allNotes.length) return;
+      if (idx < 0 || idx >= currentModalChantInfo.allNotes.length) return;
+      if (idx === modalActiveNoteIndex && modalActiveNoteEl && modalActiveNoteEl.classList.contains('active')) return;
+
+      modalActiveNoteIndex = idx;
+      const note = currentModalChantInfo.allNotes[idx];
+      const accentColor = '#c96b63';
+
+      if (modalActiveNoteEl) {
+        modalActiveNoteEl.classList.remove('active', 'active-note-highlight');
+        modalActiveNoteEl.style.removeProperty('fill');
+        modalActiveNoteEl = null;
+      }
+      if (modalActiveLyricEl) {
+        modalActiveLyricEl.classList.remove('active');
+        modalActiveLyricEl.style.removeProperty('fill');
+        modalActiveLyricEl.style.removeProperty('color');
+        if (modalActiveLyricEl.querySelectorAll) {
+          modalActiveLyricEl.querySelectorAll('tspan').forEach(ts => {
+            ts.classList.remove('active');
+            ts.style.removeProperty('fill');
+            ts.style.removeProperty('color');
+          });
+        }
+        modalActiveLyricEl = null;
+      }
+
+      if (note && note.svgNode) {
+        modalActiveNoteEl = note.svgNode;
+        modalActiveNoteEl.classList.add('active', 'active-note-highlight');
+        modalActiveNoteEl.style.setProperty('fill', accentColor, 'important');
+      }
+      if (note && note.neume && note.neume.lyrics && note.neume.lyrics.length > 0) {
+        const l = note.neume.lyrics[0];
+        if (l && l.svgNode) {
+          modalActiveLyricEl = l.svgNode;
+          modalActiveLyricEl.classList.add('active');
+          modalActiveLyricEl.style.setProperty('fill', accentColor, 'important');
+          modalActiveLyricEl.style.setProperty('color', accentColor, 'important');
+          if (modalActiveLyricEl.querySelectorAll) {
+            modalActiveLyricEl.querySelectorAll('tspan').forEach(ts => {
+              ts.classList.add('active');
+              ts.style.setProperty('fill', accentColor, 'important');
+              ts.style.setProperty('color', accentColor, 'important');
+            });
+          }
+        }
+      }
+
+      // Défilement automatique fluide vers le neume actif
+      const slot = document.getElementById('modalScoreSlot');
+      if (modalActiveNoteEl && slot) {
+        const noteRect = modalActiveNoteEl.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+        if (noteRect.top < slotRect.top + 20 || noteRect.bottom > slotRect.bottom - 20) {
+          modalActiveNoteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    function setupModalScoreClicks(svg, info) {
+      if (!svg || !info) return;
+      svg.addEventListener('click', function(e) {
+        var target = e.target;
+        var targetIndex = -1;
+
+        var indexedEl = target.closest ? target.closest('[data-note-index]') : null;
+        if (indexedEl) {
+          var parsed = parseInt(indexedEl.getAttribute('data-note-index'), 10);
+          if (!isNaN(parsed) && parsed >= 0) targetIndex = parsed;
+        }
+        if (targetIndex === -1 && info.allNotes) {
+          var candidate = target.closest ? (target.closest('use') || target.closest('text') || target) : target;
+          if (candidate && candidate.source) {
+            var sIdx = info.allNotes.indexOf(candidate.source);
+            if (sIdx >= 0) targetIndex = sIdx;
+          }
+        }
+        if (targetIndex >= 0 && currentModalPiece && currentModalPiece.timestamps && currentModalPiece.timestamps[targetIndex]) {
+          const stamp = currentModalPiece.timestamps[targetIndex];
+          if (stamp.start !== undefined && stamp.start !== null) {
+            seekModalPlayer(stamp.start);
+          }
+          highlightModalNote(targetIndex);
+        }
+      });
+    }
+
     function renderModalScore(gabcSrc) {
       const container = document.getElementById('modalScoreSlot');
       if (!container) return;
@@ -1802,6 +2137,82 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           svgNode.style.height = 'auto';
           container.appendChild(svgNode);
           currentModalScore = score;
+          currentModalChantInfo = _getChantInfo(score);
+
+          if (currentModalChantInfo && currentModalChantInfo.allNotes) {
+            var allUseElements = Array.from(svgNode.querySelectorAll('use'));
+            allUseElements.forEach(function(u) {
+              if (u.source) {
+                var idx = currentModalChantInfo.allNotes.indexOf(u.source);
+                if (idx >= 0) {
+                  currentModalChantInfo.allNotes[idx].svgNode = u;
+                  u.setAttribute('data-note-index', idx);
+                  u.style.cursor = 'pointer';
+                }
+              }
+            });
+
+            currentModalChantInfo.allNotes.forEach(function(n, idx) {
+              if (!n.svgNode) {
+                var el = null;
+                if (n.elementIndex !== undefined) {
+                  el = svgNode.querySelector('use[element-index="' + n.elementIndex + '"]');
+                }
+                if (!el && n.sourceIndex !== undefined) {
+                  el = svgNode.querySelector('use[source-index="' + n.sourceIndex + '"]');
+                }
+                if (el) {
+                  n.svgNode = el;
+                  el.setAttribute('data-note-index', idx);
+                  el.style.cursor = 'pointer';
+                }
+              } else {
+                n.svgNode.setAttribute('data-note-index', idx);
+                n.svgNode.style.cursor = 'pointer';
+              }
+
+              if (n.neume && n.neume.lyrics) {
+                n.neume.lyrics.forEach(function(l) {
+                  if (l.svgNode) {
+                    l.svgNode.setAttribute('data-note-index', idx);
+                    l.svgNode.style.cursor = 'pointer';
+                    if (l.svgNode.querySelectorAll) {
+                      l.svgNode.querySelectorAll('tspan').forEach(function(ts) {
+                        ts.setAttribute('data-note-index', idx);
+                        ts.style.cursor = 'pointer';
+                      });
+                    }
+                  }
+                });
+              }
+            });
+
+            if (score.notations) {
+              score.notations.forEach(function(notat) {
+                if (notat.notes && notat.notes.length > 0) {
+                  var firstNote = notat.notes[0];
+                  var nIdx = currentModalChantInfo.allNotes.indexOf(firstNote);
+                  if (nIdx >= 0 && notat.lyrics) {
+                    notat.lyrics.forEach(function(l) {
+                      if (l.svgNode) {
+                        l.svgNode.setAttribute('data-note-index', nIdx);
+                        l.svgNode.style.cursor = 'pointer';
+                        if (l.svgNode.querySelectorAll) {
+                          l.svgNode.querySelectorAll('tspan').forEach(function(ts) {
+                            ts.setAttribute('data-note-index', nIdx);
+                            ts.style.cursor = 'pointer';
+                          });
+                        }
+                      }
+                    });
+                  }
+                }
+              });
+            }
+          }
+
+          setupModalScoreClicks(svgNode, currentModalChantInfo);
+          highlightModalNote(0);
         });
       } catch (err) {
         console.error('Erreur Exsurge:', err);
@@ -1815,12 +2226,16 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       modal.style.display = 'flex';
 
       document.getElementById('modalPieceTitle').textContent = 'Chargement de la partition...';
-      document.getElementById('modalVideoFrame').src = 'about:blank';
+      const container = document.getElementById('modalVideoContainer');
+      if (container) container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:13px;">Chargement de la vidéo...</div>';
       document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">Chargement des neumes grégoriens...</div>';
+      document.getElementById('modalTimeDisplay').textContent = '0:00 / 0:00';
+      updateModalPlayPauseState(false);
 
       try {
         const res = await fetch(\`/api/jobs/piece/\${encodeURIComponent(pieceId)}\`);
         const piece = await res.json();
+        currentModalPiece = piece;
 
         document.getElementById('modalPieceTitle').textContent = piece.incipit || piece.piece_id;
         document.getElementById('modalPiecePart').textContent = piece.part || 'Liturgie';
@@ -1828,9 +2243,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         document.getElementById('modalNotesCountBadge').textContent = \`\${piece.timestamps ? piece.timestamps.length : 0} notes synchronisées\`;
 
         const ytId = piece.youtube_id || (piece.youtube_url ? piece.youtube_url.split('v=')[1] : '');
-        if (ytId) {
-          document.getElementById('modalVideoFrame').src = \`https://www.youtube-nocookie.com/embed/\${ytId}?autoplay=0\`;
-        }
+        initModalPlayer(ytId);
 
         if (piece.gabc_src) {
           renderModalScore(piece.gabc_src);
@@ -1845,13 +2258,71 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
     window.closeReviewModal = function() {
       document.getElementById('reviewModal').style.display = 'none';
-      document.getElementById('modalVideoFrame').src = 'about:blank';
+      if (modalPlaybackInterval) {
+        clearInterval(modalPlaybackInterval);
+        modalPlaybackInterval = null;
+      }
+      if (modalYtPlayer && typeof modalYtPlayer.destroy === 'function') {
+        try { modalYtPlayer.destroy(); } catch(e) {}
+        modalYtPlayer = null;
+      }
+      const container = document.getElementById('modalVideoContainer');
+      if (container) container.innerHTML = '';
       document.getElementById('modalScoreSlot').innerHTML = '';
       currentModalScore = null;
+      currentModalChantInfo = null;
+      currentModalPiece = null;
       currentModalGabc = '';
+      modalActiveNoteIndex = -1;
+      modalActiveNoteEl = null;
+      modalActiveLyricEl = null;
       toggleReviewComment(false);
       currentReviewPieceId = null;
     };
+
+    // Raccourcis clavier identiques au Laboratoire d'Alignement
+    window.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('reviewModal');
+      if (!modal || modal.style.display !== 'flex') return;
+
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          toggleReviewComment(false);
+          e.target.blur();
+        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          submitReviewWithComment();
+        }
+        return;
+      }
+
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        toggleModalPlayPause();
+      } else if (e.key === '1' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        submitReviewVote('approved');
+      } else if (e.key === '2' || e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        submitReviewVote('rejected');
+      } else if (e.key === '3' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        submitReviewVote('bad_gabc');
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        toggleReviewComment();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeReviewModal();
+      } else if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        seekModalRelative(-3);
+      } else if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        seekModalRelative(3);
+      }
+    });
 
     window.handleBackdropClick = function(e) {
       if (e.target === document.getElementById('reviewModal')) {
