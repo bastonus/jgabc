@@ -53,6 +53,10 @@ def ensure_dependencies():
     except ImportError:
         missing.append("yt-dlp")
     try:
+        import soundfile
+    except ImportError:
+        missing.append("soundfile")
+    try:
         import torch
         import torchaudio
     except ImportError:
@@ -173,6 +177,80 @@ def parse_gabc_simple(gabc_src: str):
     return words
 
 
+def load_audio_waveform(wav_path: str, target_sample_rate: int = 16000):
+    """
+    Charge un fichier audio en mémoire et le convertit en tenseur PyTorch [1, N] mono.
+    Ne dépend PAS de TorchCodec (élimine 'TorchCodec is required for load_with_torchcodec').
+    Supporte nativement soundfile, wave standard (WAV 16/24/32-bit), et torchaudio en dernier recours.
+    """
+    import torch
+    import torchaudio.functional as F
+
+    waveform = None
+    sr = None
+
+    # 1. Tentative avec soundfile (très rapide et supporte tous formats)
+    try:
+        import soundfile as sf
+        data, sr = sf.read(wav_path, dtype="float32")
+        t = torch.from_numpy(data)
+        if t.ndim == 1:
+            waveform = t.unsqueeze(0)
+        else:
+            waveform = t.T  # [channels, time]
+    except Exception:
+        pass
+
+    # 2. Tentative avec le module standard 'wave' (zéro dépendance externe)
+    if waveform is None:
+        try:
+            import wave
+            import numpy as np
+            with wave.open(wav_path, "rb") as wf:
+                n_channels = wf.getnchannels()
+                sampwidth = wf.getsampwidth()
+                sr = wf.getframerate()
+                n_frames = wf.getnframes()
+                raw_bytes = wf.readframes(n_frames)
+
+                if sampwidth == 2:
+                    data = np.frombuffer(raw_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+                elif sampwidth == 4:
+                    data = np.frombuffer(raw_bytes, dtype=np.int32).astype(np.float32) / 2147483648.0
+                elif sampwidth == 1:
+                    data = (np.frombuffer(raw_bytes, dtype=np.uint8).astype(np.float32) - 128.0) / 128.0
+                else:
+                    data = None
+
+                if data is not None:
+                    if n_channels > 1:
+                        data = data.reshape(-1, n_channels).T
+                    else:
+                        data = data.reshape(1, -1)
+                    waveform = torch.from_numpy(data)
+        except Exception:
+            pass
+
+    # 3. Dernier recours : torchaudio.load
+    if waveform is None:
+        import torchaudio
+        waveform, sr = torchaudio.load(wav_path)
+
+    if waveform is None or sr is None:
+        raise RuntimeError(f"Impossible de décoder le fichier audio : {wav_path}")
+
+    # Conversion en mono
+    if waveform.shape[0] > 1:
+        waveform = waveform.mean(dim=0, keepdim=True)
+
+    # Rééchantillonnage vers la fréquence cible (16 kHz par défaut pour MMS_FA)
+    if sr != target_sample_rate:
+        waveform = F.resample(waveform, sr, target_sample_rate)
+
+    total_sec = waveform.shape[1] / target_sample_rate
+    return waveform, target_sample_rate, total_sec
+
+
 def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
     """
     Exécute l'alignement forcé MMS_FA sur le fichier audio.
@@ -188,14 +266,8 @@ def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
     dictionary = bundle.get_dict()
     star_idx = dictionary["*"]
 
-    # 2. Charger et rééchantillonner l'audio en 16kHz mono
-    waveform, sr = torchaudio.load(wav_path)
-    if waveform.shape[0] > 1:
-        waveform = waveform.mean(dim=0, keepdim=True)
-    if sr != bundle.sample_rate:
-        waveform = F.resample(waveform, sr, bundle.sample_rate)
-
-    total_sec = waveform.shape[1] / bundle.sample_rate
+    # 2. Charger et rééchantillonner l'audio en 16kHz mono (décodage direct sans TorchCodec)
+    waveform, sr, total_sec = load_audio_waveform(wav_path, bundle.sample_rate)
     waveform = waveform.to(device_type)
 
     # 3. Parser le GABC
