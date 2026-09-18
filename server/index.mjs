@@ -2713,10 +2713,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 10b. API Admin : Purge des alignements recents (POST /api/admin/purge-recent)
-  // Header requis : X-Admin-Key: <valeur de API_KEY>
+  // Header requis : X-Admin-Key: <valeur de API_KEY> ou X-Admin-Key: oremus-purge-liturgique
   if (req.method === 'POST' && pathname === '/api/admin/purge-recent') {
     const adminKey = req.headers['x-admin-key'] || '';
-    if (!API_KEY || adminKey !== API_KEY) {
+    const FALLBACK_ADMIN_KEY = 'oremus-purge-liturgique';
+    const validKey = API_KEY ? adminKey === API_KEY : adminKey === FALLBACK_ADMIN_KEY;
+    if (!validKey) {
       return sendJson(res, 401, { error: 'Cle admin invalide ou absente (header X-Admin-Key requis).' });
     }
     try {
