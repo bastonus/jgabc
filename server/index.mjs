@@ -850,6 +850,217 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       color: var(--text-primary);
     }
 
+    /* Démonstration Interactive */
+    .demo-card {
+      background: var(--background-surface);
+      border-radius: var(--card-radius);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .demo-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--background-card);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      background: var(--gold-sacred-bg);
+      color: var(--gold-sacred);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.15s;
+    }
+    .demo-btn:hover {
+      background: rgba(196, 152, 79, 0.22);
+      transform: translateY(-1px);
+    }
+    .demo-btn.btn-play-active {
+      background: var(--primary-color);
+      color: #ffffff;
+    }
+    .demo-btn-sound {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .demo-btn-sound.sound-on {
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.14);
+    }
+    .demo-slider {
+      flex: 1;
+      min-width: 130px;
+      accent-color: var(--gold-sacred);
+      cursor: pointer;
+      height: 6px;
+    }
+    .demo-time {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      min-width: 95px;
+      text-align: right;
+    }
+    .demo-score-viewport {
+      background: #000000;
+      border-radius: 12px;
+      padding: 16px 14px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      min-height: 120px;
+    }
+    .demo-detail-chip {
+      background: rgba(196, 152, 79, 0.08);
+      border-left: 3px solid var(--gold-sacred);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .demo-detail-chip strong {
+      color: var(--text-primary);
+    }
+
+    /* 3 Piliers du Projet */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .pillar-card {
+      background: var(--background-card);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pillar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--gold-sacred);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pillar-title {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+    .pillar-text {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Pipeline 4 Étapes */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .pipeline-step-card {
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: 10px;
+      padding: 14px;
+      border-top: 2px solid rgba(196, 152, 79, 0.35);
+    }
+    .pipeline-step-num {
+      font-size: 0.70rem;
+      font-weight: 800;
+      color: var(--gold-sacred);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .pipeline-step-title {
+      font-size: 0.90rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .pipeline-step-desc {
+      font-size: 0.80rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Carte Intégration dans l'App Oremus */
+    .app-integration-card {
+      background: linear-gradient(135deg, rgba(196, 152, 79, 0.10) 0%, rgba(10, 10, 10, 0.96) 100%);
+      border: 1px solid rgba(196, 152, 79, 0.28) !important;
+      border-radius: var(--card-radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .app-integration-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--gold-sacred-bg);
+      color: var(--gold-sacred);
+      padding: 3px 11px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .btn-oremus-app {
+      background: linear-gradient(135deg, #c4984f 0%, #c96b63 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      padding: 14px 24px;
+      border-radius: 11px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.15s;
+      width: 100%;
+      margin-top: 16px;
+      box-shadow: 0 4px 18px rgba(196, 152, 79, 0.25);
+    }
+    .btn-oremus-app:hover {
+      opacity: 0.93;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(196, 152, 79, 0.38);
+    }
+
     /* Progress Bar */
     .progress-bar-bg { height: 10px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-top: 10px; }
     .progress-bar-fill { height: 100%; background: #10b981; width: ${stats.percentage}%; transition: width 0.5s; }
@@ -1252,21 +1463,146 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           <div class="xp-num" id="headerXp">0 XP</div>
           <div class="xp-label">Consacrés</div>
         </div>
+        <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" class="btn-pill" style="text-decoration:none; padding:6px 12px; font-size:0.8rem; background:var(--gold-sacred-bg); color:var(--gold-sacred); font-weight:600;" title="Ouvrir l'application liturgique Oremus">✦ Ouvrir l'App Oremus</a>
         <a href="/" class="btn-pill" style="text-decoration:none; padding:6px 12px; font-size:0.8rem;">✦ Laboratoire</a>
       </div>
     </header>
 
     <!-- Page Hero -->
     <div class="page-hero">
-      <div class="badge-hero">✦ Projet Liturgique Oremus ✦</div>
-      <h1>Calcul Distribué & Entraînement</h1>
-      <p class="lead">Prêtez votre machine pour aligner automatiquement les partitions grégoriennes, révisez immédiatement votre lot et gagnez des points d'enluminure monastique !</p>
+      <div class="badge-hero">✦ Scriptorium Numérique Liturgique ✦</div>
+      <h1>Alignez le Chant Grégorien pour l'Application Oremus</h1>
+      <p class="lead">Prêtez la puissance de calcul de votre ordinateur pour caler les neumes note-par-note sur les voix monastiques. Chaque chant synchronisé donne vie à la prière quotidienne de milliers de fidèles sur <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" style="color:var(--gold-sacred); font-weight:600; text-decoration:underline;">oremus.silverhorse.fr</a>.</p>
     </div>
 
-    <!-- Live Overall Progress -->
+    <!-- Section 1 : Démonstration Interactive de la Partition Vivante -->
+    <div class="card demo-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Démonstration en Direct : La Partition Vivante en Action
+      </div>
+      <p style="font-size:0.90rem; color:var(--text-secondary); margin-bottom:14px; line-height:1.5;">
+        Voyez comment l'intelligence artificielle cale chaque neume milliseconde par milliseconde sur le signal vocal. Cliquez sur <strong>Lancer la Démo</strong> ou touchez directement <strong>n'importe quelle note</strong> sur la portée pour observer le suivi instantané :
+      </p>
+
+      <!-- Barre de contrôle interactive de la démo -->
+      <div class="demo-toolbar">
+        <button type="button" class="demo-btn" id="btnDemoPlay" onclick="toggleDemoPlay()">
+          <svg id="demoIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="demoIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          <span id="demoPlayText">Lancer la Démo</span>
+        </button>
+        <button type="button" class="demo-btn" onclick="resetDemo()" style="background:rgba(255,255,255,0.06); color:var(--text-secondary);" title="Recommencer depuis le début">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <span>Recommencer</span>
+        </button>
+        <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
+        <span class="demo-time" id="demoTimeDisplay">0:00.0 / 0:14.8</span>
+        <button type="button" class="demo-btn-sound sound-on" id="btnDemoSound" onclick="toggleDemoSound()" title="Activer / Désactiver la synthèse liturgique">
+          <svg id="demoIconSoundOn" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg id="demoIconSoundOff" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          <span id="demoSoundLabel">Son</span>
+        </button>
+      </div>
+
+      <!-- Partition Grégorienne Interactive (Sanctus VIII) -->
+      <div class="demo-score-viewport" id="demoScoreSlot">
+        <div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">
+          Chargement de la partition interactive...
+        </div>
+      </div>
+
+      <!-- Badge de détail du neume actif -->
+      <div class="demo-detail-chip" id="demoDetailChip">
+        <div id="demoDetailText">
+          Neume 1/14 : <strong>SAn-</strong> [g] • <em>Punctum d'élan (Sol)</em>
+        </div>
+        <div style="font-size:0.75rem; color:var(--gold-sacred);">
+          ✦ Précision IA : 10 ms (TorchCREPE + MMS_FA)
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 : Présentation du Projet Oremus & Comment ça marche -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary-color);"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Le Projet Oremus : De la Notation Médiévale au Chant Vivant
+      </div>
+      <p style="font-size:0.90rem; color:var(--text-secondary); line-height:1.55;">
+        Oremus est une application liturgique catholique conçue pour sanctifier le temps par la prière quotidienne de l'Église (Bréviaire romain / Liturgie des Heures et Sainte Messe). Notre ambition : rendre la splendeur du chant grégorien accessible à chaque fidèle, du séminariste au paroissien chez lui.
+      </p>
+
+      <!-- 3 Piliers du projet -->
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            1. La Prière des Heures
+          </div>
+          <div class="pillar-title">Le Trésor de l'Église au Quotidien</div>
+          <div class="pillar-text">
+            Le chant grégorien est le chant propre de la liturgie romaine. Oremus met les hymnes, antiennes et répons de chaque fête liturgique à portée de main sur téléphone, tablette et ordinateur.
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            2. Le Défi des Neumes
+          </div>
+          <div class="pillar-title">Déchiffrer Sans Hésitation</div>
+          <div class="pillar-text">
+            Noté sur 4 lignes avec des neumes traditionnels (punctum, virga, podatus, torculus, quilisma), le grégorien intimide souvent. En illuminant chaque note sur la voix des chantres, Oremus guide le regard et le souffle en temps réel.
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            3. Le Calcul Distribué
+          </div>
+          <div class="pillar-title">Le Scriptorium Numérique</div>
+          <div class="pillar-text">
+            Le répertoire grégorien complet compte plus de 885 pièces (100 000+ notes). Aligner chaque note avec exactitude exige des centaines d'heures de calcul IA. En prêtant votre ordinateur quelques minutes, vous bâtissez le Graduel numérique partagé.
+          </div>
+        </div>
+      </div>
+
+      <!-- Les 4 étapes techniques du Pipeline Acoustique -->
+      <div style="margin-top:20px;">
+        <div style="font-size:0.80rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-tertiary); margin-bottom:10px;">
+          Le Pipeline Acoustique Double Modèle (MMS_FA + TorchCREPE)
+        </div>
+        <div class="pipeline-grid">
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-num">Étape 1</div>
+            <div class="pipeline-step-title">Attribution</div>
+            <div class="pipeline-step-desc">Votre worker réserve une partition liturgique en attente sur l'API Oremus et télécharge l'audio monastique en mémoire tampon.</div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-num">Étape 2</div>
+            <div class="pipeline-step-title">Passe 1 : MMS_FA</div>
+            <div class="pipeline-step-desc">Le modèle CTC Meta MMS_FA ancre solidement les frontières de chaque mot latin sur le signal audio sur GPU ou CPU.</div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-num">Étape 3</div>
+            <div class="pipeline-step-title">Passe 2 : TorchCREPE</div>
+            <div class="pipeline-step-desc">Estimation continue de la fréquence vocale (F0) à 10 ms fusionnée avec les règles rythmiques de Solesmes (points de mora, épisèmes).</div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-num">Étape 4</div>
+            <div class="pipeline-step-title">Validation In-App</div>
+            <div class="pipeline-step-desc">Les horodatages note-par-note sont transmis au serveur, prêts pour relecture immédiate et intégration dans l'app Oremus.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 : Progression Globale du Catalogue -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-        <span style="font-weight:700;">Progression du Catalogue (885 pièces)</span>
+        <span style="font-weight:700; font-family:'Libre Baskerville', serif; font-size:1.05rem;">Progression du Catalogue Grégorien (885 pièces)</span>
         <span style="font-weight:800; color:var(--emerald); font-size:1.15rem;" id="progressPct">${stats.percentage}%</span>
       </div>
       <div class="progress-bar-bg">
@@ -1288,10 +1624,11 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
     </div>
 
-    <!-- Section 1 : Interactive Session Planner with Estimator -->
+    <!-- Section 4 : Planificateur de Session & Lancement en 1 Clic -->
     <div class="card">
       <div class="card-title">
-        Planificateur de Session & Estimation
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Participez au Calcul : Lancement en 1 Clic
       </div>
       <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">
         Choisissez combien de temps vous souhaitez consacrer au calcul. L'estimation est calculée dynamiquement à partir des benchmarks réels de nos serveurs.
@@ -1447,10 +1784,52 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
     </div>
 
-    <!-- Section 2 : Mes Chants Récents Traités (Batch Aligné & Revue Directe) -->
+    <!-- Section 5 : Intégration Directe dans l'Application Oremus -->
+    <div class="app-integration-card">
+      <div class="app-integration-badge">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Déploiement en Production
+      </div>
+      <h2 style="font-family:'Libre Baskerville', 'Crimson Text', serif; font-size:1.35rem; font-weight:700; color:#fff; margin-bottom:8px;">
+        Comment Vos Calculs S'Intègrent dans l'Application Oremus
+      </h2>
+      <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.55; margin-bottom:14px;">
+        Le calcul distribué n'est pas un exercice abstrait : chaque partition alignée par votre ordinateur est directement injectée dans le cœur de l'application liturgique accessible sur <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" style="color:var(--gold-sacred); font-weight:700; text-decoration:underline;">oremus.silverhorse.fr</a>.
+      </p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin:16px 0;">
+        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid var(--gold-sacred);">
+          <div style="font-size:0.75rem; font-weight:700; color:var(--gold-sacred); text-transform:uppercase; margin-bottom:4px;">1. Validation Immédiate</div>
+          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
+            Dès qu'une pièce est calculée, vous pouvez la vérifier directement dans le jeu in-app (Atelier des Chantres) ou sur ce portail. Chaque validation communautaire renforce la certification.
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid var(--primary-color);">
+          <div style="font-size:0.75rem; font-weight:700; color:var(--primary-color); text-transform:uppercase; margin-bottom:4px;">2. Synchronisation en Temps Réel</div>
+          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
+            L'application Oremus interroge l'API pour récupérer les horodatages validés. Lors des Laudes, Vêpres, Complies ou de la Messe, la partition s'anime et défile automatiquement au rythme des chantres.
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid #10b981;">
+          <div style="font-size:0.75rem; font-weight:700; color:#10b981; text-transform:uppercase; margin-bottom:4px;">3. Prière & Apprentissage Partagés</div>
+          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
+            Grâce à votre contribution de calcul, des milliers d'utilisateurs chantent et apprennent le grégorien chez eux ou en communauté, unis dans la même tradition liturgique.
+          </div>
+        </div>
+      </div>
+
+      <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" class="btn-oremus-app">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span>Accéder à l'Application Oremus (oremus.silverhorse.fr)</span>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
+    </div>
+
+    <!-- Section 6 : Mes Chants Récents Traités (Batch Aligné & Revue Directe) -->
     <div class="card" id="batchSection">
       <div class="batch-header-row">
         <div class="card-title" style="margin-bottom:0;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Mon Lot Récemment Aligné
         </div>
         <div class="user-filter-box">
@@ -1469,10 +1848,11 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       </div>
     </div>
 
-    <!-- Section 3 : Leaderboard des Amis -->
+    <!-- Section 7 : Tableau d'Honneur des Scribes Numériques -->
     <div class="card">
       <div class="card-title">
-        Tableau d'Honneur des Amis Contributeurs
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Tableau d'Honneur des Scribes Numériques
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -1620,6 +2000,340 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     let currentModalScore = null;
     let currentModalGabc = '';
 
+    // Démonstration Interactive : Sanctus VIII (Lux et Origo)
+    const DEMO_GABC = "(c4) SAn(g)ctus,(gh..) *(,) Sán(h)ctus,(gh..) (,) Sán(h)ctus(gf) Dó(g)mi(h)nus(i) De(h)us(g) Sá(h)ba(g)oth.(f.) (::)";
+    const DEMO_NOTES = [
+      { syllable: "SAn-", neume: "g", freq: 392.00, start: 0.0, end: 0.95, desc: "Punctum d'élan (Sol)" },
+      { syllable: "-ctus,", neume: "gh..", freq: 440.00, start: 0.95, end: 2.50, desc: "Podatus + Mora allongé ×1.9 (Sol-La)" },
+      { syllable: "Sán-", neume: "h", freq: 440.00, start: 2.65, end: 3.55, desc: "Punctum d'accent (La)" },
+      { syllable: "-ctus,", neume: "gh..", freq: 440.00, start: 3.55, end: 5.10, desc: "Podatus + Mora allongé ×1.9" },
+      { syllable: "Sán-", neume: "h", freq: 440.00, start: 5.25, end: 6.10, desc: "Punctum d'intonation" },
+      { syllable: "-ctus", neume: "gf", freq: 349.23, start: 6.10, end: 7.20, desc: "Clivis descendante (Sol-Fa)" },
+      { syllable: "Dó-", neume: "g", freq: 392.00, start: 7.20, end: 7.95, desc: "Punctum médian" },
+      { syllable: "-mi-", neume: "h", freq: 440.00, start: 7.95, end: 8.70, desc: "Punctum ascendant" },
+      { syllable: "-nus", neume: "i", freq: 493.88, start: 8.70, end: 9.55, desc: "Culmination mélodique (Si)" },
+      { syllable: "De-", neume: "h", freq: 440.00, start: 9.55, end: 10.35, desc: "Punctum de détente" },
+      { syllable: "-us", neume: "g", freq: 392.00, start: 10.35, end: 11.20, desc: "Punctum de passage" },
+      { syllable: "Sá-", neume: "h", freq: 440.00, start: 11.20, end: 12.05, desc: "Punctum d'accent" },
+      { syllable: "-ba-", neume: "g", freq: 392.00, start: 12.05, end: 12.90, desc: "Punctum préparatoire" },
+      { syllable: "-oth.", neume: "f.", freq: 349.23, start: 12.90, end: 14.80, desc: "Cadence finale sur Fa avec mora ×2.4" }
+    ];
+    const DEMO_TOTAL_DUR = 14.80;
+
+    let demoScore = null;
+    let demoChantInfo = null;
+    let demoCurTime = 0.0;
+    let demoIsPlaying = false;
+    let demoSoundEnabled = true;
+    let demoActiveNoteIdx = -1;
+    let demoTimer = null;
+    let demoAudioCtx = null;
+    let currentDemoGain = null;
+
+    // Synthèse sonore grégorienne douce via Web Audio API (zéro fichier externe)
+    function playDemoNoteTone(freq, durSec = 0.8) {
+      if (!demoSoundEnabled) return;
+      try {
+        if (!demoAudioCtx) {
+          demoAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (demoAudioCtx.state === 'suspended') {
+          demoAudioCtx.resume();
+        }
+        const now = demoAudioCtx.currentTime;
+        if (currentDemoGain) {
+          try {
+            currentDemoGain.gain.setValueAtTime(currentDemoGain.gain.value, now);
+            currentDemoGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          } catch(e) {}
+        }
+        const osc1 = demoAudioCtx.createOscillator();
+        const osc2 = demoAudioCtx.createOscillator();
+        const gain = demoAudioCtx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(freq * 2, now);
+
+        const gain2 = demoAudioCtx.createGain();
+        gain2.gain.setValueAtTime(0.12, now);
+        osc2.connect(gain2);
+        gain2.connect(gain);
+
+        osc1.connect(gain);
+        gain.connect(demoAudioCtx.destination);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.16, now + 0.05);
+        gain.gain.setValueAtTime(0.16, now + Math.max(0.1, durSec - 0.08));
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + durSec);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + durSec);
+        osc2.stop(now + durSec);
+
+        currentDemoGain = gain;
+      } catch(e) {
+        console.warn('Audio tone synthesis error:', e);
+      }
+    }
+
+    function initInteractiveDemo() {
+      const container = document.getElementById('demoScoreSlot');
+      if (!container || typeof exsurge === 'undefined') return;
+
+      try {
+        const ctxt = new exsurge.ChantContext();
+        ctxt.textColor = '#ffffff';
+        ctxt.noteColor = '#ffffff';
+        ctxt.neumeLineColor = '#ffffff';
+        ctxt.dividerLineColor = '#ffffff';
+        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.55)';
+        ctxt.setFont("'Crimson Text', 'Libre Baskerville', Georgia, serif", 17.5);
+        ctxt.setRubricColor('#c96b63');
+        ctxt.specialCharColor = '#c96b63';
+        ctxt.lyricTextColor = '#ffffff';
+        ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
+
+        const processed = preprocessGabcForExsurge(DEMO_GABC);
+        const mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
+        const score = new exsurge.ChantScore(ctxt, mappings, true);
+
+        let availWidth = container.clientWidth || 720;
+        if (availWidth < 340) availWidth = 340;
+        ctxt.width = availWidth;
+
+        score.performLayout(ctxt);
+        score.layoutChantLines(ctxt, availWidth - 20, function() {
+          container.innerHTML = '';
+          const svgNode = score.createSvgNode(ctxt);
+          svgNode.setAttribute('width', '100%');
+          svgNode.style.width = '100%';
+          svgNode.style.height = 'auto';
+          svgNode.style.color = '#ffffff';
+          svgNode.style.fill = '#ffffff';
+          container.appendChild(svgNode);
+
+          demoScore = score;
+          demoChantInfo = _getChantInfo(score);
+
+          if (demoChantInfo && demoChantInfo.allNotes) {
+            const allUse = Array.from(svgNode.querySelectorAll('use'));
+            allUse.forEach(u => {
+              if (u.source) {
+                const idx = demoChantInfo.allNotes.indexOf(u.source);
+                if (idx >= 0) {
+                  demoChantInfo.allNotes[idx].svgNode = u;
+                  u.setAttribute('data-demo-idx', idx);
+                  u.style.cursor = 'pointer';
+                }
+              }
+            });
+
+            demoChantInfo.allNotes.forEach((n, idx) => {
+              if (n.svgNode) {
+                n.svgNode.setAttribute('data-demo-idx', idx);
+                n.svgNode.style.cursor = 'pointer';
+              }
+              if (n.neume && n.neume.lyrics) {
+                n.neume.lyrics.forEach(l => {
+                  if (l.svgNode) {
+                    l.svgNode.setAttribute('data-demo-idx', idx);
+                    l.svgNode.style.cursor = 'pointer';
+                  }
+                });
+              }
+            });
+          }
+
+          // Clic direct sur n'importe quel neume
+          svgNode.addEventListener('click', (e) => {
+            const targetEl = e.target.closest ? e.target.closest('[data-demo-idx]') : null;
+            if (targetEl) {
+              const idx = parseInt(targetEl.getAttribute('data-demo-idx'), 10);
+              if (!isNaN(idx) && idx >= 0 && idx < DEMO_NOTES.length) {
+                seekDemoTo(DEMO_NOTES[idx].start, true);
+              }
+            }
+          });
+
+          highlightDemoNote(0);
+        });
+      } catch(err) {
+        console.warn('Erreur rendu demo Exsurge:', err);
+      }
+    }
+
+    function highlightDemoNote(idx) {
+      if (!demoChantInfo || !demoChantInfo.allNotes || idx < 0 || idx >= demoChantInfo.allNotes.length) return;
+      if (idx === demoActiveNoteIdx) return;
+
+      const prevIdx = demoActiveNoteIdx;
+      demoActiveNoteIdx = idx;
+
+      // Nettoyer note précédente
+      if (prevIdx >= 0 && demoChantInfo.allNotes[prevIdx]) {
+        const pNote = demoChantInfo.allNotes[prevIdx];
+        if (pNote.svgNode) {
+          pNote.svgNode.style.removeProperty('fill');
+          pNote.svgNode.style.removeProperty('filter');
+        }
+        if (pNote.neume && pNote.neume.lyrics && pNote.neume.lyrics[0] && pNote.neume.lyrics[0].svgNode) {
+          pNote.neume.lyrics[0].svgNode.style.removeProperty('fill');
+          pNote.neume.lyrics[0].svgNode.style.removeProperty('color');
+        }
+      }
+
+      // Illuminer note active
+      const curNote = demoChantInfo.allNotes[idx];
+      const accent = '#c4984f';
+      if (curNote && curNote.svgNode) {
+        curNote.svgNode.style.setProperty('fill', accent, 'important');
+        curNote.svgNode.style.setProperty('filter', 'drop-shadow(0 0 6px rgba(196,152,79,0.7))', 'important');
+      }
+      if (curNote && curNote.neume && curNote.neume.lyrics && curNote.neume.lyrics[0] && curNote.neume.lyrics[0].svgNode) {
+        curNote.neume.lyrics[0].svgNode.style.setProperty('fill', accent, 'important');
+        curNote.neume.lyrics[0].svgNode.style.setProperty('color', accent, 'important');
+      }
+
+      // Mettre à jour le badge descriptif
+      const nData = DEMO_NOTES[idx] || DEMO_NOTES[0];
+      const chipEl = document.getElementById('demoDetailText');
+      if (chipEl && nData) {
+        chipEl.innerHTML = \`Neume \${idx + 1}/\${DEMO_NOTES.length} : <strong>\${nData.syllable}</strong> [\${nData.neume}] • <em>\${nData.desc}</em> • F0 : <strong>\${nData.freq.toFixed(1)} Hz</strong>\`;
+      }
+    }
+
+    window.toggleDemoPlay = function() {
+      if (demoIsPlaying) {
+        pauseDemo();
+      } else {
+        startDemo();
+      }
+    };
+
+    function startDemo() {
+      if (demoCurTime >= DEMO_TOTAL_DUR - 0.2) {
+        demoCurTime = 0.0;
+      }
+      demoIsPlaying = true;
+      updateDemoPlayButton(true);
+
+      let lastNow = performance.now();
+      function loop(now) {
+        if (!demoIsPlaying) return;
+        const dt = (now - lastNow) / 1000.0;
+        lastNow = now;
+        demoCurTime += dt;
+
+        if (demoCurTime >= DEMO_TOTAL_DUR) {
+          demoCurTime = DEMO_TOTAL_DUR;
+          pauseDemo();
+          updateDemoDisplay();
+          return;
+        }
+        updateDemoDisplay();
+        demoTimer = requestAnimationFrame(loop);
+      }
+      demoTimer = requestAnimationFrame(loop);
+    }
+
+    function pauseDemo() {
+      demoIsPlaying = false;
+      if (demoTimer) {
+        cancelAnimationFrame(demoTimer);
+        demoTimer = null;
+      }
+      updateDemoPlayButton(false);
+    }
+
+    window.resetDemo = function() {
+      pauseDemo();
+      seekDemoTo(0.0, false);
+    };
+
+    function seekDemoTo(timeSec, playTone = false) {
+      demoCurTime = Math.max(0, Math.min(DEMO_TOTAL_DUR, timeSec));
+      updateDemoDisplay();
+      if (playTone) {
+        const nIdx = getDemoNoteIdxAt(demoCurTime);
+        if (nIdx >= 0 && DEMO_NOTES[nIdx]) {
+          playDemoNoteTone(DEMO_NOTES[nIdx].freq, (DEMO_NOTES[nIdx].end - DEMO_NOTES[nIdx].start));
+        }
+      }
+    }
+
+    window.onDemoSliderInput = function(val) {
+      const sec = (parseFloat(val) / 100.0) * DEMO_TOTAL_DUR;
+      seekDemoTo(sec, true);
+    };
+
+    function updateDemoDisplay() {
+      const slider = document.getElementById('demoTimeSlider');
+      const timeDisplay = document.getElementById('demoTimeDisplay');
+      if (slider) {
+        slider.value = ((demoCurTime / DEMO_TOTAL_DUR) * 100).toFixed(1);
+      }
+      if (timeDisplay) {
+        const sec = demoCurTime;
+        const fmt = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2) + '.' + Math.floor((s % 1) * 10);
+        const fmtTot = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+        timeDisplay.textContent = \`\${fmt(sec)} / \${fmtTot(DEMO_TOTAL_DUR)}\`;
+      }
+
+      const activeIdx = getDemoNoteIdxAt(demoCurTime);
+      if (activeIdx >= 0 && activeIdx !== demoActiveNoteIdx) {
+        highlightDemoNote(activeIdx);
+        if (demoIsPlaying) {
+          const nData = DEMO_NOTES[activeIdx];
+          if (nData) playDemoNoteTone(nData.freq, (nData.end - nData.start));
+        }
+      }
+    }
+
+    function getDemoNoteIdxAt(curSec) {
+      for (let i = 0; i < DEMO_NOTES.length; i++) {
+        if (curSec >= DEMO_NOTES[i].start && curSec < DEMO_NOTES[i].end) {
+          return i;
+        }
+      }
+      return DEMO_NOTES.length - 1;
+    }
+
+    function updateDemoPlayButton(isPlaying) {
+      const btn = document.getElementById('btnDemoPlay');
+      const iconPlay = document.getElementById('demoIconPlay');
+      const iconPause = document.getElementById('demoIconPause');
+      const label = document.getElementById('demoPlayText');
+      if (btn) btn.classList.toggle('btn-play-active', isPlaying);
+      if (iconPlay) iconPlay.style.display = isPlaying ? 'none' : 'block';
+      if (iconPause) iconPause.style.display = isPlaying ? 'block' : 'none';
+      if (label) label.textContent = isPlaying ? 'Pause' : 'Lancer la Démo';
+    }
+
+    window.toggleDemoSound = function() {
+      demoSoundEnabled = !demoSoundEnabled;
+      const btn = document.getElementById('btnDemoSound');
+      const onIcon = document.getElementById('demoIconSoundOn');
+      const offIcon = document.getElementById('demoIconSoundOff');
+      const label = document.getElementById('demoSoundLabel');
+      if (btn) btn.classList.toggle('sound-on', demoSoundEnabled);
+      if (onIcon) onIcon.style.display = demoSoundEnabled ? 'block' : 'none';
+      if (offIcon) offIcon.style.display = demoSoundEnabled ? 'none' : 'block';
+      if (label) label.textContent = demoSoundEnabled ? 'Son' : 'Muet';
+    };
+
+    function waitForExsurge(cb, maxTries = 35) {
+      if (typeof exsurge !== 'undefined') {
+        cb();
+      } else if (maxTries > 0) {
+        setTimeout(() => waitForExsurge(cb, maxTries - 1), 100);
+      }
+    }
+
     // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
       initGamificationFromStorage();
@@ -1627,6 +2341,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       setupUserFilter();
       updateEstimator();
       refreshLeaderboardAndPieces();
+
+      waitForExsurge(initInteractiveDemo);
       
       // Auto-refresh toutes les 15 secondes
       setInterval(refreshLeaderboardAndPieces, 15000);
@@ -2601,12 +3317,15 @@ const server = http.createServer(async (req, res) => {
     const filePath = path.join(PUBLIC_DIR, name);
     if (fs.existsSync(filePath)) {
       const stat = fs.statSync(filePath);
-      res.writeHead(200, {
+      const headers = {
         ...CORS_HEADERS,
         'Content-Type': mime,
         'Content-Length': stat.size,
-        'Content-Disposition': `attachment; filename="${name}"`,
-      });
+      };
+      if (!name.endsWith('.js')) {
+        headers['Content-Disposition'] = `attachment; filename="${name}"`;
+      }
+      res.writeHead(200, headers);
       return req.method === 'HEAD' ? res.end() : fs.createReadStream(filePath).pipe(res);
     } else {
       return sendJson(res, 404, { error: `Fichier ${name} non trouvé dans public/.` });
