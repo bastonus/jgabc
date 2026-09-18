@@ -113,6 +113,30 @@ function loadSeedAlignments() {
   return seedAlignmentsCache;
 }
 
+
+function getValidatedDemoPieces() {
+  const seeds = loadSeedAlignments();
+  const demoIds = ['264', '8', '14262'];
+  const out = {};
+  for (const pid of demoIds) {
+    const p = seeds[pid];
+    if (p) {
+      out[pid] = {
+        piece_id: p.piece_id || pid,
+        incipit: p.incipit,
+        part: p.part || 'Liturgie',
+        youtube_id: p.youtube_id,
+        gabc_src: p.gabc_src,
+        timestamps: p.timestamps || [],
+        notes_count: (p.timestamps || []).length,
+        audio_duration_sec: p.audio_duration_sec || 61.2,
+        mode: p.mode || (pid === '264' ? '6' : (pid === '8' ? '7' : '3'))
+      };
+    }
+  }
+  return out;
+}
+
 function syncTasksWithAlignments() {
   if (!tasksCache || !Array.isArray(tasksCache)) return;
   const seeds = loadSeedAlignments();
@@ -850,7 +874,42 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       color: var(--text-primary);
     }
 
-    /* Démonstration Interactive */
+    /* Démonstration Interactive avec Chant Réel */
+    .demo-card {
+      background: var(--background-surface);
+      border-radius: var(--card-radius);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.14);
+      color: #10b981;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.70rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .demo-player-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 720px) {
+      .demo-player-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .demo-player-grid > div:first-child {
+        min-height: 180px !important;
+      }
+    }
     .demo-card {
       background: var(--background-surface);
       border-radius: var(--card-radius);
@@ -1475,50 +1534,80 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       <p class="lead">Prêtez la puissance de calcul de votre ordinateur pour caler les neumes note-par-note sur les voix monastiques. Chaque chant synchronisé donne vie à la prière quotidienne de milliers de fidèles sur <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" style="color:var(--gold-sacred); font-weight:600; text-decoration:underline;">oremus.silverhorse.fr</a>.</p>
     </div>
 
-    <!-- Section 1 : Démonstration Interactive de la Partition Vivante -->
-    <div class="card demo-card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Démonstration en Direct : La Partition Vivante en Action
+    <!-- Section 1 : Démonstration Interactive avec Chant Réel Certifié -->
+    <div class="card demo-card" id="demoSection">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+        <div>
+          <div class="demo-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+            Chant Réel Certifié (Atelier des Chantres)
+          </div>
+          <div class="card-title" style="margin-bottom:2px;">
+            Démonstration en Direct : Partition Grégorienne Réelle Validée
+          </div>
+          <div style="font-size:0.84rem; color:var(--gold-sacred);" id="demoPieceSub">
+            Agnus Dei IV • Kyriale (Mode 6) • 87 notes certifiées • Enregistrement monastique
+          </div>
+        </div>
+
+        <!-- Sélecteur de pièces réelles validées -->
+        <div class="btn-pill-group" style="margin-bottom:0;" id="demoPiecePills">
+          <button type="button" class="btn-pill active" data-demo-id="264" onclick="switchDemoPiece('264')">Agnus Dei IV (#264)</button>
+          <button type="button" class="btn-pill" data-demo-id="8" onclick="switchDemoPiece('8')">Omnes gentes (#8)</button>
+          <button type="button" class="btn-pill" data-demo-id="14262" onclick="switchDemoPiece('14262')">Deus misereatur (#14262)</button>
+        </div>
       </div>
+
       <p style="font-size:0.90rem; color:var(--text-secondary); margin-bottom:14px; line-height:1.5;">
-        Voyez comment l'intelligence artificielle cale chaque neume milliseconde par milliseconde sur le signal vocal. Cliquez sur <strong>Lancer la Démo</strong> ou touchez directement <strong>n'importe quelle note</strong> sur la portée pour observer le suivi instantané :
+        Voici un chant liturgique réel, calculé par le double modèle acoustique et <strong>entièrement certifié note-par-note</strong> par la communauté. Lancez la lecture pour entendre l'enregistrement monastique et observer l'illumination synchrone de chaque neume :
       </p>
 
-      <!-- Barre de contrôle interactive de la démo -->
-      <div class="demo-toolbar">
-        <button type="button" class="demo-btn" id="btnDemoPlay" onclick="toggleDemoPlay()">
-          <svg id="demoIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <svg id="demoIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          <span id="demoPlayText">Lancer la Démo</span>
-        </button>
-        <button type="button" class="demo-btn" onclick="resetDemo()" style="background:rgba(255,255,255,0.06); color:var(--text-secondary);" title="Recommencer depuis le début">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          <span>Recommencer</span>
-        </button>
-        <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
-        <span class="demo-time" id="demoTimeDisplay">0:00.0 / 0:14.8</span>
-        <button type="button" class="demo-btn-sound sound-on" id="btnDemoSound" onclick="toggleDemoSound()" title="Activer / Désactiver la synthèse liturgique">
-          <svg id="demoIconSoundOn" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <svg id="demoIconSoundOff" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-          <span id="demoSoundLabel">Son</span>
-        </button>
+      <!-- Lecteur Média Démo (Vidéo YouTube compacte + Barre de contrôle synchrone) -->
+      <div class="demo-player-grid">
+        <div style="background:#000; border-radius:12px; overflow:hidden; position:relative; min-height:140px; height:100%;">
+          <iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/SVZZLdPco4A?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
+        </div>
+
+        <div style="display:flex; flex-direction:column; justify-content:space-between; gap:10px; background:var(--background-card); border-radius:12px; padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="demo-btn" onclick="seekDemoRelative(-3)" title="Reculer de 3s" style="padding:6px 10px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+                <span>-3s</span>
+              </button>
+              <button type="button" class="demo-btn" id="btnDemoPlay" onclick="toggleDemoPlay()" style="padding:6px 14px;">
+                <svg id="demoIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <svg id="demoIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span id="demoPlayText">Lecture</span>
+              </button>
+              <button type="button" class="demo-btn" onclick="seekDemoRelative(3)" title="Avancer de 3s" style="padding:6px 10px;">
+                <span>+3s</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+              </button>
+            </div>
+            <span class="demo-time" id="demoTimeDisplay">0:00 / 1:01</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
+          </div>
+
+          <!-- Détail du neume actif -->
+          <div class="demo-detail-chip" id="demoDetailChip" style="margin-top:0;">
+            <div id="demoDetailText">
+              ✦ Cliquez sur un neume pour vous synchroniser directement sur le chant des moines
+            </div>
+            <div style="font-size:0.75rem; color:#10b981; font-weight:700;">
+              ✓ Certifié note-par-note
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Partition Grégorienne Interactive (Sanctus VIII) -->
+      <!-- Affichage de la partition Grégorienne Exsurge -->
       <div class="demo-score-viewport" id="demoScoreSlot">
         <div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">
-          Chargement de la partition interactive...
-        </div>
-      </div>
-
-      <!-- Badge de détail du neume actif -->
-      <div class="demo-detail-chip" id="demoDetailChip">
-        <div id="demoDetailText">
-          Neume 1/14 : <strong>SAn-</strong> [g] • <em>Punctum d'élan (Sol)</em>
-        </div>
-        <div style="font-size:0.75rem; color:var(--gold-sacred);">
-          ✦ Précision IA : 10 ms (TorchCREPE + MMS_FA)
+          Chargement de la partition grégorienne certifiée...
         </div>
       </div>
     </div>
@@ -1974,6 +2063,9 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
   </div>
 
+  <script id="validatedDemoData" type="application/json">
+${JSON.stringify(getValidatedDemoPieces())}
+  </script>
   <script>
     // Configuration & Benchmarks transmis par le serveur
     const BENCHMARKS = ${JSON.stringify(benchmarks)};
@@ -2000,88 +2092,227 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     let currentModalScore = null;
     let currentModalGabc = '';
 
-    // Démonstration Interactive : Sanctus VIII (Lux et Origo)
-    const DEMO_GABC = "(c4) SAn(g)ctus,(gh..) *(,) Sán(h)ctus,(gh..) (,) Sán(h)ctus(gf) Dó(g)mi(h)nus(i) De(h)us(g) Sá(h)ba(g)oth.(f.) (::)";
-    const DEMO_NOTES = [
-      { syllable: "SAn-", neume: "g", freq: 392.00, start: 0.0, end: 0.95, desc: "Punctum d'élan (Sol)" },
-      { syllable: "-ctus,", neume: "gh..", freq: 440.00, start: 0.95, end: 2.50, desc: "Podatus + Mora allongé ×1.9 (Sol-La)" },
-      { syllable: "Sán-", neume: "h", freq: 440.00, start: 2.65, end: 3.55, desc: "Punctum d'accent (La)" },
-      { syllable: "-ctus,", neume: "gh..", freq: 440.00, start: 3.55, end: 5.10, desc: "Podatus + Mora allongé ×1.9" },
-      { syllable: "Sán-", neume: "h", freq: 440.00, start: 5.25, end: 6.10, desc: "Punctum d'intonation" },
-      { syllable: "-ctus", neume: "gf", freq: 349.23, start: 6.10, end: 7.20, desc: "Clivis descendante (Sol-Fa)" },
-      { syllable: "Dó-", neume: "g", freq: 392.00, start: 7.20, end: 7.95, desc: "Punctum médian" },
-      { syllable: "-mi-", neume: "h", freq: 440.00, start: 7.95, end: 8.70, desc: "Punctum ascendant" },
-      { syllable: "-nus", neume: "i", freq: 493.88, start: 8.70, end: 9.55, desc: "Culmination mélodique (Si)" },
-      { syllable: "De-", neume: "h", freq: 440.00, start: 9.55, end: 10.35, desc: "Punctum de détente" },
-      { syllable: "-us", neume: "g", freq: 392.00, start: 10.35, end: 11.20, desc: "Punctum de passage" },
-      { syllable: "Sá-", neume: "h", freq: 440.00, start: 11.20, end: 12.05, desc: "Punctum d'accent" },
-      { syllable: "-ba-", neume: "g", freq: 392.00, start: 12.05, end: 12.90, desc: "Punctum préparatoire" },
-      { syllable: "-oth.", neume: "f.", freq: 349.23, start: 12.90, end: 14.80, desc: "Cadence finale sur Fa avec mora ×2.4" }
-    ];
-    const DEMO_TOTAL_DUR = 14.80;
+    // Pièces liturgiques réelles certifiées pour la démonstration interactive
+    let VALIDATED_DEMO_PIECES = {};
+    try {
+      const dataEl = document.getElementById('validatedDemoData');
+      if (dataEl && dataEl.textContent) {
+        VALIDATED_DEMO_PIECES = JSON.parse(dataEl.textContent);
+      }
+    } catch(err) {
+      console.warn('Erreur parsing demo data:', err);
+    }
 
+    let currentDemoId = '264';
+    let currentDemoPiece = VALIDATED_DEMO_PIECES['264'] || null;
+    let demoYtPlayer = null;
+    let demoSyncInterval = null;
     let demoScore = null;
     let demoChantInfo = null;
-    let demoCurTime = 0.0;
-    let demoIsPlaying = false;
-    let demoSoundEnabled = true;
     let demoActiveNoteIdx = -1;
-    let demoTimer = null;
-    let demoAudioCtx = null;
-    let currentDemoGain = null;
 
-    // Synthèse sonore grégorienne douce via Web Audio API (zéro fichier externe)
-    function playDemoNoteTone(freq, durSec = 0.8) {
-      if (!demoSoundEnabled) return;
+    function initDemoPlayer(videoId) {
+      if (demoSyncInterval) {
+        clearInterval(demoSyncInterval);
+        demoSyncInterval = null;
+      }
+      if (demoYtPlayer && typeof demoYtPlayer.destroy === 'function') {
+        try { demoYtPlayer.destroy(); } catch(e) {}
+        demoYtPlayer = null;
+      }
+
+      const container = document.querySelector('.demo-player-grid > div:first-child');
+      if (!container) return;
+      container.innerHTML = '<iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>';
+
+      function attachDemoYt() {
+        if (!window.YT || !window.YT.Player) {
+          setTimeout(attachDemoYt, 100);
+          return;
+        }
+        try {
+          demoYtPlayer = new YT.Player('demoVideoFrame', {
+            events: {
+              onReady: function() {
+                updateDemoPlayButton(false);
+                startDemoSyncTracker();
+              },
+              onStateChange: function(event) {
+                if (event.data === YT.PlayerState.PLAYING) {
+                  updateDemoPlayButton(true);
+                  startDemoSyncTracker();
+                } else {
+                  updateDemoPlayButton(false);
+                }
+              }
+            }
+          });
+        } catch(err) {
+          console.warn('YT Demo Player attach warning:', err);
+        }
+      }
+      attachDemoYt();
+    }
+
+    window.toggleDemoPlay = function() {
+      if (!demoYtPlayer || typeof demoYtPlayer.getPlayerState !== 'function') return;
       try {
-        if (!demoAudioCtx) {
-          demoAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const state = demoYtPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          demoYtPlayer.pauseVideo();
+        } else {
+          demoYtPlayer.playVideo();
         }
-        if (demoAudioCtx.state === 'suspended') {
-          demoAudioCtx.resume();
+      } catch(e) {}
+    };
+
+    function updateDemoPlayButton(isPlaying) {
+      const btn = document.getElementById('btnDemoPlay');
+      const iconPlay = document.getElementById('demoIconPlay');
+      const iconPause = document.getElementById('demoIconPause');
+      const label = document.getElementById('demoPlayText');
+      if (btn) btn.classList.toggle('btn-play-active', isPlaying);
+      if (iconPlay) iconPlay.style.display = isPlaying ? 'none' : 'block';
+      if (iconPause) iconPause.style.display = isPlaying ? 'block' : 'none';
+      if (label) label.textContent = isPlaying ? 'Pause' : 'Lecture';
+    }
+
+    window.seekDemoRelative = function(sec) {
+      if (!demoYtPlayer || typeof demoYtPlayer.getCurrentTime !== 'function') return;
+      try {
+        const cur = demoYtPlayer.getCurrentTime();
+        demoYtPlayer.seekTo(Math.max(0, cur + sec), true);
+      } catch(e) {}
+    };
+
+    window.onDemoSliderInput = function(val) {
+      if (!demoYtPlayer || !currentDemoPiece) return;
+      const totalDur = (typeof demoYtPlayer.getDuration === 'function' && demoYtPlayer.getDuration() > 0)
+        ? demoYtPlayer.getDuration()
+        : (currentDemoPiece.audio_duration_sec || 60);
+      const sec = (parseFloat(val) / 100.0) * totalDur;
+      try {
+        demoYtPlayer.seekTo(sec, true);
+      } catch(e) {}
+    };
+
+    function startDemoSyncTracker() {
+      if (demoSyncInterval) clearInterval(demoSyncInterval);
+      demoSyncInterval = setInterval(function() {
+        if (!demoYtPlayer || typeof demoYtPlayer.getCurrentTime !== 'function') return;
+        try {
+          const cur = demoYtPlayer.getCurrentTime();
+          if (typeof cur === 'number' && !isNaN(cur)) {
+            syncDemoActiveNote(cur);
+            const dur = (typeof demoYtPlayer.getDuration === 'function' && demoYtPlayer.getDuration() > 0)
+              ? demoYtPlayer.getDuration()
+              : (currentDemoPiece ? currentDemoPiece.audio_duration_sec : 60);
+            
+            const slider = document.getElementById('demoTimeSlider');
+            if (slider && dur > 0) {
+              slider.value = ((cur / dur) * 100).toFixed(1);
+            }
+            const timeEl = document.getElementById('demoTimeDisplay');
+            if (timeEl && dur > 0) {
+              const fmt = function(s) {
+                return Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+              };
+              timeEl.textContent = fmt(cur) + ' / ' + fmt(dur);
+            }
+          }
+        } catch(e) {}
+      }, 75);
+    }
+
+    function syncDemoActiveNote(cur) {
+      if (!currentDemoPiece || !currentDemoPiece.timestamps || !currentDemoPiece.timestamps.length) return;
+      const stamps = currentDemoPiece.timestamps;
+      let noteIdx = -1;
+
+      for (let k = 0; k < stamps.length; k++) {
+        const curNote = stamps[k];
+        if (curNote.start === null || curNote.start === undefined) continue;
+        const nxtTime = (k + 1 < stamps.length && stamps[k + 1].start !== undefined)
+          ? stamps[k + 1].start
+          : (curNote.end || curNote.start + 1.2);
+        if (cur >= curNote.start && cur < nxtTime) {
+          noteIdx = k;
+          break;
         }
-        const now = demoAudioCtx.currentTime;
-        if (currentDemoGain) {
-          try {
-            currentDemoGain.gain.setValueAtTime(currentDemoGain.gain.value, now);
-            currentDemoGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-          } catch(e) {}
-        }
-        const osc1 = demoAudioCtx.createOscillator();
-        const osc2 = demoAudioCtx.createOscillator();
-        const gain = demoAudioCtx.createGain();
-
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(freq, now);
-
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(freq * 2, now);
-
-        const gain2 = demoAudioCtx.createGain();
-        gain2.gain.setValueAtTime(0.12, now);
-        osc2.connect(gain2);
-        gain2.connect(gain);
-
-        osc1.connect(gain);
-        gain.connect(demoAudioCtx.destination);
-
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.16, now + 0.05);
-        gain.gain.setValueAtTime(0.16, now + Math.max(0.1, durSec - 0.08));
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + durSec);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + durSec);
-        osc2.stop(now + durSec);
-
-        currentDemoGain = gain;
-      } catch(e) {
-        console.warn('Audio tone synthesis error:', e);
+      }
+      if (noteIdx === -1 && stamps.length > 0 && cur >= stamps[stamps.length - 1].start) {
+        noteIdx = stamps.length - 1;
+      }
+      if (noteIdx >= 0 && noteIdx !== demoActiveNoteIdx) {
+        highlightDemoNote(noteIdx);
       }
     }
 
-    function initInteractiveDemo() {
+    function highlightDemoNote(idx) {
+      if (!demoChantInfo || !demoChantInfo.allNotes || idx < 0 || idx >= demoChantInfo.allNotes.length) return;
+      if (idx === demoActiveNoteIdx) return;
+
+      const prevIdx = demoActiveNoteIdx;
+      demoActiveNoteIdx = idx;
+
+      // Nettoyer ancienne note
+      if (prevIdx >= 0 && demoChantInfo.allNotes[prevIdx]) {
+        const pNote = demoChantInfo.allNotes[prevIdx];
+        if (pNote.svgNode) {
+          pNote.svgNode.style.removeProperty('fill');
+          pNote.svgNode.style.removeProperty('filter');
+        }
+        if (pNote.neume && pNote.neume.lyrics && pNote.neume.lyrics[0] && pNote.neume.lyrics[0].svgNode) {
+          pNote.neume.lyrics[0].svgNode.style.removeProperty('fill');
+          pNote.neume.lyrics[0].svgNode.style.removeProperty('color');
+          if (pNote.neume.lyrics[0].svgNode.querySelectorAll) {
+            pNote.neume.lyrics[0].svgNode.querySelectorAll('tspan').forEach(function(ts) {
+              ts.style.removeProperty('fill');
+              ts.style.removeProperty('color');
+            });
+          }
+        }
+      }
+
+      // Mettre en valeur la nouvelle note
+      const curNote = demoChantInfo.allNotes[idx];
+      const accent = '#c4984f';
+      if (curNote && curNote.svgNode) {
+        curNote.svgNode.style.setProperty('fill', accent, 'important');
+        curNote.svgNode.style.setProperty('filter', 'drop-shadow(0 0 6px rgba(196,152,79,0.75))', 'important');
+      }
+      if (curNote && curNote.neume && curNote.neume.lyrics && curNote.neume.lyrics[0] && curNote.neume.lyrics[0].svgNode) {
+        const lNode = curNote.neume.lyrics[0].svgNode;
+        lNode.style.setProperty('fill', accent, 'important');
+        lNode.style.setProperty('color', accent, 'important');
+        if (lNode.querySelectorAll) {
+          lNode.querySelectorAll('tspan').forEach(function(ts) {
+            ts.style.setProperty('fill', accent, 'important');
+            ts.style.setProperty('color', accent, 'important');
+          });
+        }
+      }
+
+      // Mise à jour du texte de description
+      const stamp = currentDemoPiece.timestamps[idx];
+      const chipEl = document.getElementById('demoDetailText');
+      if (chipEl && stamp) {
+        const dur = (stamp.end && stamp.start) ? (stamp.end - stamp.start).toFixed(2) + 's' : '';
+        chipEl.innerHTML = 'Note ' + (idx + 1) + '/' + currentDemoPiece.notes_count + ' : <strong>' + stamp.start.toFixed(2) + 's ' + (dur ? '(' + dur + ')' : '') + '</strong> • ' + currentDemoPiece.incipit + ' • Validé par l’Atelier';
+      }
+
+      // Défilement automatique doux vers la note
+      const slot = document.getElementById('demoScoreSlot');
+      if (curNote && curNote.svgNode && slot) {
+        const nRect = curNote.svgNode.getBoundingClientRect();
+        const sRect = slot.getBoundingClientRect();
+        if (nRect.top < sRect.top + 20 || nRect.bottom > sRect.bottom - 20) {
+          curNote.svgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    function renderDemoScore(gabcSrc) {
       const container = document.getElementById('demoScoreSlot');
       if (!container || typeof exsurge === 'undefined') return;
 
@@ -2098,7 +2329,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         ctxt.lyricTextColor = '#ffffff';
         ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
 
-        const processed = preprocessGabcForExsurge(DEMO_GABC);
+        const processed = preprocessGabcForExsurge(gabcSrc);
         const mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
         const score = new exsurge.ChantScore(ctxt, mappings, true);
 
@@ -2122,7 +2353,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
           if (demoChantInfo && demoChantInfo.allNotes) {
             const allUse = Array.from(svgNode.querySelectorAll('use'));
-            allUse.forEach(u => {
+            allUse.forEach(function(u) {
               if (u.source) {
                 const idx = demoChantInfo.allNotes.indexOf(u.source);
                 if (idx >= 0) {
@@ -2133,29 +2364,39 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               }
             });
 
-            demoChantInfo.allNotes.forEach((n, idx) => {
+            demoChantInfo.allNotes.forEach(function(n, idx) {
               if (n.svgNode) {
                 n.svgNode.setAttribute('data-demo-idx', idx);
                 n.svgNode.style.cursor = 'pointer';
               }
               if (n.neume && n.neume.lyrics) {
-                n.neume.lyrics.forEach(l => {
+                n.neume.lyrics.forEach(function(l) {
                   if (l.svgNode) {
                     l.svgNode.setAttribute('data-demo-idx', idx);
                     l.svgNode.style.cursor = 'pointer';
+                    if (l.svgNode.querySelectorAll) {
+                      l.svgNode.querySelectorAll('tspan').forEach(function(ts) {
+                        ts.setAttribute('data-demo-idx', idx);
+                        ts.style.cursor = 'pointer';
+                      });
+                    }
                   }
                 });
               }
             });
           }
 
-          // Clic direct sur n'importe quel neume
-          svgNode.addEventListener('click', (e) => {
+          // Clic sur n'importe quel neume pour se caler instantanément sur la vidéo YouTube
+          svgNode.addEventListener('click', function(e) {
             const targetEl = e.target.closest ? e.target.closest('[data-demo-idx]') : null;
             if (targetEl) {
               const idx = parseInt(targetEl.getAttribute('data-demo-idx'), 10);
-              if (!isNaN(idx) && idx >= 0 && idx < DEMO_NOTES.length) {
-                seekDemoTo(DEMO_NOTES[idx].start, true);
+              if (!isNaN(idx) && currentDemoPiece && currentDemoPiece.timestamps && currentDemoPiece.timestamps[idx]) {
+                const st = currentDemoPiece.timestamps[idx];
+                if (demoYtPlayer && typeof demoYtPlayer.seekTo === 'function') {
+                  demoYtPlayer.seekTo(st.start, true);
+                }
+                highlightDemoNote(idx);
               }
             }
           });
@@ -2163,177 +2404,44 @@ function renderWorkerPortalHtml(stats, benchmarks) {
           highlightDemoNote(0);
         });
       } catch(err) {
-        console.warn('Erreur rendu demo Exsurge:', err);
+        console.warn('Erreur Exsurge demo:', err);
       }
     }
 
-    function highlightDemoNote(idx) {
-      if (!demoChantInfo || !demoChantInfo.allNotes || idx < 0 || idx >= demoChantInfo.allNotes.length) return;
-      if (idx === demoActiveNoteIdx) return;
+    window.switchDemoPiece = function(pieceId) {
+      if (!VALIDATED_DEMO_PIECES[pieceId]) return;
+      currentDemoId = pieceId;
+      currentDemoPiece = VALIDATED_DEMO_PIECES[pieceId];
+      demoActiveNoteIdx = -1;
 
-      const prevIdx = demoActiveNoteIdx;
-      demoActiveNoteIdx = idx;
+      // Mise à jour des boutons pilules
+      document.querySelectorAll('#demoPiecePills .btn-pill').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.demoId === pieceId);
+      });
 
-      // Nettoyer note précédente
-      if (prevIdx >= 0 && demoChantInfo.allNotes[prevIdx]) {
-        const pNote = demoChantInfo.allNotes[prevIdx];
-        if (pNote.svgNode) {
-          pNote.svgNode.style.removeProperty('fill');
-          pNote.svgNode.style.removeProperty('filter');
-        }
-        if (pNote.neume && pNote.neume.lyrics && pNote.neume.lyrics[0] && pNote.neume.lyrics[0].svgNode) {
-          pNote.neume.lyrics[0].svgNode.style.removeProperty('fill');
-          pNote.neume.lyrics[0].svgNode.style.removeProperty('color');
-        }
+      // Sous-titre
+      const subEl = document.getElementById('demoPieceSub');
+      if (subEl) {
+        subEl.textContent = currentDemoPiece.incipit + ' • ' + currentDemoPiece.part + ' (Mode ' + currentDemoPiece.mode + ') • ' + currentDemoPiece.notes_count + ' notes certifiées • Enregistrement monastique';
       }
 
-      // Illuminer note active
-      const curNote = demoChantInfo.allNotes[idx];
-      const accent = '#c4984f';
-      if (curNote && curNote.svgNode) {
-        curNote.svgNode.style.setProperty('fill', accent, 'important');
-        curNote.svgNode.style.setProperty('filter', 'drop-shadow(0 0 6px rgba(196,152,79,0.7))', 'important');
-      }
-      if (curNote && curNote.neume && curNote.neume.lyrics && curNote.neume.lyrics[0] && curNote.neume.lyrics[0].svgNode) {
-        curNote.neume.lyrics[0].svgNode.style.setProperty('fill', accent, 'important');
-        curNote.neume.lyrics[0].svgNode.style.setProperty('color', accent, 'important');
-      }
-
-      // Mettre à jour le badge descriptif
-      const nData = DEMO_NOTES[idx] || DEMO_NOTES[0];
-      const chipEl = document.getElementById('demoDetailText');
-      if (chipEl && nData) {
-        chipEl.innerHTML = \`Neume \${idx + 1}/\${DEMO_NOTES.length} : <strong>\${nData.syllable}</strong> [\${nData.neume}] • <em>\${nData.desc}</em> • F0 : <strong>\${nData.freq.toFixed(1)} Hz</strong>\`;
-      }
-    }
-
-    window.toggleDemoPlay = function() {
-      if (demoIsPlaying) {
-        pauseDemo();
-      } else {
-        startDemo();
-      }
+      // Rendu du lecteur et de la partition
+      initDemoPlayer(currentDemoPiece.youtube_id);
+      renderDemoScore(currentDemoPiece.gabc_src);
     };
 
-    function startDemo() {
-      if (demoCurTime >= DEMO_TOTAL_DUR - 0.2) {
-        demoCurTime = 0.0;
-      }
-      demoIsPlaying = true;
-      updateDemoPlayButton(true);
-
-      let lastNow = performance.now();
-      function loop(now) {
-        if (!demoIsPlaying) return;
-        const dt = (now - lastNow) / 1000.0;
-        lastNow = now;
-        demoCurTime += dt;
-
-        if (demoCurTime >= DEMO_TOTAL_DUR) {
-          demoCurTime = DEMO_TOTAL_DUR;
-          pauseDemo();
-          updateDemoDisplay();
-          return;
-        }
-        updateDemoDisplay();
-        demoTimer = requestAnimationFrame(loop);
-      }
-      demoTimer = requestAnimationFrame(loop);
+    function initInteractiveDemo() {
+      switchDemoPiece('264');
     }
 
-    function pauseDemo() {
-      demoIsPlaying = false;
-      if (demoTimer) {
-        cancelAnimationFrame(demoTimer);
-        demoTimer = null;
-      }
-      updateDemoPlayButton(false);
-    }
-
-    window.resetDemo = function() {
-      pauseDemo();
-      seekDemoTo(0.0, false);
-    };
-
-    function seekDemoTo(timeSec, playTone = false) {
-      demoCurTime = Math.max(0, Math.min(DEMO_TOTAL_DUR, timeSec));
-      updateDemoDisplay();
-      if (playTone) {
-        const nIdx = getDemoNoteIdxAt(demoCurTime);
-        if (nIdx >= 0 && DEMO_NOTES[nIdx]) {
-          playDemoNoteTone(DEMO_NOTES[nIdx].freq, (DEMO_NOTES[nIdx].end - DEMO_NOTES[nIdx].start));
-        }
-      }
-    }
-
-    window.onDemoSliderInput = function(val) {
-      const sec = (parseFloat(val) / 100.0) * DEMO_TOTAL_DUR;
-      seekDemoTo(sec, true);
-    };
-
-    function updateDemoDisplay() {
-      const slider = document.getElementById('demoTimeSlider');
-      const timeDisplay = document.getElementById('demoTimeDisplay');
-      if (slider) {
-        slider.value = ((demoCurTime / DEMO_TOTAL_DUR) * 100).toFixed(1);
-      }
-      if (timeDisplay) {
-        const sec = demoCurTime;
-        const fmt = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2) + '.' + Math.floor((s % 1) * 10);
-        const fmtTot = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
-        timeDisplay.textContent = \`\${fmt(sec)} / \${fmtTot(DEMO_TOTAL_DUR)}\`;
-      }
-
-      const activeIdx = getDemoNoteIdxAt(demoCurTime);
-      if (activeIdx >= 0 && activeIdx !== demoActiveNoteIdx) {
-        highlightDemoNote(activeIdx);
-        if (demoIsPlaying) {
-          const nData = DEMO_NOTES[activeIdx];
-          if (nData) playDemoNoteTone(nData.freq, (nData.end - nData.start));
-        }
-      }
-    }
-
-    function getDemoNoteIdxAt(curSec) {
-      for (let i = 0; i < DEMO_NOTES.length; i++) {
-        if (curSec >= DEMO_NOTES[i].start && curSec < DEMO_NOTES[i].end) {
-          return i;
-        }
-      }
-      return DEMO_NOTES.length - 1;
-    }
-
-    function updateDemoPlayButton(isPlaying) {
-      const btn = document.getElementById('btnDemoPlay');
-      const iconPlay = document.getElementById('demoIconPlay');
-      const iconPause = document.getElementById('demoIconPause');
-      const label = document.getElementById('demoPlayText');
-      if (btn) btn.classList.toggle('btn-play-active', isPlaying);
-      if (iconPlay) iconPlay.style.display = isPlaying ? 'none' : 'block';
-      if (iconPause) iconPause.style.display = isPlaying ? 'block' : 'none';
-      if (label) label.textContent = isPlaying ? 'Pause' : 'Lancer la Démo';
-    }
-
-    window.toggleDemoSound = function() {
-      demoSoundEnabled = !demoSoundEnabled;
-      const btn = document.getElementById('btnDemoSound');
-      const onIcon = document.getElementById('demoIconSoundOn');
-      const offIcon = document.getElementById('demoIconSoundOff');
-      const label = document.getElementById('demoSoundLabel');
-      if (btn) btn.classList.toggle('sound-on', demoSoundEnabled);
-      if (onIcon) onIcon.style.display = demoSoundEnabled ? 'block' : 'none';
-      if (offIcon) offIcon.style.display = demoSoundEnabled ? 'none' : 'block';
-      if (label) label.textContent = demoSoundEnabled ? 'Son' : 'Muet';
-    };
-
-    function waitForExsurge(cb, maxTries = 35) {
+    function waitForExsurge(cb, maxTries) {
+      if (typeof maxTries === 'undefined') maxTries = 35;
       if (typeof exsurge !== 'undefined') {
         cb();
       } else if (maxTries > 0) {
-        setTimeout(() => waitForExsurge(cb, maxTries - 1), 100);
+        setTimeout(function() { waitForExsurge(cb, maxTries - 1); }, 100);
       }
     }
-
     // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
       initGamificationFromStorage();
