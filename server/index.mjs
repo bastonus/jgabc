@@ -114,13 +114,34 @@ function loadSeedAlignments() {
 }
 
 
+function normalizeWorkerKey(name) {
+  return String(name || '')
+    .normalize('NFC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function displayNameFor(key, fallback) {
+  const workers = workersCache || {};
+  for (const [k, v] of Object.entries(workers)) {
+    if (normalizeWorkerKey(k) === key) return (v && v.display_name) || k;
+  }
+  return fallback;
+}
+
 function getValidatedDemoPieces() {
   const seeds = loadSeedAlignments();
-  const demoIds = ['264', '8', '14262'];
+  // Pieces validees via l'API, alignees par l'Atelier-Chantres (famille Dextera).
+  // Remplace l'ancienne demo (264/8/14262) signalee comme mal alignee.
+  const demoIds = ['16335', 'of-dextera_domini-alleluia', 'al-dextera_dei'];
+  const modeById = { '16335': '2', 'of-dextera_domini-alleluia': '2', 'al-dextera_dei': '4' };
   const out = {};
   for (const pid of demoIds) {
     const p = seeds[pid];
-    if (p) {
+    if (p && Array.isArray(p.timestamps) && p.timestamps.length > 0) {
       out[pid] = {
         piece_id: p.piece_id || pid,
         incipit: p.incipit,
@@ -129,8 +150,10 @@ function getValidatedDemoPieces() {
         gabc_src: p.gabc_src,
         timestamps: p.timestamps || [],
         notes_count: (p.timestamps || []).length,
-        audio_duration_sec: p.audio_duration_sec || 61.2,
-        mode: p.mode || (pid === '264' ? '6' : (pid === '8' ? '7' : '3'))
+        audio_duration_sec: p.audio_duration_sec || 75.8,
+        mode: p.mode || modeById[pid] || '2',
+        worker_id: p.worker_id || 'Atelier-Chantres',
+        validated_via: 'api'
       };
     }
   }
@@ -273,13 +296,19 @@ function loadWorkers() {
   const seeds = loadSeedAlignments();
   const seedKeys = Object.keys(seeds).filter(k => Array.isArray(seeds[k].timestamps) && seeds[k].timestamps.length > 0);
   const uniqueSeedPieces = new Set(seedKeys.map(k => seeds[k].piece_id || k));
-  if (uniqueSeedPieces.size > 0 && !workersCache['Atelier-Chantres']) {
+  if (uniqueSeedPieces.size > 0 && !findWorkerKey(workersCache, 'Atelier-Chantres')) {
     workersCache['Atelier-Chantres'] = {
       count: uniqueSeedPieces.size,
+      xp: uniqueSeedPieces.size * 25,
+      review_count: 0,
+      review_xp: 0,
       last_active: '2026-09-15T12:00:00.000Z',
-      device: 'Meta MMS_FA (Curated)'
+      device: 'Meta MMS_FA (Curated)',
+      display_name: 'Atelier-Chantres'
     };
   }
+
+  rebuildWorkersFromTasks();
 
   return workersCache;
 }
@@ -291,6 +320,120 @@ function saveWorkers() {
   } catch (e) {
     console.error('[JOBS] Erreur sauvegarde workers.json:', e);
   }
+}
+
+function xpForLevel(xp) { return 1 + Math.floor((xp || 0) / 100); }
+
+function findWorkerKey(workers, name) {
+  const target = normalizeWorkerKey(name);
+  for (const k of Object.keys(workers)) {
+    if (normalizeWorkerKey(k) === target) return k;
+  }
+  return null;
+}
+
+function ensureWorkerEntry(workers, displayName) {
+  const clean = String(displayName || '').normalize('NFC').trim().replace(/\s+/g, ' ');
+  let key = findWorkerKey(workers, clean);
+  if (!key) {
+    key = clean;
+    workers[key] = { count: 0, xp: 0, review_count: 0, review_xp: 0, last_active: null, device: 'CPU', display_name: clean };
+  }
+  const entry = workers[key];
+  // Preserve le plus bel affichage (ex: "Pierre-Albéric Théobald" plutot que "pierre-alberic theobald")
+  if (clean && clean !== entry.display_name) {
+    const hasUpper = /[A-ZÀ-Þ]/.test(clean);
+    const curHasUpper = /[A-ZÀ-Þ]/.test(entry.display_name || '');
+    if (hasUpper && !curHasUpper) entry.display_name = clean;
+    else if (!entry.display_name) entry.display_name = clean;
+  }
+  if (typeof entry.xp !== 'number') entry.xp = (entry.count || 0) * 25 + (entry.review_xp || 0);
+  if (typeof entry.review_xp !== 'number') entry.review_xp = 0;
+  if (typeof entry.review_count !== 'number') entry.review_count = 0;
+  return key;
+}
+
+function rebuildWorkersFromTasks() {
+  if (!workersCache) workersCache = {};
+  // Fusion des doublons (accents / casse / espaces) vers une cle canonique
+  const merged = {};
+  for (const [k, v] of Object.entries(workersCache)) {
+    const nk = normalizeWorkerKey(k);
+    let dest = null;
+    for (const mk of Object.keys(merged)) {
+      if (normalizeWorkerKey(mk) === nk) { dest = mk; break; }
+    }
+    if (!dest) {
+      merged[k] = { ...v, display_name: v.display_name || k };
+    } else {
+      merged[dest].count = (merged[dest].count || 0) + (v.count || 0);
+      merged[dest].xp = (merged[dest].xp || 0) + (v.xp || (v.count || 0) * 25);
+      merged[dest].review_count = (merged[dest].review_count || 0) + (v.review_count || 0);
+      merged[dest].review_xp = (merged[dest].review_xp || 0) + (v.review_xp || 0);
+      if (v.last_active && (!merged[dest].last_active || v.last_active > merged[dest].last_active)) {
+        merged[dest].last_active = v.last_active;
+        if (v.device) merged[dest].device = v.device;
+      }
+    }
+  }
+  workersCache = merged;
+
+  // Recomptage depuis tasks.json + alignements disque (repare les purges / pertes workers.json).
+  // Ne diminue jamais un compteur existant : on prend le max (corrige le cas "8 vs 71").
+  try {
+    const counts = {};
+    const lastActive = {};
+    const devices = {};
+    const displayNames = {};
+    if (Array.isArray(tasksCache)) {
+      for (const t of tasksCache) {
+        if (t.status === 'completed' && t.worker_id) {
+          const nk = normalizeWorkerKey(t.worker_id);
+          if (!nk || nk === 'ami-anonyme' || nk === 'anonyme' || nk === 'ami') continue;
+          counts[nk] = (counts[nk] || 0) + 1;
+          displayNames[nk] = String(t.worker_id).normalize('NFC').trim().replace(/\s+/g, ' ');
+          if (t.completed_at && (!lastActive[nk] || String(t.completed_at) > String(lastActive[nk]))) lastActive[nk] = t.completed_at;
+        }
+      }
+    }
+    if (fs.existsSync(ALIGNMENTS_DIR)) {
+      for (const f of fs.readdirSync(ALIGNMENTS_DIR).filter(ff => ff.endsWith('.json'))) {
+        try {
+          const item = JSON.parse(fs.readFileSync(path.join(ALIGNMENTS_DIR, f), 'utf8'));
+          if (item.worker_id) {
+            const nk = normalizeWorkerKey(item.worker_id);
+            // Compte disque seulement si la tache correspondante n'est plus completed (evite double compte)
+            const pid = String(item.piece_id || f.replace('.json', ''));
+            const task = Array.isArray(tasksCache) ? tasksCache.find(tt => String(tt.id) === pid) : null;
+            if (!task || task.status !== 'completed') {
+              counts[nk] = (counts[nk] || 0) + 1;
+              displayNames[nk] = displayNames[nk] || String(item.worker_id).normalize('NFC').trim().replace(/\s+/g, ' ');
+              if (item.completed_at && (!lastActive[nk] || String(item.completed_at) > String(lastActive[nk]))) lastActive[nk] = item.completed_at;
+              if (item.compute_device) devices[nk] = item.compute_device;
+            } else if (item.compute_device) {
+              devices[nk] = devices[nk] || item.compute_device;
+            }
+          }
+        } catch (e) {}
+      }
+    }
+    for (const [nk, c] of Object.entries(counts)) {
+      let key = findWorkerKey(workersCache, nk);
+      if (!key) {
+        key = displayNames[nk] || nk;
+        workersCache[key] = { count: 0, xp: 0, review_count: 0, review_xp: 0, last_active: null, device: devices[nk] || 'CPU', display_name: displayNames[nk] || key };
+      }
+      const entry = workersCache[key];
+      if ((entry.count || 0) < c) {
+        // Preserve review_xp, recalcule xp = calculs*25 + reviews
+        entry.count = c;
+        entry.xp = c * 25 + (entry.review_xp || 0);
+      }
+      if (lastActive[nk] && (!entry.last_active || String(lastActive[nk]) > String(entry.last_active))) entry.last_active = lastActive[nk];
+      if (devices[nk] && !entry.device) entry.device = devices[nk];
+      if (displayNames[nk] && !entry.display_name) entry.display_name = displayNames[nk];
+    }
+  } catch (e) {}
 }
 
 function claimNextTask(workerId) {
@@ -312,8 +455,9 @@ function claimNextTask(workerId) {
 
   if (!task) return null;
 
+  const cleanWorker = String(workerId || '').normalize('NFC').trim().replace(/\s+/g, ' ') || 'Ami-Anonyme';
   task.status = 'claimed';
-  task.worker_id = workerId || 'Ami-Anonyme';
+  task.worker_id = cleanWorker;
   task.claimed_at = now;
   saveTasks();
 
@@ -335,8 +479,8 @@ function submitTaskResult(result) {
   if (!task) return { success: false, error: 'Tâche introuvable' };
 
   const now = Date.now();
-  const workerId = (result.worker_id || '').trim();
-  if (!workerId || workerId.toLowerCase() === 'ami-anonyme' || workerId.toLowerCase() === 'anonyme' || workerId.toLowerCase() === 'ami') {
+  const workerId = String(result.worker_id || '').normalize('NFC').trim().replace(/\s+/g, ' ');
+  if (!workerId || normalizeWorkerKey(workerId) === 'ami-anonyme' || normalizeWorkerKey(workerId) === 'anonyme' || normalizeWorkerKey(workerId) === 'ami') {
     return { success: false, error: 'Nom ou pseudo de contributeur obligatoire pour comptabiliser vos points' };
   }
 
@@ -368,18 +512,17 @@ function submitTaskResult(result) {
       console.error('[JOBS] Erreur écriture alignement:', e);
     }
 
-    // Mise à jour des statistiques du worker
+    // Mise à jour des statistiques du worker (+25 XP par chant calcule)
     const workers = loadWorkers();
-    if (!workers[workerId]) {
-      workers[workerId] = { count: 0, last_active: null, device: result.compute_device || 'CPU' };
-    }
-    workers[workerId].count += 1;
-    workers[workerId].last_active = new Date(now).toISOString();
-    if (result.compute_device) workers[workerId].device = result.compute_device;
+    const wkey = ensureWorkerEntry(workers, workerId);
+    workers[wkey].count += 1;
+    workers[wkey].xp = (workers[wkey].xp || 0) + 25;
+    workers[wkey].last_active = new Date(now).toISOString();
+    if (result.compute_device) workers[wkey].device = result.compute_device;
     saveWorkers();
 
     saveTasks();
-    return { success: true, piece_id: pieceId, worker_total: workers[workerId].count };
+    return { success: true, piece_id: pieceId, worker_total: workers[wkey].count, xp: workers[wkey].xp, level: xpForLevel(workers[wkey].xp) };
 
   } else if (result.status === 'failed') {
     const errStr = String(result.error || '');
@@ -423,8 +566,16 @@ function getJobsStats() {
   }
 
   const leaderboard = Object.entries(workers)
-    .map(([name, data]) => ({ name, count: data.count, last_active: data.last_active, device: data.device }))
-    .sort((a, b) => b.count - a.count);
+    .map(([name, data]) => ({
+      name: data.display_name || name,
+      count: data.count || 0,
+      xp: typeof data.xp === 'number' ? data.xp : (data.count || 0) * 25 + (data.review_xp || 0),
+      level: xpForLevel(typeof data.xp === 'number' ? data.xp : (data.count || 0) * 25 + (data.review_xp || 0)),
+      review_count: data.review_count || 0,
+      last_active: data.last_active,
+      device: data.device
+    }))
+    .sort((a, b) => (b.xp - a.xp) || (b.count - a.count));
 
   return {
     total_pieces: tasks.length,
@@ -482,10 +633,10 @@ function getBenchmarks() {
 function getWorkerPieces(workerId) {
   try {
     const list = [];
-    const targetWorker = (workerId || '').trim().toLowerCase();
+    const targetWorker = normalizeWorkerKey(workerId);
     const seenPieceIds = new Set();
 
-    const isTarget = (w) => targetWorker && targetWorker !== 'all' && String(w || '').toLowerCase().includes(targetWorker);
+    const isTarget = (w) => targetWorker && targetWorker !== 'all' && normalizeWorkerKey(w).includes(targetWorker);
 
     // 1. Alignements calculés sur disque
     if (fs.existsSync(ALIGNMENTS_DIR)) {
@@ -1165,19 +1316,19 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
         <h2>Démonstration</h2>
         <div class="btn-pill-group" id="demoPiecePills">
-          <button type="button" class="btn-pill active" data-demo-id="264" onclick="switchDemoPiece('264')">Agnus Dei IV (#264)</button>
-          <button type="button" class="btn-pill" data-demo-id="8" onclick="switchDemoPiece('8')">Omnes gentes (#8)</button>
-          <button type="button" class="btn-pill" data-demo-id="14262" onclick="switchDemoPiece('14262')">Deus misereatur (#14262)</button>
+          <button type="button" class="btn-pill active" data-demo-id="16335" onclick="switchDemoPiece('16335')">Dextera Domini (#16335)</button>
+          <button type="button" class="btn-pill" data-demo-id="of-dextera_domini-alleluia" onclick="switchDemoPiece('of-dextera_domini-alleluia')">Dextera Domini (All.)</button>
+          <button type="button" class="btn-pill" data-demo-id="al-dextera_dei" onclick="switchDemoPiece('al-dextera_dei')">Dextera Dei (All.)</button>
         </div>
       </div>
 
       <div style="font-size:0.80rem; color:var(--text-secondary); margin-bottom:12px;" id="demoPieceSub">
-        Agnus Dei IV • Mode 6 • 87 notes
+        Dextera Domini • Mode 2 • 120 notes • Données validées via l'API • Aligné par : Atelier-Chantres
       </div>
 
       <div style="display:grid; grid-template-columns: 240px 1fr; gap:16px; margin-bottom:14px; align-items:center;">
         <div style="aspect-ratio:16/9; overflow:hidden; position:relative; background:#000;">
-          <iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/SVZZLdPco4A?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
+          <iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/3lHW0OAHBCk?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
@@ -1299,7 +1450,11 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
     <!-- 4. Contributeurs -->
     <section style="margin-bottom: 36px;">
-      <h2 style="margin-bottom:12px;">Contributeurs</h2>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
+        <h2 style="margin-bottom:12px;">Contributeurs</h2>
+        <span id="personalXpDisplay" style="font-size:0.82rem; color:var(--primary-color);">0 XP • Niv. 1 • Série 0</span>
+      </div>
+      <div style="font-size:0.76rem; color:var(--text-tertiary); margin-bottom:12px;">+25 XP par chant calculé • +10 XP par relecture • +15 XP par commentaire</div>
       <div style="overflow-x:auto;">
         <table>
           <thead>
@@ -1308,10 +1463,11 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               <th>Contributeur</th>
               <th>Matériel</th>
               <th style="text-align:right;">Partitions</th>
+              <th style="text-align:right;">XP</th>
             </tr>
           </thead>
           <tbody id="leaderboardTbody">
-            <tr><td colspan="4" style="padding:12px 0; color:var(--text-tertiary);">Chargement...</td></tr>
+            <tr><td colspan="5" style="padding:12px 0; color:var(--text-tertiary);">Chargement...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1395,8 +1551,8 @@ ${JSON.stringify(getValidatedDemoPieces())}
       console.warn('Erreur parsing demo data:', err);
     }
 
-    let currentDemoId = '264';
-    let currentDemoPiece = VALIDATED_DEMO_PIECES['264'] || null;
+    let currentDemoId = '16335';
+    let currentDemoPiece = VALIDATED_DEMO_PIECES['16335'] || VALIDATED_DEMO_PIECES['264'] || null;
     let demoYtPlayer = null;
     let demoSyncInterval = null;
     let demoScore = null;
@@ -1695,26 +1851,38 @@ ${JSON.stringify(getValidatedDemoPieces())}
     }
 
     window.switchDemoPiece = function(pieceId) {
-      if (!VALIDATED_DEMO_PIECES[pieceId]) return;
-      currentDemoId = pieceId;
-      currentDemoPiece = VALIDATED_DEMO_PIECES[pieceId];
       demoActiveNoteIdx = -1;
 
-      document.querySelectorAll('#demoPiecePills .btn-pill').forEach(function(b) {
-        b.classList.toggle('active', b.dataset.demoId === pieceId);
-      });
-
-      const subEl = document.getElementById('demoPieceSub');
-      if (subEl) {
-        subEl.textContent = currentDemoPiece.incipit + ' • Mode ' + currentDemoPiece.mode + ' • ' + currentDemoPiece.notes_count + ' notes';
+      function applyPiece(p) {
+        currentDemoId = pieceId;
+        currentDemoPiece = p;
+        document.querySelectorAll('#demoPiecePills .btn-pill').forEach(function(b) {
+          b.classList.toggle('active', b.dataset.demoId === pieceId);
+        });
+        const subEl = document.getElementById('demoPieceSub');
+        if (subEl) {
+          subEl.textContent = p.incipit + ' • Mode ' + p.mode + ' • ' + p.notes_count + ' notes • Données validées via l\u2019API • Aligné par : ' + (p.worker_id || 'Atelier-Chantres');
+        }
+        initDemoPlayer(p.youtube_id);
+        renderDemoScore(p.gabc_src);
       }
 
-      initDemoPlayer(currentDemoPiece.youtube_id);
-      renderDemoScore(currentDemoPiece.gabc_src);
+      if (VALIDATED_DEMO_PIECES[pieceId]) {
+        applyPiece(VALIDATED_DEMO_PIECES[pieceId]);
+        return;
+      }
+      // Fallback : donnees validees via l'API en direct
+      fetch('/api/jobs/piece/' + encodeURIComponent(pieceId)).then(function(r) { return r.json(); }).then(function(p) {
+        if (p && p.timestamps && p.timestamps.length) {
+          VALIDATED_DEMO_PIECES[pieceId] = p;
+          applyPiece(p);
+        }
+      }).catch(function() {});
     };
 
     function initInteractiveDemo() {
-      switchDemoPiece('264');
+      const firstId = VALIDATED_DEMO_PIECES['16335'] ? '16335' : Object.keys(VALIDATED_DEMO_PIECES)[0];
+      if (firstId) switchDemoPiece(firstId);
     }
 
     function waitForExsurge(cb, maxTries) {
@@ -1729,6 +1897,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
     // Initialisation
     document.addEventListener('DOMContentLoaded', function() {
       initGamificationFromStorage();
+      renderPersonalXp();
       setupPlannerEvents();
       setupUserFilter();
       updateEstimator();
@@ -1744,7 +1913,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
         if (saved) {
           const parsed = JSON.parse(saved);
           userGamification.xp = parsed.xp || 0;
-          userGamification.level = parsed.level || 1;
+          userGamification.level = parsed.level || (1 + Math.floor((parsed.xp || 0) / 100));
           userGamification.streak = parsed.streak || 0;
         }
       } catch(e) {}
@@ -1759,7 +1928,40 @@ ${JSON.stringify(getValidatedDemoPieces())}
     function awardUserXp(amount) {
       userGamification.xp += amount;
       userGamification.streak += 1;
+      userGamification.level = 1 + Math.floor(userGamification.xp / 100);
       saveGamificationToStorage();
+      renderPersonalXp();
+    }
+
+    function renderPersonalXp() {
+      const el = document.getElementById('personalXpDisplay');
+      if (el) {
+        el.textContent = userGamification.xp + ' XP • Niv. ' + userGamification.level + ' • Série ' + userGamification.streak;
+      }
+      const est = document.getElementById('estXpDisplay');
+      if (est) {
+        const m = currentDurationMins > 0 ? currentDurationMins : 30;
+        est.textContent = '';
+      }
+    }
+
+    async function syncServerXp(pseudo) {
+      if (!pseudo) return;
+      try {
+        const res = await fetch('/api/gamification?worker=' + encodeURIComponent(pseudo));
+        const data = await res.json();
+        if (data && typeof data.xp === 'number') {
+          // Le serveur fait foi pour les calculs (+25/chant) ; on prend le max avec le local
+          if (data.xp > userGamification.xp) {
+            userGamification.xp = data.xp;
+            userGamification.level = data.level || (1 + Math.floor(data.xp / 100));
+            saveGamificationToStorage();
+          }
+          renderPersonalXp();
+          return data;
+        }
+      } catch (e) {}
+      return null;
     }
 
     function setupPlannerEvents() {
@@ -2318,11 +2520,26 @@ ${JSON.stringify(getValidatedDemoPieces())}
           body: JSON.stringify({
             piece_id: currentReviewPieceId,
             status: status,
-            reviewer: pseudo
+            reviewer: pseudo,
+            author: pseudo
           })
         });
         if (res.ok) {
-          awardUserXp(10);
+          try {
+            const data = await res.json();
+            if (data && data.reviewer_xp && typeof data.reviewer_xp.xp === 'number') {
+              if (data.reviewer_xp.xp > userGamification.xp) {
+                userGamification.xp = data.reviewer_xp.xp;
+                userGamification.level = data.reviewer_xp.level || userGamification.level;
+                saveGamificationToStorage();
+                renderPersonalXp();
+              } else {
+                awardUserXp(10);
+              }
+            } else {
+              awardUserXp(10);
+            }
+          } catch (e) { awardUserXp(10); }
           closeReviewModal();
           fetchWorkerBatch(pseudo);
         }
@@ -2348,11 +2565,26 @@ ${JSON.stringify(getValidatedDemoPieces())}
             piece_id: currentReviewPieceId,
             status: 'rejected',
             comment: comment,
-            reviewer: pseudo
+            reviewer: pseudo,
+            author: pseudo
           })
         });
         if (res.ok) {
-          awardUserXp(15);
+          try {
+            const data = await res.json();
+            if (data && data.reviewer_xp && typeof data.reviewer_xp.xp === 'number') {
+              if (data.reviewer_xp.xp > userGamification.xp) {
+                userGamification.xp = data.reviewer_xp.xp;
+                userGamification.level = data.reviewer_xp.level || userGamification.level;
+                saveGamificationToStorage();
+                renderPersonalXp();
+              } else {
+                awardUserXp(15);
+              }
+            } else {
+              awardUserXp(15);
+            }
+          } catch (e) { awardUserXp(15); }
           closeReviewModal();
           fetchWorkerBatch(pseudo);
         }
@@ -2375,17 +2607,20 @@ ${JSON.stringify(getValidatedDemoPieces())}
         const tbody = document.getElementById('leaderboardTbody');
         if (tbody && data.leaderboard && data.leaderboard.length > 0) {
           tbody.innerHTML = data.leaderboard.map(function(w, idx) {
+            const xpTxt = (typeof w.xp === 'number') ? (w.xp + ' XP • Niv. ' + (w.level || 1)) : (w.count + ' chants');
             return '<tr>' +
               '<td style="font-weight:600; color:var(--text-tertiary);">#' + (idx + 1) + '</td>' +
               '<td style="font-weight:600; color:#fff;">' + w.name + '</td>' +
               '<td style="color:var(--text-tertiary); font-size:0.82rem;">' + (w.device || 'CPU') + '</td>' +
               '<td style="text-align:right; font-weight:600; color:var(--primary-color);">' + w.count + ' chants</td>' +
+              '<td style="text-align:right; color:var(--text-secondary); font-size:0.82rem;">' + xpTxt + '</td>' +
             '</tr>';
           }).join('');
         }
 
         const filterInput = document.getElementById('filterWorkerInput');
         const pseudo = filterInput ? filterInput.value.trim() : '';
+        if (pseudo) syncServerXp(pseudo);
         fetchWorkerBatch(pseudo);
 
       } catch(e) {}
@@ -2567,7 +2802,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 9. API : Statistiques des tâches distribuées
-  if (req.method === 'GET' && (pathname === '/api/jobs/status' || pathname === '/api/jobs/stats')) {
+  if (req.method === 'GET' && (pathname === '/api/jobs/status' || pathname === '/api/jobs/stats' || pathname === '/api/stats')) {
     return sendJson(res, 200, getJobsStats());
   }
 
@@ -2802,10 +3037,32 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      // Attribution XP serveur au relecteur (+10 par vote, +15 si commentaire)
+      let reviewerXp = null;
+      try {
+        const reviewerRaw = data.reviewer || data.author || Object.values(reviewsMap)[0]?.reviewer || Object.values(reviewsMap)[0]?.author || '';
+        const reviewer = String(reviewerRaw).normalize('NFC').trim().replace(/\s+/g, ' ');
+        if (reviewer && normalizeWorkerKey(reviewer) !== 'anonyme' && normalizeWorkerKey(reviewer) !== 'ami-anonyme') {
+          const workers = loadWorkers();
+          const wkey = ensureWorkerEntry(workers, reviewer);
+          let gained = 0;
+          for (const rev of Object.values(reviewsMap)) {
+            gained += (rev.comment && String(rev.comment).trim()) ? 15 : 10;
+          }
+          workers[wkey].review_count = (workers[wkey].review_count || 0) + Object.keys(reviewsMap).length;
+          workers[wkey].review_xp = (workers[wkey].review_xp || 0) + gained;
+          workers[wkey].xp = (workers[wkey].xp || 0) + gained;
+          workers[wkey].last_active = nowIso;
+          saveWorkers();
+          reviewerXp = { xp: workers[wkey].xp, level: xpForLevel(workers[wkey].xp), gained };
+        }
+      } catch (e) {}
+
       return sendJson(res, 201, {
         success: true,
         saved_locally: savedFiles.length,
-        files: savedFiles
+        files: savedFiles,
+        reviewer_xp: reviewerXp
       });
 
     } catch (err) {
@@ -2854,6 +3111,32 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       return sendJson(res, 500, { error: err.message });
     }
+  }
+
+  // 15b. Gamification serveur : XP par contributeur (+25/calcul, +10/vote, +15/commentaire)
+  if (req.method === 'GET' && (pathname === '/api/gamification' || pathname.startsWith('/api/worker/'))) {
+    let workerName = reqUrl.searchParams.get('worker') || reqUrl.searchParams.get('worker_id') || '';
+    if (pathname.startsWith('/api/worker/')) {
+      const rest = decodeURIComponent(pathname.replace('/api/worker/', ''));
+      const parts = rest.split('/');
+      if (parts[0] && parts[0] !== 'xp' && parts[0] !== 'gamification') workerName = parts[0];
+      else if (parts[1]) workerName = parts[1];
+    }
+    const workers = loadWorkers();
+    const key = workerName ? findWorkerKey(workers, workerName) : null;
+    if (key) {
+      const d = workers[key];
+      const xp = typeof d.xp === 'number' ? d.xp : (d.count || 0) * 25 + (d.review_xp || 0);
+      return sendJson(res, 200, {
+        worker: d.display_name || key,
+        count: d.count || 0,
+        review_count: d.review_count || 0,
+        xp, level: xpForLevel(xp),
+        last_active: d.last_active || null,
+        device: d.device || ''
+      });
+    }
+    return sendJson(res, 200, { worker: workerName || null, count: 0, review_count: 0, xp: 0, level: 1 });
   }
 
   // 404 Route non trouvée
