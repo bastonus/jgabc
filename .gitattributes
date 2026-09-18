@@ -1,0 +1,10 @@
+# Normalisation des fins de ligne : LF obligatoire pour tout ce qui
+# s'exécute sous Linux/macOS ou Docker (shebang fragile au CRLF).
+*.sh text eol=lf
+worker/Dockerfile text eol=lf
+worker/docker-entrypoint.sh text eol=lf
+*.py text eol=lf
+*.mjs text eol=lf
+# Windows natif : CRLF conservé.
+*.bat text eol=crlf
+*.ps1 text eol=crlf
