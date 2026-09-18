@@ -264,7 +264,7 @@ def parse_gabc_file(gabc_src: str) -> list:
 
     def _tokenize(raw):
         cleaned = _IGNORABLE_RE.sub("", raw)
-        cleaned = re.sub(r"(/{{1,2}}|!)", r" \1 ", cleaned)
+        cleaned = re.sub(r"(/{1,2}|!)", r" \1 ", cleaned)
         notes = []
         pos = 0
         prev = ""
@@ -283,12 +283,12 @@ def parse_gabc_file(gabc_src: str) -> list:
                 tok = m.group(0)
                 pl = tok[0].lower()
                 if pl in "abcdefghijklmnop":
-                    notes.append({{
+                    notes.append({
                         "token": tok,
                         "duration_weight": _dur_weight(tok),
                         "repeated": _is_repeated(prev, tok),
                         "pitch_letter": pl,
-                    }})
+                    })
                     prev = tok
                 pos += len(tok)
                 continue
@@ -300,12 +300,24 @@ def parse_gabc_file(gabc_src: str) -> list:
         return notes
 
     words = []
-    current_word = {{"word": "", "clean_latin": "", "notes": []}}
+    current_word = {"word": "", "clean_latin": "", "notes": []}
 
     for match in _SYL_RE.finditer(notation):
         text_part = match.group(1)
         notes_str = match.group(2)[1:-1]
         notes = _tokenize(notes_str)
+
+        # Si text_part commence par un espace et qu'un mot est en cours, clore le mot precedent
+        if re.search(r"^\s", text_part) and (current_word["word"] or current_word["notes"]):
+            cw = dict(current_word)
+            cw["clean_latin"] = clean_latin_text(cw["word"])
+            cw["total_weight"] = sum(n["duration_weight"] for n in cw["notes"]) or 1.0
+            nc = len(cw["notes"])
+            nl = len(cw["clean_latin"])
+            cw["is_melisma"] = nc > max(1, nl)
+            if nc > 0:
+                words.append(cw)
+            current_word = {"word": "", "clean_latin": "", "notes": []}
 
         clean_text = re.sub(r"\[[^\]]*\]|<[^>]*>", "", text_part)
         clean_stripped = clean_text.strip()
@@ -313,6 +325,7 @@ def parse_gabc_file(gabc_src: str) -> list:
             current_word["word"] += clean_stripped
         current_word["notes"].extend(notes)
 
+        # Si text_part se termine par un espace ou si syllabe vide (barre)
         if re.search(r"\s$", text_part) or (notes_str.strip() == "" and current_word["word"]):
             if current_word["word"] or current_word["notes"]:
                 cw = dict(current_word)
@@ -323,7 +336,7 @@ def parse_gabc_file(gabc_src: str) -> list:
                 cw["is_melisma"] = nc > max(1, nl)
                 if nc > 0:
                     words.append(cw)
-            current_word = {{"word": "", "clean_latin": "", "notes": []}}
+            current_word = {"word": "", "clean_latin": "", "notes": []}
 
     if current_word["word"] or current_word["notes"]:
         cw = dict(current_word)
@@ -388,29 +401,43 @@ def detect_pitch_plateaus(local_pitch, notes_count, smoothing_kernel=5, min_semi
 
 
 def blend_detection_with_priors(w_start, w_end, notes_count, detected_boundaries, confidence,
-                                gabc_priors, has_repeated_notes):
+                                gabc_priors, has_repeated_notes, total_frames=None):
     """
     Combine frontieres CREPE et prior GABC, ponderees par la confiance.
-    Portage de batch_align_gabc_v3.py.
+    Garantit une monotonicite stricte bornee par [w_start, w_end].
     """
-    duration = w_end - w_start
+    duration = max(0.05, w_end - w_start)
     prior_times = w_start + np.cumsum(np.insert(gabc_priors, 0, 0.0))[:-1] * duration
 
     effective_confidence = min(confidence, 0.4) if has_repeated_notes else confidence
 
-    if detected_boundaries is None or len(detected_boundaries) == 0:
+    if not detected_boundaries or total_frames is None or total_frames <= 0:
         return [round(float(t), 3) for t in prior_times]
 
-    step_sec = duration / max(len(detected_boundaries) + 1, 1)
-    detected_times = [w_start] + [w_start + b * step_sec for b in detected_boundaries]
+    # Conversion des indices de trames en fractions de duree du mot
+    detected_rel = [b / max(1, total_frames) for b in detected_boundaries]
+    detected_times = [w_start] + [w_start + r * duration for r in detected_rel]
     detected_times = detected_times[:notes_count]
+
     while len(detected_times) < notes_count:
-        detected_times.append(detected_times[-1] + step_sec)
+        missing_idx = len(detected_times)
+        detected_times.append(prior_times[missing_idx])
 
     blended = [
-        effective_confidence * d + (1 - effective_confidence) * p
+        effective_confidence * d + (1.0 - effective_confidence) * p
         for d, p in zip(detected_times, prior_times)
     ]
+
+    # Monotonicite stricte
+    for k in range(len(blended) - 1):
+        if blended[k + 1] <= blended[k]:
+            blended[k + 1] = blended[k] + 0.02
+
+    # Bornage strict dans l'intervalle [w_start, w_end]
+    for k in range(len(blended)):
+        blended[k] = min(blended[k], w_end - 0.02 * (len(blended) - k))
+        blended[k] = max(blended[k], w_start + 0.02 * k)
+
     return [round(float(t), 3) for t in blended]
 
 
@@ -562,14 +589,19 @@ def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
         pass
 
     log_probs = emission.log_softmax(dim=-1)
-    targets = torch.tensor([flat_tokens], dtype=torch.int32)
-    input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32)
-    target_lengths = torch.tensor([targets.shape[1]], dtype=torch.int32)
-    paths, scores = F.forced_align(log_probs.cpu(), targets.cpu(), input_lengths, target_lengths, blank=0)
+    targets = torch.tensor([flat_tokens], dtype=torch.int32).to(device_type)
+    input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32).to(device_type)
+    target_lengths = torch.tensor([targets.shape[1]], dtype=torch.int32).to(device_type)
+    paths, scores = F.forced_align(log_probs, targets, input_lengths, target_lengths, blank=0)
     frame_dur = total_sec / log_probs.shape[1]
 
     # 6. Extraire start/end par mot depuis les spans CTC
-    spans = F.merge_tokens(paths[0], scores[0])
+    spans = F.merge_tokens(paths[0].cpu(), scores[0].cpu())
+    del emission, log_probs, targets, paths, scores
+    try:
+        torch.cuda.empty_cache()
+    except Exception:
+        pass
     word_records = []
     for w_idx, s_idx, e_idx, is_mel in word_spans:
         w = words[w_idx]
@@ -657,7 +689,7 @@ def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
             fmax=fmax,
             model="full",
             device=device_type,
-            batch_size=2048,
+            batch_size=512,
             return_periodicity=True,
         )
         pitch_np = pitch.squeeze().cpu().numpy()
@@ -702,7 +734,8 @@ def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
             note_starts = blend_detection_with_priors(
                 w_start, w_end, notes_count,
                 boundaries, confidence,
-                gabc_priors, has_repeated
+                gabc_priors, has_repeated,
+                total_frames=len(local_pitch)
             )
         else:
             # Fallback : priors GABC seuls (pas de TorchCREPE)
@@ -731,9 +764,9 @@ def compute_alignment_mms(wav_path: str, gabc_src: str, device_type: str):
     for idx in range(len(timestamps) - 1):
         if timestamps[idx]["word"] != timestamps[idx + 1]["word"]:
             nxt_start = timestamps[idx + 1]["start"]
-            if nxt_start > timestamps[idx]["end"]:
+            if nxt_start > timestamps[idx]["start"] and nxt_start > timestamps[idx]["end"]:
                 timestamps[idx]["end"] = nxt_start
-                timestamps[idx]["duration"] = round(nxt_start - timestamps[idx]["start"], 3)
+                timestamps[idx]["duration"] = max(0.02, round(nxt_start - timestamps[idx]["start"], 3))
 
     return timestamps, total_sec
 

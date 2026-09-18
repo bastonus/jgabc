@@ -2754,7 +2754,21 @@ const server = http.createServer(async (req, res) => {
 
       let resetCount = 0;
       for (const task of tasks) {
-        if (purgedIds.includes(String(task.id))) {
+        const pid = String(task.id);
+        if (seedIds.has(pid)) continue;
+
+        let shouldReset = purgedIds.includes(pid);
+        if (!shouldReset && task.status === 'completed') {
+          const cAt = task.completed_at ? new Date(task.completed_at).getTime() : 0;
+          if (cAt >= cutoffMs || body.all_non_seed === true) {
+            shouldReset = true;
+          }
+        }
+        if (!shouldReset && body.all_non_seed === true) {
+          shouldReset = true;
+        }
+
+        if (shouldReset) {
           task.status = 'pending';
           task.worker_id = null;
           task.claimed_at = null;
@@ -2764,6 +2778,17 @@ const server = http.createServer(async (req, res) => {
         }
       }
       if (resetCount > 0) saveTasks();
+
+      // Réinitialiser les statistiques des workers si demandé
+      if (body.reset_workers === true || body.all_non_seed === true) {
+        const workers = loadWorkers();
+        for (const wKey of Object.keys(workers)) {
+          if (wKey !== 'Atelier-Chantres') {
+            delete workers[wKey];
+          }
+        }
+        saveWorkers();
+      }
 
       console.log(`[ADMIN] Purge ${hours}h : ${purgedIds.length} alignements supprimes, ${resetCount} taches remises a pending.`);
       return sendJson(res, 200, {
