@@ -772,1177 +772,534 @@ function renderWorkerPortalHtml(stats, benchmarks) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <title>Oremus — Calcul Distribué & Scriptorium Liturgique</title>
+  <title>Oremus — Calcul Distribué Liturgique</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="/exsurge.min.js"></script>
   <style>
-    /* Oremus Frameless Zero-Stroke Design System Tokens */
     :root {
       --primary-color: #c96b63;
-      --primary-color-rgb: 201, 107, 99;
-      --gold-sacred: #c4984f;
-      --gold-sacred-bg: rgba(196, 152, 79, 0.12);
-
-      --background-base: #000000;
-      --background-surface: #0a0a0a;
-      --background-card: #141414;
-      --background-highlight: #1e1e22;
-
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-tertiary: #64748b;
-
-      --status-success: #10b981;
-      --status-success-bg: rgba(16, 185, 129, 0.14);
-      --status-warning: #f59e0b;
-      --status-warning-bg: rgba(245, 158, 11, 0.14);
-      --status-danger: #c96b63;
-      --status-danger-bg: rgba(201, 107, 99, 0.14);
-
-      --card-radius: 14px;
-      --btn-radius: 12px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--background-base);
+      background: #000000 !important;
       color: var(--text-primary);
       line-height: 1.5;
-      padding: 16px 14px 60px;
+      padding: 32px 18px 80px;
     }
-    .container { max-width: 860px; margin: 0 auto; }
 
-    /* Top Bar Header (Monastic Rank Widget Frameless) */
-    .header-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--background-surface); border: none !important;
-      border-radius: var(--card-radius); padding: 12px 18px; margin-bottom: 24px;
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
     }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-    .monk-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--gold-sacred); color: #121214;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.05rem; font-weight: 800; font-family: 'Libre Baskerville', serif; flex-shrink: 0;
-    }
-    .monk-info-title {
-      font-family: 'Libre Baskerville', 'Crimson Text', serif;
-      font-weight: 700; font-size: 1.05rem; color: var(--text-primary);
-    }
-    .monk-info-sub {
-      font-size: 0.78rem; color: var(--gold-sacred); display: flex; align-items: center; gap: 8px; margin-top: 1px;
-    }
-    .streak-pill {
-      background: rgba(245, 158, 11, 0.14); color: #f59e0b;
-      padding: 1px 7px; border-radius: 999px; font-weight: 700; font-size: 0.72rem;
-    }
-    .header-right { display: flex; align-items: center; gap: 10px; }
-    .xp-counter-badge {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 10px; padding: 6px 12px; text-align: right;
-    }
-    .xp-num { font-weight: 800; color: var(--gold-sacred); font-size: 0.95rem; }
-    .xp-label { font-size: 0.68rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* Page Titles */
-    .page-hero { text-align: center; margin-bottom: 26px; }
-    .badge-hero {
-      display: inline-block; padding: 3px 12px; border-radius: 999px;
-      background: var(--gold-sacred-bg); color: var(--gold-sacred);
-      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; margin-bottom: 8px;
+    /* Aucun fond, aucun contour nulle part */
+    .card, .demo-card, .demo-player-grid > div, .demo-toolbar, .demo-score-viewport,
+    .demo-detail-chip, .estimation-card, .cli-box, .piece-card, .stat-chip,
+    .modal-content, .modal-score-box, .score-viewport, table, th, td, header, nav, section,
+    .utility-actions-row, .decision-buttons-grid, .video-frame-container {
+      background: transparent !important;
+      border: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-top: none !important;
+      border-bottom: none !important;
+      box-shadow: none !important;
+      filter: none !important;
     }
+
     h1 {
       font-family: 'Libre Baskerville', 'Crimson Text', serif;
-      font-size: 1.95rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px;
-      color: var(--text-primary);
-    }
-    p.lead { font-size: 0.96rem; color: var(--text-secondary); max-width: 640px; margin: 0 auto; line-height: 1.5; }
-
-    /* Cards (Frameless) */
-    .card {
-      background: var(--background-surface); border: none !important;
-      border-radius: var(--card-radius); padding: 22px; margin-bottom: 20px;
-    }
-    .card-title {
-      font-family: 'Libre Baskerville', 'Crimson Text', serif;
-      font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
-      color: var(--text-primary);
-    }
-
-    /* Démonstration Interactive avec Chant Réel */
-    .demo-card {
-      background: var(--background-surface);
-      border-radius: var(--card-radius);
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-    .demo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.14);
-      color: #10b981;
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-size: 0.70rem;
+      font-size: 1.65rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: #ffffff;
+      letter-spacing: -0.01em;
       margin-bottom: 6px;
     }
-    .demo-player-grid {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
-      align-items: stretch;
-    }
-    @media (max-width: 720px) {
-      .demo-player-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .demo-player-grid > div:first-child {
-        min-height: 180px !important;
-      }
-    }
-    .demo-card {
-      background: var(--background-surface);
-      border-radius: var(--card-radius);
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-    .demo-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--background-card);
-      border-radius: 12px;
-      padding: 10px 14px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .demo-btn {
-      background: var(--gold-sacred-bg);
-      color: var(--gold-sacred);
-      border: none;
-      padding: 8px 15px;
-      border-radius: 8px;
-      font-size: 0.85rem;
+
+    h2 {
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.15rem;
       font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      transition: all 0.15s;
-    }
-    .demo-btn:hover {
-      background: rgba(196, 152, 79, 0.22);
-      transform: translateY(-1px);
-    }
-    .demo-btn.btn-play-active {
-      background: var(--primary-color);
       color: #ffffff;
     }
-    .demo-btn-sound {
-      background: rgba(255, 255, 255, 0.05);
+
+    a {
+      color: var(--primary-color);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Boutons et pilules transparents */
+    .btn-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+
+    .btn-pill {
+      background: transparent !important;
       color: var(--text-secondary);
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 4px 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 0.82rem;
+      transition: color 0.15s;
+    }
+    .btn-pill:hover {
+      color: var(--text-primary);
+    }
+    .btn-pill.active {
+      color: var(--primary-color) !important;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* Contrôles de lecture démo */
+    .demo-btn {
+      background: transparent !important;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.15s;
+      padding: 4px 0;
     }
-    .demo-btn-sound.sound-on {
-      color: #10b981;
-      background: rgba(16, 185, 129, 0.14);
+    .demo-btn-sec {
+      background: transparent !important;
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      cursor: pointer;
+      padding: 4px 6px;
+    }
+    .demo-btn-sec:hover {
+      color: var(--text-primary);
     }
     .demo-slider {
-      flex: 1;
-      min-width: 130px;
-      accent-color: var(--gold-sacred);
+      width: 100%;
+      accent-color: var(--primary-color);
       cursor: pointer;
-      height: 6px;
+      height: 4px;
     }
     .demo-time {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.85rem;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 0.84rem;
       color: var(--text-secondary);
-      font-weight: 600;
-      min-width: 95px;
-      text-align: right;
+      white-space: nowrap;
     }
-    .demo-score-viewport {
-      background: #000000;
-      border-radius: 12px;
-      padding: 16px 14px;
-      overflow-x: auto;
-      margin-bottom: 12px;
-      min-height: 120px;
+
+    /* Champ de saisie épuré sans fond ni contour */
+    .minimal-input {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff;
+      padding: 6px 2px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      border-radius: 0 !important;
+      transition: border-color 0.15s;
     }
-    .demo-detail-chip {
-      background: rgba(196, 152, 79, 0.08);
-      border-left: 3px solid var(--gold-sacred);
-      border-radius: 8px;
-      padding: 9px 14px;
+    .minimal-input:focus {
+      border-bottom: 1px solid var(--primary-color) !important;
+    }
+
+    /* CLI Tabs & Box */
+    .cli-tabs {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+    .cli-tab-btn {
+      background: transparent !important;
+      color: var(--text-tertiary);
       font-size: 0.82rem;
-      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      padding: 3px 0;
+    }
+    .cli-tab-btn.active {
+      color: var(--primary-color) !important;
+      font-weight: 700;
+      border-bottom: 1px solid var(--primary-color) !important;
+    }
+    .cli-box {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
+      padding: 8px 0;
     }
-    .demo-detail-chip strong {
+    .cli-box code {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 0.86rem;
       color: var(--text-primary);
+      word-break: break-all;
+    }
+    .btn-copy-cli {
+      background: transparent !important;
+      color: var(--primary-color);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
-    /* 3 Piliers du Projet */
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px;
-      margin-top: 14px;
+    /* Barre de progression épurée */
+    .progress-bar-bg {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
     }
-    .pillar-card {
-      background: var(--background-card);
-      border-radius: 12px;
-      padding: 16px;
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary-color);
+      width: ${stats.percentage}%;
+      transition: width 0.4s;
+    }
+
+    /* Grille des pièces sans contour ni fond */
+    .pieces-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .piece-card {
+      padding: 8px 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
-    .pillar-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--gold-sacred);
-      font-size: 0.74rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .pillar-title {
-      font-family: 'Libre Baskerville', 'Crimson Text', serif;
-      font-size: 1.02rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.35;
-    }
-    .pillar-text {
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    /* Pipeline 4 Étapes */
-    .pipeline-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .pipeline-step-card {
-      background: rgba(255, 255, 255, 0.025);
-      border-radius: 10px;
-      padding: 14px;
-      border-top: 2px solid rgba(196, 152, 79, 0.35);
-    }
-    .pipeline-step-num {
-      font-size: 0.70rem;
-      font-weight: 800;
-      color: var(--gold-sacred);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 4px;
-    }
-    .pipeline-step-title {
-      font-size: 0.90rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    .pipeline-step-desc {
-      font-size: 0.80rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    /* Carte Intégration dans l'App Oremus */
-    .app-integration-card {
-      background: linear-gradient(135deg, rgba(196, 152, 79, 0.10) 0%, rgba(10, 10, 10, 0.96) 100%);
-      border: 1px solid rgba(196, 152, 79, 0.28) !important;
-      border-radius: var(--card-radius);
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .app-integration-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--gold-sacred-bg);
-      color: var(--gold-sacred);
-      padding: 3px 11px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-    .btn-oremus-app {
-      background: linear-gradient(135deg, #c4984f 0%, #c96b63 100%);
-      color: #ffffff !important;
-      font-weight: 700;
-      padding: 14px 24px;
-      border-radius: 11px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.15s;
-      width: 100%;
-      margin-top: 16px;
-      box-shadow: 0 4px 18px rgba(196, 152, 79, 0.25);
-    }
-    .btn-oremus-app:hover {
-      opacity: 0.93;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(196, 152, 79, 0.38);
-    }
-
-    /* Progress Bar */
-    .progress-bar-bg { height: 10px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-top: 10px; }
-    .progress-bar-fill { height: 100%; background: #10b981; width: ${stats.percentage}%; transition: width 0.5s; }
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 16px; }
-    .stat-chip { background: rgba(255,255,255,0.025); border-radius: 10px; padding: 12px; text-align: center; }
-    .stat-chip-val { font-size: 1.45rem; font-weight: 800; }
-    .stat-chip-lbl { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
-
-    /* Session Planner Controls */
-    .planner-section { margin-top: 6px; }
-    .choice-group-label { font-size: 0.80rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); font-weight: 700; margin-bottom: 8px; }
-    .btn-pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .btn-pill {
-      background: rgba(255, 255, 255, 0.05); border: none;
-      color: var(--text-secondary); padding: 8px 15px; border-radius: 9px;
-      font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
-    }
-    .btn-pill:hover { background: rgba(255, 255, 255, 0.10); color: var(--text-primary); }
-    .btn-pill.active { background: var(--primary-color); color: #fff; font-weight: 600; }
-
-    .slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .slider-input { flex: 1; accent-color: var(--primary-color); cursor: pointer; height: 6px; }
-    .slider-val-badge {
-      background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px;
-      font-weight: 700; color: var(--primary-color); min-width: 70px; text-align: center; font-size: 0.85rem;
-    }
-
-    /* Estimation Highlight Box */
-    .estimation-card {
-      background: rgba(16, 185, 129, 0.08); border-radius: 12px; padding: 16px;
-      margin: 16px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
-    }
-    .est-number { font-size: 1.7rem; font-weight: 800; color: #10b981; }
-    .est-label { font-size: 0.82rem; color: var(--text-secondary); }
-    .est-xp-badge { background: var(--gold-sacred-bg); color: var(--gold-sacred); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; }
-
-    /* CTA Button */
-    .btn-cta {
-      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-      background: rgba(255, 255, 255, 0.08); color: var(--text-primary);
-      text-decoration: none; padding: 12px 24px; font-size: 0.95rem; font-weight: 600;
-      border-radius: 10px; border: none; cursor: pointer; transition: background 0.15s; width: 100%;
-    }
-    .btn-cta:hover { background: rgba(255, 255, 255, 0.14); }
-
-    /* CLI Command Section Styles */
-    .cli-section { margin-top: 20px; }
-    .cli-tabs { display: flex; gap: 8px; margin-bottom: 10px; padding-bottom: 6px; }
-    .cli-tab-btn {
-      background: none; border: none; color: var(--text-tertiary); padding: 6px 12px;
-      font-size: 0.84rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.15s;
-    }
-    .cli-tab-btn:hover { color: var(--text-primary); }
-    .cli-tab-btn.active {
-      background: rgba(201, 107, 99, 0.14); color: var(--primary-color);
-    }
-    .cli-box {
-      background: #000000; border-radius: 10px; padding: 12px 14px; display: flex;
-      justify-content: space-between; align-items: center; gap: 14px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px; overflow-x: auto;
-    }
-    .cli-box code { white-space: nowrap; user-select: all; font-family: inherit; }
-    .btn-copy-cli {
-      background: rgba(201, 107, 99, 0.15); border: none; color: var(--primary-color);
-      padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
-      cursor: pointer; white-space: nowrap; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-copy-cli:hover { background: rgba(201, 107, 99, 0.28); }
-    .btn-copy-cli.copied { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-
-    /* Batch & Review Section */
-    .batch-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-    .user-filter-box { display: flex; gap: 8px; align-items: center; }
-    .user-input {
-      background: rgba(255,255,255,0.05); border: none;
-      color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; outline: none;
-    }
-    .user-input:focus { background: rgba(255,255,255,0.08); }
-    
-    .pieces-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-    .piece-card {
-      background: var(--background-card); border-radius: 12px;
-      padding: 14px; display: flex; flex-direction: column;
-      justify-content: space-between; gap: 10px; transition: background 0.15s;
-      position: relative;
-    }
-    .piece-card:hover { background: var(--background-highlight); }
-    .piece-card.is-user-card {
-      border-left: 3px solid var(--gold-sacred);
-      background: rgba(196, 152, 79, 0.05);
-    }
-    .piece-card.is-user-card:hover {
-      background: rgba(196, 152, 79, 0.09);
-    }
-    .badge-user-piece {
-      background: var(--gold-sacred-bg); color: var(--gold-sacred);
-      padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 700;
-      letter-spacing: 0.03em;
-    }
-    .badge-other-piece {
-      background: rgba(255,255,255,0.05); color: var(--text-tertiary);
-      padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 500;
+      gap: 4px;
     }
     .piece-title {
-      font-family: 'Libre Baskerville', 'Crimson Text', serif;
-      font-weight: 700; font-size: 0.98rem; color: #fff; line-height: 1.3;
+      font-family: 'Libre Baskerville', serif;
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: var(--text-primary);
+      line-height: 1.3;
     }
-    .piece-meta { font-size: 0.78rem; color: var(--text-tertiary); display: flex; gap: 10px; }
+    .piece-meta {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+    }
     .btn-review-card {
-      background: var(--gold-sacred-bg); border: none;
-      color: var(--gold-sacred); padding: 7px 12px; border-radius: 8px;
-      font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: center;
-      transition: background 0.15s;
+      background: transparent !important;
+      color: var(--primary-color);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 2px 0;
+      margin-top: 2px;
     }
-    .btn-review-card:hover { background: rgba(196, 152, 79, 0.24); }
 
-    /* Modal Review Player — style alignment-lab (frameless) */
-    .modal-backdrop {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
-      display: none; align-items: center; justify-content: center; z-index: 9999;
-      padding: 16px;
+    /* Table des contributeurs */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
     }
-    .modal-content {
-      background: #0a0a0a; border: none;
-      border-radius: 20px; width: 100%; max-width: 820px; max-height: 94vh;
-      overflow-y: auto; padding: 24px;
-      box-shadow: 0 32px 64px rgba(0,0,0,0.9);
-      position: relative;
+    th {
+      color: var(--text-tertiary);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 0;
     }
-    .modal-close-btn {
-      position: absolute; top: 16px; right: 16px;
-      width: 32px; height: 32px; border-radius: 9px;
-      background: rgba(255,255,255,0.07); border: none;
-      color: #94a3b8; font-size: 1.0rem; cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center;
-      transition: background 0.15s, color 0.15s;
+    td {
+      padding: 8px 0;
+      font-size: 0.88rem;
     }
-    .modal-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-    .modal-chant-badge {
-      display: inline-flex; align-items: center;
-      font-size: 0.68rem; font-weight: 700; color: #c96b63;
-      background: rgba(201,107,99,0.12); padding: 2px 8px;
-      border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.04em;
-      margin-bottom: 6px;
-    }
-    .modal-chant-title {
-      font-size: 1.3rem; font-weight: 700;
-      color: #f8fafc; margin-bottom: 2px; line-height: 1.25;
-    }
-    .modal-chant-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 14px; }
-    
-    .modal-media-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-    .video-frame-container { width: 100%; aspect-ratio: 16/9; max-height: 260px; background: #000; border-radius: 12px; overflow: hidden; }
-    .video-frame-container iframe { width: 100%; height: 100%; border: none; }
 
-    /* Gregorian Score Box (Exsurge) */
-    .modal-score-box {
-      background: #000000; border-radius: 12px; padding: 14px;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .modal-score-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .modal-score-title {
-      font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; color: var(--gold-sacred);
-    }
-    .modal-score-meta {
-      font-size: 0.74rem; color: var(--text-tertiary);
-    }
-    .score-viewport {
-      max-height: 280px; overflow-y: auto; overscroll-behavior: contain;
-      padding: 12px 6px; font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
-    }
-    .score-viewport svg {
+    /* Rendu partition Exsurge */
+    .score-viewport svg, #demoScoreSlot svg {
       display: block;
       width: 100%;
       height: auto;
       color: #ffffff !important;
       fill: #ffffff !important;
     }
-    .score-viewport svg line {
-      stroke: rgba(255, 255, 255, 0.55) !important;
+    .score-viewport svg line, #demoScoreSlot svg line {
+      stroke: rgba(255, 255, 255, 0.45) !important;
       fill: none !important;
       pointer-events: none !important;
-    }
-    .score-viewport svg path.brace {
-      stroke: #ffffff !important;
-      fill: none !important;
-    }
-    .score-viewport svg .neumeLine,
-    .score-viewport svg .neumeBeam,
-    .score-viewport svg .dividerLine,
-    .score-viewport svg .horizontalEpisema {
-      fill: #ffffff !important;
-    }
-    .score-viewport svg path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-    .score-viewport svg use:not(.active):not([class*="active"]):not(.selected),
-    .score-viewport svg .glyph {
-      fill: #ffffff !important;
-    }
-    .score-viewport svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-    .score-viewport svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
-      fill: #ffffff !important;
-      font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
     }
     .score-viewport svg text.rubric,
     .score-viewport svg text.specialChar,
     .score-viewport svg tspan.rubric,
     .score-viewport svg tspan.specialChar,
-    .score-viewport svg .rubric,
-    .score-viewport svg [class*="rubric"],
-    .score-viewport svg [class*="specialChar"] {
+    #demoScoreSlot svg text.rubric,
+    #demoScoreSlot svg text.specialChar,
+    #demoScoreSlot svg tspan.rubric,
+    #demoScoreSlot svg tspan.specialChar {
       fill: var(--primary-color) !important;
     }
-    /* Note & syllabe active en cours de chant (reprise fidele du laboratoire) */
     .score-viewport svg use.active,
-    .score-viewport svg use[class*="active"],
-    .score-viewport svg use.active-note-highlight,
     .score-viewport svg text.active,
-    .score-viewport svg text.active *,
     .score-viewport svg text.active tspan,
-    .score-viewport svg tspan.active,
-    .score-viewport svg text.dropCap.active,
-    .score-viewport svg text.lyric.active,
-    .score-viewport svg text.lyric.active tspan,
-    .score-viewport svg text.aboveLinesText.active,
-    .score-viewport svg text.aboveLinesText.active tspan,
-    .score-viewport svg .note.active {
+    .score-viewport svg tspan.active {
       fill: var(--primary-color) !important;
       color: var(--primary-color) !important;
       stroke: none !important;
-      transition: fill 0.08s ease;
-    }
-    .score-viewport svg use[data-note-index],
-    .score-viewport svg text[data-note-index],
-    .score-viewport svg tspan[data-note-index] {
-      cursor: pointer;
-    }
-    .score-viewport svg use[data-note-index]:hover {
-      opacity: 0.82;
     }
 
-    /* Barre de contrôle du lecteur dans la modal */
-    .modal-player-bar {
-      display: flex;
+    /* Modal de relecture */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 10px;
-      font-size: 0.8rem;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
     }
-    .btn-player-mini {
-      height: 32px;
-      padding: 0 10px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      color: var(--text-primary);
-      font-size: 0.78rem;
+    .modal-content {
+      background: #000000 !important;
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: transparent !important;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .decision-buttons-grid {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .btn-decision {
+      background: transparent !important;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
       font-weight: 600;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      transition: background 0.15s ease;
+      gap: 6px;
+      padding: 6px 0;
     }
-    .btn-player-mini:hover { background: rgba(255, 255, 255, 0.14); }
-    .btn-player-mini:active { opacity: 0.8; }
-    .btn-player-play {
-      background: rgba(201, 107, 99, 0.22);
-      color: #fff;
+    .btn-decision:hover {
+      color: var(--text-primary);
     }
-    .btn-player-play:hover {
-      background: rgba(201, 107, 99, 0.35);
+    .btn-decision.btn-approved {
+      color: var(--primary-color) !important;
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
-    .modal-player-time {
-      font-family: monospace;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      margin-left: 4px;
-    }
-    .modal-player-hint {
-      margin-left: auto;
-      font-size: 0.72rem;
-      color: var(--gold-sacred);
-      opacity: 0.9;
-    }
-    @media (max-width: 600px) {
-      .modal-player-hint { display: none; }
-    }
-
-    /* Boutons de décision — identiques au laboratoire d'alignement */
-    .decision-buttons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .btn-decision {
-      height: 54px; border-radius: 12px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 3px;
-      cursor: pointer; user-select: none;
-      border: none !important; outline: none !important;
-      box-shadow: none !important; transform: none !important;
-      padding: 6px 4px;
-      transition: background-color 0.15s ease, opacity 0.15s ease;
-    }
-    .btn-decision:active { opacity: 0.8; }
-    .btn-decision .decision-label {
-      font-size: 0.84rem; font-weight: 600; line-height: 1.1;
-      text-align: center; display: flex; align-items: center; gap: 5px;
-    }
-    .btn-decision .decision-xp { font-size: 0.65rem; opacity: 0.65; font-weight: 500; }
-    .btn-decision.btn-approved { background: rgba(16,185,129,0.14) !important; color: #10b981 !important; }
-    .btn-decision.btn-approved:hover { background: rgba(16,185,129,0.24) !important; }
-    .btn-decision.btn-delayed { background: rgba(245,158,11,0.14) !important; color: #f59e0b !important; }
-    .btn-decision.btn-delayed:hover { background: rgba(245,158,11,0.24) !important; }
-    .btn-decision.btn-bad { background: rgba(201,107,99,0.14) !important; color: #c96b63 !important; }
-    .btn-decision.btn-bad:hover { background: rgba(201,107,99,0.24) !important; }
-
-    /* Ligne d'actions secondaires (Passer, Remarque) */
-    .utility-actions-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
     .btn-utility {
-      flex: 1; height: 34px; border-radius: 9px;
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: none !important; outline: none !important;
-      color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
+      background: transparent !important;
+      color: var(--text-tertiary);
+      font-size: 0.82rem;
+      cursor: pointer;
+      padding: 6px 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
-    .btn-utility:hover { background: rgba(255, 255, 255, 0.10) !important; color: #fff; }
-    .btn-utility.btn-skip-prominent { flex: 2; font-weight: 600; color: #f8fafc; }
-    .btn-utility.btn-comment-trigger {
-      flex: 1; font-weight: 600; color: #f8fafc;
-      background: rgba(201, 107, 99, 0.14) !important;
+    .btn-utility:hover {
+      color: var(--text-primary);
     }
-    .btn-utility.btn-comment-trigger:hover { background: rgba(201, 107, 99, 0.24) !important; }
-
-    /* Zone de commentaire dépliable */
-    .decision-comment-view { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 8px; animation: commentExpandIn 0.2s ease-out; }
-    @keyframes commentExpandIn { from { opacity: 0; transform: scaleY(0.96); } to { opacity: 1; transform: scaleY(1); } }
     .inline-comment-textarea {
-      width: 100%; min-height: 56px; max-height: 120px; padding: 10px 12px;
-      border-radius: 12px; background: #1e1e22 !important; border: none !important; outline: none !important;
-      color: #f8fafc; font-family: inherit; font-size: 0.86rem; line-height: 1.4; resize: none; box-sizing: border-box;
+      width: 100%;
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff;
+      padding: 8px 0;
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: vertical;
+      border-radius: 0 !important;
     }
-    .comment-actions-row { display: flex; gap: 10px; width: 100%; margin-top: 6px; }
-    .btn-comment-cancel {
-      flex: 1; height: 38px; border-radius: 10px;
-      background: rgba(255, 255, 255, 0.08) !important; color: #f8fafc !important;
-      border: none !important; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    .inline-comment-textarea:focus {
+      border-bottom-color: var(--primary-color) !important;
     }
-    .btn-comment-submit {
-      flex: 1.3; height: 38px; border-radius: 10px;
-      background: #c96b63 !important; color: #ffffff !important;
-      border: none !important; font-size: 0.82rem; font-weight: 600; cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .btn-comment-submit:hover { filter: brightness(1.1); }
-
-    /* Floating XP Toast */
-    .xp-float-toast {
-      position: fixed; top: 24px; right: 24px;
-      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-      color: #fff; padding: 10px 18px; border-radius: 999px;
-      font-weight: 800; font-size: 1.05rem; z-index: 10000;
-      box-shadow: 0 10px 25px rgba(217, 119, 6, 0.5);
-      animation: floatUp 1.5s ease-out forwards;
-    }
-    @keyframes floatUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      20% { opacity: 1; transform: translateY(0); }
-      80% { opacity: 1; transform: translateY(-5px); }
-      100% { opacity: 0; transform: translateY(-25px); }
-    }
-    
-    /* Table */
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- Header / Scriptorium Monastic Rank Widget -->
-    <header class="header-bar">
-      <div class="header-left">
-        <div class="monk-avatar" id="headerAvatar">I</div>
-        <div>
-          <div class="monk-info-title" id="headerTitle">Novice du Chœur</div>
-          <div class="monk-info-sub">
-            <span id="headerLevel">Degré 1 • Novicius</span>
-            <span class="streak-pill" id="headerStreak">Série : 0</span>
-          </div>
-        </div>
-      </div>
-      <div class="header-right">
-        <div class="xp-counter-badge">
-          <div class="xp-num" id="headerXp">0 XP</div>
-          <div class="xp-label">Consacrés</div>
-        </div>
-        <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" class="btn-pill" style="text-decoration:none; padding:6px 12px; font-size:0.8rem; background:var(--gold-sacred-bg); color:var(--gold-sacred); font-weight:600;" title="Ouvrir l'application liturgique Oremus">✦ Ouvrir l'App Oremus</a>
-        <a href="/" class="btn-pill" style="text-decoration:none; padding:6px 12px; font-size:0.8rem;">✦ Laboratoire</a>
-      </div>
+    <!-- En-tête épuré sans fioriture -->
+    <header style="margin-bottom: 32px;">
+      <h1>Calcul Distribué Oremus</h1>
+      <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:4px;">
+        Synchronisation note-par-note du chant grégorien pour <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener">oremus.silverhorse.fr</a>.
+      </p>
     </header>
 
-    <!-- Page Hero -->
-    <div class="page-hero">
-      <div class="badge-hero">✦ Scriptorium Numérique Liturgique ✦</div>
-      <h1>Alignez le Chant Grégorien pour l'Application Oremus</h1>
-      <p class="lead">Prêtez la puissance de calcul de votre ordinateur pour caler les neumes note-par-note sur les voix monastiques. Chaque chant synchronisé donne vie à la prière quotidienne de milliers de fidèles sur <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" style="color:var(--gold-sacred); font-weight:600; text-decoration:underline;">oremus.silverhorse.fr</a>.</p>
-    </div>
-
-    <!-- Section 1 : Démonstration Interactive avec Chant Réel Certifié -->
-    <div class="card demo-card" id="demoSection">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-        <div>
-          <div class="demo-badge">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-            Chant Réel Certifié (Atelier des Chantres)
-          </div>
-          <div class="card-title" style="margin-bottom:2px;">
-            Démonstration en Direct : Partition Grégorienne Réelle Validée
-          </div>
-          <div style="font-size:0.84rem; color:var(--gold-sacred);" id="demoPieceSub">
-            Agnus Dei IV • Kyriale (Mode 6) • 87 notes certifiées • Enregistrement monastique
-          </div>
-        </div>
-
-        <!-- Sélecteur de pièces réelles validées -->
-        <div class="btn-pill-group" style="margin-bottom:0;" id="demoPiecePills">
+    <!-- 1. Démonstration Réelle -->
+    <section style="margin-bottom: 36px;" id="demoSection">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        <h2>Démonstration</h2>
+        <div class="btn-pill-group" id="demoPiecePills">
           <button type="button" class="btn-pill active" data-demo-id="264" onclick="switchDemoPiece('264')">Agnus Dei IV (#264)</button>
           <button type="button" class="btn-pill" data-demo-id="8" onclick="switchDemoPiece('8')">Omnes gentes (#8)</button>
           <button type="button" class="btn-pill" data-demo-id="14262" onclick="switchDemoPiece('14262')">Deus misereatur (#14262)</button>
         </div>
       </div>
 
-      <p style="font-size:0.90rem; color:var(--text-secondary); margin-bottom:14px; line-height:1.5;">
-        Voici un chant liturgique réel, calculé par le double modèle acoustique et <strong>entièrement certifié note-par-note</strong> par la communauté. Lancez la lecture pour entendre l'enregistrement monastique et observer l'illumination synchrone de chaque neume :
-      </p>
+      <div style="font-size:0.80rem; color:var(--text-secondary); margin-bottom:12px;" id="demoPieceSub">
+        Agnus Dei IV • Mode 6 • 87 notes
+      </div>
 
-      <!-- Lecteur Média Démo (Vidéo YouTube compacte + Barre de contrôle synchrone) -->
-      <div class="demo-player-grid">
-        <div style="background:#000; border-radius:12px; overflow:hidden; position:relative; min-height:140px; height:100%;">
+      <div style="display:grid; grid-template-columns: 240px 1fr; gap:16px; margin-bottom:14px; align-items:center;">
+        <div style="aspect-ratio:16/9; overflow:hidden; position:relative; background:#000;">
           <iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/SVZZLdPco4A?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>
         </div>
 
-        <div style="display:flex; flex-direction:column; justify-content:space-between; gap:10px; background:var(--background-card); border-radius:12px; padding:14px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <div style="display:flex; gap:6px;">
-              <button type="button" class="demo-btn" onclick="seekDemoRelative(-3)" title="Reculer de 3s" style="padding:6px 10px;">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
-                <span>-3s</span>
-              </button>
-              <button type="button" class="demo-btn" id="btnDemoPlay" onclick="toggleDemoPlay()" style="padding:6px 14px;">
-                <svg id="demoIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                <svg id="demoIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                <span id="demoPlayText">Lecture</span>
-              </button>
-              <button type="button" class="demo-btn" onclick="seekDemoRelative(3)" title="Avancer de 3s" style="padding:6px 10px;">
-                <span>+3s</span>
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
-              </button>
-            </div>
-            <span class="demo-time" id="demoTimeDisplay">0:00 / 1:01</span>
-          </div>
-
+        <div style="display:flex; flex-direction:column; gap:10px;">
           <div style="display:flex; align-items:center; gap:10px;">
-            <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
+            <button type="button" class="demo-btn" id="btnDemoPlay" onclick="toggleDemoPlay()">
+              <svg id="demoIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="demoIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span id="demoPlayText">Lecture</span>
+            </button>
+            <button type="button" class="demo-btn-sec" onclick="seekDemoRelative(-3)">-3s</button>
+            <button type="button" class="demo-btn-sec" onclick="seekDemoRelative(3)">+3s</button>
+            <span class="demo-time" id="demoTimeDisplay" style="margin-left:auto;">0:00 / 1:01</span>
           </div>
 
-          <!-- Détail du neume actif -->
-          <div class="demo-detail-chip" id="demoDetailChip" style="margin-top:0;">
-            <div id="demoDetailText">
-              ✦ Cliquez sur un neume pour vous synchroniser directement sur le chant des moines
-            </div>
-            <div style="font-size:0.75rem; color:#10b981; font-weight:700;">
-              ✓ Certifié note-par-note
-            </div>
-          </div>
-        </div>
-      </div>
+          <input type="range" class="demo-slider" id="demoTimeSlider" min="0" max="100" value="0" step="0.1" oninput="onDemoSliderInput(this.value)">
 
-      <!-- Affichage de la partition Grégorienne Exsurge -->
-      <div class="demo-score-viewport" id="demoScoreSlot">
-        <div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">
-          Chargement de la partition grégorienne certifiée...
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 2 : Présentation du Projet Oremus & Comment ça marche -->
-    <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary-color);"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        Le Projet Oremus : De la Notation Médiévale au Chant Vivant
-      </div>
-      <p style="font-size:0.90rem; color:var(--text-secondary); line-height:1.55;">
-        Oremus est une application liturgique catholique conçue pour sanctifier le temps par la prière quotidienne de l'Église (Bréviaire romain / Liturgie des Heures et Sainte Messe). Notre ambition : rendre la splendeur du chant grégorien accessible à chaque fidèle, du séminariste au paroissien chez lui.
-      </p>
-
-      <!-- 3 Piliers du projet -->
-      <div class="pillars-grid">
-        <div class="pillar-card">
-          <div class="pillar-badge">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            1. La Prière des Heures
-          </div>
-          <div class="pillar-title">Le Trésor de l'Église au Quotidien</div>
-          <div class="pillar-text">
-            Le chant grégorien est le chant propre de la liturgie romaine. Oremus met les hymnes, antiennes et répons de chaque fête liturgique à portée de main sur téléphone, tablette et ordinateur.
-          </div>
-        </div>
-
-        <div class="pillar-card">
-          <div class="pillar-badge">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-            2. Le Défi des Neumes
-          </div>
-          <div class="pillar-title">Déchiffrer Sans Hésitation</div>
-          <div class="pillar-text">
-            Noté sur 4 lignes avec des neumes traditionnels (punctum, virga, podatus, torculus, quilisma), le grégorien intimide souvent. En illuminant chaque note sur la voix des chantres, Oremus guide le regard et le souffle en temps réel.
-          </div>
-        </div>
-
-        <div class="pillar-card">
-          <div class="pillar-badge">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-            3. Le Calcul Distribué
-          </div>
-          <div class="pillar-title">Le Scriptorium Numérique</div>
-          <div class="pillar-text">
-            Le répertoire grégorien complet compte plus de 885 pièces (100 000+ notes). Aligner chaque note avec exactitude exige des centaines d'heures de calcul IA. En prêtant votre ordinateur quelques minutes, vous bâtissez le Graduel numérique partagé.
+          <div id="demoDetailText" style="font-size:0.78rem; color:var(--text-secondary);">
+            Note active synchronisée sur la partition
           </div>
         </div>
       </div>
 
-      <!-- Les 4 étapes techniques du Pipeline Acoustique -->
-      <div style="margin-top:20px;">
-        <div style="font-size:0.80rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-tertiary); margin-bottom:10px;">
-          Le Pipeline Acoustique Double Modèle (MMS_FA + TorchCREPE)
-        </div>
-        <div class="pipeline-grid">
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">Étape 1</div>
-            <div class="pipeline-step-title">Attribution</div>
-            <div class="pipeline-step-desc">Votre worker réserve une partition liturgique en attente sur l'API Oremus et télécharge l'audio monastique en mémoire tampon.</div>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">Étape 2</div>
-            <div class="pipeline-step-title">Passe 1 : MMS_FA</div>
-            <div class="pipeline-step-desc">Le modèle CTC Meta MMS_FA ancre solidement les frontières de chaque mot latin sur le signal audio sur GPU ou CPU.</div>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">Étape 3</div>
-            <div class="pipeline-step-title">Passe 2 : TorchCREPE</div>
-            <div class="pipeline-step-desc">Estimation continue de la fréquence vocale (F0) à 10 ms fusionnée avec les règles rythmiques de Solesmes (points de mora, épisèmes).</div>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">Étape 4</div>
-            <div class="pipeline-step-title">Validation In-App</div>
-            <div class="pipeline-step-desc">Les horodatages note-par-note sont transmis au serveur, prêts pour relecture immédiate et intégration dans l'app Oremus.</div>
-          </div>
-        </div>
+      <div id="demoScoreSlot" style="overflow-x:auto; padding: 6px 0; min-height: 100px;">
+        <div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement de la partition...</div>
       </div>
-    </div>
+    </section>
 
-    <!-- Section 3 : Progression Globale du Catalogue -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:'Libre Baskerville', serif; font-size:1.05rem;">Progression du Catalogue Grégorien (885 pièces)</span>
-        <span style="font-weight:800; color:var(--emerald); font-size:1.15rem;" id="progressPct">${stats.percentage}%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBar" style="width: ${stats.percentage}%;"></div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-chip">
-          <div class="stat-chip-val" style="color: #10b981;" id="statCompleted">${stats.completed}</div>
-          <div class="stat-chip-lbl">Chants alignés</div>
-        </div>
-        <div class="stat-chip">
-          <div class="stat-chip-val" style="color: var(--gold-sacred);" id="statPending">${stats.pending}</div>
-          <div class="stat-chip-lbl">En attente</div>
-        </div>
-        <div class="stat-chip">
-          <div class="stat-chip-val" style="color: var(--primary-color);" id="statWorkers">${stats.active_workers}</div>
-          <div class="stat-chip-lbl">Ordinateurs d'amis</div>
-        </div>
-      </div>
-    </div>
+    <!-- 2. Lancer un calcul -->
+    <section style="margin-bottom: 36px;">
+      <h2 style="margin-bottom:12px;">Lancer un calcul</h2>
 
-    <!-- Section 4 : Planificateur de Session & Lancement en 1 Clic -->
-    <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Participez au Calcul : Lancement en 1 Clic
-      </div>
-      <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">
-        Choisissez combien de temps vous souhaitez consacrer au calcul. L'estimation est calculée dynamiquement à partir des benchmarks réels de nos serveurs.
-      </p>
-
-      <div class="planner-section">
-        <!-- Étape 1 : Saisie obligatoire du prénom ou pseudo -->
-        <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span>1. Entrez votre prénom ou pseudo (obligatoire pour compter vos points) :</span>
-          <span style="font-size:0.75rem; color:var(--gold-sacred); font-weight:700;">✦ +25 XP par chant calculé</span>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <label for="plannerWorkerInput" style="font-size:0.82rem; color:var(--text-secondary); white-space:nowrap;">Pseudo :</label>
+          <input type="text" id="plannerWorkerInput" class="minimal-input" placeholder="theobald" autocomplete="name" style="flex:1; max-width:280px;">
         </div>
-        <div style="margin-bottom: 20px;">
-          <input type="text" id="plannerWorkerInput" class="filter-input" style="max-width:100%; width:100%; font-size:1.02rem; padding:12px 14px; border-radius:10px; background:rgba(255,255,255,0.06); border:1.5px solid rgba(196,152,79,0.4); color:#ffffff; font-weight:600;" placeholder="Ex : theobald, frère-bernard, abbaye-saint-benoît..." autocomplete="name">
-          <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:6px;" id="plannerWorkerHint">
-            ✦ Vos points d'XP et vos chants calculés seront automatiquement enregistrés et comptabilisés sous ce nom.
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span style="font-size:0.82rem; color:var(--text-secondary); white-space:nowrap;">Durée :</span>
+          <div class="btn-pill-group" id="durationGroup">
+            <button type="button" class="btn-pill" data-mins="15">15 min</button>
+            <button type="button" class="btn-pill active" data-mins="30">30 min</button>
+            <button type="button" class="btn-pill" data-mins="60">1 h</button>
+            <button type="button" class="btn-pill" data-mins="120">2 h</button>
+            <button type="button" class="btn-pill" data-mins="0">Libre</button>
           </div>
+          <input type="range" id="durationSlider" class="demo-slider" min="5" max="180" step="5" value="30" style="display:none;">
+          <span id="sliderValDisplay" style="display:none;">30 min</span>
         </div>
 
-        <div class="choice-group-label">2. Choisissez la durée de votre session :</div>
-        <div class="btn-pill-group" id="durationGroup">
-          <button type="button" class="btn-pill" data-mins="15">15 minutes</button>
-          <button type="button" class="btn-pill active" data-mins="30">30 minutes</button>
-          <button type="button" class="btn-pill" data-mins="60">1 heure</button>
-          <button type="button" class="btn-pill" data-mins="120">2 heures</button>
-          <button type="button" class="btn-pill" data-mins="0">Libre (infini)</button>
-        </div>
-
-        <div class="slider-row">
-          <input type="range" id="durationSlider" class="slider-input" min="5" max="180" step="5" value="30">
-          <div class="slider-val-badge" id="sliderValDisplay">30 min</div>
-        </div>
-
-        <div class="choice-group-label">3. Sélectionnez votre matériel (accélération) :</div>
-        <div class="btn-pill-group" id="hardwareGroup">
-          <button type="button" class="btn-pill active" data-hw="cuda">NVIDIA GPU (CUDA)</button>
-          <button type="button" class="btn-pill" data-hw="mps">Apple Silicon (M1-M4)</button>
-          <button type="button" class="btn-pill" data-hw="cpu">Processeur (CPU)</button>
-        </div>
-
-        <!-- Live Estimator Display -->
-        <div class="estimation-card">
-          <div>
-            <div class="est-number" id="estPiecesDisplay">~43 chants</div>
-            <div class="est-label">Estimation du nombre de partitions qui seront alignées</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span style="font-size:0.82rem; color:var(--text-secondary); white-space:nowrap;">Matériel :</span>
+          <div class="btn-pill-group" id="hardwareGroup">
+            <button type="button" class="btn-pill active" data-hw="cuda">NVIDIA CUDA</button>
+            <button type="button" class="btn-pill" data-hw="mps">Apple Silicon</button>
+            <button type="button" class="btn-pill" data-hw="cpu">CPU</button>
           </div>
-          <div style="text-align:right;">
-            <div class="est-xp-badge" id="estXpDisplay">+1075 XP Monastiques</div>
-            <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">+25 XP par chant calculé</div>
-          </div>
+          <span id="estPiecesDisplay" style="font-size:0.80rem; color:var(--primary-color); margin-left:auto;">~43 chants</span>
+          <span id="estXpDisplay" style="display:none;"></span>
         </div>
 
-        <!-- Mode de lancement : 1. Ligne de commande directe (CLI) -->
-        <div class="cli-section">
-          <div class="choice-group-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span>Option 1 : Lancement direct en Ligne de Commande (Terminal)</span>
-            <span style="font-size:0.75rem; color:#10b981; text-transform:none; font-weight:700;">Zéro téléchargement manuel</span>
-          </div>
-          <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
-            Copiez-collez une seule ligne dans votre terminal. L'environnement virtuel isolé et les modules IA sont configurés automatiquement.
-          </p>
-
+        <div style="margin-top:6px;">
           <div class="cli-tabs">
-            <button type="button" class="cli-tab-btn active" data-os="windows" onclick="switchCliTab('windows')">Windows (PowerShell)</button>
-            <button type="button" class="cli-tab-btn" data-os="unix" onclick="switchCliTab('unix')">macOS & Linux (Bash)</button>
-            <button type="button" class="cli-tab-btn" data-os="python" onclick="switchCliTab('python')">Python direct</button>
+            <button type="button" class="cli-tab-btn active" data-os="windows" onclick="switchCliTab('windows')">Windows</button>
+            <button type="button" class="cli-tab-btn" data-os="unix" onclick="switchCliTab('unix')">macOS / Linux</button>
+            <button type="button" class="cli-tab-btn" data-os="python" onclick="switchCliTab('python')">Python</button>
           </div>
 
           <div id="cliPanelWindows">
             <div class="cli-box">
               <code id="cliCmdWindows">irm https://api-oremus.silverhorse.fr/run.ps1 | iex</code>
-              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdWindows', this)">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copier
-              </button>
-            </div>
-            <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              <em>Note : Ouvrez PowerShell, collez la commande et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdWindows', this)">Copier</button>
             </div>
           </div>
-
           <div id="cliPanelUnix" style="display:none;">
             <div class="cli-box">
               <code id="cliCmdUnix">curl -fsSL https://api-oremus.silverhorse.fr/run.sh | bash</code>
-              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdUnix', this)">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copier
-              </button>
-            </div>
-            <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              <em>Note : Ouvrez votre Terminal (macOS / Linux), collez et appuyez sur <kbd style="background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px;">Entrée</kbd>.</em>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdUnix', this)">Copier</button>
             </div>
           </div>
-
           <div id="cliPanelPython" style="display:none;">
             <div class="cli-box">
               <code id="cliCmdPython">curl -fsSL https://api-oremus.silverhorse.fr/worker.py | python3 -</code>
-              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdPython', this)">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                Copier
-              </button>
-            </div>
-            <div style="font-size:0.78rem; color:var(--text-tertiary);">
-              <em>Note : Exécution directe via Python (recommandé si PyTorch est déjà présent sur votre machine).</em>
+              <button type="button" class="btn-copy-cli" onclick="copyCliCommand('cliCmdPython', this)">Copier</button>
             </div>
           </div>
-        </div>
 
-        <!-- Mode de lancement : 2. Pack ZIP 1-Clic -->
-        <div style="margin-top:20px; padding-top:16px;">
-          <div class="choice-group-label" style="margin-bottom:8px;">
-            <span>Option 2 : Téléchargement du Pack Autonome (Archive ZIP)</span>
-          </div>
-          <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
-            Idéal si vous préférez un dossier zippé avec lanceurs double-clic tout prêts.
-          </p>
-          <a href="/download/worker.zip" class="btn-cta">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            Télécharger le pack Worker (oremus-worker.zip)
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick-Start Instructions for Non-Tech Friends -->
-    <div class="card">
-      <div class="card-title">
-        Instructions Simplifiées (1 Clic pour Débutants)
-      </div>
-      <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:14px;">
-        Aucune connaissance technique requise. Décompressez l'archive et lancez le script correspondant à votre système :
-      </p>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
-        <div style="background:var(--background-card); border-radius:12px; padding:16px;">
-          <div style="font-weight:700; color:#10b981; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-            <strong>Windows (1 Clic)</strong>
-          </div>
-          <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
-            <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
-            <li>Double-cliquez simplement sur <code style="color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">start_worker.bat</code>.</li>
-            <li>Indiquez votre pseudo et la durée souhaitée : l'alignement commence immédiatement !</li>
-          </ol>
-        </div>
-        <div style="background:var(--background-card); border-radius:12px; padding:16px;">
-          <div style="font-weight:700; color:var(--primary-color); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-            <strong>macOS & Linux</strong>
-          </div>
-          <ol style="font-size:0.86rem; color:var(--text-secondary); margin-left:20px; line-height:1.6;">
-            <li>Téléchargez et décompressez <strong style="color:#fff;">oremus-worker.zip</strong>.</li>
-            <li>Dans le terminal ou Finder, lancez <code style="color:var(--primary-color); background:rgba(201,107,99,0.12); padding:2px 6px; border-radius:4px;">start_worker.sh</code>.</li>
-            <li>L'accélération Apple Silicon (MPS) ou CUDA est détectée automatiquement.</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 5 : Intégration Directe dans l'Application Oremus -->
-    <div class="app-integration-card">
-      <div class="app-integration-badge">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Déploiement en Production
-      </div>
-      <h2 style="font-family:'Libre Baskerville', 'Crimson Text', serif; font-size:1.35rem; font-weight:700; color:#fff; margin-bottom:8px;">
-        Comment Vos Calculs S'Intègrent dans l'Application Oremus
-      </h2>
-      <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.55; margin-bottom:14px;">
-        Le calcul distribué n'est pas un exercice abstrait : chaque partition alignée par votre ordinateur est directement injectée dans le cœur de l'application liturgique accessible sur <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" style="color:var(--gold-sacred); font-weight:700; text-decoration:underline;">oremus.silverhorse.fr</a>.
-      </p>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin:16px 0;">
-        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid var(--gold-sacred);">
-          <div style="font-size:0.75rem; font-weight:700; color:var(--gold-sacred); text-transform:uppercase; margin-bottom:4px;">1. Validation Immédiate</div>
-          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
-            Dès qu'une pièce est calculée, vous pouvez la vérifier directement dans le jeu in-app (Atelier des Chantres) ou sur ce portail. Chaque validation communautaire renforce la certification.
-          </div>
-        </div>
-        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid var(--primary-color);">
-          <div style="font-size:0.75rem; font-weight:700; color:var(--primary-color); text-transform:uppercase; margin-bottom:4px;">2. Synchronisation en Temps Réel</div>
-          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
-            L'application Oremus interroge l'API pour récupérer les horodatages validés. Lors des Laudes, Vêpres, Complies ou de la Messe, la partition s'anime et défile automatiquement au rythme des chantres.
-          </div>
-        </div>
-        <div style="background:rgba(0,0,0,0.45); border-radius:10px; padding:15px; border-left:3px solid #10b981;">
-          <div style="font-size:0.75rem; font-weight:700; color:#10b981; text-transform:uppercase; margin-bottom:4px;">3. Prière & Apprentissage Partagés</div>
-          <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
-            Grâce à votre contribution de calcul, des milliers d'utilisateurs chantent et apprennent le grégorien chez eux ou en communauté, unis dans la même tradition liturgique.
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text-tertiary);">
+            Archive autonome : <a href="/download/worker.zip" style="color:var(--text-secondary);">oremus-worker.zip</a>
           </div>
         </div>
       </div>
+    </section>
 
-      <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener" class="btn-oremus-app">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        <span>Accéder à l'Application Oremus (oremus.silverhorse.fr)</span>
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-      </a>
-    </div>
+    <!-- 3. Catalogue & Chants Récents -->
+    <section style="margin-bottom: 36px;" id="batchSection">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <h2>Catalogue</h2>
+        <span style="font-size:0.86rem; color:var(--primary-color);" id="progressPct">${stats.completed} / 885 (${stats.percentage}%)</span>
+      </div>
+      <div class="progress-bar-bg" style="margin-bottom:20px;">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
 
-    <!-- Section 6 : Mes Chants Récents Traités (Batch Aligné & Revue Directe) -->
-    <div class="card" id="batchSection">
-      <div class="batch-header-row">
-        <div class="card-title" style="margin-bottom:0;">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Mon Lot Récemment Aligné
-        </div>
-        <div class="user-filter-box">
-          <input type="text" id="filterWorkerInput" class="user-input" placeholder="Votre pseudo d'ami..." style="width:160px;">
-          <button type="button" class="btn-pill" id="btnRefreshBatch" style="padding:6px 12px; font-size:0.85rem;">Rafraîchir</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <span style="font-size:0.90rem; font-weight:600; color:#fff;">Chants récemment calculés</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="filterWorkerInput" class="minimal-input" placeholder="Filtrer par pseudo..." style="width:150px;">
+          <button type="button" class="demo-btn-sec" id="btnRefreshBatch">Rafraîchir</button>
         </div>
       </div>
-      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:14px;">
-        Voici les dernières pièces calculées par votre machine. Vous pouvez directement les réviser pour valider les horodatages et gagner +10 XP supplémentaires par revue !
-      </p>
 
       <div class="pieces-grid" id="piecesGrid">
-        <div style="grid-column: 1/-1; text-align:center; padding:24px; color:var(--text-muted);">
-          Chargement des pièces récemment calculées...
+        <div style="grid-column: 1/-1; padding:16px 0; color:var(--text-tertiary); font-size:0.84rem;">
+          Chargement des pièces...
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Section 7 : Tableau d'Honneur des Scribes Numériques -->
-    <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold-sacred);"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-        Tableau d'Honneur des Scribes Numériques
-      </div>
+    <!-- 4. Contributeurs -->
+    <section style="margin-bottom: 36px;">
+      <h2 style="margin-bottom:12px;">Contributeurs</h2>
       <div style="overflow-x:auto;">
         <table>
           <thead>
@@ -1950,141 +1307,76 @@ function renderWorkerPortalHtml(stats, benchmarks) {
               <th>Rang</th>
               <th>Contributeur</th>
               <th>Matériel</th>
-              <th style="text-align:right;">Partitions alignées</th>
+              <th style="text-align:right;">Partitions</th>
             </tr>
           </thead>
           <tbody id="leaderboardTbody">
-            <tr><td colspan="4" style="text-align:center; padding:18px; color:var(--text-muted);">Chargement du classement...</td></tr>
+            <tr><td colspan="4" style="padding:12px 0; color:var(--text-tertiary);">Chargement...</td></tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <!-- Modal : Lecteur de Revue Directe avec Partition Grégorienne Exsurge -->
-    <div class="modal-backdrop" id="reviewModal" onclick="handleBackdropClick(event)">
-      <div class="modal-content">
-        <button type="button" class="modal-close-btn" onclick="closeReviewModal()" aria-label="Fermer">✕</button>
+  </div>
 
-        <div style="margin-bottom:12px;">
-          <div class="modal-chant-badge" id="modalPiecePart">Kyriale</div>
-          <div class="modal-chant-title" id="modalPieceTitle">Incipit du Chant</div>
-          <div class="modal-chant-sub" id="modalPieceAuthor">Aligné par : Ami</div>
-        </div>
+  <!-- Modal de relecture minimaliste -->
+  <div class="modal-backdrop" id="reviewModal">
+    <div class="modal-content">
+      <button type="button" class="modal-close-btn" onclick="closeReviewModal()">✕</button>
 
-        <div class="modal-media-grid">
-          <div class="video-frame-container">
-            <div id="modalVideoContainer" style="position:relative; width:100%; height:100%;">
-              <iframe id="modalVideoFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>
-            </div>
-          </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.75rem; color:var(--primary-color); text-transform:uppercase; margin-bottom:2px;" id="modalChantBadge">Relecture</div>
+        <h3 style="font-family:'Libre Baskerville', serif; font-size:1.2rem; font-weight:700; color:#fff;" id="modalChantTitle">Titre du chant</h3>
+        <div style="font-size:0.78rem; color:var(--text-tertiary);" id="modalChantSub">Détails de la partition</div>
+      </div>
 
-          <!-- Barre de transport et lecture synchronisée -->
-          <div class="modal-player-bar">
-            <button type="button" class="btn-player-mini" onclick="seekModalRelative(-3)" title="Reculer de 3s (Touche J)">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
-              <span>-3s</span>
-            </button>
-            <button type="button" class="btn-player-mini btn-player-play" onclick="toggleModalPlayPause()" id="modalBtnPlayPause" title="Lecture / Pause (Espace)">
-              <svg id="modalIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <svg id="modalIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-              <span id="modalPlayText">Lecture</span>
-            </button>
-            <button type="button" class="btn-player-mini" onclick="seekModalRelative(3)" title="Avancer de 3s (Touche L)">
-              <span>+3s</span>
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
-            </button>
-            <span class="modal-player-time" id="modalTimeDisplay">0:00 / 0:00</span>
-            <span class="modal-player-hint">✦ Cliquez sur un neume pour vous y synchroniser</span>
-          </div>
+      <div style="aspect-ratio:16/9; max-height:220px; overflow:hidden; position:relative; background:#000; margin-bottom:14px;" id="modalVideoContainer"></div>
 
-          <!-- Affichage fidèle de la partition grégorienne via Exsurge -->
-          <div class="modal-score-box">
-            <div class="modal-score-header">
-              <span class="modal-score-title">✦ Partition Grégorienne (Neumes)</span>
-              <span class="modal-score-meta" id="modalNotesCountBadge">0 notes synchronisées</span>
-            </div>
-            <div class="score-viewport" id="modalScoreSlot">
-              <div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">
-                Chargement des neumes grégoriens...
-              </div>
-            </div>
-          </div>
-        </div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <button type="button" class="demo-btn" onclick="toggleModalPlayPause()">
+          <svg id="modalIconPlay" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="modalIconPause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          <span id="modalPlayText">Lecture</span>
+        </button>
+        <button type="button" class="demo-btn-sec" onclick="seekModalRelative(-3)">-3s</button>
+        <button type="button" class="demo-btn-sec" onclick="seekModalRelative(3)">+3s</button>
+        <span class="demo-time" id="modalTimeDisplay" style="margin-left:auto;">0:00 / 0:00</span>
+      </div>
 
-        <!-- 3 Boutons de décision identiques au Laboratoire d'Alignement -->
-        <div class="decision-buttons-grid">
-          <button type="button" class="btn-decision btn-approved" onclick="submitReviewVote('approved')" title="Bien aligné">
-            <span class="decision-label">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Bien aligné
-            </span>
-            <span class="decision-xp">+10 XP</span>
-          </button>
-          <button type="button" class="btn-decision btn-delayed" onclick="submitReviewVote('rejected')" title="Décalé">
-            <span class="decision-label">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Décalé
-            </span>
-            <span class="decision-xp">+10 XP</span>
-          </button>
-          <button type="button" class="btn-decision btn-bad" onclick="submitReviewVote('bad_gabc')" title="Mauvais chant">
-            <span class="decision-label">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Mauvais
-            </span>
-            <span class="decision-xp">+10 XP</span>
-          </button>
-        </div>
+      <div class="score-viewport" id="modalScoreSlot" style="overflow-x:auto; min-height:120px; margin-bottom:16px;"></div>
 
-        <!-- Ligne d'actions secondaires : Passer & Remarque -->
-        <div class="utility-actions-row">
-          <button type="button" class="btn-utility btn-skip-prominent" onclick="closeReviewModal()">
-            <span>Fermer / Passer</span>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button type="button" class="btn-utility btn-comment-trigger" onclick="toggleReviewComment()">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span>Remarque</span>
-          </button>
-        </div>
+      <div class="decision-buttons-grid">
+        <button type="button" class="btn-decision btn-approved" onclick="submitReviewVote('approved')">
+          ✓ Bien aligné
+        </button>
+        <button type="button" class="btn-decision" onclick="submitReviewVote('rejected')">
+          Décalé
+        </button>
+        <button type="button" class="btn-decision" onclick="submitReviewVote('bad_gabc')">
+          Mauvais chant
+        </button>
+        <button type="button" class="btn-utility" onclick="toggleReviewComment()" style="margin-left:auto;">
+          Remarque
+        </button>
+      </div>
 
-        <!-- Zone de saisie d'une remarque (dépliable) -->
-        <div class="decision-comment-view" id="modalCommentView" style="display:none;">
-          <textarea id="modalCommentInput" class="inline-comment-textarea" placeholder="Précisez un décalage, mot incorrect ou problème audio..."></textarea>
-          <div class="comment-actions-row">
-            <button type="button" class="btn-comment-cancel" onclick="toggleReviewComment(false)">Annuler</button>
-            <button type="button" class="btn-comment-submit" onclick="submitReviewWithComment()">
-              <span>Envoyer la remarque</span>
-            </button>
-          </div>
+      <div id="modalCommentView" style="display:none; margin-top:10px;">
+        <textarea id="modalCommentInput" class="inline-comment-textarea" placeholder="Précisez un décalage, mot incorrect ou problème audio..."></textarea>
+        <div style="display:flex; gap:12px; margin-top:6px;">
+          <button type="button" class="btn-utility" onclick="toggleReviewComment(false)">Annuler</button>
+          <button type="button" class="demo-btn" onclick="submitReviewWithComment()">Envoyer</button>
         </div>
       </div>
     </div>
-
   </div>
 
   <script id="validatedDemoData" type="application/json">
 ${JSON.stringify(getValidatedDemoPieces())}
   </script>
   <script>
-    // Configuration & Benchmarks transmis par le serveur
+    // Configuration & Benchmarks
     const BENCHMARKS = ${JSON.stringify(benchmarks)};
-    
-    // Rangs Monastiques Oremus (Numération romaine monastique sans émojis)
-    const MONK_RANKS = [
-      { level: 1, title: "Novice du Chœur", latin: "Novicius", minXp: 0, icon: "I" },
-      { level: 2, title: "Scribe du Chapitre", latin: "Scriptor", minXp: 100, icon: "II" },
-      { level: 3, title: "Enlumineur Sacré", latin: "Illuminator", minXp: 250, icon: "III" },
-      { level: 4, title: "Cantor du Lutrin", latin: "Cantor", minXp: 450, icon: "IV" },
-      { level: 5, title: "Succenteur de Chœur", latin: "Succentor", minXp: 700, icon: "V" },
-      { level: 6, title: "Maître de Chapelle", latin: "Magister Chori", minXp: 1000, icon: "VI" },
-      { level: 7, title: "Prieur du Scriptorium", latin: "Prior", minXp: 1350, icon: "VII" },
-      { level: 8, title: "Abbé Bénédictin", latin: "Abbas", minXp: 1700, icon: "VIII" },
-      { level: 9, title: "Cardinal Préfet", latin: "Cardinalis", minXp: 2100, icon: "IX" },
-      { level: 10, title: "Pape Saint Grégoire", latin: "Pontifex Maximus", minXp: 2600, icon: "X" }
-    ];
 
-    // State Local
     let userGamification = { xp: 0, level: 1, streak: 0 };
     let currentDurationMins = 30;
     let currentHardware = 'cuda';
@@ -2092,7 +1384,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
     let currentModalScore = null;
     let currentModalGabc = '';
 
-    // Pièces liturgiques réelles certifiées pour la démonstration interactive
+    // Pièces liturgiques réelles certifiées
     let VALIDATED_DEMO_PIECES = {};
     try {
       const dataEl = document.getElementById('validatedDemoData');
@@ -2121,7 +1413,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
         demoYtPlayer = null;
       }
 
-      const container = document.querySelector('.demo-player-grid > div:first-child');
+      const container = document.querySelector('#demoSection iframe') ? document.querySelector('#demoSection iframe').parentElement : null;
       if (!container) return;
       container.innerHTML = '<iframe id="demoVideoFrame" src="https://www.youtube-nocookie.com/embed/' + videoId + '?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none; position:absolute; top:0; left:0;"></iframe>';
 
@@ -2167,11 +1459,9 @@ ${JSON.stringify(getValidatedDemoPieces())}
     };
 
     function updateDemoPlayButton(isPlaying) {
-      const btn = document.getElementById('btnDemoPlay');
       const iconPlay = document.getElementById('demoIconPlay');
       const iconPause = document.getElementById('demoIconPause');
       const label = document.getElementById('demoPlayText');
-      if (btn) btn.classList.toggle('btn-play-active', isPlaying);
       if (iconPlay) iconPlay.style.display = isPlaying ? 'none' : 'block';
       if (iconPause) iconPause.style.display = isPlaying ? 'block' : 'none';
       if (label) label.textContent = isPlaying ? 'Pause' : 'Lecture';
@@ -2255,7 +1545,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       const prevIdx = demoActiveNoteIdx;
       demoActiveNoteIdx = idx;
 
-      // Nettoyer ancienne note
+      // Nettoyer ancienne note (aucun glow)
       if (prevIdx >= 0 && demoChantInfo.allNotes[prevIdx]) {
         const pNote = demoChantInfo.allNotes[prevIdx];
         if (pNote.svgNode) {
@@ -2274,12 +1564,12 @@ ${JSON.stringify(getValidatedDemoPieces())}
         }
       }
 
-      // Mettre en valeur la nouvelle note
+      // Mettre en valeur la nouvelle note avec la seule couleur #c96b63 (sans aucun glow)
       const curNote = demoChantInfo.allNotes[idx];
-      const accent = '#c4984f';
+      const accent = '#c96b63';
       if (curNote && curNote.svgNode) {
         curNote.svgNode.style.setProperty('fill', accent, 'important');
-        curNote.svgNode.style.setProperty('filter', 'drop-shadow(0 0 6px rgba(196,152,79,0.75))', 'important');
+        curNote.svgNode.style.removeProperty('filter');
       }
       if (curNote && curNote.neume && curNote.neume.lyrics && curNote.neume.lyrics[0] && curNote.neume.lyrics[0].svgNode) {
         const lNode = curNote.neume.lyrics[0].svgNode;
@@ -2293,15 +1583,12 @@ ${JSON.stringify(getValidatedDemoPieces())}
         }
       }
 
-      // Mise à jour du texte de description
       const stamp = currentDemoPiece.timestamps[idx];
       const chipEl = document.getElementById('demoDetailText');
       if (chipEl && stamp) {
-        const dur = (stamp.end && stamp.start) ? (stamp.end - stamp.start).toFixed(2) + 's' : '';
-        chipEl.innerHTML = 'Note ' + (idx + 1) + '/' + currentDemoPiece.notes_count + ' : <strong>' + stamp.start.toFixed(2) + 's ' + (dur ? '(' + dur + ')' : '') + '</strong> • ' + currentDemoPiece.incipit + ' • Validé par l’Atelier';
+        chipEl.textContent = 'Note ' + (idx + 1) + '/' + currentDemoPiece.notes_count + ' (' + stamp.start.toFixed(2) + 's) • ' + currentDemoPiece.incipit;
       }
 
-      // Défilement automatique doux vers la note
       const slot = document.getElementById('demoScoreSlot');
       if (curNote && curNote.svgNode && slot) {
         const nRect = curNote.svgNode.getBoundingClientRect();
@@ -2322,7 +1609,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
         ctxt.noteColor = '#ffffff';
         ctxt.neumeLineColor = '#ffffff';
         ctxt.dividerLineColor = '#ffffff';
-        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.55)';
+        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.45)';
         ctxt.setFont("'Crimson Text', 'Libre Baskerville', Georgia, serif", 17.5);
         ctxt.setRubricColor('#c96b63');
         ctxt.specialCharColor = '#c96b63';
@@ -2338,7 +1625,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
         ctxt.width = availWidth;
 
         score.performLayout(ctxt);
-        score.layoutChantLines(ctxt, availWidth - 20, function() {
+        score.layoutChantLines(ctxt, availWidth - 10, function() {
           container.innerHTML = '';
           const svgNode = score.createSvgNode(ctxt);
           svgNode.setAttribute('width', '100%');
@@ -2386,7 +1673,6 @@ ${JSON.stringify(getValidatedDemoPieces())}
             });
           }
 
-          // Clic sur n'importe quel neume pour se caler instantanément sur la vidéo YouTube
           svgNode.addEventListener('click', function(e) {
             const targetEl = e.target.closest ? e.target.closest('[data-demo-idx]') : null;
             if (targetEl) {
@@ -2414,18 +1700,15 @@ ${JSON.stringify(getValidatedDemoPieces())}
       currentDemoPiece = VALIDATED_DEMO_PIECES[pieceId];
       demoActiveNoteIdx = -1;
 
-      // Mise à jour des boutons pilules
       document.querySelectorAll('#demoPiecePills .btn-pill').forEach(function(b) {
         b.classList.toggle('active', b.dataset.demoId === pieceId);
       });
 
-      // Sous-titre
       const subEl = document.getElementById('demoPieceSub');
       if (subEl) {
-        subEl.textContent = currentDemoPiece.incipit + ' • ' + currentDemoPiece.part + ' (Mode ' + currentDemoPiece.mode + ') • ' + currentDemoPiece.notes_count + ' notes certifiées • Enregistrement monastique';
+        subEl.textContent = currentDemoPiece.incipit + ' • Mode ' + currentDemoPiece.mode + ' • ' + currentDemoPiece.notes_count + ' notes';
       }
 
-      // Rendu du lecteur et de la partition
       initDemoPlayer(currentDemoPiece.youtube_id);
       renderDemoScore(currentDemoPiece.gabc_src);
     };
@@ -2442,8 +1725,9 @@ ${JSON.stringify(getValidatedDemoPieces())}
         setTimeout(function() { waitForExsurge(cb, maxTries - 1); }, 100);
       }
     }
+
     // Initialisation
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       initGamificationFromStorage();
       setupPlannerEvents();
       setupUserFilter();
@@ -2451,12 +1735,9 @@ ${JSON.stringify(getValidatedDemoPieces())}
       refreshLeaderboardAndPieces();
 
       waitForExsurge(initInteractiveDemo);
-      
-      // Auto-refresh toutes les 15 secondes
       setInterval(refreshLeaderboardAndPieces, 15000);
     });
 
-    // 1. Gamification State
     function initGamificationFromStorage() {
       try {
         const saved = localStorage.getItem('oremus_lab_gamification');
@@ -2467,85 +1748,52 @@ ${JSON.stringify(getValidatedDemoPieces())}
           userGamification.streak = parsed.streak || 0;
         }
       } catch(e) {}
-      renderGamificationHeader();
     }
 
     function saveGamificationToStorage() {
       try {
         localStorage.setItem('oremus_lab_gamification', JSON.stringify(userGamification));
       } catch(e) {}
-      renderGamificationHeader();
     }
 
-    function renderGamificationHeader() {
-      let currentRank = MONK_RANKS[0];
-      for (let i = 0; i < MONK_RANKS.length; i++) {
-        if (userGamification.xp >= MONK_RANKS[i].minXp) currentRank = MONK_RANKS[i];
-        else break;
-      }
-      userGamification.level = currentRank.level;
-
-      document.getElementById('headerAvatar').textContent = currentRank.icon;
-      document.getElementById('headerTitle').textContent = currentRank.title;
-      document.getElementById('headerLevel').textContent = \`Degré \${currentRank.level} • \${currentRank.latin}\`;
-      document.getElementById('headerXp').textContent = \`\${userGamification.xp} XP\`;
-      document.getElementById('headerStreak').textContent = \`Série : \${userGamification.streak}\`;
-    }
-
-    function awardUserXp(amount, label) {
+    function awardUserXp(amount) {
       userGamification.xp += amount;
       userGamification.streak += 1;
       saveGamificationToStorage();
-
-      // Floating golden toast
-      const toast = document.createElement('div');
-      toast.className = 'xp-float-toast';
-      toast.textContent = \`+\${amount} XP \${label || ''}\`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 1600);
     }
 
-    // 2. Interactive Session Planner & Dynamic Estimator
     function setupPlannerEvents() {
       const durationButtons = document.querySelectorAll('#durationGroup .btn-pill');
-      const slider = document.getElementById('durationSlider');
-      const sliderVal = document.getElementById('sliderValDisplay');
-
-      durationButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          durationButtons.forEach(b => b.classList.remove('active'));
+      durationButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          durationButtons.forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
           const mins = parseInt(btn.dataset.mins, 10);
           currentDurationMins = mins;
-          if (mins > 0) {
-            slider.value = mins;
-            sliderVal.textContent = \`\${mins} min\`;
-          } else {
-            sliderVal.textContent = 'Libre';
-          }
           updateEstimator();
         });
       });
 
-      slider.addEventListener('input', () => {
-        const mins = parseInt(slider.value, 10);
-        currentDurationMins = mins;
-        sliderVal.textContent = \`\${mins} min\`;
-        durationButtons.forEach(b => {
-          b.classList.toggle('active', parseInt(b.dataset.mins, 10) === mins);
-        });
-        updateEstimator();
-      });
-
       const hwButtons = document.querySelectorAll('#hardwareGroup .btn-pill');
-      hwButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          hwButtons.forEach(b => b.classList.remove('active'));
+      hwButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          hwButtons.forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
           currentHardware = btn.dataset.hw;
           updateEstimator();
         });
       });
+
+      const plannerInput = document.getElementById('plannerWorkerInput');
+      if (plannerInput) {
+        plannerInput.value = localStorage.getItem('oremus_worker_name') || '';
+        plannerInput.addEventListener('input', function() {
+          localStorage.setItem('oremus_worker_name', plannerInput.value.trim());
+          const filterInput = document.getElementById('filterWorkerInput');
+          if (filterInput && !filterInput.value) filterInput.value = plannerInput.value.trim();
+          updateEstimator();
+        });
+      }
     }
 
     function updateEstimator() {
@@ -2557,122 +1805,93 @@ ${JSON.stringify(getValidatedDemoPieces())}
         const totalSec = currentDurationMins * 60;
         estimatedCount = Math.max(1, Math.round(totalSec / avgSec));
       } else {
-        estimatedCount = 100; // Estimation symbolique pour session libre
+        estimatedCount = 100;
       }
 
-      const potentialXp = estimatedCount * 25; // 25 XP par chant calculé
-      
-      document.getElementById('estPiecesDisplay').textContent = currentDurationMins > 0 ? \`~\${estimatedCount} chants\` : 'Illimité (continu)';
-      document.getElementById('estXpDisplay').textContent = \`+\${potentialXp} XP Monastiques\`;
+      const estPieces = document.getElementById('estPiecesDisplay');
+      if (estPieces) {
+        estPieces.textContent = currentDurationMins > 0 ? ('~' + estimatedCount + ' chants') : 'Illimité';
+      }
 
       const plannerInput = document.getElementById('plannerWorkerInput');
       const filterInput = document.getElementById('filterWorkerInput');
       const pseudo = (plannerInput ? plannerInput.value.trim() : '') ||
                      (filterInput ? filterInput.value.trim() : '') ||
                      localStorage.getItem('oremus_worker_name') || '';
-      const durArg = currentDurationMins > 0 ? \` --duration \${currentDurationMins}\` : '';
+      const durArg = currentDurationMins > 0 ? (' --duration ' + currentDurationMins) : '';
       const origin = window.location.origin;
 
-      // Commandes dynamiques avec pseudo obligatoire pour compter les points
-      let winCode = '';
-      let unixCode = '';
-      let pyCode = '';
-
-      if (pseudo) {
-        winCode = \`$env:WORKER_NAME="\${pseudo}"; irm \${origin}/run.ps1 | iex\`;
-        unixCode = \`WORKER_NAME="\${pseudo}" curl -fsSL \${origin}/run.sh | bash\`;
-        pyCode = \`curl -fsSL \${origin}/worker.py | python3 - --name "\${pseudo}"\${durArg}\`;
-      } else {
-        winCode = \`irm \${origin}/run.ps1 | iex\`;
-        unixCode = \`curl -fsSL \${origin}/run.sh | bash\`;
-        pyCode = \`curl -fsSL \${origin}/worker.py | python3 -\`;
+      const winEl = document.getElementById('cliCmdWindows');
+      if (winEl) {
+        winEl.textContent = pseudo 
+          ? ('$env:WORKER_NAME="' + pseudo + '"; irm ' + origin + '/run.ps1 | iex' + (currentDurationMins > 0 ? ' -Duration ' + currentDurationMins : ''))
+          : ('irm ' + origin + '/run.ps1 | iex');
       }
 
-      const elWin = document.getElementById('cliCmdWindows');
-      const elUnix = document.getElementById('cliCmdUnix');
-      const elPy = document.getElementById('cliCmdPython');
-      if (elWin) elWin.textContent = winCode;
-      if (elUnix) elUnix.textContent = unixCode;
-      if (elPy) elPy.textContent = pyCode;
+      const unixEl = document.getElementById('cliCmdUnix');
+      if (unixEl) {
+        unixEl.textContent = pseudo
+          ? ('WORKER_NAME="' + pseudo + '" curl -fsSL ' + origin + '/run.sh | bash -s --' + durArg)
+          : ('curl -fsSL ' + origin + '/run.sh | bash');
+      }
+
+      const pyEl = document.getElementById('cliCmdPython');
+      if (pyEl) {
+        pyEl.textContent = pseudo
+          ? ('curl -fsSL ' + origin + '/worker.py | python3 - --name "' + pseudo + '"' + durArg)
+          : ('curl -fsSL ' + origin + '/worker.py | python3 -');
+      }
     }
 
     window.switchCliTab = function(os) {
-      document.querySelectorAll('.cli-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.os === os));
+      document.querySelectorAll('.cli-tab-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.os === os);
+      });
       document.getElementById('cliPanelWindows').style.display = os === 'windows' ? 'block' : 'none';
       document.getElementById('cliPanelUnix').style.display = os === 'unix' ? 'block' : 'none';
       document.getElementById('cliPanelPython').style.display = os === 'python' ? 'block' : 'none';
     };
 
-    window.copyCliCommand = function(elemId, btn) {
-      const plannerInput = document.getElementById('plannerWorkerInput');
-      const filterInput = document.getElementById('filterWorkerInput');
-      const pseudo = (plannerInput ? plannerInput.value.trim() : '') ||
-                     (filterInput ? filterInput.value.trim() : '') ||
-                     localStorage.getItem('oremus_worker_name') || '';
-      
-      // Imposer la saisie du nom avant de pouvoir copier la commande
-      if (!pseudo) {
-        if (plannerInput) {
-          plannerInput.focus();
-          plannerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          plannerInput.style.borderColor = 'var(--primary-color)';
-          plannerInput.style.boxShadow = '0 0 12px rgba(201, 107, 99, 0.4)';
-          setTimeout(() => {
-            plannerInput.style.borderColor = 'rgba(196,152,79,0.4)';
-            plannerInput.style.boxShadow = 'none';
-          }, 2000);
-        }
-        awardUserXp(0, 'Saisissez votre prénom ou pseudo pour compter vos points');
-        return;
-      }
-
-      const codeElem = document.getElementById(elemId);
-      if (!codeElem) return;
-      const text = codeElem.textContent.trim();
-      navigator.clipboard.writeText(text).then(() => {
-        const oldHtml = btn.innerHTML;
-        btn.innerHTML = 'Copié !';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = oldHtml;
-          btn.classList.remove('copied');
-        }, 1800);
-      }).catch(() => {
-        prompt('Copiez la commande ci-dessous (Ctrl+C) :', text);
+    window.copyCliCommand = function(elId, btn) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent).then(function() {
+        const orig = btn.textContent;
+        btn.textContent = 'Copié !';
+        setTimeout(function() { btn.textContent = orig; }, 1800);
       });
     };
 
-    // 3. User Filter & Batch View (Priorité absolue aux pièces de l'utilisateur)
     function setupUserFilter() {
       const filterInput = document.getElementById('filterWorkerInput');
-      const plannerInput = document.getElementById('plannerWorkerInput');
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramUser = urlParams.get('worker') || urlParams.get('name') || '';
-      const savedUser = paramUser || localStorage.getItem('oremus_worker_name') || '';
+      const btnRefresh = document.getElementById('btnRefreshBatch');
+      const grid = document.getElementById('piecesGrid');
+      const saved = localStorage.getItem('oremus_worker_name');
+      if (saved && filterInput) filterInput.value = saved;
 
-      if (savedUser) {
-        if (filterInput) filterInput.value = savedUser;
-        if (plannerInput) plannerInput.value = savedUser;
-        localStorage.setItem('oremus_worker_name', savedUser);
+      if (grid) {
+        grid.addEventListener('click', function(e) {
+          const btn = e.target.closest ? e.target.closest('[data-piece-id]') : null;
+          if (btn) {
+            const pid = btn.getAttribute('data-piece-id');
+            if (pid) openReviewModal(pid);
+          }
+        });
       }
 
-      function syncName(val) {
-        localStorage.setItem('oremus_worker_name', val);
-        if (filterInput && filterInput.value !== val) filterInput.value = val;
-        if (plannerInput && plannerInput.value !== val) plannerInput.value = val;
-        updateEstimator();
-        fetchWorkerBatch(val);
-      }
-
-      if (plannerInput) {
-        plannerInput.addEventListener('input', () => syncName(plannerInput.value.trim()));
-      }
       if (filterInput) {
-        filterInput.addEventListener('input', () => syncName(filterInput.value.trim()));
+        filterInput.addEventListener('input', function() {
+          localStorage.setItem('oremus_worker_name', filterInput.value.trim());
+          const plannerInput = document.getElementById('plannerWorkerInput');
+          if (plannerInput && plannerInput.value !== filterInput.value) {
+            plannerInput.value = filterInput.value;
+          }
+          updateEstimator();
+        });
       }
-      const refreshBtn = document.getElementById('btnRefreshBatch');
-      if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => {
+
+      if (btnRefresh) {
+        btnRefresh.addEventListener('click', function() {
           fetchWorkerBatch(filterInput ? filterInput.value.trim() : '');
         });
       }
@@ -2680,78 +1899,57 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
     async function fetchWorkerBatch(workerName) {
       const grid = document.getElementById('piecesGrid');
-      grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--text-secondary); font-size:0.88rem;">Mise à jour de vos pièces récentes...</div>';
+      if (!grid) return;
+      grid.innerHTML = '<div style="grid-column: 1/-1; padding:12px 0; color:var(--text-secondary); font-size:0.85rem;">Mise à jour...</div>';
       
       try {
-        const url = workerName ? \`/api/jobs/worker/\${encodeURIComponent(workerName)}/pieces\` : '/api/jobs/worker/pieces';
+        const url = workerName ? ('/api/jobs/worker/' + encodeURIComponent(workerName) + '/pieces') : '/api/jobs/worker/pieces';
         const res = await fetch(url);
         const data = await res.json();
-        
-        let pieces = data.pieces || [];
+        const pieces = data.pieces || [];
 
         if (pieces.length === 0) {
-          grid.innerHTML = \`
-            <div style="grid-column: 1/-1; text-align:center; padding:24px; color:var(--text-tertiary); font-size:0.88rem;">
-              Aucune pièce récemment calculée trouvée pour "<strong>\${workerName || 'tous'}</strong>".<br>
-              Lancez le worker pour voir vos premiers chants apparaître ici !
-            </div>\`;
+          grid.innerHTML = '<div style="grid-column: 1/-1; padding:16px 0; color:var(--text-tertiary); font-size:0.85rem;">Aucune partition trouvée. Lancez le calcul pour voir vos chants ici.</div>';
           return;
         }
 
-        const userPieces = pieces.filter(p => p.is_user_piece);
-        let bannerHtml = '';
-
-        if (userPieces.length > 0) {
-          bannerHtml = \`
-            <div style="grid-column: 1/-1; padding:10px 14px; border-radius:10px; background:rgba(196,152,79,0.1); font-size:0.84rem; color:var(--gold-sacred); margin-bottom:4px;">
-              ✦ <strong>\${userPieces.length}</strong> partition(s) calculée(s) par vous (\${workerName}) placée(s) en tête de liste pour votre relecture.
-            </div>\`;
-        } else if (workerName) {
-          bannerHtml = \`
-            <div style="grid-column: 1/-1; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.03); font-size:0.84rem; color:var(--text-secondary); margin-bottom:4px;">
-              ✦ Aucune partition encore calculée par "\${workerName}". Voici les partitions de la communauté prêtes à être vérifiées :
-            </div>\`;
-        }
-
-        grid.innerHTML = bannerHtml + pieces.map(p => \`
-          <div class="piece-card \${p.is_user_piece ? 'is-user-card' : ''}">
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
-                <span style="font-size:0.75rem; color:var(--gold-sacred); font-weight:700; text-transform:uppercase;">\${p.part || 'Chant'}</span>
-                \${p.is_user_piece 
-                  ? '<span class="badge-user-piece">✦ Votre alignement</span>' 
-                  : \`<span class="badge-other-piece">\${p.worker_id || 'Ami'}</span>\`}
-              </div>
-              <div class="piece-title">\${p.incipit || p.piece_id}</div>
-              <div class="piece-meta" style="margin-top:6px;">
-                <span>\${p.notes_count} notes</span>
-                <span>\${p.compute_time_sec ? p.compute_time_sec + 's' : ''}</span>
-              </div>
-            </div>
-            <button type="button" class="btn-review-card" onclick="openReviewModal('\${p.piece_id}')">
-              Examiner & Réviser
-            </button>
-          </div>
-        \`).join('');
+        grid.innerHTML = pieces.map(function(p) {
+          var isUser = p.is_user_piece;
+          var author = isUser ? 'Votre calcul' : (p.worker_id || 'Ami');
+          var computeTime = p.compute_time_sec ? (' • ' + p.compute_time_sec + 's') : '';
+          return '<div class="piece-card">' +
+            '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:6px;">' +
+              '<span style="font-size:0.75rem; color:var(--primary-color); font-weight:600; text-transform:uppercase;">' + (p.part || 'Chant') + '</span>' +
+              '<span style="font-size:0.75rem; color:var(--text-tertiary);">' + author + '</span>' +
+            '</div>' +
+            '<div class="piece-title">' + (p.incipit || p.piece_id) + '</div>' +
+            '<div class="piece-meta">' +
+              '<span>' + p.notes_count + ' notes</span>' + computeTime +
+            '</div>' +
+            '<button type="button" class="btn-review-card" data-piece-id="' + p.piece_id + '">' +
+              'Examiner & Réviser' +
+            '</button>' +
+          '</div>';
+        }).join('');
 
       } catch(e) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:18px; color:var(--primary-color);">Erreur lors de la récupération des pièces.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; padding:12px 0; color:var(--primary-color); font-size:0.85rem;">Erreur de chargement des pièces.</div>';
       }
     }
 
-    // 4. Rendu Grégorien Exsurge & Modal de Revue Directe
     function preprocessGabcForExsurge(gabc) {
       if (!gabc) return '';
-      gabc = gabc.replace(/<sp>['’]<\\/sp>/g, "'");
-      gabc = gabc.replace(/<v>\\\\([VRA])bar<\\/v>/gi, function(m, b) { return b.toUpperCase() + '/.'; })
-                 .replace(/<sp>([VRA])\\/?<\\/sp>\\.?/gi, function(m, b) { return b.toUpperCase() + '/.'; });
-      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*(Ps\\.?|Psalmus)\\s*<\\/i>/gi, '$1<c><i>Ps.</i></c>');
-      gabc = gabc.replace(/(^|\\s|\\))(Ps\\.)(?=\\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
-      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*([V℣]\\.?|Versus)\\s*<\\/i>/gi, '$1<c><i>℣.</i></c>');
-      gabc = gabc.replace(/(^|\\s|\\))(V\\/\\.?)(?=\\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
-      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*([R℟]\\.?|Responsorium)\\s*<\\/i>/gi, '$1<c><i>℟.</i></c>');
-      gabc = gabc.replace(/(^|\\s|\\))(R\\/\\.?)(?=\\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
-      return gabc;
+      return gabc
+        .split("<sp>'</sp>").join("'")
+        .split("<sp>’</sp>").join("'")
+        .replace(new RegExp("<v>\\\\([VRA])bar</v>", "gi"), function(m, b) { return b.toUpperCase() + '/.'; })
+        .replace(new RegExp("<sp>([VRA])/?</sp>\\\\.?", "gi"), function(m, b) { return b.toUpperCase() + '/.'; })
+        .replace(new RegExp("(^|\\\\s|\\\\))<i>\\\\s*(Ps\\\\.?|Psalmus)\\\\s*</i>", "gi"), "$1<c><i>Ps.</i></c>")
+        .replace(new RegExp("(^|\\\\s|\\\\))(Ps\\\\.)(?=\\\\s+[A-ZÁÉÍÓÚ])", "g"), "$1<c><i>Ps.</i></c>")
+        .replace(new RegExp("(^|\\\\s|\\\\))<i>\\\\s*([V℣]\\\\.?|Versus)\\\\s*</i>", "gi"), "$1<c><i>℣.</i></c>")
+        .replace(new RegExp("(^|\\\\s|\\\\))(V/\\\\.?)(?=\\\\s*[0-9A-ZÁÉÍÓÚ(])", "g"), "$1<c><i>℣.</i></c>")
+        .replace(new RegExp("(^|\\\\s|\\\\))<i>\\\\s*([R℟]\\\\.?|Responsorium)\\\\s*</i>", "gi"), "$1<c><i>℟.</i></c>")
+        .replace(new RegExp("(^|\\\\s|\\\\))(R/\\\\.?)(?=\\\\s*[0-9A-ZÁÉÍÓÚ(])", "g"), "$1<c><i>℟.</i></c>");
     }
 
     let modalYtPlayer = null;
@@ -2783,7 +1981,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       if (!container) return;
       
       if (!videoId) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:13px;">Aucune piste vidéo disponible</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:13px;">Aucune vidéo</div>';
         return;
       }
 
@@ -2838,13 +2036,9 @@ ${JSON.stringify(getValidatedDemoPieces())}
       const iconPlay = document.getElementById('modalIconPlay');
       const iconPause = document.getElementById('modalIconPause');
       const label = document.getElementById('modalPlayText');
-      if (iconPlay && iconPause) {
-        iconPlay.style.display = isPlaying ? 'none' : 'block';
-        iconPause.style.display = isPlaying ? 'block' : 'none';
-      }
-      if (label) {
-        label.textContent = isPlaying ? 'Pause' : 'Lecture';
-      }
+      if (iconPlay) iconPlay.style.display = isPlaying ? 'none' : 'block';
+      if (iconPause) iconPause.style.display = isPlaying ? 'block' : 'none';
+      if (label) label.textContent = isPlaying ? 'Pause' : 'Lecture';
     }
 
     window.seekModalRelative = function(sec) {
@@ -2854,13 +2048,6 @@ ${JSON.stringify(getValidatedDemoPieces())}
         modalYtPlayer.seekTo(Math.max(0, cur + sec), true);
       } catch(e) {}
     };
-
-    function seekModalPlayer(sec) {
-      if (!modalYtPlayer || typeof modalYtPlayer.seekTo !== 'function') return;
-      try {
-        modalYtPlayer.seekTo(Math.max(0, sec), true);
-      } catch(e) {}
-    }
 
     function startModalSyncTracker() {
       if (modalPlaybackInterval) clearInterval(modalPlaybackInterval);
@@ -2873,7 +2060,9 @@ ${JSON.stringify(getValidatedDemoPieces())}
             const dur = (typeof modalYtPlayer.getDuration === 'function') ? modalYtPlayer.getDuration() : 0;
             const timeEl = document.getElementById('modalTimeDisplay');
             if (timeEl && dur > 0) {
-              const fmt = (s) => Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+              const fmt = function(s) {
+                return Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+              };
               timeEl.textContent = fmt(cur) + ' / ' + fmt(dur);
             }
           }
@@ -2913,7 +2102,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       const accentColor = '#c96b63';
 
       if (modalActiveNoteEl) {
-        modalActiveNoteEl.classList.remove('active', 'active-note-highlight');
+        modalActiveNoteEl.classList.remove('active');
         modalActiveNoteEl.style.removeProperty('fill');
         modalActiveNoteEl = null;
       }
@@ -2922,7 +2111,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
         modalActiveLyricEl.style.removeProperty('fill');
         modalActiveLyricEl.style.removeProperty('color');
         if (modalActiveLyricEl.querySelectorAll) {
-          modalActiveLyricEl.querySelectorAll('tspan').forEach(ts => {
+          modalActiveLyricEl.querySelectorAll('tspan').forEach(function(ts) {
             ts.classList.remove('active');
             ts.style.removeProperty('fill');
             ts.style.removeProperty('color');
@@ -2933,7 +2122,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
       if (note && note.svgNode) {
         modalActiveNoteEl = note.svgNode;
-        modalActiveNoteEl.classList.add('active', 'active-note-highlight');
+        modalActiveNoteEl.classList.add('active');
         modalActiveNoteEl.style.setProperty('fill', accentColor, 'important');
       }
       if (note && note.neume && note.neume.lyrics && note.neume.lyrics.length > 0) {
@@ -2944,7 +2133,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
           modalActiveLyricEl.style.setProperty('fill', accentColor, 'important');
           modalActiveLyricEl.style.setProperty('color', accentColor, 'important');
           if (modalActiveLyricEl.querySelectorAll) {
-            modalActiveLyricEl.querySelectorAll('tspan').forEach(ts => {
+            modalActiveLyricEl.querySelectorAll('tspan').forEach(function(ts) {
               ts.classList.add('active');
               ts.style.setProperty('fill', accentColor, 'important');
               ts.style.setProperty('color', accentColor, 'important');
@@ -2953,107 +2142,43 @@ ${JSON.stringify(getValidatedDemoPieces())}
         }
       }
 
-      // Défilement automatique fluide vers le neume actif
-      const slot = document.getElementById('modalScoreSlot');
-      if (modalActiveNoteEl && slot) {
-        const noteRect = modalActiveNoteEl.getBoundingClientRect();
-        const slotRect = slot.getBoundingClientRect();
-        if (noteRect.top < slotRect.top + 20 || noteRect.bottom > slotRect.bottom - 20) {
-          modalActiveNoteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const viewport = document.getElementById('modalScoreSlot');
+      if (note && note.svgNode && viewport) {
+        const noteRect = note.svgNode.getBoundingClientRect();
+        const viewRect = viewport.getBoundingClientRect();
+        if (noteRect.top < viewRect.top + 20 || noteRect.bottom > viewRect.bottom - 20) {
+          note.svgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
-    }
-
-    function setupModalScoreClicks(svg, info) {
-      if (!svg || !info) return;
-      svg.addEventListener('click', function(e) {
-        var target = e.target;
-        var targetIndex = -1;
-
-        var indexedEl = target.closest ? target.closest('[data-note-index]') : null;
-        if (indexedEl) {
-          var parsed = parseInt(indexedEl.getAttribute('data-note-index'), 10);
-          if (!isNaN(parsed) && parsed >= 0) targetIndex = parsed;
-        }
-        if (targetIndex === -1 && info.allNotes) {
-          var candidate = target.closest ? (target.closest('use') || target.closest('text') || target) : target;
-          if (candidate && candidate.source) {
-            var sIdx = info.allNotes.indexOf(candidate.source);
-            if (sIdx >= 0) targetIndex = sIdx;
-          }
-        }
-        if (targetIndex >= 0 && currentModalPiece && currentModalPiece.timestamps && currentModalPiece.timestamps[targetIndex]) {
-          const stamp = currentModalPiece.timestamps[targetIndex];
-          if (stamp.start !== undefined && stamp.start !== null) {
-            seekModalPlayer(stamp.start);
-          }
-          highlightModalNote(targetIndex);
-        }
-      });
     }
 
     function renderModalScore(gabcSrc) {
       const container = document.getElementById('modalScoreSlot');
-      if (!container) return;
-      currentModalGabc = gabcSrc || '';
-
-      if (!gabcSrc) {
-        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">Partition GABC non disponible pour cette pièce.</div>';
-        return;
-      }
-
-      if (typeof exsurge === 'undefined') {
-        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--status-danger); font-size:0.85rem;">Module Exsurge en cours de chargement...</div>';
-        return;
-      }
+      if (!container || typeof exsurge === 'undefined') return;
 
       try {
         const ctxt = new exsurge.ChantContext();
-        const accentColor = '#c96b63';
-
         ctxt.textColor = '#ffffff';
         ctxt.noteColor = '#ffffff';
         ctxt.neumeLineColor = '#ffffff';
         ctxt.dividerLineColor = '#ffffff';
-        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.55)';
-
+        ctxt.staffLineColor = 'rgba(255, 255, 255, 0.45)';
         ctxt.setFont("'Crimson Text', 'Libre Baskerville', Georgia, serif", 17.5);
-        ctxt.setRubricColor(accentColor);
-        ctxt.specialCharColor = accentColor;
-        ctxt.rubricColor = accentColor;
-        ctxt.asteriskProperties = { fill: accentColor, class: 'rubric' };
-        ctxt.plusProperties = { fill: accentColor, class: 'rubric' };
-        ctxt.specialCharProperties = { 'font-family': "'Exsurge Characters'", fill: accentColor, class: 'rubric' };
-        ctxt.specialCharMap = { '℣': '℣', '℟': '℟', 'V': 'V', 'R': 'R', '+': '+', '*': '*' };
+        ctxt.setRubricColor('#c96b63');
+        ctxt.specialCharColor = '#c96b63';
         ctxt.lyricTextColor = '#ffffff';
         ctxt.lyricTextFont = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
-        ctxt.annotationTextFont = ctxt.lyricTextFont;
-
-        if (ctxt.textStyles) {
-          Object.keys(ctxt.textStyles).forEach(function(k) {
-            if (ctxt.textStyles[k]) {
-              ctxt.textStyles[k].color = '#ffffff';
-              ctxt.textStyles[k].font = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
-            }
-          });
-          if (ctxt.textStyles.al) {
-            ctxt.textStyles.al.color = 'rgba(255, 255, 255, 0.85)';
-            ctxt.textStyles.al.font = "'Crimson Text', 'Libre Baskerville', Georgia, serif";
-            ctxt.textStyles.al.size = 12;
-          }
-        }
 
         const processed = preprocessGabcForExsurge(gabcSrc);
         const mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processed);
         const score = new exsurge.ChantScore(ctxt, mappings, true);
 
-        var availWidth = container.clientWidth || 700;
-        if (availWidth < 340) availWidth = 340;
+        let availWidth = container.clientWidth || 640;
+        if (availWidth < 300) availWidth = 300;
         ctxt.width = availWidth;
 
         score.performLayout(ctxt);
-
-        score.layoutChantLines(ctxt, availWidth - 20, function() {
+        score.layoutChantLines(ctxt, availWidth - 10, function() {
           container.innerHTML = '';
           const svgNode = score.createSvgNode(ctxt);
           svgNode.setAttribute('width', '100%');
@@ -3062,14 +2187,15 @@ ${JSON.stringify(getValidatedDemoPieces())}
           svgNode.style.color = '#ffffff';
           svgNode.style.fill = '#ffffff';
           container.appendChild(svgNode);
+
           currentModalScore = score;
           currentModalChantInfo = _getChantInfo(score);
 
           if (currentModalChantInfo && currentModalChantInfo.allNotes) {
-            var allUseElements = Array.from(svgNode.querySelectorAll('use'));
-            allUseElements.forEach(function(u) {
+            const allUse = Array.from(svgNode.querySelectorAll('use'));
+            allUse.forEach(function(u) {
               if (u.source) {
-                var idx = currentModalChantInfo.allNotes.indexOf(u.source);
+                const idx = currentModalChantInfo.allNotes.indexOf(u.source);
                 if (idx >= 0) {
                   currentModalChantInfo.allNotes[idx].svgNode = u;
                   u.setAttribute('data-note-index', idx);
@@ -3079,24 +2205,10 @@ ${JSON.stringify(getValidatedDemoPieces())}
             });
 
             currentModalChantInfo.allNotes.forEach(function(n, idx) {
-              if (!n.svgNode) {
-                var el = null;
-                if (n.elementIndex !== undefined) {
-                  el = svgNode.querySelector('use[element-index="' + n.elementIndex + '"]');
-                }
-                if (!el && n.sourceIndex !== undefined) {
-                  el = svgNode.querySelector('use[source-index="' + n.sourceIndex + '"]');
-                }
-                if (el) {
-                  n.svgNode = el;
-                  el.setAttribute('data-note-index', idx);
-                  el.style.cursor = 'pointer';
-                }
-              } else {
+              if (n.svgNode) {
                 n.svgNode.setAttribute('data-note-index', idx);
                 n.svgNode.style.cursor = 'pointer';
               }
-
               if (n.neume && n.neume.lyrics) {
                 n.neume.lyrics.forEach(function(l) {
                   if (l.svgNode) {
@@ -3112,78 +2224,61 @@ ${JSON.stringify(getValidatedDemoPieces())}
                 });
               }
             });
-
-            if (score.notations) {
-              score.notations.forEach(function(notat) {
-                if (notat.notes && notat.notes.length > 0) {
-                  var firstNote = notat.notes[0];
-                  var nIdx = currentModalChantInfo.allNotes.indexOf(firstNote);
-                  if (nIdx >= 0 && notat.lyrics) {
-                    notat.lyrics.forEach(function(l) {
-                      if (l.svgNode) {
-                        l.svgNode.setAttribute('data-note-index', nIdx);
-                        l.svgNode.style.cursor = 'pointer';
-                        if (l.svgNode.querySelectorAll) {
-                          l.svgNode.querySelectorAll('tspan').forEach(function(ts) {
-                            ts.setAttribute('data-note-index', nIdx);
-                            ts.style.cursor = 'pointer';
-                          });
-                        }
-                      }
-                    });
-                  }
-                }
-              });
-            }
           }
 
-          setupModalScoreClicks(svgNode, currentModalChantInfo);
+          svgNode.addEventListener('click', function(e) {
+            const targetEl = e.target.closest ? e.target.closest('[data-note-index]') : null;
+            if (targetEl) {
+              const idx = parseInt(targetEl.getAttribute('data-note-index'), 10);
+              if (!isNaN(idx) && currentModalPiece && currentModalPiece.timestamps && currentModalPiece.timestamps[idx]) {
+                const st = currentModalPiece.timestamps[idx];
+                if (modalYtPlayer && typeof modalYtPlayer.seekTo === 'function') {
+                  modalYtPlayer.seekTo(st.start, true);
+                }
+                highlightModalNote(idx);
+              }
+            }
+          });
+
           highlightModalNote(0);
         });
-      } catch (err) {
-        console.error('Erreur Exsurge:', err);
-        container.innerHTML = '<div style="padding:20px; color:var(--status-danger); text-align:center; font-size:0.85rem;">Erreur de rendu grégorien : ' + err.message + '</div>';
+      } catch(err) {
+        console.warn('Erreur Exsurge modal:', err);
       }
     }
 
     window.openReviewModal = async function(pieceId) {
       currentReviewPieceId = pieceId;
-      const modal = document.getElementById('reviewModal');
-      modal.style.display = 'flex';
+      modalActiveNoteIndex = -1;
+      modalActiveNoteEl = null;
+      modalActiveLyricEl = null;
 
-      document.getElementById('modalPieceTitle').textContent = 'Chargement de la partition...';
-      const container = document.getElementById('modalVideoContainer');
-      if (container) container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:13px;">Chargement de la vidéo...</div>';
-      document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-tertiary); font-size:0.86rem;">Chargement des neumes grégoriens...</div>';
-      document.getElementById('modalTimeDisplay').textContent = '0:00 / 0:00';
-      updateModalPlayPauseState(false);
+      const modal = document.getElementById('reviewModal');
+      if (modal) modal.style.display = 'flex';
+
+      document.getElementById('modalChantTitle').textContent = 'Chargement #' + pieceId + '...';
+      document.getElementById('modalChantSub').textContent = '';
+      document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:16px 0; color:var(--text-tertiary);">Chargement de la partition...</div>';
 
       try {
-        const res = await fetch(\`/api/jobs/piece/\${encodeURIComponent(pieceId)}\`);
-        const piece = await res.json();
+        const res = await fetch('/api/jobs/piece/' + pieceId);
+        const data = await res.json();
+        const piece = data.piece || data;
         currentModalPiece = piece;
 
-        document.getElementById('modalPieceTitle').textContent = piece.incipit || piece.piece_id;
-        document.getElementById('modalPiecePart').textContent = piece.part || 'Liturgie';
-        document.getElementById('modalPieceAuthor').textContent = \`Aligné par : \${piece.worker_id || 'Ami'}\`;
-        document.getElementById('modalNotesCountBadge').textContent = \`\${piece.timestamps ? piece.timestamps.length : 0} notes synchronisées\`;
+        document.getElementById('modalChantTitle').textContent = piece.incipit || ('Pièce #' + piece.piece_id);
+        document.getElementById('modalChantSub').textContent = (piece.part || 'Liturgie') + ' • ' + (piece.notes_count || (piece.timestamps ? piece.timestamps.length : 0)) + ' notes' + (piece.worker_id ? ' • Calculé par ' + piece.worker_id : '');
 
-        const ytId = piece.youtube_id || (piece.youtube_url ? piece.youtube_url.split('v=')[1] : '');
-        initModalPlayer(ytId);
+        initModalPlayer(piece.youtube_id);
+        renderModalScore(piece.gabc_src);
 
-        if (piece.gabc_src) {
-          renderModalScore(piece.gabc_src);
-        } else {
-          document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">Partition GABC non disponible pour ce chant.</div>';
-        }
       } catch(e) {
-        document.getElementById('modalPieceTitle').textContent = 'Erreur de chargement';
-        document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:20px; text-align:center; color:var(--status-danger); font-size:0.85rem;">Impossible de charger la partition.</div>';
+        document.getElementById('modalChantTitle').textContent = 'Erreur #' + pieceId;
+        document.getElementById('modalScoreSlot').innerHTML = '<div style="padding:16px 0; color:var(--primary-color);">Impossible de charger cette pièce.</div>';
       }
     };
 
     window.closeReviewModal = function() {
-      document.getElementById('reviewModal').style.display = 'none';
       if (modalPlaybackInterval) {
         clearInterval(modalPlaybackInterval);
         modalPlaybackInterval = null;
@@ -3192,146 +2287,105 @@ ${JSON.stringify(getValidatedDemoPieces())}
         try { modalYtPlayer.destroy(); } catch(e) {}
         modalYtPlayer = null;
       }
-      const container = document.getElementById('modalVideoContainer');
-      if (container) container.innerHTML = '';
-      document.getElementById('modalScoreSlot').innerHTML = '';
-      currentModalScore = null;
-      currentModalChantInfo = null;
-      currentModalPiece = null;
-      currentModalGabc = '';
-      modalActiveNoteIndex = -1;
-      modalActiveNoteEl = null;
-      modalActiveLyricEl = null;
-      toggleReviewComment(false);
-      currentReviewPieceId = null;
-    };
-
-    // Raccourcis clavier identiques au Laboratoire d'Alignement
-    window.addEventListener('keydown', function(e) {
       const modal = document.getElementById('reviewModal');
-      if (!modal || modal.style.display !== 'flex') return;
-
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          toggleReviewComment(false);
-          e.target.blur();
-        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-          e.preventDefault();
-          submitReviewWithComment();
-        }
-        return;
-      }
-
-      if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        toggleModalPlayPause();
-      } else if (e.key === '1' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        submitReviewVote('approved');
-      } else if (e.key === '2' || e.key === 'd' || e.key === 'D') {
-        e.preventDefault();
-        submitReviewVote('rejected');
-      } else if (e.key === '3' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        submitReviewVote('bad_gabc');
-      } else if (e.key === 'c' || e.key === 'C') {
-        e.preventDefault();
-        toggleReviewComment();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        closeReviewModal();
-      } else if (e.key === 'j' || e.key === 'J') {
-        e.preventDefault();
-        seekModalRelative(-3);
-      } else if (e.key === 'l' || e.key === 'L') {
-        e.preventDefault();
-        seekModalRelative(3);
-      }
-    });
-
-    window.handleBackdropClick = function(e) {
-      if (e.target === document.getElementById('reviewModal')) {
-        closeReviewModal();
-      }
+      if (modal) modal.style.display = 'none';
+      currentReviewPieceId = null;
+      currentModalPiece = null;
+      currentModalChantInfo = null;
     };
 
-    window.toggleReviewComment = function(show) {
+    window.toggleReviewComment = function(forceShow) {
       const view = document.getElementById('modalCommentView');
-      const input = document.getElementById('modalCommentInput');
-      if (typeof show === 'boolean') {
-        view.style.display = show ? 'flex' : 'none';
-      } else {
-        view.style.display = view.style.display === 'none' ? 'flex' : 'none';
-      }
-      if (view.style.display === 'flex') {
-        input.focus();
-      } else {
-        input.value = '';
+      if (!view) return;
+      const isVisible = view.style.display !== 'none';
+      const show = typeof forceShow === 'boolean' ? forceShow : !isVisible;
+      view.style.display = show ? 'block' : 'none';
+      if (show) {
+        const input = document.getElementById('modalCommentInput');
+        if (input) input.focus();
       }
     };
 
-    window.submitReviewWithComment = function() {
-      const comment = (document.getElementById('modalCommentInput').value || '').trim();
-      submitReviewVote('commented', comment || 'Remarque utilisateur');
-    };
-
-    window.submitReviewVote = async function(status, customComment) {
+    window.submitReviewVote = async function(status) {
       if (!currentReviewPieceId) return;
-      
-      const payload = {
-        piece_id: currentReviewPieceId,
-        status: status,
-        comment: customComment || 'Relecture directe via portail worker',
-        author: document.getElementById('filterWorkerInput').value.trim() || 'Ami-Reviewer'
-      };
+      const pseudo = (document.getElementById('filterWorkerInput') ? document.getElementById('filterWorkerInput').value.trim() : '') ||
+                     localStorage.getItem('oremus_worker_name') || 'Anonyme';
 
       try {
-        const res = await fetch('/api/review', {
+        const res = await fetch('/api/reviews', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            piece_id: currentReviewPieceId,
+            status: status,
+            reviewer: pseudo
+          })
         });
-        
         if (res.ok) {
-          awardUserXp(10, 'Relecture');
+          awardUserXp(10);
           closeReviewModal();
-          const pseudo = document.getElementById('filterWorkerInput').value.trim();
           fetchWorkerBatch(pseudo);
-        } else {
-          alert('Erreur lors de l\\'enregistrement du vote.');
         }
       } catch(e) {
-        alert('Impossible de joindre le serveur.');
+        alert("Erreur lors de l'envoi de l'avis");
       }
     };
 
-    // 5. Leaderboard & Progression globale
+    window.submitReviewWithComment = async function() {
+      if (!currentReviewPieceId) return;
+      const input = document.getElementById('modalCommentInput');
+      const comment = input ? input.value.trim() : '';
+      if (!comment) return;
+
+      const pseudo = (document.getElementById('filterWorkerInput') ? document.getElementById('filterWorkerInput').value.trim() : '') ||
+                     localStorage.getItem('oremus_worker_name') || 'Anonyme';
+
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            piece_id: currentReviewPieceId,
+            status: 'rejected',
+            comment: comment,
+            reviewer: pseudo
+          })
+        });
+        if (res.ok) {
+          awardUserXp(15);
+          closeReviewModal();
+          fetchWorkerBatch(pseudo);
+        }
+      } catch(e) {
+        alert("Erreur lors de l'envoi du commentaire");
+      }
+    };
+
     async function refreshLeaderboardAndPieces() {
       try {
-        const res = await fetch('/api/jobs/status');
+        const res = await fetch('/api/stats');
         const data = await res.json();
 
-        document.getElementById('progressPct').textContent = \`\${data.percentage}%\`;
-        document.getElementById('progressBar').style.width = \`\${data.percentage}%\`;
-        document.getElementById('statCompleted').textContent = data.completed;
-        document.getElementById('statPending').textContent = data.pending;
-        document.getElementById('statWorkers').textContent = data.active_workers;
+        const pctEl = document.getElementById('progressPct');
+        if (pctEl) pctEl.textContent = (data.completed || 0) + ' / 885 (' + (data.percentage || 0) + '%)';
+
+        const barEl = document.getElementById('progressBar');
+        if (barEl) barEl.style.width = (data.percentage || 0) + '%';
 
         const tbody = document.getElementById('leaderboardTbody');
-        if (data.leaderboard && data.leaderboard.length > 0) {
-          tbody.innerHTML = data.leaderboard.map((w, idx) => \`
-            <tr>
-              <td style="font-weight:700; color:\${idx === 0 ? '#fbbf24' : (idx === 1 ? '#94a3b8' : (idx === 2 ? '#b45309' : 'var(--text-muted)'))};">#\${idx + 1}</td>
-              <td style="font-weight:600; color:#fff;">\${w.name}</td>
-              <td style="color:var(--text-muted); font-size:0.85rem;">\${w.device || 'CPU'}</td>
-              <td style="text-align:right; font-weight:700; color:var(--emerald);">\${w.count} chants</td>
-            </tr>
-          \`).join('');
+        if (tbody && data.leaderboard && data.leaderboard.length > 0) {
+          tbody.innerHTML = data.leaderboard.map(function(w, idx) {
+            return '<tr>' +
+              '<td style="font-weight:600; color:var(--text-tertiary);">#' + (idx + 1) + '</td>' +
+              '<td style="font-weight:600; color:#fff;">' + w.name + '</td>' +
+              '<td style="color:var(--text-tertiary); font-size:0.82rem;">' + (w.device || 'CPU') + '</td>' +
+              '<td style="text-align:right; font-weight:600; color:var(--primary-color);">' + w.count + ' chants</td>' +
+            '</tr>';
+          }).join('');
         }
 
-        // Rafraîchir aussi le lot si affiché
-        const pseudo = document.getElementById('filterWorkerInput').value.trim();
+        const filterInput = document.getElementById('filterWorkerInput');
+        const pseudo = filterInput ? filterInput.value.trim() : '';
         fetchWorkerBatch(pseudo);
 
       } catch(e) {}
@@ -3341,7 +2395,6 @@ ${JSON.stringify(getValidatedDemoPieces())}
 </html>`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // SERVEUR HTTP PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
 
