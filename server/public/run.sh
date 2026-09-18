@@ -104,8 +104,19 @@ if [ ! -d ".venv" ]; then
 fi
 source .venv/bin/activate
 
-# 4. Installation des dépendances si nécessaire
-echo "[*] Vérification des modules IA (PyTorch, MMS_FA, yt-dlp)..."
+# 4. Installation des dépendances avec détection intelligente NVIDIA CUDA
+echo "[*] Détection du matériel d'accélération IA (NVIDIA CUDA / CPU)..."
+if command -v nvidia-smi >/dev/null 2>&1; then
+    if ! python -c "import torch; exit(0 if torch.cuda.is_available() else 1)" 2>/dev/null; then
+        echo "======================================================================="
+        echo "✦ CARTE GRAPHIQUE NVIDIA DÉTECTÉE !"
+        echo "✦ Installation de PyTorch CUDA pour multiplier la vitesse par 25..."
+        echo "======================================================================="
+        pip uninstall -y torch torchaudio >/dev/null 2>&1 || true
+        pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+    fi
+fi
+echo "[*] Vérification des modules audio et réseau..."
 pip install -r requirements.txt --quiet --disable-pip-version-check
 
 # 5. Exécution du worker

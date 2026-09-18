@@ -61,8 +61,21 @@ if not exist ".venv" (
 
 call .venv\Scripts\activate.bat
 
-:: 3. Installation / Mise a jour des bibliotheques d'IA
-echo [*] Verification des modules d'intelligence artificielle (PyTorch, MMS_FA, yt-dlp)...
+:: 3. Installation / Mise a jour des bibliotheques d'IA avec detection NVIDIA CUDA
+echo [*] Detection du materiel d'acceleration IA (NVIDIA CUDA / CPU)...
+where nvidia-smi >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    python -c "import torch; exit(0 if torch.cuda.is_available() else 1)" >nul 2>nul
+    if errorlevel 1 (
+        echo =======================================================================
+        echo ✦ CARTE GRAPHIQUE NVIDIA DETECTEE !
+        echo ✦ Installation de PyTorch CUDA pour multiplier la vitesse par 25...
+        echo =======================================================================
+        pip uninstall -y torch torchaudio >nul 2>nul
+        pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+    )
+)
+echo [*] Verification des modules audio et reseau (yt-dlp, soundfile)...
 pip install -r requirements.txt --quiet --disable-pip-version-check
 
 :: 4. Choix de la duree de session

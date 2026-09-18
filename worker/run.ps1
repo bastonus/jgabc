@@ -17,6 +17,14 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+# Configuration stricte de l'encodage de la console en UTF-8 et activation des couleurs ANSI / VT100
+try {
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+    chcp 65001 | Out-Null
+    cmd /c ""
+} catch {}
+
 Write-Host "=======================================================================" -ForegroundColor DarkYellow
 Write-Host "       ✦ OREMUS — WORKER DE CALCUL DISTRIBUÉ LITURGIQUE (CLI) ✦" -ForegroundColor Yellow
 Write-Host "=======================================================================" -ForegroundColor DarkYellow
@@ -57,18 +65,18 @@ if (Get-Command python -ErrorAction SilentlyContinue) {
     exit 1
 }
 
-# 2. Création du dossier de travail
+# 3. Création du dossier de travail
 if (-not (Test-Path $WorkDir)) {
     New-Item -ItemType Directory -Path $WorkDir -Force | Out-Null
 }
 Set-Location $WorkDir
 
-# 3. Téléchargement des composants worker.py et requirements.txt
+# 4. Téléchargement des composants worker.py et requirements.txt
 Write-Host "[*] Récupération des composants du worker..." -ForegroundColor Cyan
 Invoke-RestMethod -Uri "$Server/worker.py" -OutFile "worker.py"
 Invoke-RestMethod -Uri "$Server/requirements.txt" -OutFile "requirements.txt"
 
-# 4. Environnement virtuel isolé
+# 5. Environnement virtuel isolé
 $VenvDir = Join-Path $WorkDir ".venv"
 if (-not (Test-Path $VenvDir)) {
     Write-Host "[*] Initialisation de l'environnement virtuel (.venv)..." -ForegroundColor Cyan
@@ -78,8 +86,52 @@ if (-not (Test-Path $VenvDir)) {
 $VenvPython = Join-Path $VenvDir "Scripts\python.exe"
 $VenvPip = Join-Path $VenvDir "Scripts\pip.exe"
 
-# 6. Dépendances IA
-Write-Host "[*] Vérification des modules IA (PyTorch, MMS_FA, yt-dlp)..." -ForegroundColor Cyan
+# 6. Dépendances IA avec détection matérielle intelligente (NVIDIA CUDA / CPU)
+Write-Host "[*] Détection du matériel d'accélération IA..." -ForegroundColor Cyan
+
+$HasNvidia = $false
+$GpuName = ""
+try {
+    if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
+        $smiOut = & nvidia-smi --query-gpu=name --format=csv,noheader 2>$null
+        if ($smiOut) {
+            $HasNvidia = $true
+            $GpuName = ($smiOut -split "`n")[0].Trim()
+        }
+    }
+    if (-not $HasNvidia) {
+        $videoCtrl = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*NVIDIA*" }
+        if ($videoCtrl) {
+            $HasNvidia = $true
+            $GpuName = $videoCtrl[0].Name
+        }
+    }
+} catch {}
+
+$TorchHasCuda = $false
+if (Test-Path $VenvPython) {
+    try {
+        $cudaCheck = & $VenvPython -c "import torch; print(torch.cuda.is_available())" 2>$null
+        if ($cudaCheck -and $cudaCheck.Trim() -eq "True") {
+            $TorchHasCuda = $true
+        }
+    } catch {}
+}
+
+if ($HasNvidia -and -not $TorchHasCuda) {
+    Write-Host "=======================================================================" -ForegroundColor Green
+    if ($GpuName) {
+        Write-Host "✦ CARTE GRAPHIQUE NVIDIA DÉTECTÉE : $GpuName" -ForegroundColor Green
+    } else {
+        Write-Host "✦ CARTE GRAPHIQUE NVIDIA DÉTECTÉE !" -ForegroundColor Green
+    }
+    Write-Host "✦ Installation de PyTorch avec accélération CUDA (vitesse multipliée par 25)..." -ForegroundColor Yellow
+    Write-Host "=======================================================================" -ForegroundColor Green
+    & $VenvPip uninstall -y torch torchaudio | Out-Null
+    & $VenvPip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+}
+
+Write-Host "[*] Vérification des modules IA (MMS_FA, yt-dlp)..." -ForegroundColor Cyan
 & $VenvPip install -r requirements.txt --quiet --disable-pip-version-check
 
 # 7. Lancement du worker

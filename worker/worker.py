@@ -25,8 +25,28 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-# Force UTF-8 stdout sur consoles Windows
-if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+# Configuration de l'encodage UTF-8 et des couleurs ANSI / VT100
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+    # Activer le mode VT100 dans conhost Windows pour que les couleurs ANSI fonctionnent sans afficher ←[92m
+    try:
+        os.system("")
+    except Exception:
+        pass
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        hStdOut = kernel32.GetStdHandle(-11)
+        mode = ctypes.c_ulong()
+        if kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode)):
+            kernel32.SetConsoleMode(hStdOut, mode.value | 0x0004)
+    except Exception:
+        pass
+elif sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -75,10 +95,33 @@ def ensure_dependencies():
     import subprocess
     req_file = Path(__file__).parent / "requirements.txt"
     try:
-        if req_file.exists():
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req_file)])
+        # Vérifier si un GPU NVIDIA est présent pour installer directement la version CUDA
+        has_nvidia = False
+        try:
+            r = subprocess.run(["nvidia-smi"], capture_output=True, timeout=3)
+            if r.returncode == 0:
+                has_nvidia = True
+        except Exception:
+            pass
+
+        if has_nvidia and ("torch" in missing or "torchaudio" in missing):
+            print("  ✦ GPU NVIDIA détecté : Installation de PyTorch avec accélération CUDA...")
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "torch", "torchaudio",
+                "--index-url", "https://download.pytorch.org/whl/cu124"
+            ])
+            if req_file.exists():
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req_file)])
+            else:
+                rest = [m for m in missing if m not in ("torch", "torchaudio")]
+                if rest:
+                    subprocess.check_call([sys.executable, "-m", "pip", "install"] + rest)
         else:
-            subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing)
+            if req_file.exists():
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", str(req_file)])
+            else:
+                subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing)
         print("\n  \033[92m[✓] Dépendances installées avec succès !\033[0m Reprise de l'exécution...\n")
     except Exception as e:
         print("\n" + "=" * 75)
@@ -90,6 +133,46 @@ def ensure_dependencies():
         print("      • Ou en 1 ligne : irm https://api-oremus.silverhorse.fr/run.ps1 | iex")
         print("=" * 75 + "\n")
         sys.exit(1)
+
+
+def check_and_enable_cuda():
+    """Si une carte graphique NVIDIA est présente mais que PyTorch est en version CPU, installe automatiquement la version CUDA."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return
+    except Exception:
+        pass
+
+    import subprocess
+    try:
+        res = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+            capture_output=True,
+            text=True,
+            timeout=3
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            gpu_name = res.stdout.strip().split("\n")[0].strip()
+            print("\n" + "=" * 75)
+            print(f"  ✦ CARTE GRAPHIQUE NVIDIA DÉTECTÉE : \033[92m{gpu_name}\033[0m")
+            print("  [!] PyTorch est actuellement installé en version CPU uniquement.")
+            print("  ✦ Activation automatique de l'accélération matérielle CUDA (vitesse x25)...")
+            print("=" * 75 + "\n")
+
+            # Désinstallation de la version CPU et installation de la version CUDA 12.4
+            subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "torch", "torchaudio"])
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "torch", "torchaudio",
+                "--index-url", "https://download.pytorch.org/whl/cu124"
+            ])
+            print("\n  \033[92m[✓] PyTorch CUDA activé avec succès !\033[0m Redémarrage du worker sur GPU NVIDIA...\n")
+            # Relancer avec les mêmes arguments sous l'environnement GPU
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+    except Exception as e:
+        # Si échec (ex: pas d'internet ou interruption), continuer en CPU sans bloquer
+        pass
 
 
 def detect_device():
@@ -472,6 +555,7 @@ def main():
             print("\033[91m✦ [ERREUR] Veuillez choisir un prénom ou pseudo personnalisé pour compter vos points.\033[0m")
             worker_name = ""
 
+    check_and_enable_cuda()
     device_type, device_desc = detect_device()
 
     SESSION_STATE["worker_name"] = worker_name

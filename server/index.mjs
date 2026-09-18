@@ -2545,10 +2545,10 @@ const server = http.createServer(async (req, res) => {
 
   // 3b. Fichiers CLI & ressources statiques (run.sh, run.ps1, worker.py, requirements.txt, exsurge.min.js)
   const CLI_FILES = {
-    '/run.sh':            { name: 'run.sh',            mime: 'text/x-shellscript' },
-    '/run.ps1':           { name: 'run.ps1',           mime: 'text/plain' },
-    '/worker.py':         { name: 'worker.py',         mime: 'text/x-python' },
-    '/requirements.txt':  { name: 'requirements.txt',  mime: 'text/plain' },
+    '/run.sh':            { name: 'run.sh',            mime: 'text/x-shellscript; charset=utf-8' },
+    '/run.ps1':           { name: 'run.ps1',           mime: 'text/plain; charset=utf-8' },
+    '/worker.py':         { name: 'worker.py',         mime: 'text/x-python; charset=utf-8' },
+    '/requirements.txt':  { name: 'requirements.txt',  mime: 'text/plain; charset=utf-8' },
     '/exsurge.min.js':    { name: 'exsurge.min.js',    mime: 'application/javascript; charset=utf-8' },
   };
   if ((req.method === 'GET' || req.method === 'HEAD') && CLI_FILES[pathname]) {
