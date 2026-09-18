@@ -1875,22 +1875,21 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     // 4. Rendu Grégorien Exsurge & Modal de Revue Directe
     function preprocessGabcForExsurge(gabc) {
       if (!gabc) return '';
-      gabc = gabc.replace(/<sp>['’]<\/sp>/g, "'");
-      gabc = gabc.replace(/<v>\\([VRA])bar<\/v>/gi, function(m, b) { return b.toUpperCase() + '/.'; })
-                 .replace(/<sp>([VRA])\/?<\/sp>\.?/gi, function(m, b) { return b.toUpperCase() + '/.'; });
-      gabc = gabc.replace(/(^|\s|\))<i>\s*(Ps\.?|Psalmus)\s*<\/i>/gi, '$1<c><i>Ps.</i></c>');
-      gabc = gabc.replace(/(^|\s|\))(Ps\.)(?=\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
-      gabc = gabc.replace(/(^|\s|\))<i>\s*([V℣]\.?|Versus)\s*<\/i>/gi, '$1<c><i>℣.</i></c>');
-      gabc = gabc.replace(/(^|\s|\))(V\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
-      gabc = gabc.replace(/(^|\s|\))<i>\s*([R℟]\.?|Responsorium)\s*<\/i>/gi, '$1<c><i>℟.</i></c>');
-      gabc = gabc.replace(/(^|\s|\))(R\/\.?)(?=\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
+      gabc = gabc.replace(/<sp>['’]<\\/sp>/g, "'");
+      gabc = gabc.replace(/<v>\\\\([VRA])bar<\\/v>/gi, function(m, b) { return b.toUpperCase() + '/.'; })
+                 .replace(/<sp>([VRA])\\/?<\\/sp>\\.?/gi, function(m, b) { return b.toUpperCase() + '/.'; });
+      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*(Ps\\.?|Psalmus)\\s*<\\/i>/gi, '$1<c><i>Ps.</i></c>');
+      gabc = gabc.replace(/(^|\\s|\\))(Ps\\.)(?=\\s+[A-ZÁÉÍÓÚ])/g, '$1<c><i>Ps.</i></c>');
+      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*([V℣]\\.?|Versus)\\s*<\\/i>/gi, '$1<c><i>℣.</i></c>');
+      gabc = gabc.replace(/(^|\\s|\\))(V\\/\\.?)(?=\\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℣.</i></c>');
+      gabc = gabc.replace(/(^|\\s|\\))<i>\\s*([R℟]\\.?|Responsorium)\\s*<\\/i>/gi, '$1<c><i>℟.</i></c>');
+      gabc = gabc.replace(/(^|\\s|\\))(R\\/\\.?)(?=\\s*[0-9A-ZÁÉÍÓÚ(])/g, '$1<c><i>℟.</i></c>');
       return gabc;
     }
 
     let modalYtPlayer = null;
     let modalPlaybackInterval = null;
     let currentModalPiece = null;
-    let currentModalScore = null;
     let currentModalChantInfo = null;
     let modalActiveNoteIndex = -1;
     let modalActiveNoteEl = null;
