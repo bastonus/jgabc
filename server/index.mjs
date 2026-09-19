@@ -932,9 +932,19 @@ function renderWorkerPortalHtml(stats, benchmarks) {
   <style>
     :root {
       --primary-color: #c96b63;
+      --primary-color-rgb: 201, 107, 99;
+      --gold-sacred: #c4984f;
+      --gold-sacred-bg: rgba(196, 152, 79, 0.12);
+      --background-base: #000000;
+      --background-surface: #0a0a0a;
+      --score-bg: #000000;
+      --score-text: #f4f4f6;
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-tertiary: #64748b;
+      --card-radius: 16px;
+      --btn-radius: 12px;
+      --pill-radius: 20px;
     }
 
     * {
@@ -1030,6 +1040,58 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       font-weight: 700;
       text-decoration: underline;
       text-underline-offset: 3px;
+    }
+
+    /* Carte d'information du chant (parité alignment-lab, pure et simple) */
+    .lab-chant-info-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 0;
+      flex-shrink: 0;
+    }
+    .chant-info-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .score-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      padding: 2px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .chant-info-title {
+      margin: 2px 0 0 0;
+      padding: 0;
+      font-family: 'Libre Baskerville', 'Crimson Text', serif;
+      font-size: 1.08rem;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chant-info-details {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-type {
+      color: var(--primary-color) !important;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+      line-height: 1.2;
     }
 
     /* Contrôles de lecture démo */
@@ -1194,11 +1256,17 @@ function renderWorkerPortalHtml(stats, benchmarks) {
       font-size: 0.88rem;
     }
 
-    /* Rendu partition Exsurge */
+    /* Rendu partition Exsurge (parité alignment-lab, pure et simple) */
+    #demoScoreSlot, #modalScoreSlot.score-viewport {
+      background: var(--score-bg);
+      color: var(--score-text);
+    }
     .score-viewport svg, #demoScoreSlot svg {
       display: block;
+      margin: 0 auto;
       width: 100%;
       height: auto;
+      overflow: visible;
       color: #ffffff !important;
       fill: #ffffff !important;
     }
@@ -1220,10 +1288,22 @@ function renderWorkerPortalHtml(stats, benchmarks) {
     .score-viewport svg use.active,
     .score-viewport svg text.active,
     .score-viewport svg text.active tspan,
-    .score-viewport svg tspan.active {
+    .score-viewport svg tspan.active,
+    #demoScoreSlot svg use.active,
+    #demoScoreSlot svg use[class*="active"],
+    #demoScoreSlot svg .active-note-highlight,
+    .active-note-highlight {
       fill: var(--primary-color) !important;
       color: var(--primary-color) !important;
       stroke: none !important;
+    }
+    #demoScoreSlot svg use[data-demo-idx],
+    #demoScoreSlot svg text[data-demo-idx],
+    #demoScoreSlot svg tspan[data-demo-idx],
+    .score-viewport svg use[data-note-index],
+    .score-viewport svg text[data-note-index],
+    .score-viewport svg tspan[data-note-index] {
+      cursor: pointer;
     }
 
     /* Modal de relecture */
@@ -1313,6 +1393,7 @@ function renderWorkerPortalHtml(stats, benchmarks) {
 
     <!-- En-tête épuré sans fioriture -->
     <header style="margin-bottom: 32px;">
+      <div class="card-type">Scriptorium numérique</div>
       <h1>Calcul Distribué Oremus</h1>
       <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:4px;">
         Synchronisation note-par-note du chant grégorien pour <a href="https://oremus.silverhorse.fr" target="_blank" rel="noopener">oremus.silverhorse.fr</a>.
@@ -1330,8 +1411,13 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         </div>
       </div>
 
-      <div style="font-size:0.80rem; color:var(--text-secondary); margin-bottom:12px;" id="demoPieceSub">
-        Dextera Domini • Mode 2 • 120 notes • Données validées via l'API • Aligné par : Atelier-Chantres
+      <div class="lab-chant-info-card" style="margin-bottom:12px;">
+        <div class="chant-info-badge-row">
+          <span class="score-mode-badge" id="demoModeBadge">Mode 2</span>
+          <span style="font-size:0.74rem; color:var(--text-tertiary);" id="demoNotesBadge">120 notes</span>
+        </div>
+        <h3 class="chant-info-title" id="demoPieceTitle">Dextera Domini</h3>
+        <div class="chant-info-details" id="demoPieceSub">Données validées via l'API • Aligné par : Atelier-Chantres</div>
       </div>
 
       <div style="display:grid; grid-template-columns: 240px 1fr; gap:16px; margin-bottom:14px; align-items:center;">
@@ -1957,7 +2043,19 @@ ${JSON.stringify(getValidatedDemoPieces())}
         });
         const subEl = document.getElementById('demoPieceSub');
         if (subEl) {
-          subEl.textContent = p.incipit + ' • Mode ' + p.mode + ' • ' + p.notes_count + ' notes • Données validées via l\u2019API • Aligné par : ' + (p.worker_id || 'Atelier-Chantres');
+          subEl.textContent = 'Données validées via l\u2019API • Aligné par : ' + (p.worker_id || 'Atelier-Chantres');
+        }
+        const badgeEl = document.getElementById('demoModeBadge');
+        if (badgeEl) {
+          badgeEl.textContent = 'Mode ' + (p.mode || '—');
+        }
+        const notesEl = document.getElementById('demoNotesBadge');
+        if (notesEl) {
+          notesEl.textContent = (p.notes_count || (p.timestamps ? p.timestamps.length : 0)) + ' notes';
+        }
+        const titleEl = document.getElementById('demoPieceTitle');
+        if (titleEl) {
+          titleEl.textContent = p.incipit || ('Pièce #' + (p.piece_id || pieceId));
         }
         initDemoPlayer(p.youtube_id);
         renderDemoScore(p.gabc_src);
@@ -2446,7 +2544,6 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
       if (!currentModalChantInfo || !currentModalChantInfo.allNotes || !currentModalChantInfo.allNotes.length) return;
       if (idx >= currentModalChantInfo.allNotes.length) return;
-      if (modalActiveNoteEl && modalActiveNoteEl.classList.contains('active')) return;
       const note = currentModalChantInfo.allNotes[idx];
       const accentColor = '#c96b63';
 
