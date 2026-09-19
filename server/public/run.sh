@@ -2,14 +2,14 @@
 # run.sh — Lanceur CLI 1-ligne pour macOS & Linux
 # Usage :
 #   curl -fsSL https://api-oremus.silverhorse.fr/run.sh | bash
-#   curl -fsSL https://api-oremus.silverhorse.fr/run.sh | bash -s -- --name "MonPseudo" --duration 30
+#   curl -fsSL https://api-oremus.silverhorse.fr/run.sh | WORKER_NAME="MonPseudo" bash -s -- --duration 30
 set -e
 
 SERVER_URL="${OREMUS_SERVER:-https://api-oremus.silverhorse.fr}"
 WORK_DIR="${OREMUS_WORK_DIR:-$HOME/.oremus-worker}"
 
-# Extraction des arguments optionnels
-WORKER_NAME=""
+# Extraction des arguments optionnels (WORKER_NAME préservé depuis l'environnement)
+WORKER_NAME="${WORKER_NAME:-}"
 WORKER_DURATION=0
 WORKER_MAX_JOBS=0
 

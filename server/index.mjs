@@ -1359,8 +1359,8 @@ function renderWorkerPortalHtml(stats, benchmarks) {
         </div>
       </div>
 
-      <div id="demoScoreSlot" style="overflow-x:auto; padding: 6px 0; min-height: 100px;">
-        <div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement de la partition...</div>
+      <div id="demoScoreSlot" style="overflow-x:auto; padding:12px 16px; min-height:100px; font-family:'Crimson Text','Libre Baskerville',Georgia,serif;">
+        <div style="color:var(--text-tertiary); font-size:0.84rem; padding:40px 0; text-align:center;">Chargement de la partition...</div>
       </div>
     </section>
 
@@ -1838,7 +1838,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       const container = document.getElementById('demoScoreSlot');
       if (!container) return;
       if (typeof exsurge === 'undefined') {
-        container.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement du moteur de partition…</div>';
+        container.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem; padding:40px 0; text-align:center;">Chargement du moteur de partition…</div>';
         waitForExsurge(function() {
           if (currentDemoPiece) renderDemoScore(currentDemoPiece.gabc_src);
         });
@@ -1969,7 +1969,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       }
       // Fallback : donnees validees via l'API en direct
       const slotEl = document.getElementById('demoScoreSlot');
-      if (slotEl) slotEl.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem;">Chargement de la partition…</div>';
+      if (slotEl) slotEl.innerHTML = '<div style="color:var(--text-tertiary); font-size:0.84rem; padding:40px 0; text-align:center;">Chargement de la partition…</div>';
       fetch('/api/jobs/piece/' + encodeURIComponent(pieceId)).then(function(r) { return r.json(); }).then(function(p) {
         if (p && p.timestamps && p.timestamps.length) {
           VALIDATED_DEMO_PIECES[pieceId] = p;
@@ -2147,15 +2147,19 @@ ${JSON.stringify(getValidatedDemoPieces())}
 
       const winEl = document.getElementById('cliCmdWindows');
       if (winEl) {
-        winEl.textContent = pseudo 
-          ? ('$env:WORKER_NAME="' + pseudo + '"; irm ' + origin + '/run.ps1 | iex' + (currentDurationMins > 0 ? ' -Duration ' + currentDurationMins : ''))
-          : ('irm ' + origin + '/run.ps1 | iex');
+        if (pseudo) {
+          let sb = '& ([scriptblock]::Create((irm ' + origin + '/run.ps1))) -Name "' + pseudo + '"';
+          if (currentDurationMins > 0) sb += ' -Duration ' + currentDurationMins;
+          winEl.textContent = sb;
+        } else {
+          winEl.textContent = 'irm ' + origin + '/run.ps1 | iex';
+        }
       }
 
       const unixEl = document.getElementById('cliCmdUnix');
       if (unixEl) {
         unixEl.textContent = pseudo
-          ? ('WORKER_NAME="' + pseudo + '" curl -fsSL ' + origin + '/run.sh | bash -s --' + durArg)
+          ? ('curl -fsSL ' + origin + '/run.sh | WORKER_NAME="' + pseudo + '" bash -s --' + durArg)
           : ('curl -fsSL ' + origin + '/run.sh | bash');
       }
 
@@ -2266,7 +2270,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       return gabc
         .split("<sp>'</sp>").join("'")
         .split("<sp>’</sp>").join("'")
-        .replace(new RegExp("<v>\\\\([VRA])bar</v>", "gi"), function(m, b) { return b.toUpperCase() + '/.'; })
+        .replace(new RegExp("<v>\\\\\\\\([VRA])bar</v>", "gi"), function(m, b) { return b.toUpperCase() + '/.'; })
         .replace(new RegExp("<sp>([VRA])/?</sp>\\\\.?", "gi"), function(m, b) { return b.toUpperCase() + '/.'; })
         .replace(new RegExp("(^|\\\\s|\\\\))<i>\\\\s*(Ps\\\\.?|Psalmus)\\\\s*</i>", "gi"), "$1<c><i>Ps.</i></c>")
         .replace(new RegExp("(^|\\\\s|\\\\))(Ps\\\\.)(?=\\\\s+[A-ZÁÉÍÓÚ])", "g"), "$1<c><i>Ps.</i></c>")
@@ -2542,7 +2546,7 @@ ${JSON.stringify(getValidatedDemoPieces())}
       const container = document.getElementById('modalScoreSlot');
       if (!container) return;
       if (typeof exsurge === 'undefined') {
-        container.innerHTML = '<div style="padding:16px 0; color:var(--text-tertiary);">Chargement du moteur de partition…</div>';
+        container.innerHTML = '<div style="padding:40px 0; text-align:center; color:var(--text-tertiary);">Chargement du moteur de partition…</div>';
         waitForExsurge(function() {
           if (currentModalPiece) renderModalScore(currentModalPiece.gabc_src);
         });
