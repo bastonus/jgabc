@@ -834,14 +834,61 @@ def print_session_summary(worker_name: str, server_url: str, count: int, elapsed
     print("=" * 75 + "\n")
 
 
-def request_json(url: str, method: str = "GET", payload: dict = None, timeout: int = 15):
-    """Effectue un appel API HTTP standard avec urllib."""
+COMPLETED_DIR = Path(__file__).resolve().parent / "completed"
+
+
+def request_json(url: str, method: str = "GET", payload: dict = None, timeout: int = 15, retries: int = 1, retry_delay: float = 2.0):
+    """Effectue un appel API HTTP standard avec urllib avec retries automatiques."""
     headers = {"User-Agent": "Oremus-Distributed-Worker/1.0", "Content-Type": "application/json", "Accept": "application/json"}
     data_bytes = json.dumps(payload).encode("utf-8") if payload is not None else None
     
-    req = urllib.request.Request(url, data=data_bytes, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    last_err = None
+    for attempt in range(1, retries + 1):
+        try:
+            req = urllib.request.Request(url, data=data_bytes, headers=headers, method=method)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            last_err = e
+            if attempt < retries:
+                time.sleep(retry_delay * attempt)
+    raise last_err
+
+
+def sync_unsubmitted_completed_jobs(server_url: str, worker_name: str) -> int:
+    """Vérifie le dossier completed/ et tente de soumettre les alignements non marqués comme validés."""
+    if not COMPLETED_DIR.exists():
+        return 0
+    orphan_files = []
+    for p in sorted(COMPLETED_DIR.glob("*.json")):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if not data.get("submitted") and data.get("status") == "completed" and data.get("timestamps"):
+                orphan_files.append((p, data))
+        except Exception:
+            pass
+    if not orphan_files:
+        return 0
+    print(f"\n  ✦ \033[93m[RÉCUPÉRATION]\033[0m {len(orphan_files)} alignement(s) local(aux) en attente de synchronisation détecté(s)...")
+    recovered = 0
+    for p, data in orphan_files:
+        piece_id = data.get("piece_id")
+        try:
+            data["worker_id"] = worker_name
+            sub_resp = request_json(f"{server_url}/api/jobs/submit", method="POST", payload=data, retries=3)
+            if sub_resp.get("success"):
+                data["submitted"] = True
+                data["submitted_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                with open(p, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                print(f"    ✓ Pièce {piece_id} synchronisée avec succès (+25 XP).")
+                recovered += 1
+        except Exception as e:
+            print(f"    [!] Échec synchronisation pièce {piece_id} : {e}")
+    if recovered > 0:
+        print(f"  \033[92m[✓]\033[0m {recovered} pièce(s) synchronisée(s) vers le serveur !")
+    return recovered
 
 
 # État global de session pour bilan en cas d'interruption
@@ -903,7 +950,9 @@ def main():
         print(f"  ✦ Durée        : \033[93mEn continu\033[0m (arrêt possible à tout instant avec Ctrl+C)\n")
     print("=" * 75)
 
-    jobs_processed = 0
+    recovered_count = sync_unsubmitted_completed_jobs(server_url, worker_name)
+    jobs_processed = recovered_count
+    SESSION_STATE["jobs_processed"] = jobs_processed
 
     while True:
         elapsed = time.time() - SESSION_STATE["start_time"]
@@ -967,7 +1016,9 @@ def main():
 
             print(f"  [3/3] Alignement réussi : {len(timestamps)} notes synchronisées sur {audio_dur:.1f}s d'audio (calcul en {duration_sec}s).")
 
-            # 3. Soumission au serveur
+            # 3. Sauvegarde locale de sécurité avant envoi (0% de perte)
+            COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
+            backup_file = COMPLETED_DIR / f"{piece_id}.json"
             submit_payload = {
                 "piece_id": piece_id,
                 "worker_id": worker_name,
@@ -976,22 +1027,44 @@ def main():
                 "audio_duration_sec": audio_dur,
                 "compute_device": device_desc,
                 "compute_time_sec": duration_sec,
-                "status": "completed"
+                "status": "completed",
+                "saved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "submitted": False
             }
+            try:
+                with open(backup_file, "w", encoding="utf-8") as f:
+                    json.dump(submit_payload, f, ensure_ascii=False, indent=2)
+            except Exception as w_err:
+                print(f"  [WARN] Écriture sauvegarde locale : {w_err}")
 
-            sub_resp = request_json(f"{server_url}/api/jobs/submit", method="POST", payload=submit_payload)
+            # 4. Soumission au serveur avec retries automatiques
+            sub_resp = request_json(f"{server_url}/api/jobs/submit", method="POST", payload=submit_payload, retries=3)
             if sub_resp.get("success"):
-                print(f"  \033[92m[SUCCÈS]\033[0m Enregistré avec succès sur le serveur ! Total de vos contributions : {sub_resp.get('worker_total', jobs_processed + 1)} chant(s).")
+                try:
+                    submit_payload["submitted"] = True
+                    submit_payload["submitted_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                    with open(backup_file, "w", encoding="utf-8") as f:
+                        json.dump(submit_payload, f, ensure_ascii=False, indent=2)
+                except Exception:
+                    pass
+
+                worker_tot = sub_resp.get('worker_total', jobs_processed + 1)
+                worker_xp = sub_resp.get('xp')
+                worker_lvl = sub_resp.get('level')
+                xp_info = f" | Total compte : \033[1m{worker_xp} XP\033[0m (Niv. {worker_lvl})" if worker_xp else ""
+                print(f"  \033[92m[SUCCÈS]\033[0m Enregistré avec succès sur le serveur !")
+                print(f"  ✦ \033[92m+25 XP liturgiques attribués !\033[0m Total de vos contributions : \033[1m{worker_tot} chant(s)\033[0m{xp_info}")
                 jobs_processed += 1
                 SESSION_STATE["jobs_processed"] = jobs_processed
 
                 # Affichage du lien direct de relecture immédiate
                 local_lab = Path(__file__).resolve().parent.parent / "pipeline" / "align" / "alignment-lab.html"
+                worker_param = urllib.parse.quote(worker_name)
                 if local_lab.exists():
-                    local_url = local_lab.as_uri() + f"?id={piece_id}"
+                    local_url = local_lab.as_uri() + f"?id={piece_id}&worker={worker_param}"
                     print(f"  ✦ \033[1mRelecture in-app immédiate\033[0m : \033[96m{local_url}\033[0m")
                 else:
-                    web_lab = f"https://bastonus.github.io/jgabc/pipeline/align/alignment-lab.html?id={piece_id}"
+                    web_lab = f"https://bastonus.github.io/jgabc/pipeline/align/alignment-lab.html?id={piece_id}&worker={worker_param}"
                     print(f"  ✦ \033[1mRelecture in-app immédiate\033[0m : \033[96m{web_lab}\033[0m")
             else:
                 print(f"  [WARN] Le serveur a retourné une réponse inattendue : {sub_resp}")

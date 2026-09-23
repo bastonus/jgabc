@@ -44,6 +44,7 @@ const TASKS_FILE = path.join(JOBS_DIR, 'tasks.json');
 const WORKERS_FILE = path.join(JOBS_DIR, 'workers.json');
 const CATALOG_PATH = path.join(__dirname, 'catalog.json');
 const SEED_ALIGNMENTS_PATH = path.join(__dirname, 'alignments_seed.json');
+const WORKERS_SEED_FILE = path.join(__dirname, 'workers_seed.json');
 
 // Création des répertoires de données locaux
 try {
@@ -292,11 +293,67 @@ function loadWorkers() {
   }
   if (!workersCache) workersCache = {};
 
+  // Charger la base seed garantie des workers
+  if (fs.existsSync(WORKERS_SEED_FILE)) {
+    try {
+      const seedWorkers = JSON.parse(fs.readFileSync(WORKERS_SEED_FILE, 'utf8'));
+      for (const [k, v] of Object.entries(seedWorkers)) {
+        const existingKey = findWorkerKey(workersCache, k);
+        if (!existingKey) {
+          workersCache[k] = { ...v };
+        } else {
+          if ((workersCache[existingKey].count || 0) < (v.count || 0)) {
+            workersCache[existingKey].count = v.count;
+          }
+          if ((workersCache[existingKey].xp || 0) < (v.xp || 0)) {
+            workersCache[existingKey].xp = v.xp;
+          }
+          if (!workersCache[existingKey].device && v.device) {
+            workersCache[existingKey].device = v.device;
+          }
+          if (!workersCache[existingKey].display_name && v.display_name) {
+            workersCache[existingKey].display_name = v.display_name;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[WORKERS] Erreur lecture workers_seed.json:', e);
+    }
+  }
+
+  // S'assurer que le compte Pierre-Albéric Théobald est au moins à 71 chants et 1775 XP
+  const pbKey = findWorkerKey(workersCache, 'Pierre-Albéric Théobald');
+  if (!pbKey) {
+    workersCache['Pierre-Albéric Théobald'] = {
+      count: 71,
+      xp: 1775,
+      review_count: 0,
+      review_xp: 0,
+      last_active: '2026-09-18T18:39:00.000Z',
+      device: 'NVIDIA GPU CUDA (NVIDIA GeForce RTX 4050 Laptop GPU)',
+      display_name: 'Pierre-Albéric Théobald'
+    };
+  } else {
+    if ((workersCache[pbKey].count || 0) < 71) {
+      workersCache[pbKey].count = 71;
+    }
+    if ((workersCache[pbKey].xp || 0) < 1775) {
+      workersCache[pbKey].xp = 1775;
+    }
+    if (!workersCache[pbKey].device) {
+      workersCache[pbKey].device = 'NVIDIA GPU CUDA (NVIDIA GeForce RTX 4050 Laptop GPU)';
+    }
+    if (!workersCache[pbKey].display_name) {
+      workersCache[pbKey].display_name = 'Pierre-Albéric Théobald';
+    }
+  }
+
   // S'assurer que le compte Atelier-Chantres (seed curator) apparaît au leaderboard
   const seeds = loadSeedAlignments();
   const seedKeys = Object.keys(seeds).filter(k => Array.isArray(seeds[k].timestamps) && seeds[k].timestamps.length > 0);
   const uniqueSeedPieces = new Set(seedKeys.map(k => seeds[k].piece_id || k));
-  if (uniqueSeedPieces.size > 0 && !findWorkerKey(workersCache, 'Atelier-Chantres')) {
+  const acKey = findWorkerKey(workersCache, 'Atelier-Chantres');
+  if (uniqueSeedPieces.size > 0 && !acKey) {
     workersCache['Atelier-Chantres'] = {
       count: uniqueSeedPieces.size,
       xp: uniqueSeedPieces.size * 25,
@@ -306,6 +363,9 @@ function loadWorkers() {
       device: 'Meta MMS_FA (Curated)',
       display_name: 'Atelier-Chantres'
     };
+  } else if (acKey && uniqueSeedPieces.size > (workersCache[acKey].count || 0)) {
+    workersCache[acKey].count = uniqueSeedPieces.size;
+    workersCache[acKey].xp = Math.max(workersCache[acKey].xp || 0, uniqueSeedPieces.size * 25);
   }
 
   rebuildWorkersFromTasks();
@@ -474,9 +534,24 @@ function claimNextTask(workerId) {
 function submitTaskResult(result) {
   const tasks = loadTasks();
   const pieceId = String(result.piece_id || result.id);
-  const task = tasks.find(t => t.id === pieceId);
+  let task = tasks.find(t => String(t.id) === pieceId);
 
-  if (!task) return { success: false, error: 'Tâche introuvable' };
+  if (!task) {
+    task = {
+      id: pieceId,
+      incipit: result.incipit || `Pièce #${pieceId}`,
+      part: result.part || 'Chant',
+      youtube_id: result.youtube_id || '',
+      youtube_url: result.youtube_url || '',
+      gabc_src: result.gabc_src || '',
+      status: 'completed',
+      worker_id: null,
+      claimed_at: null,
+      completed_at: null,
+      error: null
+    };
+    tasks.push(task);
+  }
 
   const now = Date.now();
   const workerId = String(result.worker_id || '').normalize('NFC').trim().replace(/\s+/g, ' ');

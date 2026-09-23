@@ -2128,18 +2128,22 @@
         </div>
 
         <!-- Stats row -->
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
-          <div style="padding:12px 10px; background:var(--background-highlight); border-radius:12px; text-align:center;">
-            <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Chants révisés</div>
-            <div style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-top:2px;" id="modalStatReviewedCount">0</div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+          <div style="padding:12px 6px; background:var(--background-highlight); border-radius:12px; text-align:center;">
+            <div style="font-size:0.70rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Révisés</div>
+            <div style="font-size:1.20rem; font-weight:700; color:var(--text-primary); margin-top:2px;" id="modalStatReviewedCount">0</div>
           </div>
-          <div style="padding:12px 10px; background:var(--background-highlight); border-radius:12px; text-align:center;">
-            <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Meilleure série</div>
-            <div style="font-size:1.25rem; font-weight:700; color:#f59e0b; margin-top:2px;" id="modalStatStreakMax">0</div>
+          <div style="padding:12px 6px; background:var(--background-highlight); border-radius:12px; text-align:center;">
+            <div style="font-size:0.70rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Calculs GPU</div>
+            <div style="font-size:1.20rem; font-weight:700; color:var(--primary-color); margin-top:2px;" id="modalStatComputedCount">0</div>
           </div>
-          <div style="padding:12px 10px; background:var(--background-highlight); border-radius:12px; text-align:center;">
-            <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Reliques</div>
-            <div style="font-size:1.25rem; font-weight:700; color:var(--gold-sacred); margin-top:2px;" id="modalStatRelicsCount">1/10</div>
+          <div style="padding:12px 6px; background:var(--background-highlight); border-radius:12px; text-align:center;">
+            <div style="font-size:0.70rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Série max</div>
+            <div style="font-size:1.20rem; font-weight:700; color:#f59e0b; margin-top:2px;" id="modalStatStreakMax">0</div>
+          </div>
+          <div style="padding:12px 6px; background:var(--background-highlight); border-radius:12px; text-align:center;">
+            <div style="font-size:0.70rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600;">Reliques</div>
+            <div style="font-size:1.20rem; font-weight:700; color:var(--gold-sacred); margin-top:2px;" id="modalStatRelicsCount">1/10</div>
           </div>
         </div>
 
@@ -2456,6 +2460,7 @@
       streak: 0,
       maxStreak: 0,
       reviewedCount: 0,
+      computedCount: 0,
       relics: ["monk"],
       achievements: []
     };
@@ -2480,7 +2485,7 @@
     }
 
     function initGamification() {
-      // Calculate XP strictly from the local user's own reviews (NEVER from all server/repo users)
+      // Calcul des relectures locales de l'utilisateur
       let localReviewsCount = 0;
       let localCommentsCount = 0;
       if (LOCAL_USER_REVIEWS && typeof LOCAL_USER_REVIEWS === 'object') {
@@ -2496,27 +2501,52 @@
         const saved = localStorage.getItem('oremus_lab_gamification');
         if (saved) {
           USER_GAMIFICATION = Object.assign(USER_GAMIFICATION, JSON.parse(saved));
-          USER_GAMIFICATION.reviewedCount = localReviewsCount;
-          // Calculate expected XP strictly based on current user reviews
-          const expectedMinXp = (localReviewsCount * 10) + (localCommentsCount * 15);
-          if (!localReviewsCount) {
-            USER_GAMIFICATION.xp = 0;
-            USER_GAMIFICATION.streak = 0;
-            USER_GAMIFICATION.maxStreak = 0;
-          } else if (USER_GAMIFICATION.xp < expectedMinXp || USER_GAMIFICATION.xp > (expectedMinXp * 3)) {
-            USER_GAMIFICATION.xp = expectedMinXp;
-          }
-          USER_GAMIFICATION.level = getRankByXp(USER_GAMIFICATION.xp).level;
-        } else {
-          const calculatedXp = (localReviewsCount * 10) + (localCommentsCount * 15);
-          USER_GAMIFICATION.xp = calculatedXp;
-          USER_GAMIFICATION.reviewedCount = localReviewsCount;
-          USER_GAMIFICATION.level = getRankByXp(calculatedXp).level;
         }
+        USER_GAMIFICATION.reviewedCount = Math.max(USER_GAMIFICATION.reviewedCount || 0, localReviewsCount);
+
+        // Plancher d'XP : avis locaux (+10/+15) + calculs worker (+25)
+        const reviewMinXp = (localReviewsCount * 10) + (localCommentsCount * 15);
+        const computedMinXp = (USER_GAMIFICATION.computedCount || 0) * 25;
+        const baselineXp = reviewMinXp + computedMinXp;
+
+        if (typeof USER_GAMIFICATION.xp !== 'number' || USER_GAMIFICATION.xp < baselineXp) {
+          USER_GAMIFICATION.xp = baselineXp;
+        }
+        USER_GAMIFICATION.level = getRankByXp(USER_GAMIFICATION.xp).level;
         saveGamification();
       } catch(e) {}
 
       updateGamificationUI();
+      syncWorkerGamification();
+    }
+
+    async function syncWorkerGamification(explicitWorker) {
+      const workerName = explicitWorker || FILTER_WORKER || localStorage.getItem('oremus_worker_name') || '';
+      if (!workerName || workerName.toLowerCase() === 'anonyme' || workerName.toLowerCase() === 'ami-anonyme' || workerName.toLowerCase() === 'ami') return;
+
+      try {
+        localStorage.setItem('oremus_worker_name', workerName);
+      } catch (e) {}
+
+      try {
+        const baseUrl = getCoolifyBaseUrl();
+        const res = await fetch(`${baseUrl}/api/gamification?worker=${encodeURIComponent(workerName)}`, { signal: AbortSignal.timeout(6000) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.xp === 'number') {
+            const serverCount = data.count || 0;
+            USER_GAMIFICATION.computedCount = Math.max(USER_GAMIFICATION.computedCount || 0, serverCount);
+            if (data.xp > (USER_GAMIFICATION.xp || 0)) {
+              USER_GAMIFICATION.xp = data.xp;
+              USER_GAMIFICATION.level = getRankByXp(USER_GAMIFICATION.xp).level;
+            }
+            saveGamification();
+            updateGamificationUI();
+          }
+        }
+      } catch (err) {
+        console.warn('[GAMIFICATION] Sync serveur impossible:', err);
+      }
     }
 
     function saveGamification() {
@@ -2812,6 +2842,8 @@
       // Stats
       const stReviewed = document.getElementById('modalStatReviewedCount');
       if (stReviewed) stReviewed.textContent = USER_GAMIFICATION.reviewedCount;
+      const stComputed = document.getElementById('modalStatComputedCount');
+      if (stComputed) stComputed.textContent = USER_GAMIFICATION.computedCount || 0;
       const stStreak = document.getElementById('modalStatStreakMax');
       if (stStreak) stStreak.textContent = USER_GAMIFICATION.maxStreak;
       const stRelics = document.getElementById('modalStatRelicsCount');
@@ -3124,7 +3156,15 @@
         TARGET_PIECE_ID = params.get('id') || params.get('piece_id') || null;
         FILTER_WORKER = params.get('worker') || params.get('contributor') || null;
         if (TARGET_PIECE_ID) TARGET_PIECE_ID = String(TARGET_PIECE_ID).trim();
-        if (FILTER_WORKER) FILTER_WORKER = String(FILTER_WORKER).trim();
+        if (FILTER_WORKER) {
+          FILTER_WORKER = String(FILTER_WORKER).trim();
+          try {
+            localStorage.setItem('oremus_worker_name', FILTER_WORKER);
+          } catch (e) {}
+          if (typeof syncWorkerGamification === 'function') {
+            syncWorkerGamification(FILTER_WORKER);
+          }
+        }
       } catch (e) {}
     }
 
@@ -4681,9 +4721,11 @@
       const relayUrl = window.OREMUS_REVIEW_RELAY_URL || localStorage.getItem('oremus_review_relay_url') || 'https://api-oremus.silverhorse.fr/api/review';
       const isExitTrigger = (triggerReason === 'visibility_hidden' || triggerReason === 'pagehide' || triggerReason === 'beforeunload');
 
+      const activeWorker = (typeof FILTER_WORKER !== 'undefined' && FILTER_WORKER) || localStorage.getItem('oremus_worker_name') || '';
       const payload = {
         reviews: batch,
         count: count,
+        reviewer: activeWorker,
         client: (window.AndroidBrowser || (window.Capacitor && window.Capacitor.isNativePlatform())) ? 'android_apk' : 'web',
         timestamp: new Date().toISOString(),
         reason: triggerReason || 'immediate'
@@ -4716,6 +4758,14 @@
             // Vérification du retour API (success: true ou statut HTTP 2xx)
             if (data && data.success !== false) {
               apiConfirmed = true;
+              if (data.reviewer_xp && typeof data.reviewer_xp.xp === 'number') {
+                if (data.reviewer_xp.xp > (USER_GAMIFICATION.xp || 0)) {
+                  USER_GAMIFICATION.xp = data.reviewer_xp.xp;
+                  USER_GAMIFICATION.level = getRankByXp(USER_GAMIFICATION.xp).level;
+                  saveGamification();
+                  updateGamificationUI();
+                }
+              }
             }
           }
         }

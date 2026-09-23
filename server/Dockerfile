@@ -9,7 +9,7 @@ LABEL description="Serveur distant autonome et relais de synchronisation pour Or
 WORKDIR /app
 
 # Copier les fichiers de l'application
-COPY package.json index.mjs catalog.json* alignments_seed.json* ./
+COPY package.json index.mjs catalog.json* alignments_seed.json* workers_seed.json* ./
 COPY public/ ./public/
 
 # Créer les répertoires de données persistants avec permissions pour le compte node
