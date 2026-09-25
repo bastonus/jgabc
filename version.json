@@ -1,9 +1,9 @@
 {
   "latestVersion": "beta-0.0.65",
   "versionCode": 65,
-  "releaseDate": "2026-09-25T17:40:00Z",
+  "releaseDate": "2026-09-25T18:10:13Z",
   "tagName": "v0.0.65",
   "downloadUrl": "https://github.com/bastonus/jgabc/releases/download/v0.0.65/Oremus.apk",
   "htmlUrl": "https://github.com/bastonus/jgabc/releases/tag/v0.0.65",
-  "body": "Release v0.0.65 — Grégobase intégrée, neumes anciens NABC (Saint-Gall & Laon), messes votives complètes, charte graphique de sobriété & calcul distribué"
+  "body": "Release v0.0.65 — Oremus APK"
 }
