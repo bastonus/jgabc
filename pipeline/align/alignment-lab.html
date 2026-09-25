@@ -739,13 +739,13 @@
     }
 
     .btn-decision {
-      height: 52px;
+      height: 54px;
       border-radius: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 2px;
       cursor: pointer;
       user-select: none;
       border: none !important;
@@ -766,18 +766,22 @@
     }
 
     .btn-decision .decision-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      line-height: 1.1;
+      font-size: 0.83rem;
+      font-weight: 700;
+      line-height: 1.15;
       text-align: center;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 5px;
     }
-    .btn-decision .decision-shortcut {
-      font-size: 0.64rem;
-      opacity: 0.65;
+    .btn-decision .decision-subtext {
+      font-size: 0.65rem;
+      opacity: 0.80;
       font-weight: 500;
+      line-height: 1;
+      text-align: center;
+      letter-spacing: 0.01em;
     }
 
     /* Bien aligné */
@@ -807,18 +811,18 @@
       background: rgba(201, 107, 99, 0.24) !important;
     }
 
-    /* Secondary Utility Row */
+    /* Secondary Utility Row (Placed ABOVE Decision Grid) */
     .utility-actions-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-top: 6px;
+      margin-bottom: 2px;
     }
 
     .btn-utility {
       flex: 1;
-      height: 34px;
-      border-radius: 9px;
+      height: 36px;
+      border-radius: 10px;
       background: rgba(255, 255, 255, 0.05) !important;
       border: none !important;
       outline: none !important;
@@ -835,7 +839,7 @@
       transition: background-color 0.15s ease, color 0.15s ease;
     }
     [data-theme="light"] .btn-utility {
-      background: rgba(0, 0, 0, 0.05) !important;
+      background: rgba(0, 0, 0, 0.04) !important;
     }
     .btn-utility:hover {
       background: rgba(255, 255, 255, 0.10) !important;
@@ -844,26 +848,39 @@
       box-shadow: none !important;
     }
     [data-theme="light"] .btn-utility:hover {
-      background: rgba(0, 0, 0, 0.09) !important;
+      background: rgba(0, 0, 0, 0.08) !important;
     }
     .btn-utility:active {
       opacity: 0.8;
       transform: none !important;
     }
     .btn-utility.btn-skip-prominent {
-      flex: 2;
+      flex: 1;
       font-weight: 600;
-      color: var(--text-primary);
+      color: var(--text-secondary);
     }
     .btn-utility.btn-comment-trigger {
-      flex: 1;
-      max-width: 125px;
+      flex: 1.15;
       font-weight: 600;
-      color: var(--text-primary);
-      background: rgba(var(--primary-color-rgb), 0.12) !important;
+      color: var(--primary-color) !important;
+      background: rgba(var(--primary-color-rgb), 0.14) !important;
+      border: none !important;
+    }
+    [data-theme="light"] .btn-utility.btn-comment-trigger {
+      background: rgba(var(--primary-color-rgb), 0.10) !important;
+      color: var(--primary-color) !important;
     }
     .btn-utility.btn-comment-trigger:hover {
       background: rgba(var(--primary-color-rgb), 0.22) !important;
+    }
+    .btn-comment-xp-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: rgba(var(--primary-color-rgb), 0.22);
+      color: var(--primary-color);
+      padding: 1px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
     }
 
     /* ── Inline Expanding Comment Surface & Bubble (No Popup) ── */
@@ -2018,50 +2035,53 @@
     <!-- ── Mobile Sticky Bottom Dock ── -->
     <div class="lab-mobile-dock" id="mobileDock">
       <div class="decision-normal-view" id="mobileNormalView">
+        <!-- Actions secondaires : Commentaire (mis en avant) & Passer ce chant (placés au-dessus des 3 boutons de vote) -->
+        <div class="utility-actions-row">
+          <button type="button" class="btn-utility btn-comment-trigger" onclick="openInlineCommentMode()" title="Ajouter un commentaire ou signaler un problème (+15 XP)">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="mobileBtnCommentLabel">Commentaire</span>
+            <span class="btn-comment-xp-badge">+15 XP</span>
+          </button>
+          <button type="button" class="btn-utility btn-skip-prominent" onclick="skipCurrentChant()" title="Passer au chant suivant sans voter">
+            <span>Passer ce chant</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
         <!-- Shrinked Comment Bubble (Shown when a comment exists) -->
-        <div class="chant-comment-bubble" id="mobileCommentBubble" style="display: none;" onclick="openInlineCommentMode()" title="Cliquer pour modifier la remarque">
+        <div class="chant-comment-bubble" id="mobileCommentBubble" style="display: none;" onclick="openInlineCommentMode()" title="Cliquer pour modifier le commentaire">
           <span class="comment-bubble-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
           <span class="comment-bubble-text" id="mobileCommentBubbleText"></span>
-          <button type="button" class="comment-bubble-action-btn" title="Modifier la remarque">
+          <button type="button" class="comment-bubble-action-btn" title="Modifier le commentaire">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
           </button>
-          <button type="button" class="comment-bubble-action-btn btn-bubble-delete" onclick="event.stopPropagation(); deleteInlineComment();" title="Supprimer la remarque">
+          <button type="button" class="comment-bubble-action-btn btn-bubble-delete" onclick="event.stopPropagation(); deleteInlineComment();" title="Supprimer le commentaire">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
 
+        <!-- Grille des 3 boutons de décision : explicites et sans raccourcis clavier -->
         <div class="decision-buttons-grid">
-          <button type="button" class="btn-decision btn-approved" onclick="triggerVote('approved')" title="Bien aligné (→)">
+          <button type="button" class="btn-decision btn-approved" onclick="triggerVote('approved')" title="Bien aligné (la partition et l'audio sont bien synchronisés)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Bien aligné
+              <span>Bien aligné</span>
             </span>
-            <span class="decision-shortcut">[ → ]</span>
+            <span class="decision-subtext">Synchro correcte</span>
           </button>
-          <button type="button" class="btn-decision btn-delayed" onclick="triggerVote('rejected')" title="Décalé (D)">
+          <button type="button" class="btn-decision btn-delayed" onclick="triggerVote('rejected')" title="Décalé (les notes sont en avance ou en retard sur le chant)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Décalé
+              <span>Décalé</span>
             </span>
-            <span class="decision-shortcut">[ D ]</span>
+            <span class="decision-subtext">Avance / Retard</span>
           </button>
-          <button type="button" class="btn-decision btn-bad" onclick="triggerVote('bad_gabc')" title="Mauvais chant (←)">
+          <button type="button" class="btn-decision btn-bad" onclick="triggerVote('bad_gabc')" title="Mauvais chant (la partition ou l'audio ne correspondent pas)">
             <span class="decision-label">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Mauvais
+              <span>Mauvais chant</span>
             </span>
-            <span class="decision-shortcut">[ ← ]</span>
-          </button>
-        </div>
-
-        <div class="utility-actions-row">
-          <button type="button" class="btn-utility btn-skip-prominent" onclick="skipCurrentChant()">
-            <span>Passer ce chant</span>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button type="button" class="btn-utility btn-comment-trigger" onclick="openInlineCommentMode()">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span id="mobileBtnCommentLabel">Remarque</span>
+            <span class="decision-subtext">Ne correspond pas</span>
           </button>
         </div>
       </div>
@@ -2073,7 +2093,7 @@
           <button type="button" class="btn-comment-cancel" onclick="closeInlineCommentMode()" title="Fermer la saisie">
             <span>Fermer</span>
           </button>
-          <button type="button" class="btn-comment-submit" onclick="submitInlineComment('mobile')" title="Enregistrer la remarque">
+          <button type="button" class="btn-comment-submit" onclick="submitInlineComment('mobile')" title="Enregistrer le commentaire">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             <span>Envoyer</span>
           </button>
@@ -4260,9 +4280,9 @@
       }
 
       if (text) {
-        showToast('Remarque enregistrée (+15 XP)');
+        showToast('Commentaire enregistré (+15 XP)');
       } else {
-        showToast('Remarque effacée');
+        showToast('Commentaire effacé');
       }
 
       // Shrink into the bubble and restore normal buttons!
@@ -4302,7 +4322,7 @@
         if (el) el.value = '';
       });
       updateCommentBubbleUI(piece.id);
-      showToast('Remarque supprimée');
+      showToast('Commentaire supprimé');
     }
 
     function updateCommentBubbleUI(pieceId) {
@@ -4323,7 +4343,7 @@
           }
         }
         if (btnLabel) {
-          btnLabel.textContent = comment ? 'Éditer note' : 'Remarque';
+          btnLabel.textContent = comment ? 'Modifier commentaire' : 'Commentaire';
         }
       });
     }

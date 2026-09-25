@@ -168,7 +168,6 @@ h6 {
 /* Tab Content Logic */
 .tab-content {
     display: none;
-    animation: fadeIn 0.3s ease;
 }
 
 .tab-content.active {
@@ -177,18 +176,6 @@ h6 {
 
 .tab-content.hidden {
     display: none;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Hide original Control Header since we have tabs now */
@@ -316,7 +303,7 @@ h6 {
 
 .rite-toggle {
     background: rgba(168, 85, 247, 0.12);
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    border: none !important;
     color: var(--accent-purple);
     padding: 5px 14px;
     border-radius: 100px;
@@ -331,12 +318,12 @@ h6 {
 
 .rite-toggle:hover {
     background: rgba(168, 85, 247, 0.2);
-    border-color: rgba(168, 85, 247, 0.4);
+    border: none !important;
 }
 
 [data-theme="light"] .rite-toggle {
     background: rgba(79, 70, 229, 0.08);
-    border: 1px solid rgba(79, 70, 229, 0.2);
+    border: none !important;
     color: var(--primary-color);
 }
 
@@ -358,7 +345,7 @@ h6 {
 
 .modal-body .modern-select {
     background-color: var(--background-highlight);
-    border: 1px solid var(--border-color);
+    border: none !important;
     border-radius: 10px;
     padding: 10px 14px;
     padding-right: 2em;
@@ -479,19 +466,20 @@ h6 {
 .chant-item {
     background-color: var(--background-surface);
     padding: 20px;
-    border: 1px solid var(--border-color);
+    border: none !important;
     border-radius: var(--border-radius);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    transition: background-color 0.25s ease;
 }
 
 .chant-item:hover {
-    border-color: rgba(168, 85, 247, 0.35);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.06);
+    background-color: var(--background-highlight);
+    border: none !important;
+    box-shadow: none !important;
 }
 
 [data-theme="light"] .chant-item {
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .chant-item-header {
@@ -500,7 +488,7 @@ h6 {
     align-items: flex-start;
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: none !important;
 }
 
 .chant-type {
@@ -672,13 +660,13 @@ text.annotation {
 
 #themeToggle {
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none !important;
     color: var(--text-primary);
 }
 
 [data-theme="light"] #themeToggle {
     background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none !important;
     color: var(--text-primary);
 }
 
@@ -1361,7 +1349,7 @@ body {
     background: var(--primary-color, #6366f1);
     color: #fff;
     border-color: var(--primary-color, #6366f1);
-    box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 99, 102, 241), 0.3);
+    box-shadow: none !important;
 }
 
 .settings-colors {
@@ -1387,7 +1375,7 @@ body {
 .color-swatch.active {
     border-color: var(--text-primary, #fff);
     transform: scale(1.1);
-    box-shadow: 0 0 0 2px var(--surface-primary, #1a1a2e), 0 0 12px rgba(var(--primary-color-rgb), 0.4);
+    box-shadow: 0 0 0 2px var(--surface-primary, #1a1a2e) !important;
 }
 
 /* ===== Selector Bar ===== */
@@ -1593,8 +1581,8 @@ body {
     animation: dropdownReveal 0.18s ease;
 }
 @keyframes dropdownReveal {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 .hdd-group {
     padding: 10px 20px 4px;
@@ -1751,17 +1739,17 @@ body {
     display: none !important;
 }
 
-/* Card active playing state */
+/* Card active playing state (sans glow) */
 .chant-card.is-playing {
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 
-/* Note Highlighting (SVG) */
+/* Note Highlighting (SVG) — Net, contrasté, ZÉRO GLOW */
 svg.ChantScore use[source-index].active {
     fill: var(--primary-color, #ef5350) !important;
     color: var(--primary-color, #ef5350) !important;
-    filter: drop-shadow(0px 0px 3px rgba(239, 83, 80, 0.5));
+    filter: none !important;
 }
 svg.ChantScore text[source-index].active {
     fill: var(--primary-color, #ef5350) !important;
@@ -1772,4 +1760,39 @@ svg.ChantScore use[source-index] {
 }
 svg.ChantScore use[source-index]:hover {
     fill: var(--primary-light, #ff8a80) !important;
-}
+}
+
+/* =========================================================================
+   SOBRIÉTÉ LITURGIQUE (« MODERN SACRED ») — ENFORCEMENT
+   ========================================================================= */
+.card,
+.chant-card,
+.chant-item,
+.btn,
+.btn-pill,
+.btn-icon,
+.icon-button {
+    border: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.card:hover,
+.chant-card:hover,
+.chant-item:hover,
+.btn:hover,
+.btn-pill:hover,
+.btn-icon:hover {
+    transform: none !important;
+    -webkit-transform: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Interdiction absolue des halos lumineux et effets de glow */
+*, *::before, *::after {
+    text-shadow: none !important;
+}
+

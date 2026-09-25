@@ -1,5 +1,44 @@
 # 📝 Notes de Version — Oremus
 
+## 🚀 Version 0.0.65 (25 Septembre 2026)
+
+---
+
+### 🎼 Grégobase Intégrée, Neumes Anciens NABC, Messes Votives, Charte de Sobriété & Calcul Distribué
+
+* **Grégobase Complète Intégrée dans la Navigation :**
+  * Nouvelle section dédiée `Grégobase` accessible directement depuis la barre latérale (`#btnSidebarGregobase`).
+  * Navigation structurée par onglets : Vue d'ensemble, Usages liturgiques, Sources historiques, Modes musicaux, et recherche textuelle en direct (`js/gregobase_ui.js`, `css/gregobase.css`).
+  * Support complet des paramètres d'URL pour le partage et le deep-linking (`hora=gregobase&gbtab=...&gbf=...&gbq=...`).
+
+* **Neumes Anciens NABC (Notation Sangallienne & Laonnoise) :**
+  * Moteur de rendu adiastématique haute fidélité (`js/gregorian_nabc.js`) projetant les neumes anciens directement au-dessus des notes carrées d'Exsurge.
+  * Intégration des polices typographiques grégoriennes médiévales : `gregall.ttf`, `grelaon.ttf`, `gresgmodern.ttf`.
+  * Table de correspondance complète GregorioTeX / NABC (`js/gregall_cmap.json`) et gestion native des tags et annotations dans les fichiers GABC.
+
+* **Messes Votives & Liturgie :**
+  * Interface modale dédiée aux Messes Votives (`#votiveMassModal`) avec sélection rapide.
+  * Disponibilité des Messes Votives majeures : Dédicace d'une Église, Messe des Défunts (Requiem), Messe de Mariage (Pro Sponso et Sponsa / Nuptiale).
+  * Messes Votives hebdomadaires : Très Sainte Trinité (Lundi), Saints Anges (Mardi), Saint Joseph (Mercredi), Saint-Sacrement (Jeudi), Sacré-Cœur de Jésus (Vendredi), Sainte Vierge Marie (Samedi), Saints Apôtres Pierre et Paul.
+  * Mappage et extraction automatique des chants votifs et règles de commun (`extractCommuneRef`).
+
+* **Charte Graphique de Sobriété & « Modern Sacred » :**
+  * Application stricte de la charte de sobriété liturgique (`CHARTE_GRAPHIQUE.md` / `docs/charte_graphique_sobriete.md`).
+  * Zéro bordure inutile (*frameless & zero-strokes*) sur l'ensemble des conteneurs, cartes et boutons.
+  * Élimination des cartes gigognes et simplification de la hiérarchie spatiale en une couche de surface unique.
+  * Suppression des animations automatiques de déplacement vertical (*no hover lift / translateY*) au profit d'animations guidées exclusivement par les gestes tactiles de l'utilisateur (*gesture-driven motion*).
+  * Noir OLED absolu (`#000000`) et teintes minérales naturelles.
+
+* **Calcul Distribué d'Alignement & Laboratoire (`/worker` & `alignment-lab.html`) :**
+  * Portail web public `/worker` pour participer au calcul distribué des alignements audio/GABC.
+  * Lancement 1-clic en ligne de commande (CLI) via `curl -sSL ... | bash` (Linux/macOS) et `irm ... | iex` (PowerShell/Windows).
+  * Double modèle d'alignement phonétique et fréquentiel MMS_FA + TorchCREPE v3.1.
+  * Synchronisation note-par-note en temps réel entre l'audio YouTube et la partition Exsurge avec auto-scroll et click-to-seek.
+  * Gamification du scriptorium : attribution d'XP, badges, classements communautaires et persistance sécurisée.
+  * Bootstrap 100% automatisé du worker avec détection automatique de l'accélération NVIDIA CUDA.
+
+---
+
 ## 🚀 Version 0.0.64 (17 Septembre 2026)
 
 ---

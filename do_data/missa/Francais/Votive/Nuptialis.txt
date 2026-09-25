@@ -1,0 +1,68 @@
+[Officium]
+Missa pro Sponso et Sponsa (Messe de Mariage)
+
+[Name]
+Missa pro Sponso et Sponsa (Messe Nuptiale)
+
+[Rule]
+Gloria
+no Credo
+Prefatio=Communis
+
+[Introitus]
+!Tb 7:15 ; 8:19 ; Ps 127:1
+v. Que le Dieu d’Israël vous unisse et qu’il soit lui-même avec vous, lui qui a eu pitié de deux enfants uniques : et maintenant, Seigneur, faites qu’ils vous bénissent plus pleinement.
+!Ps 127:1
+Heureux tous ceux qui craignent le Seigneur, et qui marchent dans ses voies.
+v. Gloire au Père, et au Fils, et au Saint-Esprit. Comme il était au commencement, et maintenant, et toujours, et dans les siècles des siècles. Amen.
+v. Que le Dieu d’Israël vous unisse et qu’il soit lui-même avec vous, lui qui a eu pitié de deux enfants uniques : et maintenant, Seigneur, faites qu’ils vous bénissent plus pleinement.
+
+[Oratio]
+Exaucez-nous, Dieu tout-puissant et miséricordieux : afin que ce qui est accompli par notre ministère soit plutôt rempli par votre bénédiction.
+$Par notre Seigneur
+
+[Lectio]
+Lectio Epístolæ beáti Pauli Apóstoli ad Ephésios.
+!Ep 5:22-33.
+Mes frères : Que les femmes soient soumises à leurs maris comme au Seigneur ; car le mari est le chef de la femme, comme le Christ est le chef de l'Église, lui le sauveur de son corps.
+Or, comme l'Église est soumise au Christ, ainsi les femmes doivent l'être à leurs maris en toutes choses.
+Maris, aimez vos femmes, comme le Christ a aimé l'Église et s'est livré lui-même pour elle, afin de la sanctifier, après l'avoir purifiée par l'eau et la parole, pour la faire paraître devant lui, cette Église, glorieuse, sans tache, ni ride, ni rien de semblable, mais sainte et immaculée.
+C'est ainsi que les maris doivent aimer leurs femmes comme leurs propres corps. Celui qui aime sa femme s'aime lui-même.
+Car jamais personne n'a haï sa propre chair ; au contraire, il la nourrit et en prend soin, comme le Christ le fait pour l'Église, parce que nous sommes membres de son corps, de sa chair et de ses os.
+C'est pourquoi l'homme quittera son père et sa mère, pour s'attacher à sa femme, et les deux deviendront une seule chair.
+Ce mystère est grand ; je le dis par rapport au Christ et à l'Église.
+Au reste, que chacun de vous, pour sa part, aime sa femme comme lui-même, et que la femme respecte son mari.
+
+[Graduale]
+!Ps 127:3
+Votre épouse sera comme une vigne féconde à l’intérieur de votre maison.
+V. Vos enfants seront comme de jeunes plants d’olivier autour de votre table.
+
+[Alleluia]
+!Ps 19:3
+Alléluia, alléluia.
+V. Que le Seigneur vous envoie du secours depuis son sanctuaire, et que depuis Sion il vous protège. Alléluia.
+
+[Evangelium]
+Sequéntia ++ sancti Evangélii secúndum Matthǽum.
+!Mt 19:3-6.
+En ce temps-là : Des pharisiens s'approchèrent de Jésus pour le mettre à l'épreuve ; ils lui dirent : Est-il permis à un homme de répudier sa femme pour n'importe quel motif ?
+Il leur répondit : N'avez-vous pas lu que le Créateur, au commencement, les fit homme et femme, et qu'il dit : À cause de cela, l'homme quittera son père et sa mère pour s'attacher à sa femme, et les deux deviendront une seule chair ?
+Ainsi, ils ne sont plus deux, mais une seule chair.
+Que l'homme ne sépare donc pas ce que Dieu a uni.
+
+[Offertorium]
+!Ps 30:15-16
+En vous j'ai espéré, Seigneur ; j'ai dit : Vous êtes mon Dieu, mes destinées sont dans vos mains.
+
+[Secreta]
+Recevez, nous vous en supplions, Seigneur, l'offrande présentée selon la sainte loi du mariage : et soyez le régisseur de l'œuvre dont vous êtes l'auteur.
+$Par notre Seigneur
+
+[Communio]
+!Ps 127:4, 6
+Voici comment sera béni l'homme qui craint le Seigneur : et puisses-tu voir les enfants de tes enfants : paix sur Israël !
+
+[Postcommunio]
+Nous vous en prions, Dieu tout-puissant : accompagnez d'une bienveillante faveur les institutions de votre providence ; afin que ceux que vous unissez par une société légitime, vous les gardiez dans une paix durable.
+$Par notre Seigneur

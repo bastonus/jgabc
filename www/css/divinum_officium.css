@@ -35,8 +35,31 @@
     font-display: swap;
 }
 
+/* Police et style des neumes anciens manuscrits (NABC / St-Gall) */
+@font-face {
+    font-family: 'GregorioNabc';
+    src: url('../fonts/gregall.ttf') format('truetype'),
+         url('fonts/gregall.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 
-
+.nabc-neume {
+    font-family: 'GregorioNabc', 'gregall', serif !important;
+    font-size: 22px;
+    pointer-events: none;
+    user-select: none;
+    fill: var(--primary-color, #c96b63) !important;
+    color: var(--primary-color, #c96b63) !important;
+    transition: fill 0.2s ease;
+}
+[data-theme="dark"] .nabc-neume,
+[data-theme="oled"] .nabc-neume,
+:root:not([data-theme="light"]) .nabc-neume,
+[data-theme="light"] .nabc-neume {
+    fill: var(--primary-color, #c96b63) !important;
+}
 :root {
     --noise-overlay: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
     --content-padding-top: 20px;
@@ -312,7 +335,7 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
 .do-brand:hover {
     background: transparent !important;
     color: var(--primary-color) !important;
-    transform: translateY(-1px);
+    transform: none !important;
 }
 
 .do-brand.active {
@@ -539,7 +562,34 @@ body.is-dragging-sidebar .do-sidebar-backdrop {
 
 .do-footer-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    width: 100%;
+}
+
+.do-footer-actions .do-footer-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 7px 4px !important;
+    font-size: 0.68rem !important;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    gap: 4px !important;
+    white-space: nowrap;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.do-footer-actions .do-footer-btn svg {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    flex-shrink: 0;
+}
+
+.do-footer-actions .do-footer-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .do-footer-btn {
@@ -976,12 +1026,12 @@ body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHeaderTitle .t
 @keyframes do-dropdown-chevron-pulse {
     0%, 100% {
         opacity: 0.3;
-        transform: translateY(-1px) scale(0.92);
+        transform: scale(0.94);
         color: var(--text-tertiary);
     }
     50% {
         opacity: 0.95;
-        transform: translateY(2px) scale(1.08);
+        transform: scale(1.04);
         color: var(--text-primary);
     }
 }
@@ -1006,11 +1056,9 @@ body:has(.do-home-saint-hero) .do-top-header.is-header-loading #doHeaderTitle .t
 @keyframes do-header-lazy-reveal {
     from {
         opacity: 0;
-        transform: translateY(3px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -2256,6 +2304,17 @@ body.is-bible-mode .modern-player-bar {
         background: transparent;
     }
 
+    .do-footer-actions {
+        gap: 6px;
+    }
+
+    .do-footer-actions .do-footer-btn {
+        padding: 9px 4px !important;
+        font-size: 0.68rem !important;
+        gap: 4px !important;
+        border-radius: 10px;
+    }
+
     .do-footer-btn {
         padding: 10px 16px;
         border-radius: 12px;
@@ -2701,7 +2760,7 @@ body.is-bible-mode .modern-player-bar {
     padding: 12px 16px;
     background: var(--background-highlight);
     border-radius: 12px;
-    border: 1px solid var(--border-subtle);
+    border: none !important;
 }
 
 .icon-preview-square {
@@ -2712,8 +2771,8 @@ body.is-bible-mode .modern-player-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none !important;
+    border: none !important;
     flex-shrink: 0;
     transition: transform 0.2s ease;
 }
@@ -3038,7 +3097,14 @@ body.header-dropdown-open {
 
 @media (max-width: 649px) {
     .hdd-mode-btn {
-        flex: 1;
+        flex: 1 1 calc(50% - 6px);
+        padding: 8px 6px;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
@@ -3154,9 +3220,9 @@ body.header-dropdown-open {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border: 1px solid var(--border-color) !important;
+    border: none !important;
     animation: fadeIn 0.15s ease;
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25);
+    box-shadow: none !important;
     max-height: 280px;
     overflow-y: auto;
 }
@@ -3251,7 +3317,7 @@ body.header-dropdown-open {
     background: var(--primary-color) !important;
     color: #fff !important;
     font-weight: 700;
-    box-shadow: 0 2px 6px rgba(var(--primary-color-rgb), 0.4);
+    box-shadow: none !important;
 }
 
 .hdd-search-bar {
@@ -3486,7 +3552,7 @@ body.header-dropdown-open {
     background: var(--primary-color) !important;
     color: #fff !important;
     font-weight: 700;
-    box-shadow: 0 2px 6px rgba(var(--primary-color-rgb), 0.4);
+    box-shadow: none !important;
 }
 
 /* =============================================================
@@ -3605,7 +3671,7 @@ body, html {
     left: 0;
     right: 0;
     background: var(--background-surface);
-    border: 1px solid var(--border-color);
+    border: none !important;
     border-radius: 10px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     max-height: 360px;
@@ -3690,8 +3756,8 @@ body, html {
     width: 100% !important;
     padding: 16px 18px !important;
     background: var(--background-surface, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-    border-radius: 12px;
+    border: none !important;
+    border-radius: 14px;
 }
 
 .do-home-saint-hero.do-hero-no-image .do-home-saint-hero-bg-clip,
@@ -4262,7 +4328,8 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     justify-content: center;
     padding: 14px 18px;
     background: var(--background-surface);
-    border: 1px solid var(--border-color);
+    border: none !important;
+    box-shadow: none !important;
     border-radius: 14px;
     cursor: pointer;
     transition: all 0.18s ease;
@@ -4549,7 +4616,7 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 
 .do-test-banner {
     background: color-mix(in srgb, var(--primary-color) 8%, var(--background-surface));
-    border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+    border: none !important;
     border-radius: 14px;
     padding: 20px 22px;
     margin-bottom: 24px;
@@ -4616,7 +4683,7 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     font-size: 0.82rem;
     font-weight: 600;
     background: var(--background-highlight);
-    border: 1px solid var(--border-color);
+    border: none !important;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -4689,113 +4756,9 @@ body.header-dropdown-open .do-top-header #doHourLabel {
      rubric styling ("en blanc, présentée comme elle devrait l'être").
    ============================================================= */
 
-/* 1. Latin-only: hide duplicate text lines entirely */
-.do-card.has-gregorian-score .do-card-text-lines.is-latin-only {
-    display: none !important;
-}
-
-/* 2. Bilingual mode: hide Latin column (avoid duplicate of the chant neumes) */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-la {
-    display: none !important;
-}
-
-/* 3. Vernacular Translation Container underneath Gregorian Score */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only {
-    display: block !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    margin-top: 8px !important;
-    padding-top: 0 !important;
-    border-top: none !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-wrapper {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-grid {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    transform: none !important;
-    transition: none !important;
-    display: block !important;
-    gap: 0 !important;
-    margin: 4px 0 !important;
-}
-
-/* 4. Vernacular Column: Full-width, crisp white / text-primary, smaller font size */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-bilingual-row > .do-col-vernacular {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 1 100% !important;
-    display: block !important;
-    transform: none !important;
-    box-sizing: border-box !important;
-    text-align: justify !important;
-    text-justify: inter-word !important;
-    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
-    font-size: 0.95rem !important;
-    line-height: 1.65 !important;
-    font-style: normal !important;
-    color: var(--text-primary) !important;
-}
-
-/* Ensure all text elements, paragraphs and non-rubric spans inside vernacular column use smaller white font */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular p,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular div,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
-    color: var(--text-primary) !important;
-    font-size: 0.95rem !important;
-    line-height: 1.65 !important;
-    font-style: normal;
-}
-
-/* Preserve italics ONLY for genuine semantic emphasis / citations */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular i,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular em {
-    color: inherit !important;
-    font-style: italic !important;
-    font-size: inherit !important;
-}
-
-/* Preserve liturgical rubric symbols in accent red with proportional size */
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular .do-resp-sym,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular b,
-.do-card.has-gregorian-score .do-card-text-lines.is-bilingual .do-col-vernacular strong,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only .do-resp-sym,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only b,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only strong {
-    color: var(--primary-color) !important;
-    font-weight: normal !important;
-    font-size: 0.95rem !important;
-}
-
-/* 5. Vernacular-only mode under score: smaller white text, normal typography, no separator */
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only {
-    font-size: 0.95rem !important;
-    line-height: 1.65 !important;
-}
-
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only p,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only div,
-.do-card.has-gregorian-score .do-card-text-lines.is-vern-only span:not(.do-resp-sym):not(.do-verse-num):not(.do-badge):not(.do-initial):not(.do-pt-sym) {
-    color: var(--text-primary) !important;
-    font-size: 0.95rem !important;
-    line-height: 1.65 !important;
-    font-style: normal;
+/* Chant score cards: preserve standard canonical missal typography (1.12rem, bilingual layout, Latin column) */
+.do-card.has-gregorian-score .do-card-text-lines {
+    margin-top: 14px !important;
 }
 
 
@@ -4850,7 +4813,7 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     color: var(--do-text-secondary, #777);
     background: rgba(0, 0, 0, 0.04);
     border-radius: 8px;
-    border: 1px dashed rgba(0, 0, 0, 0.12);
+    border: none !important;
     margin: 4px 0;
 }
 
@@ -4859,7 +4822,7 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 :root:not([data-theme="light"]) .do-chant-error {
     color: rgba(255, 255, 255, 0.65);
     background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.12);
+    border: none !important;
 }
 
 .do-chant-retry-btn {
@@ -4871,7 +4834,7 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     font-weight: 600;
     color: var(--primary-color, #c96b63);
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
-    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.3);
+    border: none !important;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -5062,36 +5025,36 @@ body.header-dropdown-open .do-top-header #doHourLabel {
     fill: #ffffff !important;
 }
 
-[data-theme="dark"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="dark"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="dark"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="dark"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="dark"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="dark"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="dark"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="dark"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="dark"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="dark"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="oled"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="oled"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="oled"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="oled"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="oled"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="oled"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="oled"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="oled"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="oled"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="oled"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-:root:not([data-theme="light"]) svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-:root:not([data-theme="light"]) svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+[data-theme="dark"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="dark"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="dark"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="dark"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="dark"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="dark"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="dark"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="dark"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="dark"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="dark"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="oled"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="oled"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="oled"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="oled"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="oled"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="oled"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="oled"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="oled"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="oled"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+:root:not([data-theme="light"]) .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+:root:not([data-theme="light"]) .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+:root:not([data-theme="light"]) .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+:root:not([data-theme="light"]) svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+:root:not([data-theme="light"]) svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+:root:not([data-theme="light"]) svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+:root:not([data-theme="light"]) svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume) {
     fill: #ffffff !important;
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
 }
@@ -5152,21 +5115,28 @@ body.header-dropdown-open .do-top-header #doHourLabel {
 [data-theme="light"] svg.Exsurge use:not(.active):not([class*="active"]):not(.selected),
 [data-theme="light"] svg.ChantScore path:not(.brace):not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
 [data-theme="light"] svg.ChantScore use:not(.active):not([class*="active"]):not(.selected),
-[data-theme="light"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="light"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="light"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="light"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]),
-[data-theme="light"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]),
-[data-theme="light"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]) {
+[data-theme="light"] .do-chant-preview svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="light"] .do-chant-preview svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="light"] .gregorian-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="light"] .gregorian-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="light"] .do-verses-score-container svg text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="light"] .do-verses-score-container svg text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="light"] svg.Exsurge text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="light"] svg.Exsurge text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume),
+[data-theme="light"] svg.ChantScore text:not(.active):not([class*="active"]):not(.rubric):not([class*="rubric"]):not(.nabc-neume):not([class*="nabc-neume"]),
+[data-theme="light"] svg.ChantScore text:not(.active) tspan:not(.rubric):not([class*="rubric"]):not([class*="specialChar"]):not(.active):not([class*="active"]):not(.nabc-neume) {
     fill: #111317 !important;
     font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
 }
 
-/* Rubrics & Special Characters in Chants (Ps., V., R., asterisks, Eouae, etc.): Always in Accent Color */
+/* Rubrics & Special Characters in Chants (Ps., V., R., asterisks, Eouae, etc.) & Ancient Neumes (NABC): Always in Accent Color */
+.nabc-neume,
+text.nabc-neume,
+svg text.nabc-neume,
+svg .nabc-neume,
+.do-chant-preview svg .nabc-neume,
+.do-chant-preview svg text.nabc-neume,
+.gregorian-score-container svg .nabc-neume,
 .do-chant-preview svg text.rubric,
 .do-chant-preview svg text.specialChar,
 .do-chant-preview svg tspan.rubric,
@@ -5298,10 +5268,10 @@ svg .active {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 2px 7px;
-    border-radius: 5px;
+    border-radius: 6px;
     background: color-mix(in srgb, var(--primary-color, #c96b63) 18%, transparent);
     color: var(--primary-color, #c96b63);
-    border: 1px solid color-mix(in srgb, var(--primary-color, #c96b63) 32%, transparent);
+    border: none !important;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -5318,22 +5288,22 @@ svg .active {
     border-radius: 6px;
     background: var(--background-surface, #1e1e1e);
     color: var(--text-secondary, #94a3b8);
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    border: none !important;
     cursor: pointer;
     transition: all 0.15s ease;
 }
 .do-toggle-nabc-btn:hover {
     color: var(--text-primary, #ffffff);
-    border-color: var(--primary-color, #c96b63);
+    background: var(--background-highlight);
 }
 .do-toggle-nabc-btn.is-active {
     background: color-mix(in srgb, var(--primary-color, #c96b63) 14%, transparent);
     color: var(--primary-color, #c96b63);
-    border-color: color-mix(in srgb, var(--primary-color, #c96b63) 40%, transparent);
+    border: none !important;
 }
 .btn-toggle-main-nabc.is-active {
     background: color-mix(in srgb, var(--primary-color, #c96b63) 15%, var(--background-surface)) !important;
-    border-color: color-mix(in srgb, var(--primary-color, #c96b63) 45%, transparent) !important;
+    border: none !important;
     color: var(--primary-color, #c96b63) !important;
 }
 
@@ -5341,7 +5311,7 @@ svg .active {
     margin-top: 10px;
     padding: 10px 12px;
     background: var(--background-base);
-    border: 1px dashed color-mix(in srgb, var(--primary-color) 30%, transparent);
+    border: none !important;
     border-radius: 6px;
     font-family: 'Fira Code', 'Consolas', monospace;
     font-size: 0.75rem;
@@ -5376,7 +5346,7 @@ svg .active {
 .do-note-key-btn {
     padding: 7px 4px;
     border-radius: 8px;
-    border: 1px solid color-mix(in srgb, var(--primary-color) 22%, rgba(255,255,255,0.08));
+    border: none !important;
     background: var(--background-highlight);
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
@@ -5893,7 +5863,7 @@ body.is-dragging-player #modernPlayerBar {
     background: rgba(26, 28, 34, 0.96) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, rgba(255, 255, 255, 0.12)) !important;
+    border: none !important;
     border-radius: 14px !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
     padding: 12px 14px !important;
@@ -5902,7 +5872,7 @@ body.is-dragging-player #modernPlayerBar {
     gap: 10px !important;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(8px) scale(0.96);
+    transform: scale(0.96);
     transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s !important;
     box-sizing: border-box !important;
     user-select: none !important;
@@ -5910,14 +5880,14 @@ body.is-dragging-player #modernPlayerBar {
 
 [data-theme="light"] .do-pitch-bubble {
     background: rgba(255, 255, 255, 0.98) !important;
-    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, rgba(0, 0, 0, 0.12)) !important;
+    border: none !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18) !important;
 }
 
 .do-pitch-bubble.visible {
     opacity: 1 !important;
     visibility: visible !important;
-    transform: translateY(0) scale(1) !important;
+    transform: scale(1) !important;
     pointer-events: auto !important;
 }
 
@@ -6274,7 +6244,7 @@ button#playerBtnSolesmes.active {
     gap: 10px;
     padding: 12px 14px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border: none !important;
     border-radius: 12px;
     color: var(--text-secondary, #94a3b8);
     font-family: 'Inter', sans-serif;
@@ -6289,7 +6259,7 @@ button#playerBtnSolesmes.active {
 
 [data-theme="light"] .do-yt-empty-notice {
     background: rgba(0, 0, 0, 0.03);
-    border: 1px dashed rgba(0, 0, 0, 0.12);
+    border: none !important;
     color: var(--text-secondary, #64748b);
 }
 
@@ -6569,12 +6539,12 @@ html.is-android .do-install-banner {
 }
 
 .pwa-install-step {
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none !important;
 }
 
 [data-theme="light"] .pwa-install-step {
     background: rgba(0, 0, 0, 0.04) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none !important;
 }
 
 .do-update-banner-left {
@@ -7146,7 +7116,7 @@ html.is-ios .web-download-app-wrapper,
     border: none !important;
     outline: none !important;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb), 0.3);
+    box-shadow: none !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
@@ -7156,19 +7126,19 @@ html.is-ios .web-download-app-wrapper,
 }
 
 .update-btn-download:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(var(--primary-color-rgb), 0.4);
+    transform: none !important;
+    box-shadow: none !important;
     opacity: 0.95;
 }
 
 .update-btn-download:active {
-    transform: translateY(0);
+    transform: none !important;
 }
 
 /* Feedback Body & Iframe (Harmonized White Theme) */
 .feedback-header {
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.07) !important;
+    border-bottom: none !important;
 }
 
 .feedback-header .update-title {
@@ -7189,7 +7159,7 @@ html.is-ios .web-download-app-wrapper,
     align-items: center;
     gap: 6px;
     background: #f4f4f5 !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
     color: #3f3f46 !important;
     padding: 6px 12px;
     border-radius: 8px;
@@ -7205,11 +7175,11 @@ html.is-ios .web-download-app-wrapper,
 .feedback-reload-btn:hover {
     background: #e4e4e7 !important;
     color: #09090b !important;
-    transform: translateY(-1px);
+    transform: none !important;
 }
 
 .feedback-reload-btn:active {
-    transform: translateY(0);
+    transform: none !important;
 }
 
 @media (max-width: 520px) {
@@ -7397,7 +7367,7 @@ html.is-ios .web-download-app-wrapper,
     background: rgba(28, 28, 30, 0.88);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none !important;
     border-radius: 18px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
     padding: 10px 14px;
@@ -7416,7 +7386,7 @@ html.is-ios .web-download-app-wrapper,
 
 [data-theme="light"] .do-floating-notif {
     background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: none !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
     color: #18181b;
 }
@@ -7735,12 +7705,12 @@ html.is-ios .web-download-app-wrapper,
 .remote-notif-btn-primary {
     background: var(--primary-color, #c96b63);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb, 201, 107, 99), 0.3);
+    box-shadow: none !important;
 }
 
 .remote-notif-btn-primary:hover {
     filter: brightness(1.08);
-    transform: translateY(-1px);
+    transform: none !important;
 }
 
 .remote-notif-btn-secondary {
@@ -7803,7 +7773,7 @@ html.is-ios .web-download-app-wrapper,
     min-height: var(--toc-pill-height, 40px) !important;
     padding: 0 16px 0 13px !important;
     border-radius: 999px !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border: none !important;
     outline: none !important;
     background: rgba(24, 25, 30, 0.88) !important;
     background-image: var(--noise-overlay) !important;
@@ -7822,8 +7792,6 @@ html.is-ios .web-download-app-wrapper,
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 0.2s ease,
-                border-color 0.2s ease,
-                box-shadow 0.2s ease,
                 color 0.2s ease !important;
     user-select: none;
     touch-action: manipulation;
@@ -7832,25 +7800,50 @@ html.is-ios .web-download-app-wrapper,
 [data-theme="light"] .do-mass-toc-pill {
     background: rgba(255, 255, 255, 0.92) !important;
     background-image: var(--noise-overlay) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border: none !important;
     color: var(--text-primary, #111317) !important;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
     opacity: 1 !important;
 }
 
+/* Cache impératif du Sommaire liturgique lorsqu'il est masqué ou hors mode Messe */
+#doMassTocPill.hidden,
+.do-mass-toc-pill.hidden,
+#doMassTocPanel.hidden,
+.do-mass-toc-panel.hidden,
+#doMassTocBackdrop.hidden,
+.do-mass-toc-backdrop.hidden,
+body.is-gregobase-mode #doMassTocPill,
+body.is-gregobase-mode .do-mass-toc-pill,
+body.is-gregobase-mode #doMassTocPanel,
+body.is-gregobase-mode .do-mass-toc-panel,
+body.is-gregobase-mode #doMassTocBackdrop,
+body.is-gregobase-mode .do-mass-toc-backdrop,
+body.is-search-mode #doMassTocPill,
+body.is-search-mode .do-mass-toc-pill,
+body.is-bible-mode #doMassTocPill,
+body.is-bible-mode .do-mass-toc-pill,
+body.is-chant-mode #doMassTocPill,
+body.is-chant-mode .do-mass-toc-pill {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 @media (hover: hover) {
     .do-mass-toc-pill:hover {
         background: rgba(34, 36, 44, 0.96) !important;
-        border-color: rgba(var(--primary-color-rgb), 0.5) !important;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 14px rgba(var(--primary-color-rgb), 0.22) !important;
-        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) translateY(-2px) !important;
+        border: none !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) !important;
     }
 
     [data-theme="light"] .do-mass-toc-pill:hover {
         background: #ffffff !important;
-        border-color: rgba(var(--primary-color-rgb), 0.45) !important;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14), 0 0 12px rgba(var(--primary-color-rgb), 0.16) !important;
-        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) translateY(-2px) !important;
+        border: none !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+        transform: translateY(var(--picker-drag-y, var(--player-drag-y, 0px))) !important;
     }
 }
 
@@ -7863,7 +7856,7 @@ html.is-ios .web-download-app-wrapper,
     background: var(--primary-color) !important;
     color: #ffffff !important;
     border-color: transparent !important;
-    box-shadow: 0 8px 26px rgba(var(--primary-color-rgb), 0.5), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
 }
 
 .do-mass-toc-pill.is-scrolling {
@@ -8250,17 +8243,17 @@ body.mass-toc-open #modernPlayerBar {
    DESKTOP TABLE OF CONTENTS (Floating overlay, right-aligned, collapsed by default)
    ============================================================= */
 @media (min-width: 901px) {
-    /* On desktop: pill and backdrop behave the same as mobile (fixed, visible) */
-    #doMassTocPill,
-    .do-mass-toc-pill {
+    /* On desktop: pill and backdrop behave the same as mobile (fixed, visible only when active) */
+    #doMassTocPill:not(.hidden),
+    .do-mass-toc-pill:not(.hidden) {
         display: inline-flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         pointer-events: auto !important;
     }
 
-    #doMassTocBackdrop,
-    .do-mass-toc-backdrop {
+    #doMassTocBackdrop:not(.hidden),
+    .do-mass-toc-backdrop:not(.hidden) {
         display: block !important;
         visibility: visible !important;
     }
@@ -8659,15 +8652,16 @@ body.picker-drawer-open #modernPlayerBar {
     max-width: calc(100vw - 280px) !important;
     height: auto !important;
     max-height: 75vh !important;
-    padding: 8px 20px max(0px, env(safe-area-inset-bottom, 0px)) !important;
+    padding: 12px 24px max(16px, env(safe-area-inset-bottom, 0px)) !important;
     border-radius: 16px 16px 0 0 !important;
     border: none !important;
     border-top: none !important;
+    outline: none !important;
     box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45) !important;
-    background-color: #16161a !important;
+    background-color: var(--background-base, #0e0e10) !important;
     background-image: var(--noise-overlay) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     z-index: 967 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -8683,19 +8677,27 @@ body.picker-drawer-open #modernPlayerBar {
 
 [data-theme="dark"] .do-part-picker-drawer,
 [data-theme="oled"] .do-part-picker-drawer {
-    background-color: #0f0f12 !important;
+    background-color: var(--background-base, #0e0e10) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: none !important;
     border-top: none !important;
     box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.55) !important;
 }
 
 [data-theme="light"] .do-part-picker-drawer {
-    background-color: #f8f8fa !important;
+    background-color: color-mix(in srgb, var(--background-base) 90%, transparent) !important;
+    background-image: var(--noise-overlay) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: none !important;
     border-top: none !important;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
 .do-part-picker-drawer.is-visible {
-    transform: translateY(0) !important;
+    transform: translateY(var(--picker-drag-y, 0px)) !important;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
@@ -8704,18 +8706,18 @@ body.picker-drawer-open #modernPlayerBar {
 @media (max-width: 900px) {
     .do-part-picker-drawer {
         left: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 6px 16px max(0px, env(safe-area-inset-bottom, 0px)) !important;
-        max-height: 75vh !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 8px 16px max(14px, env(safe-area-inset-bottom, 0px)) !important;
+        max-height: 80vh !important;
     }
 }
 
 /* ── Grabber / Drag Handle for Part Picker Drawer ── */
 #partPickerDragHandleWrap {
     width: 100%;
-    padding: 10px 0 12px;
-    margin: -6px 0 -2px;
+    padding: 14px 0 18px;
+    margin: -10px 0 -4px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8725,6 +8727,9 @@ body.picker-drawer-open #modernPlayerBar {
     -webkit-user-select: none;
     z-index: 20;
     flex-shrink: 0;
+    min-height: 44px;
+    box-sizing: border-box;
+    background: transparent;
 }
 
 #partPickerDragHandleWrap:active,
@@ -8733,13 +8738,14 @@ body.is-dragging-picker #partPickerDragHandleWrap {
 }
 
 #partPickerDragHandleWrap .do-player-drag-handle {
-    width: 44px;
-    height: 5px;
-    background: color-mix(in srgb, var(--text-secondary) 35%, transparent);
-    border-radius: 4px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    width: 48px;
+    height: 6px;
+    background: color-mix(in srgb, var(--text-secondary) 50%, transparent);
+    border-radius: 6px;
+    transition: background-color 0.2s ease, transform 0.2s ease, width 0.2s ease;
     flex-shrink: 0;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: grab;
 }
 
 #partPickerDragHandleWrap:hover .do-player-drag-handle,
@@ -8748,8 +8754,16 @@ body.is-dragging-picker #partPickerDragHandleWrap {
     transform: scaleX(1.15);
 }
 
+body.is-dragging-picker,
+body.is-dragging-picker * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: grabbing !important;
+}
+
 body.is-dragging-picker #massPartPickerDrawer {
     transition: none !important;
+    transform: translateY(var(--picker-drag-y, 0px)) !important;
 }
 
 /* ── Header inside Part Picker Drawer (2 Clean Structured Rows) ── */
@@ -8783,6 +8797,7 @@ body.is-dragging-picker #massPartPickerDrawer {
     justify-content: space-between;
     gap: 12px;
     width: 100%;
+    touch-action: none;
 }
 
 .do-part-picker-badge-wrap {
@@ -8790,6 +8805,7 @@ body.is-dragging-picker #massPartPickerDrawer {
     align-items: center;
     gap: 8px;
     min-width: 0;
+    touch-action: none;
 }
 
 .do-part-picker-badge {
@@ -8823,6 +8839,38 @@ body.is-dragging-picker #massPartPickerDrawer {
     font-size: 0.8rem;
     color: var(--text-secondary);
     flex-shrink: 0;
+}
+
+.do-part-picker-header-top-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.do-part-picker-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--background-highlight, rgba(255, 255, 255, 0.08));
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.do-part-picker-close-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2);
+    color: var(--primary-color, #c96b63);
+    transform: scale(1.08);
+}
+
+.do-part-picker-close-btn:active {
+    transform: scale(0.94);
 }
 
 .do-part-picker-select {
@@ -8888,7 +8936,7 @@ body.is-dragging-picker #massPartPickerDrawer {
     align-items: center;
     gap: 5px;
     background: var(--background-highlight, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border: none !important;
     border-radius: 8px;
     padding: 3px 9px;
     font-size: 0.72rem;
@@ -8903,14 +8951,14 @@ body.is-dragging-picker #massPartPickerDrawer {
 .do-card-pt-btn:hover,
 .do-card-gp-btn:hover {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
-    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.35);
+    border: none !important;
     color: var(--primary-color, #c96b63);
 }
 
 .do-card-pt-btn.is-active,
 .do-card-gp-btn.is-active {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.2) !important;
-    border-color: var(--primary-color, #c96b63) !important;
+    border: none !important;
     color: var(--primary-color, #c96b63) !important;
     font-weight: 700 !important;
 }
@@ -9125,14 +9173,16 @@ body.is-dragging-picker #massPartPickerDrawer {
 
 /* ── Active Piece Highlight: Subtly tinted background, with full colored Gregorian score ── */
 .do-part-picker-drawer .gregorian-card.is-active {
-    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.28) !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.1) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     background: color-mix(in srgb, var(--background-surface, #18181b) 87%, var(--primary-color, #c96b63) 13%) !important;
 }
 
 [data-theme="light"] .do-part-picker-drawer .gregorian-card.is-active {
-    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
-    box-shadow: 0 2px 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
     background: color-mix(in srgb, var(--background-surface, #ffffff) 92%, var(--primary-color, #c96b63) 8%) !important;
 }
 
@@ -9150,7 +9200,7 @@ body.is-dragging-picker #massPartPickerDrawer {
 .do-part-picker-drawer .gregorian-card.is-active .gregorian-badge-mode {
     background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
     color: var(--primary-color, #c96b63) !important;
-    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.35) !important;
+    border: none !important;
 }
 
 /* ── All Gregorian SVG elements in theme color for the active card ── */
@@ -9186,42 +9236,141 @@ body.is-dragging-picker #massPartPickerDrawer {
     fill: none !important;
 }
 
-/* List view mode in drawer */
-.do-part-picker-drawer .gregorian-results.is-list .gregorian-card {
-    background: var(--background-surface) !important;
+/* ── List view mode in drawer (Clean, simple, title-only, matching Mass Dropdown .hdd-item-card) ── */
+.do-part-picker-drawer .gregorian-results.is-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 2px 8px !important;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    margin-bottom: 2px;
+    font-family: inherit;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.09) !important;
+    transform: translateX(2px);
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card.is-active,
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card.selected {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card:focus,
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card:focus-visible,
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card:active {
+    outline: none !important;
     border: none !important;
     box-shadow: none !important;
-    border-radius: 12px !important;
 }
 
-.do-part-picker-drawer .gregorian-results.is-list .gregorian-card:hover {
-    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-item-title {
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    font-size: 1.04rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card.is-active .do-picker-item-title,
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card.selected .do-picker-item-title {
+    color: var(--primary-color, #c96b63);
+    font-weight: 700;
+}
+
+.do-part-picker-drawer .gregorian-results.is-list .do-picker-active-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary-color, #c96b63);
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+/* Style pour .gregorian-card en mode liste (recherches et sélecteur) */
+.gregorian-results.is-list .gregorian-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    margin-bottom: 2px !important;
+    min-height: 44px !important;
+}
+
+.gregorian-results.is-list .gregorian-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.09) !important;
+    transform: translateX(2px) !important;
+}
+
+.gregorian-results.is-list .gregorian-card:active,
+.gregorian-results.is-list .gregorian-card:focus,
+.gregorian-results.is-list .gregorian-card:focus-visible,
+.gregorian-results.is-list .gregorian-card.is-active,
+.gregorian-results.is-list .gregorian-card.selected {
+    outline: none !important;
     border: none !important;
     box-shadow: none !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15) !important;
 }
 
-.do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active {
-    background: color-mix(in srgb, var(--background-surface, #18181b) 87%, var(--primary-color, #c96b63) 13%) !important;
-    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.28) !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.1) !important;
+.gregorian-results.is-list .gregorian-card-actions,
+.gregorian-results.is-list .gregorian-score-container,
+.gregorian-results.is-list .gregorian-card-middle,
+.gregorian-results.is-list .gregorian-text-preview,
+.gregorian-results.is-list .gregorian-card-saint-bg,
+.gregorian-results.is-list .gregorian-card-saint-gradient {
+    display: none !important;
 }
 
-[data-theme="light"] .do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active {
-    background: color-mix(in srgb, var(--background-surface, #ffffff) 92%, var(--primary-color, #c96b63) 8%) !important;
-    border: 1px solid rgba(var(--primary-color-rgb, 201, 107, 99), 0.22) !important;
-    box-shadow: 0 2px 10px rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
-}
-
-.do-part-picker-drawer .gregorian-results.is-list .gregorian-card:hover .gregorian-card-incipit,
-.do-part-picker-drawer .gregorian-results.is-list .gregorian-card.is-active .gregorian-card-incipit {
-    color: var(--primary-color, #c96b63) !important;
-}
-
-/* Active button style */
-.gregorian-action-btn.btn-select-piece.is-current {
-    background: var(--primary-color, #c96b63) !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
+@media (max-width: 600px) {
+    .do-part-picker-drawer .gregorian-results.is-list .do-picker-list-item.hdd-item-card {
+        padding: 9px 11px;
+        gap: 8px;
+    }
+    .do-part-picker-drawer .gregorian-results.is-list .do-picker-item-title {
+        font-size: 0.95rem;
+    }
 }
 
 /* ── Versus Ad Libitum (Clean, Unboxed, Same Fonts & Margins as Card) ── */
@@ -9425,4 +9574,222 @@ body.is-dragging-picker #massPartPickerDrawer {
 }
 [data-theme="light"] .do-sidebar-nav::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.10);
+}
+
+/* ── Modale des Messes Particulières & Votives ── */
+#votiveMassModal .update-card {
+    max-width: 580px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#votiveMassModalBody {
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.votive-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin: 16px 0 8px 4px;
+}
+.votive-section-title:first-child {
+    margin-top: 4px;
+}
+
+.votive-mass-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.votive-mass-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--background-surface, #1e1e24);
+    border: none !important;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.votive-mass-card:hover {
+    background: color-mix(in srgb, var(--background-surface, #1e1e24) 88%, var(--primary-color, #c96b63) 12%);
+    border: none !important;
+    transform: none !important;
+}
+
+.votive-mass-card:active {
+    transform: scale(0.985);
+}
+
+.votive-mass-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12);
+    flex-shrink: 0;
+}
+
+.votive-mass-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.votive-mass-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.votive-mass-sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.votive-mass-arrow {
+    color: var(--text-secondary);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+.votive-mass-card:hover .votive-mass-arrow {
+    color: var(--primary-color, #c96b63);
+    opacity: 1;
+}
+
+/* =========================================================================
+   CHARTE DE SOBRIÉTÉ LITURGIQUE (« MODERN SACRED ») — RÈGLES UNIVERSELLES
+   1. SANS AUCUNE BORDURE JAMAIS (Frameless & Zero-Strokes)
+   2. AUCUNE ANIMATION DE DÉPLACEMENT VERS LE HAUT (No translateY lift/bounce)
+   3. VALEURS D'ARRONDIS STRICTEMENT STANDARDISÉES
+   ========================================================================= */
+
+/* 1. Éradication absolue de toute bordure sur cartes, tuiles, boutons et conteneurs */
+.do-card,
+.do-extra-link-card,
+.do-top-card,
+.gregorian-card,
+.gregorian-skeleton-card,
+.hdd-item-card,
+.votive-mass-card,
+.pwa-install-step,
+.do-test-banner,
+.do-test-ctrl-btn,
+.do-chant-retry-btn,
+.do-toggle-nabc-btn,
+.btn-toggle-main-nabc,
+.do-card-pt-btn,
+.do-card-gp-btn,
+.feedback-reload-btn,
+.do-note-key-btn,
+.do-badge,
+.do-badge-nabc,
+.gregorian-badge-part,
+.gregorian-badge-mode,
+.do-floating-notif,
+.do-mass-toc-pill,
+.do-pitch-bubble,
+.hdd-custom-calendar,
+.do-home-search-results,
+.do-home-saint-hero,
+.do-home-saint-hero.do-hero-no-image,
+.icon-preview-box,
+.icon-preview-square {
+    border: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+}
+
+/* 2. Suppression stricte de tout déplacement vers le haut au survol / focus / actif */
+.do-card:hover,
+.do-card:focus,
+.do-extra-link-card:hover,
+.do-extra-link-card:focus,
+.do-top-card:hover,
+.gregorian-card:hover,
+.gregorian-card:focus,
+.hdd-item-card:hover,
+.votive-mass-card:hover,
+.votive-mass-card:focus,
+.do-nav-item:hover,
+.do-brand:hover,
+.update-btn-download:hover,
+.feedback-reload-btn:hover,
+.remote-notif-btn-primary:hover,
+.remote-notif-btn-secondary:hover,
+.do-mass-toc-pill:hover,
+.do-test-ctrl-btn:hover,
+.do-chant-retry-btn:hover,
+.do-toggle-nabc-btn:hover,
+.do-card-pt-btn:hover,
+.do-card-gp-btn:hover {
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+
+/* 3. Standardisation des arrondis */
+.do-card,
+.do-extra-link-card,
+.do-top-card,
+.gregorian-card,
+.votive-mass-card {
+    border-radius: 12px;
+}
+
+.do-nav-item,
+.hdd-item-card,
+.feedback-reload-btn,
+.do-card-pt-btn,
+.do-card-gp-btn {
+    border-radius: 9px;
+}
+
+.do-badge,
+.do-badge-nabc,
+.gregorian-badge-part,
+.gregorian-badge-mode,
+.do-toggle-nabc-btn,
+.do-chant-retry-btn {
+    border-radius: 6px;
+}
+
+/* =========================================================================
+   SOBRIÉTÉ LITURGIQUE : PROSCRIPTION STRICTE DES EFFETS DE GLOW / HALOS
+   ========================================================================= */
+*, *::before, *::after {
+    text-shadow: none !important;
+}
+
+.do-card,
+.do-extra-link-card,
+.do-nav-item,
+.hdd-item-card,
+.do-mass-toc-pill,
+.do-mass-toc-item,
+.gregorian-card,
+.gregobase-category-card,
+.gregobase-tab-btn {
+    text-shadow: none !important;
 }

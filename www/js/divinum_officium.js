@@ -119,7 +119,8 @@ var DO_HORA_TITLES_BY_LANG = {
         nona:             'None',
         vesperae:         'Vêpres',
         completorium:     'Complies',
-        bible:            'Sainte Bible'
+        bible:            'Sainte Bible',
+        gregobase:        'Grégobase'
     },
     la: {
         missa:            'Sancta Missa',
@@ -132,7 +133,8 @@ var DO_HORA_TITLES_BY_LANG = {
         nona:             'Ad Nonam',
         vesperae:         'Ad Vesperas',
         completorium:     'Ad Completorium',
-        bible:            'Sacra Biblia'
+        bible:            'Sacra Biblia',
+        gregobase:        'Grégobase'
     },
     en: {
         missa:            'Holy Mass',
@@ -145,7 +147,8 @@ var DO_HORA_TITLES_BY_LANG = {
         nona:             'None',
         vesperae:         'Vespers',
         completorium:     'Compline',
-        bible:            'Holy Bible'
+        bible:            'Holy Bible',
+        gregobase:        'Grégobase'
     },
     es: {
         missa:            'Santa Misa',
@@ -158,7 +161,8 @@ var DO_HORA_TITLES_BY_LANG = {
         nona:             'Nona',
         vesperae:         'Vísperas',
         completorium:     'Completas',
-        bible:            'Santa Biblia'
+        bible:            'Santa Biblia',
+        gregobase:        'Grégobase'
     }
 };
 
@@ -653,6 +657,18 @@ var OremusRouter = window.OremusRouter = {
             }
         }
 
+        // 6b. Grégobase
+        if (hora === 'gregobase') {
+            if (window.gregobaseUI && typeof window.gregobaseUI.getState === 'function') {
+                var gbSt = window.gregobaseUI.getState();
+                if (gbSt.tab && gbSt.tab !== 'overview') q.set('gbtab', gbSt.tab);
+                if (gbSt.filterType && gbSt.filterValue) {
+                    q.set('gbf', gbSt.filterType + ':' + gbSt.filterValue);
+                }
+                if (gbSt.inCategoryQuery) q.set('gbq', gbSt.inCategoryQuery);
+            }
+        }
+
         // 7. Options liturgiques & Traductions
         if (st.edition && st.edition !== '1960') {
             q.set('ed', st.edition);
@@ -775,6 +791,8 @@ var OremusRouter = window.OremusRouter = {
         } else if (hora === 'gregorian_chant') {
             var chantTitle = $('#doHeaderTitle .title-text').text() || ('Chant #' + doState.currentChantId);
             title = chantTitle + ' • Cantus Gregorianus — Oremus';
+        } else if (hora === 'gregobase') {
+            title = 'Grégobase • Base de données grégorienne — Oremus';
         } else {
             var horaMap = DO_HORA_TITLES_BY_LANG[uiLang] || DO_HORA_TITLES_BY_LANG['fr'] || DO_HORA_TITLES_BY_LANG['la'];
             var horaLabel = horaMap[hora] || hora;
@@ -813,13 +831,30 @@ var OremusRouter = window.OremusRouter = {
             var validHorae = [
                 'home', 'missa', 'missa_gregorian', 'matutinum', 'laudes', 
                 'prima', 'tertia', 'sexta', 'nona', 'vesperae', 'completorium', 
-                'bible', 'gregorian_search', 'gregorian_chant', 'search', 'chant'
+                'bible', 'gregorian_search', 'gregorian_chant', 'gregobase', 'search', 'chant', 'scores'
             ];
             if (horaVal === 'search') horaVal = 'gregorian_search';
             if (horaVal === 'chant') horaVal = 'gregorian_chant';
+            if (horaVal === 'scores') horaVal = 'gregobase';
             if (validHorae.indexOf(horaVal) >= 0) {
                 doState.hora = horaVal;
                 localStorage.setItem('do_hora', horaVal);
+            }
+            if (horaVal === 'gregobase') {
+                if (window.gregobaseUI && typeof window.gregobaseUI.setState === 'function') {
+                    var fType = null, fVal = null;
+                    if (params.gbf) {
+                        var parts = params.gbf.split(':');
+                        fType = parts[0];
+                        fVal = parts.slice(1).join(':');
+                    }
+                    window.gregobaseUI.setState({
+                        tab: params.gbtab || 'overview',
+                        filterType: fType,
+                        filterValue: fVal,
+                        inCategoryQuery: params.gbq || ''
+                    });
+                }
             }
         }
 
@@ -2199,23 +2234,27 @@ function isSanctiGreaterFeastOnSunday(sanctiFileText) {
 
 // ---- Data Loaders for Mass & Office ----
 
-function extractCommuneRef(text) {
+function extractCommuneRef(text, relPath) {
     if (!text) return null;
     var mRule = text.match(/\[Rule\][^\n]*\n([^\[\n]+)/i);
     if (mRule) {
-        var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
+        if (/Oratio\s+Dominica/i.test(mRule[1]) && relPath) {
+            var mDom = relPath.match(/^Tempora\/(.+)-([1-6])/i);
+            if (mDom) return 'Tempora/' + mDom[1] + '-0';
+        }
+        var mC = mRule[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+|Tempora\/[^\s;]+)/i);
         if (mC) return mC[1].trim();
     }
     var mRank = text.match(/\[Rank\][^\n]*\n([^\[\n]+)/i);
     if (mRank) {
-        var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
+        var mC2 = mRank[1].match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+|Tempora\/[^\s;]+)/i);
         if (mC2) return mC2[1].trim();
     }
     var headerPart = text.split(/\n\s*\[/)[0];
     var mTop = headerPart.match(/^\s*@([A-Za-z0-9_\-\/]+)(?:\s|\n|$)/);
     if (mTop && !mTop[1].startsWith(':')) return mTop[1].trim();
 
-    var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+)/i);
+    var mGen = text.match(/(?:vide|ex)\s+(?:Commune\/)?(C\d+(?:-[0-9]+)?[a-z\-]*(?:Pasc)?|Sancti\/[^\s;]+|Tempora\/[^\s;]+)/i);
     if (mGen) return mGen[1].trim();
     return null;
 }
@@ -2232,13 +2271,17 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
     var cleanPath = relPath;
     if (!/\.txt$/i.test(cleanPath)) cleanPath += '.txt';
 
+    var isVotive = /^Votive\//i.test(cleanPath);
     var isCommune = /^(?:Commune\/|C\d+)/i.test(cleanPath);
     var candidatePaths = [];
 
     var ed = DO_EDITIONS[doState.edition] || DO_EDITIONS['1960'];
     var suffixes = (ed && ed.suffixes) ? ed.suffixes : ['r', ''];
 
-    if (isCommune) {
+    if (isVotive) {
+        candidatePaths.push('do_data/missa/' + langFolder + '/' + cleanPath);
+        candidatePaths.push('do_data/missa/Latin/' + cleanPath);
+    } else if (isCommune) {
         var cClean = cleanPath.replace(/^Commune\//i, '').replace(/\.txt$/i, '');
         var cVariants = [cClean];
         var cNoTrailing = cClean.replace(/[a-z]+$/i, '');
@@ -2304,7 +2347,7 @@ function loadRecursiveDOFile(relPath, langFolder, isMissa, callback, depth, visi
                 var laP = p.replace('/' + langFolder + '/', '/Latin/');
                 fetchLocalFile(laP, function(errLa, laData) {
                     var fullTextForRules = (laData || '') + '\n' + data;
-                    var baseRef = extractCommuneRef(fullTextForRules);
+                    var baseRef = extractCommuneRef(fullTextForRules, cleanPath);
                     var curSections = parseSections(data);
 
                     if (baseRef) {
@@ -2341,8 +2384,9 @@ function loadMissaData(date, lang, callback) {
     var temporaCode = feastKey || codes.tempora;
 
     var isDirectTempora = feastKey && /^(Adv|Quad|Quadp|Pasc|Pent|PentEpi|Epi|7a|6a|5a|10-DU|093-)/i.test(feastKey);
-    var primaryPath = isDirectTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode);
-    var fallbackPath = isDirectTempora ? ('Sancti/' + sanctiCode) : ('Tempora/' + temporaCode);
+    var isDirectPath = feastKey && /^(Votive\/|Commune\/|Sancti\/|Tempora\/)/i.test(feastKey);
+    var primaryPath = isDirectPath ? feastKey : (isDirectTempora ? ('Tempora/' + temporaCode) : ('Sancti/' + sanctiCode));
+    var fallbackPath = isDirectPath ? feastKey : (isDirectTempora ? ('Sancti/' + sanctiCode) : ('Tempora/' + temporaCode));
 
     if (codes.isSunday && !feastKey) {
         fetchLocalFile('do_data/missa/Latin/Sancti/' + sanctiCode + '.txt', function(errS, laSData) {
@@ -2574,11 +2618,22 @@ function convertFeastKeyToCode(key) {
         'ChristRex': '10-DU', 'ChristusRex': '10-DU',
         'EmbWedSept': '093-3', 'EmbFriSept': '093-5', 'EmbSatSept': '093-6',
         'PentEpi3': 'PentEpi3-0', 'PentEpi4': 'PentEpi4-0', 'PentEpi5': 'PentEpi5-0', 'PentEpi6': 'PentEpi6-0',
-        'SMadvent': 'C11', 'SMchristmas': 'C11', 'SMlent': 'C11', 'SMpasch': 'C11', 'SMperannum': 'C11',
-        'requiem': 'Defunctorum', 'defunctorum': 'Defunctorum', 'nuptial': 'C12', 'nuptialis': 'C12', 'angels': '09-29'
+        'requiem': 'Votive/Defunctorum', 'defunctorum': 'Votive/Defunctorum',
+        'nuptial': 'Votive/Nuptialis', 'nuptialis': 'Votive/Nuptialis', 'mariage': 'Votive/Nuptialis',
+        'coronatio': 'Commune/Coronatio', 'propaganda': 'Commune/Propaganda',
+        'dedicatio': 'Commune/C8',
+        'votive_trinity': 'Tempora/Pent01-0',
+        'votive_angels': 'Sancti/09-29',
+        'votive_joseph': 'Sancti/03-19',
+        'votive_eucharist': 'Tempora/Pent01-4',
+        'votive_sacredheart': 'Tempora/Pent02-5',
+        'votive_bvm': 'Commune/C11',
+        'votive_apostles': 'Sancti/06-29',
+        'angels': '09-29'
     };
 
     if (seasonMap[key]) return seasonMap[key];
+    if (/^(Votive|Commune|Sancti|Tempora)\//i.test(key)) return key;
 
     // Lenten ferias: Quad1m..s to Quad1-1..6
     var quadFeria = key.match(/^Quad([1-6])([mtwhfs])$/);
@@ -4814,12 +4869,14 @@ function renderDO() {
     var isBible = (doState.hora === 'bible');
     var isSearch = (doState.hora === 'gregorian_search');
     var isChant = (doState.hora === 'gregorian_chant');
+    var isGregobase = (doState.hora === 'gregobase');
     var isMissa = (doState.hora === 'missa' || doState.hora === 'missa_gregorian');
     $('body').toggleClass('is-home-mode', isHome);
     $('body').toggleClass('is-missa-mode', isMissa);
     $('body').toggleClass('is-bible-mode', isBible);
     $('body').toggleClass('is-search-mode', isSearch);
     $('body').toggleClass('is-chant-mode', isChant);
+    $('body').toggleClass('is-gregobase-mode', isGregobase);
     if (!isHome && !isMissa) {
         $(window).off('scroll.saintParallax');
         if (typeof updateHeroImageState === 'function') {
@@ -4849,6 +4906,16 @@ function renderDO() {
         closeDoPlayer();
         if (window.gregorianSearchUI && typeof window.gregorianSearchUI.renderMainView === 'function') {
             window.gregorianSearchUI.renderMainView();
+        }
+        if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
+        return;
+    }
+
+    if (isGregobase) {
+        hideMassToc();
+        closeDoPlayer();
+        if (window.gregobaseUI && typeof window.gregobaseUI.renderMainView === 'function') {
+            window.gregobaseUI.renderMainView();
         }
         if (typeof setHeaderLoading === 'function') setHeaderLoading(false);
         return;
@@ -5129,7 +5196,22 @@ function convertDOKeyToPropriumKey(key, mom) {
         return monthNames[mom.month()] + mom.date();
     }
     if (!key) return null;
-    var clean = key.replace(/^(Sancti|Tempora|Commune)\//i, '').replace(/\.txt$/i, '').trim();
+    var clean = key.replace(/^(Sancti|Tempora|Commune|Votive)\//i, '').replace(/\.txt$/i, '').trim();
+
+    var votiveChantMap = {
+        'nuptial': 'nuptialis',
+        'Nuptialis': 'nuptialis',
+        'nuptialis': 'nuptialis',
+        'mariage': 'nuptialis',
+        'defunctorum': 'defunctorum',
+        'Defunctorum': 'defunctorum',
+        'requiem': 'defunctorum',
+        'coronatio': 'coronatio',
+        'propaganda': 'propaganda',
+        'dedicatio': 'dedicatio'
+    };
+    if (votiveChantMap[clean]) return votiveChantMap[clean];
+    if (votiveChantMap[key]) return votiveChantMap[key];
 
     // Pent01-0 to Pent24-0 / Pent1-0 etc.
     var pentMatch = clean.match(/^Pent0?(\d+)(?:-(\d))?$/i);
@@ -5729,17 +5811,17 @@ function preprocessGabcForExsurge(gabc, options) {
     if (!gabc || typeof gabc !== 'string') return gabc;
     options = options || {};
 
-    // 0. Support stripping NABC if explicitly requested
-    if (options.stripNabc) {
-        gabc = gabc.replace(/\(([^)]*)\)/g, function(match, inner) {
-            if (inner.indexOf('|') === -1) return match;
-            var parts = inner.split('|');
-            var notes = [];
-            for (var i = 0; i < parts.length; i += 2) {
-                notes.push(parts[i]);
-            }
-            return '(' + notes.join(' ') + ')';
-        });
+    // 0. Toujours dépouiller les neumes NABC pour Exsurge (Exsurge ne gère que les notes carrées)
+    if (options.stripNabc !== false) {
+        if (window.GregorianNABC && typeof window.GregorianNABC.stripNabc === 'function') {
+            gabc = window.GregorianNABC.stripNabc(gabc);
+        } else {
+            gabc = gabc.replace(/\(([^)]*)\)/g, function(match, inner) {
+                if (inner.indexOf('|') === -1) return match;
+                var parts = inner.split('|');
+                return '(' + parts[0].trim() + ')';
+            });
+        }
     }
 
     // 1. Process <eu>...</eu> (Euouae - saeculorum Amen termination)
@@ -6877,6 +6959,9 @@ function closeDoPlayer() {
 }
 
 function initDoPlayer() {
+    if (typeof initSwipeToClose === 'function') {
+        initSwipeToClose();
+    }
     // Restart from beginning button
     $('#playerBtnRestart').off('click').on('click', function(e) {
         e.stopPropagation();
@@ -7142,9 +7227,11 @@ function initDoPlayer() {
     window.addEventListener('resize', syncPlayerBarOffset);
 
     // Swipe down to dismiss grab handle / player bar gesture & upward stretch to fluidly reveal sources
-    (function initSwipeToClose() {
+    window.initSwipeToClose = function initSwipeToClose() {
         var playerBar = document.getElementById('modernPlayerBar');
         if (!playerBar) return;
+        if (playerBar._playerSwipeBound) return;
+        playerBar._playerSwipeBound = true;
         var startY = 0, currentY = 0, startTime = 0, isDragging = false;
         var isDrawerOpenAtStart = false;
 
@@ -7386,7 +7473,8 @@ function initDoPlayer() {
         window.addEventListener('touchend', onTouchEnd, { passive: true });
         window.addEventListener('touchcancel', onTouchEnd, { passive: true });
         playerBar.addEventListener('mousedown', onMouseDown);
-    })();
+    };
+    initSwipeToClose();
 
     // Progress bar click & drag scrubbing without forcing play
     function seekToTimelinePercent(percent) {
@@ -9294,15 +9382,14 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                 }
             }
 
-            var hasNabc = /nabc-lines:\s*[1-9]/i.test(cachedGabc) || /\([^)]*\|[^)]*\)/.test(cachedGabc);
-            var showNabc = $wrapper.data('show-nabc');
-            if (showNabc === undefined) {
-                showNabc = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
+            var hasNabc = (window.GregorianNABC && window.GregorianNABC.hasNabc(cachedGabc)) ||
+                /nabc-lines:\s*[1-9]/i.test(cachedGabc) || /\([^)]*\|[^)]*\)/.test(cachedGabc);
+            if (hasNabc) {
+                ctxt.spaceBetweenSystems = 4.2;
             }
-            ctxt.showNabc = !!(hasNabc && showNabc);
 
             var cleanGabc = sanitizeGabc(cachedGabc);
-            var processedGabc = preprocessGabcForExsurge(cleanGabc);
+            var processedGabc = preprocessGabcForExsurge(cleanGabc, { stripNabc: true });
             var mappings = exsurge.Gabc.createMappingsFromSource(ctxt, processedGabc);
             var score = new exsurge.ChantScore(ctxt, mappings, true);
 
@@ -9372,34 +9459,21 @@ function renderSingleChantScore($wrapper, force, onComplete) {
                     $preview.removeClass('gregorian-skeleton').addClass('is-rendered').find('.gregorian-score-loader').remove();
                     $preview.empty().append(svg);
 
-                    // NABC toolbar badge & interactive toggle
+                    // Rendu vectoriel fidèle des neumes anciens manuscrits (NABC)
+                    if (hasNabc && window.GregorianNABC && typeof window.GregorianNABC.renderNabcOverlay === 'function') {
+                        window.GregorianNABC.renderNabcOverlay(svg, score, cachedGabc);
+                    }
+
+                    // NABC badge informatif (les neumes sont affichés directement dès qu'ils sont présents)
                     var $nabcBar = $card.find('.do-chant-nabc-bar');
                     if (hasNabc) {
                         if (!$nabcBar.length) {
                             $nabcBar = $(
                                 '<div class="do-chant-nabc-bar">' +
-                                    '<span class="do-badge-nabc" title="Notation adiastématique ancienne (neumes manuscrits)">NABC</span>' +
-                                    '<button type="button" class="do-toggle-nabc-btn' + (showNabc ? ' is-active' : '') + '" title="' + (showNabc ? 'Masquer les neumes anciens' : 'Afficher les neumes anciens') + '">' +
-                                        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
-                                        '<span>' + (showNabc ? 'Neumes actifs' : 'Neumes masqués') + '</span>' +
-                                    '</button>' +
+                                    '<span class="do-badge-nabc" title="Notation adiastématique ancienne (neumes manuscrits de Saint-Gall)">NABC</span>' +
                                 '</div>'
                             );
                             $preview.before($nabcBar);
-                            $nabcBar.find('.do-toggle-nabc-btn').on('click', function(e) {
-                                e.stopPropagation();
-                                var cur = $wrapper.data('show-nabc');
-                                if (cur === undefined) cur = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
-                                var next = !cur;
-                                $wrapper.data('show-nabc', next);
-                                if (window.doState) window.doState.showNabc = next;
-                                renderSingleChantScore($wrapper, true);
-                            });
-                        } else {
-                            $nabcBar.find('.do-toggle-nabc-btn')
-                                .toggleClass('is-active', !!showNabc)
-                                .attr('title', showNabc ? 'Masquer les neumes anciens' : 'Afficher les neumes anciens')
-                                .find('span').text(showNabc ? 'Neumes actifs' : 'Neumes masqués');
                         }
                     } else if ($nabcBar.length) {
                         $nabcBar.remove();
@@ -9804,37 +9878,37 @@ function getMassPartCandidateChants(partKey) {
     } else if (partKey === 'kyrie') {
         if (currentOrd && currentOrd.kyrie) {
             var k = currentOrd.kyrie;
-            addCandidate(k.id || k, (k.name || 'Kyrie') + ' (' + currentOrd.name + ')', 'Kyrie', currentOrd.name, currentOrd.name);
+            addCandidate(k.id || k, k.name || 'Kyrie', 'Kyrie', currentOrd.name, currentOrd.name);
+        }
+        if (typeof massOrdinary !== 'undefined') {
+            massOrdinary.forEach(function(m, idx) {
+                if (m.kyrie) {
+                    var k = m.kyrie;
+                    addCandidate(k.id || k, k.name || ('Kyrie ' + (idx + 1)), 'Kyrie', m.name || ('Missa ' + (idx + 1)), m.name);
+                }
+            });
         }
         if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.kyrie) {
             ordinaryAdLib.kyrie.forEach(function(item) {
                 addCandidate(item.id, item.name, 'Kyrie', 'Ad Libitum');
             });
         }
-        if (typeof massOrdinary !== 'undefined') {
-            massOrdinary.forEach(function(m, idx) {
-                if (m.kyrie) {
-                    var k = m.kyrie;
-                    addCandidate(k.id || k, (k.name || ('Kyrie ' + (idx + 1))) + ' (' + (m.name || ('Missa ' + (idx + 1))) + ')', 'Kyrie', m.name || ('Missa ' + (idx + 1)), m.name);
-                }
-            });
-        }
     } else if (partKey === 'gloria') {
         if (currentOrd && currentOrd.gloria) {
             var g = currentOrd.gloria;
-            addCandidate(g.id || g, (g.name || 'Gloria') + ' (' + currentOrd.name + ')', 'Gloria', currentOrd.name, currentOrd.name);
-        }
-        if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.gloria) {
-            ordinaryAdLib.gloria.forEach(function(item) {
-                addCandidate(item.id, item.name, 'Gloria', 'Ad Libitum');
-            });
+            addCandidate(g.id || g, g.name || 'Gloria', 'Gloria', currentOrd.name, currentOrd.name);
         }
         if (typeof massOrdinary !== 'undefined') {
             massOrdinary.forEach(function(m, idx) {
                 if (m.gloria) {
                     var g = m.gloria;
-                    addCandidate(g.id || g, (g.name || ('Gloria ' + (idx + 1))) + ' (' + (m.name || ('Missa ' + (idx + 1))) + ')', 'Gloria', m.name || ('Missa ' + (idx + 1)), m.name);
+                    addCandidate(g.id || g, g.name || ('Gloria ' + (idx + 1)), 'Gloria', m.name || ('Missa ' + (idx + 1)), m.name);
                 }
+            });
+        }
+        if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.gloria) {
+            ordinaryAdLib.gloria.forEach(function(item) {
+                addCandidate(item.id, item.name, 'Gloria', 'Ad Libitum');
             });
         }
     } else if (partKey === 'credo') {
@@ -9846,42 +9920,42 @@ function getMassPartCandidateChants(partKey) {
     } else if (partKey === 'praefatio') {
         if (currentOrd && currentOrd.sanctus) {
             var s = currentOrd.sanctus;
-            addCandidate(s.id || s, (s.name || 'Sanctus') + ' (' + currentOrd.name + ')', 'Sanctus', currentOrd.name, currentOrd.name);
+            addCandidate(s.id || s, s.name || 'Sanctus', 'Sanctus', currentOrd.name, currentOrd.name);
+        }
+        if (typeof massOrdinary !== 'undefined') {
+            massOrdinary.forEach(function(m, idx) {
+                if (m.sanctus) {
+                    var s = m.sanctus;
+                    addCandidate(s.id || s, s.name || ('Sanctus ' + (idx + 1)), 'Sanctus', m.name || ('Missa ' + (idx + 1)), m.name);
+                }
+            });
         }
         if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.sanctus) {
             ordinaryAdLib.sanctus.forEach(function(item) {
                 addCandidate(item.id, item.name, 'Sanctus', 'Ad Libitum');
             });
         }
-        if (typeof massOrdinary !== 'undefined') {
-            massOrdinary.forEach(function(m, idx) {
-                if (m.sanctus) {
-                    var s = m.sanctus;
-                    addCandidate(s.id || s, (s.name || ('Sanctus ' + (idx + 1))) + ' (' + (m.name || ('Missa ' + (idx + 1))) + ')', 'Sanctus', m.name || ('Missa ' + (idx + 1)), m.name);
-                }
-            });
-        }
         if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.preface) {
             ordinaryAdLib.preface.forEach(function(item) {
-                addCandidate(item.id, 'Præfatio - ' + item.name, 'Præfatio', 'Tonus Præfationis');
+                addCandidate(item.id, item.name, 'Præfatio', 'Tonus Præfationis');
             });
         }
     } else if (partKey === 'communion_prep') {
         if (currentOrd && currentOrd.agnus) {
             var a = currentOrd.agnus;
-            addCandidate(a.id || a, (a.name || 'Agnus Dei') + ' (' + currentOrd.name + ')', 'Agnus Dei', currentOrd.name, currentOrd.name);
-        }
-        if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.agnus) {
-            ordinaryAdLib.agnus.forEach(function(item) {
-                addCandidate(item.id, item.name, 'Agnus Dei', 'Ad Libitum');
-            });
+            addCandidate(a.id || a, a.name || 'Agnus Dei', 'Agnus Dei', currentOrd.name, currentOrd.name);
         }
         if (typeof massOrdinary !== 'undefined') {
             massOrdinary.forEach(function(m, idx) {
                 if (m.agnus) {
                     var a = m.agnus;
-                    addCandidate(a.id || a, (a.name || ('Agnus ' + (idx + 1))) + ' (' + (m.name || ('Missa ' + (idx + 1))) + ')', 'Agnus Dei', m.name || ('Missa ' + (idx + 1)), m.name);
+                    addCandidate(a.id || a, a.name || ('Agnus ' + (idx + 1)), 'Agnus Dei', m.name || ('Missa ' + (idx + 1)), m.name);
                 }
+            });
+        }
+        if (typeof ordinaryAdLib !== 'undefined' && ordinaryAdLib.agnus) {
+            ordinaryAdLib.agnus.forEach(function(item) {
+                addCandidate(item.id, item.name, 'Agnus Dei', 'Ad Libitum');
             });
         }
     } else if (partKey === 'conclusio') {
@@ -9889,12 +9963,30 @@ function getMassPartCandidateChants(partKey) {
             var it = currentOrd.ite;
             var itArr = Array.isArray(it) ? it : [it];
             itArr.forEach(function(item) {
-                addCandidate(item.id || item, (item.name || 'Ite Missa est') + ' (' + currentOrd.name + ')', 'Ite Missa est', currentOrd.name, currentOrd.name);
+                addCandidate(item.id || item, item.name || 'Ite Missa est', 'Ite Missa est', currentOrd.name, currentOrd.name);
             });
         }
         if (currentOrd && currentOrd.benedicamus) {
             var b = currentOrd.benedicamus;
-            addCandidate(b.id || b, (b.name || 'Benedicamus Dómino') + ' (' + currentOrd.name + ')', 'Benedicamus', currentOrd.name, currentOrd.name);
+            addCandidate(b.id || b, b.name || 'Benedicamus Dómino', 'Benedicamus', currentOrd.name, currentOrd.name);
+        }
+        if (typeof massOrdinary !== 'undefined') {
+            massOrdinary.forEach(function(m, idx) {
+                if (m.ite) {
+                    var it = m.ite;
+                    var itArr = Array.isArray(it) ? it : [it];
+                    itArr.forEach(function(item) {
+                        addCandidate(item.id || item, item.name || 'Ite Missa est', 'Ite Missa est', m.name || ('Missa ' + (idx + 1)), m.name);
+                    });
+                }
+                if (m.benedicamus) {
+                    var b = m.benedicamus;
+                    var bArr = Array.isArray(b) ? b : [b];
+                    bArr.forEach(function(item) {
+                        addCandidate(item.id || item, item.name || 'Benedicamus Dómino', 'Benedicamus', m.name || ('Missa ' + (idx + 1)), m.name);
+                    });
+                }
+            });
         }
         if (typeof ordinaryAdLib !== 'undefined') {
             if (ordinaryAdLib.ite) {
@@ -9904,28 +9996,19 @@ function getMassPartCandidateChants(partKey) {
                 });
             }
             if (ordinaryAdLib.benedicamus) {
-                var bArr = Array.isArray(ordinaryAdLib.benedicamus) ? ordinaryAdLib.benedicamus : [ordinaryAdLib.benedicamus];
-                bArr.forEach(function(item) {
+                var bArr2 = Array.isArray(ordinaryAdLib.benedicamus) ? ordinaryAdLib.benedicamus : [ordinaryAdLib.benedicamus];
+                bArr2.forEach(function(item) {
                     addCandidate(item.id || item, item.name || 'Benedicamus Dómino', 'Benedicamus', 'Ad Libitum');
                 });
             }
-        }
-        if (typeof massOrdinary !== 'undefined') {
-            massOrdinary.forEach(function(m, idx) {
-                if (m.ite) {
-                    var it = m.ite;
-                    var itArr = Array.isArray(it) ? it : [it];
-                    itArr.forEach(function(item) {
-                        addCandidate(item.id || item, (item.name || 'Ite') + ' (' + (m.name || ('Missa ' + (idx + 1))) + ')', 'Ite Missa est', m.name || ('Missa ' + (idx + 1)), m.name);
-                    });
-                }
-            });
         }
     } else {
         var activeId = getActiveChantIdForPart(partKey);
         var curName = getMassPartMetadata(partKey).title;
         if (activeId) {
-            addCandidate(activeId, curName + ' (Propre du jour)', curName, 'Messe du jour');
+            var gItem = lookupChantIndex(activeId);
+            var incipit = (gItem && gItem.incipit) ? gItem.incipit : (curName + ' (Propre du jour)');
+            addCandidate(activeId, incipit, curName, 'Messe du jour');
         }
 
         var partFilterName = partKey;
@@ -10023,6 +10106,12 @@ function closeMassPartPicker() {
     $('html, body').removeClass('picker-drawer-open');
     document.documentElement.style.setProperty('--picker-drag-y', '0px');
     document.documentElement.style.removeProperty('--part-picker-offset');
+    var drawerEl = $drawer[0];
+    if (drawerEl) {
+        drawerEl.style.removeProperty('transform');
+        drawerEl.style.removeProperty('opacity');
+        drawerEl.style.removeProperty('transition');
+    }
     if (_partPickerObserver) {
         _partPickerObserver.disconnect();
     }
@@ -10041,8 +10130,9 @@ function updatePartPickerPeekHeight() {
 
     var isGrid = container.classList.contains('is-grid');
     if (!isGrid) {
-        var firstListCard = container.querySelector('.gregorian-card');
+        var firstListCard = container.querySelector('.do-picker-list-item, .gregorian-card');
         var listCardH = firstListCard ? firstListCard.offsetHeight : 52;
+        if (!listCardH || listCardH < 30) listCardH = 52;
         var listPeekH = Math.round((listCardH * 4) + 16);
         drawer.style.setProperty('--picker-results-peek-h', listPeekH + 'px');
         return;
@@ -10180,42 +10270,54 @@ function populateMassPartPickerItems(partKey, query) {
             textExtract = rawIncipit;
         }
 
-        // Canonical .gregorian-card structure matching Gregorian Search exactly (no pastille actif)
-        html += 
-            '<div class="gregorian-card' + (isActive ? ' is-active' : '') + '" data-chant-id="' + escHtml(item.id) + '" data-chant-name="' + escHtml(item.name) + '" data-part-key="' + escHtml(partKey) + '">' +
-                '<div class="gregorian-card-header">' +
-                    '<div class="gregorian-card-titles">' +
-                        '<div class="gregorian-card-incipit" title="' + escHtml(rawIncipit) + '">' +
-                            escHtml(rawIncipit) +
+        var hasNabc = !!(item.has_nabc || (item.tags || '').indexOf('NABC') !== -1 || (gIndexItem && gIndexItem.has_nabc));
+
+        // Intelligent parsing of Incipit & Qualification (e.g. "Asperges me (ad libitum 1)")
+        var displayTitle = rawIncipit;
+        var displaySub = source;
+        var parenMatch = displayTitle.match(/^(.*?)\s*\((.*?)\)$/);
+        if (parenMatch) {
+            displayTitle = parenMatch[1].trim();
+            var parenInfo = parenMatch[2].trim();
+            if (!displaySub) {
+                displaySub = parenInfo;
+            } else if (displaySub.indexOf(parenInfo) === -1) {
+                displaySub = parenInfo + ' • ' + displaySub;
+            }
+        }
+
+        if (!isGrid) {
+            // Minimalist title-only list item matching chant-tools/propers.html and header dropdown
+            html += 
+                '<button type="button" class="do-picker-list-item hdd-item-card' + (isActive ? ' selected is-active' : '') + '" data-chant-id="' + escHtml(item.id) + '" data-chant-name="' + escHtml(rawIncipit) + '" data-part-key="' + escHtml(partKey) + '" role="option" aria-selected="' + (isActive ? 'true' : 'false') + '">' +
+                    '<span class="hdd-item-title do-picker-item-title" title="' + escHtml(rawIncipit) + '">' + escHtml(rawIncipit) + '</span>' +
+                    (isActive ? '<span class="do-picker-active-check" title="Actuellement sélectionné"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' : '') +
+                '</button>';
+        } else {
+            // Canonical .gregorian-card structure matching Gregorian Search for Grid mode
+            html += 
+                '<div class="gregorian-card' + (isActive ? ' is-active' : '') + '" data-chant-id="' + escHtml(item.id) + '" data-chant-name="' + escHtml(item.name) + '" data-part-key="' + escHtml(partKey) + '">' +
+                    '<div class="gregorian-card-header">' +
+                        '<div class="gregorian-card-titles">' +
+                            '<div class="gregorian-card-incipit" title="' + escHtml(rawIncipit) + '">' +
+                                escHtml(rawIncipit) +
+                            '</div>' +
+                            (source ? '<div class="gregorian-card-source" title="' + escHtml(source) + '">' + escHtml(source) + '</div>' : '') +
                         '</div>' +
-                        (source ? '<div class="gregorian-card-source" title="' + escHtml(source) + '">' + escHtml(source) + '</div>' : '') +
+                        '<div class="gregorian-card-badges">' +
+                            '<span class="gregorian-badge-part">' + escHtml(partText) + '</span>' +
+                            (modeText ? '<span class="gregorian-badge-mode">' + escHtml(modeText) + '</span>' : '') +
+                            (hasNabc ? '<span class="do-badge-nabc" title="Notation ancienne NABC">NABC</span>' : '') +
+                        '</div>' +
                     '</div>' +
-                    '<div class="gregorian-card-badges">' +
-                        '<span class="gregorian-badge-part">' + escHtml(partText) + '</span>' +
-                        (modeText ? '<span class="gregorian-badge-mode">' + escHtml(modeText) + '</span>' : '') +
-                        ((item.has_nabc || (item.tags || '').indexOf('NABC') !== -1 || (gIndexItem && gIndexItem.has_nabc)) ? '<span class="do-badge-nabc" title="Notation ancienne NABC">NABC</span>' : '') +
+                    '<div class="gregorian-score-container gregorian-skeleton" data-chant-id="' + escHtml(item.id) + '">' +
+                        '<div class="gregorian-score-loader">' +
+                            '<div class="gregorian-skeleton-staff"><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div></div>' +
+                            '<div class="gregorian-skeleton-staff"><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div></div>' +
+                        '</div>' +
                     '</div>' +
-                '</div>' +
-                '<div class="gregorian-score-container gregorian-skeleton" data-chant-id="' + escHtml(item.id) + '">' +
-                    '<div class="gregorian-score-loader">' +
-                        '<div class="gregorian-skeleton-staff"><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div></div>' +
-                        '<div class="gregorian-skeleton-staff"><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div><div class="gregorian-staff-line"></div></div>' +
-                    '</div>' +
-                '</div>' +
-                (!isGrid && textExtract ? 
-                    '<div class="gregorian-card-middle gregorian-text-preview">' +
-                        '<p>' + escHtml(textExtract) + '</p>' +
-                    '</div>' : '') +
-                '<div class="gregorian-card-actions">' +
-                    '<button type="button" class="gregorian-action-btn btn-select-piece' + (isActive ? ' is-current' : '') + '">' +
-                        (isActive ? 'Actuel' : 'Choisir') +
-                    '</button>' +
-                    '<button type="button" class="gregorian-action-btn btn-play-chant" title="Écouter">' +
-                        '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
-                        '<span>Écouter</span>' +
-                    '</button>' +
-                '</div>' +
-            '</div>';
+                '</div>';
+        }
     });
 
     $container.html(html);
@@ -11745,9 +11847,38 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    $(document).on('click', '#massPartPickerBackdrop', function(e) {
+    $(document).on('click', '#partPickerCloseBtn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMassPartPicker();
+    });
+
+    $(document).on('click touchstart', '#massPartPickerBackdrop', function(e) {
         e.preventDefault();
         closeMassPartPicker();
+    });
+
+    // Évite que les clics à l'intérieur du tiroir ne provoquent la fermeture
+    $(document).on('click', '#massPartPickerDrawer', function(e) {
+        e.stopPropagation();
+    });
+
+    // Clic en dehors du tiroir pour le fermer en toute circonstance
+    $(document).on('click', function(e) {
+        var $drawer = $('#massPartPickerDrawer');
+        if (!$drawer.hasClass('is-visible')) return;
+        if (e.target && !e.target.isConnected) return;
+        if (e.composedPath) {
+            var path = e.composedPath();
+            for (var i = 0; i < path.length; i++) {
+                if (path[i] && (path[i].id === 'massPartPickerDrawer' || path[i].id === 'massPartPickerBackdrop' || (path[i].classList && path[i].classList.contains('do-part-picker-trigger')))) {
+                    return;
+                }
+            }
+        }
+        if ($(e.target).closest('#massPartPickerDrawer, .do-card-title.do-part-picker-trigger, .do-part-picker-trigger, #partPickerDragHandleWrap, #massPartPickerBackdrop').length === 0) {
+            closeMassPartPicker();
+        }
     });
 
     // Auto-agrandissement jusqu'à 75% dès que l'utilisateur fait défiler la liste des pièces
@@ -11775,53 +11906,79 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         }
     });
 
-    // Gestes tactiles et souris pour le tiroir : arrêt à 1,5 cartes au début, glisser vers le haut pour étendre à 75%, vers le bas pour fermer/réduire
-    (function initPartPickerSwipeGestures() {
+    // Gestes tactiles, souris et pointeur pour le sélecteur : glisser vers le haut pour étendre à 75%, vers le bas pour fermer/réduire, ou tap sur le grabber
+    window.initPartPickerSwipeGestures = function initPartPickerSwipeGestures() {
         var drawer = document.getElementById('massPartPickerDrawer');
         if (!drawer) return;
-        var startY = 0, currentY = 0, startTime = 0, isDragging = false;
+        if (drawer._partPickerGesturesBound) return;
+        drawer._partPickerGesturesBound = true;
 
-        function startDrag(clientY, target) {
-            var isHandle = $(target).closest('#partPickerDragHandleWrap, #partPickerDragHandle').length > 0;
-            var isHeader = $(target).closest('.do-part-picker-header, .do-part-picker-header-top').length > 0;
-            var $results = $(target).closest('#partPickerResultsContainer');
-            var isAtTop = $results.length > 0 && ($results[0].scrollTop <= 0);
+        var startY = 0, currentY = 0, startTime = 0, isDragging = false, hasMoved = false;
+        var activePointerId = null;
+        var dragTargetEl = null;
 
-            if (!isHandle && !isHeader && !isAtTop && target !== drawer) {
+        function isValidTarget(target) {
+            if (!target) return false;
+            // Handle wrap or handle itself
+            if ($(target).closest('#partPickerDragHandleWrap, #partPickerDragHandle').length > 0) {
+                return true;
+            }
+            // Form controls inside header should not initiate drag
+            if ($(target).closest('button, input, select, textarea, a, option').length > 0) {
                 return false;
             }
-            if ($(target).closest('button, input, select, a').length && !isHandle) {
-                return false;
+            // Drawer header or top bar or badge
+            if ($(target).closest('.do-part-picker-header, .do-part-picker-header-top, .do-part-picker-badge-wrap, #partPickerTitle, #partPickerCategoryBadge').length > 0) {
+                return true;
             }
+            // Drawer base element or inner container
+            if (target === drawer || $(target).hasClass('do-part-picker-inner')) {
+                return true;
+            }
+            return false;
+        }
+
+        function startDrag(clientY, target, pointerId) {
+            if (!isValidTarget(target)) return false;
 
             startY = clientY;
             currentY = startY;
             startTime = Date.now();
             isDragging = true;
+            hasMoved = false;
+            activePointerId = (pointerId !== undefined) ? pointerId : null;
+
             $('body').addClass('is-dragging-picker');
             drawer.style.setProperty('transition', 'none', 'important');
             document.documentElement.style.setProperty('--picker-drag-y', '0px');
             return true;
         }
 
-        function moveDrag(clientY, target, cancelable, preventDefaultFn) {
+        function moveDrag(clientY, e) {
             if (!isDragging) return;
             currentY = clientY;
             var deltaY = currentY - startY;
+            if (Math.abs(deltaY) > 4) {
+                hasMoved = true;
+            }
+            if (e && e.cancelable) {
+                e.preventDefault();
+            }
+
+            var drawerH = drawer.offsetHeight || 380;
             var isExpanded = drawer.classList.contains('is-expanded');
 
             if (deltaY > 0) {
-                if (cancelable && preventDefaultFn) preventDefaultFn();
-                var drawerH = drawer.offsetHeight || 380;
+                // Dragging down -> fluid downward follow-through to dismiss
                 var progress = Math.min(1, Math.max(0, deltaY / drawerH));
                 var opacity = 1 - (progress * 0.7);
                 drawer.style.setProperty('transform', 'translateY(' + deltaY + 'px)', 'important');
                 drawer.style.setProperty('opacity', opacity.toFixed(3), 'important');
                 document.documentElement.style.setProperty('--picker-drag-y', deltaY + 'px');
             } else {
+                // Dragging up
                 if (!isExpanded) {
-                    if (cancelable && preventDefaultFn) preventDefaultFn();
-                    var pullUp = deltaY * 0.4;
+                    var pullUp = deltaY * 0.45;
                     drawer.style.setProperty('transform', 'translateY(' + pullUp + 'px)', 'important');
                     document.documentElement.style.setProperty('--picker-drag-y', pullUp + 'px');
                 } else {
@@ -11835,6 +11992,7 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         function endDrag(clientY, target) {
             if (!isDragging) return;
             isDragging = false;
+            activePointerId = null;
             $('body').removeClass('is-dragging-picker');
 
             var deltaY = clientY - startY;
@@ -11851,20 +12009,11 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
             if (isHandleTap) {
                 // Tapping the grab handle always closes the drawer
                 triggerHapticFeedback('light');
-                drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
-                drawer.style.setProperty('transform', 'translateY(100%)', 'important');
-                drawer.style.setProperty('opacity', '0', 'important');
-                document.documentElement.style.setProperty('--picker-drag-y', drawerH + 'px');
-                setTimeout(function() {
-                    drawer.style.removeProperty('transition');
-                    drawer.style.removeProperty('transform');
-                    drawer.style.removeProperty('opacity');
-                    closeMassPartPicker();
-                }, 230);
+                dismissDrawerAnimate(drawerH);
                 return;
             }
 
-            // Glissement vers le haut depuis le mode aperçu (1,5 cartes) → passe en mode étendu (75%)
+            // Upward swipe from preview mode (1.5 cards) -> expand to 75%
             if (deltaY < -24 && !isExpanded) {
                 triggerHapticFeedback('light');
                 drawer.classList.add('is-expanded');
@@ -11882,20 +12031,12 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
                 return;
             }
 
-            // Glissement vers le bas (peu importe l'état étendu ou aperçu) → fermeture du tiroir
-            if (deltaY > drawerH * 0.15 || deltaY > 30 || (deltaY > 12 && vy > 0.22)) {
+            // Downward pull -> close drawer if pulled >= 20px, or > 12% of height, or downward flick
+            if (deltaY > 20 || deltaY > drawerH * 0.12 || (deltaY > 10 && vy > 0.18)) {
                 triggerHapticFeedback('light');
-                drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
-                drawer.style.setProperty('transform', 'translateY(100%)', 'important');
-                drawer.style.setProperty('opacity', '0', 'important');
-                document.documentElement.style.setProperty('--picker-drag-y', drawerH + 'px');
-                setTimeout(function() {
-                    drawer.style.removeProperty('transition');
-                    drawer.style.removeProperty('transform');
-                    drawer.style.removeProperty('opacity');
-                    closeMassPartPicker();
-                }, 220);
+                dismissDrawerAnimate(drawerH);
             } else {
+                // Restore open position
                 drawer.style.setProperty('transition', 'transform 0.20s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.20s ease', 'important');
                 drawer.style.setProperty('transform', 'translateY(0)', 'important');
                 drawer.style.setProperty('opacity', '1', 'important');
@@ -11908,51 +12049,124 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
             }
         }
 
-        // Écouteurs tactiles (mobile)
-        function onTouchStart(e) {
-            if (!e.touches || e.touches.length !== 1) return;
-            startDrag(e.touches[0].clientY, e.target);
+        function dismissDrawerAnimate(drawerH) {
+            drawer.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease', 'important');
+            drawer.style.setProperty('transform', 'translateY(100%)', 'important');
+            drawer.style.setProperty('opacity', '0', 'important');
+            document.documentElement.style.setProperty('--picker-drag-y', (drawerH || 380) + 'px');
+            setTimeout(function() {
+                drawer.style.removeProperty('transition');
+                drawer.style.removeProperty('transform');
+                drawer.style.removeProperty('opacity');
+                closeMassPartPicker();
+            }, 220);
         }
 
-        function onTouchMove(e) {
-            if (!isDragging || !e.touches || !e.touches.length) return;
-            moveDrag(e.touches[0].clientY, e.target, e.cancelable, function() { e.preventDefault(); });
-        }
+        // Unified Pointer Events (touch, pen, mouse)
+        if (window.PointerEvent) {
+            drawer.addEventListener('pointerdown', function(e) {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                if (!startDrag(e.clientY, e.target, e.pointerId)) return;
+                dragTargetEl = e.target;
+                try {
+                    if (dragTargetEl && typeof dragTargetEl.setPointerCapture === 'function') {
+                        dragTargetEl.setPointerCapture(e.pointerId);
+                    }
+                } catch (err) {}
+            }, { passive: true });
 
-        function onTouchEnd(e) {
-            if (!isDragging) return;
-            var clientY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : currentY;
-            endDrag(clientY, e.target);
-        }
+            window.addEventListener('pointermove', function(e) {
+                if (!isDragging) return;
+                if (activePointerId !== null && e.pointerId !== activePointerId) return;
+                moveDrag(e.clientY, e);
+            }, { passive: false });
 
-        drawer.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-        window.addEventListener('touchend', onTouchEnd, { passive: true });
-        window.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
-        // Écouteurs souris (desktop)
-        function onMouseDown(e) {
-            if (e.button !== 0) return;
-            var target = e.target;
-            if (!startDrag(e.clientY, target)) return;
-
-            function onMouseMove(e) {
-                moveDrag(e.clientY, target, true, function() { e.preventDefault(); });
-            }
-
-            function onMouseUp(e) {
-                window.removeEventListener('mousemove', onMouseMove);
-                window.removeEventListener('mouseup', onMouseUp);
+            window.addEventListener('pointerup', function(e) {
+                if (!isDragging) return;
+                if (activePointerId !== null && e.pointerId !== activePointerId) return;
+                try {
+                    if (dragTargetEl && typeof dragTargetEl.releasePointerCapture === 'function') {
+                        dragTargetEl.releasePointerCapture(e.pointerId);
+                    }
+                } catch (err) {}
+                var target = dragTargetEl || e.target;
+                dragTargetEl = null;
                 endDrag(e.clientY, target);
-            }
+            }, { passive: true });
 
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('pointercancel', function(e) {
+                if (!isDragging) return;
+                if (activePointerId !== null && e.pointerId !== activePointerId) return;
+                try {
+                    if (dragTargetEl && typeof dragTargetEl.releasePointerCapture === 'function') {
+                        dragTargetEl.releasePointerCapture(e.pointerId);
+                    }
+                } catch (err) {}
+                var target = dragTargetEl || e.target;
+                dragTargetEl = null;
+                endDrag(currentY, target);
+            }, { passive: true });
+        } else {
+            // Touch events fallback
+            drawer.addEventListener('touchstart', function(e) {
+                if (!e.touches || e.touches.length !== 1) return;
+                startDrag(e.touches[0].clientY, e.target);
+            }, { passive: true });
+
+            window.addEventListener('touchmove', function(e) {
+                if (!isDragging || !e.touches || !e.touches.length) return;
+                moveDrag(e.touches[0].clientY, e);
+            }, { passive: false });
+
+            window.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                var clientY = (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientY : currentY;
+                endDrag(clientY, e.target);
+            }, { passive: true });
+
+            window.addEventListener('touchcancel', function(e) {
+                if (!isDragging) return;
+                endDrag(currentY, e.target);
+            }, { passive: true });
+
+            // Mouse events fallback
+            drawer.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                var target = e.target;
+                if (!startDrag(e.clientY, target)) return;
+
+                function onMouseMove(me) {
+                    if (!isDragging) return;
+                    moveDrag(me.clientY, me);
+                }
+
+                function onMouseUp(me) {
+                    window.removeEventListener('mousemove', onMouseMove);
+                    window.removeEventListener('mouseup', onMouseUp);
+                    endDrag(me.clientY, target);
+                }
+
+                window.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('mouseup', onMouseUp);
+            });
         }
 
-        drawer.addEventListener('mousedown', onMouseDown);
+        // Direct tap / click on the grab handle wrap
+        var handleWrap = document.getElementById('partPickerDragHandleWrap');
+        if (handleWrap) {
+            handleWrap.addEventListener('click', function(e) {
+                if (hasMoved) {
+                    hasMoved = false;
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                triggerHapticFeedback('light');
+                dismissDrawerAnimate(drawer.offsetHeight || 380);
+            });
+        }
 
-        // Verrouillage absolu du défilement de la page principale lorsque le menu est ouvert
+        // Lock background scrolling while drawer is open
         window.addEventListener('wheel', function(e) {
             if (!$('body').hasClass('picker-drawer-open')) return;
             var $scrollable = $(e.target).closest('#partPickerResultsContainer, #partPickerKyrialeSelect');
@@ -11968,10 +12182,15 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
                 e.preventDefault();
             }
         }, { passive: false });
-    })();
+    };
+
+    // Attempt early init in case DOM is already ready
+    initPartPickerSwipeGestures();
 
     $(document).on('click', '#partPickerToggleViewBtn', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         _partPickerViewMode = (_partPickerViewMode === 'grid') ? 'list' : 'grid';
         localStorage.setItem('do_part_picker_view', _partPickerViewMode);
         $('#partPickerResultsContainer').removeClass('is-grid is-list').addClass('is-' + _partPickerViewMode);
@@ -11991,7 +12210,7 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
     });
 
     // Clic sur une pièce dans le tiroir du bas : remplace la pièce directement au sein de la messe
-    $(document).on('click', '#partPickerResultsContainer .gregorian-card, #partPickerResultsContainer .btn-select-piece', function(e) {
+    $(document).on('click', '#partPickerResultsContainer .gregorian-card, #partPickerResultsContainer .do-picker-list-item, #partPickerResultsContainer .btn-select-piece', function(e) {
         if ($(e.target).closest('.btn-play-chant').length) return;
         e.preventDefault();
         e.stopPropagation();
@@ -11999,7 +12218,7 @@ function buildPsalmToneGabcFromSource(sourceGabc, title, officePart, mode, partK
         var $item = $(this).closest('[data-chant-id]');
         var partKey = $item.data('part-key') || _activePickerPartKey;
         var chantId = $item.data('chant-id');
-        var chantName = $item.data('chant-name') || $item.find('.gregorian-card-incipit').text();
+        var chantName = $item.data('chant-name') || $item.find('.gregorian-card-incipit, .hdd-item-title').text();
         closeMassPartPicker();
         if (partKey && chantId) {
             selectMassPart(partKey, chantId, chantName);
@@ -12456,6 +12675,9 @@ function updateSidebarAndHeader() {
         if (!doState.currentChantId) {
             $('#doHeaderTitle .title-text').text('Cantus Gregorianus');
         }
+    } else if (hora === 'gregobase') {
+        $('#doHourLabel').text('GRÉGOBASE • BASE DE DONNÉES GRÉGORIENNE');
+        $('#doHeaderTitle .title-text').text('Grégobase');
     } else {
         $('#doHourLabel').text((horaLabel + ' • ' + dateFormatted).toUpperCase());
     }
@@ -12532,6 +12754,7 @@ function closeModals() {
     $('#pwaInstallModalBackdrop, #pwaInstallModal').addClass('hidden');
     $('#appIconModalBackdrop, #appIconModal').addClass('hidden');
     $('#notificationPromptModalBackdrop, #notificationPromptModal').addClass('hidden');
+    $('#votiveMassModalBackdrop, #votiveMassModal').addClass('hidden');
     if (typeof window.closeGregorianSearch === 'function') {
         window.closeGregorianSearch();
     } else {
@@ -12544,6 +12767,31 @@ function closeModals() {
     $('body').removeClass('sidebar-open is-dragging-sidebar');
     closeHeaderDropdown();
     document.body.style.overflow = '';
+}
+
+function openVotiveMassModal() {
+    closeModals();
+    $('#votiveMassModalBackdrop, #votiveMassModal').removeClass('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeVotiveMassModal() {
+    $('#votiveMassModalBackdrop, #votiveMassModal').addClass('hidden');
+    document.body.style.overflow = '';
+}
+
+function selectVotiveMass(votiveKey) {
+    if (!votiveKey) return;
+    doState.hora = 'missa';
+    doState.officiumKey = votiveKey;
+    localStorage.setItem('do_hora', 'missa');
+    localStorage.setItem('do_officiumKey', votiveKey);
+    closeVotiveMassModal();
+    if (window.OremusRouter) {
+        window.OremusRouter.syncUrl({ push: true });
+    }
+    renderDO();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function getDateForLiturgicalKey(key, year) {
@@ -14386,6 +14634,96 @@ function formatMonthGroupTitle(momDate, uiLang) {
     return mName + ' ' + yr;
 }
 
+var DO_VOTIVE_MASSES = [
+    // Aliæ Missæ pro variis necessitatibus (Messes de Circonstance)
+    {
+        key: 'requiem',
+        group: { fr: 'Aliæ Missæ (Circonstances & Défunts)', la: 'Aliæ Missæ pro variis necessitatibus' },
+        title: { fr: 'Missa Defunctorum (Messe des Défunts)', la: 'Missa Defunctorum (Requiem)', en: 'Missa Defunctorum (Mass for the Dead)' },
+        badge: { fr: 'Defunctorum', la: 'Defunctorum', en: 'Defunctorum' },
+        desc: 'Requiem æternam • Dies Iræ'
+    },
+    {
+        key: 'nuptial',
+        group: { fr: 'Aliæ Missæ (Circonstances & Défunts)', la: 'Aliæ Missæ pro variis necessitatibus' },
+        title: { fr: 'Missa pro Sponso et Sponsa (Messe de Mariage)', la: 'Missa pro Sponso et Sponsa', en: 'Missa pro Sponso et Sponsa (Nuptial Mass)' },
+        badge: { fr: 'Nuptialis', la: 'Nuptialis', en: 'Nuptialis' },
+        desc: 'Deus Israël • Bénédiction nuptiale'
+    },
+    {
+        key: 'coronatio',
+        group: { fr: 'Aliæ Missæ (Circonstances & Défunts)', la: 'Aliæ Missæ pro variis necessitatibus' },
+        title: { fr: 'In die Coronationis Papæ (Pour le Pape)', la: 'In die Anniversarii Electionis seu Coronationis Papæ', en: 'Anniversary of the Pope' },
+        badge: { fr: 'Papa', la: 'Papa', en: 'Papa' },
+        desc: 'Missa Statuit'
+    },
+    {
+        key: 'propaganda',
+        group: { fr: 'Aliæ Missæ (Circonstances & Défunts)', la: 'Aliæ Missæ pro variis necessitatibus' },
+        title: { fr: 'Pro Propagatione Fidei (Pour les Missions)', la: 'Pro Propagatione Fidei', en: 'For the Propagation of the Faith' },
+        badge: { fr: 'Missiones', la: 'Missiones', en: 'Missiones' },
+        desc: 'Deus misereátur nostri'
+    },
+    {
+        key: 'dedicatio',
+        group: { fr: 'Aliæ Missæ (Circonstances & Défunts)', la: 'Aliæ Missæ pro variis necessitatibus' },
+        title: { fr: 'Commune Dedicationis Ecclesiæ (Dédicace)', la: 'Commune Dedicationis Ecclesiæ', en: 'Dedication of a Church' },
+        badge: { fr: 'Dedicatio', la: 'Dedicatio', en: 'Dedicatio' },
+        desc: 'Terríbilis est locus iste'
+    },
+
+    // Missæ Votivæ per hebdomadam (Messes Votives Hebdomadaires)
+    {
+        key: 'votive_trinity',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De Sanctissima Trinitate (Lundi)', la: 'Sanctissimæ Trinitatis (Feria II)', en: 'Holy Trinity (Monday)' },
+        badge: { fr: 'Feria II', la: 'Feria II', en: 'Feria II' },
+        desc: 'Benedícta sit sancta Trínitas'
+    },
+    {
+        key: 'votive_angels',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De Sanctis Angelis (Mardi)', la: 'Sanctorum Angelorum (Feria III)', en: 'Holy Angels (Tuesday)' },
+        badge: { fr: 'Feria III', la: 'Feria III', en: 'Feria III' },
+        desc: 'Benedícite Dóminum omnes Angeli ejus'
+    },
+    {
+        key: 'votive_joseph',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De Sancto Joseph (Mercredi)', la: 'Sancti Joseph (Feria IV)', en: 'Saint Joseph (Wednesday)' },
+        badge: { fr: 'Feria IV', la: 'Feria IV', en: 'Feria IV' },
+        desc: 'Justus ut palma florébit'
+    },
+    {
+        key: 'votive_eucharist',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De SS. Eucharistiæ Sacramento (Jeudi)', la: 'SS. Eucharistiæ Sacramenti (Feria V)', en: 'Blessed Sacrament (Thursday)' },
+        badge: { fr: 'Feria V', la: 'Feria V', en: 'Feria V' },
+        desc: 'Cibávit eos ex ádipe fruménti'
+    },
+    {
+        key: 'votive_sacredheart',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De Sacratissimo Corde Jesu (Vendredi)', la: 'Sacratissimi Cordis Jesu (Feria VI)', en: 'Sacred Heart of Jesus (Friday)' },
+        badge: { fr: 'Feria VI', la: 'Feria VI', en: 'Feria VI' },
+        desc: 'Cogitatiónes Cordis ejus'
+    },
+    {
+        key: 'votive_bvm',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'Sanctæ Mariæ in Sabbato (Samedi)', la: 'Sanctæ Mariæ in Sabbato', en: 'Blessed Virgin Mary (Saturday)' },
+        badge: { fr: 'Sabbato', la: 'Sabbato', en: 'Sabbato' },
+        desc: 'Salve, sancta Parens'
+    },
+    {
+        key: 'votive_apostles',
+        group: { fr: 'Missæ Votivæ (Votives hebdomadaires)', la: 'Missæ Votivæ per hebdomadam' },
+        title: { fr: 'De SS. Apostolis Petro et Paulo', la: 'SS. Apostolorum Petri et Pauli', en: 'Saints Peter and Paul' },
+        badge: { fr: 'Apostoli', la: 'Apostoli', en: 'Apostles' },
+        desc: 'Nunc scio vere quia misit Dominus Angelum suum'
+    }
+];
+
 function renderHeaderDropdown() {
     var isBible = (doState.hora === 'bible');
     var uiLang = getUiLang();
@@ -14394,9 +14732,11 @@ function renderHeaderDropdown() {
     var annusLabel = (uiLang === 'fr' ? 'Année ' + yearStr : (uiLang === 'es' ? 'Año ' + yearStr : (uiLang === 'en' ? 'Year ' + yearStr : 'Annus ' + yearStr)));
     var temporaleLabel = (uiLang === 'fr' ? 'Temporal' : (uiLang === 'es' ? 'Temporal' : (uiLang === 'en' ? 'Temporal' : 'Temporale')));
     var sanctoraleLabel = (uiLang === 'fr' ? 'Sanctoral' : (uiLang === 'es' ? 'Santoral' : (uiLang === 'en' ? 'Sanctoral' : 'Sanctorale')));
+    var votivesLabel = 'Votivæ et aliæ missæ';
     var todayLabel = (uiLang === 'fr' ? "Aujourd'hui" : (uiLang === 'es' ? 'Hoy' : (uiLang === 'en' ? 'Today' : 'Hodie')));
-    var searchPlaceholder = (uiLang === 'fr' ? 'Rechercher un jour ou une fête…' : (uiLang === 'es' ? 'Buscar un día o fiesta…' : (uiLang === 'en' ? 'Search a day or feast…' : 'Quaere diem vel festum…')));
-    var bibleSearchPlaceholder = (uiLang === 'fr' ? 'Rechercher un livre ou un chapitre…' : (uiLang === 'es' ? 'Buscar un libro o capítulo…' : (uiLang === 'en' ? 'Search a book or chapter…' : 'Quaere librum vel caput…')));
+    var mode = doState.hddMode || 'annus';
+    var searchPlaceholder = (mode === 'votives') ? (uiLang === 'fr' ? 'Rechercher parmi Votivæ et aliæ missæ…' : 'Quaere inter votivas et alias missas…') : (uiLang === 'fr' ? 'Rechercher un jour ou une fête…' : (uiLang === 'es' ? 'Buscar un día o fiesta…' : (uiLang === 'en' ? 'Search a day or feast…' : 'Quaere diem vel festum…')));
+    var bibleSearchPlaceholder = (uiLang === 'fr' ? 'Rechercher un livre ou un chapitre…' : (uiLang === 'es' ? 'Buscar un livre ou chapitre…' : (uiLang === 'en' ? 'Search a book or chapter…' : 'Quaere librum vel caput…')));
 
     var curMode = isBible ? 'bible' : 'liturgy';
     var controlsMode = $('#hddControlsContainer').attr('data-mode');
@@ -14417,7 +14757,6 @@ function renderHeaderDropdown() {
 
             $('#hddControlsContainer').append($searchBar).append($controlsRow);
         } else {
-            var mode = doState.hddMode || 'annus';
             var dateFormatted = formatLiturgicalDate(doState.date, uiLang);
 
             var $calContainer = $('<div id="hddCustomCalendar" class="hdd-custom-calendar' + (doState.calOpen ? '' : ' hidden') + '"></div>');
@@ -14431,7 +14770,8 @@ function renderHeaderDropdown() {
             var $modeGroup = $('<div class="hdd-mode-group">')
                 .append('<button class="hdd-mode-btn' + (mode === 'annus' ? ' active' : '') + '" data-mode="annus">' + escHtml(annusLabel) + '</button>')
                 .append('<button class="hdd-mode-btn' + (mode === 'temporum' ? ' active' : '') + '" data-mode="temporum">' + escHtml(temporaleLabel) + '</button>')
-                .append('<button class="hdd-mode-btn' + (mode === 'sanctorum' ? ' active' : '') + '" data-mode="sanctorum">' + escHtml(sanctoraleLabel) + '</button>');
+                .append('<button class="hdd-mode-btn' + (mode === 'sanctorum' ? ' active' : '') + '" data-mode="sanctorum">' + escHtml(sanctoraleLabel) + '</button>')
+                .append('<button class="hdd-mode-btn' + (mode === 'votives' ? ' active' : '') + '" data-mode="votives">' + escHtml(votivesLabel) + '</button>');
 
             var $dateGroup = $('<div class="hdd-date-group">')
                 .append('<button id="btnHddPrevDay" class="hdd-date-nav" title="Præcedens"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>')
@@ -14462,11 +14802,13 @@ function renderHeaderDropdown() {
             $('.hdd-mode-btn[data-mode="annus"]').text(annusLabel);
             $('.hdd-mode-btn[data-mode="temporum"]').text(temporaleLabel);
             $('.hdd-mode-btn[data-mode="sanctorum"]').text(sanctoraleLabel);
+            $('.hdd-mode-btn[data-mode="votives"]').text(votivesLabel);
             $('.hdd-mode-btn[data-mode]').removeClass('active');
             $('.hdd-mode-btn[data-mode="' + mode + '"]').addClass('active');
             $('#btnHddToday').text(todayLabel);
             $('#hddDateBtnText').text(formatLiturgicalDate(doState.date, uiLang));
             $('#hddSearchInput').attr('placeholder', searchPlaceholder);
+            $('.hdd-date-group').show();
             if (doState.calOpen) {
                 renderCustomCalendarGrid();
             }
@@ -14772,6 +15114,30 @@ function renderHeaderDropdownItems() {
                 }
                 groups[grp].push(item);
             });
+        } else if (mode === 'votives') {
+            DO_VOTIVE_MASSES.forEach(function(v) {
+                var titleText = (v.title && v.title[uiLang]) || (v.title && v.title.fr) || (v.title && v.title.la) || v.key;
+                var badgeText = (v.badge && v.badge[uiLang]) || (v.badge && v.badge.fr) || (v.badge && v.badge.la) || '';
+                var grpText = (v.group && v.group[uiLang]) || (v.group && v.group.fr) || (v.group && v.group.la) || 'Votivæ et aliæ missæ';
+                var searchTarget = normalizeSearchStr(titleText + ' ' + (v.title.fr || '') + ' ' + (v.title.la || '') + ' ' + (v.desc || '') + ' ' + v.key + ' ' + badgeText);
+
+                if (tokens.length > 0) {
+                    var matchesAll = tokens.every(function(tok) { return searchTarget.indexOf(tok) >= 0; });
+                    if (!matchesAll) return;
+                }
+
+                if (!groups[grpText]) {
+                    groups[grpText] = [];
+                    groupOrder.push(grpText);
+                }
+                groups[grpText].push({
+                    isVotive: true,
+                    key: v.key,
+                    title: titleText,
+                    badge: badgeText,
+                    desc: v.desc
+                });
+            });
         } else {
             var seenKeys = {};
             allSaints.forEach(function(item) {
@@ -14810,6 +15176,30 @@ function renderHeaderDropdownItems() {
             $list.append('<div class="hdd-group-title">' + escHtml(grpName) + '</div>');
 
             rawList.forEach(function(rawEntry) {
+                if (rawEntry && rawEntry.isVotive) {
+                    var isSel = (doState.officiumKey === rawEntry.key);
+                    var $card = $('<button class="hdd-item-card' + (isSel ? ' selected' : '') + '">')
+                        .append('<span class="hdd-item-title">' + escHtml(rawEntry.title) + '</span>')
+                        .append('<span class="hdd-item-date">' + escHtml(rawEntry.badge) + '</span>')
+                        .on('click', function(e) {
+                            e.stopPropagation();
+                            triggerHapticFeedback('selection');
+                            doState.hora = 'missa';
+                            doState.officiumKey = rawEntry.key;
+                            localStorage.setItem('do_hora', 'missa');
+                            localStorage.setItem('do_officiumKey', rawEntry.key);
+                            doState.userChangedHddMode = false;
+                            $('#doHeaderTitle .title-text').text(rawEntry.title);
+                            if (typeof checkHeaderTitleMarquee === 'function') checkHeaderTitleMarquee();
+                            closeHeaderDropdown();
+                            if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
+                            renderDO();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                    $list.append($card);
+                    return;
+                }
+
                 var item = rawEntry.item ? rawEntry.item : rawEntry;
                 var entryIsTempora = (rawEntry.isTempora === true);
                 var itemDate = rawEntry.itemDate ? rawEntry.itemDate : getDateForLiturgicalKey(item.key, year);
@@ -14871,6 +15261,9 @@ function renderHeaderDropdownItems() {
 }
 
 function getDefaultHddModeForDate(date) {
+    if (doState.officiumKey && /^(Votive\/|Commune\/Coronatio|Commune\/Propaganda|requiem|nuptial|coronatio|propaganda|dedicatio|votive_)/i.test(doState.officiumKey)) {
+        return 'votives';
+    }
     return 'annus';
 }
 
@@ -14947,7 +15340,20 @@ function renderHddSearchResults(query) {
         });
     }
 
-    var hasAny = liturgyMatches.length || bibleMatches.length;
+    // ---- Collect Votive matches ----
+    var votiveMatches = [];
+    if (typeof DO_VOTIVE_MASSES !== 'undefined' && Array.isArray(DO_VOTIVE_MASSES)) {
+        DO_VOTIVE_MASSES.forEach(function(v) {
+            var titleText = (v.title && v.title[uiLang]) || (v.title && v.title.fr) || (v.title && v.title.la) || v.key;
+            var badgeText = (v.badge && v.badge[uiLang]) || (v.badge && v.badge.fr) || (v.badge && v.badge.la) || '';
+            var target = normalizeSearchStr(titleText + ' ' + (v.title.fr || '') + ' ' + (v.title.la || '') + ' ' + (v.desc || '') + ' ' + v.key + ' ' + badgeText);
+            if (tokens.every(function(t) { return target.indexOf(t) >= 0; })) {
+                votiveMatches.push({ key: v.key, title: titleText, badge: badgeText });
+            }
+        });
+    }
+
+    var hasAny = liturgyMatches.length || bibleMatches.length || votiveMatches.length;
     if (!hasAny) {
         var noRes = uiLang === 'fr' ? 'Aucun résultat' : (uiLang === 'en' ? 'No results' : 'Nihil inventum');
         $list.html('<div style="text-align:center;padding:32px 16px;opacity:0.55;font-size:0.88rem;font-family:\'Inter\',sans-serif;">' + noRes + '</div>');
@@ -15009,6 +15415,33 @@ function renderHddSearchResults(query) {
         // Current Office hora first, then Messe
         renderLiturgySection(officeLabel, officeTargetHora, liturgyMatches, 6);
         renderLiturgySection(massLabel,   'missa',          liturgyMatches, 4);
+    }
+
+    // Votives section
+    if (votiveMatches.length) {
+        var votiveLabel = 'Votivæ et aliæ missæ';
+        $list.append($('<div class="hdd-group-title hdd-search-section-title">').text(votiveLabel));
+        votiveMatches.slice(0, 6).forEach(function(vm) {
+            var $card = $('<button class="hdd-item-card">')
+                .append('<span class="hdd-item-title">' + escHtml(vm.title) + '</span>')
+                .append('<span class="hdd-item-date">' + escHtml(vm.badge) + '</span>')
+                .on('click', function(e) {
+                    e.stopPropagation();
+                    triggerHapticFeedback('selection');
+                    doState.hora = 'missa';
+                    doState.officiumKey = vm.key;
+                    localStorage.setItem('do_hora', 'missa');
+                    localStorage.setItem('do_officiumKey', vm.key);
+                    doState.userChangedHddMode = false;
+                    $('#doHeaderTitle .title-text').text(vm.title);
+                    if (typeof checkHeaderTitleMarquee === 'function') checkHeaderTitleMarquee();
+                    closeHeaderDropdown();
+                    if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
+                    renderDO();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            $list.append($card);
+        });
     }
 
     // Bible section always last
@@ -15463,7 +15896,7 @@ function triggerHapticFeedback(patternOrType, fallbackDuration) {
 }
 
 // ── GitHub Releases Update Engine ──
-var CURRENT_APP_VERSION = 'beta-0.0.64';
+var CURRENT_APP_VERSION = 'beta-0.0.65';
 
 function getInstalledAppVersion() {
     try {
@@ -15474,7 +15907,7 @@ function getInstalledAppVersion() {
             }
         }
     } catch (e) {}
-    return (typeof CURRENT_APP_VERSION !== 'undefined' && CURRENT_APP_VERSION) ? CURRENT_APP_VERSION : 'beta-0.0.64';
+    return (typeof CURRENT_APP_VERSION !== 'undefined' && CURRENT_APP_VERSION) ? CURRENT_APP_VERSION : 'beta-0.0.65';
 }
 
 function getInstalledAppVersionCode() {
@@ -17174,10 +17607,27 @@ function setupEventListeners() {
             openBible();
             return;
         }
+        if (hora === 'votive_modal') {
+            closeModals();
+            openVotiveMassModal();
+            return;
+        }
         if (hora === 'gregorian_search') {
             closeModals();
             if (typeof window.openGregorianSearch === 'function') {
                 window.openGregorianSearch();
+            }
+            return;
+        }
+        if (hora === 'gregobase') {
+            closeModals();
+            if (typeof window.openGregobase === 'function') {
+                window.openGregobase();
+            } else {
+                doState.hora = 'gregobase';
+                localStorage.setItem('do_hora', 'gregobase');
+                if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
+                renderDO();
             }
             return;
         }
@@ -17192,6 +17642,28 @@ function setupEventListeners() {
         $('#alignmentLabModal').fadeOut(150);
         if (window.OremusRouter) window.OremusRouter.syncUrl({ push: true });
         renderDO();
+    });
+
+    $(document).on('click', '#btnSidebarVotive', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerHapticFeedback('selection');
+        closeModals();
+        openVotiveMassModal();
+    });
+
+    $(document).on('click', '#btnCloseVotiveMassModal, #btnDismissVotiveMassModal, #votiveMassModalBackdrop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerHapticFeedback('light');
+        closeVotiveMassModal();
+    });
+
+    $(document).on('click', '.votive-mass-card[data-votive-key]', function(e) {
+        e.preventDefault();
+        triggerHapticFeedback('selection');
+        var key = $(this).data('votive-key');
+        selectVotiveMass(key);
     });
 
     $(document).on('click', '#btnSidebarSearchHeader, #btnSidebarGregorianSearch', function(e) {
@@ -18806,6 +19278,9 @@ function setupEventListeners() {
     });
 
     initDoPlayer();
+    if (typeof initPartPickerSwipeGestures === 'function') {
+        initPartPickerSwipeGestures();
+    }
 }
 
 // ---- Initialization ----
@@ -18813,6 +19288,9 @@ $(function() {
     console.log('Divinum Officium & Missale Initialized with Recursive Section & Variable Resolver.');
     initTheme();
     setupEventListeners();
+    if (typeof initPartPickerSwipeGestures === 'function') {
+        initPartPickerSwipeGestures();
+    }
 
     // Initialize Router & Deep-Linking from URL (No Page Refresh)
     if (window.OremusRouter) {
@@ -18856,6 +19334,7 @@ $(function() {
                             !$('#pwaInstallModal').hasClass('hidden') ||
                             !$('#appIconModal').hasClass('hidden') ||
                             !$('#notificationPromptModal').hasClass('hidden') ||
+                            !$('#votiveMassModal').hasClass('hidden') ||
                             !$('#doHoraePicker').hasClass('hidden') ||
                             !$('#doMassTocPanel').hasClass('hidden');
 
@@ -18968,6 +19447,11 @@ $(function() {
             window.openGregorianSearch();
         }, 150);
     }
+    if ((window.location.hash === '#gregobase' || window.location.hash === '#scores') && typeof window.openGregobase === 'function') {
+        setTimeout(function() {
+            window.openGregobase();
+        }, 150);
+    }
 });
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -18982,7 +19466,7 @@ var _massTocGroups = [
             { label: "Introït", match: /^Introitus|^Introït/i, cardId: /^Introitus/i, badge: "Propre" },
             { label: "Kyrie eleison", match: /^Kyrie/i, cardId: /^Kyrie/i, badge: "Ordinaire" },
             { label: "Gloria in excelsis", match: /^Gloria/i, cardId: /^Gloria/i, badge: "Ordinaire" },
-            { label: "Collecte (Oraison)", match: /^Oratio|^Collecta|^Collecte/i, cardId: /^Oratio/i, badge: "Propre" },
+            { label: "Collecte (Oraison)", match: /^(?!.*Leonis)(?:Oratio|Collecta|Collecte)/i, cardId: /^oratio$/i, badge: "Propre" },
             { label: "Épître / Lecture", match: /^Epistola|^Lectio|^Épître|^Lecture/i, cardId: /^Epistola|^Lectio/i, badge: "Propre" },
             { label: "Graduel", match: /^Graduale|^Graduel/i, cardId: /^Graduale/i, badge: "Propre" },
             { label: "Alléluia", match: /^Alleluia/i, cardId: /^Alleluia/i, badge: "Propre" },
@@ -19017,7 +19501,8 @@ var _massTocGroups = [
             { label: "Communion", match: /^Communio|^Communion/i, cardId: /^Communio/i, badge: "Propre" },
             { label: "Postcommunion", match: /^Postcommunio|^Postcommunion/i, cardId: /^Postcommunio/i, badge: "Propre" },
             { label: "Ite Missa Est & Bénédiction", match: /Ite missa est|Benedicat vos|Placeat tibi/i, cardId: /^Ite|^Benedictio/i, badge: "Ordinaire" },
-            { label: "Dernier Évangile (In principio)", match: /In principio|Dernier Évangile/i, cardId: /^LastGospel|^InPrincipio/i, badge: "Ordinaire" }
+            { label: "Dernier Évangile (In principio)", match: /In principio|Dernier Évangile/i, cardId: /^LastGospel|^InPrincipio/i, badge: "Ordinaire" },
+            { label: "Prières de Léon XIII", match: /Leonis|Léon XIII/i, cardId: /^leonis$/i, badge: "Prières" }
         ]
     }
 ];
@@ -19066,7 +19551,8 @@ function setupMassToc(missaResult) {
 
                 // Use the card's real display title or item label
                 var rawCardTitle = $(matchedCard).find('.do-card-title').text().trim();
-                var displayLabel = rawCardTitle || item.label;
+                var cardId = ($(matchedCard).attr('data-card-id') || '').trim();
+                var displayLabel = (/^leonis$/i.test(cardId)) ? 'Prières de Léon XIII' : (rawCardTitle || item.label);
 
                 _massTocSectionsMap.push({
                     id: sectionId,

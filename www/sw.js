@@ -3,7 +3,7 @@
    ========================================================================= */
 
 // ── Cache Versioning (Increment this string upon updates to refresh cache across browsers) ──
-const CACHE_NAME = 'oremus-pwa-v1.3.36';
+const CACHE_NAME = 'oremus-pwa-v1.3.38';
 
 // Core shell assets to cache on install
 const PRECACHE_ASSETS = [
@@ -12,6 +12,7 @@ const PRECACHE_ASSETS = [
     './css/modern.css',
     './css/divinum_officium.css',
     './css/gregorian_search.css',
+    './css/gregobase.css',
     './jquery.min.js',
     './moment.min.js',
     './moment.easter.js',
@@ -36,6 +37,9 @@ const PRECACHE_ASSETS = [
     './canticumMap.json',
     './Caeciliae-Staffless.ttf',
     './Caeciliae-Staffless-print.ttf',
+    './fonts/gregall.ttf',
+    './fonts/grelaon.ttf',
+    './fonts/gresgmodern.ttf',
     './js/bible_mappings.js',
     './js/divinum_officium.js',
     './js/horas_common_chants.js',
@@ -48,6 +52,8 @@ const PRECACHE_ASSETS = [
     './js/gregorian_search_engine.js',
     './js/gregorian_search_worker.js',
     './js/gregorian_search_ui.js',
+    './js/gregorian_nabc.js',
+    './js/gregobase_ui.js',
     './icon/favicon.svg',
     './icon/apple-touch-icon.png',
     './icon/icon-192.png',

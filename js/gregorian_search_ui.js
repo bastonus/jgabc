@@ -1524,11 +1524,6 @@
             '        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
             '        <span>Écouter</span>' +
             '      </button>' +
-            (hasNabc ? 
-            '      <button class="gregorian-action-btn btn-toggle-main-nabc' + (showNabc ? ' is-active' : '') + '" style="padding: 7px 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-color);">' +
-            '        <span class="do-badge-nabc">NABC</span>' +
-            '        <span>' + (showNabc ? 'Neumes actifs' : 'Neumes masqués') + '</span>' +
-            '      </button>' : '') +
             '      <button class="gregorian-action-btn btn-copy-main-gabc" style="padding: 7px 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-color);">' +
             '        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' +
             '        <span>Copier GABC</span>' +
@@ -1593,23 +1588,6 @@
             playThisScore();
         });
 
-        // Handler pour le bouton basculer NABC
-        if (hasNabc) {
-            $card.find('.btn-toggle-main-nabc').off('click').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var cur = $chantWrapper.data('show-nabc');
-                if (cur === undefined) cur = (window.doState && window.doState.showNabc !== undefined) ? window.doState.showNabc : true;
-                var next = !cur;
-                $chantWrapper.data('show-nabc', next);
-                if (window.doState) window.doState.showNabc = next;
-                $(this).toggleClass('is-active', next).find('span:last-child').text(next ? 'Neumes actifs' : 'Neumes masqués');
-                if (typeof window.renderSingleChantScore === 'function') {
-                    window.renderSingleChantScore($chantWrapper, true);
-                }
-            });
-        }
-
         // Synchronisation avec le lecteur audio (fermé par défaut si pas autoPlay)
         if (!isAutoPlay) {
             if (typeof window.closeDoPlayer === 'function') {
@@ -1645,11 +1623,15 @@
         openSearch: openSearch,
         getState: getState,
         setState: setState,
-        triggerSearch: triggerSearch
+        triggerSearch: triggerSearch,
+        renderGabcToContainer: renderGabcToContainer,
+        truncateGabcByNotes: truncateGabcByNotes,
+        extractGabcWindowWithHighlight: extractGabcWindowWithHighlight
     };
 
     window.openGregorianSearch = openSearch;
     window.openChantMainView = renderChantMainView;
+    window.renderGregorianGabcToContainer = renderGabcToContainer;
 
     $(document).ready(function() {
         initSearchEngine();

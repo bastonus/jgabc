@@ -1,0 +1,620 @@
+/* =========================================================================
+   Oremus - gregobase.css
+   Vue Grégobase — Style identique à la recherche universelle (Quærere)
+   Même header avec recherche orientée Grégobase, labels en dessous (chips)
+   Charte Graphique de Sobriété (« Modern Sacred ») :
+   ZÉRO bordure, ZÉRO translateY, ZÉRO marge parasite dans la zone d'écriture,
+   Zéro halo lumineux / glow.
+   ========================================================================= */
+
+/* Masquage des éléments spécifiques aux autres modes */
+body.is-gregobase-mode .header-title-area,
+body.is-gregobase-mode #headerDropdownToggle,
+body.is-gregobase-mode .header-dropdown-toggle,
+body.is-gregobase-mode #headerDropdown,
+body.is-gregobase-mode #gregorianSearchHeaderRow,
+body.is-gregobase-mode #gregorianFilterBar {
+    display: none !important;
+}
+
+/* En-tête Oremus en mode Grégobase — EXACTEMENT identique à la recherche */
+body.is-gregobase-mode .do-top-header {
+    padding-top: max(12px, calc(12px + env(safe-area-inset-top, 0px))) !important;
+    padding-bottom: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+}
+
+@media (min-width: 901px) {
+    body.is-gregobase-mode .do-top-header {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    body.is-gregobase-mode .do-top-left {
+        width: 100% !important;
+        max-width: 760px !important;
+        margin: 0 auto !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box !important;
+    }
+
+    body.is-gregobase-mode #gregobaseFilterBar {
+        width: 100% !important;
+        max-width: 760px !important;
+        margin: 0 auto !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        padding-bottom: 2px !important;
+        box-sizing: border-box !important;
+    }
+
+    body.is-gregobase-mode .do-mobile-menu-btn {
+        display: none !important;
+    }
+}
+
+body.is-gregobase-mode .do-top-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+@media (max-width: 900px) {
+    body.is-gregobase-mode .do-mobile-menu-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
+        background: var(--background-highlight) !important;
+        border: none !important;
+        color: var(--text-secondary) !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: all 0.18s ease !important;
+    }
+
+    body.is-gregobase-mode .do-mobile-menu-btn:hover {
+        color: var(--primary-color) !important;
+        background: rgba(var(--primary-color-rgb), 0.15) !important;
+    }
+}
+
+/* Ligne 1 : Barre de recherche intégrée dans l'en-tête */
+body.is-gregobase-mode #gregobaseSearchHeaderRow {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+/* Ligne 2 : Barre de filtres de catégories (Chips) dans l'en-tête */
+body.is-gregobase-mode #gregobaseFilterBar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+@media (max-width: 900px) {
+    body.is-gregobase-mode #gregobaseFilterBar {
+        width: auto !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-bottom: 2px !important;
+    }
+}
+
+body.is-gregobase-mode #gregobaseFilterBar::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Badge de compteur dans les chips de l'en-tête */
+.gregobase-chip-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    opacity: 0.8;
+    margin-left: 4px;
+    font-weight: 600;
+}
+
+/* Item Grégobase dans la Sidebar */
+.do-nav-item.is-gregobase {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 9px;
+    height: 38px;
+    padding: 0 14px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.do-nav-item.is-gregobase:hover {
+    background: var(--background-highlight, #141414) !important;
+    color: var(--text-primary) !important;
+    transform: none !important;
+}
+
+.do-nav-item.is-gregobase.active {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 600;
+    transform: none !important;
+}
+
+/* Masquer impérativement le bouton flottant Sommaire sur la page Grégobase */
+body.is-gregobase-mode #doMassTocPill,
+body.is-gregobase-mode .do-mass-toc-pill,
+body.is-gregobase-mode #doMassTocPanel,
+body.is-gregobase-mode .do-mass-toc-panel,
+body.is-gregobase-mode #doMassTocBackdrop,
+body.is-gregobase-mode .do-mass-toc-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* =========================================================================
+   Zone de Contenu Principal Grégobase (Sobriété & Pleine Largeur)
+   ========================================================================= */
+.gregobase-page {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 0 calc(36px + env(safe-area-inset-bottom, 0px)) 0 !important;
+    box-sizing: border-box;
+}
+
+@media (min-width: 901px) {
+    .gregobase-page {
+        max-width: 760px;
+    }
+}
+
+/* Grille de catégories — 1 colonne sur mobile (< 520px) pour éviter TOUT débordement */
+.gregobase-category-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 521px) and (max-width: 800px) {
+    .gregobase-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 801px) {
+    .gregobase-category-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+/* Carte de catégorie — Sobriété absolue, zéro bordure, zéro translateY */
+.gregobase-category-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--background-highlight, #141414);
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 9px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    user-select: none;
+    transform: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+}
+
+[data-theme="light"] .gregobase-category-card {
+    background: var(--background-highlight, #e2e6ee);
+}
+
+.gregobase-category-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.12) !important;
+    transform: none !important;
+}
+
+.gregobase-cat-name {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
+}
+
+.gregobase-category-card:hover .gregobase-cat-name {
+    color: var(--primary-color, #c96b63);
+}
+
+.gregobase-cat-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .gregobase-cat-count {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary, #475569);
+}
+
+/* Grille Alphabétique pour les Incipits (A–Z) */
+.gregobase-alphabet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+    .gregobase-alphabet-grid {
+        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+        gap: 6px;
+    }
+}
+
+.gregobase-letter-card {
+    background: var(--background-highlight, #141414);
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 8px;
+    padding: 10px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    user-select: none;
+    text-align: center;
+    transform: none !important;
+    box-sizing: border-box;
+}
+
+[data-theme="light"] .gregobase-letter-card {
+    background: var(--background-highlight, #e2e6ee);
+}
+
+.gregobase-letter-card:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
+    transform: none !important;
+}
+
+.gregobase-letter-card.active {
+    background: var(--primary-color, #c96b63) !important;
+    color: #ffffff !important;
+}
+
+.gregobase-letter-char {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.gregobase-letter-card:hover .gregobase-letter-char {
+    color: var(--primary-color);
+}
+
+.gregobase-letter-card.active .gregobase-letter-char {
+    color: #ffffff !important;
+}
+
+.gregobase-letter-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+}
+
+.gregobase-letter-card.active .gregobase-letter-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* En-tête du navigateur de catégorie (2 lignes compactes) */
+.gregobase-browser-header-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.gregobase-browser-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.gregobase-browser-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.gregobase-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    background: var(--background-highlight, #141414);
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.80rem;
+    font-weight: 500;
+    padding: 0 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    transform: none !important;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .gregobase-back-btn {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+}
+
+.gregobase-back-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
+    color: var(--primary-color, #c96b63);
+    transform: none !important;
+}
+
+.gregobase-category-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.gregobase-category-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gregobase-category-pill {
+    background: var(--background-highlight, #141414);
+    color: var(--primary-color, #c96b63);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .gregobase-category-pill {
+    background: var(--background-highlight, #e2e6ee);
+}
+
+.gregobase-browser-right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.gregobase-view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: none !important;
+    box-shadow: none !important;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+    transform: none !important;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .gregobase-view-toggle-btn {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+}
+
+.gregobase-view-toggle-btn:hover {
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.14) !important;
+    color: var(--primary-color, #c96b63);
+}
+
+/* Ligne 2 : Filtres de la catégorie */
+.gregobase-browser-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.gregobase-filter-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.gregobase-filter-search .gregobase-search-icon {
+    position: absolute;
+    left: 11px;
+    color: var(--text-secondary);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.gregobase-filter-search input {
+    width: 100%;
+    height: 36px;
+    border-radius: 9px;
+    border: none !important;
+    outline: none;
+    box-shadow: none !important;
+    background: var(--background-highlight, #141414);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    padding: 0 32px 0 32px;
+    box-sizing: border-box;
+    transition: background 0.18s ease;
+}
+
+[data-theme="light"] .gregobase-filter-search input {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+}
+
+.gregobase-filter-search input:focus {
+    background: var(--background-surface, #181818);
+}
+
+.gregobase-filter-search input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.85;
+}
+
+.gregobase-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.gregobase-select-filter {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 9px;
+    border: none !important;
+    outline: none;
+    box-shadow: none !important;
+    background: var(--background-highlight, #141414);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+[data-theme="light"] .gregobase-select-filter {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-primary, #111317);
+}
+
+.gregobase-filter-pill-nabc {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: none !important;
+    box-shadow: none !important;
+    background: var(--background-highlight, #141414);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.18s ease, color 0.18s ease;
+    transform: none !important;
+}
+
+[data-theme="light"] .gregobase-filter-pill-nabc {
+    background: var(--background-highlight, #e2e6ee);
+    color: var(--text-secondary, #475569);
+}
+
+.gregobase-filter-pill-nabc:hover {
+    color: var(--text-primary);
+}
+
+.gregobase-filter-pill-nabc.active {
+    background: var(--primary-color, #c96b63) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Barre de métadonnées lors de la recherche globale */
+.gregobase-search-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 2px 8px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 8px;
+}
+
+[data-theme="light"] .gregobase-search-meta-bar {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+#gregobaseSearchResultCount {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Sentinelle de chargement différé */
+.gregobase-sentinel {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+    border: none !important;
+}

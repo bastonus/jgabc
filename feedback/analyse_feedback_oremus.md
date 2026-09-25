@@ -1,5 +1,5 @@
 # 📋 Tâches & Retours Utilisateurs — Oremus
-*Suivi des actions et analyse exhaustive des retours utilisateurs au 6 septembre 2026 (Couvrant jusqu'à la Version 0.0.57)*
+*Suivi des actions et analyse exhaustive des retours utilisateurs au 25 septembre 2026 (Couvrant jusqu'à la Version 0.0.65)*
 
 ---
 
@@ -43,10 +43,18 @@
   - *Origine du retour :* Utilisateur `bZzJ6v0` (31/08).
   - *Problème :* Lorsqu'un jour présente deux offices en concurrence (ex. dimanche du Temporal coïncidant avec une fête du Sanctoral), l'application peut proposer ou afficher des solutions ambiguës dans la vue de l'année 2026.
   - *Spécification / Action requise :* Appliquer strictly les tables de préséance et règles d'occurrence du calendrier 1962 pour l'année 2026, afficher la fête prioritaire dans l'accès calendrier 2026, et répercuter cette hiérarchie de manière cohérente dans les sections Temporel et Sanctoral (avec commémorations appropriées).
-- [x] **Correction des Faux Positifs sur les Mises à Jour :**
-  - *Origine du retour :* Utilisateur `Z9e4QR5` (01/09).
-  - *Problème :* Une notification de mise à jour s'affichait de manière erronée alors que l'application était déjà en version 0.0.53.
-  - *Correction :* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.53'` dans `js/divinum_officium.js` et renforcement de `parseVersionString` pour décoder de façon robuste les préfixes de versions (`v`, `beta-`, `vbeta-`). *(Livré en v0.0.53)*
+- [x] **Correction des Faux Positifs et Boucle d'Alerte sur les Mises à Jour :**
+  - *Origine du retour :* Utilisateur `Z9e4QR5` (01/09) et retours testeurs.
+  - *Problème :* Une notification de mise à jour s'affichait de manière erronée ou en boucle alors que l'application était déjà à jour.
+  - *Correction :* Synchronisation de `CURRENT_APP_VERSION` sur `'beta-0.0.64'` dans `js/divinum_officium.js`, renforcement du parser `parseVersionString` pour décoder de façon robuste les préfixes (`v`, `beta-`, `vbeta-`), détection native sous Android et synchronisation stricte avec `version.json`. *(Livré en v0.0.53 & stabilisé définitivement en v0.0.64)*
+- [x] **Correction du Positionnement des Prières de Léon XIII dans le Sommaire (Index) de la Messe :**
+  - *Origine du retour :* Utilisateur `Ge777Yp` (04/09, CSV `Oremus_Submissions_2026-09-24.csv`).
+  - *Problème :* Dans la table des matières / sommaire de la Messe (`#doMassTocPanel`), la ligne « Prières de Léon XIII » s'insérait de manière erronée dans le groupe *1. Avant-Messe & Parole* immédiatement après le Gloria, alors qu'il s'agit des prières d'action de grâces prescrites à genoux après la fin de la célébration (*Post Missam* / après le Dernier Évangile).
+  - *Diagnostic technique :* Dans `js/divinum_officium.js` (`_massTocGroups`), la détection de la Collecte s'appuyait sur `match: /^Oratio|^Collecta|^Collecte/i`. Or, la carte générée pour les prières de Léon XIII porte le titre `Orationes Leonis XIII` (`cardId: 'leonis'`). L'expression `^Oratio` capturait donc abusivement `Orationes Leonis XIII` dès le premier groupe (notamment sur les féries sans collecte propre). Par ailleurs, le groupe 4 (*Communion & Envoi*) n'intégrait aucun item dédié aux prières post-messe.
+  - *Correction appliquée :*
+    1. Filtre de l'oraison rendu strictement sélectif dans `_massTocGroups` : `match: /^(?!.*Leonis)(?:Oratio|Collecta|Collecte)/i`, `cardId: /^oratio$/i`.
+    2. Item dédié ajouté en clôture du Groupe 4 (*4. Communion & Envoi*) : `{ label: "Prières de Léon XIII", match: /Leonis|Léon XIII/i, cardId: /^leonis$/i, badge: "Prières" }`.
+    3. Prise en charge de la règle `Oratio Dominica` dans `extractCommuneRef` pour hériter automatiquement de la collecte dominicale sur les féries du temporel (`Tempora/*-0`). *(Livré en v0.0.65)*
 
 ---
 
@@ -91,17 +99,19 @@
 - [x] **Découvrabilité du texte bilingue (Latin / Français) :**
   - *Origine du retour :* Utilisateurs `bZzeZb1` (27/08) et `OQE1AvR` (26/08).
   - *Correction :* Indicateur visuel animé inspiré de Samsung One UI (`#doBilingualGestureIndicator`), dégradé arrondi aux couleurs d'accentuation (`var(--primary-color)`), impulsion unique, bascule de texte élargie (-110px), fondu en fin de course, déclenchement après défilement sur les sections textuelles (hors grégorien) et relance périodique. *(Livré en v0.0.45)*
-- [ ] **Gestion du bouton Retour (Back navigation) sous Android :**
+- [x] **Gestion du bouton Retour (Back navigation) sous Android :**
   - *Origine du retour :* Utilisateur `jezD1o9` (26/08).
-  - *Statut actuel :* ⚠️ **Non pris en compte sur l'application Android native**.
-  - *Problème :* Bien que des écouteurs JavaScript existent, l'interception de la touche ou geste physique « Retour » via le plugin Capacitor (`@capacitor/app` `App.addListener('backButton')`) dans l'APK Android n'est pas encore opérationnelle. L'appui sur Retour peut quitter l'application au lieu de naviguer en arrière.
-  - *Spécification / Action requise :* Finaliser le branchement natif Capacitor pour intercepter l'événement matériel Android : fermer en priorité toute modale, menu latéral, tiroir ou panneau de paramètres ouvert, puis retourner à la page d'accueil si un office spécifique est ouvert, évitant la fermeture intempestive de l'application.
+  - *Correction :* Prise en charge native de l'événement matériel Android via Capacitor (`App.addListener('backButton')` dans `js/divinum_officium.js:18890`). La fonction `handleAppBackButton` ferme séquentiellement toutes les modales ouvertes (panneau de configuration, tiroir latéral, recherche universelle, zoom, notifications, sommaire de messe, sélecteur d'heures), puis navigue en arrière dans l'historique ou réinitialise la vue à l'accueil sans quitter l'application intempestivement. *(Livré en v0.0.50)*
 - [x] **Réinitialisation automatique à l'accueil :**
   - *Origine du retour :* Utilisateur `gbzjKQ4` (26/08).
   - *Correction :* Détecteur d'inactivité réinitialisant automatiquement l'affichage sur la page d'accueil et sur la date du jour actuel après 30 minutes de mise en arrière-plan ou d'absence d'activité (`checkInactivityReset`). *(Livré en v0.0.45)*
 - [ ] **Onboarding & Clarté de la navigation liturgique :**
   - *Origine du retour :* Utilisateur `OQE1AvR` (26/08).
   - *Spécification :* Ajout d'une courte présentation au premier lancement ou d'infobulles contextuelles discrètes pour expliquer la navigation entre calendrier annuel, Temporal, Sanctoral et Bréviaire.
+- [x] **Satisfaction Utilisateur, Ergonomie Moderne & Électro-choc Visuel (« Slay l'app ») :**
+  - *Origine du retour :* Utilisateur `LDoyZjy` (04/09, CSV `Oremus_Submissions_2026-09-24.csv`).
+  - *Verbatim :* *« Slay l'app »* (expression populaire célébrant une esthétique frappante et une exécution particulièrement soignée).
+  - *Impact :* Plébiscite la modernisation de l'expérience utilisateur d'Oremus : thème One UI, fluidité des transitions, animations soignées, design glassmorphism épuré et réactivité du moteur liturgique. *(Validé en v0.0.57)*
 
 ---
 
@@ -123,9 +133,24 @@
 - [ ] **Évangile et Commémoration du Temporal en cas de fête sanctorale :**
   - *Origine du retour :* Utilisateur `5XMRJoP` (25/08).
   - *Spécification :* Lorsque la messe célébrée est celle d'un saint (Sanctoral) qui prime sur un dimanche ou une férie privilégiée (Temporal), afficher automatiquement en bas de page l'oraison de commémoration ainsi que le Dernier Évangile propre du temporal.
-- [ ] **Messes Diverses et Votives hors calendrier :**
-  - *Origine du retour :* Utilisateur `8NrLz1l` (27/08).
-  - *Spécification :* Ajouter une section dédiée aux formulaires hors cycle propre : Messes de Mariage (*Missa pro Sponso et Sponsa*), Messes des Défunts (*Requiem* avec choix complet des oraisons pour anniversaire, enterrement, quotidien), et principales messes votives (Sacré-Cœur, Saint-Esprit, Sainte Vierge, etc.).
+- [x] **Messes Diverses, Votives & Particulières hors calendrier (Mariage, Requiem, Défunts) :**
+  - *Origine du retour :* Utilisateurs `8NrLz1l` (27/08) et `o9xQ9MN` (04/09, CSV `Oremus_Submissions_2026-09-24.csv` : *« Ou sont les messes particulières ? Messe de requiem, de mariage? »*).
+  - *Synthèse du besoin & Renforcement :* Demande formulée de façon récurrente par les fidèles et les chantres, soulignant le besoin d'accéder directement aux formulaires liturgiques hors temporal/sanctoral régulier sans avoir à chercher leur date ou leur code interne.
+  - *Correction & Solution déployée :*
+    1. **Accès UI Dédié dans le Menu Déroulant du Header (après Temporal et Sanctoral) :**
+       - Retrait de la navigation principale (sidebar et carte d'accueil) pour ne pas encombrer le parcours quotidien.
+       - Ajout d'un 4ᵉ onglet dédié officiel **« Votivæ et aliæ missæ »** (`data-mode="votives"`) dans le menu déroulant supérieur (`#headerDropdown`), positionné logiquement après *Temporal* et *Sanctoral*.
+       - Présentation fluide sous forme de cartes glassmorphism classées selon la taxonomie liturgique traditionnelle du Missel Romain : *Aliæ Missæ (Circonstances & Défunts)* et *Missæ Votivæ (Votives hebdomadaires)*.
+       - Grille responsive 2x2 optimisée sur mobile (`flex: 1 1 calc(50% - 6px)`) pour garantir une lisibilité irréprochable sans troncature du titre.
+       - Sélecteur de date et calendrier dépliable maintenus actifs et visibles en permanence dans tous les modes pour une ergonomie homogène et stable.
+       - Intégration dans la recherche en temps réel du menu déroulant (indexation des mots-clés comme "requiem", "mariage", etc.).
+    2. **Formulaires Complets Bilingues Défunts & Mariage :**
+       - Intégration intégrale en Latin et Français de la *Missa Defunctorum* (`do_data/missa/Latin/Votive/Defunctorum.txt` & `Francais/...`) avec Introït, Oraisons, Épître, Graduel, Trait, Séquence complète du *Dies Iræ* (58 versets), Évangile, Offertoire, Secrète, Communion et Postcommunion.
+       - Intégration intégrale en Latin et Français de la *Missa pro Sponso et Sponsa* (`do_data/missa/Latin/Votive/Nuptialis.txt` & `Francais/...`) avec bénédiction nuptiale.
+       - Prise en charge des messes pour le Pape (*Coronatio*), la Propagation de la Foi, la Dédicace d'une église, et des 7 formulaires votifs hebdomadaires (Trinité, Anges, Saint Joseph, Saint-Sacrement, Sacré-Cœur, Sainte Vierge, Saints Apôtres).
+    3. **Ergonomie & Workflow :**
+       - Affichage épuré directement au texte de la messe sans bandeau parasite superflu en haut de page.
+       - Deep linking URL synchronisé (`?key=requiem`, `?key=nuptial`, etc.) et fermeture native par touche retour Android (`handleAppBackButton`). *(Résolu en v0.0.65)*
 - [x] **Intégration du Kyriale & Choix Chanté / Psalmodié (Chant Tools) :**
   - *Origine du retour :* Utilisateurs `gbzNPpJ` (28/08) et `Yj97Bg5` (31/08).
   - *Correction :* Titres interactifs avec chevrons circulaires, tiroir bottom sheet glassmorphism (`#massPartPickerDrawer`), grille 1:1 lazy & liste, ton psalmodié ℣, versets ad libitum sous GABC et deep linking URL synchronisé. *(Livré en v0.0.57)*
@@ -185,34 +210,27 @@
 - [ ] **Amélioration UX : Clic Direct & Suppression du Double-Clic de Recherche :**
   - *Problème :* Sur la page d'accueil ou lors du basculement vers la recherche, l'utilisateur doit actuellement cliquer deux fois pour activer le champ et commencer à saisir sa requête.
   - *Spécification / Solution :* Dès le premier clic ou tap sur la barre d'accueil ou l'icône loupe, déclencher instantanément le basculement vers la vue de recherche et donner le focus clavier automatique (`input.focus()`) sans délai ni second clic requis.
-- [ ] **Adaptation Responsive de la Grille de Résultats sur Desktop (Multi-colonnes) :**
-  - *Problème :* Sur grand écran / desktop, la grille de recherche reste bloquée à 2 résultats par ligne avec des cartes étirées et de larges espaces vides latéraux au lieu d'exploiter la largeur disponible.
-  - *Spécification / Solution :* Déverrouiller le `max-width: 760px` du conteneur en mode recherche et configurer une grille adaptative fluide `grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))` avec un espacement régulier (`gap: 16px`), permettant d'afficher dynamiquement 3, 4, 5 ou 6 colonnes de cartes proportionnées selon la largeur d'écran.
-- [ ] **Transformation de la Recherche en « Répertoire Grégorien » (Thesaurus Cantuum) & Mise en Valeur des Partitions GABC :**
+- [x] **Adaptation Responsive de la Grille de Résultats sur Desktop (Multi-colonnes) :**
+  - *Origine du retour :* Retour testeurs (01/09).
+  - *Correction :* Déverrouillage de la largeur du conteneur en mode recherche et grille fluide adaptative implémentée dans `css/gregorian_search.css:355-374` : 2 colonnes sur mobile (`repeat(2, 1fr)`), 3 colonnes sur tablette (`min-width: 600px : repeat(3, 1fr)`), et multi-colonnes adaptatives sur grand écran (`min-width: 901px : repeat(auto-fill, minmax(150px, 1fr))`). *(Livré en v0.0.52)*
+- [x] **Transformation de la Recherche en « Répertoire Grégorien » / Grégobase Intégrée & Mise en Valeur des Partitions GABC :**
   - *Constat & Problématique :* Les milliers de partitions GABC de l'application (avec neumes carrés SVG, modes 1 à 8 et synthèse audio) ne sont aujourd'hui découvertes que lors d'une saisie dans la barre de recherche. Sans requête, la page ressemble à un moteur de recherche vide plutôt qu'à un recueil musical et liturgique vivant.
-  - *Axes de réflexion & Spécifications :*
-    1. **Repositionnement & Navigation :** Renommer la section dans la barre latérale et l'en-tête en **« Répertoire Grégorien »** ou **« Cantus & Partitions »** (avec sous-titre *Répertoire & Recherche*), lui donnant le même rang de livre canonique que le *Missale*, le *Breviarium* et la *Sacra Biblia*.
-    2. **Hub d'Exploration Musicale (sans requête de recherche) :** Remplacer l'état vide par une page d'accueil organisée en collections :
-       - 🎼 **Grands Livres & Formes liturgiques :**
-         - *Kyriale Romanum* : Accès direct aux 18 Messes, aux 4 Credos, Asperges me et Vidi Aquam.
-         - *Propres de la Messe (Graduale Romanum)* : Introïts, Graduels, Alléluias, Traits, Séquences, Offertoires, Communions.
-         - *Office Divin (Antiphonale)* : Antiennes majeures, Hymnes, Répons et Cantiques évangéliques (Magnificat, Benedictus).
-         - *Prières & Chants Célèbres* : Te Deum, Litanies des Saints, 4 Antiennes Mariales (Salve Regina, Alma, Ave Regina, Regina Caeli), Tantum Ergo, etc.
-       - 🎵 **Exploration Modale (Modes 1 à 8) :** Grille/pastilles interactives des 8 tons grégoriens (*Protus*, *Deuterus*, *Tritus*, *Tetrardus*) pour filtrer tout le corpus d'un mode d'un simple tap.
-       - ✨ **Sélection du Temps Liturgique (« À la Une ») :** 6 à 8 pièces phares correspondant au temps liturgique courant ou à la fête du jour.
-    3. **Mise en valeur visuelle GABC :** Mode Grille 1:1 actif par défaut affichant la partition en neumes carrés vectoriels, avec le genre en rubriques rouges, le mode et un mini-bouton d'écoute audio instantanée.
-    4. **Bascule instantanée Exploration $\leftrightarrow$ Recherche :** Dès la première frappe dans la barre, bascule immédiate vers la recherche temps réel avec highlights. Dès l'effacement, retour direct au hub du Répertoire.
+  - *Correction & Solution déployée :*
+    1. **Section Dédiée Grégobase dans la Barre Latérale :** Bouton permanent « Grégobase » (`#btnSidebarGregobase`) élevant la base de données grégorienne au même rang que le *Missale*, le *Breviarium* et la *Sacra Biblia*.
+    2. **Hub d'Exploration Structuré par Onglets :** Interface complète avec onglets Vue d'ensemble, Usages liturgiques, Sources historiques, Modes musicaux (tons 1 à 8) et recherche textuelle instantanée (`js/gregobase_ui.js`, `css/gregobase.css`).
+    3. **Rendu Vectoriel des Neumes Anciens NABC (Saint-Gall & Laon) :** Projection directe des neumes adiastématiques au-dessus des notes carrées Exsurge via polices médiévales (`fonts/gregall.ttf`, `grelaon.ttf`, `gresgmodern.ttf`) et table GregorioTeX (`js/gregall_cmap.json`).
+    4. **Deep-Linking & Partage :** Synchronisation complète des paramètres d'URL (`hora=gregobase&gbtab=...&gbf=...&gbq=...`). *(Livré en v0.0.65)*
 - [ ] **Accès direct aux Prières Isolées & Antiennes autonomes :**
   - *Origine du retour :* Utilisateur `Z9ebbd0` (31/08).
   - *Spécification :* Créer une rubrique dédiée pour interroger et afficher directement des antiennes ou prières individuelles isolées (hors flux complet d'office ou de messe).
-- [ ] **Vue Liste : Extraits Surlignés (Highlights) Calés sur 2 Lignes :**
-  - *Problème :* En mode liste, les extraits de recherche textuels doivent être plus clairs, homogènes et mettre en valeur les correspondances exactes.
-  - *Spécification / Solution :* Afficher systématiquement l'extrait textuel pertinent contenant les termes recherchés avec surlignage (*highlight*), limité et calé rigoureusement sur 2 lignes de texte (`display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;`) avec ellipse douce de fin.
-- [ ] **Barre de Recherche Desktop : Épuration & Alignement Largeur Résultats :**
-  - *Problème :* Sur grand écran (Desktop), la présence du bouton chevron/menu gauche de la sidebar est redondante, et la barre de recherche ne correspond pas toujours à la largeur du flux de résultats.
-  - *Spécification / Solution :*
-    1. **Masquage du chevron gauche sur desktop :** Masquer le bouton d'ouverture de la sidebar (`.do-mobile-menu-btn`) en mode recherche sur grand écran (`@media (min-width: 900px)`).
-    2. **Alignement de largeur :** Faire en sorte que la barre de recherche supérieure épouse exactement la même largeur maximale que le conteneur des cartes de résultats.
+- [x] **Vue Liste : Extraits Surlignés (Highlights) Calés sur 2 Lignes :**
+  - *Origine du retour :* Retour testeurs (01/09).
+  - *Correction :* Application stricte du serrage sur 2 lignes avec ellipse dans `css/gregorian_search.css:976-980` (`.gregorian-results.is-list .gregorian-card-middle, .gregorian-results.is-list .gregorian-text-preview { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; text-overflow: ellipsis !important; }`). *(Livré en v0.0.52)*
+- [x] **Barre de Recherche Desktop : Épuration & Alignement Largeur Résultats :**
+  - *Origine du retour :* Retour testeurs (01/09).
+  - *Correction :*
+    1. **Masquage du chevron gauche sur desktop :** Bouton hamburger (`.do-mobile-menu-btn`) masqué en CSS sur écran desktop (`@media (min-width: 901px) { body.is-search-mode .do-mobile-menu-btn { display: none !important; } }`).
+    2. **Alignement de largeur :** Barre supérieure calée à `max-width: 760px; margin: 0 auto;` exactement alignée sur le flux des résultats. *(Livré en v0.0.52)*
 - [ ] **Positionnement Aéré & Zone Rétractable au Scroll (Desktop Uniquement) :**
   - *Problème :* L'en-tête de recherche sur desktop est trop tassé en haut de page.
   - *Spécification / Solution :* Positionner la barre de recherche un peu plus bas avec un espacement supérieur aéré au repos, et intégrer une zone supérieure qui se rétracte de manière fluide lors du défilement (*shrink on scroll*), active uniquement sur Desktop.
@@ -253,21 +271,25 @@
 - [x] **Diagnostic des Sources Audio sur Pages Isolées & Message de Repli GABC :**
   * *Origine du retour :* Utilisateur `PRP5ayd` (02/09) (*« Aussi il faut comprendre pourquoi ça ne marche pas sur certaines sources dans les pages seules... A ce moment s'il n'y a rien mettre un message qui affiche gabc et aucune autre source disponible »*).
   * *Solution appliquée :* Transmission des métadonnées GABC sur la vue isolée via `do-chant-main-view-card` et attente asynchrone de `chant:rendered`. Message clair et explicite en cas d'absence de source vidéo externe. *(Livré en v0.0.56)*
-- [ ] **Suivi Intelligent, Retour Sticky & Centrage au Changement de Portée :**
-  - *Problème :* Le suivi de la note active pendant la lecture audio peut interférer avec le défilement manuel ou provoquer des sauts visuels saccadés.
-  - *Spécification / Solution :*
-    1. **Délai après scroll manuel :** Le recentrage automatique ne doit réintervenir qu'après un délai d'inactivité de l'utilisateur (2,5 à 3 secondes) ET **uniquement si la note active n'est plus visible dans la zone utile de l'écran**.
-    2. **Centrage vertical précis :** Positionner la note / la portée au milieu exact de la zone visible (entre l'en-tête supérieur et le lecteur audio inférieur).
-    3. **Suivi au changement de ligne de portée :** Une fois le chant centré au milieu, suivre la lecture en recentrant automatiquement la vue au milieu lors de chaque transition vers une **nouvelle ligne de portée** (système musical), sans saut vertical note par note à l'intérieur d'une même ligne.
-- [ ] **Interface des Tons Grégoriens :**
+- [x] **Suivi Intelligent, Retour Sticky & Centrage au Changement de Portée :**
+  - *Origine du retour :* Retour testeurs (01/09).
+  - *Correction :* Moteur de centrage doux `centerActiveNote` et `initUserScrollTracker` implémenté dans `js/divinum_officium.js:7690-7760`. Positionnement vertical centré au milieu exact de la zone visible (`visibleMid`), détection automatique des sauts de portée (transition > 60px) pour recentrer la vue sans à-coups note par note, et retour sticky automatique après inactivité si la lecture continue hors écran. *(Livré en v0.0.56)*
+- [x] **Interface des Tons & Transposition du Lecteur Audio :**
   - *Origine du retour :* Utilisateur `8NMv4MO` (26/08).
-  - *Spécification :* Remplacer la longue liste déroulante des tons par un sélecteur matriciel compact ou une grille de pastilles (Modes 1 à 8, terminaisons solennelles/ordinaires).
-- [x] **Intégration Enregistrements YouTube / Audio par Pièce Grégorienne :**
+  - *Correction :* Remplacement de l'ancien cycle fastidieux par le tiroir de tonalité `#playerPitchDrawer` et la grille de pastilles interactives `#playerPitchBubbleGrid` (13 demi-tons chromatiques de -6 à +6 autour du ton naturel avec bouton de réinitialisation rapide). *(Livré en v0.0.56)*
+- [x] **Intégration & Extension Massive des Enregistrements YouTube / Audio (14 000+ Pièces) :**
   - *Origine du retour :* Utilisateur `LDOAoxG` (01/09).
-  - *Correction :* Scraper multi-sources automatisé ([`tools/scrape_gregorian_youtube.py`](file:///d:/Documents/jgabc/tools/scrape_gregorian_youtube.py)) ayant associé **1 645 pièces grégoriennes** à leurs enregistrements YouTube / YouTube Music. Plusieurs interprétations par pièce sont proposées (Marek Klein, Abbaye de Fontgombault, Abbaye de Solesmes, Le Barroux, Ensemble Organum, etc.), embarquées hors-ligne dans [`js/gregorian_youtube_links.js`](file:///d:/Documents/jgabc/js/gregorian_youtube_links.js). *(Livré en v0.0.53)*
+  - *Correction :* Scraper multi-sources automatisé ([`tools/scrape_gregorian_youtube.py`](file:///d:/Documents/jgabc/tools/scrape_gregorian_youtube.py)) ayant initialement associé 1 645 pièces, puis étendu massivement à **plus de 14 000 enregistrements YouTube / YouTube Music** intégrés dans [`js/gregorian_youtube_links.js`](file:///d:/Documents/jgabc/js/gregorian_youtube_links.js) (Marek Klein, Abbaye de Fontgombault, Solesmes, Le Barroux, Ensemble Organum, etc.). *(Livré en v0.0.53 & v0.0.58)*
 - [x] **Moteur Audio & Synthèse sonore :**
   - *Origine du retour :* Utilisateur `X5QlZ7V` (26/08).
   - *Correction :* Synthèse sonore enrichie reproduisant les harmoniques chaleureuses d'un orgue liturgique à tuyaux (positif d'orgue). *(Livré en v0.0.45)*
+- [x] **Laboratoire d'Alignement Grégorien IA, Suivi Note-à-Note Exsurge & Infrastructure Distribuée :**
+  - *Origine :* Évolution technologique majeure du lecteur et des partitions interactives.
+  - *Réalisations livrées (v0.0.59 à v0.0.64) :*
+    1. **Laboratoire d'Alignement (`alignment-lab.html` & portail `/worker`) :** Station de calage temporel haute précision permettant d'aligner chaque note et neume sur l'audio réel.
+    2. **Double Modèle IA (MMS_FA + TorchCREPE) :** Modèle combinant reconnaissance phonétique du latin d'église et suivi de hauteur mélodique, avec script distributed worker 1-clic (`worker.py`, `run.sh`, `run.ps1`) et accélération GPU NVIDIA CUDA.
+    3. **Rendu Exsurge Immersif & Suivi Interactif :** Partitions grégoriennes vectorielles Exsurge adaptées au mode nuit (neumes blancs), synchronisation note-par-note temps réel avec défilement automatique doux (*auto-scroll*), click-to-seek direct sur la partition et revue collaborative.
+    4. **Serveur Autonome Coolify (`api-oremus.silverhorse.fr`) :** API de synchronisation continue des avis et scores alignés, file de réessai hors-ligne et publication automatisée. *(Livré en v0.0.59 - v0.0.64)*
 
 ---
 
@@ -291,40 +313,43 @@
 | **5** | `vXKk7yA` | 2026-08-25 23:29 | Anonyme | Bug technique / affichage | *« Le HOC EST ENIM CORPUS MEUM et HIC EST ENIM SANGUINIS ... sont en rouge et pas en noir »* | Typographie noire et grasse pour les paroles de la Consécration (`.do-consecration-words`). | **Résolu** | v0.0.45 |
 | **6** | `bZv0op0` | 2026-08-26 06:58 | Anonyme | Remarque générale | *« https://bastonus.github.io/jgabc/divinum-officium.html »* | Vérification et point de repère sur le déploiement web de référence. | **Traité** | v0.0.45 |
 | **7** | `PRkMQ1e` | 2026-08-26 09:40 | Anonyme | Suggestion de fonctionnalité | *« Faire en sorte que le lecteur soit grabbable pour le fermer avec un Scroll vers le bas »* | Ajout du geste de glissement vers le bas (*swipe down*) pour fermer le mini-lecteur audio. | **Résolu** | v0.0.45 |
-| **8** | `8NMv4MO` | 2026-08-26 09:51 | Anonyme | Suggestion de fonctionnalité | *« Faire des boutons de paramètres avancés du lecteur plus simples avec un bouton vitesse qui utilise une boucle x1 x1.25 x2 x0.25 x0.5 x0.75... Trouver une solution pour les tons »* | Bouton cyclique de vitesse en 1 clic ; refonte du sélecteur de tons à finaliser. | **Résolu (Vitesse)** / **Planifié (Tons)** | v0.0.45 / *v0.0.5x* |
+| **8** | `8NMv4MO` | 2026-08-26 09:51 | Anonyme | Suggestion de fonctionnalité | *« Faire des boutons de paramètres avancés du lecteur plus simples avec un bouton vitesse qui utilise une boucle x1 x1.25 x2 x0.25 x0.5 x0.75... Trouver une solution pour les tons »* | Bouton cyclique de vitesse en 1 clic ; sélecteur de tonalités par grille de pastilles chromatiques (-6 à +6) et reset. | **Résolu** | v0.0.45 & v0.0.56 |
 | **9** | `1W6ZayQ` | 2026-08-26 09:55 | Anonyme | Bug technique / affichage | *« Comorendre pourquoi sur mobile ça charge d'abord le headeer en haut avant de le remplacer en dessous de la safe bar »* | Application native CSS du `padding-top: env(safe-area-inset-top)` supprimant le saut visuel. | **Résolu** | v0.0.45 |
 | **10** | `OQE1AvR` | 2026-08-26 11:14 | bertrand.du.boullay@gmail.com | Remarque générale | *« Bonjour, je viens de télécharger votre APK... certaines fêtes sont indiquées en anglais. Pour le reste ...attendons que je maîtrise mieux la navigation. It's not obvious for now. »* | Traduction des fêtes anglaises complétée ; intégration d'onboarding/ergonomie planifiée. | **Résolu (Textes)** / **Planifié (UX)** | v0.0.45 / *v0.0.5x* |
-| **11** | `jezD1o9` | 2026-08-26 12:54 | Anonyme | Suggestion de fonctionnalité | *« Activer le retour en arrière dans lapp »* | Prise en charge native du bouton/geste Retour Android via Capacitor. | **En cours (Android)** | *Prochaine version* |
+| **11** | `jezD1o9` | 2026-08-26 12:54 | Anonyme | Suggestion de fonctionnalité | *« Activer le retour en arrière dans lapp »* | Prise en charge native du bouton/geste Retour Android via Capacitor (`App.addListener('backButton')`). | **Résolu** | v0.0.50 |
 | **12** | `gbzjKQ4` | 2026-08-26 12:55 | Anonyme | Suggestion de fonctionnalité | *« Faire en sorte que l'app revienne à l'accueil pas tout le temps mais à partir d'un certain temps »* | Réinitialisation automatique à l'accueil et sur le jour courant après 30 min d'inactivité. | **Résolu** | v0.0.45 |
 | **13** | `X5QlZ7V` | 2026-08-26 12:56 | Anonyme | Suggestion de fonctionnalité | *« Changer le son audio »* | Synthèse audio enrichie avec émulation d'harmoniques de positif d'orgue. | **Résolu** | v0.0.45 |
 | **14** | `NqPpWDb` | 2026-08-26 13:31 | Anonyme | Suggestion de fonctionnalité | *« Il faudrait avoir une barre de scroll qui indique où on en est dans la messe parce que quand on met l’ordinaire cnest vraiment super long si on doit aller en bas »* | Indicateur / barre de progression de défilement visuelle pour situer sa position dans la messe. | **Résolu** | v0.0.52 |
 | **15** | `bZzeZb1` | 2026-08-27 05:38 | clement.c.portal@gmail.com | Bug technique / affichage | *« Il y a 2 Croix au lieu d'une pour Evangelium... trouver un moyen de signaler qu'il faut glisser à droite... Le titre du saint du jour dépasse souvent du chapeau »* | Geste bilingue animé One UI ; titre avec défilement fluide *marquee* et chevron d'expansion. | **Résolu** | v0.0.45 & v0.0.47 |
 | **16** | `kbzGlXM` | 2026-08-27 05:42 | clement.c.portal@gmail.com | Bug technique / affichage | *« Il y a des fêtes en anglais (All souls, Holy relics). Je peux difficilement cliquer sur aujourd'hui à cause des boutons du téléphone. »* | Marge inférieure de sécurité mobile (`safe-area-inset-bottom`) & traduction des fêtes en anglais. | **Résolu** | v0.0.45 |
-| **17** | `8NrLz1l` | 2026-08-27 05:44 | clement.c.portal@gmail.com | Suggestion de fonctionnalité | *« Est-ce qu'il y a les messes en dehors du sanctoral et du temporal (mariage, défunts avec toutes les oraisons propres, messes votives...) ? »* | Intégration des formulaires de Messes de Mariage, Requiem et messes votives. | **Planifié** | *Prochaine version* |
+| **17** | `8NrLz1l` | 2026-08-27 05:44 | clement.c.portal@gmail.com | Suggestion de fonctionnalité | *« Est-ce qu'il y a les messes en dehors du sanctoral et du temporal (mariage, défunts avec toutes les oraisons propres, messes votives...) ? »* | Intégration des formulaires de Messes de Mariage, Requiem et messes votives via modale `#votiveMassModal` et carte d'accueil. | **Résolu** | v0.0.65 |
 | **18** | `gbzNPpJ` | 2026-08-28 19:10 | Anonyme | Suggestion de fonctionnalité | *« Ce serait bien de rajouter le kyrilae »* | Intégration du recueil des messes du Kyriale (Messes I à XVIII, Credo I à IV, Asperges). | **Résolu** | v0.0.57 |
 | **19** | `2joly9M` | 2026-08-29 12:14 | clement.c.portal@gmail.com | Remarque générale | *« Pour la Bible, vous ne pouvez pas prendre la Vulgate tridentine pour le latin et AELF... pour le français. Prenez par exemple Tobie 7... prenez une traduction de la Vulgate comme Crampon ou Sacy. »* | Remplacement complet d'AELF par la Bible Crampon 1923 (73 livres, 35 580 versets, 1:1 Vulgate). | **Résolu** | v0.0.53 |
 | **20** | `Yj97Bg5` | 2026-08-31 13:20 | Anonyme | Suggestion de fonctionnalité | *« Faire un truc pour choisir version chantée ou psalmodiee comme chant tools. Également faire un truc comme chat tools pour changer de kyriale etc, ajouter un antiphon etc. »* | Bascule chanté / psalmodié et ajout/substitution dynamique d'antiennes et de pièces du Kyriale. | **Résolu** | v0.0.57 |
 | **21** | `Z9ebbd0` | 2026-08-31 13:22 | Anonyme | Suggestion de fonctionnalité | *« Améliore la recherche... rechercher individuellement toute messe, tout office, ou toute prière seule. Ajouter une rubrique de pierres seule... repertoire entier de Gregorio... »* | Moteur de recherche universel instantané indexant 2292 éléments embarqué ; prières isolées à découper. | **Résolu (Moteur)** / **Planifié (Prières)** | v0.0.47 à v0.0.52 |
 | **22** | `M1VjpKE` | 2026-08-31 13:24 | Anonyme | Suggestion de fonctionnalité | *« Ajouter le bouton de recherche globale à côté du logo oremus et dans la page de démarrage, et faire une recherche intelligente avec affichage des résultats au mots, prevsisaliation en carré ou en ligne... »* | Bouton loupe header/accueil, recherche par mots-clés, surlignage et double mode Grille/Ligne. | **Résolu** | v0.0.47 & v0.0.49 |
-| **23** | `M1Vjpql` | 2026-08-31 13:26 | Anonyme | Suggestion de fonctionnalité | *« Ajouter une image et une bio ou paratexte dans le début des messes avec fond degradé pour chaque saint du jour. Ou fête. Trouver la bonne db... connecté au repo github »* | Affichage d'icônes avec fond dégradé et notices biographiques des saints du jour. | **Planifié** | *Prochaine version* |
+| **23** | `M1Vjpql` | 2026-08-31 13:26 | Anonyme | Suggestion de fonctionnalité | *« Ajouter une image et une bio ou paratexte dans le début des messes avec fond degradé pour chaque saint du jour. Ou fête. Trouver la bonne db... connecté au repo github »* | Carte saint immersive avec notice biographique (Lectio 94 / Martyrologe) et iconographie via module `.pack` ou CDN GitHub. | **Résolu** | v0.0.53 |
 | **24** | `bZzJ6v0` | 2026-08-31 17:08 | Anonyme | Bug technique / affichage | *« Quand on clique sur un jour où il y a deux solutions il faut affiche que la bonne solution dans année 2026 et la respecter fans els autres catégories temporal et snactoral »* | Détermination automatique de la célébration prévalente selon les rubriques 1962 pour 2026. | **Planifié** | *Prochaine version* |
 | **25** | *Évolution UX* | 2026-09-01 10:41 | Équipe / Retours | Ergonomie Recherche | *« Système où toutes les barres de recherche utilisent la mise en page de la barre principale »* | Unification du Design System (hauteur 38px, arrondi 10px, icône animée, bouton vidage, pastilles). | **Planifié** | *Prochaine version* |
 | **26** | *Évolution UX* | 2026-09-01 10:41 | Équipe / Retours | Ergonomie Recherche | *« Améliorer l'UX de la barre car cliquer 2 fois pour rechercher n'est pas commode »* | Activation immédiate et focus automatique direct au premier clic/tap. | **Planifié** | *Prochaine version* |
-| **27** | *Bug Affichage* | 2026-09-01 10:41 | Équipe / Retours | Responsive Desktop | *« Corriger que sur desktop il y en ait toujours 2 résultats par ligne au lieu de s'adapter »* | Déverrouillage de la largeur du conteneur en recherche et grille fluide multi-colonnes (3 à 6 col.). | **Planifié** | *Prochaine version* |
-| **28** | *Bug Audio* | 2026-09-01 10:41 | Équipe / Retours | Moteur Audio / Vitesse | *« La vitesse ne marche pas et change n'importe comment (corriger le calcul par rapport au bpm) »* | Formule de vitesse BPM stricte (`BASE_TEMPO * speedFactor`) et synchronisation du scheduler audio. | **Planifié** | *Prochaine version* |
-| **29** | *Évolution Audio* | 2026-09-01 10:41 | Équipe / Retours | Lecteur Audio / Scroll | *« Retour sticky après inactivité si hors écran au milieu, et suivi au milieu au changement de portée »* | Délai d'inactivité avant recentrage au milieu et suivi vertical doux par ligne de portée. | **Planifié** | *Prochaine version* |
-| **30** | *Évolution UX* | 2026-09-01 10:44 | Équipe / Retours | Recherche Vue Liste | *« Dans la vue liste, ajouter les extraits highlights lors de recherches highlight entre 2 lignes »* | Affichage des extraits textuels surlignés avec serrage propre sur 2 lignes max (`line-clamp: 2`). | **Planifié** | *Prochaine version* |
-| **31** | *Évolution UI* | 2026-09-01 10:49 | Équipe / Retours | Recherche Desktop | *« Masquer le chevron gauche sidebar sur desktop et aligner la barre sur la largeur des résultats »* | Masquage du chevron hamburger sur desktop et alignement de largeur barre / grille de résultats. | **Planifié** | *Prochaine version* |
+| **27** | *Bug Affichage* | 2026-09-01 10:41 | Équipe / Retours | Responsive Desktop | *« Corriger que sur desktop il y en ait toujours 2 résultats par ligne au lieu de s'adapter »* | Déverrouillage largeur conteneur et grille fluide responsive multi-colonnes (`minmax(150px, 1fr)`). | **Résolu** | v0.0.52 |
+| **28** | *Bug Audio* | 2026-09-01 10:41 | Équipe / Retours | Moteur Audio / Vitesse | *« La vitesse ne marche pas et change n'importe comment (corriger le calcul par rapport au bpm) »* | Formule de vitesse BPM stricte et nouveau scheduler de haute précision `scheduleNextNote` avec ticks absolus. | **Résolu** | v0.0.56 |
+| **29** | *Évolution Audio* | 2026-09-01 10:41 | Équipe / Retours | Lecteur Audio / Scroll | *« Retour sticky après inactivité si hors écran au milieu, et suivi au milieu au changement de portée »* | Centrage vertical doux au milieu (`visibleMid`), détection de saut de portée (> 60px) et retour sticky. | **Résolu** | v0.0.56 |
+| **30** | *Évolution UX* | 2026-09-01 10:44 | Équipe / Retours | Recherche Vue Liste | *« Dans la vue liste, ajouter les extraits highlights lors de recherches highlight entre 2 lignes »* | Affichage des extraits textuels surlignés avec serrage propre sur 2 lignes max (`-webkit-line-clamp: 2`). | **Résolu** | v0.0.52 |
+| **31** | *Évolution UI* | 2026-09-01 10:49 | Équipe / Retours | Recherche Desktop | *« Masquer le chevron gauche sidebar sur desktop et aligner la barre sur la largeur des résultats »* | Masquage du chevron hamburger sur desktop et centrage aligné de la barre (`max-width: 760px`). | **Résolu** | v0.0.52 |
 | **32** | *Évolution UX* | 2026-09-01 10:49 | Équipe / Retours | Recherche Desktop | *« Placer la barre plus bas avec une zone qui se rétracte au scroll pour aérer (desktop uniquement) »* | Espacement initial aéré avec rétraction fluide de l'en-tête de recherche lors du défilement. | **Planifié** | *Prochaine version* |
-| **33** | *Évolution UI* | 2026-09-01 10:47 | Équipe / Retours | Répertoire Grégorien | *« Mettre en avant les partitions GABC et faire passer la recherche pour un répertoire »* | Transformation de la vue en véritable Répertoire Grégorien / Thesaurus Cantuum avec navigation par livres et modes. | **Planifié** | *Prochaine version* |
+| **33** | *Évolution UI* | 2026-09-01 10:47 | Équipe / Retours | Répertoire Grégorien | *« Mettre en avant les partitions GABC et faire passer la recherche pour un répertoire »* | Section complète Grégobase intégrée dans la barre latérale avec navigation par usages, sources, modes, recherche et neumes NABC. | **Résolu** | v0.0.65 |
 | **34** | *Bug Affichage* | 2026-09-01 10:53 | Équipe / Retours | En-tête / Android | *« Corriger le chargement de la barre (Oneratur...) qui n'est pas nécessaire et s'affiche mal sur Android »* | Suppression du texte statique Oneratur et affichage instantané fluide sans saut ni rognage. | **Résolu** | v0.0.57 |
-| **36** | `Z9e4QR5` | 2026-09-01 14:21 | Anonyme | Bug technique / affichage | *« Faux positif sur les mises a jour »* | Détection et comparaison stricte des versions (`beta-0.0.53` vs `v0.0.53`) pour éliminer les notifications erronées. | **Résolu** | v0.0.53 |
-| **37** | `LDOAoxG` | 2026-09-01 14:22 | Anonyme | Suggestion de fonctionnalité | *« Intégrer les vidéo ou audio youtube pour chaque pièce de gregorien »* | Scraping multi-sources de 1 645 pièces (Marek Klein, Fontgombault, Solesmes, Organum) embarqué dans `js/gregorian_youtube_links.js`. | **Résolu** | v0.0.53 |
+| **36** | `Z9e4QR5` | 2026-09-01 14:21 | Anonyme | Bug technique / affichage | *« Faux positif sur les mises a jour »* | Détection stricte des versions, élimination des boucles d'alerte sous Android et synchronisation `version.json`. | **Résolu** | v0.0.53 & v0.0.64 |
+| **37** | `LDOAoxG` | 2026-09-01 14:22 | Anonyme | Suggestion de fonctionnalité | *« Intégrer les vidéo ou audio youtube pour chaque pièce de gregorien »* | Scraping multi-sources initial de 1 645 pièces étendu à plus de 14 000 enregistrements YouTube dans `js/gregorian_youtube_links.js`. | **Résolu** | v0.0.53 & v0.0.58 |
 | **38** | `PRP5ayd` | 2026-09-02 17:37 | Anonyme | Bug technique / audio | *« Sur l'audio, il ne faut pas quil se mette en pause lorseu l'on ferme les sources. Il faut aussi que le sync soit désactivé par défaut sur les sources yt comme elles ne marchent pas vraiment. Aussi il faut comprendre pourquoi ça ne marche pas sur certaines sources dans les pages seules... A ce moment s'il n'y a rien mettre un message qui affiche gabc et aucune autre source disponible »* | Maintenir l'audio actif au repli du tiroir de sources ; désactiver la synchro YT par défaut ; diagnostiquer l'audio des pages seules et afficher un message explicite « Partition GABC uniquement — aucun enregistrement externe » si aucune source vidéo. | **Résolu** | v0.0.56 |
 | **39** | `YjqWEDB` | 2026-09-02 17:38 | Anonyme | Liturgie / Grégorien | *« Remove grgeorian chant for blessing and... »* | Suppression des partitions grégoriennes / boutons de chant inopportuns sur les bénédictions et versets d'envoi non chantés. | **Planifié** | *v0.0.56* |
 | **40** | `NqO6a2l` | 2026-09-02 19:55 | Anonyme (avec capture) | Correction de texte liturgique | *« Page en français, mais il manque les accents français. »* | Restauration intégrale des accents diacritiques français sur les pages et formulaires textuels du Missel/Bréviaire. | **Planifié** | *v0.0.56* |
 | **41** | `5XOzW46` | 2026-09-02 20:03 | Anonyme | Suggestion de fonctionnalité & Bréviaire | *« Est-ce que vous pouvez mettre aussi le nouvel ordo ? Pour les offices, pourquoi les petites heures n'ont pas de capitule, voire certaines heures pas de réponds. »* | Clarification du périmètre (Oremus centré sur la forme extraordinaire 1962) ; audit et complétion des capitules et répons brefs manquants aux petites heures (Prime, Tierce, Sexte, None). | **À l'étude (Novus Ordo) / Planifié (Bréviaire)** | *v0.0.56* |
-| **42** | `Ge75aZO` | 2026-09-04 09:16 | Anonyme | Suggestion de fonctionnalité | *« Il faudrait pouvoir avoir le choix du kyriale et pouvoir mettre le kyriale sans tout l’ordinaire »* | Sélecteur interactif du Kyriale (Messes I à XVIII) et mode d'affichage autonome « Kyriale seul » sans dérouler l'Ordinaire complet. | **Résolu** | v0.0.57 |
+| **42** | `Ge75aZO` | 2026-09-04 09:16 | Anonyme | Suggestion de fonctionnalité | *« Il faudrait pouvoir avoir le choix du kyriale et pouvoir mettre le kyriale sans tout l’ordinaire »* | Sélecteur interactif du Kyriale (Messes I à XVIII) dans la messe ; vue autonome « Kyriale seul » sans Ordinaire à ajouter. | **Partiellement résolu (Sélecteur fait / Vue isolée planifiée)** | v0.0.57 / *v0.0.65* |
 | **43** | `k9PqW8a` | 2026-09-04 12:12 | Anonyme (Retour direct) | Bug technique / audio | *« lorsque l'n clique pour la première fois, le curseur reste 2 secondes au bon endroit, puis se vide, mais la veluer de l'hordatage ne chnage pas c'est bizarre »* | Correction du bug de seek / barre de progression au 1er clic : verrouillage temporel (`_isUserSeekingUntil`) empêchant l'écrasement asynchrone de la jauge (`#playerProgressFill`), et calcul pondéré cohérent. | **Résolu** | v0.0.56 |
 | **44** | `w2XnK7b` | 2026-09-04 12:14 | Anonyme (Retour direct) | Bug technique / audio synthé | *« desolé ca marche toujours pas, ya que le 1X qui est a la bonne vitesse, tous les autres sont trop lents, ils semblent pas calsulés de la meme manière sur que le 1X (que pour le synthé evidemmebnt) »* | Correction critique du tempo sur le synthétiseur GABC : remplacement du scheduler temporel Tone.js r12 par des ticks d'horloge absolue (`targetTick + 'i'`), application directe du BPM sans dérive. | **Résolu** | v0.0.56 |
+| **45** | `Ge777Yp` | 2026-09-04 13:55 | Anonyme | Bug technique / affichage | *« Les prières de Léon 13 sont misent dans l’index juste après le gloria alors que c’est les prières après la messe »* | Exclusion de `Orationes Leonis XIII` du filtre regex de la Collecte dans `_massTocGroups` et ajout dédié en clôture du groupe 4 (post-messe). | **Résolu** | v0.0.65 |
+| **46** | `LDoyZjy` | 2026-09-04 20:13 | Anonyme | Remarque générale | *« Slay l'app »* | Retours très positifs et satisfaction utilisateur sur la modernité, l'esthétique et la fluidité de l'application. | **Traité** | v0.0.57 |
+| **47** | `o9xQ9MN` | 2026-09-04 20:15 | Anonyme | Suggestion de fonctionnalité | *« Ou sont les messes particulières ? Messe de requiem, de mariage? »* | Consolidation de la demande d'accès dédié aux formulaires particuliers et votifs hors calendrier (Requiem, Mariage, messes votives). | **Résolu** | v0.0.65 |
 

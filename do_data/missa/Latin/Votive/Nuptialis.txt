@@ -1,0 +1,68 @@
+[Officium]
+Missa pro Sponso et Sponsa (Missa Nuptialis)
+
+[Name]
+Missa pro Sponso et Sponsa
+
+[Rule]
+Gloria
+no Credo
+Prefatio=Communis
+
+[Introitus]
+!Tob 7:15; 8:19; Ps 127:1
+v. Deus Israël conjúngat vos, et ipse sit vobíscum, qui misértus est duóbus únicis: et nunc, Dómine, fac eos plénius benedícere te.
+!Ps 127:1
+Beáti omnes, qui timent Dóminum: qui ámbulant in viis ejus.
+v. Glória Patri, et Fílio, et Spirítui Sancto. Sicut erat in princípio, et nunc, et semper, et in sǽcula sæculórum. Amen.
+v. Deus Israël conjúngat vos, et ipse sit vobíscum, qui misértus est duóbus únicis: et nunc, Dómine, fac eos plénius benedícere te.
+
+[Oratio]
+Exáudi nos, omnípotens et miséricors Deus: ut, quod nostro ministrátur offício, tua benedictióne pótius impleátur.
+$Per Dominum
+
+[Lectio]
+Léctio Epístolæ beáti Pauli Apóstoli ad Ephésios.
+!Eph 5:22-33.
+Fratres: Mulíeres viris suis súbditæ sint, sicut Dómino: quóniam vir caput est mulíeris, sicut Christus caput est Ecclésiæ: ipse, salvátor córporis ejus.
+Sed sicut Ecclésia subjécta est Christo, ita et mulíeres viris suis in ómnibus.
+Viri, dilígite uxóres vestras, sicut et Christus diléxit Ecclésiam, et seípsum trádidit pro ea, ut illam sanctificáret, mundans lavácro aquæ in verbo vitæ, ut exhibéret ipse sibi gloriósam Ecclésiam, non habéntem máculam, aut rugam, aut áliquid hujúsmodi, sed ut sit sancta et immaculáta.
+Ita et viri debent dilígere uxóres suas ut córpora sua. Qui suam uxórem díligit, seípsum díligit.
+Nemo enim umquam carnem suam ódio hábuit: sed nutrit et fovet eam, sicut et Christus Ecclésiam: quia mémbra sumus córporis ejus, de carne ejus et de óssibus ejus.
+Propter hoc relínquet homo patrem et matrem suam, et adhærébit uxóri suæ, et erunt duo in carne una.
+Sacraméntum hoc magnum est, ego autem dico in Christo et in Ecclésia.
+Verúmtamen et vos sínguli, unusquísque uxórem suam sicut seípsum díligat: uxor autem tímeat virum suum.
+
+[Graduale]
+!Ps 127:3
+Uxor tua sicut vitis abúndans in latéribus domus tuæ.
+V. Fílii tui sicut novéllæ olivárum in circúitu mensæ tuæ.
+
+[Alleluia]
+!Ps 19:3
+Allelúja, allelúja.
+V. Mittat vobis Dóminus auxílium de sancto: et de Sion tueátur vos. Allelúja.
+
+[Evangelium]
+Sequéntia ++ sancti Evangélii secúndum Matthǽum.
+!Matt 19:3-6.
+In illo témpore: Accessérunt ad Jesum pharisǽi tentántes eum, et dicéntes: Si licet hómini dimíttere uxórem suam quacúmque ex causa?
+Qui respóndens, ait eis: Non legístis, quia qui fecit hóminem ab inítio, másculum et féminam fecit eos? et dixit: Propter hoc dimíttet homo patrem et matrem, et adhærébit uxóri suæ, et erunt duo in carne una.
+Itaque jam non sunt duo, sed una caro.
+Quod ergo Deus conjúnxit, homo non séparet.
+
+[Offertorium]
+!Ps 30:15-16
+In te sperávi, Dómine: dixi: Tu es Deus meus, in mánibus tuis témpora mea.
+
+[Secreta]
+Súscipe, quǽsumus, Dómine, pro sacra connúbii lege munus oblátum: et cujus largítor es óperis, esto dispósitor.
+$Per Dominum
+
+[Communio]
+!Ps 127:4, 6
+Ecce sic benedicétur omnis homo, qui timet Dóminum: et vídeas fílios filiórum tuórum: pax super Israël.
+
+[Postcommunio]
+Quǽsumus, omnípotens Deus: institúta providéntiæ tuæ pio favóre comitáre; ut, quos legítima societáte connéctis, longǽva pace custódias.
+$Per Dominum

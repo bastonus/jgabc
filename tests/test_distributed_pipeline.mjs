@@ -112,8 +112,8 @@ try {
   assert(workerPageRes.status === 200, 'GET /worker répond HTTP 200');
   assert(workerPageRes.headers['content-type'].includes('text/html'), 'Content-Type est text/html');
   assert(workerPageRes.bodyText.includes('Calcul Distribué'), 'Page contient le titre "Calcul Distribué"');
-  assert(workerPageRes.bodyText.includes('start_worker.bat'), 'Instructions Windows présentes');
-  assert(workerPageRes.bodyText.includes('start_worker.sh'), 'Instructions Mac/Linux présentes');
+  assert(workerPageRes.bodyText.includes('run.ps1') || workerPageRes.bodyText.includes('start_worker.bat'), 'Instructions Windows présentes');
+  assert(workerPageRes.bodyText.includes('run.sh') || workerPageRes.bodyText.includes('start_worker.sh'), 'Instructions Mac/Linux présentes');
 
   // ── TEST 3 : Téléchargement du ZIP worker ──
   console.log('\n📦 Test 3 : Téléchargement du pack worker (/download/worker.zip)');

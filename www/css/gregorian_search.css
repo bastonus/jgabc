@@ -5,7 +5,9 @@
 
 /* Intégration du Header Oremus en mode recherche */
 #gregorianSearchHeaderRow,
-#gregorianFilterBar {
+#gregorianFilterBar,
+#gregobaseSearchHeaderRow,
+#gregobaseFilterBar {
     display: none !important;
 }
 
@@ -868,141 +870,159 @@ mark.search-highlight {
 }
 
 /* =========================================================================
-   Mode Liste (is-list) : Même style épuré que la liste de sélection (.hdd-item-card)
+   Mode Liste (is-list) : Même style épuré que le menu déroulant (.hdd-item-card)
    ========================================================================= */
 .gregorian-results.is-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    width: 100% !important;
+    padding: 6px 2px 8px !important;
 }
 
 .gregorian-results.is-list .gregorian-card {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
-    background: var(--background-surface, rgba(255, 255, 255, 0.03)) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    border: none !important;
+    outline: none !important;
     box-shadow: none !important;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 6px;
-    box-sizing: border-box;
+    background: transparent !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    margin: 0 0 2px 0 !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    aspect-ratio: auto !important;
+    min-height: 44px !important;
+    max-height: none !important;
+    height: auto !important;
 }
 
 .gregorian-results.is-list .gregorian-card:hover {
-    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.08) !important;
-    border-color: rgba(var(--primary-color-rgb, 201, 107, 99), 0.3) !important;
-    transform: none;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.09) !important;
+    transform: translateX(2px) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.gregorian-results.is-list .gregorian-card:active,
+.gregorian-results.is-list .gregorian-card:focus,
+.gregorian-results.is-list .gregorian-card:focus-visible,
+.gregorian-results.is-list .gregorian-card.is-active,
+.gregorian-results.is-list .gregorian-card.selected {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: rgba(var(--primary-color-rgb, 201, 107, 99), 0.15) !important;
+}
+
+.gregorian-results.is-list .gregorian-card.is-active .gregorian-card-incipit,
+.gregorian-results.is-list .gregorian-card.selected .gregorian-card-incipit {
+    color: var(--primary-color, #c96b63) !important;
+    font-weight: 700 !important;
 }
 
 .gregorian-results.is-list .gregorian-card-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 0;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
 }
 
 .gregorian-results.is-list .gregorian-card-titles {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
 }
 
 .gregorian-results.is-list .gregorian-card-incipit {
-    font-family: 'Libre Baskerville', serif;
-    font-size: 0.88rem;
-    color: var(--text-primary);
-    line-height: 1.4;
-    font-weight: 400;
-    flex: 1;
-    min-width: 0;
-    word-break: normal;
-    overflow-wrap: break-word;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0;
+    font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif !important;
+    font-size: 1.04rem !important;
+    color: var(--text-primary) !important;
+    line-height: 1.35 !important;
+    font-weight: 600 !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 0 !important;
 }
 
 .gregorian-results.is-list .gregorian-card-source {
     display: inline-block !important;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.76rem;
-    color: var(--text-tertiary, #64748b);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    color: var(--text-tertiary, #64748b) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 180px !important;
+    opacity: 0.85;
 }
 
 .gregorian-results.is-list .gregorian-card-badges {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
 }
 
 .gregorian-results.is-list .gregorian-badge-part,
 .gregorian-results.is-list .gregorian-badge-mode {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.76rem;
-    font-weight: 600;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
     color: var(--text-secondary, #94a3b8) !important;
     background: transparent !important;
     padding: 0 !important;
-    border-radius: 0 !important;
-    white-space: nowrap;
-    flex-shrink: 0;
-    opacity: 0.75;
-    margin-left: 8px;
+    border: none !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    opacity: 0.8;
+    margin-left: 6px !important;
 }
 
-/* En mode liste : masquer uniquement la partition SVG, afficher les extraits et actions */
-.gregorian-results.is-list .gregorian-score-container {
+/* En mode liste : masquer complètement les partitions SVG, extraits de texte, boutons d'action et images de fond */
+.gregorian-results.is-list .gregorian-score-container,
+.gregorian-results.is-list .gregorian-card-middle,
+.gregorian-results.is-list .gregorian-text-preview,
+.gregorian-results.is-list .gregorian-card-actions,
+.gregorian-results.is-list .gregorian-card-saint-bg,
+.gregorian-results.is-list .gregorian-card-saint-gradient {
     display: none !important;
 }
 
-.gregorian-results.is-list .gregorian-card-middle,
-.gregorian-results.is-list .gregorian-text-preview {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    font-family: 'Crimson Text', serif !important;
-    font-size: 0.92rem !important;
-    line-height: 1.38 !important;
-    color: var(--text-secondary, #94a3b8) !important;
-    margin: 2px 0 0 0 !important;
-    padding: 0 !important;
-}
-
-.gregorian-results.is-list .gregorian-card-middle p,
-.gregorian-results.is-list .gregorian-text-preview p {
-    margin: 0 !important;
-    line-height: inherit !important;
-    font-size: inherit !important;
-    color: inherit !important;
-    display: inline !important;
-}
-
-.gregorian-results.is-list .gregorian-card-actions {
-    display: flex !important;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+@media (max-width: 600px) {
+    .gregorian-results.is-list .gregorian-card {
+        padding: 9px 12px !important;
+        gap: 8px !important;
+    }
+    .gregorian-results.is-list .gregorian-card-incipit {
+        font-size: 0.95rem !important;
+    }
+    .gregorian-results.is-list .gregorian-card-source {
+        display: none !important;
+    }
 }
 
 /* Éléments communs aux cartes */
@@ -1128,7 +1148,7 @@ mark.search-highlight {
 .gregorian-badge-part.do-badge-nabc {
     background: color-mix(in srgb, var(--primary-color, #c96b63) 18%, transparent);
     color: var(--primary-color, #c96b63);
-    border: 1px solid color-mix(in srgb, var(--primary-color, #c96b63) 30%, transparent);
+    border: none !important;
     font-weight: 700;
 }
 
@@ -1172,7 +1192,12 @@ mark.search-highlight {
     color: #ffffff;
 }
 
-/* Surlignage et rubriques dans les partitions Exsurge SVG */
+/* Surlignage, neumes NABC et rubriques dans les partitions Exsurge SVG */
+.nabc-neume,
+svg.Exsurge text.nabc-neume,
+svg.Exsurge .nabc-neume,
+svg.ChantScore text.nabc-neume,
+svg.ChantScore .nabc-neume,
 svg.Exsurge text .rubric,
 svg.Exsurge tspan.rubric,
 svg.Exsurge text.lyric tspan.rubric,
@@ -1181,6 +1206,11 @@ svg.Exsurge .rubric {
     font-weight: 700;
 }
 
+[data-theme="light"] .nabc-neume,
+[data-theme="light"] svg.Exsurge text.nabc-neume,
+[data-theme="light"] svg.Exsurge .nabc-neume,
+[data-theme="light"] svg.ChantScore text.nabc-neume,
+[data-theme="light"] svg.ChantScore .nabc-neume,
 [data-theme="light"] svg.Exsurge text .rubric,
 [data-theme="light"] svg.Exsurge tspan.rubric,
 [data-theme="light"] svg.Exsurge text.lyric tspan.rubric,
@@ -1264,8 +1294,8 @@ svg.Exsurge .rubric {
 
 .gregorian-zoom-card {
     background: var(--background-surface, #0a0a0a);
-    border: 1px solid var(--border-color, transparent);
-    border-radius: 18px;
+    border: none !important;
+    border-radius: 16px;
     width: 100%;
     max-width: 900px;
     max-height: 90vh;
@@ -1388,7 +1418,7 @@ body.is-search-mode .header-dropdown-toggle {
     aspect-ratio: 1 / 1;
     padding: 12px 13px;
     background: var(--background-surface, #0f1013);
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+    border: none !important;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -1668,3 +1698,32 @@ body.is-search-mode .header-dropdown-toggle {
 .do-yt-item.is-active .do-yt-channel svg {
     fill: var(--primary-color, #c96b63) !important;
 }
+
+/* =========================================================================
+   GREGORIAN SEARCH (QUÆRERE) — CHARTE DE SOBRIÉTÉ (« MODERN SACRED »)
+   ========================================================================= */
+.gregorian-card,
+.gregorian-skeleton-card,
+.gregorian-results.is-list .gregorian-card,
+.gregorian-zoom-card,
+.gregorian-filter-chip,
+.gregorian-toggle-view-btn,
+.gregorian-badge-part,
+.gregorian-badge-mode,
+.gregorian-search-input {
+    border: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.gregorian-card:hover,
+.gregorian-card:focus,
+.gregorian-card:active,
+.gregorian-results.is-list .gregorian-card:focus,
+.gregorian-filter-chip:hover,
+.gregorian-toggle-view-btn:hover {
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+

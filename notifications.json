@@ -1,8 +1,95 @@
 {
   "version": "1.1.1",
-  "updatedAt": "2026-09-17T12:00:00Z",
+  "updatedAt": "2026-09-25T17:40:00Z",
   "channel": "official",
   "notifications": [
+    {
+      "id": "notif-release-beta-0.0.65",
+      "enabled": true,
+      "priority": 210,
+      "platforms": [
+        "all"
+      ],
+      "minVersion": "beta-0.0.65",
+      "frequency": "once",
+      "style": "liturgical",
+      "badge": "Mise à jour",
+      "icon": "sparkles",
+      "title": "Notes de version v0.0.65",
+      "subtitle": "Votre application Oremus a été mise à jour",
+      "message": "Découvrez les nouveautés de la v0.0.65 : Grégobase intégrée dans la barre latérale, neumes anciens NABC (Saint-Gall & Laon), messes votives complètes, charte graphique de sobriété (« Modern Sacred ») et calcul distribué d'alignement.",
+      "cancelsNotifications": [
+        "notif-release-beta-0.0.64",
+        "notif-release-beta-0.0.63",
+        "notif-release-beta-0.0.62",
+        "notif-release-beta-0.0.61",
+        "notif-release-beta-0.0.60",
+        "notif-release-beta-0.0.59",
+        "notif-release-beta-0.0.58",
+        "notif-release-beta-0.0.57",
+        "notif-release-beta-0.0.56",
+        "notif-release-beta-0.0.55",
+        "notif-release-beta-0.0.54",
+        "notif-release-beta-0.0.53",
+        "notif-release-beta-0.0.52",
+        "notif-release-beta-0.0.51",
+        "notif-release-beta-0.0.50",
+        "notif-release-beta-0.0.49",
+        "notif-release-beta-0.0.48",
+        "notif-release-beta-0.0.47",
+        "notif-release-beta-0.0.46",
+        "notif-release-beta-0.0.45",
+        "notif-release-beta-0.0.44",
+        "notif-release-beta-0.0.43",
+        "notif-release-beta-0.0.42",
+        "notif-release-beta-0.0.41",
+        "notif-release-beta-0.0.40",
+        "notif-release-beta-0.0.39",
+        "notif-release-beta-0.0.38",
+        "notif-oremus-welcome-v1"
+      ],
+      "banner": {
+        "show": true,
+        "text": "Oremus v0.0.65 : Grégobase, Neumes NABC, Messes Votives & Sobriété Visuelle",
+        "tag": "Nouveautés",
+        "actionLabel": "Voir les notes",
+        "actionType": "open_modal",
+        "dismissible": true
+      },
+      "modal": {
+        "title": "Notes de Version (v0.0.65)",
+        "subtitle": "Grégobase · Neumes NABC · Messes Votives · Charte de Sobriété · Calcul Distribué",
+        "icon": "sparkles",
+        "wrappers": [
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Nouveautés majeures de la v0.0.65",
+            "content": "<ul><li><strong>Grégobase Intégrée :</strong> Nouvelle section complète dans la barre de navigation avec exploration par usages, sources, modes, recherche instantanée et filtres catégoriels.</li><li><strong>Neumes Anciens NABC (Saint-Gall &amp; Laon) :</strong> Rendu vectoriel fidèle des neumes adiastématiques au-dessus des notes carrées d'Exsurge grâce aux polices grégoriennes médiévales et au résolveur NABC.</li><li><strong>Messes Votives Complètes :</strong> Modale dédiée d'accès direct aux messes votives majeures (Dédicace, Requiem, Mariage/Nuptiale) et votives hebdomadaires (Trinité, Anges, St Joseph, St Sacrement, Sacré-Cœur, Sainte Vierge, Apôtres).</li><li><strong>Charte Graphique de Sobriété (« Modern Sacred ») :</strong> Élimination radicale des bordures superflues, hiérarchie visuelle pure à un seul niveau, animations douces guidées uniquement par les gestes et thème OLED absolu.</li><li><strong>Calcul Distribué &amp; Laboratoire d'Alignement :</strong> Nouveau portail public /worker, script 1-clic CLI, alignement audio/partition avec double modèle MMS_FA + TorchCREPE, et synchronisation note-par-note en temps réel.</li></ul>"
+          },
+          {
+            "type": "card",
+            "icon": "check",
+            "title": "Rappels de la v0.0.64",
+            "content": "<ul><li><strong>Avis Utilisateurs Directs :</strong> Soumission fluide des retours avec file d'attente hors-ligne et réessai automatique.</li><li><strong>Détection Native :</strong> Élimination définitive des boucles de notification de mise à jour sur Android.</li></ul>"
+          },
+          {
+            "type": "callout",
+            "style": "primary",
+            "title": "Merci pour vos retours",
+            "content": "Merci à toute la communauté pour vos suggestions et votre précieux soutien au développement d'Oremus !"
+          }
+        ],
+        "buttons": [
+          {
+            "label": "Parfait, continuer",
+            "type": "primary",
+            "action": "dismiss",
+            "dismissOnClick": true
+          }
+        ]
+      }
+    },
     {
       "id": "notif-release-beta-0.0.64",
       "enabled": true,
